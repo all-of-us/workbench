@@ -1,8 +1,18 @@
-import * as fp from 'lodash/fp';
-import { InputSwitch } from 'primereact/inputswitch';
 import * as React from 'react';
 import { CSSProperties } from 'react';
+import * as fp from 'lodash/fp';
+import { InputSwitch } from 'primereact/inputswitch';
 
+import {
+  CdrVersion,
+  CdrVersionTiersResponse,
+  Criteria,
+  CriteriaSubType,
+  CriteriaType,
+  Domain,
+} from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { domainToTitle } from 'app/cohort-search/utils';
 import { AlertDanger } from 'app/components/alert';
 import { Clickable, StyledExternalLink } from 'app/components/buttons';
@@ -29,15 +39,6 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { environment } from 'environments/environment';
-import {
-  CdrVersion,
-  CdrVersionTiersResponse,
-  Criteria,
-  CriteriaSubType,
-  CriteriaType,
-  Domain,
-} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({

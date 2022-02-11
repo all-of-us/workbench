@@ -9,7 +9,9 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 import { CohortListResponse } from 'generated/fetch/api';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+
 import { convertToResources } from './resources-stub';
 import { WorkspaceStubVariables } from './workspaces';
 

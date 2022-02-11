@@ -4357,12 +4357,18 @@ definitions:
       - name
       - expirable
       - bypassable
+      - requiredForRTAccess
+      - requiredForCTAccess
     properties:
       name:
         "$ref": "#/definitions/AccessModule"
       expirable:
         type: boolean
       bypassable:
+        type: boolean
+      requiredForRTAccess:
+        type: boolean
+      requiredForCTAccess:
         type: boolean
   FeaturedWorkspacesConfigResponse:
     type: object

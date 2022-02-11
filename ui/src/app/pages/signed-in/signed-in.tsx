@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
+import { environment } from 'environments/environment';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -20,8 +21,6 @@ import {
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
-import { environment } from 'environments/environment';
-
 import backgroundImage from 'assets/images/BG-Pattern.png';
 
 const styles = reactStyles({

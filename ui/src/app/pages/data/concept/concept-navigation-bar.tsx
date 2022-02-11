@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -5,7 +7,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
-import * as React from 'react';
 
 const styles = reactStyles({
   headerLinks: {

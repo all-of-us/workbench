@@ -1,5 +1,15 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { validate } from 'validate.js';
+
+import {
+  ConceptSet,
+  CreateConceptSetRequest,
+  Criteria,
+  Domain,
+  DomainCount,
+  UpdateConceptSetRequest,
+} from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
 import { Button } from 'app/components/buttons';
@@ -18,15 +28,6 @@ import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
 import { conceptSetUpdating } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  ConceptSet,
-  CreateConceptSetRequest,
-  Criteria,
-  Domain,
-  DomainCount,
-  UpdateConceptSetRequest,
-} from 'generated/fetch';
-import { validate } from 'validate.js';
 
 const styles = reactStyles({
   label: {

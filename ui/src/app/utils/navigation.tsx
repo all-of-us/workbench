@@ -1,10 +1,7 @@
-import * as querystring from 'querystring';
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import * as querystring from 'querystring';
 
-import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
-import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   Cohort,
   CohortReview,
@@ -12,6 +9,10 @@ import {
   Criteria,
   ErrorResponse,
 } from 'generated/fetch';
+
+import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It

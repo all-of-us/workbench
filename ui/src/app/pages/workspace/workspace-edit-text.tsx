@@ -1,14 +1,16 @@
-import { FlexColumn } from 'app/components/flex';
-import { TooltipTrigger } from 'app/components/popups';
-import { AoU, AouTitle } from 'app/components/text-wrappers';
-import colors from 'app/styles/colors';
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+
 import {
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+
+import { FlexColumn } from 'app/components/flex';
+import { TooltipTrigger } from 'app/components/popups';
+import { AoU, AouTitle } from 'app/components/text-wrappers';
+import colors from 'app/styles/colors';
 
 export const toolTipTextDemographic =
   'For example, by stratifying results based on race/ethnicity, age, ' +

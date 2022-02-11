@@ -1,14 +1,17 @@
 import * as React from 'react';
+import { mount } from 'enzyme';
+
+import { DataSetApi, TerraJobStatus } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { genomicExtractionStore } from 'app/utils/stores';
+import moment from 'moment';
+
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { GenomicExtractionModal } from './genomic-extraction-modal';
-import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { DataSetApi, TerraJobStatus } from 'generated/fetch';
-import { mount } from 'enzyme';
-import { workspaceDataStub } from 'testing/stubs/workspaces';
-import { genomicExtractionStore } from 'app/utils/stores';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import moment from 'moment';
 
 describe('GenomicExtractionModal', () => {
   let dataset;

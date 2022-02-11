@@ -1,13 +1,12 @@
-import { Button } from 'app/components/buttons';
+import * as React from 'react';
 
+import { Button } from 'app/components/buttons';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-
-import * as React from 'react';
 
 export interface TextModalProps {
   title: string;

@@ -1,7 +1,13 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { TieredMenu } from 'primereact/tieredmenu';
-import * as React from 'react';
-import { Subscription } from 'rxjs/Subscription';
+
+import {
+  CdrVersionTiersResponse,
+  CriteriaMenu,
+  Domain,
+  SearchRequest,
+} from 'generated/fetch';
 
 import { SearchGroup } from 'app/cohort-search/search-group/search-group.component';
 import {
@@ -20,12 +26,7 @@ import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CdrVersionTiersResponse,
-  CriteriaMenu,
-  Domain,
-  SearchRequest,
-} from 'generated/fetch';
+import { Subscription } from 'rxjs/Subscription';
 
 function initItem(id: string, type: string) {
   return {

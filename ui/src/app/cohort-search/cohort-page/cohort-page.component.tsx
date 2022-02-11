@@ -1,5 +1,8 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { Prompt, RouteComponentProps, withRouter } from 'react-router';
+import * as fp from 'lodash/fp';
+
+import { Cohort, SearchRequest } from 'generated/fetch';
 
 import { CohortSearch } from 'app/cohort-search/cohort-search/cohort-search.component';
 import { ListOverview } from 'app/cohort-search/overview/overview.component';
@@ -9,6 +12,7 @@ import {
   searchRequestStore,
 } from 'app/cohort-search/search-state.service';
 import { mapRequest, parseCohortDefinition } from 'app/cohort-search/utils';
+import { parseQueryParams } from 'app/components/app-router';
 import { FlexRowWrap } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -27,9 +31,6 @@ import {
   currentCohortStore,
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { Cohort, SearchRequest } from 'generated/fetch';
-import { Prompt, RouteComponentProps, withRouter } from 'react-router';
-import { parseQueryParams } from 'app/components/app-router';
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 

@@ -1,11 +1,13 @@
+import * as React from 'react';
+
+import { CohortReview } from 'generated/fetch';
+
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { CohortReview } from 'generated/fetch';
-import * as React from 'react';
 
 const css = `
   .graph-border {

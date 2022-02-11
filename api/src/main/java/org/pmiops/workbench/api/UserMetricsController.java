@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetService;
@@ -58,6 +59,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
   private final CohortService cohortService;
+  private final CohortReviewService cohortReviewService;
 
   private int distinctWorkspaceLimit = 5;
 
@@ -65,6 +67,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   UserMetricsController(
       CloudStorageClient cloudStorageClient,
       CohortService cohortService,
+      CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
@@ -75,6 +78,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       WorkspaceResourceMapper workspaceResourceMapper) {
     this.cloudStorageClient = cloudStorageClient;
     this.cohortService = cohortService;
+    this.cohortReviewService = cohortReviewService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
@@ -255,6 +259,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         idToFcWorkspaceResponse.get(workspaceId),
         idToDbWorkspace.get(workspaceId),
         cohortService,
+        cohortReviewService,
         conceptSetService,
         dataSetService);
   }

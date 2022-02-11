@@ -1,9 +1,10 @@
+import { Runtime, RuntimeStatus } from 'generated/fetch';
+
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import { runtimeStore } from 'app/utils/stores';
-import { Runtime, RuntimeStatus } from 'generated/fetch';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.

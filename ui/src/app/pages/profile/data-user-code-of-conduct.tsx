@@ -1,6 +1,9 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
+
+import { Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -19,8 +22,6 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { getLiveDUCCVersion } from 'app/utils/code-of-conduct';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { Profile } from 'generated/fetch';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {

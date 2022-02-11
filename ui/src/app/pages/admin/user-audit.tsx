@@ -1,9 +1,10 @@
-import { AuditPageComponent } from 'app/components/admin/audit-page-component';
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+
+import { AuditPageComponent } from 'app/components/admin/audit-page-component';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
 
 const getAuditLog = (subject: string) => {
   const bqRowLimit = 1000; // Workspaces take many rows because of the Research Purpose fields

@@ -1,9 +1,8 @@
-import { Button } from 'app/components/buttons';
-import { reactStyles } from 'app/utils';
-
-import { signIn } from 'app/utils/authentication';
 import * as React from 'react';
 
+import { Button } from 'app/components/buttons';
+import { reactStyles } from 'app/utils';
+import { signIn } from 'app/utils/authentication';
 import googleIcon from 'assets/icons/google-icon.png';
 
 export const styles = reactStyles({

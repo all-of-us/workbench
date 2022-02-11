@@ -1,5 +1,6 @@
-import * as Utils from 'app/utils';
 import * as fp from 'lodash/fp';
+
+import * as Utils from 'app/utils';
 
 describe('Helper functions', () => {
   it('(cond) Should handle conditionals and defaults correctly', async () => {

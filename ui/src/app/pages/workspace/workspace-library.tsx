@@ -1,5 +1,13 @@
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
+import {
+  FeaturedWorkspace,
+  FeaturedWorkspaceCategory,
+  Profile,
+} from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -14,20 +22,12 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
+import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import { environment } from 'environments/environment';
-import {
-  FeaturedWorkspace,
-  FeaturedWorkspaceCategory,
-  Profile,
-} from 'generated/fetch';
-
+import demonstration from 'assets/icons/demonstration.svg';
 import phenotypeLibrary from 'assets/icons/phenotype-library.svg';
 import tutorialWorkspaces from 'assets/icons/tutorial-workspaces.svg';
-import demonstration from 'assets/icons/demonstration.svg';
-import { hasTierAccess } from 'app/utils/access-tiers';
-import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   navPanel: {

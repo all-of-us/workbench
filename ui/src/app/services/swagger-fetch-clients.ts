@@ -21,11 +21,6 @@
  */
 
 import {
-  cookiesEnabled,
-  LOCAL_STORAGE_API_OVERRIDE_KEY,
-} from 'app/utils/cookies';
-import { environment } from 'environments/environment';
-import {
   AuthDomainApi,
   BaseAPI, // internal
   CdrVersionsApi,
@@ -53,6 +48,11 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
+import {
+  cookiesEnabled,
+  LOCAL_STORAGE_API_OVERRIDE_KEY,
+} from 'app/utils/cookies';
 import * as portableFetch from 'portable-fetch';
 
 let frozen = false;

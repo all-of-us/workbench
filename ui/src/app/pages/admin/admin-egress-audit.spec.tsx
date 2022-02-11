@@ -1,15 +1,19 @@
 import * as React from 'react';
-import { waitForFakeTimersAndUpdate } from 'testing/react-test-helpers';
-import { AdminEgressAudit } from './admin-egress-audit';
-import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { MemoryRouter, Route } from 'react-router';
+import { mount } from 'enzyme';
+
 import {
   EgressEvent,
   EgressEventsAdminApi,
   EgressEventStatus,
 } from 'generated/fetch';
-import { MemoryRouter, Route } from 'react-router';
-import { mount } from 'enzyme';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+
+import { waitForFakeTimersAndUpdate } from 'testing/react-test-helpers';
+import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
+
+import { AdminEgressAudit } from './admin-egress-audit';
 
 describe('AdminEgressAudit', () => {
   let event: EgressEvent;

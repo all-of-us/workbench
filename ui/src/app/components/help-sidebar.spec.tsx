@@ -1,14 +1,6 @@
 import * as React from 'react';
-
 import { act } from 'react-dom/test-utils';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import {
-  currentCohortCriteriaStore,
-  currentCohortReviewStore,
-  currentWorkspaceStore,
-  setSidebarActiveIconStore,
-} from 'app/utils/navigation';
+
 import {
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
@@ -22,18 +14,16 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import defaultServerConfig from 'testing/default-server-config';
-import {
-  mountWithRouter,
-  waitForFakeTimersAndUpdate,
-} from 'testing/react-test-helpers';
-import { CohortAnnotationDefinitionServiceStub } from 'testing/stubs/cohort-annotation-definition-service-stub';
-import {
-  CohortReviewServiceStub,
-  cohortReviewStubs,
-} from 'testing/stubs/cohort-review-service-stub';
-import { workspaceDataStub } from 'testing/stubs/workspaces';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {
+  currentCohortCriteriaStore,
+  currentCohortReviewStore,
+  currentWorkspaceStore,
+  setSidebarActiveIconStore,
+} from 'app/utils/navigation';
+import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -42,15 +32,28 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
+
+import defaultServerConfig from 'testing/default-server-config';
+import {
+  mountWithRouter,
+  waitForFakeTimersAndUpdate,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
   cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
+import { CohortAnnotationDefinitionServiceStub } from 'testing/stubs/cohort-annotation-definition-service-stub';
+import {
+  CohortReviewServiceStub,
+  cohortReviewStubs,
+} from 'testing/stubs/cohort-review-service-stub';
+import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
+import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 import { ConfirmDeleteModal } from './confirm-delete-modal';
 import { HelpSidebar } from './help-sidebar';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
-import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 

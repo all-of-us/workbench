@@ -8,6 +8,7 @@ module.exports = {
     'prettier',
     'react',
     'react-hooks',
+    'simple-import-sort',
   ],
   // If we extend multiple rulesets in the future, ensure that 'prettier' is last.
   // This will allow it to disable prettier-incompatible rules from other rulesets.
@@ -98,11 +99,36 @@ module.exports = {
     ],
 
     'no-trailing-spaces': 'warn',
+    'simple-import-sort/imports': ['warn',
+      {
+        // each 'regex' below matches an import `from` string
+        // regexes ['are', 'arranged', 'in', 'groups'] below
+        // within a [group], imports are sorted first by 'regex', then inside each 'regex'
+        // so for example, 'react' and 'react-router-dom' will come before 'lodash/fp' in that group
+        // groups are separated by empty lines
+        'groups': [
+          // Side effect imports.
+          ['^\\u0000'],
+
+          // dependencies, in importance order (YMMV, and I'm sure I missed some)
+          [
+            '^react', '^lodash', '^enzyme', '^highcharts', '^primereact', '^validate', '^@fortawesome', '^querystring',
+            '^stacktrace', '^history', '^nouislider', '^setupTests'
+          ],
+
+          // swagger
+          ['^generated'],
+
+          // main group plus catchall - anything not matched in another group.
+          ['^environments', '^'],
+
+          ['^testing'],
+
+          ['^./'],
+        ]
+      }
+    ],
     'spaced-comment': 'warn',
-
-    // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
-
-    // 'simple-import-sort/sort': 'warn',
 
     /* Jest */
     'jest/no-focused-tests': 'warn',

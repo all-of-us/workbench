@@ -1,8 +1,10 @@
+import * as React from 'react';
+
+import { CohortReview, CriteriaType, Domain } from 'generated/fetch';
+
 import { domainToTitle } from 'app/cohort-search/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { CohortReview, CriteriaType, Domain } from 'generated/fetch';
-import * as React from 'react';
 
 const css = `
   @media print{

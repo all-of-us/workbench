@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { WorkspaceAccessLevel } from 'generated/fetch';
+
 import { MenuItem } from 'app/components/buttons';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

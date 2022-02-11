@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -99,6 +100,17 @@ public interface WorkspaceResourceMapper {
       source = "dbUserRecentlyModifiedResource.lastAccessDate")
   ResourceFields fromDbUserRecentlyModifiedResource(
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, DbCohort dbCohort);
+
+  @Mapping(target = "cohortReview", source = "cohortReview")
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(
+      target = "lastModifiedEpochMillis",
+      source = "dbUserRecentlyModifiedResource.lastAccessDate")
+  ResourceFields fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, CohortReview cohortReview);
 
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "cohort", ignore = true)
@@ -225,11 +237,23 @@ public interface WorkspaceResourceMapper {
         fromDbUserRecentlyModifiedResource(dbUserRecentResource, notebookName));
   }
 
+  default WorkspaceResource fromDbUserRecentlyModifiedResourceAndCohortReview(
+      DbUserRecentlyModifiedResource dbUserRecentResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace,
+      CohortReview cohortReview) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace),
+        fcWorkspace,
+        fromDbUserRecentlyModifiedResource(dbUserRecentResource, cohortReview));
+  }
+
   default WorkspaceResource fromDbUserRecentlyModifiedResource(
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
       FirecloudWorkspaceResponse fcWorkspace,
       DbWorkspace dbWorkspace,
       CohortService cohortService,
+      CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService) {
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
@@ -267,6 +291,14 @@ public interface WorkspaceResourceMapper {
             fcWorkspace,
             dbWorkspace,
             dbUserRecentlyModifiedResource.getResourceId());
+      case COHORT_REVIEW:
+        return fromDbUserRecentlyModifiedResourceAndCohortReview(
+            dbUserRecentlyModifiedResource,
+            fcWorkspace,
+            dbWorkspace,
+            cohortReviewService.findCohortReviewForWorkspace(
+                workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource)));
+
       default:
         throw new ServerErrorException("Recent resource: bad resource type ");
     }

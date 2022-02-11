@@ -1,7 +1,9 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
-
+import * as fp from 'lodash/fp';
 import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
+
+import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
+
 import { RenameModal } from 'app/components/rename-modal';
 import {
   Action,
@@ -32,7 +34,7 @@ import { getDescription, getDisplayName, getType } from 'app/utils/resources';
 import { serverConfigStore } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
+
 import { ExportDatasetModal } from './export-dataset-modal';
 
 interface Props

@@ -1,10 +1,9 @@
-import * as fp from 'lodash/fp';
-import moment from 'moment';
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
 import Switch from 'react-switch';
-import { CSSProperties } from 'react';
+import * as fp from 'lodash/fp';
 
 import { Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
@@ -12,8 +11,10 @@ import { PopupTrigger } from 'app/components/popups';
 import { commonStyles } from 'app/pages/login/account-creation/common';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withStyle } from 'app/utils';
-import { FlexRow } from './flex';
 import { isDateValid } from 'app/utils/dates';
+import moment from 'moment';
+
+import { FlexRow } from './flex';
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 

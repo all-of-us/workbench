@@ -1,12 +1,13 @@
+import * as React from 'react';
+import ReactSwitch from 'react-switch';
+import validate from 'validate.js';
+
 import { BoldHeader, Header } from 'app/components/headers';
 import { TextArea, TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import * as React from 'react';
-import ReactSwitch from 'react-switch';
-import validate from 'validate.js';
 
 const styles = {
   smallHeaderStyles: {

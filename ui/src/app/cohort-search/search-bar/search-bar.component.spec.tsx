@@ -1,9 +1,12 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
+
+import { CohortBuilderApi, Criteria } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { CohortBuilderApi, Criteria } from 'generated/fetch';
+
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
+
 import { SearchBar } from './search-bar.component';
 
 const nodeStub = {

@@ -1,9 +1,10 @@
 import * as React from 'react';
-
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
+import * as fp from 'lodash/fp';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { ErrorCode, ErrorResponse, Profile } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
@@ -23,8 +24,7 @@ import {
 } from 'app/utils';
 import { globalErrorStore } from 'app/utils/navigation';
 import { openZendeskWidget } from 'app/utils/zendesk';
-import { ErrorCode, ErrorResponse, Profile } from 'generated/fetch';
-import * as fp from 'lodash/fp';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 const styles = reactStyles({
   errorCodeContainer: {

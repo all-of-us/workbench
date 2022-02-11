@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -67,6 +68,7 @@ public class UserMetricsControllerTest {
   @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
   @Mock private CohortService mockCohortService;
+  @Mock private CohortReviewService mockCohortReviewService;
   @Mock private ConceptSetService mockConceptSetService;
   @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
@@ -211,6 +213,7 @@ public class UserMetricsControllerTest {
         new UserMetricsController(
             mockCloudStorageClient,
             mockCohortService,
+            mockCohortReviewService,
             mockConceptSetService,
             mockDataSetService,
             mockFireCloudService,

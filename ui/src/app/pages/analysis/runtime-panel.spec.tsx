@@ -1,10 +1,28 @@
-import { act } from 'react-dom/test-utils';
 import * as React from 'react';
+import { act } from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
+import { ReactWrapper } from 'enzyme';
+
+import {
+  ProfileApi,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
+} from 'generated/fetch';
+import { BillingStatus } from 'generated/fetch';
+import {
+  Disk,
+  DiskApi,
+  DiskType,
+  Runtime,
+  RuntimeApi,
+} from 'generated/fetch/api';
 
 import { Button, LinkButton } from 'app/components/buttons';
-import { Spinner } from 'app/components/spinners';
+import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
+import { Spinner } from 'app/components/spinners';
 import {
   ConfirmDelete,
   DATAPROC_WORKER_MIN_DISK_SIZE_GB,
@@ -18,22 +36,19 @@ import {
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
-import { findMachineByName, ComputeType } from 'app/utils/machines';
+import { ComputeType, findMachineByName } from 'app/utils/machines';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
+import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
-  ProfileApi,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-  WorkspaceAccessLevel,
-  WorkspacesApi,
-} from 'generated/fetch';
-import {
-  Disk,
-  DiskApi,
-  DiskType,
-  Runtime,
-  RuntimeApi,
-} from 'generated/fetch/api';
+  cdrVersionStore,
+  clearCompoundRuntimeOperations,
+  diskStore,
+  profileStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
 import {
   mountWithRouter,
@@ -41,31 +56,18 @@ import {
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
-  cdrVersionTiersResponse,
   CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
+import { DiskApiStub } from 'testing/stubs/disk-api-stub';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import {
-  defaultGceConfig,
   defaultDataprocConfig,
+  defaultGceConfig,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import { BillingStatus } from 'generated/fetch';
-import {
-  cdrVersionStore,
-  clearCompoundRuntimeOperations,
-  serverConfigStore,
-  runtimeStore,
-  profileStore,
-  diskStore,
-} from 'app/utils/stores';
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import { diskTypeLabels } from 'app/utils/runtime-utils';
-import { DiskApiStub } from 'testing/stubs/disk-api-stub';
-import { ReactWrapper } from 'enzyme';
-import { RadioButton } from 'app/components/inputs';
 
 describe('RuntimePanel', () => {
   let props: Props;

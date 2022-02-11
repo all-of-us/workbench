@@ -1,15 +1,18 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
+import * as fp from 'lodash/fp';
+
+import { EgressEventsAdminApi, EgressEventStatus } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import {
   mountWithRouter,
   waitForFakeTimersAndUpdate,
 } from 'testing/react-test-helpers';
-import { EgressEventsTable } from './egress-events-table';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { EgressEventsAdminApi, EgressEventStatus } from 'generated/fetch';
+
+import { EgressEventsTable } from './egress-events-table';
 
 describe('EgressEventsTable', () => {
   let eventsStub: EgressEventsAdminApiStub;

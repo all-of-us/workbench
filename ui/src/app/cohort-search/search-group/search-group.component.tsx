@@ -1,7 +1,15 @@
+import * as React from 'react';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Menu } from 'primereact/menu';
 import { TieredMenu } from 'primereact/tieredmenu';
-import * as React from 'react';
+
+import {
+  Domain,
+  ResourceType,
+  SearchRequest,
+  TemporalMention,
+  TemporalTime,
+} from 'generated/fetch';
 
 import { SearchGroupItem } from 'app/cohort-search/search-group-item/search-group-item.component';
 import {
@@ -26,13 +34,6 @@ import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  Domain,
-  ResourceType,
-  SearchRequest,
-  TemporalMention,
-  TemporalTime,
-} from 'generated/fetch';
 
 const styles = reactStyles({
   card: {

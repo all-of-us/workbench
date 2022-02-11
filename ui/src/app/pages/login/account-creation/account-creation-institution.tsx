@@ -1,7 +1,14 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import * as React from 'react';
 import validate from 'validate.js';
+
+import {
+  CheckEmailResponse,
+  InstitutionalRole,
+  Profile,
+  PublicInstitutionDetails,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -15,6 +22,7 @@ import {
 import { BulletAlignedUnorderedList } from 'app/components/lists';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { SupportMailto } from 'app/components/support';
 import { AouTitle } from 'app/components/text-wrappers';
 import { PubliclyDisplayed } from 'app/icons/publicly-displayed-icon';
 import {
@@ -27,17 +35,10 @@ import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { reportError } from 'app/utils/errors';
 import {
+  checkInstitutionalEmail,
   getEmailValidationErrorMessage,
   getRoleOptions,
-  checkInstitutionalEmail,
 } from 'app/utils/institutions';
-import {
-  CheckEmailResponse,
-  InstitutionalRole,
-  Profile,
-  PublicInstitutionDetails,
-} from 'generated/fetch';
-import { SupportMailto } from 'app/components/support';
 
 const styles = reactStyles({
   ...commonStyles,

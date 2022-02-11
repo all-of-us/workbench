@@ -1,16 +1,17 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import { mount } from 'enzyme';
+import { mockNavigate } from 'setupTests';
 
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
-import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
-import { MemoryRouter, Route } from 'react-router-dom';
-import { mockNavigate } from 'setupTests';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 describe('WorkspaceNavBar', () => {
   let props: {};

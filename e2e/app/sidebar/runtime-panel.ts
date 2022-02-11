@@ -8,6 +8,8 @@ import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
+import Checkbox from 'app/element/checkbox';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -61,18 +63,50 @@ export default class RuntimePanel extends BaseSidebar {
     return await ramDropdown.getSelectedValue();
   }
 
-  async pickDiskGbs(diskGbs: number): Promise<void> {
-    const diskInput = new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+  private getStandardDiskSelector(): string {
+    const id = config.ENABLED_PERSISTENT_DISK ? 'standard-disk' : 'runtime-disk';
+    return `//*[@id="${id}"]`;
+  }
+
+  getStandardDiskInput(): PrimereactInputNumber {
+    return new PrimereactInputNumber(this.page, this.getStandardDiskSelector());
+  }
+
+  async pickStandardDiskGbs(diskGbs: number): Promise<void> {
+    const diskInput = this.getStandardDiskInput();
     return await diskInput.setValue(diskGbs);
   }
 
-  getDiskInput(): PrimereactInputNumber {
-    return new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+  async getStandardDiskGbs(): Promise<number> {
+    const diskInput = this.getStandardDiskInput();
+    return await diskInput.getInputValue();
   }
 
-  async getDiskGbs(): Promise<number> {
-    const diskInput = this.getDiskInput();
+  getDetachableDiskInput(): PrimereactInputNumber {
+    return new PrimereactInputNumber(this.page, '//*[@id="detachable-disk"]');
+  }
+
+  async pickDetachableDiskGbs(diskGbs: number): Promise<void> {
+    const diskInput = this.getDetachableDiskInput();
+    return await diskInput.setValue(diskGbs);
+  }
+
+  async getDetachableDiskGbs(): Promise<number> {
+    const diskInput = this.getDetachableDiskInput();
     return await diskInput.getInputValue();
+  }
+
+  private getDetachableRadioButton(detachable: boolean): RadioButton {
+    const dataTestId = detachable ? 'detachable-disk-radio' : 'standard-disk-radio';
+    return RadioButton.findByName(this.page, { dataTestId });
+  }
+
+  async isDetachableDisk(): Promise<boolean> {
+    return await this.getDetachableRadioButton(true).isSelected();
+  }
+
+  async pickDetachableDisk(detachable = true): Promise<void> {
+    await this.getDetachableRadioButton(detachable).select();
   }
 
   getComputeTypeSelect(): SelectMenu {
@@ -82,6 +116,14 @@ export default class RuntimePanel extends BaseSidebar {
   async pickComputeType(computeType: ComputeType): Promise<void> {
     const computeTypeDropdown = this.getComputeTypeSelect();
     return await computeTypeDropdown.select(computeType);
+  }
+
+  getEnableGpu(): Checkbox {
+    return Checkbox.findByName(this.page, { id: 'enable-gpu' });
+  }
+
+  async pickEnableGpu(enable = true): Promise<void> {
+    return this.getEnableGpu().toggle(enable);
   }
 
   getAutoPauseSelect(): SelectMenu {
@@ -282,14 +324,20 @@ export default class RuntimePanel extends BaseSidebar {
     logger.info('Unattached persistent disk is deleted');
   }
 
-  async applyChanges(): Promise<NotebookPreviewPage> {
+  async applyChanges(expectPreviewPageNavigate = false): Promise<NotebookPreviewPage | null> {
     await this.clickButton(LinkText.Next);
     await this.clickButton(LinkText.ApplyRecreate);
     await this.waitUntilClose();
 
-    // Automatically opens the Preview page
-    const notebookPreviewPage = new NotebookPreviewPage(this.page);
-    await notebookPreviewPage.waitForLoad();
+    // The preview page automatically opens only if the browser is currently on a
+    // notebook / terminal page.
+    let notebookPreviewPage: NotebookPreviewPage = null;
+    if (expectPreviewPageNavigate) {
+      notebookPreviewPage = new NotebookPreviewPage(this.page);
+      await notebookPreviewPage.waitForLoad();
+    } else {
+      await waitWhileLoading(this.page);
+    }
 
     // Wait for new runtime running. The runtime status transition from Stopping to None to Running
     await this.open();

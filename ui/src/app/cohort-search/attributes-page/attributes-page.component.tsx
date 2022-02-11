@@ -1,6 +1,8 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import * as React from 'react';
+
+import { AttrName, CriteriaSubType, Domain, Operator } from 'generated/fetch';
 
 import { PM_UNITS, PREDEFINED_ATTRIBUTES } from 'app/cohort-search/constant';
 import {
@@ -33,7 +35,6 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { AttrName, CriteriaSubType, Domain, Operator } from 'generated/fetch';
 
 const styles = reactStyles({
   countPreview: {

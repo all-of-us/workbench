@@ -1,9 +1,13 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
-import { AdminUserBypass } from './admin-user-bypass';
+import { mount } from 'enzyme';
+
 import { AdminTableUser } from 'generated/fetch';
-import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+
 import { serverConfigStore } from 'app/utils/stores';
+
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+
+import { AdminUserBypass } from './admin-user-bypass';
 
 describe('AdminUserBypassSpec', () => {
   let props: { user: AdminTableUser };

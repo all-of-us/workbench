@@ -1,9 +1,10 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+
 import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 
 const styles = reactStyles({
   dropdownMenu: {

@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { WorkspaceResource } from 'generated/fetch';
+
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import {
@@ -8,7 +10,7 @@ import {
   getType,
   getTypeString,
 } from 'app/utils/resources';
-import { WorkspaceResource } from 'generated/fetch';
+
 import { Button } from './buttons';
 import { Modal, ModalBody, ModalTitle } from './modals';
 

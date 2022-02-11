@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useState } from 'react';
 
+import { Profile } from 'generated/fetch';
+
 import { Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -16,6 +18,7 @@ import { getProfilePictureSrc } from 'app/utils/profile-picture';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 import { Profile } from 'generated/fetch';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
+
 
 const styles = reactStyles({
   flex: {
