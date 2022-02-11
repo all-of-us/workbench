@@ -449,7 +449,8 @@ export const AdminInstitutionEdit = fp.flow(
           tierConfigs: [
             {
               ...defaultTierConfig(AccessTierShortNames.Registered),
-              membershipRequirement: null, // the default is NOACCESS which also means "don't render the card"
+              membershipRequirement:
+                InstitutionMembershipRequirement.UNINITIALIZED,
             },
           ],
         },

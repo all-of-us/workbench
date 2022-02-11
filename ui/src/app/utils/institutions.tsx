@@ -222,7 +222,6 @@ export function updateEnableControlledTier(
   const rtConfig = tierConfigs.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Registered
   );
-
   const rtReq = rtConfig.membershipRequirement;
 
   const ctConfig = cond(
@@ -240,11 +239,11 @@ export function updateEnableControlledTier(
       }),
     ],
     [
-      // if we are enabling CT access and RT is ADDRESSES, init CT with DOMAINS and leave empty
-      enableCtAccess && rtReq === InstitutionMembershipRequirement.ADDRESSES,
+      // otherwise, init CT with RT's requirement (UNINITIALIZED or ADDRESSES) and leave empty
+      enableCtAccess,
       () => ({
         ...defaultTierConfig(AccessTierShortNames.Controlled),
-        membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+        membershipRequirement: rtReq,
       }),
     ]
   );

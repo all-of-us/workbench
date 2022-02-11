@@ -465,14 +465,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
+    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+
     await simulateComponentChange(
       wrapper,
       findCTDropdown(wrapper),
       InstitutionMembershipRequirement.ADDRESSES
     );
-
-    expect(findCTAddressError(wrapper)).toBeFalsy();
 
     // In case of a single entry which is not in the correct format
     findCTAddressInput(wrapper)
@@ -570,11 +569,6 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       wrapper,
       findCTDropdown(wrapper),
       InstitutionMembershipRequirement.DOMAINS
-    );
-
-    expect(findCTDomainError(wrapper)).toBeTruthy();
-    expect(findCTDomainError(wrapper)[0]).toBe(
-      'Controlled tier email domains should not be empty'
     );
 
     // Single Entry with incorrect Email Domain format
