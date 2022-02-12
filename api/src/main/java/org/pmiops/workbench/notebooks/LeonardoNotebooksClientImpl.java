@@ -245,17 +245,15 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
       String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
       customEnvironmentVariables.putAll(
-          ImmutableMap.of(
-                  CDR_STORAGE_PATH_KEY,
-                  "",
-                  WGS_VCF_MERGED_STORAGE_PATH_KEY,
-                  cdrVersion.getWgsVcfMergedStoragePath(),
-                  WGS_HAIL_STORAGE_PATH_KEY,
-                  cdrVersion.getWgsHailStoragePath(),
-                  MICROARRAY_HAIL_STORAGE_PATH_KEY,
-                  cdrVersion.getMicroarrayHailStoragePath(),
+          ImmutableMap.<String, String>builder()
+              .put(CDR_STORAGE_PATH_KEY, "/")
+              .put(WGS_VCF_MERGED_STORAGE_PATH_KEY, cdrVersion.getWgsVcfMergedStoragePath())
+              .put(WGS_HAIL_STORAGE_PATH_KEY, cdrVersion.getWgsHailStoragePath())
+              .put(MICROARRAY_HAIL_STORAGE_PATH_KEY, cdrVersion.getMicroarrayHailStoragePath())
+              .put(
                   MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
                   cdrVersion.getMicroarrayVcfSingleSampleStoragePath())
+              .build()
               .entrySet()
               .stream()
               .filter(entry -> !Strings.isNullOrEmpty(entry.getValue()))
