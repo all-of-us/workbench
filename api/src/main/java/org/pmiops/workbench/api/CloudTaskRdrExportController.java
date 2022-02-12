@@ -1,9 +1,6 @@
 package org.pmiops.workbench.api;
 
-import java.util.ArrayList;
-import java.util.Optional;
 import java.util.logging.Logger;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.rdr.RdrExportService;
