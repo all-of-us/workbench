@@ -39,7 +39,6 @@ export async function getStyleValue<T>(page: Page, element: ElementHandle, style
       styleName
     )
     .then((prop) => prop.jsonValue());
-  console.log(`value: "${value}"`);
   return value as T;
 }
 

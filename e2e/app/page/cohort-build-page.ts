@@ -73,7 +73,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
       default:
         break;
     }
-    await waitForText(this.page, 'Cohort Saved Successfully');
+    await createCohortButton.waitUntilDisabled();
     return cohortName;
   }
 
