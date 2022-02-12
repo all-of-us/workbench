@@ -216,7 +216,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return ResponseEntity.ok(recentResponse);
   }
 
-  private Boolean foundBlobIdsContainsUserRecentlyModifiedResource(
+  private boolean foundBlobIdsContainsUserRecentlyModifiedResource(
       Set<BlobId> foundNotebooks, DbUserRecentlyModifiedResource urr) {
     if (urr.getResourceType()
         == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
