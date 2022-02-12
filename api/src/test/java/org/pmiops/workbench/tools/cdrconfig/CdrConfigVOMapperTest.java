@@ -163,6 +163,8 @@ public class CdrConfigVOMapperTest {
     expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);
     expected.setAllSamplesWgsDataBucket(testVersionJson.allSamplesWgsDataBucket);
     expected.setSingleSampleArrayDataBucket(testVersionJson.singleSampleArrayDataBucket);
+    expected.setStorageBasePath(testVersionJson.storageBasePath);
+    expected.setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath);
 
     assertThat(mapper.toDbVersion(testVersionJson, accessTierDao)).isEqualTo(expected);
   }
