@@ -95,14 +95,11 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [tableData, setTableData] = useState<TableData[]>();
 
   const loadResources = async () => {
-    try {
-      setLoading(true);
-      await userMetricsApi().getUserRecentResources().then(setResources);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    await userMetricsApi()
+      .getUserRecentResources()
+      .then(setResources)
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -225,6 +222,6 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       </div>
     </React.Fragment>
   ) : (
-    <SpinnerOverlay />
+    loading && <SpinnerOverlay />
   );
 });
