@@ -11,15 +11,26 @@ import { Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
 import Button from 'app/element/button';
 import Cell from 'app/component/cell';
+import UserAuditPage from 'app/page/admin-user-audit-page';
+import { isBlank } from '../../../utils/str-utils';
 
 describe('User Admin', () => {
+  enum TableColumns {
+    ACCESS_MODULE = 'Access Module',
+    STATUS = 'Status',
+    LAST_COMPLETED_ON = 'Last completed on',
+    EXPIRES_ON = 'Expires on',
+    REQUIRED_FOR_TIER = 'Required for tier access',
+    BYPASS = 'Bypass'
+  }
+
   const accessStatusTableColumns = [
-    'Access Module',
-    'Status',
-    'Last completed on',
-    'Expires on',
-    'Required for tier access',
-    'Bypass'
+    TableColumns.ACCESS_MODULE,
+    TableColumns.STATUS,
+    TableColumns.LAST_COMPLETED_ON,
+    TableColumns.EXPIRES_ON,
+    TableColumns.REQUIRED_FOR_TIER,
+    TableColumns.BYPASS
   ];
 
   enum AccessModules {
@@ -51,7 +62,7 @@ describe('User Admin', () => {
     newPage = await searchTestUser(page, userEmail);
   });
 
-  xtest('Verify User Profile Admin page render correctly for test user', async () => {
+  xtest('Verify Researcher Information renders correctly', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(newPage);
     await userProfileAdminPage.waitForLoad();
 
@@ -90,11 +101,11 @@ describe('User Admin', () => {
     // Get Institution Role
     const institutionRole = userProfileAdminPage.getInstitutionalRole();
     const role = await institutionRole.getSelectedValue();
+    expect(isBlank(role)).toBeFalsy();
     // Verify Institution Role dropdown is not empty. Checks existence of some Select options.
     options = await institutionRole.getAllOptionTexts();
     expect(options).toEqual(
       expect.arrayContaining([
-        role,
         InstitutionRole.UndergraduteStudent,
         InstitutionRole.Teacher,
         InstitutionRole.ResearchAssistant
@@ -110,27 +121,33 @@ describe('User Admin', () => {
     const userName = await userProfileAdminPage.getUserName();
     expect(userName).toEqual(`${userEmail}${config.EMAIL_DOMAIN_NAME}`);
 
-    // Verify Data Access Tiers is Registered Tier only
-    const accessTiers = await userProfileAdminPage.getDataAccessTiers();
-    expect(accessTiers).toEqual('Registered Tier');
-    expect(accessTiers).not.toContain('Controlled Tier');
-
     // Verify Credits Used
     const [usedAmount, creditsLimitAmount] = await userProfileAdminPage.getInitialCreditsUsed();
     expect(usedAmount).toEqual(0);
     expect(creditsLimitAmount).toEqual(credits); // Match value in Initial Credit Limit Select dropdown
+  });
 
-    // Verify expected column names in Account Access table
+  xtest('Verify Access Status table render correctly', async () => {
+    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    await userProfileAdminPage.waitForLoad();
+
+    // Verify column headers listed correctly
     const accountAccessTable = userProfileAdminPage.getAccessStatusTable();
     const columnNames = await accountAccessTable.getColumnNames();
     expect(columnNames.sort()).toEqual(accessStatusTableColumns.sort());
+    expect(columnNames.length).toEqual(accessStatusTableColumns.length);
 
-    // Verify Access module names in Column #1
+    // Verify Access module names listed correctly
     const moduleNames = await accountAccessTable.getRowValues(1);
     expect(moduleNames.sort()).toEqual(accessModules.sort());
+    expect(moduleNames.length).toEqual(accessModules.length);
+
+    // check badges
+    // $x('//*[@id="Registered-user"]')
+    // $x('//*[@id="Controlled-user"]')
   });
 
-  test('Verify CANCEL and SAVE buttons work correctly in User Profile Admin page', async () => {
+  xtest('Verify CANCEL and SAVE buttons work correctly', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(newPage);
     await userProfileAdminPage.waitForLoad();
 
@@ -171,45 +188,45 @@ describe('User Admin', () => {
 
     // Change Contact Email
     const contactEmail = userProfileAdminPage.getContactEmail();
-    const oldContactEmail = await contactEmail.getTextContent();
+    const oldContactEmail = await contactEmail.getValue();
     // Input background color is white before change
-    const backgroundColor = await getStyleValue<string>(
+    let backgroundColor = await getStyleValue<string>(
       newPage,
       await contactEmail.asElementHandle(),
       'background-color'
     );
     expect(backgroundColor).toEqual('rgb(255, 255, 255)');
 
-    // Change Verified Institution that cause domain mismatch
-    const verifiedInstitution = userProfileAdminPage.getVerifiedInstitution();
-    const oldInstitution = await verifiedInstitution.getSelectedValue();
-    await verifiedInstitution.select('Broad Institute');
+    // Type in modified email
+    const invalidContactEmail = 'mod-' + oldContactEmail;
+    await contactEmail.type(invalidContactEmail);
 
-    // TODO Edit UI code so that error and fields are in same parent node
-    // Check error when Verified Institution and Contact Email domains do not match
-    await waitForText(newPage, 'Your email does not match your institution');
-
-    /*
-    TODO Typing new email doesn't work at this time
-    const invalidContactEmail = 'h' + oldContactEmail;
-    await userProfileAdminPage.contactEmailBugWorkaround(invalidContactEmail);
-
-    // Input background color changed from white after change
-    const newBackgroundColor = await getStyleValue<string>(
-      newPage,
-      await contactEmail.asElementHandle(),
-      'background-color'
-    );
-    expect(newBackgroundColor).toEqual('rgb(248, 201, 84)');
+    // Input background color changed
+    backgroundColor = await getStyleValue<string>(newPage, await contactEmail.asElementHandle(), 'background-color');
+    expect(backgroundColor).toEqual('rgb(248, 201, 84)');
 
     // Find email error
     const emailErrorMsg = await userProfileAdminPage.getEmailErrorMessage();
     expect(emailErrorMsg).toContain('The institution has authorized access only to select members');
 
-    await openInstitutionAgreementPage(newPage);
-
+    await verifyInstitutionAgreementPage(newPage);
     await newPage.bringToFront();
-    */
+
+    await verifyButtonEnabled(cancelButton, true);
+    // SAVE buttons is disabled due to error in page
+    await verifyButtonEnabled(saveButton, false);
+
+    // Undo changes
+    await cancelButton.click();
+    await cancelButton.waitUntilDisabled();
+
+    // Change Verified Institution that cause domain mismatch
+    const verifiedInstitution = userProfileAdminPage.getVerifiedInstitution();
+    const oldInstitution = await verifiedInstitution.getSelectedValue();
+    await verifiedInstitution.select('Broad Institute');
+
+    // Check error when Verified Institution and Contact Email domains do not match
+    await waitForText(newPage, 'Your email does not match your institution');
 
     await verifyButtonEnabled(cancelButton, true);
     // SAVE buttons is disabled due to error in page
@@ -222,39 +239,125 @@ describe('User Admin', () => {
     const newCreditLimit = await initialCreditLimit.getSelectedValue();
     expect(newCreditLimit).toEqual(oldCreditLimit);
 
-    const newContactEmail = await contactEmail.getTextContent();
+    const newContactEmail = await contactEmail.getValue();
     expect(newContactEmail).toEqual(oldContactEmail);
 
     const newVerifiedInstitution = await verifiedInstitution.getSelectedValue();
     expect(newVerifiedInstitution).toEqual(oldInstitution);
+  });
 
-    // Toggle switch checks
-    // Toggle off Bypass for one module: Google 2-step verification
+  xtest('Can go to User Audit page', async () => {
+    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    await userProfileAdminPage.waitForLoad();
+
+    // Check AUDIT link is working
+    await userProfileAdminPage.getAuditLink().click();
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newPage2 = await newTarget.page();
+    await new UserAuditPage(newPage2).waitForLoad();
+
+    await newPage.bringToFront();
+    await userProfileAdminPage.waitForLoad();
+
+    // Check BACK (admin/user) link is working
+    await userProfileAdminPage.getBackLink().click();
+    await new UserAdminPage(newPage).waitForLoad();
+  });
+
+  xtest('Can bypass Google 2-Step Verification module', async () => {
+    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    await userProfileAdminPage.waitForLoad();
+
+    const accessStatusTable = await userProfileAdminPage.getAccessStatusTable();
+    // Expires on is NEVER for Google 2-step verification module
+    const expiresOnCell = await accessStatusTable.getCellByValue(
+      AccessModules.GOOGLE_VERIFICATION,
+      TableColumns.EXPIRES_ON
+    );
+    const expiresOn = await expiresOnCell.getCellValue();
+    expect(expiresOn).toEqual('Never');
+
+    // Change Bypass for Google 2-step verification module
+    const statusCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, TableColumns.STATUS);
+    const oldStatus = await statusCell.getCellValue();
+
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.GOOGLE_VERIFICATION);
-    expect(await bypassSwitch.isOn()).toBe(true);
-    await bypassSwitch.turnOff();
+    if (oldStatus === 'Bypassed') {
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+      await bypassSwitch.turnOff();
+    } else {
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('No data access');
+      await bypassSwitch.turnOn();
+    }
+
+    const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, 'Bypass');
+    await verifyToggleSwitchNewBackgroundColor(newPage, bypassSwitchCell);
+
+    const saveButton = userProfileAdminPage.getSaveButton();
     await verifyButtonEnabled(saveButton, true);
+    await saveButton.click();
+    await userProfileAdminPage.waitForLoad();
 
-    const bypassSwitchCell = await userProfileAdminPage.getBypassSwitchCell(AccessModules.GOOGLE_VERIFICATION);
-    await verifyToggleCellBackgroundColor(newPage, bypassSwitchCell);
+    const newStatus = await statusCell.getCellValue();
+    if (oldStatus === 'Bypassed') {
+      expect(newStatus).toBe('Incomplete');
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('No data access');
+    } else {
+      expect(newStatus).toBe('Bypassed');
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+    }
+
+    if (newStatus === 'Incomplete') {
+      await bypassSwitch.turnOn();
+      await saveButton.click();
+      await userProfileAdminPage.waitForLoad();
+    }
   });
 
-  xtest('Can navigate to User Audit page from User Admin Profile page', async () => {
-    // blank
-  });
+  xtest('Can bypass Controlled Tier training module', async () => {
+    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    await userProfileAdminPage.waitForLoad();
 
-  xtest('Verify test user expected state in User Admin Profile page', async () => {
-    // Verify information in all columns for Google 2-Step Verification, era common, login.gov in table
-  });
+    const accessStatusTable = await userProfileAdminPage.getAccessStatusTable();
+    const expiresOnCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.EXPIRES_ON);
+    const expiresOn = await expiresOnCell.getCellValue();
+    expect(expiresOn).toEqual('-');
 
-  xtest('Can modify user in User Admin Profile page', async () => {
-    // Modify Initial credit limit: check highlights, SAVE button enabled, change back. check highlights gone, SAVE disabled.
-    // Change 1 Bypass toggle: check highlight, SAVE. Status column update.
-    // Change multiple Bypass toggles: check highlight, SAVE. Status column update.
-    // Moke changes in multiple fields (Account access toggle, etc.), click CANCEL, verify values unchaged
-    // change Account enabled toggle, check label updated, change back, label updated. change again, save, check label
-    // change institution, check "Your email does not match your institution". SAVE button remain disabled
-    // check BACK (admin/user) button working
+    // Change Bypass for Google 2-step verification module
+    const statusCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.STATUS);
+    const oldStatus = await statusCell.getCellValue();
+
+    const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.CT_TRAINING);
+    if (oldStatus === 'Bypassed') {
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+      await bypassSwitch.turnOff();
+    } else {
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+      await bypassSwitch.turnOn();
+    }
+
+    const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, 'Bypass');
+    await verifyToggleSwitchNewBackgroundColor(newPage, bypassSwitchCell);
+
+    const saveButton = userProfileAdminPage.getSaveButton();
+    await verifyButtonEnabled(saveButton, true);
+    await saveButton.click();
+    await userProfileAdminPage.waitForLoad();
+
+    const newStatus = await statusCell.getCellValue();
+    if (oldStatus === 'Bypassed') {
+      expect(newStatus).toBe('Incomplete');
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+    } else {
+      expect(newStatus).toBe('Bypassed');
+      expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+    }
+
+    if (newStatus === 'Incomplete') {
+      await bypassSwitch.turnOn();
+      await saveButton.click();
+      await userProfileAdminPage.waitForLoad();
+    }
   });
 });
 
@@ -262,7 +365,7 @@ async function verifyButtonEnabled(button: Button, enabled: boolean): Promise<vo
   expect(await button.isCursorNotAllowed()).toBe(!enabled);
 }
 
-async function verifyToggleCellBackgroundColor(page: Page, cell: Cell): Promise<void> {
+async function verifyToggleSwitchNewBackgroundColor(page: Page, cell: Cell): Promise<void> {
   const divXpath = `${cell.getXpath()}/div`;
 
   const background = await getStyleValue<string>(page, await page.waitForXPath(divXpath), 'background-color');
@@ -297,24 +400,20 @@ async function searchTestUser(page: Page, userName: string): Promise<Page> {
   return newPage;
 }
 
-/*
-async function openInstitutionAgreementPage(page: Page): Promise<void> {
+async function verifyInstitutionAgreementPage(page: Page): Promise<void> {
   const userProfileAdminPage = new UserProfileAdminPage(page);
   await userProfileAdminPage.getEmailErrorMessageLink().then((link) => {
     link.click();
   });
   const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
   const newPage = await newTarget.page();
-  const pageTitle = await newPage.title();
-  expect(pageTitle).toEqual('Institutional Agreements – All of Us Research Hub');
   // SUBMIT REQUEST button exists
   await newPage.waitForXPath('//a[text()="SUBMIT REQUEST"]', { visible: true });
+  const pageTitle = await newPage.title();
+  expect(pageTitle).toEqual('Institutional Agreements – All of Us Research Hub');
   await newPage.close();
 }
-*/
 
 function replaceWithTmpUrl(url: string): string {
   return url.replace('users', 'users-tmp');
 }
-
-// create bug change institution, values not restored

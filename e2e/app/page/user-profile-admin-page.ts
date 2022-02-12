@@ -13,6 +13,7 @@ import { parseForNumbericalString } from 'utils/test-utils';
 import DataTable from 'app/component/data-table';
 import { getPropValue } from 'utils/element-utils';
 import Cell from 'app/component/cell';
+import ClrIconLink from 'app/element/clr-icon-link';
 
 const pageTitle = 'User Profile Admin';
 
@@ -29,6 +30,10 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
     ]);
     await waitWhileLoading(this.page);
     return true;
+  }
+
+  getBackLink(): ClrIconLink {
+    return ClrIconLink.findByName(this.page, { iconShape: 'arrow' });
   }
 
   getAuditLink(): Link {
