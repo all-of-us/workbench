@@ -11,6 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.pmiops.workbench.model.ArchivalStatus;
 
 @Entity
@@ -58,7 +60,7 @@ public class DbCdrVersion {
   @Transient
   @NotNull
   public boolean getIsDefaultNotNull() {
-    return Optional.ofNullable(isDefault).orElse(false);
+    return BooleanUtils.isTrue(isDefault);
   }
 
   @Column(name = "name")

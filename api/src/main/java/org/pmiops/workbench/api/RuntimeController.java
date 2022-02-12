@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -275,7 +277,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     leonardoNotebooksClient.deleteRuntime(
         dbWorkspace.getGoogleProject(),
         user.getRuntimeName(),
-        Optional.ofNullable(deleteDisk).orElse(false));
+            BooleanUtils.isTrue(deleteDisk));
     return ResponseEntity.ok(new EmptyResponse());
   }
 

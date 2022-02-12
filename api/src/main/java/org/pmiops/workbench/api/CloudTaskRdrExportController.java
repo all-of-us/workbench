@@ -3,6 +3,8 @@ package org.pmiops.workbench.api;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
@@ -46,11 +48,11 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportWorkspaceData(ArrayOfLong workspaceIds, Boolean backfill) {
-    if (workspaceIds == null || ((ArrayList) workspaceIds).isEmpty()) {
+    if (workspaceIds == null || workspaceIds.isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    rdrExportService.exportWorkspaces(workspaceIds, Optional.ofNullable(backfill).orElse(false));
+    rdrExportService.exportWorkspaces(workspaceIds, BooleanUtils.isTrue(backfill));
     return ResponseEntity.noContent().build();
   }
 }
