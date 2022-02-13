@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -205,6 +206,58 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .collect(Collectors.joining("/"));
   }
 
+  private Map<String, String> buildCdrEnvVars(DbCdrVersion cdrVersion) {
+    Map<String, String> vars = new HashMap<>();
+    vars.put(
+        WORKSPACE_CDR_ENV_KEY,
+        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
+
+    String datasetsBucket = cdrVersion.getAccessTier().getDatasetsBucket();
+    String bucketInfix = cdrVersion.getStorageBasePath();
+    if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
+      String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
+      Map<String, Optional<String>> partialStoragePaths =
+          ImmutableMap.<String, Optional<String>>builder()
+              .put(CDR_STORAGE_PATH_KEY, Optional.of("/"))
+              .put(
+                  WGS_VCF_MERGED_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsVcfMergedStoragePath()))
+              .put(
+                  WGS_HAIL_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsHailStoragePath()))
+              .put(
+                  MICROARRAY_HAIL_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getMicroarrayHailStoragePath()))
+              .put(
+                  MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getMicroarrayVcfSingleSampleStoragePath()))
+              .build();
+      vars.putAll(
+          partialStoragePaths.entrySet().stream()
+              .filter(entry -> entry.getValue().filter(p -> !p.isEmpty()).isPresent())
+              .collect(
+                  Collectors.toMap(
+                      Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue().get()))));
+    }
+
+    // TODO(calbach): Remove these env vars.
+    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
+      vars.put(
+          ALL_SAMPLES_WGS_KEY,
+          joinStoragePaths(
+              cdrVersion.getAccessTier().getDatasetsBucket(),
+              cdrVersion.getAllSamplesWgsDataBucket()));
+    }
+    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
+      vars.put(
+          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
+          joinStoragePaths(
+              cdrVersion.getAccessTier().getDatasetsBucket()
+                  + cdrVersion.getSingleSampleArrayDataBucket()));
+    }
+    return vars;
+  }
+
   @Override
   public void createRuntime(
       Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
@@ -236,44 +289,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
 
-    customEnvironmentVariables.put(
-        WORKSPACE_CDR_ENV_KEY,
-        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-
-    String datasetsBucket = cdrVersion.getAccessTier().getDatasetsBucket();
-    String bucketInfix = cdrVersion.getStorageBasePath();
-    if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
-      String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
-      customEnvironmentVariables.putAll(
-          ImmutableMap.<String, String>builder().put(CDR_STORAGE_PATH_KEY, "/")
-              .put(WGS_VCF_MERGED_STORAGE_PATH_KEY, cdrVersion.getWgsVcfMergedStoragePath())
-              .put(WGS_HAIL_STORAGE_PATH_KEY, cdrVersion.getWgsHailStoragePath())
-              .put(MICROARRAY_HAIL_STORAGE_PATH_KEY, cdrVersion.getMicroarrayHailStoragePath())
-              .put(
-                  MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
-                  cdrVersion.getMicroarrayVcfSingleSampleStoragePath())
-              .build().entrySet().stream()
-              .filter(entry -> !Strings.isNullOrEmpty(entry.getValue()))
-              .collect(
-                  Collectors.toMap(
-                      Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue()))));
-    }
-
-    // TODO(calbach): Remove these env vars.
-    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
-      customEnvironmentVariables.put(
-          ALL_SAMPLES_WGS_KEY,
-          joinStoragePaths(
-              cdrVersion.getAccessTier().getDatasetsBucket(),
-              cdrVersion.getAllSamplesWgsDataBucket()));
-    }
-    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
-      customEnvironmentVariables.put(
-          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
-          joinStoragePaths(
-              cdrVersion.getAccessTier().getDatasetsBucket()
-                  + cdrVersion.getSingleSampleArrayDataBucket()));
-    }
+    customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     // See RW-6079
     customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
