@@ -11,7 +11,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
-import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
@@ -58,24 +57,15 @@ public class SetAccessModuleTimestamps {
 
   private static DbUser dbUser;
 
-  void applyTimestampUpdateToUser(
+  void updateCompletionTime(
       AccessModuleService accessModuleService,
       String username,
       AccessModuleName moduleName,
-      @Nullable Timestamp timestamp,
-      boolean isBypass) {
+      @Nullable Timestamp timestamp) {
     accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
 
-    if (moduleName != AccessModuleName.PROFILE_CONFIRMATION) {
-      accessModuleService.updateBypassTime(
-          dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
-    }
-
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
-    LOG.info(
-        String.format(
-            "Updating %s bypass and/or completion time for user %s to %s; bypass mode is %s",
-            moduleName, username, time, isBypass));
+    LOG.info(String.format("Updating %s completion time for user %s to %s", moduleName, username, time));
   }
 
   @Bean
@@ -88,12 +78,12 @@ public class SetAccessModuleTimestamps {
         throw new IllegalArgumentException(String.format("User %s not found!", username));
       }
 
-      applyTimestampUpdateToUser(
+      updateCompletionTime(
           accessModuleService,
           username,
           AccessModuleName.PROFILE_CONFIRMATION,
-          PROFILE_CONFIRMATION_TIMESTAMP,
-          false);
+          PROFILE_CONFIRMATION_TIMESTAMP
+      );
     };
   }
 
