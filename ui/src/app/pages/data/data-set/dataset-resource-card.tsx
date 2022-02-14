@@ -167,6 +167,7 @@ export const DatasetResourceCard = fp.flow(
         ...dataset,
         name: name,
         description: description,
+        domainValuePairs: [],
       };
 
       return dataSetApi()
