@@ -308,4 +308,17 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const snowmanMenu = new SnowmanMenu(this.page);
     return snowmanMenu;
   }
+
+ //verify that only edit option is enabled on the workspace-action menu
+  async verifyLockedWorkspaceActionOptions(): Promise<void> {
+    const snowmanMenu = await this.getWorkspaceActionMenu();
+    const links = await snowmanMenu.getAllOptionTexts();
+    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
+
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+  }
+
 }
