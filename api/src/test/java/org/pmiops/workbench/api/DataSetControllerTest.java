@@ -1252,7 +1252,7 @@ public class DataSetControllerTest {
   @Test
   public void testCreateMinimalDataset() {
     DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
-    dataSetRequest.setConceptSetIds(Arrays.asList(conceptSet1.getId()));
+    dataSetRequest.setConceptSetIds(ImmutableList.of(conceptSet1.getId()));
     dataSetRequest.setCohortIds(Arrays.asList(cohort.getId()));
     dataSetRequest.setDomainValuePairs(
         Arrays.asList(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
