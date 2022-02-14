@@ -766,6 +766,12 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), false);
     expect(findCTEnabled(wrapper).props.checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
+
+    // both RT and CT are uninitialized
+    expect(findRTDomainInput(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
   });
 
   it('should update institution tier requirement', async () => {
