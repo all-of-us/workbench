@@ -19,9 +19,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class, AccessModuleMapper.class},
     nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface UserAccessModuleMapper {
-  @Mapping(
-      target = "moduleName",
-      source = "accessModule.name")
+  @Mapping(target = "moduleName", source = "accessModule.name")
   @Mapping(target = "completionEpochMillis", source = "completionTime")
   @Mapping(target = "bypassEpochMillis", source = "bypassTime")
   // expirationEpochMillis is derived value, will calculate & set it later.

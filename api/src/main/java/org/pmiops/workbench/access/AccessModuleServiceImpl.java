@@ -47,14 +47,14 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Autowired
   public AccessModuleServiceImpl(
-      AccessModuleMapper accessModuleMapper,      Clock clock,
+      AccessModuleMapper accessModuleMapper,
+      Clock clock,
       Provider<List<DbAccessModule>> dbAccessModulesProvider,
       Provider<WorkbenchConfig> configProvider,
       UserAccessModuleDao userAccessModuleDao,
       UserAccessModuleMapper userAccessModuleMapper,
       UserDao userDao,
-      UserServiceAuditor userServiceAuditor
-  ) {
+      UserServiceAuditor userServiceAuditor) {
     this.accessModuleMapper = accessModuleMapper;
     this.clock = clock;
     this.configProvider = configProvider;
@@ -73,7 +73,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
-    DbAccessModule accessModule = getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleMapper.clientAccessModuleToStorage(accessModuleName));
+    DbAccessModule accessModule =
+        getDbAccessModuleOrThrow(
+            dbAccessModulesProvider.get(),
+            accessModuleMapper.clientAccessModuleToStorage(accessModuleName));
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
@@ -155,7 +158,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     // if the module is not required, the user is always compliant
-    if (!isModuleRequiredInEnvironment(accessModuleMapper.storageAccessModuleToClient(dbAccessModule.getName()))) {
+    if (!isModuleRequiredInEnvironment(
+        accessModuleMapper.storageAccessModuleToClient(dbAccessModule.getName()))) {
       return true;
     }
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
