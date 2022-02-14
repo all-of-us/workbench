@@ -165,8 +165,8 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(1, 2); // arbitrary
-    providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
-    providedWorkbenchConfig.accessRenewal.expiryDaysWarningThresholds =
+    providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
+    providedWorkbenchConfig.access.renewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);

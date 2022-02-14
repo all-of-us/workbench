@@ -1,5 +1,4 @@
 import { jest } from '@jest/globals';
-
 import { apiCallWithGatewayTimeoutRetries } from 'app/utils/retry';
 
 const functionStub = {

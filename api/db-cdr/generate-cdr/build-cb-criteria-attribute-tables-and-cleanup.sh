@@ -98,6 +98,7 @@ FROM
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'MEASUREMENT'
                     and is_group = 0
+                    and is_standard = 1
             )
             and value_as_number is not null
         GROUP BY 1
@@ -118,6 +119,7 @@ FROM
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'MEASUREMENT'
                     and is_group = 0
+                    and is_standard = 1
             )
             and value_as_number is not null
         GROUP BY 1
@@ -159,6 +161,7 @@ FROM
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'MEASUREMENT'
                     and is_group = 0
+                    and is_standard = 1
             )
             and value_as_concept_id != 0
             and value_as_concept_id is not null
@@ -173,6 +176,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 SET has_attribute = 1
 WHERE domain_id = 'MEASUREMENT'
     and is_selectable = 1
+    and is_standard = 1
     and concept_id in
     (
         SELECT DISTINCT concept_id

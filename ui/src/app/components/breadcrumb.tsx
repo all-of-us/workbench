@@ -1,6 +1,13 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { Link as RouterLink, matchPath } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import {
+  BillingStatus,
+  Cohort,
+  CohortReview,
+  ConceptSet,
+} from 'generated/fetch';
 
 import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
@@ -13,17 +20,12 @@ import {
 } from 'app/utils';
 import {
   MatchParams,
-  routeDataStore,
   RouteDataStore,
+  routeDataStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  BillingStatus,
-  Cohort,
-  CohortReview,
-  ConceptSet,
-} from 'generated/fetch';
+
 import { BreadcrumbType } from './breadcrumb-type';
 
 const styles = {

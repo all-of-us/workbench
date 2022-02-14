@@ -1,4 +1,7 @@
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { ResearchPurpose, SpecificPopulationEnum } from 'generated/fetch';
 
 import {
   PrimaryPurposeItems,
@@ -7,8 +10,6 @@ import {
   SpecificPopulationItems,
 } from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import { ResearchPurpose, SpecificPopulationEnum } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 
 const styles = {
   researchPurposeItemHeader: {
@@ -127,7 +128,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
   return categories.map((selectedPopulationOfInterest, index) => {
     return (
       <React.Fragment key={index}>
-        {/*Generate a header for each section of underserved populations*/}
+        {/* Generate a header for each section of underserved populations*/}
         <div
           style={{
             ...styles.researchPurposeItemHeader,
@@ -136,7 +137,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
         >
           {selectedPopulationOfInterest.label}
         </div>
-        {/*Iterate through the subcategories of underserved populations and list each of them*/}
+        {/* Iterate through the subcategories of underserved populations and list each of them*/}
         {selectedPopulationOfInterest.subCategory.map(
           (subCategory, subCategoryIndex) => (
             <div

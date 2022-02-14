@@ -2,14 +2,18 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 
-import { CTAvailableBannerMaybe, DAR_PATH } from './ct-available-banner-maybe';
-import { cdrVersionStore, profileStore } from 'app/utils/stores';
-import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { environment } from 'environments/environment';
 import { CdrVersionTier, Profile, UserTierEligibility } from 'generated/fetch';
-import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
+
+import { environment } from 'environments/environment';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
+import { cdrVersionStore, profileStore } from 'app/utils/stores';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+
+import { CTAvailableBannerMaybe } from './ct-available-banner-maybe';
 
 // 3 times, in order
 const [TIME1, TIME2, TIME3] = [10000, 20000, 30000];
@@ -142,7 +146,7 @@ describe('CTAvailableBannerMaybe', () => {
     updateProfile({ newFirstSignIn: TIME3 });
   };
   const darActive = () => {
-    window.location.pathname = DAR_PATH;
+    window.location.pathname = DATA_ACCESS_REQUIREMENTS_PATH;
   };
 
   test.each([

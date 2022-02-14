@@ -1,3 +1,18 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { TabPanel, TabView } from 'primereact/tabview';
+
+import {
+  CohortReview,
+  Domain,
+  Operator,
+  PageFilterRequest,
+  SortOrder,
+} from 'generated/fetch';
+
 import { domainToTitle } from 'app/cohort-search/utils';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
@@ -14,20 +29,7 @@ import {
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CohortReview,
-  Domain,
-  Operator,
-  PageFilterRequest,
-  SortOrder,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import moment from 'moment';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import { OverlayPanel } from 'primereact/overlaypanel';
-import { TabPanel, TabView } from 'primereact/tabview';
-import * as React from 'react';
 
 const styles = reactStyles({
   container: {
@@ -528,6 +530,9 @@ export const DetailTabTable = fp.flow(
         .then((response) => {
           data = response.items.map((item) => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
+              // Property 'itemTime' does not exist on type 'ParticipantData'
+              // TODO RW-5572 confirm proper behavior and fix
+              // eslint-disable-next-line @typescript-eslint/dot-notation
               item['itemTime'] = moment(
                 item.itemDate,
                 'YYYY-MM-DD HH:mm Z'

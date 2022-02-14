@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { withUserProfile } from 'app/utils';
+import { Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import {
@@ -9,8 +9,8 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { withUserProfile } from 'app/utils';
 import { openZendeskWidget } from 'app/utils/zendesk';
-import { Profile } from 'generated/fetch';
 
 export const BugReportModal = withUserProfile()(
   class extends React.Component<

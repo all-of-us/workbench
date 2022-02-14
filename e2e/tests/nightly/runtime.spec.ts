@@ -1,4 +1,4 @@
-import RuntimePanel from 'app/component/runtime-panel';
+import RuntimePanel from 'app/sidebar/runtime-panel';
 import { config } from 'resources/workbench-config';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 

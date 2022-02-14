@@ -1,11 +1,13 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { Redirect, Switch } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 
 import {
   AppRoute,
   withFullHeight,
   withRouteData,
 } from 'app/components/app-router';
+import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { AccessRenewal } from 'app/pages/access/access-renewal';
 import { AdminBanner } from 'app/pages/admin/admin-banner';
@@ -16,12 +18,13 @@ import { AdminInstitutionEdit } from 'app/pages/admin/admin-institution-edit';
 import { AdminNotebookView } from 'app/pages/admin/admin-notebook-view';
 import { AdminReviewWorkspace } from 'app/pages/admin/admin-review-workspace';
 import { AdminUser } from 'app/pages/admin/admin-user';
+import { AdminUserAccess } from 'app/pages/admin/admin-user-access';
+import { AdminUserProfile } from 'app/pages/admin/admin-user-profile';
 import { AdminUsers } from 'app/pages/admin/admin-users';
 import { AdminWorkspace } from 'app/pages/admin/admin-workspace';
 import { WorkspaceAudit } from 'app/pages/admin/admin-workspace-audit';
 import { AdminWorkspaceSearch } from 'app/pages/admin/admin-workspace-search';
 import { UserAudit } from 'app/pages/admin/user-audit';
-import { AdminUserAccess } from 'app/pages/admin/admin-user-access';
 import { DataAccessRequirements } from 'app/pages/homepage/data-access-requirements';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
@@ -33,12 +36,15 @@ import {
 import { WorkspaceLibrary } from 'app/pages/workspace/workspace-library';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
-import { NIH_CALLBACK_PATH, RAS_CALLBACK_PATH } from 'app/utils/access-utils';
-import { Redirect, Switch } from 'react-router-dom';
-import { authorityGuard, expiredGuard, registrationGuard } from './guards';
+import {
+  ACCESS_RENEWAL_PATH,
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  NIH_CALLBACK_PATH,
+  RAS_CALLBACK_PATH,
+} from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
-import { AdminUserProfile } from 'app/pages/admin/admin-user-profile';
-import { BreadcrumbType } from 'app/components/breadcrumb-type';
+
+import { authorityGuard, expiredGuard, registrationGuard } from './guards';
 
 const AccessRenewalPage = fp.flow(
   withRouteData,
@@ -129,7 +135,7 @@ export const SignedInRoutes = () => {
       <AppRoute exact path='/' guards={[expiredGuard, registrationGuard]}>
         <HomepagePage routeData={{ title: 'Homepage' }} />
       </AppRoute>
-      <AppRoute exact path='/access-renewal'>
+      <AppRoute exact path={ACCESS_RENEWAL_PATH}>
         <AccessRenewalPage routeData={{ title: 'Access Renewal' }} />
       </AppRoute>
       <AppRoute
@@ -299,7 +305,7 @@ export const SignedInRoutes = () => {
           routeData={{ pathElementForTitle: 'nbName', minimizeChrome: true }}
         />
       </AppRoute>
-      <AppRoute exact path='/data-access-requirements'>
+      <AppRoute exact path={DATA_ACCESS_REQUIREMENTS_PATH}>
         <DataAccessRequirementsPage
           routeData={{ title: 'Data Access Requirements' }}
         />

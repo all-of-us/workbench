@@ -2,6 +2,8 @@ package org.pmiops.workbench.db.dao;
 
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
+import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
@@ -232,24 +234,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return dbUser;
   }
 
-  // missing ERA_COMMONS (special-cased below)
-  // see also: AccessModuleServiceImpl.isModuleRequiredInEnvironment()
-  private static final List<AccessModuleName> requiredModulesForRegisteredTier =
-      ImmutableList.of(
-          AccessModuleName.TWO_FACTOR_AUTH,
-          AccessModuleName.RT_COMPLIANCE_TRAINING,
-          AccessModuleName.DATA_USER_CODE_OF_CONDUCT,
-          AccessModuleName.RAS_LOGIN_GOV,
-          AccessModuleName.PROFILE_CONFIRMATION,
-          AccessModuleName.PUBLICATION_CONFIRMATION);
-
-  private static final List<AccessModuleName> requiredModulesForControlledTier =
-      ImmutableList.of(AccessModuleName.CT_COMPLIANCE_TRAINING);
-
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
     // If user does NOT have access to RT, they should not have access to any TIER
     if (!shouldGrantUserTierAccess(
-        dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+        dbUser, REQUIRED_MODULES_FOR_REGISTERED_TIER, REGISTERED_TIER_SHORT_NAME)) {
       return Collections.emptyList();
     }
 
@@ -263,7 +251,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         .ifPresent(
             tier -> {
               if (shouldGrantUserTierAccess(
-                  dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)) {
+                  dbUser, REQUIRED_MODULES_FOR_CONTROLLED_TIER, CONTROLLED_TIER_SHORT_NAME)) {
                 userAccessTiers.add(tier);
               }
             });
@@ -924,7 +912,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
-    final List<Long> thresholds = configProvider.get().accessRenewal.expiryDaysWarningThresholds;
+    final List<Long> thresholds = configProvider.get().access.renewal.expiryDaysWarningThresholds;
     try {
       // we only want to send the expiration email on the day of the actual expiration
       if (millisRemaining < 0 && daysRemaining == 0) {

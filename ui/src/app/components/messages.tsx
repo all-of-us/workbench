@@ -1,7 +1,8 @@
+import * as React from 'react';
+
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import * as React from 'react';
 
 const MessageWithIcon = ({
   messageType,

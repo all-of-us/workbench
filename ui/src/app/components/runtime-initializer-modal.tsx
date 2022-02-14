@@ -1,17 +1,20 @@
-import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
 import * as React from 'react';
-import { Button, Clickable } from './buttons';
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { RuntimeCostEstimator } from './runtime-cost-estimator';
-import { RuntimeSummary } from './runtime-summary';
-import { toRuntimeConfig } from 'app/utils/runtime-utils';
-
 import { useState } from 'react';
-import { ClrIcon } from './icons';
+
+import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { toAnalysisConfig } from 'app/utils/runtime-utils';
+import { diskStore, useStore } from 'app/utils/stores';
+
+import { Button, Clickable } from './buttons';
+import { ClrIcon } from './icons';
 import { WarningMessage } from './messages';
+import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
+import { RuntimeCostEstimator } from './runtime-cost-estimator';
+import { RuntimeSummary } from './runtime-summary';
 
 const styles = reactStyles({
   bodyElement: {
@@ -37,8 +40,12 @@ export const RuntimeInitializerModal = ({
   defaultRuntime,
 }: Props) => {
   const [showDetails, setShowDetails] = useState(false);
+  const { persistentDisk } = useStore(diskStore);
 
-  const defaultRuntimeConfig = toRuntimeConfig(defaultRuntime);
+  const defaultAnalysisConfig = toAnalysisConfig(
+    defaultRuntime,
+    persistentDisk
+  );
   return (
     <Modal width={600}>
       <ModalTitle>Create an Analysis Environment</ModalTitle>
@@ -52,7 +59,7 @@ export const RuntimeInitializerModal = ({
             : 'Would you like to continue with your most recently used environment settings in this workspace?'}
         </WarningMessage>
         <RuntimeCostEstimator
-          runtimeConfig={defaultRuntimeConfig}
+          analysisConfig={defaultAnalysisConfig}
           style={{ ...styles.bodyElement, justifyContent: 'space-evenly' }}
         />
         <Clickable
@@ -69,7 +76,7 @@ export const RuntimeInitializerModal = ({
         </Clickable>
         {showDetails && (
           <div style={styles.runtimeDetails}>
-            <RuntimeSummary runtimeConfig={defaultRuntimeConfig} />
+            <RuntimeSummary analysisConfig={defaultAnalysisConfig} />
             <div style={{ marginTop: '10px' }}>
               To change this configuration, click 'Configure' below.
             </div>

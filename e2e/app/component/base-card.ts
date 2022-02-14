@@ -3,7 +3,7 @@ import { MenuOption } from 'app/text-labels';
 import Container from 'app/container';
 import SnowmanMenu, { snowmanIconXpath } from './snowman-menu';
 
-export default abstract class CardBase extends Container {
+export default abstract class BaseCard extends Container {
   protected cardElement: ElementHandle;
 
   protected constructor(page: Page, xpath?: string) {

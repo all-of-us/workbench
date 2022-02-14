@@ -1,5 +1,12 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  Concept,
+  Domain,
+  DomainCard as ConceptDomainCard,
+  SurveyModule,
+} from 'generated/fetch';
 
 import { AlertClose, AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
@@ -25,12 +32,6 @@ import {
 } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  Concept,
-  Domain,
-  DomainCard as ConceptDomainCard,
-  SurveyModule,
-} from 'generated/fetch';
 const styles = reactStyles({
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',

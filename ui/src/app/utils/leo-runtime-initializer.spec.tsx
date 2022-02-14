@@ -1,4 +1,12 @@
 import {
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
+import { RuntimeApi } from 'generated/fetch/api';
+
+import { expect } from '@jest/globals';
+import {
   leoRuntimesApi,
   registerApiClient as registerApiClientNotebooks,
 } from 'app/services/notebooks-swagger-fetch-clients';
@@ -11,18 +19,14 @@ import {
   LeoRuntimeInitializer,
   LeoRuntimeInitializerOptions,
 } from 'app/utils/leo-runtime-initializer';
-import {
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
-import { RuntimeApi } from 'generated/fetch/api';
-import { expect } from '@jest/globals';
-import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
-import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import { serverConfigStore } from 'app/utils/stores';
+import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
+
+import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
+import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+
 import { runtimePresets } from './runtime-presets';
+
 import SpyInstance = jest.SpyInstance;
 
 let mockGetRuntime: SpyInstance;

@@ -1,12 +1,13 @@
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { StyledRouterLink } from 'app/components/buttons';
-import { Dropdown } from 'primereact/dropdown';
+import { useCallback, useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
 
-import { useState, useEffect, useCallback } from 'react';
-import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
 import { EgressEvent } from 'generated/fetch';
+
+import { StyledRouterLink } from 'app/components/buttons';
+import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
 import { mutableEgressEventStatuses } from 'app/utils/egress-events';
 
 interface Props {

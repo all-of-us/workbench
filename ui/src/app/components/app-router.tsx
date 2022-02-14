@@ -1,7 +1,3 @@
-import { cond } from 'app/utils';
-import { routeDataStore } from 'app/utils/stores';
-import { buildPageTitleForEnvironment } from 'app/utils/title';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { useEffect } from 'react';
 import * as ReactDOM from 'react-dom';
@@ -14,6 +10,12 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import { cond } from 'app/utils';
+import { routeDataStore } from 'app/utils/stores';
+import { buildPageTitleForEnvironment } from 'app/utils/title';
+
 import { Button } from './buttons';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
 

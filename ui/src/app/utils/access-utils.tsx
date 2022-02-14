@@ -1,9 +1,24 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { Redirect } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 
+import {
+  AccessModule,
+  AccessModuleConfig,
+  AccessModuleStatus,
+  ErrorCode,
+  Profile,
+} from 'generated/fetch';
+
+import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
+import { InfoIcon } from 'app/components/icons';
+import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import {
+  hasExpired,
+  isExpiringNotBypassed,
+} from 'app/pages/access/access-renewal';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -14,21 +29,22 @@ import {
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
+
 import {
-  AccessModule,
-  AccessModuleStatus,
-  ErrorCode,
-  Profile,
-} from 'generated/fetch';
-import { parseQueryParams } from 'app/components/app-router';
-import { cond, switchCase } from './index';
-import { TooltipTrigger } from 'app/components/popups';
-import { InfoIcon } from 'app/components/icons';
-import {
-  getWholeDaysFromNow,
   displayDateWithoutHours,
+  getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
+import { cond, switchCase } from './index';
+
+export enum AccessModulesStatus {
+  NEVER_EXPIRES = 'Complete (Never Expires)',
+  CURRENT = 'Current',
+  EXPIRING_SOON = 'Expiring Soon',
+  EXPIRED = 'Expired',
+  BYPASSED = 'Bypassed',
+  INCOMPLETE = 'Incomplete',
+}
 
 const { useState, useEffect } = React;
 
@@ -110,16 +126,14 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url} />;
 };
 
-interface AccessModuleConfig {
-  moduleName: AccessModule;
+export const ACCESS_RENEWAL_PATH = '/access-renewal';
+export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
+
+interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
-  isRequiredByRT: boolean;
-  isRequiredByCT: boolean;
   AARTitleComponent: () => JSX.Element;
   DARTitleComponent: () => JSX.Element;
   adminPageTitle: string;
-  adminBypassable: true;
-  canExpire: boolean;
   externalSyncAction?: Function;
   refreshAction?: Function;
 }
@@ -134,39 +148,45 @@ interface AccessModuleConfig {
 // https://github.com/all-of-us/workbench/blob/main/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getAccessModuleConfig = (
   moduleName: AccessModule
-): AccessModuleConfig => {
+): AccessModuleUIConfig => {
   const {
     enableRasLoginGovLinking,
     enforceRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
+    accessModules,
   } = serverConfigStore.get().config;
+  const apiConfig = accessModules.find((m) => m.name === moduleName);
   return switchCase(
     moduleName,
 
     [
       AccessModule.TWOFACTORAUTH,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
         adminPageTitle: 'Google 2-Step Verification',
-        adminBypassable: true,
-        canExpire: false,
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
     [
       AccessModule.RASLINKLOGINGOV,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment:
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
+
+        // override these API config values temporarily
+        // when we complete RW-7862, enforceRasLoginGovLinking will work as normal access enable flag
+        // and we can remove this override
+
+        requiredForRTAccess: enforceRasLoginGovLinking,
+        requiredForCTAccess: enforceRasLoginGovLinking,
+
         DARTitleComponent: () => (
           <div>
             Verify your identity with Login.gov{' '}
@@ -180,23 +200,17 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Verify your identity with Login.gov',
-        canExpire: false,
-        adminBypassable: true,
         refreshAction: () => redirectToRas(false),
-        isRequiredByRT: enforceRasLoginGovLinking,
-        isRequiredByCT: enforceRasLoginGovLinking,
       }),
     ],
 
     [
       AccessModule.ERACOMMONS,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: enableEraCommons,
         DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
-        adminPageTitle: 'Connect your eRA Commons account',
-        adminBypassable: true,
-        canExpire: false,
+        adminPageTitle: 'Connect your eRA Commons* account',
         externalSyncAction: async () =>
           await profileApi().syncEraCommonsStatus(),
         refreshAction: async () => await profileApi().syncEraCommonsStatus(),
@@ -206,7 +220,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.COMPLIANCETRAINING,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
         AARTitleComponent: () => (
           <div>
@@ -219,21 +233,17 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Registered Tier training',
-        adminBypassable: true,
-        canExpire: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
     [
       AccessModule.CTCOMPLIANCETRAINING,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
         DARTitleComponent: () => (
           <div>
@@ -241,58 +251,42 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Controlled Tier training',
-        adminBypassable: true,
-        canExpire: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
-        isRequiredByRT: false,
-        isRequiredByCT: true,
       }),
     ],
 
     [
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
-        adminBypassable: true,
-        isRequiredByRT: true,
-        isRequiredByCT: true,
-        canExpire: true,
       }),
     ],
 
     [
       AccessModule.PROFILECONFIRMATION,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
-        adminBypassable: false,
-        isRequiredByRT: true,
-        isRequiredByCT: true,
-        canExpire: true,
       }),
     ],
 
     [
       AccessModule.PUBLICATIONCONFIRMATION,
       () => ({
-        moduleName,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
-        adminBypassable: false,
-        isRequiredByRT: true,
-        isRequiredByCT: true,
-        canExpire: true,
       }),
     ]
   );
@@ -422,6 +416,18 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
+  function getCompleteOrExpireModuleStatus(): AccessModulesStatus {
+    return cond(
+      [!expirationEpochMillis, () => AccessModulesStatus.NEVER_EXPIRES],
+      [hasExpired(expirationEpochMillis), () => AccessModulesStatus.EXPIRED],
+      [
+        isExpiringNotBypassed({ expirationEpochMillis }),
+        () => AccessModulesStatus.EXPIRING_SOON,
+      ],
+      [!!expirationEpochMillis, () => AccessModulesStatus.CURRENT]
+    );
+  }
+
   return cond(
     // User has bypassed module
     [
@@ -429,6 +435,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: `${bypassDate}`,
         nextReviewDate: 'Unavailable (bypassed)',
+        moduleStatus: AccessModulesStatus.BYPASSED,
       }),
     ],
     // User never completed training
@@ -437,6 +444,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: 'Unavailable (not completed)',
         nextReviewDate: 'Unavailable (not completed)',
+        moduleStatus: AccessModulesStatus.INCOMPLETE,
       }),
     ],
     // User completed training; covers expired, within-lookback, and after-lookback cases.
@@ -451,6 +459,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
+          moduleStatus: getCompleteOrExpireModuleStatus(),
         };
       },
     ]

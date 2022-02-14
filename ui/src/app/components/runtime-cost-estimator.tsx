@@ -1,21 +1,22 @@
+import { CSSProperties } from 'react';
+
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { cond, reactStyles } from 'app/utils';
 import {
-  ComputeType,
-  diskPricePerMonth,
+  detachableDiskPricePerMonth,
+  diskConfigPricePerMonth,
   machineRunningCost,
   machineRunningCostBreakdown,
   machineStorageCost,
   machineStorageCostBreakdown,
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
-import { RuntimeConfig } from 'app/utils/runtime-utils';
-import { CSSProperties } from 'react';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 
 interface Props {
-  runtimeConfig: RuntimeConfig;
+  analysisConfig: AnalysisConfig;
   costTextColor?: string;
   style?: CSSProperties;
 }
@@ -24,29 +25,34 @@ const styles = reactStyles({
   costSection: {
     marginRight: '1rem',
     overflow: 'hidden',
-    whiteSpace: 'nowrap',
   },
   cost: {
+    fontSize: '12px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
 });
 
 export const RuntimeCostEstimator = ({
-  runtimeConfig,
+  analysisConfig,
   costTextColor = colors.accent,
   style = {},
 }: Props) => {
-  const { computeType, diskConfig } = runtimeConfig;
-  const runningCost = machineRunningCost(runtimeConfig);
-  const runningCostBreakdown = machineRunningCostBreakdown(runtimeConfig);
-  const storageCost = machineStorageCost(runtimeConfig);
-  const storageCostBreakdown = machineStorageCostBreakdown(runtimeConfig);
+  const { detachedDisk, diskConfig } = analysisConfig;
+  const runningCost = machineRunningCost(analysisConfig);
+  const runningCostBreakdown = machineRunningCostBreakdown(analysisConfig);
+  const storageCost = machineStorageCost(analysisConfig);
+  const storageCostBreakdown = machineStorageCostBreakdown(analysisConfig);
   const costStyle = {
     ...styles.cost,
-    fontSize: diskConfig.detachable ? '12px' : '15px',
     color: costTextColor,
   };
+  const pdCost = cond(
+    [diskConfig.detachable, () => diskConfigPricePerMonth(diskConfig)],
+    [!!detachedDisk, () => detachableDiskPricePerMonth(detachedDisk)],
+    () => 0
+  );
   return (
     <FlexRow style={style}>
       <FlexColumn style={styles.costSection}>
@@ -87,13 +93,13 @@ export const RuntimeCostEstimator = ({
           </div>
         </TooltipTrigger>
       </FlexColumn>
-      {diskConfig.detachable && computeType === ComputeType.Standard && (
+      {!!pdCost && (
         <FlexColumn style={styles.costSection}>
           <div style={{ fontSize: '10px', fontWeight: 600 }}>
             Persistent disk cost
           </div>
           <div style={costStyle} data-test-id='pd-cost'>
-            {formatUsd(diskConfig.size * diskPricePerMonth)}/month
+            {formatUsd(pdCost)}/month
           </div>
         </FlexColumn>
       )}

@@ -1,4 +1,11 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
+
+import {
+  ResourceType,
+  WorkspaceAccessLevel,
+  WorkspaceResource,
+} from 'generated/fetch';
 
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -13,13 +20,6 @@ import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  ResourceType,
-  WorkspaceAccessLevel,
-  WorkspaceResource,
-} from 'generated/fetch';
-import { useEffect, useState } from 'react';
-
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
 
@@ -213,7 +213,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 />
               </div>
               <div style={styles.cardText}>{descriptions.cohorts}</div>
-              {/*Because the container can stretch based on window size, but the height
+              {/* Because the container can stretch based on window size, but the height
               can't we set a max width to cap the height based on aspect ratio*/}
               <div
                 style={{ width: '100%', maxWidth: '425px', paddingTop: '1rem' }}
@@ -257,7 +257,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 />
               </div>
               <div style={styles.cardText}>{descriptions.datasets}</div>
-              {/*Because the container can stretch based on window size, but the height
+              {/* Because the container can stretch based on window size, but the height
                can't we set a max width to cap the height based on aspect ratio*/}
               <div
                 style={{

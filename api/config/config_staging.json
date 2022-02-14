@@ -23,13 +23,6 @@
     "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-staging-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
-    "retryCount": 2,
-    "bufferCapacityPerTier": {
-      "registered": 150,
-      "controlled": 20
-    },
-    "bufferRefillProjectsPerTask": 1,
-    "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [
       0.5,
@@ -99,7 +92,12 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
     "enforceRasLoginGovLinking": true,
-    "currentDuccVersions": [3, 4]
+    "currentDuccVersions": [3, 4],
+    "renewal": {
+      "expiryDays": 365,
+      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "lookbackPeriod": 330
+    }
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,

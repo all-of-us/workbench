@@ -1,5 +1,5 @@
-import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
-import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
+import { findOrCreateWorkspace, isValidDate, openTab, signInWithAccessToken } from 'utils/test-utils';
+import { MenuOption, LinkText, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
@@ -8,7 +8,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { waitForText } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
-import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
+import AnnotationsSidebar, { ReviewStatus } from 'app/sidebar/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Page } from 'puppeteer';
@@ -67,8 +67,7 @@ describe('Cohort review set tests', () => {
 
     // Back out to Data page
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
-    await dataPage.waitForLoad();
+    await openTab(page, Tabs.Data, dataPage);
 
     // Verify Cohort Review card exists
     const resourceCard = new DataResourceCard(page);
@@ -254,7 +253,8 @@ describe('Cohort review set tests', () => {
 
     // Land on the Data Page & click the Cohort Reviews SubTab
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openCohortReviewsSubtab();
+    await openTab(page, Tabs.Data, dataPage);
+    await openTab(page, Tabs.CohortReviews, dataPage);
 
     // Rename Cohort Review
     const newCohortReviewName = makeRandomName();
@@ -310,7 +310,7 @@ describe('Cohort review set tests', () => {
     const cohortActionsPage = new CohortActionsPage(page);
     await cohortActionsPage.waitForLoad();
 
-    await dataPage.openDataPage({ waitPageChange: true });
+    await openTab(page, Tabs.Data, dataPage);
     const cohortCard: DataResourceCard = await dataPage.findCohortCard(cohortName);
     return cohortCard;
   }

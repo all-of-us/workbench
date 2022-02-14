@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as fp from 'lodash/fp';
 import { faEdit } from '@fortawesome/free-regular-svg-icons';
 import {
@@ -9,24 +11,42 @@ import {
   faInfoCircle,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
-import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import moment from 'moment';
-import { CSSProperties } from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
+import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
 import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import {
+  CdrVersionTiersResponse,
+  Criteria,
+  GenomicExtractionJob,
+  ParticipantCohortStatus,
+  ResourceType,
+  RuntimeError,
+  RuntimeStatus,
+  TerraJobStatus,
+} from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
+import { Clickable, StyledExternalLink } from 'app/components/buttons';
+import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
+import { HelpTips } from 'app/components/help-tips';
+import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { PopupTrigger } from 'app/components/popups';
+import { Spinner } from 'app/components/spinners';
 import { RuntimePanelWrapper } from 'app/pages/analysis/runtime-panel';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
+import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
+import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { participantStore } from 'app/services/review-state.service';
+import { dataSetApi } from 'app/services/swagger-fetch-clients';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   DEFAULT,
@@ -40,6 +60,7 @@ import {
   withUserProfile,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { getCdrVersion } from 'app/utils/cdr-versions';
 import {
   currentConceptStore,
   NavigationProps,
@@ -55,42 +76,23 @@ import {
   GenomicExtractionStore,
   genomicExtractionStore,
   routeDataStore,
-  runtimeStore,
   RuntimeStore,
+  runtimeStore,
   serverConfigStore,
   updateGenomicExtractionStore,
   withStore,
 } from 'app/utils/stores';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import { Clickable, StyledExternalLink } from 'app/components/buttons';
-import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
-import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
-import { HelpTips } from 'app/components/help-tips';
-import { withErrorModal } from 'app/components/modals';
-import { Spinner } from 'app/components/spinners';
-import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
-import { dataSetApi } from 'app/services/swagger-fetch-clients';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { getCdrVersion } from 'app/utils/cdr-versions';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
-import {
-  CdrVersionTiersResponse,
-  Criteria,
-  GenomicExtractionJob,
-  ParticipantCohortStatus,
-  ResourceType,
-  RuntimeError,
-  RuntimeStatus,
-  TerraJobStatus,
-} from 'generated/fetch';
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import runtime from 'assets/icons/thunderstorm-solid.svg';
 import times from 'assets/icons/times-light.svg';
-import { RuntimeErrorModal } from './runtime-error-modal';
-import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
+import moment from 'moment';
+
 import { RouteLink } from './app-router';
+import { RuntimeErrorModal } from './runtime-error-modal';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 

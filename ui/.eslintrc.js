@@ -8,16 +8,18 @@ module.exports = {
     'prettier',
     'react',
     'react-hooks',
+    'simple-import-sort',
   ],
   // If we extend multiple rulesets in the future, ensure that 'prettier' is last.
   // This will allow it to disable prettier-incompatible rules from other rulesets.
   extends: ['prettier'],
   parserOptions: {
-    ecmaVersion: 6,
-    sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
     },
+    ecmaVersion: 6,
+    project: ['./tsconfig.json'],
+    sourceType: 'module',
   },
   settings: {
     react: {
@@ -51,7 +53,6 @@ module.exports = {
     'no-var': 'warn',
     'prefer-const': ['warn', { destructuring: 'all' }],
     radix: 'warn', // Add radix on parseInt
-    // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
     // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
     // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
 
@@ -62,6 +63,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '_' }],
 
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
+    '@typescript-eslint/dot-notation': 'warn',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/no-empty-interface': 'warn',
     '@typescript-eslint/no-inferrable-types': [
@@ -97,11 +99,36 @@ module.exports = {
     ],
 
     'no-trailing-spaces': 'warn',
+    'simple-import-sort/imports': ['warn',
+      {
+        // each 'regex' below matches an import `from` string
+        // regexes ['are', 'arranged', 'in', 'groups'] below
+        // within a [group], imports are sorted first by 'regex', then inside each 'regex'
+        // so for example, 'react' and 'react-router-dom' will come before 'lodash/fp' in that group
+        // groups are separated by empty lines
+        'groups': [
+          // Side effect imports.
+          ['^\\u0000'],
 
-    // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
+          // dependencies, in importance order (YMMV, and I'm sure I missed some)
+          [
+            '^react', '^lodash', '^enzyme', '^highcharts', '^primereact', '^validate', '^@fortawesome', '^querystring',
+            '^stacktrace', '^history', '^nouislider', '^setupTests'
+          ],
 
-    // 'simple-import-sort/sort': 'warn',
-    // 'spaced-comment': 'warn',
+          // swagger
+          ['^generated'],
+
+          // main group plus catchall - anything not matched in another group.
+          ['^environments', '^'],
+
+          ['^testing'],
+
+          ['^./'],
+        ]
+      }
+    ],
+    'spaced-comment': 'warn',
 
     /* Jest */
     'jest/no-focused-tests': 'warn',

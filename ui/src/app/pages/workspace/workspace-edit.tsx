@@ -1,8 +1,23 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
-import validate from 'validate.js';
+import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
+import validate from 'validate.js';
 
+import {
+  ArchivalStatus,
+  BillingAccount,
+  CdrVersion,
+  CdrVersionTiersResponse,
+  DisseminateResearchEnum,
+  Profile,
+  ResearchOutcomeEnum,
+  ResearchPurpose,
+  SpecificPopulationEnum,
+  Workspace,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -78,21 +93,8 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
-import {
-  ArchivalStatus,
-  BillingAccount,
-  CdrVersion,
-  CdrVersionTiersResponse,
-  DisseminateResearchEnum,
-  Profile,
-  ResearchOutcomeEnum,
-  ResearchPurpose,
-  SpecificPopulationEnum,
-  Workspace,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+
 import { OldCdrVersionModal } from './old-cdr-version-modal';
-import { environment } from 'environments/environment';
 import { UnavailableTierModal } from './unavailable-tier-modal';
 
 export const styles = reactStyles({
@@ -243,13 +245,11 @@ function getDiseaseNames(keyword) {
     .then((response) => {
       return response.json();
     })
-    .then((matches) => {
-      const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(
-        matches
-      );
-      const diseases = fp.map((elt) => elt['label'])(labeledMatches);
-      return diseases;
-    });
+    .then((matches) =>
+      matches
+        .filter((elt) => elt.hasOwnProperty('label'))
+        .map((elt) => elt.label)
+    );
 }
 
 interface UpgradeProps {
@@ -1234,7 +1234,7 @@ export const WorkspaceEdit = fp.flow(
           },
         },
       } = this.state;
-      let values: object = {
+      const values: object = {
         name,
         billingAccountName,
         anticipatedFindings,
@@ -1245,6 +1245,14 @@ export const WorkspaceEdit = fp.flow(
         researchOutcomeList,
         disseminateResearchFindingList,
         primaryPurpose: this.primaryPurposeIsSelected,
+
+        // Conditionally include optional fields for validation.
+
+        otherPurposeDetails,
+        populationDetails,
+        otherPopulationDetails,
+        diseaseOfFocus,
+        otherDisseminateResearchFindings,
       };
 
       const requiredStringWithMaxLength = (maximum: number, prefix = '') => ({
@@ -1274,46 +1282,36 @@ export const WorkspaceEdit = fp.flow(
         researchOutcomeList: { presence: { allowEmpty: false } },
         disseminateResearchFindingList: { presence: { allowEmpty: false } },
         primaryPurpose: { truthiness: true },
+
+        // Conditionally include optional fields for validation.
+
+        otherPurposeDetails: otherPurpose
+          ? requiredStringWithMaxLength(500, 'Other primary purpose')
+          : {},
+        populationDetails: populationChecked
+          ? {
+              presence: true,
+            }
+          : {},
+        otherPopulationDetails: populationDetails?.includes(
+          SpecificPopulationEnum.OTHER
+        )
+          ? requiredStringWithMaxLength(100, 'Other Specific Population')
+          : {},
+        diseaseOfFocus: diseaseFocusedResearch
+          ? requiredStringWithMaxLength(80, 'Disease of Focus')
+          : {},
+        otherDisseminateResearchFindings:
+          disseminateResearchFindingList?.includes(
+            DisseminateResearchEnum.OTHER
+          )
+            ? requiredStringWithMaxLength(
+                100,
+                'Other methods of disseminating research findings'
+              )
+            : {},
       };
 
-      // Conditionally include optional fields for validation.
-      if (otherPurpose) {
-        values = { ...values, otherPurposeDetails };
-        constraints['otherPurposeDetails'] = requiredStringWithMaxLength(
-          500,
-          'Other primary purpose'
-        );
-      }
-      if (populationChecked) {
-        values = { ...values, populationDetails };
-        constraints['populationDetails'] = {
-          presence: true,
-        };
-      }
-      if (populationDetails?.includes(SpecificPopulationEnum.OTHER)) {
-        values = { ...values, otherPopulationDetails };
-        constraints['otherPopulationDetails'] = requiredStringWithMaxLength(
-          100,
-          'Other Specific Population'
-        );
-      }
-      if (diseaseFocusedResearch) {
-        values = { ...values, diseaseOfFocus };
-        constraints['diseaseOfFocus'] = requiredStringWithMaxLength(
-          80,
-          'Disease of Focus'
-        );
-      }
-      if (
-        disseminateResearchFindingList?.includes(DisseminateResearchEnum.OTHER)
-      ) {
-        values = { ...values, otherDisseminateResearchFindings };
-        constraints['otherDisseminateResearchFindings'] =
-          requiredStringWithMaxLength(
-            100,
-            'Other methods of disseminating research findings'
-          );
-      }
       return validate(values, constraints, { fullMessages: false });
     }
 
@@ -1656,7 +1654,7 @@ export const WorkspaceEdit = fp.flow(
               }
             />
 
-            {/*Primary purpose */}
+            {/* Primary purpose */}
             <WorkspaceEditSection
               header={researchPurposeQuestions[0].header}
               publiclyDisplayed={true}
@@ -1749,7 +1747,7 @@ export const WorkspaceEdit = fp.flow(
                   index='2.2'
                   id='scientificApproachText'
                 />
-                {/*TextBox: anticipated findings from the study section*/}
+                {/* TextBox: anticipated findings from the study section*/}
                 <WorkspaceResearchSummary
                   researchPurpose={researchPurposeQuestions[4]}
                   researchValue={anticipatedFindings}
@@ -1762,7 +1760,7 @@ export const WorkspaceEdit = fp.flow(
               </FlexColumn>
             </WorkspaceEditSection>
 
-            {/*disseminate  research Section */}
+            {/* disseminate  research Section */}
             <WorkspaceEditSection
               header={researchPurposeQuestions[5].header}
               description={researchPurposeQuestions[5].description}
@@ -1783,7 +1781,7 @@ export const WorkspaceEdit = fp.flow(
               </FlexRow>
             </WorkspaceEditSection>
 
-            {/*Research outcome section*/}
+            {/* Research outcome section*/}
             <WorkspaceEditSection
               header={researchPurposeQuestions[6].header}
               index='4.'
@@ -1799,7 +1797,7 @@ export const WorkspaceEdit = fp.flow(
               </FlexRow>
             </WorkspaceEditSection>
 
-            {/*Underrespresented population section*/}
+            {/* Underrespresented population section*/}
             <WorkspaceEditSection
               header={researchPurposeQuestions[7].header}
               index='5.'

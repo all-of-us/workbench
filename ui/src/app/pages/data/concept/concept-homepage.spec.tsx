@@ -1,14 +1,16 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 
-import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   CohortBuilderApi,
   ConceptSetsApi,
   WorkspacesApi,
 } from 'generated/fetch';
+
+import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
@@ -61,7 +63,7 @@ describe('ConceptHomepage', () => {
   });
 
   // Need to update with new api calls
-  /*it('should show warning and not search if invalid characters have been entered', async() => {
+  /* it('should show warning and not search if invalid characters have been entered', async() => {
     const conceptSpy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const countSpy = jest.spyOn(conceptsApi(), 'domainCounts');
     const surveySpy = jest.spyOn(conceptsApi(), 'searchSurveys');

@@ -1,6 +1,6 @@
+import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import * as React from 'react';
 
 import { getChartObj } from 'app/cohort-search/utils';
 import colors from 'app/styles/colors';
@@ -108,7 +108,7 @@ export class GenderChart extends React.Component<Props, State> {
     );
     return {
       categories: chartData.categories.sort((a, b) => (a > b ? 1 : -1)),
-      data: chartData.data.sort((a, b) => (a['name'] > b['name'] ? 1 : -1)),
+      data: chartData.data.sort((a, b) => (a.name > b.name ? 1 : -1)),
     };
   }
 

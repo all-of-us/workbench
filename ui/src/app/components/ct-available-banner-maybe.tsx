@@ -1,21 +1,24 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { ToastBanner, ToastType } from './toast-banner';
-import { cookiesEnabled } from 'app/utils/cookies';
-import { StyledRouterLink } from './buttons';
+import { CdrVersionTier, Profile } from 'generated/fetch';
+
 import { environment } from 'environments/environment';
 import {
   AccessTierDisplayNames,
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
-import { CdrVersionTier, Profile } from 'generated/fetch';
-import { eligibleForTier } from 'app/utils/access-utils';
+import {
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  eligibleForTier,
+} from 'app/utils/access-utils';
+import { cookiesEnabled } from 'app/utils/cookies';
 import { cdrVersionStore, profileStore, useStore } from 'app/utils/stores';
-import { AoU } from './text-wrappers';
 
-// Visible For Testing
-export const DAR_PATH = '/data-access-requirements';
+import { StyledRouterLink } from './buttons';
+import { AoU } from './text-wrappers';
+import { ToastBanner, ToastType } from './toast-banner';
+
 const CT_COOKIE_KEY = 'controlled-tier-available';
 
 const shouldShowBanner = (
@@ -41,7 +44,7 @@ const shouldShowBanner = (
     // the user's first sign-in time was before the release of the default CT CDR Version
     profile.firstSignInTime < ct.defaultCdrVersionCreationTime &&
     // the user is not currently visiting the DAR page
-    window.location.pathname !== DAR_PATH;
+    window.location.pathname !== DATA_ACCESS_REQUIREMENTS_PATH;
 
   if (cookiesEnabled()) {
     const cookie = localStorage.getItem(CT_COOKIE_KEY);
@@ -72,7 +75,7 @@ export const CTAvailableBannerMaybe = () => {
     <div data-test-id='controlled-tier-available'>
       To access genomic data and more in the <AoU />{' '}
       {AccessTierDisplayNames.Controlled},
-      <StyledRouterLink path={DAR_PATH}>
+      <StyledRouterLink path={DATA_ACCESS_REQUIREMENTS_PATH}>
         complete the necessary steps
       </StyledRouterLink>
       .

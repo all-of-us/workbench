@@ -1,5 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -13,6 +15,7 @@ import {
 import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -21,18 +24,16 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { cond, useId, withStyle } from 'app/utils';
 import {
-  computeRenewalDisplayDates,
   accessRenewalModules,
-  syncModulesExternal,
+  computeRenewalDisplayDates,
   getAccessModuleConfig,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
+  syncModulesExternal,
 } from 'app/utils/access-utils';
+import { getWholeDaysFromNow } from 'app/utils/dates';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
-import { AccessModule, AccessModuleStatus } from 'generated/fetch';
-import { SupportMailto } from 'app/components/support';
-import { getWholeDaysFromNow } from 'app/utils/dates';
 
 const { useState, useEffect } = React;
 
@@ -131,7 +132,11 @@ const syncAndReloadTraining = fp.flow(
 });
 
 // Helper Functions
+// The module has already expired
+export const hasExpired = (expiration: number): boolean =>
+  !!expiration && getWholeDaysFromNow(expiration) < 0;
 
+// The module can either be expired or is expiring
 export const isExpiring = (expiration?: number): boolean =>
   expiration
     ? getWholeDaysFromNow(expiration) <=
@@ -141,12 +146,16 @@ export const isExpiring = (expiration?: number): boolean =>
 const isModuleExpiring = (status: AccessModuleStatus): boolean =>
   isExpiring(status.expirationEpochMillis);
 
+export const isExpiringNotBypassed = (moduleStatus: AccessModuleStatus) => {
+  return isModuleExpiring(moduleStatus) && !moduleStatus.bypassEpochMillis;
+};
+
 const isExpiringAndNotBypassed = (
   moduleName: AccessModule,
   modules: AccessModuleStatus[]
 ) => {
   const status = modules.find((m) => m.moduleName === moduleName);
-  return isModuleExpiring(status) && !status.bypassEpochMillis;
+  return isExpiringNotBypassed(status);
 };
 
 const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {

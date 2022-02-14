@@ -1,5 +1,9 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { Router } from 'react-router';
+import { mount } from 'enzyme';
+import { createMemoryHistory } from 'history';
+
+import { CohortBuilderApi, CohortsApi } from 'generated/fetch';
 
 import {
   cohortsApi,
@@ -7,15 +11,14 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore } from 'app/utils/stores';
-import { CohortBuilderApi, CohortsApi } from 'generated/fetch';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { CohortsApiStub } from 'testing/stubs/cohorts-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+
 import { CohortPage } from './cohort-page.component';
-import { Router } from 'react-router';
-import { createMemoryHistory } from 'history';
 
 describe('CohortPage', () => {
   let history;

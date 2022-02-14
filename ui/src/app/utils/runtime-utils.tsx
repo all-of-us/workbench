@@ -1,6 +1,22 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  DataprocConfig,
+  Disk,
+  DiskType,
+  ErrorCode,
+  GpuConfig,
+  PersistentDiskRequest,
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+  SecuritySuspendedErrorParameters,
+} from 'generated/fetch';
+
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
-import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
-import { DEFAULT, switchCase, withAsyncErrorHandling } from 'app/utils';
+import { diskApi, runtimeApi } from 'app/services/swagger-fetch-clients';
+import { switchCase, withAsyncErrorHandling } from 'app/utils';
 import {
   ExceededActionCountError,
   ExceededErrorCountError,
@@ -26,19 +42,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 
-import {
-  DataprocConfig,
-  Disk,
-  DiskType,
-  ErrorCode,
-  GpuConfig,
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-  SecuritySuspendedErrorParameters,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 import { runtimePresets } from './runtime-presets';
 
 const { useState, useEffect } = React;
@@ -61,32 +64,40 @@ export enum RuntimeStatusRequest {
   Stop = 'Stop',
 }
 
-export interface RuntimeDiff {
+export interface AnalysisDiff {
   desc: string;
   previous: string;
   new: string;
-  differenceType: RuntimeDiffState;
+  diff: AnalysisDiffState;
+  diskDiff?: AnalysisDiffState;
 }
 
-export enum RuntimeDiffState {
+export enum AnalysisDiffState {
   // Arranged in order of increasing severity. We depend on this ordering below.
   NO_CHANGE,
   CAN_UPDATE_IN_PLACE,
   CAN_UPDATE_WITH_REBOOT,
-  NEEDS_DELETE_RUNTIME,
-  NEEDS_DELETE_PD,
+  NEEDS_DELETE,
 }
+
+export const diskTypeLabels = {
+  [DiskType.Standard]: 'Standard Disk',
+  [DiskType.Ssd]: 'Solid State Disk',
+};
 
 export interface DiskConfig {
   size: number;
   detachable: boolean;
   detachableType: DiskType | null;
+  existingDiskName: string | null;
 }
 
-export interface RuntimeConfig {
+export interface AnalysisConfig {
   computeType: ComputeType;
   machine: Machine;
   diskConfig: DiskConfig;
+  // This should only be populated if !diskconfig.detachable.
+  detachedDisk: Disk;
   // TODO: Refactor this type to an intermediate representation.
   dataprocConfig: DataprocConfig;
   // TODO: Refactor this type to an intermediate representation.
@@ -98,15 +109,6 @@ export interface UpdateMessaging {
   applyAction: string;
   warn?: string;
   warnMore?: string;
-}
-
-// Used to wrap the sate of runtime panel
-export interface RuntimeCtx {
-  runtimeExists: boolean;
-  gceExists: boolean;
-  dataprocExists: boolean;
-  pdExists: boolean;
-  enablePD: boolean;
 }
 
 const errorToSecuritySuspendedParams = async (
@@ -138,229 +140,303 @@ export const maybeUnwrapSecuritySuspendedError = async (
 
 // Visible for testing only.
 export const findMostSevereDiffState = (
-  states: RuntimeDiffState[]
-): RuntimeDiffState => {
-  return fp.last([...states].sort());
+  states: AnalysisDiffState[]
+): AnalysisDiffState => {
+  return fp.last(
+    [...states].filter((s) => s !== null && s !== undefined).sort()
+  );
 };
 
 export const diffsToUpdateMessaging = (
-  diffs: RuntimeDiff[]
+  diffs: AnalysisDiff[]
 ): UpdateMessaging => {
-  const diffType = findMostSevereDiffState(
-    diffs.map(({ differenceType }) => differenceType)
+  const diffType = findMostSevereDiffState(diffs.map(({ diff }) => diff));
+  const diskDiffType = findMostSevereDiffState(
+    diffs.map(({ diskDiff }) => diskDiff)
   );
-  return switchCase(
-    diffType,
-    [
-      RuntimeDiffState.NEEDS_DELETE_PD,
-      () => ({
+  if (diffType === AnalysisDiffState.NEEDS_DELETE) {
+    if (diskDiffType === AnalysisDiffState.NEEDS_DELETE) {
+      return {
         applyAction: 'APPLY & RECREATE',
-        warn: 'Reducing the size of a persistent disk requires it to be deleted and recreated. This will delete all files on the disk.',
+        warn:
+          'These changes require deletion and re-creation of your persistent disk and cloud environment to take ' +
+          'effect. This will delete all files on the disk.',
         warnMore:
           'If you want to save some files permanently, such as input data, analysis outputs, or installed packages, ' +
           'move them to the workspace bucket. \nNote: Jupyter notebooks are autosaved to the workspace bucket, and deleting ' +
           'your disk will not delete your notebooks.',
-      }),
-    ],
-    [
-      RuntimeDiffState.NEEDS_DELETE_RUNTIME,
-      () => ({
-        applyAction: 'APPLY & RECREATE',
-        warn:
-          'These changes require deletion and re-creation of your cloud ' +
-          'environment to take effect.',
-        warnMore:
-          'Any in-memory state and local file modifications will be ' +
-          'erased. Data stored in workspace buckets is never affected ' +
-          'by changes to your cloud environment.',
-      }),
-    ],
-    [
-      RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
-      () => ({
-        applyAction: 'APPLY & REBOOT',
-        warn: 'These changes require a reboot of your cloud environment to take effect.',
-        warnMore:
-          'Any in-memory state will be erased, but local file ' +
-          'modifications will be preserved. Data stored in workspace ' +
-          'buckets is never affected by changes to your cloud environment.',
-      }),
-    ],
-    [
-      DEFAULT,
-      () => ({
-        applyAction: 'APPLY',
-      }),
-    ]
-  );
+      };
+    }
+    return {
+      applyAction: 'APPLY & RECREATE',
+      warn:
+        'These changes require deletion and re-creation of your cloud ' +
+        'environment to take effect.',
+      warnMore:
+        'Any in-memory state and local file modifications will be ' +
+        'erased. Data stored in workspace buckets is never affected ' +
+        'by changes to your cloud environment.',
+    };
+  } else if (diffType === AnalysisDiffState.CAN_UPDATE_WITH_REBOOT) {
+    return {
+      applyAction: 'APPLY & REBOOT',
+      warn: 'These changes require a reboot of your cloud environment to take effect.',
+      warnMore:
+        'Any in-memory state will be erased, but local file ' +
+        'modifications will be preserved. Data stored in workspace ' +
+        'buckets is never affected by changes to your cloud environment.',
+    };
+  } else {
+    // All other cases can be applied without user disruption.
+    return {
+      applyAction: 'APPLY',
+    };
+  }
 };
 
 const compareComputeTypes = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
   return {
     desc: 'Change compute type',
-    previous: oldRuntime.computeType,
-    new: newRuntime.computeType,
-    differenceType:
-      oldRuntime.computeType === newRuntime.computeType
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+    previous: oldConfig.computeType,
+    new: newConfig.computeType,
+    diff:
+      oldConfig.computeType === newConfig.computeType
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.NEEDS_DELETE,
   };
 };
 
 const compareMachineCpu = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  const oldCpu = oldRuntime.machine.cpu;
-  const newCpu = newRuntime.machine.cpu;
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  const oldCpu = oldConfig.machine.cpu;
+  const newCpu = newConfig.machine.cpu;
 
   return {
     desc: (newCpu < oldCpu ? 'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
-    differenceType:
+    diff:
       oldCpu === newCpu
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
   };
 };
 
 const compareMachineMemory = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  const oldMemory = oldRuntime.machine.memory;
-  const newMemory = newRuntime.machine.memory;
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  const oldMemory = oldConfig.machine.memory;
+  const newMemory = newConfig.machine.memory;
 
   return {
     desc: (newMemory < oldMemory ? 'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
-    differenceType:
+    diff:
       oldMemory === newMemory
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
   };
 };
 
 export const compareGpu = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  const oldGpuExists = !!oldRuntime.gpuConfig;
-  const newGpuExists = !!newRuntime.gpuConfig;
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  const oldGpuExists = !!oldConfig.gpuConfig;
+  const newGpuExists = !!newConfig.gpuConfig;
   return {
     desc: 'Change GPU config',
     previous: oldGpuExists
-      ? `${oldRuntime.gpuConfig.numOfGpus} ${oldRuntime.gpuConfig.gpuType} GPU`
+      ? `${oldConfig.gpuConfig.numOfGpus} ${oldConfig.gpuConfig.gpuType} GPU`
       : 'No GPUs',
     new: newGpuExists
-      ? `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU`
+      ? `${newConfig.gpuConfig.numOfGpus} ${newConfig.gpuConfig.gpuType} GPU`
       : 'No GPUs',
-    differenceType:
+    diff:
       (!oldGpuExists && !newGpuExists) ||
       (oldGpuExists &&
         newGpuExists &&
-        oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
-        oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus)
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+        oldConfig.gpuConfig.gpuType === newConfig.gpuConfig.gpuType &&
+        oldConfig.gpuConfig.numOfGpus === newConfig.gpuConfig.numOfGpus)
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.NEEDS_DELETE,
   };
 };
 
 const compareDiskSize = (
-  { diskConfig: oldDiskConfig }: RuntimeConfig,
-  { diskConfig: newDiskConfig }: RuntimeConfig
-): RuntimeDiff => {
+  { diskConfig: oldDiskConfig }: AnalysisConfig,
+  { diskConfig: newDiskConfig }: AnalysisConfig
+): AnalysisDiff => {
   let desc = 'Disk Size';
-  let diffType: RuntimeDiffState;
+  let diff: AnalysisDiffState;
+  let diskDiff: AnalysisDiffState;
   if (newDiskConfig.size < oldDiskConfig.size) {
-    desc = 'Decease ' + desc;
+    desc = 'Decrease ' + desc;
+    diff = AnalysisDiffState.NEEDS_DELETE;
     if (newDiskConfig.detachable && oldDiskConfig.detachable) {
-      diffType = RuntimeDiffState.NEEDS_DELETE_PD;
+      diskDiff = AnalysisDiffState.NEEDS_DELETE;
     } else {
-      diffType = RuntimeDiffState.NEEDS_DELETE_RUNTIME;
+      diskDiff = AnalysisDiffState.NO_CHANGE;
     }
   } else if (newDiskConfig.size > oldDiskConfig.size) {
     desc = 'Increase ' + desc;
-    diffType = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
+    if (newDiskConfig.detachable) {
+      // Technically, a PD can always be extended in place. However, the only Leo-supported
+      // way to claim the newly allocated space is by rebooting (disk is remounted).
+      diff = AnalysisDiffState.NO_CHANGE;
+      diskDiff = AnalysisDiffState.CAN_UPDATE_IN_PLACE;
+    } else {
+      // Attached PDs are not distinct from the runtime itself.
+      diff = AnalysisDiffState.CAN_UPDATE_WITH_REBOOT;
+    }
   } else {
-    diffType = RuntimeDiffState.NO_CHANGE;
+    diff = AnalysisDiffState.NO_CHANGE;
   }
 
   return {
     desc: desc,
     previous: oldDiskConfig.size && oldDiskConfig.size.toString() + ' GB',
     new: newDiskConfig.size && newDiskConfig.size.toString() + ' GB',
-    differenceType: diffType,
+    diff,
+    diskDiff,
+  };
+};
+
+const compareDiskTypes = (
+  { diskConfig: oldDiskConfig }: AnalysisConfig,
+  { diskConfig: newDiskConfig }: AnalysisConfig
+): AnalysisDiff => {
+  let diff: AnalysisDiffState;
+  let diskDiff: AnalysisDiffState;
+  if (newDiskConfig.detachable === oldDiskConfig.detachable) {
+    if (newDiskConfig.detachableType === oldDiskConfig.detachableType) {
+      diff = AnalysisDiffState.NO_CHANGE;
+      diskDiff = AnalysisDiffState.NO_CHANGE;
+    } else {
+      diff = AnalysisDiffState.NEEDS_DELETE;
+      diskDiff = AnalysisDiffState.NEEDS_DELETE;
+    }
+  } else {
+    diff = AnalysisDiffState.NEEDS_DELETE;
+    // Detachability state has changed. There is no forced PD change in this
+    // scenario. However, there may be changes required on an unattached PD
+    // (not handled here).
+    diskDiff = AnalysisDiffState.NO_CHANGE;
+  }
+
+  const describeDiskType = ({ detachable, detachableType }: DiskConfig) => {
+    return detachable
+      ? `Reattachable ${diskTypeLabels[detachableType]}`
+      : 'Standard Disk';
+  };
+  return {
+    desc: 'Change disk type',
+    previous: describeDiskType(oldDiskConfig),
+    new: describeDiskType(newDiskConfig),
+    diff,
+    diskDiff,
+  };
+};
+
+const compareDetachedDisks = (
+  { diskConfig: oldDiskConfig, detachedDisk: oldDetachedDisk }: AnalysisConfig,
+  { diskConfig: newDiskConfig, detachedDisk: newDetachedDisk }: AnalysisConfig
+): AnalysisDiff => {
+  // This comparator only concerns itself with legal state transitions within
+  // the Workbench. Currently the only allowed interaction with an unattached
+  // disk is to delete it. Therefore, this only returns a diff if an analysis
+  // config transition deletes a detached disk.
+  const oldDetachableExists = oldDiskConfig.detachable || !!oldDetachedDisk;
+  const newDetachableExists = newDiskConfig.detachable || !!newDetachedDisk;
+  if (oldDetachableExists && !newDetachableExists) {
+    const oldSize = oldDiskConfig.detachable
+      ? oldDiskConfig.size
+      : oldDetachedDisk.size;
+    return {
+      desc: 'Reattachable disk',
+      previous: `${oldSize}GB disk`,
+      new: 'None',
+      diff: AnalysisDiffState.NO_CHANGE,
+      diskDiff: AnalysisDiffState.NEEDS_DELETE,
+    };
+  }
+  return {
+    desc: 'Reattachable disk',
+    previous: '',
+    new: '',
+    diff: AnalysisDiffState.NO_CHANGE,
   };
 };
 
 const compareWorkerCpu = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  if (!oldConfig.dataprocConfig || !newConfig.dataprocConfig) {
     return null;
   }
 
   const oldCpu = findMachineByName(
-    oldRuntime.dataprocConfig.workerMachineType
+    oldConfig.dataprocConfig.workerMachineType
   ).cpu;
   const newCpu = findMachineByName(
-    newRuntime.dataprocConfig.workerMachineType
+    newConfig.dataprocConfig.workerMachineType
   ).cpu;
 
   return {
     desc: (newCpu < oldCpu ? 'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
-    differenceType:
+    diff:
       oldCpu === newCpu
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.NEEDS_DELETE,
   };
 };
 
 const compareWorkerMemory = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  if (!oldConfig.dataprocConfig || !newConfig.dataprocConfig) {
     return null;
   }
 
   const oldMemory = findMachineByName(
-    oldRuntime.dataprocConfig.workerMachineType
+    oldConfig.dataprocConfig.workerMachineType
   ).memory;
   const newMemory = findMachineByName(
-    newRuntime.dataprocConfig.workerMachineType
+    newConfig.dataprocConfig.workerMachineType
   ).memory;
 
   return {
     desc: (newMemory < oldMemory ? 'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
-    differenceType:
+    diff:
       oldMemory === newMemory
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.NEEDS_DELETE,
   };
 };
 
 const compareDataprocWorkerDiskSize = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  if (!oldConfig.dataprocConfig || !newConfig.dataprocConfig) {
     return null;
   }
 
-  const oldDiskSize = oldRuntime.dataprocConfig.workerDiskSize || 0;
-  const newDiskSize = newRuntime.dataprocConfig.workerDiskSize || 0;
+  const oldDiskSize = oldConfig.dataprocConfig.workerDiskSize || 0;
+  const newDiskSize = newConfig.dataprocConfig.workerDiskSize || 0;
 
   return {
     desc:
@@ -368,25 +444,25 @@ const compareDataprocWorkerDiskSize = (
       ' worker disk size',
     previous: oldDiskSize.toString() + ' GB',
     new: newDiskSize.toString() + ' GB',
-    differenceType:
+    diff:
       oldDiskSize === newDiskSize
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.NEEDS_DELETE,
   };
 };
 
 const compareDataprocNumberOfPreemptibleWorkers = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  if (!oldConfig.dataprocConfig || !newConfig.dataprocConfig) {
     return null;
   }
 
   const oldNumWorkers =
-    oldRuntime.dataprocConfig.numberOfPreemptibleWorkers || 0;
+    oldConfig.dataprocConfig.numberOfPreemptibleWorkers || 0;
   const newNumWorkers =
-    newRuntime.dataprocConfig.numberOfPreemptibleWorkers || 0;
+    newConfig.dataprocConfig.numberOfPreemptibleWorkers || 0;
 
   return {
     desc:
@@ -394,23 +470,23 @@ const compareDataprocNumberOfPreemptibleWorkers = (
       ' number of preemptible workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
-    differenceType:
+    diff:
       oldNumWorkers === newNumWorkers
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.CAN_UPDATE_IN_PLACE,
   };
 };
 
 const compareDataprocNumberOfWorkers = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
-  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
+  if (!oldConfig.dataprocConfig || !newConfig.dataprocConfig) {
     return null;
   }
 
-  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfWorkers || 0;
-  const newNumWorkers = newRuntime.dataprocConfig.numberOfWorkers || 0;
+  const oldNumWorkers = oldConfig.dataprocConfig.numberOfWorkers || 0;
+  const newNumWorkers = newConfig.dataprocConfig.numberOfWorkers || 0;
 
   return {
     desc:
@@ -418,27 +494,27 @@ const compareDataprocNumberOfWorkers = (
       ' number of workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
-    differenceType:
+    diff:
       oldNumWorkers === newNumWorkers
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.CAN_UPDATE_IN_PLACE,
   };
 };
 
 const compareAutopauseThreshold = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff => {
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff => {
   const oldAutopauseThreshold =
-    oldRuntime.autopauseThreshold === null ||
-    oldRuntime.autopauseThreshold === undefined
+    oldConfig.autopauseThreshold === null ||
+    oldConfig.autopauseThreshold === undefined
       ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES
-      : oldRuntime.autopauseThreshold;
+      : oldConfig.autopauseThreshold;
   const newAutopauseThreshold =
-    newRuntime.autopauseThreshold == null ||
-    newRuntime.autopauseThreshold === undefined
+    newConfig.autopauseThreshold == null ||
+    newConfig.autopauseThreshold === undefined
       ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES
-      : newRuntime.autopauseThreshold;
+      : newConfig.autopauseThreshold;
 
   return {
     desc:
@@ -447,10 +523,10 @@ const compareAutopauseThreshold = (
         : 'Increase') + ' autopause threshold',
     previous: AutopauseMinuteThresholds.get(oldAutopauseThreshold),
     new: AutopauseMinuteThresholds.get(newAutopauseThreshold),
-    differenceType:
+    diff:
       oldAutopauseThreshold === newAutopauseThreshold
-        ? RuntimeDiffState.NO_CHANGE
-        : RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        ? AnalysisDiffState.NO_CHANGE
+        : AnalysisDiffState.CAN_UPDATE_IN_PLACE,
   };
 };
 
@@ -466,19 +542,19 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   return fp.isEqual(strip(a), strip(b));
 };
 
-export const fromRuntimeConfig = (runtimeConfig: RuntimeConfig): Runtime => {
+export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
   const {
     diskConfig,
     machine: { name: machineType },
     gpuConfig,
-  } = runtimeConfig;
+  } = analysisConfig;
 
   const runtime: Runtime = {
-    autopauseThreshold: runtimeConfig.autopauseThreshold,
+    autopauseThreshold: analysisConfig.autopauseThreshold,
   };
-  if (runtimeConfig.computeType === ComputeType.Dataproc) {
+  if (analysisConfig.computeType === ComputeType.Dataproc) {
     runtime.dataprocConfig = {
-      ...runtimeConfig.dataprocConfig,
+      ...analysisConfig.dataprocConfig,
       masterMachineType: machineType,
       masterDiskSize: diskConfig.size,
     };
@@ -489,7 +565,7 @@ export const fromRuntimeConfig = (runtimeConfig: RuntimeConfig): Runtime => {
         size: diskConfig.size,
         diskType: diskConfig.detachableType,
         labels: {},
-        name: '',
+        name: diskConfig.existingDiskName,
       },
       gpuConfig,
     };
@@ -514,29 +590,64 @@ export const fromRuntimeConfig = (runtimeConfig: RuntimeConfig): Runtime => {
   return runtime;
 };
 
-export const withRuntimeConfigDefaults = (
-  r: RuntimeConfig,
+const canUseExistingDisk = (
+  { detachableType, size },
   existingDisk: Disk | null
-): RuntimeConfig => {
+) => {
+  return (
+    !!existingDisk &&
+    detachableType === existingDisk.diskType &&
+    size >= existingDisk.size
+  );
+};
+
+const diskNeedsSizeIncrease = (
+  requestedDisk: PersistentDiskRequest | null,
+  existingDisk: Disk | null
+) => {
+  if (!requestedDisk) {
+    return false;
+  }
+  const { diskType, size } = requestedDisk;
+  return (
+    canUseExistingDisk({ detachableType: diskType, size }, existingDisk) &&
+    size > existingDisk.size
+  );
+};
+
+export const maybeWithExistingDiskName = (
+  c: Omit<DiskConfig, 'existingDiskName'>,
+  existingDisk: Disk | null
+): DiskConfig => {
+  if (canUseExistingDisk(c, existingDisk)) {
+    return { ...c, existingDiskName: existingDisk.name };
+  }
+  return { ...c, existingDiskName: null };
+};
+
+export const withAnalysisConfigDefaults = (
+  r: AnalysisConfig,
+  existingDisk: Disk | null
+): AnalysisConfig => {
   let {
     diskConfig: { size, detachable, detachableType },
     gpuConfig,
     dataprocConfig,
   } = r;
+  let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
   if (computeType === ComputeType.Standard) {
     dataprocConfig = null;
-    if (detachable === true) {
+    if (detachable === false) {
+      detachableType = null;
+    } else if (detachable === true || existingDisk) {
+      detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
         detachableType ?? existingDisk?.diskType ?? DiskType.Standard;
-    } else if (detachable === false) {
-      detachableType = null;
-    } else if (existingDisk) {
-      // Detachable unspecified, but we have an existing disk.
-      detachable = true;
-      size = size ?? existingDisk.size;
-      detachableType = detachableType ?? existingDisk.diskType;
+      if (canUseExistingDisk(r.diskConfig, existingDisk)) {
+        existingDiskName = existingDisk.name;
+      }
     } else {
       // Detachable unspecified and no existing disk.
       detachable = false;
@@ -568,7 +679,9 @@ export const withRuntimeConfigDefaults = (
       size: size ?? DEFAULT_DISK_SIZE,
       detachable,
       detachableType,
+      existingDiskName,
     },
+    detachedDisk: detachable ? null : existingDisk,
     dataprocConfig,
     gpuConfig,
     autopauseThreshold:
@@ -576,7 +689,10 @@ export const withRuntimeConfigDefaults = (
   };
 };
 
-export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
+export const toAnalysisConfig = (
+  runtime: Runtime,
+  existingDisk: Disk | null
+): AnalysisConfig => {
   if (runtime.gceConfig) {
     const { machineType, diskSize, gpuConfig } = runtime.gceConfig;
     return {
@@ -586,7 +702,9 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
         size: diskSize,
         detachable: false,
         detachableType: null,
+        existingDiskName: null,
       },
+      detachedDisk: existingDisk,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
@@ -600,11 +718,15 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(machineType),
-      diskConfig: {
-        size: diskSize,
-        detachable: true,
-        detachableType,
-      },
+      diskConfig: maybeWithExistingDiskName(
+        {
+          size: diskSize,
+          detachable: true,
+          detachableType,
+        },
+        existingDisk
+      ),
+      detachedDisk: null,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
@@ -617,7 +739,9 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
         size: runtime.dataprocConfig.masterDiskSize,
         detachable: false,
         detachableType: null,
+        existingDiskName: null,
       },
+      detachedDisk: existingDisk,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: runtime.dataprocConfig,
       gpuConfig: null,
@@ -628,9 +752,11 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       machine: null,
       diskConfig: {
         size: null,
-        detachable: false,
+        detachable: null,
         detachableType: null,
+        existingDiskName: null,
       },
+      detachedDisk: existingDisk,
       autopauseThreshold: null,
       dataprocConfig: null,
       gpuConfig: null,
@@ -638,10 +764,10 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   }
 };
 
-export const getRuntimeConfigDiffs = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
-): RuntimeDiff[] => {
+export const getAnalysisConfigDiffs = (
+  oldConfig: AnalysisConfig,
+  newConfig: AnalysisConfig
+): AnalysisDiff[] => {
   return [
     compareWorkerCpu,
     compareWorkerMemory,
@@ -651,14 +777,19 @@ export const getRuntimeConfigDiffs = (
     compareComputeTypes,
     compareMachineCpu,
     compareMachineMemory,
-    // TODO(RW-7582): Compare disk types, compare detachable.
+    compareDiskTypes,
     compareDiskSize,
+    compareDetachedDisks,
     compareAutopauseThreshold,
     compareGpu,
   ]
-    .map((compareFn) => compareFn(oldRuntime, newRuntime))
+    .map((compareFn) => compareFn(oldConfig, newConfig))
     .filter((diff) => diff !== null)
-    .filter((diff) => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
+    .filter(
+      ({ diff, diskDiff }) =>
+        diff !== AnalysisDiffState.NO_CHANGE ||
+        (diskDiff !== undefined && diskDiff !== AnalysisDiffState.NO_CHANGE)
+    );
 };
 
 // useRuntime hook is a simple hook to populate the runtime store.
@@ -753,7 +884,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
       async () => {
         let persistentDisk: Disk = null;
         try {
-          persistentDisk = await disksApi().getDisk(currentWorkspaceNamespace);
+          persistentDisk = await diskApi().getDisk(currentWorkspaceNamespace);
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
             throw e;
@@ -855,7 +986,7 @@ export const useRuntimeStatus = (
       [
         RuntimeStatusRequest.DeletePD,
         () => {
-          return disksApi().deleteDisk(
+          return diskApi().deleteDisk(
             currentWorkspaceNamespace,
             diskStore.get().persistentDisk.name
           );
@@ -885,28 +1016,6 @@ export const useRuntimeStatus = (
   return [runtime ? runtime.status : undefined, setStatusRequest];
 };
 
-export const getRuntimeCtx = (runtime: Runtime, pendingRuntime: Runtime) => {
-  const pdFeatureFlag = serverConfigStore.get().config.enablePersistentDisk;
-  const runtimeExists =
-    (runtime?.status &&
-      ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) ||
-    !!pendingRuntime;
-  const { dataprocConfig = null } =
-    pendingRuntime || runtime || ({} as Partial<Runtime>);
-  const initialCompute = dataprocConfig
-    ? ComputeType.Dataproc
-    : ComputeType.Standard;
-  const gceExists = runtimeExists && initialCompute === ComputeType.Standard;
-  const persistentDisk = diskStore.get().persistentDisk;
-  return {
-    runtimeExists: runtimeExists,
-    gceExists: runtimeExists && initialCompute === ComputeType.Standard,
-    dataprocExists: dataprocConfig !== null,
-    pdExists: !!persistentDisk,
-    enablePD: pdFeatureFlag && (!!persistentDisk || !gceExists),
-  };
-};
-
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
@@ -915,12 +1024,13 @@ export const useCustomRuntime = (
   detachablePd: Disk | null
 ): [
   { currentRuntime: Runtime; pendingRuntime: Runtime },
-  (runtime: Runtime) => void
+  (request: { runtime: Runtime; detachedDisk: Disk | null }) => void
 ] => {
   const { runtime, workspaceNamespace } = useStore(runtimeStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const { pendingRuntime = null } = runtimeOps[currentWorkspaceNamespace] || {};
-  const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
+  const [request, setRequest] =
+    useState<{ runtime: Runtime; detachedDisk: Disk | null }>();
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
@@ -928,88 +1038,85 @@ export const useCustomRuntime = (
   useEffect(() => {
     let mounted = true;
     const aborter = new AbortController();
+    const existingDisk = diskStore.get().persistentDisk;
+    const requestedDisk = request?.runtime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
-      // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
-      // to reach a terminal status before attempting deletion.
-      const runtimeCtx = getRuntimeCtx(runtime, pendingRuntime);
-      try {
-        if (runtimeCtx.runtimeExists) {
-          const oldRuntimeConfig = toRuntimeConfig(runtime);
-          const newRuntimeConfig = toRuntimeConfig(requestedRuntime);
-          const runtimeDiffTypes = getRuntimeConfigDiffs(
-            oldRuntimeConfig,
-            newRuntimeConfig
-          ).map((diff) => diff.differenceType);
-          const pdIncreased =
-            !!detachablePd &&
-            newRuntimeConfig.diskConfig.detachable &&
-            newRuntimeConfig.diskConfig.size > detachablePd.size;
+      const applyRuntimeUpdate = async () => {
+        const oldConfig = toAnalysisConfig(runtime, detachablePd);
+        const newConfig = toAnalysisConfig(
+          request.runtime,
+          request.detachedDisk
+        );
+        const mostSevereDiff = findMostSevereDiffState(
+          getAnalysisConfigDiffs(oldConfig, newConfig).map(({ diff }) => diff)
+        );
+        const mostSevereDiskDiff = findMostSevereDiffState(
+          getAnalysisConfigDiffs(oldConfig, newConfig).map(
+            ({ diskDiff }) => diskDiff
+          )
+        );
 
-          if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
-            // Directly call disk api to delete pd if there's no runtime or the runtime is dataproc
-            if (
-              runtime.status === RuntimeStatus.Deleted ||
-              runtimeCtx.dataprocExists
-            ) {
-              await disksApi().deleteDisk(
-                currentWorkspaceNamespace,
-                detachablePd.name,
-                {
-                  signal: aborter.signal,
-                }
-              );
-            }
-            // Call runtime api to delete pd if the runtime is gce with pd
-            if (runtimeCtx.gceExists) {
-              await runtimeApi().deleteRuntime(
-                currentWorkspaceNamespace,
-                true,
-                {
-                  signal: aborter.signal,
-                }
-              );
-            }
-          } else if (
-            runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_RUNTIME)
-          ) {
-            await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
+        // A disk update may be need in combination with a runtime update.
+        if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
+          await diskApi().updateDisk(
+            currentWorkspaceNamespace,
+            existingDisk.name,
+            requestedDisk.size
+          );
+        }
+
+        if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
+          const deleteAttachedDisk =
+            mostSevereDiskDiff === AnalysisDiffState.NEEDS_DELETE;
+          await runtimeApi().deleteRuntime(
+            currentWorkspaceNamespace,
+            deleteAttachedDisk,
+            {
               signal: aborter.signal,
-            });
-          } else if (
-            runtimeDiffTypes.includes(
-              RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
-            ) ||
-            runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE_IN_PLACE)
-          ) {
-            if (
-              runtime.status === RuntimeStatus.Running ||
-              runtime.status === RuntimeStatus.Stopped
-            ) {
-              await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-                runtime: requestedRuntime,
-              });
-              // Calling updateRuntime will not immediately set the Runtime status to not Running so the
-              // default initializer will resolve on its first call. The polling below first checks for the
-              // non Running status before initializing the default one that checks for Running status
-              await LeoRuntimeInitializer.initialize({
-                workspaceNamespace,
-                targetRuntime: requestedRuntime,
-                resolutionCondition: (r) => r.status !== RuntimeStatus.Running,
-                pollAbortSignal: aborter.signal,
-                overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
-              });
-            } else if (
-              runtime.status === RuntimeStatus.Deleted &&
-              pdIncreased
-            ) {
-              await disksApi().updateDisk(
-                currentWorkspaceNamespace,
-                diskStore.get().persistentDisk.name,
-                requestedRuntime.gceWithPdConfig.persistentDisk.size
-              );
             }
+          );
+        } else if (
+          [
+            AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
+            AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+          ].includes(mostSevereDiff)
+        ) {
+          if (
+            runtime.status === RuntimeStatus.Running ||
+            runtime.status === RuntimeStatus.Stopped
+          ) {
+            await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
+              runtime: request.runtime,
+            });
+            // Calling updateRuntime will not immediately set the Runtime status to not Running so the
+            // default initializer will resolve on its first call. The polling below first checks for the
+            // non Running status before initializing the default one that checks for Running status
+            await LeoRuntimeInitializer.initialize({
+              workspaceNamespace,
+              targetRuntime: request.runtime,
+              resolutionCondition: (r) => r.status !== RuntimeStatus.Running,
+              pollAbortSignal: aborter.signal,
+              overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
+            });
           }
-        } else if (runtime?.status === RuntimeStatus.Error) {
+        }
+      };
+
+      const runtimeExists =
+        !!runtime &&
+        ![RuntimeStatus.Error, RuntimeStatus.Deleted].includes(runtime.status);
+      try {
+        if (runtimeExists) {
+          await applyRuntimeUpdate();
+        } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
+          await diskApi().updateDisk(
+            currentWorkspaceNamespace,
+            existingDisk.name,
+            requestedDisk.size
+          );
+        }
+
+        if (runtime?.status === RuntimeStatus.Error) {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
             signal: aborter.signal,
           });
@@ -1017,7 +1124,7 @@ export const useCustomRuntime = (
 
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
-          targetRuntime: requestedRuntime,
+          targetRuntime: request.runtime,
           pollAbortSignal: aborter.signal,
         });
       } catch (e) {
@@ -1027,17 +1134,14 @@ export const useCustomRuntime = (
       } finally {
         markCompoundRuntimeOperationCompleted(currentWorkspaceNamespace);
         if (mounted) {
-          setRequestedRuntime(undefined);
+          setRequest(undefined);
         }
       }
     };
 
-    if (
-      requestedRuntime !== undefined &&
-      !fp.equals(requestedRuntime, runtime)
-    ) {
+    if (request !== undefined && !fp.equals(request.runtime, runtime)) {
       registerCompoundRuntimeOperation(currentWorkspaceNamespace, {
-        pendingRuntime: requestedRuntime,
+        pendingRuntime: request.runtime,
         aborter,
       });
       runAction();
@@ -1049,9 +1153,9 @@ export const useCustomRuntime = (
     return () => {
       mounted = false;
     };
-  }, [requestedRuntime]);
+  }, [request]);
 
-  return [{ currentRuntime: runtime, pendingRuntime }, setRequestedRuntime];
+  return [{ currentRuntime: runtime, pendingRuntime }, setRequest];
 };
 
 export const withRuntimeStore = () => (WrappedComponent) => {

@@ -1,5 +1,8 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router';
+import { mount } from 'enzyme';
+
+import { CohortBuilderApi, CriteriaType, Domain } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
@@ -7,14 +10,14 @@ import {
   currentCohortSearchContextStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
-import { CohortBuilderApi, CriteriaType, Domain } from 'generated/fetch';
-import { MemoryRouter } from 'react-router';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
   CriteriaStubVariables,
 } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+
 import { CohortSearch } from './cohort-search.component';
 
 const searchContextStubs = [

@@ -1,8 +1,9 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import * as React from 'react';
-import moment from 'moment';
+
+import { AdminTableUser, Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -15,7 +16,8 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
-import { AdminTableUser, Profile } from 'generated/fetch';
+import moment from 'moment';
+
 import { UserAuditLink } from './admin-user-common';
 
 const styles = reactStyles({

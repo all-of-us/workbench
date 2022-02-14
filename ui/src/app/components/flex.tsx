@@ -1,5 +1,6 @@
-import { reactStyles } from 'app/utils';
 import * as React from 'react';
+
+import { reactStyles } from 'app/utils';
 
 export const flexStyle = reactStyles({
   column: {

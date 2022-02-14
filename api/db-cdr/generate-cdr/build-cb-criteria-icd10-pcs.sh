@@ -3,6 +3,7 @@
 set -e
 SQL_FOR='ICD10CM - SOURCE'
 TBL_CBC='cb_criteria'
+TBL_CBA='cb_criteria_ancestor'
 TBL_PAS='prep_ancestor_staging'
 TBL_PCA='prep_concept_ancestor'
 export BQ_PROJECT=$1        # project
@@ -16,6 +17,7 @@ CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
 CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
+TBL_CBA=$(createTmpTable $TBL_CBA)
 TBL_PAS=$(createTmpTable $TBL_PAS)
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
@@ -314,10 +316,29 @@ WHERE x.concept_id = y.concept_id
 AND x.type = 'ICD10PCS'
 AND x.is_standard = 0"
 
+################################################
+# CB_CRITERIA_ANCESTOR
+################################################
+echo "CB_CRITERIA_ANCESTOR - Drugs - add any drugs from the ICD10PCS hierarchy"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBA\`
+    (
+          ancestor_id
+        , descendant_id
+    )
+SELECT concept_id as ancestor_concept_id , concept_id as descendant_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+WHERE domain_id = 'DRUG'
+and type in ('ICD10PCS')
+and is_standard = 0
+and is_group = 0
+and is_selectable = 1"
+
 #wait for process to end before copying
 wait
 ## copy temp tables back to main tables, and delete temp?
 cpToMain "$TBL_CBC" &
+cpToMain "$TBL_CBA" &
 cpToMain "$TBL_PAS" &
 cpToMain "$TBL_PCA" &
 wait

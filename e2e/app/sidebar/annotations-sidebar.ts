@@ -8,7 +8,7 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import Textarea from 'app/element/textarea';
 import EditDeleteAnnotationsModal from 'app/modal/edit-delete-annotations-modal';
 import AnnotationFieldModal from 'app/modal/annotation-field-modal';
-import BaseHelpSidebar from './base-help-sidebar';
+import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 
 export enum ReviewStatus {
@@ -17,7 +17,7 @@ export enum ReviewStatus {
   NeedsFurtherReview = 'Needs Further Review '
 }
 
-export default class AnnotationsSidebar extends BaseHelpSidebar {
+export default class AnnotationsSidebar extends BaseSidebar {
   constructor(page: Page) {
     super(page);
   }

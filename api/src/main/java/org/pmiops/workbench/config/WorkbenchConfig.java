@@ -2,7 +2,6 @@ package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -30,6 +29,7 @@ public class WorkbenchConfig {
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
   public RasConfig ras;
+  @Deprecated // moved inside AccessConfig.  will remove as part of RW-7828
   public AccessRenewalConfig accessRenewal;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
@@ -38,60 +38,37 @@ public class WorkbenchConfig {
   public static WorkbenchConfig createEmptyConfig() {
     WorkbenchConfig config = new WorkbenchConfig();
     config.access = new AccessConfig();
+    config.access.currentDuccVersions = new ArrayList<>();
+    config.access.renewal = new AccessRenewalConfig();
+    config.accessRenewal = new AccessRenewalConfig();
+    config.actionAudit = new ActionAuditConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
-    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
+    config.billing = new BillingConfig();
+    config.captcha = new CaptchaConfig();
     config.cdr = new CdrConfig();
+    config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
-    config.zendesk = new ZendeskConfig();
-    config.server = new ServerConfig();
-    config.billing = new BillingConfig();
-    config.actionAudit = new ActionAuditConfig();
-    config.rdrExport = new RdrExportConfig();
-    config.captcha = new CaptchaConfig();
-    config.reporting = new ReportingConfig();
-    config.ras = new RasConfig();
-    config.accessRenewal = new AccessRenewalConfig();
     config.offlineBatch = new OfflineBatchConfig();
-    config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
+    config.ras = new RasConfig();
+    config.rdrExport = new RdrExportConfig();
+    config.reporting = new ReportingConfig();
+    config.server = new ServerConfig();
+    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
+    config.zendesk = new ZendeskConfig();
     return config;
   }
 
-  // Environment config variables related to billing and the billing project buffer (which buffers
-  // GCP projects, aka "billing projects" in Terra terminology).
+  // Environment config variables related to Terra billing projects / GCP projects.
   public static class BillingConfig {
-    // This config variable seems to be unused.
-    public Integer retryCount;
-    // The total capacity of the GCP project buffer, per access tier. The buffering system will not
-    // attempt to create any new projects in a tier when the total number of in-progress & ready
-    // projects is at or above this level.
-    public Map<String, Integer> bufferCapacityPerTier;
-    // The number of times to attempt project creation per cron task execution. This effectively
-    // controls the max rate of project refill. If the cron task is configured to run once per
-    // minute and this param is set to 5, then the buffer system will create up to approximately
-    // 5 projects per minute.
-    //
-    // Per guidance from Google Cloud's project infrastructure team, we should limit our total rate
-    // of project creation to a number less than 1 per second. In practice, a reasonable aggressive
-    // value for this parameter would be 5-10 project refills per minute.
-    public Integer bufferRefillProjectsPerTask;
-    // The number of projects whose status should be checked per cron task execution. This controls
-    // the maximum rate of API calls to Terra's getBillingProjectStatus endpoint. This value has
-    // little impact during normal operation, when the number of CREATING projects which need to be
-    // synced is quite small, but can impact system behavior during outages and after recovery.
-    //
-    // A higher number ensures that projects are kept in sync more quickly, at the cost of greater
-    // load on Terra's endpoints. Historically this number was hard-coded to 5, but a larger value
-    // (between 10-20) significantly speeds the Workbench's recovery from an outage.
-    public Integer bufferStatusChecksPerTask;
-    // The environment-driven prefix to apply to GCP projects created in the buffer. Example:
-    // "aou-rw-perf-" causes the buffer to create projects named like "aou-rw-perf-8aec175b".
+    // The environment-driven prefix to apply to Terra billing projects we create. Example:
+    // "aou-rw-perf-" causes us to create projects named like "aou-rw-perf-8aec175b".
     public String projectNamePrefix;
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
@@ -247,6 +224,8 @@ public class WorkbenchConfig {
     public boolean enforceRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
+
+    public AccessRenewalConfig renewal;
   }
 
   public static class FeatureFlagsConfig {
@@ -329,6 +308,7 @@ public class WorkbenchConfig {
     public String logoutUrl;
   }
 
+  // Note: migrating this to live inside AccessConfig soon as part of RW-7828
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;

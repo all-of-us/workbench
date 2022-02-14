@@ -1,8 +1,8 @@
-import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import * as fp from 'lodash/fp';
 import { MemoryRouter } from 'react-router';
+import * as fp from 'lodash/fp';
+import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   const waitImmediate = () =>
@@ -20,12 +20,30 @@ export async function waitOnTimersAndUpdate(wrapper: ReactWrapper) {
   wrapper.update();
 }
 
-export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {
-  await act(() => {
-    jest.runOnlyPendingTimers();
-    return Promise.resolve();
-  });
-  wrapper.update();
+// Use in combination with jest fake timers only; runs all pending jest timers.
+// maxRetries may be specified to retry on timer exception.
+export async function waitForFakeTimersAndUpdate(
+  wrapper: ReactWrapper,
+  maxRetries = 0
+) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await act(() => {
+        jest.runOnlyPendingTimers();
+        return Promise.resolve();
+      });
+    } catch (e) {
+      if (attempt >= maxRetries) {
+        throw e;
+      }
+      console.log(
+        `retrying timer exception (try ${attempt}/${maxRetries}): ${e}`
+      );
+      continue;
+    }
+    wrapper.update();
+    return;
+  }
 }
 
 export async function simulateSelection(

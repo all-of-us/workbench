@@ -1,6 +1,9 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
+
+import { AnnotationType, CohortAnnotationDefinition } from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
@@ -17,8 +20,6 @@ import { cohortAnnotationDefinitionApi } from 'app/services/swagger-fetch-client
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { AnnotationType, CohortAnnotationDefinition } from 'generated/fetch';
-import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   editRow: {

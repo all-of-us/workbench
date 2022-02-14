@@ -1,6 +1,17 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Menu } from 'primereact/menu';
-import * as React from 'react';
+
+import {
+  AgeType,
+  CdrVersionTiersResponse,
+  Cohort,
+  GenderOrSexType,
+  ResourceType,
+  TemporalTime,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
 
 import { GenderChart } from 'app/cohort-search/gender-chart/gender-chart.component';
 import { searchRequestStore } from 'app/cohort-search/search-state.service';
@@ -28,16 +39,6 @@ import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  AgeType,
-  CdrVersionTiersResponse,
-  Cohort,
-  GenderOrSexType,
-  ResourceType,
-  TemporalTime,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const COHORT_TYPE = 'AoU_Discover';
 

@@ -1,4 +1,4 @@
-import RuntimePanel, { ComputeType, RuntimePreset, StartStopIconState } from 'app/component/runtime-panel';
+import RuntimePanel, { ComputeType, RuntimePreset, StartStopIconState } from 'app/sidebar/runtime-panel';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
@@ -53,7 +53,7 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.pickRamGbs(30);
 
     // Apply changes and wait for new runtime running
-    const notebookPreviewPage = await runtimePanel.applyChanges();
+    const notebookPreviewPage = await runtimePanel.applyChanges(true);
 
     // Go back to the notebook
     await notebookPreviewPage.openEditMode(notebookName);

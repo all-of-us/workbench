@@ -1,10 +1,16 @@
-import { switchCase } from './index';
 import { Profile } from 'generated/fetch';
+
+import { switchCase } from './index';
 
 export enum AccessTierShortNames {
   Registered = 'registered',
   Controlled = 'controlled',
 }
+
+export const orderedAccessTierShortNames = [
+  AccessTierShortNames.Registered,
+  AccessTierShortNames.Controlled,
+];
 
 export enum AccessTierDisplayNames {
   Registered = 'Registered Tier',

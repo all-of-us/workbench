@@ -145,7 +145,7 @@ public class UserServiceTest {
     providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
+    providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
 

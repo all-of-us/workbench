@@ -2,12 +2,14 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +50,9 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -62,6 +66,7 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
+import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.Domain;
@@ -270,34 +275,18 @@ public class ConceptSetsControllerTest {
     currentUser = user;
 
     DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-
-    workspace = new Workspace();
-    workspace.setName(WORKSPACE_NAME);
-    workspace.setNamespace(WORKSPACE_NAMESPACE);
-    workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("billing-account");
-
-    workspace2 = new Workspace();
-    workspace2.setName(WORKSPACE_NAME_2);
-    workspace2.setNamespace(WORKSPACE_NAMESPACE);
-    workspace2.setResearchPurpose(new ResearchPurpose());
-    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace2.setBillingAccountName("billing-account");
-
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspace2 = workspacesController.createWorkspace(workspace2).getBody();
-    stubGetWorkspace(workspace.getNamespace(), WORKSPACE_NAME);
-    stubGetWorkspaceAcl(workspace.getNamespace(), WORKSPACE_NAME);
-    stubGetWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2);
-    stubGetWorkspaceAcl(workspace2.getNamespace(), WORKSPACE_NAME_2);
-
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), WORKSPACE_NAME))
-        .thenReturn(fcResponse);
-    when(fireCloudService.getWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2))
-        .thenReturn(fcResponse);
+    workspace =
+        createTestWorkspace(
+            WORKSPACE_NAMESPACE,
+            WORKSPACE_NAME,
+            cdrVersion.getCdrVersionId(),
+            WorkspaceAccessLevel.OWNER);
+    workspace2 =
+        createTestWorkspace(
+            WORKSPACE_NAMESPACE,
+            WORKSPACE_NAME_2,
+            cdrVersion.getCdrVersionId(),
+            WorkspaceAccessLevel.OWNER);
   }
 
   @Test
@@ -740,6 +729,207 @@ public class ConceptSetsControllerTest {
         .isEqualTo(CLIENT_CRITERIA_2.getConceptId());
   }
 
+  @Test
+  public void testCopyConceptSetOwnerToOwner() {
+    // owner: to workspace has no permission to write
+    testCopyConceptSetForAccessLevels(workspace, workspace2);
+  }
+
+  @Test
+  public void testCopyConceptSetWriterToWriter() {
+    // writer: minimal access level to create and copy conceptSet
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    testCopyConceptSetForAccessLevels(workspace, workspace2);
+  }
+
+  @Test
+  public void testCopyConceptSetOwnerToWriter() {
+    // writer: to workspace has permission to write
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    testCopyConceptSetForAccessLevels(workspace, workspace2);
+  }
+
+  @Test
+  public void testCopyConceptSetOwnerToReaderFail() {
+    // reader: to workspace has no permission to write
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.READER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () -> testCopyConceptSetForAccessLevels(workspace, workspace2));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/%s",
+                workspace2.getNamespace(), workspace2.getId()));
+  }
+
+  @Test
+  public void testCopyConceptSetOwnerToNoAccessFail() {
+    // no access: to workspace has no permission to write
+    stubGetWorkspace(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.NO_ACCESS);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.NO_ACCESS);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () -> testCopyConceptSetForAccessLevels(workspace, workspace2));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/%s",
+                workspace2.getNamespace(), workspace2.getId()));
+  }
+
+  @Test
+  public void validateCreateConceptSetRequest() {
+    // just conceptSet not enough also need non null set of conceptSet ids
+    final CreateConceptSetRequest createConceptSetRequest =
+        new CreateConceptSetRequest().conceptSet(new ConceptSet().domain(Domain.CONDITION));
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
+    // also need non-emptyList of conceptSetIds
+    final CreateConceptSetRequest createConceptSetRequest2 =
+        createConceptSetRequest.addedConceptSetConceptIds(new ArrayList<>());
+    exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest2),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
+    // add a single conceptSetConceptId to List
+    final CreateConceptSetRequest createConceptSetRequest3 =
+        createConceptSetRequest.addAddedConceptSetConceptIdsItem(
+            new ConceptSetConceptId().conceptId(1000L));
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest3),
+        "BadRequestException is not expected to be thrown");
+    // add a multiple conceptSetConceptIds to list
+    final CreateConceptSetRequest createConceptSetRequest4 =
+        createConceptSetRequest.addedConceptSetConceptIds(
+            Arrays.asList(
+                new ConceptSetConceptId().conceptId(1000L),
+                new ConceptSetConceptId().conceptId(2000L)));
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest4),
+        "BadRequestException is not expected to be thrown");
+  }
+
+  @Test
+  public void validateUpdateConceptSet() {
+    // invalid empty object need etag and domain
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateUpdateConceptSet(new ConceptSet()),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("missing required update field 'etag'");
+    // just add etag
+    final ConceptSet conceptSet = new ConceptSet().etag("testEtag");
+    exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateUpdateConceptSet(conceptSet),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("Domain cannot be null");
+    // add etag and domain
+    final ConceptSet conceptSet2 = new ConceptSet().etag("testEtag").domain(Domain.CONDITION);
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateUpdateConceptSet(conceptSet2),
+        "BadRequestException is not expected to be thrown");
+  }
+
+  @Test
+  public void validateUpdateConceptSetConcepts() {
+    // invalid empty object
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                conceptSetsController.validateUpdateConceptSetConcepts(
+                    new UpdateConceptSetRequest()),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("missing required update field 'etag'");
+    // just add etag which is required
+    assertDoesNotThrow(
+        () ->
+            conceptSetsController.validateUpdateConceptSetConcepts(
+                addConceptsRequest("eTagTest", 1000L, 1001L)),
+        "BadRequestException is not expected to be thrown");
+  }
+
+  private void testCopyConceptSetForAccessLevels(Workspace fromWs, Workspace toWs) {
+    ConceptSet conceptSet =
+        makeTestConceptSet(
+            fromWs.getNamespace(),
+            fromWs.getId(),
+            "From_3-Cnditions_Concept_set",
+            "From_Cond_CS",
+            CLIENT_CRITERIA_1,
+            CLIENT_CRITERIA_3,
+            CLIENT_CRITERIA_4);
+
+    assertThat(conceptSet.getCriteriums().size()).isEqualTo(3);
+    CopyRequest copyRequest =
+        new CopyRequest()
+            .newName("from_concept_set_copy")
+            .toWorkspaceName(toWs.getId())
+            .toWorkspaceNamespace(toWs.getNamespace());
+    ConceptSet conceptSetCopy =
+        conceptSetsController
+            .copyConceptSet(
+                fromWs.getNamespace(),
+                fromWs.getId(),
+                String.valueOf(conceptSet.getId()),
+                copyRequest)
+            .getBody();
+    assertThat(conceptSet.getCriteriums()).containsAllIn(conceptSetCopy.getCriteriums()).inOrder();
+  }
+
+  private ConceptSet makeTestConceptSet(
+      String workspaceName, String workspaceId, String desc, String name, Criteria... criteria) {
+    // only domain of the 1st in the list is used
+    List<ConceptSetConceptId> conceptSetConceptIdList = new ArrayList<>();
+    Domain domain = Domain.valueOf(criteria[0].getDomainId());
+    for (Criteria criterium : criteria) {
+      if (domain.toString().equals(criterium.getDomainId())) {
+        cbCriteriaDao.save(makeDbCriteria(criterium));
+        conceptSetConceptIdList.add(
+            new ConceptSetConceptId()
+                .conceptId(criterium.getConceptId())
+                .standard(criterium.getIsStandard()));
+      }
+    }
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setDescription(desc);
+    conceptSet.setName(name);
+    conceptSet.setDomain(domain);
+
+    return conceptSetsController
+        .createConceptSet(
+            workspaceName,
+            workspaceId,
+            new CreateConceptSetRequest()
+                .conceptSet(conceptSet)
+                .addedConceptSetConceptIds(conceptSetConceptIdList))
+        .getBody();
+  }
+
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
     List<ConceptSetConceptId> conceptSetConceptIdList =
         Arrays.stream(conceptIds)
@@ -866,26 +1056,54 @@ public class ConceptSetsControllerTest {
         .getBody();
   }
 
-  private void stubGetWorkspace(String ns, String name) {
+  private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
     FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(USER_EMAIL);
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(workspaceAccessLevel.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
-  private void stubGetWorkspaceAcl(String ns, String name) {
+  private void stubGetWorkspaceAcl(
+      String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.OWNER.toString());
+        new FirecloudWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))
         .thenReturn(workspaceAccessLevelResponse);
+  }
+
+  private Workspace createTestWorkspace(
+      String workspaceNamespace,
+      String workspaceName,
+      long cdrVersionId,
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    Workspace tmpWorkspace = new Workspace();
+    tmpWorkspace.setName(workspaceName);
+    tmpWorkspace.setNamespace(workspaceNamespace);
+    tmpWorkspace.setResearchPurpose(new ResearchPurpose());
+    tmpWorkspace.setCdrVersionId(String.valueOf(cdrVersionId));
+    tmpWorkspace.setBillingAccountName("billing-account");
+
+    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
+
+    stubGetWorkspace(tmpWorkspace.getNamespace(), tmpWorkspace.getName(), workspaceAccessLevel);
+    stubGetWorkspaceAcl(tmpWorkspace.getNamespace(), tmpWorkspace.getName(), workspaceAccessLevel);
+
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    fcResponse.setAccessLevel(workspaceAccessLevel.name());
+    when(fireCloudService.getWorkspace(tmpWorkspace.getNamespace(), tmpWorkspace.getName()))
+        .thenReturn(fcResponse);
+
+    return tmpWorkspace;
   }
 
   private void saveConcepts() {

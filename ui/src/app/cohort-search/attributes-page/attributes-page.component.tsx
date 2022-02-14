@@ -1,6 +1,8 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import * as React from 'react';
+
+import { AttrName, CriteriaSubType, Domain, Operator } from 'generated/fetch';
 
 import { PM_UNITS, PREDEFINED_ATTRIBUTES } from 'app/cohort-search/constant';
 import {
@@ -33,7 +35,6 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { AttrName, CriteriaSubType, Domain, Operator } from 'generated/fetch';
 
 const styles = reactStyles({
   countPreview: {
@@ -473,6 +474,9 @@ export const AttributesPage = fp.flow(
             } else {
               // CAT attributes are displayed as checkboxes in the attributes form
               if (parseInt(attr.estCount, 10) > 0) {
+                // Property 'checked' does not exist on type 'CriteriaAttribute'.
+                // TODO RW-5572 confirm proper behavior and fix
+                // eslint-disable-next-line @typescript-eslint/dot-notation
                 attr['checked'] = false;
                 form.cat.push(attr);
               }
@@ -666,6 +670,9 @@ export const AttributesPage = fp.flow(
           .forEach(({ operator, operands, conceptId }) => {
             const attr = { name: AttrName.NUM, operator, operands };
             if (subtype === CriteriaSubType.BP) {
+              // Property 'conceptId' does not exist on type '{ name: AttrName; operator: any; operands: any; }'..
+              // TODO RW-5572 confirm proper behavior and fix
+              // eslint-disable-next-line @typescript-eslint/dot-notation
               attr['conceptId'] = conceptId;
             }
             if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {

@@ -1,19 +1,21 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 
 import { CohortPage } from 'app/cohort-search/cohort-page/cohort-page.component';
 import { AppRoute, withRouteData } from 'app/components/app-router';
+import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
-import { NotebookList } from 'app/pages/analysis/notebook-list';
 import { LeonardoAppLauncher } from 'app/pages/analysis/leonardo-app-launcher';
+import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
+import { NotebookList } from 'app/pages/analysis/notebook-list';
+import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortReview } from 'app/pages/data/cohort-review/cohort-review';
 import { DetailPage } from 'app/pages/data/cohort-review/detail-page';
 import { QueryReport } from 'app/pages/data/cohort-review/query-report.component';
 import { ParticipantsTable } from 'app/pages/data/cohort-review/table-page';
-import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { ConceptSearch } from 'app/pages/data/concept/concept-search';
 import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
@@ -24,10 +26,8 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { adminLockedGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
-import { BreadcrumbType } from 'app/components/breadcrumb-type';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(

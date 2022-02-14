@@ -1,11 +1,14 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
+
+import { CohortBuilderApi } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { CohortBuilderApi } from 'generated/fetch';
+
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+
 import { CriteriaTree } from './tree.component';
 
 describe('CriteriaTree', () => {

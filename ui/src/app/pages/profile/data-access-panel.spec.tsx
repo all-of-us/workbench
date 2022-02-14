@@ -1,15 +1,16 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { mount } from 'enzyme';
 
+import { environment } from 'environments/environment';
 import {
   DataAccessPanel,
   DataAccessPanelProps,
 } from 'app/pages/profile/data-access-panel';
-import { cdrVersionStore } from 'app/utils/stores';
-import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
-import { environment } from 'environments/environment';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { cdrVersionStore } from 'app/utils/stores';
+
+import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 
 const findRTGranted = (wrapper) =>
   wrapper.find('[data-test-id="registered-tier-access-granted"]');

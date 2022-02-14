@@ -100,7 +100,7 @@
       "creationTime": "2021-08-10 00:00:00Z",
       "releaseNumber": 7,
       "numParticipants": 329070,
-      "cdrDbName": "r_2021q3_6",
+      "cdrDbName": "r_2021q3_8",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -115,12 +115,12 @@
       "creationTime": "2021-10-06 00:00:00Z",
       "releaseNumber": 8,
       "numParticipants": 331382,
-      "cdrDbName": "c_2021q3_6",
+      "cdrDbName": "c_2021q3_8",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
-      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/alpha2",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha2"
+      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/beta",
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/beta"
     }
   ]
 }

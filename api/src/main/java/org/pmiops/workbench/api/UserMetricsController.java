@@ -17,10 +17,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -51,12 +56,20 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceResourceMapper workspaceResourceMapper;
+  private final ConceptSetService conceptSetService;
+  private final DataSetService dataSetService;
+  private final CohortService cohortService;
+  private final CohortReviewService cohortReviewService;
 
   private int distinctWorkspaceLimit = 5;
 
   @Autowired
   UserMetricsController(
       CloudStorageClient cloudStorageClient,
+      CohortService cohortService,
+      CohortReviewService cohortReviewService,
+      ConceptSetService conceptSetService,
+      DataSetService dataSetService,
       FireCloudService fireCloudService,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
@@ -64,6 +77,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       WorkspaceDao workspaceDao,
       WorkspaceResourceMapper workspaceResourceMapper) {
     this.cloudStorageClient = cloudStorageClient;
+    this.cohortService = cohortService;
+    this.cohortReviewService = cohortReviewService;
+    this.conceptSetService = conceptSetService;
+    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
@@ -121,11 +138,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    List<DbUserRecentResource> userRecentResourceList =
-        userRecentResourceService.findAllResourcesByUser(userId);
+    List<DbUserRecentlyModifiedResource> userRecentlyModifiedResourceList =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(userId);
+
     List<Long> workspaceIdList =
-        userRecentResourceList.stream()
-            .map(DbUserRecentResource::getWorkspaceId)
+        userRecentlyModifiedResourceList.stream()
+            .map(DbUserRecentlyModifiedResource::getWorkspaceId)
             .distinct()
             .limit(distinctWorkspaceLimit)
             .collect(Collectors.toList());
@@ -160,8 +178,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 ImmutableMap.toImmutableMap(
                     SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    final ImmutableList<DbUserRecentResource> workspaceFilteredResources =
-        userRecentResourceList.stream()
+    final ImmutableList<DbUserRecentlyModifiedResource> workspaceFilteredResources =
+        userRecentlyModifiedResourceList.stream()
             .filter(r -> idToFirecloudWorkspace.containsKey(r.getWorkspaceId()))
             .filter(this::hasValidBlobIdIfNotebookNamePresent)
             .collect(ImmutableList.toImmutableList());
@@ -176,7 +194,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final Set<BlobId> foundBlobIds =
         cloudStorageClient.getExistingBlobIdsIn(
             workspaceFilteredResources.stream()
-                .map(DbUserRecentResource::getNotebookName)
+                .filter(
+                    recentResource ->
+                        recentResource.getResourceType()
+                            == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType
+                                .NOTEBOOK)
+                .map(DbUserRecentlyModifiedResource::getResourceId)
                 .map(this::uriToBlobId)
                 .flatMap(Streams::stream)
                 .limit(MAX_RECENT_NOTEBOOKS)
@@ -184,7 +207,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
     final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
-            .filter(urr -> foundBlobIdsContainsUserRecentResource(foundBlobIds, urr))
+            .filter(urr -> foundBlobIdsContainsUserRecentlyModifiedResource(foundBlobIds, urr))
             .map(urr -> buildRecentResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
@@ -193,31 +216,52 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return ResponseEntity.ok(recentResponse);
   }
 
-  private Boolean foundBlobIdsContainsUserRecentResource(
-      Set<BlobId> foundNotebooks, DbUserRecentResource urr) {
-    return Optional.ofNullable(urr.getNotebookName())
-        .flatMap(this::uriToBlobId)
-        .map(foundNotebooks::contains)
-        .orElse(true);
+  private Boolean foundBlobIdsContainsUserRecentlyModifiedResource(
+      Set<BlobId> foundNotebooks, DbUserRecentlyModifiedResource urr) {
+    if (urr.getResourceType()
+        == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
+      return Optional.ofNullable(urr.getResourceId())
+          .flatMap(this::uriToBlobId)
+          .map(foundNotebooks::contains)
+          .orElse(true);
+    }
+    return true;
   }
 
   @VisibleForTesting
-  public boolean hasValidBlobIdIfNotebookNamePresent(DbUserRecentResource dbUserRecentResource) {
-    return Optional.ofNullable(dbUserRecentResource.getNotebookName())
-        .map(name -> uriToBlobId(name).isPresent())
-        .orElse(true);
+  public boolean hasValidBlobIdIfNotebookNamePresent(
+      DbUserRecentlyModifiedResource dbUserRecentResource) {
+    if (dbUserRecentResource.getResourceType()
+        == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
+      return Optional.ofNullable(dbUserRecentResource.getResourceId())
+          .map(name -> uriToBlobId(name).isPresent())
+          .orElse(true);
+    }
+    return true;
   }
 
+  /**
+   * Build recent resource object by grabbing the DB object (cohort/conceptSet or dataSet) depending
+   * upon the DbUserRecentlyModifiedResource.ResourceType
+   *
+   * @param idToDbWorkspace
+   * @param idToFcWorkspaceResponse
+   * @param dbUserRecentlyModifiedResource
+   * @return WorkspaceResource
+   */
   private WorkspaceResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
-      DbUserRecentResource dbUserRecentResource) {
-
-    final long workspaceId = dbUserRecentResource.getWorkspaceId();
-    return workspaceResourceMapper.fromDbUserRecentResource(
-        dbUserRecentResource,
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
+    return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
+        dbUserRecentlyModifiedResource,
         idToFcWorkspaceResponse.get(workspaceId),
-        idToDbWorkspace.get(workspaceId));
+        idToDbWorkspace.get(workspaceId),
+        cohortService,
+        cohortReviewService,
+        conceptSetService,
+        dataSetService);
   }
 
   // Retrieves Database workspace ID

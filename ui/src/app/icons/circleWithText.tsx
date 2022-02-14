@@ -1,5 +1,6 @@
-import colors from 'app/styles/colors';
 import * as React from 'react';
+
+import colors from 'app/styles/colors';
 
 export const CircleWithText = (props) => {
   return (

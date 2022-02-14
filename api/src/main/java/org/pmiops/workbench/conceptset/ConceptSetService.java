@@ -194,7 +194,7 @@ public class ConceptSetService {
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 
-  private DbConceptSet getDbConceptSet(Long workspaceId, Long conceptSetId) {
+  public DbConceptSet getDbConceptSet(Long workspaceId, Long conceptSetId) {
     return conceptSetDao
         .findByWorkspaceIdAndConceptSetId(workspaceId, conceptSetId)
         .orElseThrow(

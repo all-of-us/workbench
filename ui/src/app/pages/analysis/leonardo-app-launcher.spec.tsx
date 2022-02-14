@@ -1,50 +1,53 @@
-import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
-import Iframe from 'react-iframe';
 import { act } from 'react-dom/test-utils';
+import Iframe from 'react-iframe';
+import { Route, Router } from 'react-router-dom';
+import { mount, ReactWrapper } from 'enzyme';
+import { createMemoryHistory } from 'history';
+import { mockNavigate } from 'setupTests';
 
-import { registerApiClient as registerApiClientNotebooks } from 'app/services/notebooks-swagger-fetch-clients';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import {
-  profileStore,
-  runtimeStore,
-  serverConfigStore,
-} from 'app/utils/stores';
 import {
   ErrorCode,
   RuntimeApi,
   RuntimeStatus,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+
 import {
-  RuntimesApi as LeoRuntimesApi,
-  JupyterApi,
-  ProxyApi,
-} from 'notebooks-generated/fetch';
-import {
-  waitOneTickAndUpdate,
-  waitForFakeTimersAndUpdate,
-} from 'testing/react-test-helpers';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import { JupyterApiStub } from 'testing/stubs/jupyter-api-stub';
-import { ProxyApiStub } from 'testing/stubs/proxy-api-stub';
-import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
-import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
-import { workspaceStubs } from 'testing/stubs/workspaces';
-import { mockNavigate } from 'setupTests';
-import {
-  LeonardoAppLauncher,
-  Progress,
-  ProgressCardState,
-  notebookProgressStrings,
   genericProgressStrings,
   LeoApplicationType,
+  LeonardoAppLauncher,
+  notebookProgressStrings,
+  Progress,
+  ProgressCardState,
 } from 'app/pages/analysis/leonardo-app-launcher';
-import { Route, Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { SecuritySuspendedMessage } from './notebook-frame-error';
+import { registerApiClient as registerApiClientNotebooks } from 'app/services/notebooks-swagger-fetch-clients';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
+import {
+  profileStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
+import {
+  JupyterApi,
+  ProxyApi,
+  RuntimesApi as LeoRuntimesApi,
+} from 'notebooks-generated/fetch';
+
+import {
+  waitForFakeTimersAndUpdate,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
+import { JupyterApiStub } from 'testing/stubs/jupyter-api-stub';
+import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import { ProxyApiStub } from 'testing/stubs/proxy-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import { workspaceStubs } from 'testing/stubs/workspaces';
+
+import { SecuritySuspendedMessage } from './notebook-frame-error';
 
 function currentCardText(wrapper: ReactWrapper) {
   return wrapper.find('[data-test-id="current-progress-card"]').first().text();

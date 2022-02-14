@@ -1,9 +1,9 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, LinkText, ConceptSetSelectValue, MenuOption, ResourceCard } from 'app/text-labels';
+import { ConceptSetSelectValue, Language, LinkText, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
@@ -27,8 +27,7 @@ describe('Datasets card snowman menu actions', () => {
 
     // Find Dataset card.
     const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
-    await dataBuildPage.openDatasetsSubtab();
-    await waitWhileLoading(page);
+    await openTab(page, Tabs.Datasets, dataBuildPage);
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
@@ -62,7 +61,8 @@ describe('Datasets card snowman menu actions', () => {
 
     // Delete Datasets cards.
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDatasetsSubtab();
+    await openTab(page, Tabs.Data, dataPage);
+    await openTab(page, Tabs.Datasets, dataPage);
     await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 
@@ -73,8 +73,7 @@ describe('Datasets card snowman menu actions', () => {
 
     // Find Dataset card.
     const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
-    await dataBuildPage.openDatasetsSubtab();
-    await waitWhileLoading(page);
+    await openTab(page, Tabs.Datasets, dataBuildPage);
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
@@ -121,8 +120,7 @@ describe('Datasets card snowman menu actions', () => {
 
     // Find Dataset card.
     const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
-    await dataBuildPage.openDatasetsSubtab();
-    await waitWhileLoading(page);
+    await openTab(page, Tabs.Datasets, dataBuildPage);
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
@@ -148,8 +146,10 @@ describe('Datasets card snowman menu actions', () => {
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
 
     // Delete Dataset.
-    await analysisPage.openDatasetsSubtab();
-    await analysisPage.deleteResource(datasetName, ResourceCard.Dataset);
+    const dataPage = new WorkspaceDataPage(page);
+    await openTab(page, Tabs.Data, dataPage);
+    await openTab(page, Tabs.Datasets, dataPage);
+    await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 
   async function createDataSet(): Promise<string> {

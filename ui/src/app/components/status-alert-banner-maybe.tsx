@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { cookiesEnabled } from 'app/utils/cookies';
-import { statusAlertApi } from 'app/services/swagger-fetch-clients';
-import { Button } from './buttons';
 import { StatusAlert } from 'generated/fetch';
+
+import { statusAlertApi } from 'app/services/swagger-fetch-clients';
+import { cookiesEnabled } from 'app/utils/cookies';
+
+import { Button } from './buttons';
 import { ToastBanner, ToastType } from './toast-banner';
 
 const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';

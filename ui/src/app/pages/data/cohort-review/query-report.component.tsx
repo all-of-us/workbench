@@ -1,3 +1,20 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import {
+  AgeType,
+  CdrVersionTiersResponse,
+  Cohort,
+  CohortReview,
+  DemoChartInfo,
+  Domain,
+  EthnicityInfo,
+  GenderOrSexType,
+  SearchRequest,
+  SortOrder,
+} from 'generated/fetch';
+
 import { ComboChart } from 'app/components/combo-chart.component';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -23,22 +40,7 @@ import {
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  AgeType,
-  CdrVersionTiersResponse,
-  Cohort,
-  CohortReview,
-  DemoChartInfo,
-  Domain,
-  EthnicityInfo,
-  GenderOrSexType,
-  SearchRequest,
-  SortOrder,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import moment from 'moment';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const css = `
   .stats-left-padding {
@@ -396,8 +398,8 @@ export const QueryReport = fp.flow(
                         <div style={{ ...columns.col10, ...styles.queryTitle }}>
                           Descriptive Statistics
                         </div>
-                        {/*TODO uncomment print icon when we know how we want to display the data download policy*/}
-                        {/*<ClrIcon*/}
+                        {/* TODO uncomment print icon when we know how we want to display the data download policy*/}
+                        {/* <ClrIcon*/}
                         {/*  className='is-solid'*/}
                         {/*  style={{...columns.col2,*/}
                         {/*    ...(groupedData ? styles.print : styles.printDisabled)}}*/}

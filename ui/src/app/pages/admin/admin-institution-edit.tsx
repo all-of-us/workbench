@@ -1,9 +1,16 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import validate from 'validate.js';
+
+import {
+  Institution,
+  InstitutionMembershipRequirement,
+  InstitutionTierConfig,
+  OrganizationType,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -30,6 +37,7 @@ import { reactStyles, switchCase } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,
+  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
 import {
@@ -47,12 +55,6 @@ import {
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import {
-  Institution,
-  InstitutionMembershipRequirement,
-  InstitutionTierConfig,
-  OrganizationType,
-} from 'generated/fetch';
 
 const styles = reactStyles({
   label: {
@@ -659,7 +661,7 @@ export const AdminInstitutionEdit = fp.flow(
             this.props.match.params.institutionId,
             institutionToSave
           )
-          .then(() => this.backNavigate())
+          .then((updatedInstitution) => this.initEditMode(updatedInstitution))
           .catch((reason) => this.handleError(reason));
       } else {
         await institutionApi()
@@ -785,12 +787,6 @@ export const AdminInstitutionEdit = fp.flow(
         }
       );
 
-      // in display order
-      const tiers = [
-        AccessTierShortNames.Registered,
-        AccessTierShortNames.Controlled,
-      ];
-
       return (
         <div>
           <style>{css}</style>
@@ -897,7 +893,7 @@ export const AdminInstitutionEdit = fp.flow(
             </SemiBoldHeader>
             <hr style={{ border: '1px solid #A9B6CB' }} />
             <FlexRow style={{ gap: '2rem' }}>
-              {tiers.map((accessTierShortName) => (
+              {orderedAccessTierShortNames.map((accessTierShortName) => (
                 <TierConfig
                   key={accessTierShortName}
                   accessTierShortName={accessTierShortName}
@@ -973,7 +969,11 @@ export const AdminInstitutionEdit = fp.flow(
                     data-test-id='save-institution-button'
                     style={styles.saveButton}
                     disabled={this.disableSave(errors)}
-                    onClick={() => this.saveInstitution()}
+                    onClick={async () => {
+                      this.props.showSpinner();
+                      await this.saveInstitution();
+                      this.props.hideSpinner();
+                    }}
                   >
                     {this.buttonText}
                   </Button>

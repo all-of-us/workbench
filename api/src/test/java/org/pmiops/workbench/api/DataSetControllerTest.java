@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -82,6 +83,7 @@ import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -111,6 +113,7 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -119,8 +122,10 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -197,6 +202,7 @@ public class DataSetControllerTest {
   @Autowired private ConceptSetsController conceptSetsController;
   @Autowired private DataSetController dataSetController;
   @Autowired private UserDao userDao;
+  @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
@@ -821,6 +827,40 @@ public class DataSetControllerTest {
   }
 
   @Test
+  public void generateCode_pyhton() {
+    mockLinkingTableQuery();
+    DataSetRequest dataSetRequest = buildValidDataSetRequest();
+    DataSetCodeResponse dataSetCodeResponse =
+        dataSetController
+            .generateCode(
+                workspace.getNamespace(),
+                workspace.getId(),
+                KernelTypeEnum.PYTHON.toString(),
+                dataSetRequest)
+            .getBody();
+
+    assertThat(dataSetCodeResponse.getCode())
+        .containsMatch("import pandas[\\S|\\s]*pandas\\.read_gbq");
+  }
+
+  @Test
+  public void generateCode_R() {
+    mockLinkingTableQuery();
+    DataSetRequest dataSetRequest = buildValidDataSetRequest();
+    DataSetCodeResponse dataSetCodeResponse =
+        dataSetController
+            .generateCode(
+                workspace.getNamespace(),
+                workspace.getId(),
+                KernelTypeEnum.R.toString(),
+                dataSetRequest)
+            .getBody();
+
+    assertThat(dataSetCodeResponse.getCode())
+        .containsMatch("library[\\S|\\s]*read_bq_export_from_workspace_bucket");
+  }
+
+  @Test
   public void exportToExistingNotebook() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(cohort.getId());
@@ -1173,6 +1213,54 @@ public class DataSetControllerTest {
         () ->
             dataSetController.getDataSet(
                 workspace.getNamespace(), workspace.getName(), finalDataSet.getId()));
+  }
+
+  @Test
+  public void testMarkDirty_cohort() {
+    MarkDataSetRequest markDataSetRequest =
+        new MarkDataSetRequest().resourceType(ResourceType.COHORT).id(cohort.getId());
+    assertThat(
+            dataSetController
+                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .getBody())
+        .isTrue();
+  }
+
+  @Test
+  public void testMarkDirty_concept() {
+    MarkDataSetRequest markDataSetRequest =
+        new MarkDataSetRequest().resourceType(ResourceType.CONCEPT_SET).id(conceptSet1.getId());
+    assertThat(
+            dataSetController
+                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .getBody())
+        .isTrue();
+  }
+
+  @Test
+  public void testMarkDirty_dataset() {
+    MarkDataSetRequest markDataSetRequest =
+        new MarkDataSetRequest().resourceType(ResourceType.DATASET).id(noAccessDataSet.getId());
+    assertThat(
+            dataSetController
+                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .getBody())
+        .isTrue();
+  }
+
+  @Disabled(
+      "The DataSetController#getDataSetByResourceId(...) is a passthrough "
+          + "call to DataSetServiceImpl#getDataSets(...) which is already "
+          + "tested in DataSetServiceTest test suite.")
+  public void testGetDataSetByResourceId() {
+    // The DataSetController call is a pass through to
+    // DataSetServiceImpl.getDataSets(...)
+  }
+
+  @Disabled("Already tested as part of DataSetControllerTest#createDataSetMissingArguments")
+  public void testValidateDataSetCreateRequest() {
+    // The private method ValidateDataSetCreateRequest is already tested as
+    // part of DataSetControllerTest#createDataSetMissingArguments
   }
 
   DataSetRequest buildValidDataSetRequest() {

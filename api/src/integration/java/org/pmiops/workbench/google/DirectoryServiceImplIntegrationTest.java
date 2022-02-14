@@ -38,7 +38,8 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     String userPrefix = String.format("integration.test.%d", Clock.systemUTC().millis());
     String username = userPrefix + "@" + config.googleDirectoryService.gSuiteDomain;
     service.createUser("Integration", "Test", username, "notasecret@gmail.com");
-    assertThat(service.isUsernameTaken(userPrefix)).isTrue();
+    boolean userNameTaken = retryTemplate().execute(c -> service.isUsernameTaken(userPrefix));
+    assertThat(userNameTaken).isTrue();
 
     // As of ~6/25/19, customSchemas are sometimes unavailable on the initial call to Gsuite. This
     // data is likely not written with strong consistency. Retry until it is available.
@@ -57,7 +58,12 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
     assertThat(service.getContactEmail(username)).hasValue("notasecret@gmail.com");
 
-    service.deleteUser(username);
+    retryTemplate()
+        .execute(
+            c -> {
+              service.deleteUser(username);
+              return null;
+            });
     assertThat(service.isUsernameTaken(userPrefix)).isFalse();
   }
 

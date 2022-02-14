@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
+import { environment } from 'environments/environment';
 import { FlexRow } from 'app/components/flex';
 import {
   CheckCircle,
@@ -13,8 +14,9 @@ import { useId } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,
+  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
-import { environment } from 'environments/environment';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 interface TierProps {
   shortName: string;
@@ -59,22 +61,17 @@ export interface DataAccessPanelProps {
 export const DataAccessPanel = (props: DataAccessPanelProps) => {
   const { userAccessTiers } = props;
 
-  const orderedTiers = [
-    AccessTierShortNames.Registered,
-    AccessTierShortNames.Controlled,
-  ];
-
   const sectionId = useId();
   return (
     <section aria-labelledby={sectionId} style={{ marginLeft: '1rem' }}>
       <FlexRow id={sectionId}>
         <div style={styles.title}>Data access</div>
-        <Link style={{ marginLeft: 'auto' }} to='/data-access-requirements'>
+        <Link style={{ marginLeft: 'auto' }} to={DATA_ACCESS_REQUIREMENTS_PATH}>
           Manage data access
         </Link>
       </FlexRow>
       <hr style={{ ...styles.verticalLine }} />
-      {orderedTiers.map((tier) => (
+      {orderedAccessTierShortNames.map((tier) => (
         <Tier
           key={tier}
           shortName={tier}

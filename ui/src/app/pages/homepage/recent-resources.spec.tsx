@@ -1,10 +1,12 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 
+import { UserMetricsApi, WorkspacesApi } from 'generated/fetch';
+
+import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { RecentResources } from 'app/pages/homepage/recent-resources';
-import { UserMetricsApi, WorkspacesApi } from 'generated/fetch';
+
 import { UserMetricsApiStub } from 'testing/stubs/user-metrics-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';

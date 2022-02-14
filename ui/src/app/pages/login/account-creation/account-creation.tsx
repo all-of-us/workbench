@@ -1,7 +1,9 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { MultiSelect } from 'primereact/multiselect';
-import * as React from 'react';
 import validate from 'validate.js';
+
+import { Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -30,7 +32,6 @@ import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
-import { Profile } from 'generated/fetch';
 import { canonicalizeUrl } from 'app/utils/urls';
 
 const styles = reactStyles({
@@ -211,6 +212,14 @@ export class AccountCreation extends React.Component<
   validate(): { [key: string]: string } {
     const { gsuiteDomain } = serverConfigStore.get().config;
 
+    // The validation data for this form is *almost* the raw Profile, except for the additional
+    // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
+    // username itself from validation of the full email address.
+    const validationData = {
+      ...this.state.profile,
+      usernameWithEmail: this.state.profile.username + '@' + gsuiteDomain,
+    };
+
     const validationCheck = {
       username: {
         presence: {
@@ -222,6 +231,13 @@ export class AccountCreation extends React.Component<
           maximum: 64,
         },
       },
+      usernameWithEmail: isBlank(validationData.username)
+        ? {}
+        : {
+            email: {
+              message: '^Username contains invalid characters',
+            },
+          },
       givenName: {
         presence: {
           allowEmpty: false,
@@ -301,22 +317,6 @@ export class AccountCreation extends React.Component<
         },
       },
     };
-
-    // The validation data for this form is *almost* the raw Profile, except for the additional
-    // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
-    // username itself from validation of the full email address. For this reason, we need to cast
-    // the profile object to 'any'.
-    const validationData = { ...this.state.profile } as any;
-    validationData.usernameWithEmail =
-      validationData.username + '@' + gsuiteDomain;
-
-    if (!isBlank(validationData.username)) {
-      validationCheck['usernameWithEmail'] = {
-        email: {
-          message: '^Username contains invalid characters',
-        },
-      };
-    }
 
     // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
     // forking their website regex, just ensure a scheme ahead of validation.

@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { QuickTourAndVideos } from './quick-tour-and-videos';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+
+import { QuickTourAndVideos } from './quick-tour-and-videos';
 
 describe('Quick Tour and Videos', () => {
   const component = (initialQuickTour: boolean) => {

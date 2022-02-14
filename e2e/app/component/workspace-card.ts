@@ -2,7 +2,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
-import CardBase from './card-base';
+import BaseCard from './base-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
@@ -24,7 +24,7 @@ const WorkspaceCardSelector = {
  * WorkspaceCard represents workspace card user found on Home and All Workspaces pages.
  * A Workspace Card is element that contains a child element with attribute: @data-test-id='workspace-card'
  */
-export default class WorkspaceCard extends CardBase {
+export default class WorkspaceCard extends BaseCard {
   // **********************
   // static functions
   // **********************

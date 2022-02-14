@@ -1,15 +1,16 @@
-import { Button } from 'app/components/buttons';
+import * as React from 'react';
 
+import { ResourceType } from 'generated/fetch';
+
+import { Button } from 'app/components/buttons';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-
 import { toDisplay } from 'app/utils/resources';
-import { ResourceType } from 'generated/fetch';
-import * as React from 'react';
+
 import { TextInput } from './inputs';
 
 export interface ConfirmDeleteModalProps {

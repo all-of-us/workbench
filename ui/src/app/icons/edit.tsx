@@ -1,6 +1,6 @@
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-
 import * as React from 'react';
+
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 
 export interface EditComponentProps {
   disabled: boolean;
@@ -80,8 +80,8 @@ export class EditComponentReact extends React.Component<
         <rect
           x='0'
           y='0'
-          width={this.state.style['width']}
-          height={this.state.style['height']}
+          width={this.state.style.width}
+          height={this.state.style.height}
           fillOpacity='0'
         />
       </svg>

@@ -12,7 +12,7 @@ export const enum Selectors {
   closeIconXpath = '//*[@role="button"][./*[@alt="Close"]]'
 }
 
-export default abstract class BaseHelpSidebar extends Container {
+export default abstract class BaseSidebar extends Container {
   deleteIconXpath: string;
 
   protected constructor(page: Page, xpath = `${Selectors.rootXpath}${Selectors.contentXpath}`) {

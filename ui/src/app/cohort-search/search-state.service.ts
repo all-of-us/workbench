@@ -1,4 +1,5 @@
 import { SearchRequest } from 'generated/fetch';
+
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export const initSearchRequest = {

@@ -7,11 +7,16 @@ import {
   RuntimeLocalizeResponse,
   RuntimeStatus,
 } from 'generated/fetch';
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+
 import {
   DATAPROC_WORKER_MIN_DISK_SIZE_GB,
   MIN_DISK_SIZE_GB,
 } from 'app/pages/analysis/runtime-panel';
+import { diskApi } from 'app/services/swagger-fetch-clients';
+
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+
+import { DiskApiStub, stubDisk } from './disk-api-stub';
 
 export const defaultGceConfig = (): GceConfig => ({
   diskSize: 120,
@@ -55,18 +60,38 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  createRuntime(workspaceNamespace: string, runtime: Runtime): Promise<{}> {
-    return new Promise<{}>((resolve) => {
-      this.runtime = { ...runtime, status: RuntimeStatus.Creating };
-      resolve({});
-    });
+  async createRuntime(
+    workspaceNamespace: string,
+    runtime: Runtime
+  ): Promise<{}> {
+    const reqDisk = runtime?.gceWithPdConfig?.persistentDisk;
+    if (reqDisk && !reqDisk.name) {
+      const dapi = diskApi();
+      if (dapi instanceof DiskApiStub) {
+        dapi.disk = {
+          ...stubDisk(),
+          size: reqDisk.size,
+          diskType: reqDisk.diskType,
+        };
+        reqDisk.name = dapi.disk.name;
+      }
+    }
+    this.runtime = { ...runtime, status: RuntimeStatus.Creating };
+    return {};
   }
 
-  deleteRuntime(): Promise<{}> {
-    return new Promise<{}>((resolve) => {
-      this.runtime.status = RuntimeStatus.Deleting;
-      resolve({});
-    });
+  async deleteRuntime(
+    workspaceNamespace: string,
+    deleteDisk: boolean
+  ): Promise<{}> {
+    if (deleteDisk) {
+      await diskApi().deleteDisk(
+        workspaceNamespace,
+        this.runtime.gceWithPdConfig?.persistentDisk?.name
+      );
+    }
+    this.runtime.status = RuntimeStatus.Deleting;
+    return {};
   }
 
   updateRuntime(): Promise<{}> {

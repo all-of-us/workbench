@@ -1,5 +1,8 @@
+import { useState } from 'react';
+import * as React from 'react';
 import { faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { Button } from 'app/components/buttons';
 import {
   Modal,
@@ -8,8 +11,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
-import { useState } from 'react';
-import * as React from 'react';
 
 interface Props {
   title: string;

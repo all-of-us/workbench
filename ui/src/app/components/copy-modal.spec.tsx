@@ -1,13 +1,7 @@
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
 import Select from 'react-select';
+import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 
-import { TextInput } from 'app/components/inputs';
-import {
-  conceptSetsApi,
-  registerApiClient,
-  notebooksApi,
-} from 'app/services/swagger-fetch-clients';
 import {
   ConceptSetsApi,
   NotebooksApi,
@@ -15,20 +9,27 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+import { TextInput } from 'app/components/inputs';
+import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
 import {
-  cdrVersionTiersResponse,
-  CdrVersionsStubVariables,
-} from 'testing/stubs/cdr-versions-api-stub';
+  conceptSetsApi,
+  notebooksApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
-import { CopyModal, CopyModalProps } from './copy-modal';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from 'testing/stubs/cdr-versions-api-stub';
+import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
+import { CopyModal, CopyModalProps } from './copy-modal';
 
 function simulateSelect(
   wrapper: ReactWrapper,

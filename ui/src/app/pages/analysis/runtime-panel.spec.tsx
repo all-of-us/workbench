@@ -1,10 +1,28 @@
-import { act } from 'react-dom/test-utils';
 import * as React from 'react';
+import { act } from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
+import { ReactWrapper } from 'enzyme';
+
+import {
+  ProfileApi,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
+} from 'generated/fetch';
+import { BillingStatus } from 'generated/fetch';
+import {
+  Disk,
+  DiskApi,
+  DiskType,
+  Runtime,
+  RuntimeApi,
+} from 'generated/fetch/api';
 
 import { Button, LinkButton } from 'app/components/buttons';
-import { Spinner } from 'app/components/spinners';
+import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
+import { Spinner } from 'app/components/spinners';
 import {
   ConfirmDelete,
   DATAPROC_WORKER_MIN_DISK_SIZE_GB,
@@ -13,53 +31,52 @@ import {
   RuntimePanelWrapper,
 } from 'app/pages/analysis/runtime-panel';
 import {
+  diskApi,
   profileApi,
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
-import { findMachineByName, ComputeType } from 'app/utils/machines';
+import { ComputeType, findMachineByName } from 'app/utils/machines';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import {
-  ProfileApi,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-  WorkspaceAccessLevel,
-  WorkspacesApi,
-} from 'generated/fetch';
-import { RuntimeApi } from 'generated/fetch/api';
-import defaultServerConfig from 'testing/default-server-config';
-import {
-  mountWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
-import {
-  cdrVersionTiersResponse,
-  CdrVersionsStubVariables,
-} from 'testing/stubs/cdr-versions-api-stub';
-import {
-  defaultGceConfig,
-  defaultDataprocConfig,
-  RuntimeApiStub,
-} from 'testing/stubs/runtime-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
-import { workspaceStubs } from 'testing/stubs/workspaces';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import { BillingStatus } from 'generated/fetch';
+import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
-  serverConfigStore,
-  runtimeStore,
+  diskStore,
   profileStore,
+  runtimeStore,
+  serverConfigStore,
 } from 'app/utils/stores';
-import { currentWorkspaceStore } from 'app/utils/navigation';
+
+import defaultServerConfig from 'testing/default-server-config';
+import {
+  mountWithRouter,
+  waitForFakeTimersAndUpdate,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from 'testing/stubs/cdr-versions-api-stub';
+import { DiskApiStub } from 'testing/stubs/disk-api-stub';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import {
+  defaultDataprocConfig,
+  defaultGceConfig,
+  RuntimeApiStub,
+} from 'testing/stubs/runtime-api-stub';
+import { workspaceStubs } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 describe('RuntimePanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
+  let diskApiStub: DiskApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
   let enableGpu: boolean;
+  let enablePersistentDisk: boolean;
   let freeTierBillingAccountId: string;
 
   const component = async (propOverrides?: object) => {
@@ -69,17 +86,62 @@ describe('RuntimePanel', () => {
     return c;
   };
 
+  const existingDisk = (): Disk => {
+    return {
+      size: 1000,
+      diskType: DiskType.Standard,
+      name: 'my-existing-disk',
+      blockSize: 1,
+    };
+  };
+
+  const detachableDiskRuntime = (): Runtime => {
+    const { size, diskType, name } = existingDisk();
+    return {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.UserOverride,
+      gceWithPdConfig: {
+        machineType: 'n1-standard-16',
+        persistentDisk: {
+          size,
+          diskType,
+          name,
+          labels: {},
+        },
+        gpuConfig: null,
+      },
+      gceConfig: null,
+      dataprocConfig: null,
+    };
+  };
+
   let runtimeStoreStub;
+  let diskStoreStub;
+
+  const setCurrentDisk = (d: Disk) => {
+    diskApiStub.disk = d;
+    diskStoreStub.persistentDisk = d;
+  };
+
+  const setCurrentRuntime = (r: Runtime) => {
+    runtimeApiStub.runtime = r;
+    runtimeStoreStub.runtime = r;
+  };
 
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: { ...defaultServerConfig } });
     enableGpu = serverConfigStore.get().config.enableGpu;
+    enablePersistentDisk = serverConfigStore.get().config.enablePersistentDisk;
     freeTierBillingAccountId =
       serverConfigStore.get().config.freeTierBillingAccountId;
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
+
+    diskApiStub = new DiskApiStub();
+    registerApiClient(DiskApi, diskApiStub);
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
@@ -113,11 +175,18 @@ describe('RuntimePanel', () => {
     };
     runtimeStore.set(runtimeStoreStub);
 
+    diskStoreStub = {
+      workspaceNamespace: workspaceStubs[0].namespace,
+      persistentDisk: null,
+    };
+    diskStore.set(diskStoreStub);
+
     jest.useFakeTimers();
   });
 
   afterEach(() => {
     act(() => clearCompoundRuntimeOperations());
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 
@@ -127,9 +196,7 @@ describe('RuntimePanel', () => {
   };
 
   const pickDropdownOption = async (wrapper, id, label) => {
-    act(() => {
-      wrapper.find(id).first().simulate('click');
-    });
+    wrapper.find(id).first().simulate('click');
     const item = wrapper
       .find(`${id} .p-dropdown-item`)
       .find({ 'aria-label': label })
@@ -155,17 +222,25 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
-  function getCheckbox(wrapper, id) {
+  function getCheckbox(wrapper, id): boolean {
     return wrapper.find(id).first().prop('checked');
   }
 
-  function clickCheckbox(wrapper, id) {
+  async function clickCheckbox(wrapper, id) {
     const currentChecked = getCheckbox(wrapper, id);
     wrapper
       .find(id)
+      .find('input')
       .first()
       .simulate('change', { target: { checked: !currentChecked } });
+    await waitOneTickAndUpdate(wrapper);
   }
+
+  const clickDeletePdRadioButton = (wrapper) =>
+    wrapper
+      .find({ 'data-test-id': 'delete-unattached-pd-radio' })
+      .first()
+      .simulate('change');
 
   const getMainCpu = (wrapper) => getInputValue(wrapper, '#runtime-cpu');
   const pickMainCpu = (wrapper, cpu) =>
@@ -175,9 +250,31 @@ describe('RuntimePanel', () => {
   const pickMainRam = (wrapper, ram) =>
     pickDropdownOption(wrapper, '#runtime-ram', ram);
 
-  const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#runtime-disk');
+  const getMainDiskSize = (wrapper) =>
+    getInputValue(
+      wrapper,
+      enablePersistentDisk ? '#standard-disk' : '#runtime-disk'
+    );
   const pickMainDiskSize = (wrapper, diskSize) =>
-    enterNumberInput(wrapper, '#runtime-disk', diskSize);
+    enterNumberInput(
+      wrapper,
+      enablePersistentDisk ? '#standard-disk' : '#runtime-disk',
+      diskSize
+    );
+
+  const enableDetachable = (wrapper, detachable = true) =>
+    wrapper
+      .find({ name: detachable ? 'detachableDisk' : 'standardDisk' })
+      .first()
+      .simulate('change');
+
+  const pickDetachableType = (wrapper, diskType: DiskType) =>
+    pickDropdownOption(wrapper, '#disk-type', diskTypeLabels[diskType]);
+
+  const getDetachableDiskSize = (wrapper) =>
+    getInputValue(wrapper, '#detachable-disk');
+  const pickDetachableDiskSize = (wrapper, diskSize) =>
+    enterNumberInput(wrapper, '#detachable-disk', diskSize);
 
   const pickGpuType = (wrapper, gpuType) =>
     pickDropdownOption(wrapper, '#gpu-type', gpuType);
@@ -215,14 +312,22 @@ describe('RuntimePanel', () => {
     pickDropdownOption(wrapper, '#runtime-presets-menu', displayName);
 
   const mustClickButton = async (wrapper, label) => {
-    const createButton = wrapper
-      .find(Button)
-      .find({ 'aria-label': label })
-      .first();
-    expect(createButton.exists()).toBeTruthy();
-    expect(createButton.prop('disabled')).toBeFalsy();
+    const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
+    expect(btn.exists()).toBeTruthy();
+    expect(btn.prop('disabled')).toBeFalsy();
 
-    createButton.simulate('click');
+    btn.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+  };
+
+  const clickButtonIfVisible = async (wrapper, label) => {
+    const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
+    if (!btn.exists()) {
+      return;
+    }
+    expect(btn.prop('disabled')).toBeFalsy();
+
+    btn.simulate('click');
     await waitOneTickAndUpdate(wrapper);
   };
 
@@ -240,8 +345,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should show Create panel when no runtime', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -255,8 +359,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation when no runtime exists with defaults', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -269,8 +372,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should show customize after create', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapperBefore = await component();
 
@@ -284,7 +386,7 @@ describe('RuntimePanel', () => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
@@ -294,9 +396,7 @@ describe('RuntimePanel', () => {
         diskSize: 1000,
       },
       dataprocConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Create');
@@ -314,7 +414,7 @@ describe('RuntimePanel', () => {
     // we should ignore the other runtime config values that were delivered with the getRuntime response
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
 
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
@@ -326,9 +426,7 @@ describe('RuntimePanel', () => {
         workerDiskSize: 444,
         numberOfWorkers: 5,
       },
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Create');
@@ -347,7 +445,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation when runtime has error status', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Error,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
@@ -358,9 +456,7 @@ describe('RuntimePanel', () => {
         diskSize: 100,
       },
       dataprocConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -371,7 +467,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation with update from error', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Error,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
@@ -382,9 +478,7 @@ describe('RuntimePanel', () => {
         diskSize: 100,
       },
       dataprocConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -415,8 +509,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation with GCE config', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -441,8 +534,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation with Dataproc config', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -479,8 +571,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow configuration via GCE preset', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -506,8 +597,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow configuration via dataproc preset', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -531,7 +621,7 @@ describe('RuntimePanel', () => {
     'should set runtime preset values in customize panel instead of getRuntime values ' +
       'if configurationType is GeneralAnalysis',
     async () => {
-      const runtime = {
+      setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
@@ -541,9 +631,7 @@ describe('RuntimePanel', () => {
           diskSize: 1000,
         },
         dataprocConfig: null,
-      };
-      runtimeApiStub.runtime = runtime;
-      runtimeStoreStub.runtime = runtime;
+      });
 
       const wrapper = await component();
       await mustClickButton(wrapper, 'Customize');
@@ -568,7 +656,7 @@ describe('RuntimePanel', () => {
     'should set runtime preset values in customize panel instead of getRuntime values ' +
       'if configurationType is HailGenomicsAnalysis',
     async () => {
-      const runtime = {
+      setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
@@ -580,9 +668,7 @@ describe('RuntimePanel', () => {
           workerDiskSize: 444,
           numberOfWorkers: 5,
         },
-      };
-      runtimeApiStub.runtime = runtime;
-      runtimeStoreStub.runtime = runtime;
+      });
 
       const wrapper = await component();
       await mustClickButton(wrapper, 'Customize');
@@ -615,8 +701,7 @@ describe('RuntimePanel', () => {
   );
 
   it('should allow configuration via dataproc preset from modified form', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -650,8 +735,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should tag as user override after preset modification', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
 
@@ -670,8 +754,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should tag as preset if configuration matches', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
@@ -759,13 +842,12 @@ describe('RuntimePanel', () => {
   });
 
   it('should not warn user for updates where not needed - number of workers', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.UserOverride,
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -776,12 +858,11 @@ describe('RuntimePanel', () => {
   });
 
   it('should not warn user for updates where not needed - number of preemptibles', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -836,12 +917,11 @@ describe('RuntimePanel', () => {
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker CPU', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -855,12 +935,11 @@ describe('RuntimePanel', () => {
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker RAM', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -874,12 +953,11 @@ describe('RuntimePanel', () => {
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker Disk', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
@@ -891,12 +969,11 @@ describe('RuntimePanel', () => {
   });
 
   it('should retain original inputs when hitting cancel from the Confirm panel', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -923,13 +1000,12 @@ describe('RuntimePanel', () => {
   });
 
   it('should disable Next button if Runtime is in between states', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       status: RuntimeStatus.Creating,
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
@@ -970,11 +1046,10 @@ describe('RuntimePanel', () => {
   });
 
   it('should show create button if runtime is deleted', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
-    };
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -1037,7 +1112,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should update the cost estimator when master machine changes', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
@@ -1050,9 +1125,7 @@ describe('RuntimePanel', () => {
         workerMachineType: 'n1-standard-4',
         workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
       },
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -1118,8 +1191,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should display a compute-none when there is no runtime', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     expect(
       wrapper.find('[data-test-id="runtime-status-icon-none"]').exists()
@@ -1127,8 +1199,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should prevent runtime creation when disk size is invalid', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () =>
@@ -1176,9 +1247,282 @@ describe('RuntimePanel', () => {
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
+  it('should prevent runtime update when PD disk size is invalid', async () => {
+    const wrapper = await component();
+    const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
+
+    await enableDetachable(wrapper);
+    await pickDetachableType(wrapper, DiskType.Standard);
+
+    await pickDetachableDiskSize(wrapper, 49);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickDetachableType(wrapper, DiskType.Ssd);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickDetachableDiskSize(wrapper, 4900);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickDetachableType(wrapper, DiskType.Standard);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+  });
+
+  it('should prevent detachable PD use for Dataproc', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+
+    const wrapper = await component();
+    const getDetachableRadio = () =>
+      wrapper.find({ name: 'detachableDisk' }).first();
+
+    expect(getDetachableRadio().prop('disabled')).toBeFalsy();
+    await enableDetachable(wrapper);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    expect(getDetachableRadio().prop('disabled')).toBeTruthy();
+  });
+
+  const pickSsdType = async (wrapper) =>
+    pickDetachableType(wrapper, DiskType.Ssd);
+  const decrementDetachableDiskSize = async (wrapper) => {
+    const prevSize = await getDetachableDiskSize(wrapper);
+    await pickDetachableDiskSize(wrapper, prevSize - 1);
+  };
+  const incrementDetachableDiskSize = async (wrapper) => {
+    const prevSize = await getDetachableDiskSize(wrapper);
+    await pickDetachableDiskSize(wrapper, prevSize + 1);
+  };
+  const changeMainCpu = async (wrapper) => pickMainCpu(wrapper, 8);
+
+  type DetachableDiskCase = [
+    string,
+    ((w: ReactWrapper) => Promise<void>)[],
+    {
+      wantUpdateDisk?: boolean;
+      wantDeleteDisk?: boolean;
+      wantUpdateRuntime?: boolean;
+      wantDeleteRuntime?: boolean;
+    }
+  ];
+
+  async function runDetachableDiskCase(
+    wrapper: ReactWrapper,
+    [
+      _,
+      setters,
+      {
+        wantUpdateDisk = false,
+        wantDeleteDisk = false,
+        wantUpdateRuntime = false,
+        wantDeleteRuntime = false,
+      },
+    ]: DetachableDiskCase,
+    existingDiskName: string
+  ) {
+    const updateDiskSpy = jest.spyOn(diskApi(), 'updateDisk');
+    const deleteDiskSpy = jest.spyOn(diskApi(), 'deleteDisk');
+    const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
+    const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+
+    for (const f of setters) {
+      await f(wrapper);
+    }
+
+    await waitOneTickAndUpdate(wrapper);
+    await clickButtonIfVisible(wrapper, 'Next');
+    await clickButtonIfVisible(wrapper, 'Update');
+    await clickButtonIfVisible(wrapper, 'Create');
+
+    if (
+      wrapper.find({ 'data-test-id': 'delete-unattached-pd-radio' }).exists()
+    ) {
+      await clickDeletePdRadioButton(wrapper);
+      await clickButtonIfVisible(wrapper, 'Delete');
+    }
+
+    expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+    expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
+
+    expect(updateRuntimeSpy).toHaveBeenCalledTimes(wantUpdateRuntime ? 1 : 0);
+    if (wantDeleteRuntime) {
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+
+      runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+
+      // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
+      await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+      expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+    }
+
+    if (wantDeleteDisk) {
+      expect(diskApiStub.disk.name).not.toEqual(existingDiskName);
+    } else {
+      expect(diskApiStub.disk.name).toEqual(existingDiskName);
+    }
+  }
+
+  test.each([
+    [
+      'disk type',
+      [pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'disk decrease',
+      [decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+    ['in-place', [changeMainCpu], { wantUpdateRuntime: true }],
+    [
+      'in-place + disk type',
+      [changeMainCpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk decrease',
+      [changeMainCpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk increase',
+      [changeMainCpu, incrementDetachableDiskSize],
+      { wantUpdateDisk: true, wantUpdateRuntime: true },
+    ],
+    ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
+    [
+      'recreate + disk type',
+      [clickEnableGpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk decrease',
+      [clickEnableGpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk increase',
+      [clickEnableGpu, incrementDetachableDiskSize],
+      { wantUpdateDisk: true, wantDeleteRuntime: true },
+    ],
+  ] as DetachableDiskCase[])(
+    'should allow runtime updates to attached PD: %s',
+    async (desc: string, setters, expectations) => {
+      setCurrentRuntime(detachableDiskRuntime());
+
+      const disk = existingDisk();
+      setCurrentDisk(disk);
+
+      const wrapper = await component();
+      await runDetachableDiskCase(
+        wrapper,
+        [desc, setters, expectations],
+        disk.name
+      );
+    }
+  );
+
+  test.each([
+    ['disk type', [pickSsdType], { wantDeleteDisk: true }],
+    ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
+    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+  ] as DetachableDiskCase[])(
+    'should allow runtime creates with existing disk: %s',
+    async (desc, setters, expectations) => {
+      setCurrentRuntime(null);
+
+      const disk = existingDisk();
+      setCurrentDisk(disk);
+
+      const wrapper = await component();
+      await mustClickButton(wrapper, 'Customize');
+      await runDetachableDiskCase(
+        wrapper,
+        [desc, setters, expectations],
+        disk.name
+      );
+    }
+  );
+
+  it('should allow Dataproc -> PD transition', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const wrapper = await component();
+    pickComputeType(wrapper, ComputeType.Standard);
+
+    enableDetachable(wrapper);
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
+
+    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+
+    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(diskApiStub.disk).toBeTruthy();
+  });
+
+  it('should allow disk deletion when detaching', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+    setCurrentDisk(existingDisk());
+
+    const wrapper = await component();
+    pickComputeType(wrapper, ComputeType.Dataproc);
+
+    await mustClickButton(wrapper, 'Next');
+    expect(wrapper.text()).toContain(
+      'will be unused after you apply this update'
+    );
+
+    // Click the "delete" radio button.
+    wrapper
+      .find({ 'data-test-id': 'delete-pd' })
+      .find(RadioButton)
+      .first()
+      .simulate('change');
+
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
+
+    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(diskApiStub.disk).toBeNull();
+  });
+
+  it('should allow skipping disk deletion when detaching', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+
+    const wrapper = await component();
+    enableDetachable(wrapper, false);
+
+    await mustClickButton(wrapper, 'Next');
+
+    expect(wrapper.text()).toContain(
+      'will be unused after you apply this update'
+    );
+
+    // Default option should be NOT to delete.
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
+
+    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(diskApiStub.disk?.name).toEqual(disk.name);
+  });
+
   it('should prevent runtime creation when running cost is too high for free tier', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () =>
@@ -1195,8 +1539,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should prevent runtime creation when worker count is invalid', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () =>
@@ -1220,8 +1563,7 @@ describe('RuntimePanel', () => {
       billingAccountName: 'user provided billing',
     });
 
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () =>
@@ -1235,8 +1577,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should prevent runtime creation when running cost is too high for paid tier', async () => {
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
@@ -1289,19 +1630,16 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creating gce with GPU', async () => {
-    if (!enableGpu) {
-      return;
-    }
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await clickEnableGpu(wrapper);
-    await pickGpuType(wrapper, 'nvidia-tesla-t4');
+    await pickGpuType(wrapper, 'NVIDIA Tesla T4');
     await pickGpuNum(wrapper, 2);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 150);
+
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual(
@@ -1314,28 +1652,25 @@ describe('RuntimePanel', () => {
     if (!enableGpu) {
       return;
     }
-    runtimeApiStub.runtime = null;
-    runtimeStoreStub.runtime = null;
+    setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 150);
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
   });
 
   it('should disable worker count updates for stopped dataproc cluster', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
 
@@ -1349,15 +1684,13 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow worker configuration for stopped GCE runtime', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
       gceConfig: defaultGceConfig(),
       dataprocConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     await pickComputeType(wrapper, ComputeType.Dataproc);
@@ -1372,15 +1705,13 @@ describe('RuntimePanel', () => {
   });
 
   it('should disable Spark console for non-running cluster', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     const manageButton = wrapper.find('[data-test-id="manage-spark-console"]');
@@ -1389,15 +1720,13 @@ describe('RuntimePanel', () => {
   });
 
   it('should render Spark console links for running cluster', async () => {
-    const runtime = {
+    setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+    });
 
     const wrapper = await component();
     const manageButton = wrapper.find('[data-test-id="manage-spark-console"]');

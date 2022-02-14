@@ -13,9 +13,9 @@ import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
-import RuntimePanel, { AutoPauseIdleTime, ComputeType } from 'app/component/runtime-panel';
+import RuntimePanel, { AutoPauseIdleTime, ComputeType } from 'app/sidebar/runtime-panel';
 import { logger } from 'libs/logger';
-import GenomicExtractionsSidebar from 'app/component/genomic-extractions-sidebar';
+import GenomicExtractionsSidebar from 'app/sidebar/genomic-extractions-sidebar';
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
@@ -109,7 +109,7 @@ describe('Genomics Extraction Test', () => {
     await runtimePanel.pickAutoPauseTime(AutoPauseIdleTime.EightHours);
 
     // Disk (GB) is visible after select Dataproc Cluster.
-    expect(await runtimePanel.getDiskGbs()).toBe(100);
+    expect(await runtimePanel.getStandardDiskGbs()).toBe(100);
     // Make sure CPU and RAM remains unchanged after change Compute Type.
     expect(await runtimePanel.getCpus()).toBe('4');
     expect(await runtimePanel.getRamGbs()).toBe('15');

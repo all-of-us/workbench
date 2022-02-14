@@ -5,16 +5,15 @@ import { FlexColumn } from 'app/components/flex';
 import { AoU } from 'app/components/text-wrappers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-
-import homepage from 'assets/images/quick-tour/homepage.png';
-import workspaces from 'assets/images/quick-tour/workspaces.png';
+import expandIcon from 'assets/icons/expand.svg';
+import shrinkIcon from 'assets/icons/shrink.svg';
+import checkImg from 'assets/images/check.svg';
 import cohorts from 'assets/images/quick-tour/cohorts.png';
 import conceptSets from 'assets/images/quick-tour/concept-sets.png';
 import datasets from 'assets/images/quick-tour/datasets.png';
+import homepage from 'assets/images/quick-tour/homepage.png';
 import notebooks from 'assets/images/quick-tour/notebooks.png';
-import checkImg from 'assets/images/check.svg';
-import expandIcon from 'assets/icons/expand.svg';
-import shrinkIcon from 'assets/icons/shrink.svg';
+import workspaces from 'assets/images/quick-tour/workspaces.png';
 
 const OMOPTutorialsLink =
   'https://www.ohdsi.org/past-events/2017-tutorials-' +
@@ -405,7 +404,7 @@ export class QuickTourReact extends React.Component<
             {panels.map((p, i) => {
               return (
                 <React.Fragment key={i}>
-                  {/*We don't set the width on the last item, because there is no connector,
+                  {/* We don't set the width on the last item, because there is no connector,
                 so setting a width would offset the entire selection area by half a connector length*/}
                   <div
                     style={{ width: i !== panels.length - 1 ? '128px' : null }}

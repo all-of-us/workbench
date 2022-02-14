@@ -1,3 +1,9 @@
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
+import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import {
   faBan,
   faCheckCircle,
@@ -5,13 +11,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import moment from 'moment';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+
+import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
 
 import { FlexRow } from 'app/components/flex';
 import { GenomicsExtractionMenu } from 'app/components/genomics-extraction-menu';
@@ -28,7 +29,8 @@ import {
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
+import moment from 'moment';
+
 import { SupportMailto } from './support';
 
 const styles = {
@@ -136,7 +138,7 @@ const mapJobToTableRow = (
       <TooltipTrigger content={iconConfig.iconTooltip}>
         <div>
           {' '}
-          {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
+          {/* This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
           <FontAwesomeIcon
             icon={iconConfig.icon}
             style={{

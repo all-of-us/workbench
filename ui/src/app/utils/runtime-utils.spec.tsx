@@ -1,20 +1,23 @@
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import {
-  useCustomRuntime,
-  RuntimeDiffState,
-  findMostSevereDiffState,
-} from 'app/utils/runtime-utils';
-import { runtimeStore, diskStore, serverConfigStore } from 'app/utils/stores';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+
 import { RuntimeApi } from 'generated/fetch/api';
+
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
-  waitOneTickAndUpdate,
-  waitForFakeTimersAndUpdate,
-} from 'testing/react-test-helpers';
-import * as React from 'react';
+  AnalysisDiffState,
+  findMostSevereDiffState,
+  useCustomRuntime,
+} from 'app/utils/runtime-utils';
+import { diskStore, runtimeStore, serverConfigStore } from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
+import {
+  waitForFakeTimersAndUpdate,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 const WORKSPACE_NS = 'test';
 
@@ -108,38 +111,39 @@ describe('runtime-utils', () => {
 
   test.each([
     [[], undefined],
+    [[AnalysisDiffState.NEEDS_DELETE], AnalysisDiffState.NEEDS_DELETE],
     [
-      [RuntimeDiffState.NEEDS_DELETE_RUNTIME],
-      RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+      [AnalysisDiffState.NEEDS_DELETE, undefined],
+      AnalysisDiffState.NEEDS_DELETE,
     ],
     [
       [
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NEEDS_DELETE_RUNTIME,
-        RuntimeDiffState.NO_CHANGE,
-        RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
-        RuntimeDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.NEEDS_DELETE,
+        AnalysisDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
+        AnalysisDiffState.NO_CHANGE,
       ],
-      RuntimeDiffState.NEEDS_DELETE_RUNTIME,
+      AnalysisDiffState.NEEDS_DELETE,
     ],
     [
       [
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NO_CHANGE,
-        RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
       ],
-      RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
+      AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
     ],
     [
       [
-        RuntimeDiffState.NO_CHANGE,
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NO_CHANGE,
+        AnalysisDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.NO_CHANGE,
       ],
-      RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+      AnalysisDiffState.CAN_UPDATE_IN_PLACE,
     ],
-    [[RuntimeDiffState.NO_CHANGE], RuntimeDiffState.NO_CHANGE],
+    [[AnalysisDiffState.NO_CHANGE], AnalysisDiffState.NO_CHANGE],
   ])('findMostSevereDiffState(%s) = %s', (diffStates, want) => {
     expect(findMostSevereDiffState(diffStates)).toEqual(want);
   });

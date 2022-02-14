@@ -5,8 +5,7 @@ import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
-import { waitForPreviewCellsRendered } from 'utils/notebook-preview-utils';
-import { getFormattedPreviewCode } from 'utils/notebook-preview-utils';
+import { getFormattedPreviewCode, waitForPreviewCellsRendered } from 'utils/notebook-preview-utils';
 
 const Selector = {
   editLink: '//div[contains(normalize-space(text()), "Edit")]',
