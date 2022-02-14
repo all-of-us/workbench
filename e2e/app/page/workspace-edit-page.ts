@@ -16,7 +16,7 @@ import { makeWorkspaceName } from 'utils/str-utils';
 
 const faker = require('faker/locale/en_US');
 
-export const PageTitle = 'Create|Duplicate Workspace';
+export const PageTitle = 'Create|Duplicate|Edit Workspace';
 
 export const LabelAlias = {
   SELECT_BILLING: 'Select a current billing account', // Select a current billing account
