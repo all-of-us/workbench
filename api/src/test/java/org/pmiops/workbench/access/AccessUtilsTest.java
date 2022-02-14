@@ -3,8 +3,6 @@ package org.pmiops.workbench.access;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleToStorage;
-import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
-import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_ACCESS_MODULES;
 
 import org.junit.jupiter.api.Test;

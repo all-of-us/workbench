@@ -1,8 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
-import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
-import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -40,28 +38,31 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final Provider<List<DbAccessModule>> dbAccessModulesProvider;
   private final Clock clock;
 
+  private final AccessModuleMapper accessModuleMapper;
+  private final Provider<WorkbenchConfig> configProvider;
   private final UserAccessModuleDao userAccessModuleDao;
+  private final UserAccessModuleMapper userAccessModuleMapper;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
-  private final Provider<WorkbenchConfig> configProvider;
-  private final UserAccessModuleMapper userAccessModuleMapper;
 
   @Autowired
   public AccessModuleServiceImpl(
+      AccessModuleMapper accessModuleMapper,      Clock clock,
       Provider<List<DbAccessModule>> dbAccessModulesProvider,
-      Clock clock,
-      UserAccessModuleDao userAccessModuleDao,
-      UserDao userDao,
-      UserServiceAuditor userServiceAuditor,
       Provider<WorkbenchConfig> configProvider,
-      UserAccessModuleMapper userAccessModuleMapper) {
-    this.dbAccessModulesProvider = dbAccessModulesProvider;
+      UserAccessModuleDao userAccessModuleDao,
+      UserAccessModuleMapper userAccessModuleMapper,
+      UserDao userDao,
+      UserServiceAuditor userServiceAuditor
+  ) {
+    this.accessModuleMapper = accessModuleMapper;
     this.clock = clock;
+    this.configProvider = configProvider;
+    this.dbAccessModulesProvider = dbAccessModulesProvider;
     this.userAccessModuleDao = userAccessModuleDao;
+    this.userAccessModuleMapper = userAccessModuleMapper;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
-    this.configProvider = configProvider;
-    this.userAccessModuleMapper = userAccessModuleMapper;
   }
 
   @Override
@@ -72,11 +73,11 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
-    DbAccessModule accessModule =
-        getDbAccessModuleFromApi(dbAccessModulesProvider.get(), accessModuleName);
+    DbAccessModule accessModule = getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleMapper.clientAccessModuleToStorage(accessModuleName));
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
+
     final DbUser user = userDao.findUserByUserId(userId);
     DbUserAccessModule userAccessModuleToUpdate =
         retrieveUserAccessModuleOrCreate(user, accessModule);
@@ -154,7 +155,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     // if the module is not required, the user is always compliant
-    if (!isModuleRequiredInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+    if (!isModuleRequiredInEnvironment(accessModuleMapper.storageAccessModuleToClient(dbAccessModule.getName()))) {
       return true;
     }
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
@@ -226,11 +227,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             () ->
                 new BadRequestException(
                     "There is no access module named: " + accessModuleName.toString()));
-  }
-
-  private static DbAccessModule getDbAccessModuleFromApi(
-      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
-    return getDbAccessModuleOrThrow(dbAccessModules, clientAccessModuleToStorage(apiAccessModule));
   }
 
   /**

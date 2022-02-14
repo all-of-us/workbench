@@ -8,62 +8,10 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.AccessModule;
 
 /** Utilities for RW Access related functionalities. */
 public class AccessUtils {
   private AccessUtils() {}
-
-  private static final BiMap<AccessModule, DbAccessModuleName> CLIENT_TO_STORAGE_ACCESS_MODULE =
-      ImmutableBiMap.<AccessModule, DbAccessModuleName>builder()
-          .put(AccessModule.TWO_FACTOR_AUTH, DbAccessModuleName.TWO_FACTOR_AUTH)
-          .put(AccessModule.ERA_COMMONS, DbAccessModuleName.ERA_COMMONS)
-          .put(AccessModule.COMPLIANCE_TRAINING, DbAccessModuleName.RT_COMPLIANCE_TRAINING)
-          .put(AccessModule.CT_COMPLIANCE_TRAINING, DbAccessModuleName.CT_COMPLIANCE_TRAINING)
-          .put(AccessModule.RAS_LINK_LOGIN_GOV, DbAccessModuleName.RAS_LOGIN_GOV)
-          .put(AccessModule.DATA_USER_CODE_OF_CONDUCT, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)
-          .put(AccessModule.PUBLICATION_CONFIRMATION, DbAccessModuleName.PUBLICATION_CONFIRMATION)
-          .put(AccessModule.PROFILE_CONFIRMATION, DbAccessModuleName.PROFILE_CONFIRMATION)
-          .build();
-
-  private static final BiMap<BypassTimeTargetProperty, DbAccessModuleName>
-      AUDIT_TO_STORAGE_ACCESS_MODULE =
-          ImmutableBiMap.<BypassTimeTargetProperty, DbAccessModuleName>builder()
-              .put(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME, DbAccessModuleName.ERA_COMMONS)
-              .put(
-                  BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
-                  DbAccessModuleName.RT_COMPLIANCE_TRAINING)
-              .put(
-                  BypassTimeTargetProperty.CT_COMPLIANCE_TRAINING_BYPASS_TIME,
-                  DbAccessModuleName.CT_COMPLIANCE_TRAINING)
-              .put(
-                  BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
-                  DbAccessModuleName.TWO_FACTOR_AUTH)
-              .put(BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV, DbAccessModuleName.RAS_LOGIN_GOV)
-              .put(
-                  BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
-                  DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)
-              .build();
-
-  /** Converts {@link AccessModule} to {@link DbAccessModuleName}. */
-  public static DbAccessModuleName clientAccessModuleToStorage(AccessModule s) {
-    return CLIENT_TO_STORAGE_ACCESS_MODULE.get(s);
-  }
-
-  /** Converts {@link DbAccessModuleName} to {@link AccessModule}. */
-  public static AccessModule storageAccessModuleToClient(DbAccessModuleName s) {
-    return CLIENT_TO_STORAGE_ACCESS_MODULE.inverse().get(s);
-  }
-
-  /** Converts {@link BypassTimeTargetProperty} to {@link DbAccessModuleName}. */
-  public static DbAccessModuleName auditAccessModuleToStorage(BypassTimeTargetProperty b) {
-    return AUDIT_TO_STORAGE_ACCESS_MODULE.get(b);
-  }
-
-  /** Converts {@link DbAccessModuleName} to {@link BypassTimeTargetProperty}. */
-  public static BypassTimeTargetProperty auditAccessModuleFromStorage(DbAccessModuleName s) {
-    return AUDIT_TO_STORAGE_ACCESS_MODULE.inverse().get(s);
-  }
 
   /**
    * Returns the {@link DbAccessTier} from list of access tiers by tier short name. Throws {@link
