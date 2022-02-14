@@ -1473,13 +1473,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME),
+            eq(BypassTimeTargetProperty.DATA_USER_CODE_OF_CONDUCT),
             any(),
             any());
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME),
+            eq(BypassTimeTargetProperty.RT_COMPLIANCE_TRAINING),
             any(),
             any());
 
@@ -1487,13 +1487,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME),
+            eq(BypassTimeTargetProperty.ERA_COMMONS),
             any(),
             any());
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME),
+            eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH),
             any(),
             any());
   }

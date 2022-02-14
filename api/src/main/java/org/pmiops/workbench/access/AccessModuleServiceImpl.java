@@ -1,7 +1,5 @@
 package org.pmiops.workbench.access;
 
-import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
@@ -97,7 +95,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     userAccessModuleDao.save(userAccessModuleToUpdate);
     userServiceAuditor.fireAdministrativeBypassTime(
         user.getUserId(),
-        auditAccessModuleFromStorage(accessModule.getName()),
+        accessModuleMapper.auditAccessModuleFromStorage(accessModule.getName()),
         Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
         Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
   }

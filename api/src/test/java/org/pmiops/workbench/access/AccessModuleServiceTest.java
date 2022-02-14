@@ -101,7 +101,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             Optional.empty(),
             nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
   }
@@ -129,7 +129,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             nullableTimestampToOptionalInstant(existingBypasstime),
             nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
   }
@@ -147,7 +147,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             Optional.empty(),
             Optional.empty());
   }
@@ -175,7 +175,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             nullableTimestampToOptionalInstant(existingBypasstime),
             Optional.empty());
   }
