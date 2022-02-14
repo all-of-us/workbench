@@ -239,7 +239,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
 
     return (
       <React.Fragment>
-        <div id='outdated' /> {/* for outdated-browser-rework */}
+        {/* for outdated-browser-rework https://www.npmjs.com/package/outdated-browser-rework*/}
+        {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
+        <div id='outdated' />
         {authLoaded && isUserDisabledInDb !== undefined && (
           <React.Fragment>
             {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
