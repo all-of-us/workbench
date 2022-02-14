@@ -96,8 +96,7 @@ public class ConceptSetDaoTest {
 
   @Test
   public void saveEmptyDbConceptSetReturnsNonNullConceptSetConceptIds() {
-    DbConceptSet dbConceptSet1 = new DbConceptSet();
-    DbConceptSet saved = conceptSetDao.save(dbConceptSet1);
+    DbConceptSet saved = conceptSetDao.save(new DbConceptSet());
     assertThat(saved.getConceptSetConceptIds()).isEmpty();
   }
 }
