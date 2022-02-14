@@ -18,6 +18,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class, AccessModuleNameMapper.class},
     nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface UserAccessModuleMapper {
+  @Mapping(target = "moduleNameTemp", source = "accessModule.name")
   @Mapping(target = "moduleName", source = "accessModule.name")
   @Mapping(target = "completionEpochMillis", source = "completionTime")
   @Mapping(target = "bypassEpochMillis", source = "bypassTime")

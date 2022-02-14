@@ -4504,14 +4504,17 @@ definitions:
   AccessModuleConfig:
     type: object
     required:
-      - name
+      - moduleNameTemp
       - expirable
       - bypassable
       - requiredForRTAccess
       - requiredForCTAccess
     properties:
       name:
+        description: DEPRECATED. Use moduleNameTemp.
         "$ref": "#/definitions/AccessModule"
+      moduleNameTemp:
+        "$ref": "#/definitions/AccessModuleName"
       expirable:
         type: boolean
       bypassable:
@@ -5072,6 +5075,7 @@ definitions:
         type: boolean
         default: false
   AccessModule:
+    description: DEPRECATED.  use AccessModuleName.
     type: string
     enum:
     - DATA_USER_CODE_OF_CONDUCT
@@ -5082,13 +5086,27 @@ definitions:
     - RAS_LINK_LOGIN_GOV
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
+  AccessModuleName:
+    type: string
+    enum:
+      - DATA_USER_CODE_OF_CONDUCT
+      - RT_COMPLIANCE_TRAINING
+      - CT_COMPLIANCE_TRAINING
+      - ERA_COMMONS
+      - TWO_FACTOR_AUTH
+      - RAS_LOGIN_GOV
+      - PROFILE_CONFIRMATION
+      - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:
-    - moduleName
+    - moduleNameTemp
     - isBypassed
     properties:
+      moduleNameTemp:
+        "$ref": "#/definitions/AccessModuleName"
       moduleName:
+        description: DEPRECATED. Use moduleNameTemp.
         "$ref": "#/definitions/AccessModule"
       isBypassed:
         type: boolean
@@ -6005,9 +6023,12 @@ definitions:
   AccessModuleStatus:
     type: object
     required:
-      - moduleName
+      - moduleNameTemp
     properties:
+      moduleNameTemp:
+        "$ref": "#/definitions/AccessModuleName"
       moduleName:
+        description: DEPRECATED. Use moduleNameTemp.
         "$ref": "#/definitions/AccessModule"
       completionEpochMillis:
         type: integer

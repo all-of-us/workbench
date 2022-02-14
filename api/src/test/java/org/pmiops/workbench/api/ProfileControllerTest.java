@@ -75,7 +75,7 @@ import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
-import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
@@ -1022,7 +1022,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
     assertThat(user.getEraCommonsLinkExpireTime()).isNotNull();
     assertThat(
-            getCompletionEpochMillis(profileController.getMe().getBody(), AccessModule.ERA_COMMONS))
+            getCompletionEpochMillis(
+                profileController.getMe().getBody(), AccessModuleName.ERA_COMMONS))
         .isNotNull();
   }
 
@@ -1064,7 +1065,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
-    assertThat(getCompletionEpochMillis(profile, AccessModule.PROFILE_CONFIRMATION))
+    assertThat(getCompletionEpochMillis(profile, AccessModuleName.PROFILE_CONFIRMATION))
         .isEqualTo(initialTestTime);
 
     // time passes
@@ -1079,7 +1080,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
-    assertThat(getCompletionEpochMillis(updatedProfile, AccessModule.PROFILE_CONFIRMATION))
+    assertThat(getCompletionEpochMillis(updatedProfile, AccessModuleName.PROFILE_CONFIRMATION))
         .isEqualTo(laterTime);
   }
 
@@ -1415,19 +1416,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // user has no bypasses at test start
-    assertThat(getBypassEpochMillis(original, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
-    assertThat(getBypassEpochMillis(original, AccessModule.COMPLIANCE_TRAINING)).isNull();
-    assertThat(getBypassEpochMillis(original, AccessModule.ERA_COMMONS)).isNull();
-    assertThat(getBypassEpochMillis(original, AccessModule.TWO_FACTOR_AUTH)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModuleName.RT_COMPLIANCE_TRAINING)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModuleName.ERA_COMMONS)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModuleName.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
             new AccessBypassRequest()
-                .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+                .moduleNameTemp(AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
                 .isBypassed(true),
             // would un-bypass if a bypass had existed
             new AccessBypassRequest()
-                .moduleName(AccessModule.COMPLIANCE_TRAINING)
+                .moduleNameTemp(AccessModuleName.RT_COMPLIANCE_TRAINING)
                 .isBypassed(false));
 
     final AccountPropertyUpdate request1 =
@@ -1435,36 +1436,42 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
     // this is now bypassed
-    assertThat(getBypassEpochMillis(retrieved1, AccessModule.DATA_USER_CODE_OF_CONDUCT))
+    assertThat(getBypassEpochMillis(retrieved1, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
         .isNotNull();
     // remains unbypassed because the flag was set to false
-    assertThat(getBypassEpochMillis(retrieved1, AccessModule.COMPLIANCE_TRAINING)).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModuleName.RT_COMPLIANCE_TRAINING)).isNull();
     // unchanged: unbypassed
-    assertThat(getBypassEpochMillis(retrieved1, AccessModule.ERA_COMMONS)).isNull();
-    assertThat(getBypassEpochMillis(retrieved1, AccessModule.TWO_FACTOR_AUTH)).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModuleName.ERA_COMMONS)).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModuleName.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses2 =
         ImmutableList.of(
             // un-bypass the previously bypassed
             new AccessBypassRequest()
-                .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+                .moduleNameTemp(AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
                 .isBypassed(false),
             // bypass
-            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
+            new AccessBypassRequest()
+                .moduleNameTemp(AccessModuleName.RT_COMPLIANCE_TRAINING)
+                .isBypassed(true),
+            new AccessBypassRequest().moduleNameTemp(AccessModuleName.ERA_COMMONS).isBypassed(true),
+            new AccessBypassRequest()
+                .moduleNameTemp(AccessModuleName.TWO_FACTOR_AUTH)
+                .isBypassed(true));
 
     final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
     final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
     // this is now unbypassed
-    assertThat(getBypassEpochMillis(retrieved2, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isNull();
     // these 3 are now bypassed
-    assertThat(getBypassEpochMillis(retrieved2, AccessModule.COMPLIANCE_TRAINING)).isNotNull();
-    assertThat(getBypassEpochMillis(retrieved2, AccessModule.ERA_COMMONS)).isNotNull();
-    assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModuleName.RT_COMPLIANCE_TRAINING))
+        .isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModuleName.ERA_COMMONS)).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModuleName.TWO_FACTOR_AUTH)).isNotNull();
 
-    // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
+    // TODO(RW-6930): Make Profile contain the new AccessModuleName block, then read from there.
     final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved1, adminAgent);
     verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2, adminAgent);
@@ -1575,7 +1582,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final Profile profile = profileController.linkRasAccount(body).getBody();
     assertThat(profile.getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
-    assertThat(getCompletionEpochMillis(profile, AccessModule.RAS_LINK_LOGIN_GOV))
+    assertThat(getCompletionEpochMillis(profile, AccessModuleName.RAS_LOGIN_GOV))
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
@@ -1624,9 +1631,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEmpty();
-    assertThat(getCompletionEpochMillis(profile, AccessModule.PROFILE_CONFIRMATION))
+    assertThat(getCompletionEpochMillis(profile, AccessModuleName.PROFILE_CONFIRMATION))
         .isEqualTo(TIMESTAMP.getTime());
-    assertThat(getCompletionEpochMillis(profile, AccessModule.PUBLICATION_CONFIRMATION))
+    assertThat(getCompletionEpochMillis(profile, AccessModuleName.PUBLICATION_CONFIRMATION))
         .isEqualTo(TIMESTAMP.getTime());
 
     DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
@@ -1640,17 +1647,17 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(accessTierService.getAccessTierShortNamesForUser(user)).isEmpty();
   }
 
-  private Long getCompletionEpochMillis(Profile profile, AccessModule accessModuleName) {
+  private Long getCompletionEpochMillis(Profile profile, AccessModuleName accessModuleName) {
     return profile.getAccessModules().getModules().stream()
-        .filter(m -> m.getModuleName() == accessModuleName)
+        .filter(m -> m.getModuleNameTemp() == accessModuleName)
         .findFirst()
         .map(AccessModuleStatus::getCompletionEpochMillis)
         .orElse(null);
   }
 
-  private Long getBypassEpochMillis(Profile profile, AccessModule accessModuleName) {
+  private Long getBypassEpochMillis(Profile profile, AccessModuleName accessModuleName) {
     return profile.getAccessModules().getModules().stream()
-        .filter(m -> m.getModuleName() == accessModuleName)
+        .filter(m -> m.getModuleNameTemp() == accessModuleName)
         .findFirst()
         .map(AccessModuleStatus::getBypassEpochMillis)
         .orElse(null);
