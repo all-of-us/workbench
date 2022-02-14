@@ -62,6 +62,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -159,6 +160,7 @@ public class CohortsControllerTest {
           .countValue(789L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
+  public static final String UPDATED_COHORT_NAME = "updatedCohortName";
 
   private static DbUser currentUser;
 
@@ -426,6 +428,69 @@ public class CohortsControllerTest {
     assertThat(cohorts.size()).isEqualTo(2);
   }
 
+  private Cohort saveCohort(WorkspaceAccessLevel workspaceAccessLevel, Cohort cohort) {
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, workspaceAccessLevel);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, workspaceAccessLevel);
+
+    return cohortsController
+        .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
+  }
+
+  @Test
+  public void testCreateCohortAccessLevelOwner() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.OWNER, cohort);
+    assertThat(saved.getCriteria()).isEqualTo(cohort.getCriteria());
+    assertThat(saved.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(saved.getCreationTime()).isNotNull();
+    assertThat(saved.getCreationTime()).isEqualTo(saved.getLastModifiedTime());
+  }
+
+  @Test
+  public void testCreateCohortAccessLevelWriter() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    assertThat(saved.getCriteria()).isEqualTo(cohort.getCriteria());
+    assertThat(saved.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(saved.getCreationTime()).isNotNull();
+    assertThat(saved.getCreationTime()).isEqualTo(saved.getLastModifiedTime());
+  }
+
+  @Test
+  public void testCreateCohortAccessLevelReader() {
+    Cohort cohort = createDefaultCohort();
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class, () -> saveCohort(WorkspaceAccessLevel.READER, cohort));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
+  }
+
+  @Test
+  public void testCreateCohortAccessLevelNoAccess() {
+    Cohort cohort = createDefaultCohort();
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class, () -> saveCohort(WorkspaceAccessLevel.NO_ACCESS, cohort));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
+  }
+
   @Test
   public void testCreateCohortBadCriteria() {
     assertThrows(
@@ -468,6 +533,102 @@ public class CohortsControllerTest {
             .getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId())
             .getBody();
     assertThat(got).isEqualTo(cohort);
+  }
+
+  @Test
+  public void testUpdateCohortAccessLevelOwner() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // update
+    Cohort toUpdate = saved.name(UPDATED_COHORT_NAME);
+    CLOCK.increment(1000); // lets say time ticked 1 sec past
+    Cohort updated =
+        cohortsController
+            .updateCohort(workspace.getNamespace(), workspace.getId(), toUpdate.getId(), toUpdate)
+            .getBody();
+    assertThat(updated.getName()).isEqualTo(UPDATED_COHORT_NAME);
+    assertThat(updated.getCriteria()).isEqualTo(saved.getCriteria());
+    assertThat(updated.getCreationTime()).isEqualTo(saved.getCreationTime());
+    assertThat(updated.getLastModifiedTime()).isGreaterThan(saved.getLastModifiedTime());
+  }
+
+  @Test
+  public void testUpdateCohortAccessLevelWriter() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // update
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.WRITER);
+    Cohort toUpdate = saved.name(UPDATED_COHORT_NAME);
+    CLOCK.increment(1000); // lets say time ticked 1 sec past
+    Cohort updated =
+        cohortsController
+            .updateCohort(workspace.getNamespace(), workspace.getId(), toUpdate.getId(), toUpdate)
+            .getBody();
+    assertThat(updated.getName()).isEqualTo(UPDATED_COHORT_NAME);
+    assertThat(updated.getCriteria()).isEqualTo(saved.getCriteria());
+    assertThat(updated.getCreationTime()).isEqualTo(saved.getCreationTime());
+    assertThat(updated.getLastModifiedTime()).isGreaterThan(saved.getLastModifiedTime());
+  }
+
+  @Test
+  public void testUpdateCohortAccessLevelReader() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // update
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.READER);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.READER);
+    Cohort toUpdate = saved.name(UPDATED_COHORT_NAME);
+    CLOCK.increment(1000); // lets say time ticked 1 sec past
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.updateCohort(
+                    workspace.getNamespace(), workspace.getId(), toUpdate.getId(), toUpdate));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
+  }
+
+  @Test
+  public void testUpdateCohortAccessLevelNoAccess() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // update
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
+    Cohort toUpdate = saved.name(UPDATED_COHORT_NAME);
+    CLOCK.increment(1000); // lets say time ticked 1 sec past
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.updateCohort(
+                    workspace.getNamespace(), workspace.getId(), toUpdate.getId(), toUpdate));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
   }
 
   @Test
