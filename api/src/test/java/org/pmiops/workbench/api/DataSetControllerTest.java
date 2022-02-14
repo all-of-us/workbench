@@ -1255,7 +1255,7 @@ public class DataSetControllerTest {
     dataSetRequest.setConceptSetIds(ImmutableList.of(conceptSet1.getId()));
     dataSetRequest.setCohortIds(ImmutableList.of(cohort.getId()));
     dataSetRequest.setDomainValuePairs(
-        Arrays.asList(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+        ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
     DataSet dataset =
         dataSetController
             .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
