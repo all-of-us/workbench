@@ -17,7 +17,7 @@ import { MenuOption } from 'app/text-labels';
 describe('Workspace Admin lock-workspace', () => {
   let workspaceName = 'e2eLockWorkspace';
   let reasonText = 'locking this workspace';
-  const pyNotebookName = 'e2eLockNotebook';
+  let pyNotebookName = 'e2eLockWorkspaceNotebook';
   let workspaceNamespace = '';
   let workspaceEditedName = '';
 
