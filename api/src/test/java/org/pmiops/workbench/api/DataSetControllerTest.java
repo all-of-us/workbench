@@ -1261,7 +1261,7 @@ public class DataSetControllerTest {
             .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
             .getBody();
     // criteriums must be empty and not null, since
-    // conceptSetDao *will* return an empty hashSet for dbConceptEtConceptIds
+    // conceptSetDao will return an empty hashSet for dbConceptEtConceptIds
     // fix workbench-api.yml#ConceptSet#criteriums array to be required
     assertThat(dataset.getConceptSets()).contains(conceptSet1);
     assertThat(dataset.getCohorts()).contains(cohort);
