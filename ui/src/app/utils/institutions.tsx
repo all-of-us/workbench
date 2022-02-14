@@ -17,7 +17,7 @@ import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 import { isAbortError } from './errors';
-import { cond, isBlank, switchCase } from './index';
+import { isBlank, switchCase } from './index';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
@@ -222,31 +222,39 @@ export function updateEnableControlledTier(
   const rtConfig = tierConfigs.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Registered
   );
-  const rtReq = rtConfig.membershipRequirement;
 
-  const ctConfig = cond(
-    [
-      // if we are disabling CT access, choose the default (empty) config
-      !enableCtAccess,
-      () => defaultTierConfig(AccessTierShortNames.Controlled),
-    ],
-    [
-      // if we are enabling CT access and RT is DOMAINS, copy RT to CT
-      enableCtAccess && rtReq === InstitutionMembershipRequirement.DOMAINS,
-      () => ({
-        ...rtConfig,
-        accessTierShortName: AccessTierShortNames.Controlled,
-      }),
-    ],
-    [
-      // otherwise, init CT with RT's requirement (UNINITIALIZED or ADDRESSES) and leave empty
-      enableCtAccess,
-      () => ({
-        ...defaultTierConfig(AccessTierShortNames.Controlled),
-        membershipRequirement: rtReq,
-      }),
-    ]
-  );
+  const ctConfig = !enableCtAccess
+    ? // if we are disabling CT access, choose the default (empty) config
+      defaultTierConfig(AccessTierShortNames.Controlled)
+    : switchCase(
+        rtConfig.membershipRequirement,
+        [
+          // if RT is DOMAINS, copy RT to CT
+          InstitutionMembershipRequirement.DOMAINS,
+          () => ({
+            ...rtConfig,
+            accessTierShortName: AccessTierShortNames.Controlled,
+          }),
+        ],
+        [
+          // if RT is ADDRESSES, copy RT to CT but clear the address list
+          InstitutionMembershipRequirement.ADDRESSES,
+          () => ({
+            ...rtConfig,
+            accessTierShortName: AccessTierShortNames.Controlled,
+            emailAddresses: [],
+          }),
+        ],
+        [
+          // if RT is UNINITIALIZED, choose the default (empty) config but set to UNINITIALIZED
+          InstitutionMembershipRequirement.UNINITIALIZED,
+          () => ({
+            ...defaultTierConfig(AccessTierShortNames.Controlled),
+            membershipRequirement:
+              InstitutionMembershipRequirement.UNINITIALIZED,
+          }),
+        ]
+      );
 
   return mergeTierConfigs(tierConfigs, ctConfig);
 }
