@@ -565,6 +565,11 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       InstitutionMembershipRequirement.DOMAINS
     );
 
+    expect(findCTDomainError(wrapper)).toBeTruthy();
+    expect(findCTDomainError(wrapper)[0]).toBe(
+      'Controlled tier email domains should not be empty'
+    );
+
     // Single Entry with incorrect Email Domain format
     findCTDomainInput(wrapper)
       .first()
