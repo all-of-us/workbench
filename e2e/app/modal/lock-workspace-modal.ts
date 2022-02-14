@@ -40,7 +40,6 @@ export default class LockWorkspaceModal extends Modal {
     const reasonInput = this.getLockWorkspaceTextArea();
     await reasonInput.type(reasonText);
   }
-  
 
   async clickCancelButton(): Promise<void> {
     this.getCancelButton();
@@ -49,5 +48,4 @@ export default class LockWorkspaceModal extends Modal {
   async clickModalLockWorkspace(): Promise<void> {
     await this.clickButton(LinkText.LockWorkspace);
   }
-
 }

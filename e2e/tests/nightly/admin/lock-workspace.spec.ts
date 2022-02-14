@@ -2,7 +2,7 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
-import WorkspaceAdminPage, {workspaceStatus} from 'app/page/admin-workspace-page';
+import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
 import { ConceptSetSelectValue, Language } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -13,11 +13,10 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 
-
 describe('Workspace Admin lock-workspace', () => {
-  let workspaceName = 'e2eLockWorkspace';
-  let reasonText = 'locking this workspace';
-  let pyNotebookName = 'e2eLockWorkspaceNotebook';
+  const workspaceName = 'e2eLockWorkspace';
+  const reasonText = 'locking this workspace';
+  const pyNotebookName = 'e2eLockWorkspaceNotebook';
   let workspaceNamespace = '';
   let workspaceEditedName = '';
 
@@ -65,7 +64,7 @@ describe('Workspace Admin lock-workspace', () => {
     expect(aboutLockReason).toEqual(reasonText);
     const aboutLockedIcon = aboutPage.getAboutLockedWorkspaceIcon();
     expect(aboutLockedIcon).toBeTruthy();
-    // verify DATA & ANALYSIS tabs are disabled 
+    // verify DATA & ANALYSIS tabs are disabled
     await aboutPage.openDataPage({ waitPageChange: false });
     await aboutPage.openAnalysisPage({ waitPageChange: false });
     // verify share button is disabled
@@ -101,8 +100,8 @@ describe('Workspace Admin lock-workspace', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
     // verify DATA & ANALYSIS tabs are accessible
-    await dataPage.openAnalysisPage({ waitPageChange: true});
-    await dataPage.openAboutPage({ waitPageChange: true});
+    await dataPage.openAnalysisPage({ waitPageChange: true });
+    await dataPage.openAboutPage({ waitPageChange: true });
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(false);
@@ -114,31 +113,26 @@ describe('Workspace Admin lock-workspace', () => {
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
   });
 
-  
+  async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.waitForLoad();
+    const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
-    async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
-      const dataPage = new WorkspaceDataPage(page);
-      await dataPage.waitForLoad();
-      const datasetBuildPage = await dataPage.clickAddDatasetButton();
+    // Step 1 Select Cohort: Choose "All Participants"
+    await datasetBuildPage.selectCohorts(['All Participants']);
 
-      // Step 1 Select Cohort: Choose "All Participants"
-      await datasetBuildPage.selectCohorts(['All Participants']);
+    // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
 
-      // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
-      await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
+    const createModal = await datasetBuildPage.clickCreateButton();
+    await createModal.createDataset();
 
-      const createModal = await datasetBuildPage.clickCreateButton();
-      await createModal.createDataset();
+    const exportModal = await datasetBuildPage.clickAnalyzeButton();
 
-      const exportModal = await datasetBuildPage.clickAnalyzeButton();
-
-      await exportModal.enterNotebookName(pyNotebookName);
-      await exportModal.pickLanguage(Language.Python);
-      await exportModal.clickExportButton();
-      const notebookPreviewPage = new NotebookPreviewPage(page);
-      return await notebookPreviewPage.waitForLoad();
-    }
-
+    await exportModal.enterNotebookName(pyNotebookName);
+    await exportModal.pickLanguage(Language.Python);
+    await exportModal.clickExportButton();
+    const notebookPreviewPage = new NotebookPreviewPage(page);
+    return await notebookPreviewPage.waitForLoad();
+  }
 });
-
-

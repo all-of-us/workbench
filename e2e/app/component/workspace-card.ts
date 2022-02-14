@@ -17,7 +17,8 @@ const WorkspaceCardSelector = {
   dateTimeXpath:
     './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-access-level"]/following-sibling::div',
   lockedIconXpath: 
-    './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]'
+    './/*[@data-test-id="workspace-card"]'
+    + '//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]'
 };
 
 /**
@@ -199,7 +200,7 @@ export default class WorkspaceCard extends BaseCard {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
-    } 
+    }
     // Close menu
     await this.clickSnowmanIcon();
     await snowmanMenu.waitUntilClose();
@@ -207,7 +208,7 @@ export default class WorkspaceCard extends BaseCard {
 
   async getWorkspaceLockedIcon(): Promise<void> {
     await this.cardElement.$x(WorkspaceCardSelector.lockedIconXpath);
-  } 
+  }
 
   // for a locked-workspace only the edit options is enabled
   async verifyLockedWorkspaceMenuOptions(): Promise<void> {
@@ -221,13 +222,12 @@ export default class WorkspaceCard extends BaseCard {
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
   }
 
-
   /**
    * Clicking on a locked-workspace, user is navigated to about page
    * Click workspace name link in Workspace Card.
    * @param {boolean} waitForAboutPage Waiting for About page load and ready after click on Workspace name link.
    */
-  async clickLockedWorkspaceName(waitForAboutPage: boolean = true): Promise<string> {
+  async clickLockedWorkspaceName(waitForAboutPage = true): Promise<string> {
     const workspaceName = await this.getWorkspaceName();
     const link = new Link(this.page, this.getWorkspaceNameXpath(workspaceName));
     await link.click();

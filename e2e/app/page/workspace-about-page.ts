@@ -7,7 +7,6 @@ import ShareModal from 'app/modal/share-modal';
 import BaseElement from 'app/element/base-element';
 import WorkspaceEditPage from './workspace-edit-page';
 
-
 export const PageTitle = 'View Workspace Details';
 
 export default class WorkspaceAboutPage extends WorkspaceBase {
@@ -77,7 +76,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     await waitWhileLoading(this.page);
   }
 
-  async getAboutLockedWorkspaceIcon(): Promise<void>  {
+  async getAboutLockedWorkspaceIcon(): Promise<void> {
     const xpath = '//*[local-name()="svg" and @data-icon="lock-alt"]';
     await this.page.$x(xpath);
   }
@@ -89,7 +88,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
 
   // get the REASON for lock-workspace
   async getLockedWorkspaceReason(): Promise<string> {
-    const xpath = '//*[@data-test-id="lock-workspace-msg"]//child::div[2]/div[1]/b'
+    const xpath = '//*[@data-test-id="lock-workspace-msg"]//child::div[2]/div[1]/b';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
     const textContent = element.getTextContent();
     return textContent;
@@ -99,17 +98,16 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   async extractReasonMessage(): Promise<string> {
     const reasonMessage = this.getLockedWorkspaceReason();
     // slice the text 'REASON:' - to extract only the reasonText
-    const messageText = (await reasonMessage).slice(8)
+    const messageText = (await reasonMessage).slice(8);
     return messageText;
   }
 
   // click the edit icon on about page to navigate to the edit page
-  async getAboutEditIcon(): Promise<WorkspaceEditPage>  {
+  async getAboutEditIcon(): Promise<WorkspaceEditPage> {
     const xpath = '//div[contains(text(), "Primary purpose of project")]/div[@role="button"]';
     const edit = new Button(this.page, xpath);
     await edit.click();
     const editPage = new WorkspaceEditPage(page);
     return await editPage.waitForLoad();
   }
-
 }

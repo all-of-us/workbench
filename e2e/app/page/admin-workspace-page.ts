@@ -10,18 +10,15 @@ import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
 import LockWorkspaceModal from 'app/modal/lock-workspace-modal';
 
-
 export enum workspaceStatus {
   Lock = 'LOCK WORKSPACE',
-  Unlock = 'UNLOCK WORKSPACE',
+  Unlock = 'UNLOCK WORKSPACE'
 }
-
 
 enum StatusSelectors {
   Deleting = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[text()="Deleting"]',
   Running = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[text()="Running"]'
 }
-
 
 const PageTitle = 'Workspace Admin | All of Us Researcher Workbench';
 
@@ -64,7 +61,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return Button.findByName(this.page, { normalizeSpace: status });
   }
 
-  
   async clickLockWorkspaceButton(status: workspaceStatus): Promise<LockWorkspaceModal> {
     const button = this.getLockWorkspaceButton(status);
     await button.click();
@@ -73,12 +69,10 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return modal;
   }
 
-
   async clickUnlockWorkspaceButton(status: workspaceStatus): Promise<void> {
     const button = this.getLockWorkspaceButton(status);
     await button.click();
   }
-
 
   //click "Lock Workspace" button
   // async clickLockWorkspaceButton1(): Promise<LockWorkspaceModal> {
@@ -88,7 +82,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   //   await modal.waitForLoad();
   //   return modal;
   // }
-  
 
   // extract only the Workspace Namespace text for verification
   async getWorkspaceNamespaceText(): Promise<string> {
@@ -163,5 +156,4 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, { visible: true });
   }
-
 }
