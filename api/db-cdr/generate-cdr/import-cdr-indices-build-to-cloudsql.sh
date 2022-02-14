@@ -47,7 +47,7 @@ then
   fi
 
   # Import Sql dump and data in bucket to cloudsql
-  if ./generate-cdr/cloudsql-import.sh --project $WORKBENCH_PROJECT --instance workbenchmaindb --bucket "$BUCKET/$BQ_DATASET/$CDR_VERSION" \
+  if ./generate-cdr/cloudsql-import.sh --project $WORKBENCH_PROJECT --instance workbench-mysql8 --bucket "$BUCKET/$BQ_DATASET/$CDR_VERSION" \
       --database $WORKBENCH_DATASET --create-db-sql-file $WORKBENCH_DATASET.sql
   then
     echo "Success"
