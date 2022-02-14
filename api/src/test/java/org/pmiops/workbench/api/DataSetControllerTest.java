@@ -1250,16 +1250,21 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testCreateMinimalDataset(){
+  public void testCreateMinimalDataset() {
     DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
     dataSetRequest.setConceptSetIds(Arrays.asList(conceptSet1.getId()));
     dataSetRequest.setCohortIds(Arrays.asList(cohort.getId()));
-    dataSetRequest.setDomainValuePairs(Arrays.asList(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
-    DataSet dataset = dataSetController.createDataSet(workspace.getNamespace(),workspace.getId(),dataSetRequest).getBody();
+    dataSetRequest.setDomainValuePairs(
+        Arrays.asList(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+    DataSet dataset =
+        dataSetController
+            .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
+            .getBody();
     System.out.println(dataset);
     assertThat(dataset.getConceptSets()).contains(conceptSet1);
     assertThat(dataset.getCohorts()).contains(cohort);
-    assertThat(dataset.getDomainValuePairs()).contains(new DomainValuePair().domain(Domain.CONDITION).value("some condition1"));
+    assertThat(dataset.getDomainValuePairs())
+        .contains(new DomainValuePair().domain(Domain.CONDITION).value("some condition1"));
   }
 
   @Disabled(
