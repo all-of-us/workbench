@@ -240,6 +240,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
     return (
       <React.Fragment>
         {/* for outdated-browser-rework https://www.npmjs.com/package/outdated-browser-rework*/}
+        {/* Check checkBrowserSupport() function defined in index.ts and implemented in setup.ts*/}
         {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
         <div id='outdated' />
         {authLoaded && isUserDisabledInDb !== undefined && (
