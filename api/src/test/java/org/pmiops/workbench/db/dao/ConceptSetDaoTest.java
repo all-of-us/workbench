@@ -93,4 +93,11 @@ public class ConceptSetDaoTest {
                 .get(0))
         .isEqualTo(dbConceptSet);
   }
+
+  @Test
+  public void saveEmptyDbConceptSetReturnsNonNullConceptSetConceptIds() {
+    DbConceptSet dbConceptSet1 = new DbConceptSet();
+    DbConceptSet saved = conceptSetDao.save(dbConceptSet1);
+    assertThat(saved.getConceptSetConceptIds()).isEmpty();
+  }
 }
