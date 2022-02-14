@@ -225,7 +225,7 @@ export function updateEnableControlledTier(
   );
 
   const ctConfig = !enableCtAccess
-    ? // if we are disabling CT access, choose the default (empty) config
+    ? // if we are disabling CT access, choose the default (no-render) config
       defaultTierConfig(AccessTierShortNames.Controlled)
     : switchCase(
         rtConfig.membershipRequirement,
@@ -247,7 +247,7 @@ export function updateEnableControlledTier(
           }),
         ],
         [
-          // if RT is UNINITIALIZED, choose the default (empty) config but set to UNINITIALIZED
+          // if RT is UNINITIALIZED, choose the default config but set to UNINITIALIZED
           InstitutionMembershipRequirement.UNINITIALIZED,
           () => ({
             ...defaultTierConfig(AccessTierShortNames.Controlled),
