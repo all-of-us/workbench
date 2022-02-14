@@ -36,13 +36,18 @@ export default class LockWorkspaceModal extends Modal {
    * @param {string} reasonText reason Text.
    */
   async createLockWorkspaceReason(reasonText?: string): Promise<void> {
-    reasonText = 'locking this workspace';
     // Type new message.
     const reasonInput = this.getLockWorkspaceTextArea();
     await reasonInput.type(reasonText);
   }
+  
 
   async clickCancelButton(): Promise<void> {
     this.getCancelButton();
   }
+
+  async clickModalLockWorkspace(): Promise<void> {
+    await this.clickButton(LinkText.LockWorkspace);
+  }
+
 }
