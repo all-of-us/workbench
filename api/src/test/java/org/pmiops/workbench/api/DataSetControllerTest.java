@@ -32,6 +32,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -1246,6 +1247,19 @@ public class DataSetControllerTest {
                 .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
                 .getBody())
         .isTrue();
+  }
+
+  @Test
+  public void testCreateMinimalDataset(){
+    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
+    dataSetRequest.setConceptSetIds(Arrays.asList(conceptSet1.getId()));
+    dataSetRequest.setCohortIds(Arrays.asList(cohort.getId()));
+    dataSetRequest.setDomainValuePairs(Arrays.asList(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+    DataSet dataset = dataSetController.createDataSet(workspace.getNamespace(),workspace.getId(),dataSetRequest).getBody();
+    System.out.println(dataset);
+    assertThat(dataset.getConceptSets()).contains(conceptSet1);
+    assertThat(dataset.getCohorts()).contains(cohort);
+    assertThat(dataset.getDomainValuePairs()).contains(new DomainValuePair().domain(Domain.CONDITION).value("some condition1"));
   }
 
   @Disabled(
