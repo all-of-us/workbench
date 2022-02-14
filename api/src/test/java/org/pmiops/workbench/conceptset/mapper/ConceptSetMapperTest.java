@@ -72,7 +72,7 @@ public class ConceptSetMapperTest {
     assertThat(clientConceptSet.getCreator()).isEqualTo(dbConceptSet.getCreator().getUsername());
     // DbConceptSet initializes the dbConceptSetConceptIds to empty HashSet
     // conceptSetDao will return an empty dbConceptSetConceptIds hence an empty ConceptSet
-    // *must* initialize criteriums to empty and not a null object
+    // must initialize criteriums to empty and not a null object
     assertThat(clientConceptSet.getCriteriums()).isEmpty();
   }
 
