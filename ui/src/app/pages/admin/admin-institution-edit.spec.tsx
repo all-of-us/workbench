@@ -183,7 +183,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    // CT copies RT's requirements: domain, same domains, ERA = true
+    // CT copies RT's requirements: domain, ERA = true, domain list is equal
 
     expect(findCTDomain(wrapper).exists()).toBeTruthy();
     expect(findCTAddress(wrapper).exists()).toBeFalsy();
@@ -192,7 +192,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(textInputValue(findCTDomainInput(wrapper))).toBe(testDomains);
   });
 
-  it('should not populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
+  it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
     const wrapper = component(VERILY_WITHOUT_CT.shortName);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -229,13 +229,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    // CT has the default requirement: domain, empty, ERA = false
+    // CT copies RT's requirements: address, ERA = true
+    // but the CT address list is empty
 
-    expect(findCTDomain(wrapper).exists()).toBeTruthy();
-    expect(findCTAddress(wrapper).exists()).toBeFalsy();
-    expect(findCTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findCTAddress(wrapper).exists()).toBeTruthy();
+    expect(findCTDomain(wrapper).exists()).toBeFalsy();
+    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
 
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe('');
+    expect(textInputValue(findCTAddressInput(wrapper))).toBe('');
   });
 
   it('should not change eRA Required and tier enabled switches when changing tier requirement', async () => {
