@@ -83,6 +83,7 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -115,6 +116,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.annotation.Propagation;
@@ -578,6 +581,79 @@ public class CohortsControllerTest {
   }
 
   @Test
+  public void testDeleteCohortAccessLevelOwner() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.OWNER, cohort);
+    // delete and check
+    ResponseEntity<EmptyResponse> response =
+        cohortsController.deleteCohort(workspace.getNamespace(), workspace.getId(), saved.getId());
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  public void testDeleteCohortAccessLevelWriter() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // delete and check
+    ResponseEntity<EmptyResponse> response =
+        cohortsController.deleteCohort(workspace.getNamespace(), workspace.getId(), saved.getId());
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  public void testDeleteCohortAccessLevelReader() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // delete and check
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.deleteCohort(
+                    workspace.getNamespace(), workspace.getId(), saved.getId()));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
+  }
+
+  @Test
+  public void testDeleteCohortAccessLevelNoAccess() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setName(COHORT_NAME);
+    cohort.setCriteria(cohortCriteria);
+    Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
+    // delete and check
+    stubGetWorkspace(
+        workspace.getNamespace(),
+        workspace.getName(),
+        CREATOR_EMAIL,
+        WorkspaceAccessLevel.NO_ACCESS);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.deleteCohort(
+                    workspace.getNamespace(), workspace.getId(), saved.getId()));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
+  }
+
+  @Test
   public void testUpdateCohortAccessLevelReader() {
     Cohort cohort = createDefaultCohort();
     cohort.setName(COHORT_NAME);
@@ -612,9 +688,15 @@ public class CohortsControllerTest {
     Cohort saved = saveCohort(WorkspaceAccessLevel.WRITER, cohort);
     // update
     stubGetWorkspace(
-        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
+        workspace.getNamespace(),
+        workspace.getName(),
+        CREATOR_EMAIL,
+        WorkspaceAccessLevel.NO_ACCESS);
     stubGetWorkspaceAcl(
-        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
+        workspace.getNamespace(),
+        workspace.getName(),
+        CREATOR_EMAIL,
+        WorkspaceAccessLevel.NO_ACCESS);
     Cohort toUpdate = saved.name(UPDATED_COHORT_NAME);
     CLOCK.increment(1000); // lets say time ticked 1 sec past
     Throwable exception =
