@@ -212,9 +212,10 @@ export function updateRequireEra(
   });
 }
 
-// if RT has InstitutionMembershipRequirement.DOMAINS,
-// copy the RT config and domains to CT.
-// otherwise initialize to the defaultTierConfig with empty DOMAINS
+// initialize the CT config depending on the RT config:
+// RT = DOMAINS -> copy the DOMAINS list to CT
+// RT = ADDRESSES -> use ADDRESSES in CT but do not copy the list
+// RT = UNINITIALIZED (add mode) -> CT is also UNINITIALIZED
 export function updateEnableControlledTier(
   tierConfigs: Array<InstitutionTierConfig>,
   enableCtAccess: boolean
