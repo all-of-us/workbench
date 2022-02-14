@@ -65,7 +65,8 @@ public class SetAccessModuleTimestamps {
     accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
 
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
-    LOG.info(String.format("Updating %s completion time for user %s to %s", moduleName, username, time));
+    LOG.info(
+        String.format("Updating %s completion time for user %s to %s", moduleName, username, time));
   }
 
   @Bean
@@ -82,8 +83,7 @@ public class SetAccessModuleTimestamps {
           accessModuleService,
           username,
           AccessModuleName.PROFILE_CONFIRMATION,
-          PROFILE_CONFIRMATION_TIMESTAMP
-      );
+          PROFILE_CONFIRMATION_TIMESTAMP);
     };
   }
 
