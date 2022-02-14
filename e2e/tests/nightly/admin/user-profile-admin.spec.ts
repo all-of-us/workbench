@@ -6,13 +6,14 @@ import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
 import UserProfileAdminPage from 'app/page/user-profile-admin-page';
 import { Page } from 'puppeteer';
-import { waitForText } from 'utils/waits-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
 import Button from 'app/element/button';
 import Cell from 'app/component/cell';
 import UserAuditPage from 'app/page/admin-user-audit-page';
-import { isBlank } from '../../../utils/str-utils';
+import { isBlank } from 'utils/str-utils';
+import fp from 'lodash/fp';
 
 describe('User Admin', () => {
   enum TableColumns {
@@ -55,15 +56,15 @@ describe('User Admin', () => {
     AccessModules.PUBLICATION
   ];
 
-  const userEmail = 'admin_test';
-  let newPage: Page;
+  const testUserEmail = 'admin_test';
+  let adminTab: Page;
 
   beforeEach(async () => {
-    newPage = await searchTestUser(page, userEmail);
+    adminTab = await searchTestUser(page, testUserEmail);
   });
 
   xtest('Verify Researcher Information renders correctly', async () => {
-    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
     // SAVE and CANCEL buttons are disabled
@@ -72,9 +73,7 @@ describe('User Admin', () => {
     await verifyButtonEnabled(cancelButton, false);
     await verifyButtonEnabled(saveButton, false);
 
-    // verify Researcher information, Editable fields.
-    // Edit Information block
-    // Verify Institution
+    // Verify Verified Institution
     const verifiedInstitution = userProfileAdminPage.getVerifiedInstitution();
     const institutionName = await verifiedInstitution.getSelectedValue();
     expect(institutionName).toEqual('Admin testing');
@@ -119,7 +118,7 @@ describe('User Admin', () => {
 
     // Verify User Name
     const userName = await userProfileAdminPage.getUserName();
-    expect(userName).toEqual(`${userEmail}${config.EMAIL_DOMAIN_NAME}`);
+    expect(userName).toEqual(`${testUserEmail}${config.EMAIL_DOMAIN_NAME}`);
 
     // Verify Credits Used
     const [usedAmount, creditsLimitAmount] = await userProfileAdminPage.getInitialCreditsUsed();
@@ -128,16 +127,16 @@ describe('User Admin', () => {
   });
 
   xtest('Verify Access Status table render correctly', async () => {
-    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
-    // Verify column headers listed correctly
+    // Verify column headers displayed correctly
     const accountAccessTable = userProfileAdminPage.getAccessStatusTable();
     const columnNames = await accountAccessTable.getColumnNames();
     expect(columnNames.sort()).toEqual(accessStatusTableColumns.sort());
     expect(columnNames.length).toEqual(accessStatusTableColumns.length);
 
-    // Verify Access module names listed correctly
+    // Verify Access module names displayed correctly
     const moduleNames = await accountAccessTable.getRowValues(1);
     expect(moduleNames.sort()).toEqual(accessModules.sort());
     expect(moduleNames.length).toEqual(accessModules.length);
@@ -148,7 +147,7 @@ describe('User Admin', () => {
   });
 
   xtest('Verify CANCEL and SAVE buttons work correctly', async () => {
-    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
     // Verify Account access toggle text label update after toggle
@@ -191,7 +190,7 @@ describe('User Admin', () => {
     const oldContactEmail = await contactEmail.getValue();
     // Input background color is white before change
     let backgroundColor = await getStyleValue<string>(
-      newPage,
+      adminTab,
       await contactEmail.asElementHandle(),
       'background-color'
     );
@@ -202,15 +201,15 @@ describe('User Admin', () => {
     await contactEmail.type(invalidContactEmail);
 
     // Input background color changed
-    backgroundColor = await getStyleValue<string>(newPage, await contactEmail.asElementHandle(), 'background-color');
+    backgroundColor = await getStyleValue<string>(adminTab, await contactEmail.asElementHandle(), 'background-color');
     expect(backgroundColor).toEqual('rgb(248, 201, 84)');
 
     // Find email error
     const emailErrorMsg = await userProfileAdminPage.getEmailErrorMessage();
     expect(emailErrorMsg).toContain('The institution has authorized access only to select members');
 
-    await verifyInstitutionAgreementPage(newPage);
-    await newPage.bringToFront();
+    await verifyInstitutionAgreementPage(adminTab);
+    await adminTab.bringToFront();
 
     await verifyButtonEnabled(cancelButton, true);
     // SAVE buttons is disabled due to error in page
@@ -226,7 +225,7 @@ describe('User Admin', () => {
     await verifiedInstitution.select('Broad Institute');
 
     // Check error when Verified Institution and Contact Email domains do not match
-    await waitForText(newPage, 'Your email does not match your institution');
+    await waitForText(adminTab, 'Your email does not match your institution');
 
     await verifyButtonEnabled(cancelButton, true);
     // SAVE buttons is disabled due to error in page
@@ -247,7 +246,7 @@ describe('User Admin', () => {
   });
 
   xtest('Can go to User Audit page', async () => {
-    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
     // Check AUDIT link is working
@@ -256,19 +255,28 @@ describe('User Admin', () => {
     const newPage2 = await newTarget.page();
     await new UserAuditPage(newPage2).waitForLoad();
 
-    await newPage.bringToFront();
+    await adminTab.bringToFront();
     await userProfileAdminPage.waitForLoad();
 
     // Check BACK (admin/user) link is working
     await userProfileAdminPage.getBackLink().click();
-    await new UserAdminPage(newPage).waitForLoad();
+    await new UserAdminPage(adminTab).waitForLoad();
   });
 
   xtest('Can bypass Google 2-Step Verification module', async () => {
-    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
     const accessStatusTable = await userProfileAdminPage.getAccessStatusTable();
+
+    // Last completed on is a dash
+    const lastCompletedOnCell = await accessStatusTable.getCellByValue(
+      AccessModules.GOOGLE_VERIFICATION,
+      TableColumns.LAST_COMPLETED_ON
+    );
+    const completedOn = await lastCompletedOnCell.getCellValue();
+    expect(completedOn).toEqual('-');
+
     // Expires on is NEVER for Google 2-step verification module
     const expiresOnCell = await accessStatusTable.getCellByValue(
       AccessModules.GOOGLE_VERIFICATION,
@@ -282,16 +290,19 @@ describe('User Admin', () => {
     const oldStatus = await statusCell.getCellValue();
 
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.GOOGLE_VERIFICATION);
+
     if (oldStatus === 'Bypassed') {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
+      expect(await bypassSwitch.isOn()).toBe(true);
       await bypassSwitch.turnOff();
     } else {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('No data access');
+      expect(await bypassSwitch.isOn()).toBe(false);
       await bypassSwitch.turnOn();
     }
 
     const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, 'Bypass');
-    await verifyToggleSwitchNewBackgroundColor(newPage, bypassSwitchCell);
+    await verifyToggleSwitchNewBackgroundColor(adminTab, bypassSwitchCell);
 
     const saveButton = userProfileAdminPage.getSaveButton();
     await verifyButtonEnabled(saveButton, true);
@@ -315,7 +326,7 @@ describe('User Admin', () => {
   });
 
   xtest('Can bypass Controlled Tier training module', async () => {
-    const userProfileAdminPage = new UserProfileAdminPage(newPage);
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
     const accessStatusTable = await userProfileAdminPage.getAccessStatusTable();
@@ -337,7 +348,7 @@ describe('User Admin', () => {
     }
 
     const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, 'Bypass');
-    await verifyToggleSwitchNewBackgroundColor(newPage, bypassSwitchCell);
+    await verifyToggleSwitchNewBackgroundColor(adminTab, bypassSwitchCell);
 
     const saveButton = userProfileAdminPage.getSaveButton();
     await verifyButtonEnabled(saveButton, true);
@@ -358,6 +369,44 @@ describe('User Admin', () => {
       await saveButton.click();
       await userProfileAdminPage.waitForLoad();
     }
+  });
+
+  test('Can modify editable information', async () => {
+    const userProfileAdminPage = new UserProfileAdminPage(adminTab);
+    await userProfileAdminPage.waitForLoad();
+
+    // Modify Institution Role
+    const institutionRole = userProfileAdminPage.getInstitutionalRole();
+    const oldRole = await institutionRole.getSelectedValue();
+
+    let options = (await institutionRole.getAllOptionTexts()).filter((role) => role !== oldRole);
+    const randRole = fp.shuffle(options)[0];
+    await institutionRole.select(randRole);
+
+    // Modify Initial Credit Limit
+    const initialCreditLimit = userProfileAdminPage.getInitialCreditLimit();
+    const oldCreditLimit = await initialCreditLimit.getSelectedValue();
+
+    options = (await initialCreditLimit.getAllOptionTexts()).filter((role) => role !== oldCreditLimit);
+    const randCreditLimit = fp.shuffle(options)[0];
+    await initialCreditLimit.select(randCreditLimit);
+
+    // Initial Credit Limit remains unchanged before save
+    const creditLimitNumber = parseInt(parseForNumbericalString(await initialCreditLimit.getSelectedValue())[0]);
+    expect(isNaN(creditLimitNumber)).toBeFalsy();
+    expect(creditLimitNumber).not.toEqual(parseInt(parseForNumbericalString(oldCreditLimit)[0]));
+
+    // Save and verify changes
+    const saveButton = userProfileAdminPage.getSaveButton();
+    await saveButton.click();
+    await waitWhileLoading(adminTab);
+    await saveButton.waitUntilDisabled();
+
+    const newRole = await institutionRole.getSelectedValue();
+    expect(newRole).toEqual(randRole);
+
+    const newCreditLimit = await initialCreditLimit.getSelectedValue();
+    expect(newCreditLimit).toEqual(randCreditLimit);
   });
 });
 
