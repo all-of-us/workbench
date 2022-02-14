@@ -17,7 +17,7 @@ require "tempfile"
 require "net/http"
 require "json"
 
-INSTANCE_NAME = "workbench-mysql8"
+INSTANCE_NAME = "workbenchmaindb"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com iam.googleapis.com
               compute.googleapis.com admin.googleapis.com appengine.googleapis.com
@@ -1878,7 +1878,7 @@ Common.register_command({
 })
 
 def write_db_creds_file(project, cdr_db_name, root_password, workbench_password, readonly_password)
-  instance_name = "#{project}:us-central1:workbench-mysql8"
+  instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
     begin
@@ -2912,7 +2912,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     run_with_redirects(
       "docker run -i -t --rm --network host --entrypoint '' " +
       "-v $(pwd)/libproject/with-mysql-login.sh:/with-mysql-login.sh " +
-      "mysql:8.0.28 /bin/bash -c " +
+      "mysql:5.7.27 /bin/bash -c " +
       "'export MYSQL_HOME=$(./with-mysql-login.sh root #{password}); /bin/bash'", password)
   end
 end
@@ -3241,7 +3241,7 @@ def create_project_resources(gcc)
   common.status "Waiting for database instance to become ready..."
   loop do
     sleep 3.0
-    db_status = `gcloud sql instances describe workbench-mysql8 --project #{gcc.project} | grep state`
+    db_status = `gcloud sql instances describe workbenchmaindb --project #{gcc.project} | grep state`
     common.status "DB status: #{db_status}"
     break if db_status.include? "RUNNABLE"
   end
