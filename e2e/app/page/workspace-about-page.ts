@@ -5,6 +5,8 @@ import WorkspaceBase from './workspace-base';
 import Button from 'app/element/button';
 import ShareModal from 'app/modal/share-modal';
 import { config } from 'resources/workbench-config';
+import BaseElement from 'app/element/base-element';
+import WorkspaceEditPage from './workspace-edit-page';
 
 export const PageTitle = 'View Workspace Details';
 
@@ -74,4 +76,40 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     await modal.removeUser(name);
     await waitWhileLoading(this.page);
   }
+
+  async getAboutLockedWorkspaceIcon(): Promise<void>  {
+    const xpath = '//*[local-name()="svg" and @data-icon="lock-alt"]';
+    await this.page.$x(xpath);
+  }
+
+  // get the share button to verify if disabled for locked-workspace
+  getShareButton(): Button {
+    return Button.findByName(this.page, { containsText: 'Share' });
+  }
+
+  // get the REASON for lock-workspace
+  async getLockedWorkspaceReason(): Promise<string> {
+    const xpath = '//*[@data-test-id="lock-workspace-msg"]//child::div[2]/div[1]/b'
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
+    const textContent = element.getTextContent();
+    return textContent;
+  }
+
+  // extract the reason text from banner on about page
+  async extractReasonMessage(): Promise<string> {
+    const reasonMessage = this.getLockedWorkspaceReason();
+    // slice the text 'REASON:' - to extract only the reasonText
+    const messageText = (await reasonMessage).slice(8)
+    return messageText;
+  }
+
+  // click the edit icon on about page to navigate to the edit page
+  async getAboutEditIcon(): Promise<WorkspaceEditPage>  {
+    const xpath = '//div[contains(text(), "Primary purpose of project")]/div[@role="button"]';
+    const edit = new Button(this.page, xpath);
+    await edit.click();
+    const editPage = new WorkspaceEditPage(page);
+    return await editPage.waitForLoad();
+  }
+
 }
