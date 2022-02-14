@@ -247,12 +247,11 @@ export function updateEnableControlledTier(
           }),
         ],
         [
-          // if RT is UNINITIALIZED, choose the default config but set to UNINITIALIZED
+          // if RT is UNINITIALIZED, copy UNINITIALIZED RT to CT
           InstitutionMembershipRequirement.UNINITIALIZED,
           () => ({
-            ...defaultTierConfig(AccessTierShortNames.Controlled),
-            membershipRequirement:
-              InstitutionMembershipRequirement.UNINITIALIZED,
+            ...rtConfig,
+            accessTierShortName: AccessTierShortNames.Controlled,
           }),
         ]
       );
