@@ -239,6 +239,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
 
     return (
       <React.Fragment>
+        <div id='outdated' /> {/* for outdated-browser-rework */}
         {authLoaded && isUserDisabledInDb !== undefined && (
           <React.Fragment>
             {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
@@ -295,7 +296,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
                 </span>
               </div>
             )}
-            <div id='outdated' /> {/* for outdated-browser-rework */}
           </React.Fragment>
         )}
         {!firstPartyCookiesEnabled ||
