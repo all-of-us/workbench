@@ -205,8 +205,9 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
         </React.Fragment>
       ),
     ],
-    () =>
-      resources && wsMap && !loading ? (
+    [
+      resources && wsMap && !loading,
+      () => (
         <React.Fragment>
           <SmallHeader>Recently Accessed Items</SmallHeader>
           <div data-test-id='recent-resources-table'>
@@ -246,8 +247,8 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
             </DataTable>
           </div>
         </React.Fragment>
-      ) : (
-        loading && <SpinnerOverlay />
-      )
+      ),
+    ],
+    [loading, () => <SpinnerOverlay />]
   );
 });
