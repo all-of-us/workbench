@@ -2,13 +2,16 @@ version: "3.4"
 
 services:
   db:
-    image: mysql:5.7.27
+    platform: linux/amd64
+    image: mysql:8.0.27
     env_file:
       - db/vars.env
     volumes:
       - db:/var/lib/mysql
     ports:
       - 127.0.0.1:3306:3306
+    cap_add:
+      - SYS_NICE
 
 volumes:
   db:
