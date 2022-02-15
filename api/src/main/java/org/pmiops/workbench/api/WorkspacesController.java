@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.apache.commons.lang3.BooleanUtils;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -420,7 +419,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
     Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
-    if (BooleanUtils.isTrue(body.getIncludeUserRoles())) {
+    if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());

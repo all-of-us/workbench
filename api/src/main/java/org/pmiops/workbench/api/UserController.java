@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Provider;
-import org.apache.commons.lang3.BooleanUtils;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -248,7 +247,7 @@ public class UserController implements UserApiDelegate {
                     .isFreeTier(false)
                     .displayName(googleBillingAccount.getDisplayName())
                     .name(googleBillingAccount.getName())
-                    .isOpen(BooleanUtils.isTrue(googleBillingAccount.getOpen())));
+                    .isOpen(Boolean.TRUE.equals(googleBillingAccount.getOpen())));
   }
 
   private PaginationToken getPaginationTokenFromPageToken(String pageToken) {

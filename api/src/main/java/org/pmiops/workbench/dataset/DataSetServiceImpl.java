@@ -34,7 +34,6 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.jetbrains.annotations.NotNull;
@@ -460,7 +459,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(DbDataset dbDataset) {
     final boolean includesAllParticipants =
-        BooleanUtils.isTrue(dbDataset.getIncludesAllParticipants());
+        Boolean.TRUE.equals(dbDataset.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
         ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dbDataset.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
