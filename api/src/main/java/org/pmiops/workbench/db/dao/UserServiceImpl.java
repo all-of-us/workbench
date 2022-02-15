@@ -7,10 +7,10 @@ import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGIS
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +28,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
+import org.pmiops.workbench.access.AccessModuleMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -85,12 +86,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
 
-  private static final Map<DbAccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
-      ImmutableMap.<DbAccessModuleName, BadgeName>builder()
-          .put(DbAccessModuleName.RT_COMPLIANCE_TRAINING, BadgeName.REGISTERED_TIER_TRAINING)
-          .put(DbAccessModuleName.CT_COMPLIANCE_TRAINING, BadgeName.CONTROLLED_TIER_TRAINING)
-          .build();
-
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
   private final Clock clock;
@@ -103,6 +98,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final AccessTierService accessTierService;
+  private final AccessModuleMapper accessModuleMapper;
   private final AccessModuleService accessModuleService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
@@ -123,6 +119,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       AdminActionHistoryDao adminActionHistoryDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
+      AccessModuleMapper accessModuleMapper,
       AccessModuleService accessModuleService,
       FireCloudService fireCloudService,
       ComplianceService complianceService,
@@ -139,6 +136,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.adminActionHistoryDao = adminActionHistoryDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.accessModuleMapper = accessModuleMapper;
     this.accessModuleService = accessModuleService;
     this.fireCloudService = fireCloudService;
     this.complianceService = complianceService;
@@ -599,7 +597,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
        */
       Function<DbAccessModuleName, Optional<Timestamp>> determineCompletionTime =
           (moduleName) -> {
-            BadgeName badgeName = BADGE_BY_COMPLIANCE_MODULE.get(moduleName);
+            BadgeName badgeName = accessModuleMapper.badgeFromModule(moduleName);
             Optional<BadgeDetailsV2> badge =
                 Optional.ofNullable(userBadgesByName.get(badgeName))
                     .filter(BadgeDetailsV2::getValid);
@@ -636,7 +634,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           };
 
       Map<DbAccessModuleName, Optional<Timestamp>> completionTimes =
-          BADGE_BY_COMPLIANCE_MODULE.keySet().stream()
+          Arrays.stream(BadgeName.values())
+              .map(accessModuleMapper::moduleFromBadge)
               .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
 
       completionTimes.forEach(

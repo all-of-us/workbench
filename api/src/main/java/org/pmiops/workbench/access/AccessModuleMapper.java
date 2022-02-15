@@ -24,13 +24,13 @@ public interface AccessModuleMapper {
   @ValueMapping(source = "PUBLICATION_CONFIRMATION", target = MappingConstants.NULL)
   BypassTimeTargetProperty auditAccessModuleFromStorage(DbAccessModuleName source);
 
-  /*
-  > Task :compileJava
-/Users/thibault/src/aou/api/src/main/java/org/pmiops/workbench/access/AccessModuleMapper.java:27: error: The following constants from the source enum have no corresponding constant in the target enum and must be be mapped via adding additional mappings: ERA_COMMONS, TWO_FACTOR_AUTH, RAS_LOGIN_GOV, RT_COMPLIANCE_TRAINING, DATA_USER_CODE_OF_CONDUCT, PROFILE_CONFIRMATION, PUBLICATION_CONFIRMATION, CT_COMPLIANCE_TRAINING.
-  BadgeName badgeFromStorage(DbAccessModuleName source);
+  @ValueMapping(source = "RT_COMPLIANCE_TRAINING", target = "REGISTERED_TIER_TRAINING")
+  @ValueMapping(source = "CT_COMPLIANCE_TRAINING", target = "CONTROLLED_TIER_TRAINING")
+  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)
+  BadgeName badgeFromModule(DbAccessModuleName source);
 
-
-accessmodulemappertest
-   */
-  BadgeName badgeFromStorage(DbAccessModuleName source);
+  @ValueMapping(source = "REGISTERED_TIER_TRAINING", target = "RT_COMPLIANCE_TRAINING")
+  @ValueMapping(source = "CONTROLLED_TIER_TRAINING", target = "CT_COMPLIANCE_TRAINING")
+  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)
+  DbAccessModuleName moduleFromBadge(BadgeName source);
 }
