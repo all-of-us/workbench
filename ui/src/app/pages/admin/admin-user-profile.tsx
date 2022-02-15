@@ -397,13 +397,15 @@ const DisabledToggle = (props: {
       : {};
 
   return (
-    <div style={{ ...highlightStyle, paddingTop: '2.5em', paddingLeft: '2em' }}>
-      <CommonToggle
-        name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
-        checked={!currentlyDisabled}
-        dataTestId='user-disabled-toggle'
-        onToggle={() => toggleDisabled()}
-      />
+    <div style={{ paddingTop: '2.5em', paddingLeft: '2em' }}>
+      <div style={highlightStyle}>
+        <CommonToggle
+          name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
+          checked={!currentlyDisabled}
+          dataTestId='user-disabled-toggle'
+          onToggle={() => toggleDisabled()}
+        />
+      </div>
     </div>
   );
 };
