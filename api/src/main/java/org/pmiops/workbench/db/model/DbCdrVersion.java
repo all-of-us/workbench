@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Objects;
-import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -58,7 +57,7 @@ public class DbCdrVersion {
   @Transient
   @NotNull
   public boolean getIsDefaultNotNull() {
-    return Optional.ofNullable(isDefault).orElse(false);
+    return Boolean.TRUE.equals(getIsDefault());
   }
 
   @Column(name = "name")

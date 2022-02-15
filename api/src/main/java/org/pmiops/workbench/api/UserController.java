@@ -247,7 +247,7 @@ public class UserController implements UserApiDelegate {
                     .isFreeTier(false)
                     .displayName(googleBillingAccount.getDisplayName())
                     .name(googleBillingAccount.getName())
-                    .isOpen(Optional.ofNullable(googleBillingAccount.getOpen()).orElse(false)));
+                    .isOpen(Boolean.TRUE.equals(googleBillingAccount.getOpen())));
   }
 
   private PaginationToken getPaginationTokenFromPageToken(String pageToken) {
