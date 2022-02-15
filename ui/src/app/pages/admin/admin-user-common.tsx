@@ -268,12 +268,13 @@ const isEraRequiredForTier = (
   );
 };
 
-export const displayTierBadgeByRequiredModule = (
-  profile: Profile,
-  moduleName: AccessModule
-) => {
+export const TierBadgesMaybe = (props: {
+  profile: Profile;
+  moduleName: AccessModule;
+}) => {
+  const { profile, moduleName } = props;
   return (
-    <div>
+    <FlexRow style={{ justifyContent: 'center' }}>
       {(moduleName === AccessModule.ERACOMMONS
         ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
         : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
@@ -284,7 +285,7 @@ export const displayTierBadgeByRequiredModule = (
         : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
         <ControlledTierBadge style={{ gridArea: 'badge' }} />
       )}
-    </div>
+    </FlexRow>
   );
 };
 

@@ -38,7 +38,6 @@ import {
   displayModuleCompletionDate,
   displayModuleExpirationDate,
   displayModuleStatus,
-  displayTierBadgeByRequiredModule,
   ErrorsTooltip,
   getEraNote,
   getInitalCreditsUsage,
@@ -49,6 +48,7 @@ import {
   InstitutionDropdown,
   isBypassed,
   profileNeedsUpdate,
+  TierBadgesMaybe,
   updateAccountProperties,
   UserAdminTableLink,
   UserAuditLink,
@@ -308,7 +308,12 @@ const ToggleForModule = (props: ToggleProps) => {
       : {};
 
   return (
-    <div style={highlightStyle}>
+    <FlexRow
+      style={{
+        ...highlightStyle,
+        justifyContent: 'center',
+      }}
+    >
       <CommonToggle
         name=' '
         checked={isModuleBypassed}
@@ -317,7 +322,7 @@ const ToggleForModule = (props: ToggleProps) => {
           bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
         }
       />
-    </div>
+    </FlexRow>
   );
 };
 
@@ -349,9 +354,11 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
               updatedProfile,
               moduleName
             ),
-            accessTierBadge: displayTierBadgeByRequiredModule(
-              props.updatedProfile,
-              moduleName
+            accessTierBadge: (
+              <TierBadgesMaybe
+                profile={props.updatedProfile}
+                moduleName={moduleName}
+              />
             ),
             bypassToggle: bypassable && (
               <ToggleForModule moduleName={moduleName} {...props} />
