@@ -1,7 +1,7 @@
 import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
-import WorkspaceAdminPage from 'app/page/admin-workspace-page';
+import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
 import { ConceptSetSelectValue, CloudStorageHeader, Language } from 'app/text-labels';
 import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
@@ -50,7 +50,7 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeFalsy();
 
     //click on the LOCK WORKSPACE button
-    const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton();
+    const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton(workspaceStatus.Lock);
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
 
     await lockWorkspaceModal.createLockWorkspaceReason();
