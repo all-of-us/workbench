@@ -7,6 +7,8 @@ import { waitForDocumentTitle, waitWhileLoading, waitWhileSpinnerDisplayed } fro
 import WorkspacesPage from './workspaces-page';
 import { getAttrValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
+import { takeScreenshot } from 'utils/save-file-utils';
+import { makeDateTimeStr } from 'utils/str-utils';
 
 export const PageTitle = 'Homepage';
 
@@ -67,6 +69,7 @@ export default class HomePage extends AuthenticatedPage {
       await this.page.waitForTimeout(5000);
       await waitFor(30 * 1000);
     }
+    await takeScreenshot(this.page, makeDateTimeStr('home-page'));
     return true;
   }
 

@@ -17,7 +17,7 @@ import {
 
 import { Clickable } from 'app/components/buttons';
 import { SmallHeader } from 'app/components/headers';
-import { ExclamationTriangle } from 'app/components/icons';
+import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { renderResourceCard } from 'app/components/render-resource-card';
 import {
@@ -30,7 +30,6 @@ import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { convertAPIError } from 'app/utils/errors';
 import { getDisplayName, isNotebook } from 'app/utils/resources';
 
 const styles = reactStyles({
@@ -111,9 +110,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     await userMetricsApi()
       .getUserRecentResources()
       .then(setResources)
-      .catch(async (e) => {
-        const response = await convertAPIError(e);
-        console.error(response.message);
+      .catch(() => {
         setApiError(true);
       })
       .finally(() => setLoading(false));
@@ -207,12 +204,14 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       <SmallHeader>Recently Accessed Items</SmallHeader>
       {apiError ? (
         <div>
-          <ExclamationTriangle
-            color={colors.warning}
-            style={{ height: '1.5rem', width: '1.5rem' }}
+          <ClrIcon
+            style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
+            className='is-solid'
+            shape='exclamation-triangle'
+            size='30'
           />
           <div style={{ ...styles.error }}>
-            Sorry, loading of recent resources request cannot be completed.
+            Error loading recent resources. Request cannot be completed.
           </div>
         </div>
       ) : (
