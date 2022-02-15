@@ -1,5 +1,6 @@
 package org.pmiops.workbench.testconfig;
 
+import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -21,5 +22,6 @@ import org.springframework.context.annotation.Import;
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionTierConfigMapperImpl.class,
+  AccessModuleNameMapperImpl.class,
 })
 public class UserServiceTestConfiguration {}
