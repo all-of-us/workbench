@@ -123,7 +123,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
     boolean includesAllParticipants =
-        Optional.ofNullable(dataSetRequest.getIncludesAllParticipants()).orElse(false);
+        Boolean.TRUE.equals(dataSetRequest.getIncludesAllParticipants());
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
     } else if (CollectionUtils.isEmpty(dataSetRequest.getConceptSetIds())

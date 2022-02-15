@@ -44,6 +44,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -103,6 +104,7 @@ import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -228,6 +230,7 @@ public class RuntimeControllerTest {
   @Autowired CdrVersionDao cdrVersionDao;
   @MockBean WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
+  @Autowired AccessTierDao accessTierDao;
   @Autowired RuntimeController runtimeController;
   @Autowired LeonardoMapper leonardoMapper;
 
@@ -267,6 +270,7 @@ public class RuntimeControllerTest {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
     cdrVersion.setBigqueryDataset(BIGQUERY_DATASET);
+    cdrVersion.setAccessTier(TestMockFactory.createControlledTierForTests(accessTierDao));
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 

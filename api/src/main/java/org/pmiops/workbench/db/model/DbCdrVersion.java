@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Objects;
-import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -30,8 +29,15 @@ public class DbCdrVersion {
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
+  // TODO(calbach): Remove these columns.
   private String allSamplesWgsDataBucket;
   private String singleSampleArrayDataBucket;
+
+  private String storageBasePath;
+  private String wgsVcfMergedStoragePath;
+  private String wgsHailStoragePath;
+  private String microarrayHailStoragePath;
+  private String microarrayVcfSingleSampleStoragePath;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -58,7 +64,7 @@ public class DbCdrVersion {
   @Transient
   @NotNull
   public boolean getIsDefaultNotNull() {
-    return Optional.ofNullable(isDefault).orElse(false);
+    return Boolean.TRUE.equals(getIsDefault());
   }
 
   @Column(name = "name")
@@ -197,6 +203,51 @@ public class DbCdrVersion {
     this.singleSampleArrayDataBucket = singleSampleArrayDataBucket;
   }
 
+  @Column(name = "storage_base_path")
+  public String getStorageBasePath() {
+    return storageBasePath;
+  }
+
+  public void setStorageBasePath(String storageBasePath) {
+    this.storageBasePath = storageBasePath;
+  }
+
+  @Column(name = "wgs_vcf_merged_storage_path")
+  public String getWgsVcfMergedStoragePath() {
+    return wgsVcfMergedStoragePath;
+  }
+
+  public void setWgsVcfMergedStoragePath(String wgsVcfMergedStoragePath) {
+    this.wgsVcfMergedStoragePath = wgsVcfMergedStoragePath;
+  }
+
+  @Column(name = "wgs_hail_storage_path")
+  public String getWgsHailStoragePath() {
+    return wgsHailStoragePath;
+  }
+
+  public void setWgsHailStoragePath(String wgsHailStoragePath) {
+    this.wgsHailStoragePath = wgsHailStoragePath;
+  }
+
+  @Column(name = "microarray_hail_storage_path")
+  public String getMicroarrayHailStoragePath() {
+    return microarrayHailStoragePath;
+  }
+
+  public void setMicroarrayHailStoragePath(String microarrayHailStoragePath) {
+    this.microarrayHailStoragePath = microarrayHailStoragePath;
+  }
+
+  @Column(name = "microarray_vcf_single_sample_storage_path")
+  public String getMicroarrayVcfSingleSampleStoragePath() {
+    return microarrayVcfSingleSampleStoragePath;
+  }
+
+  public void setMicroarrayVcfSingleSampleStoragePath(String microarrayVcfSingleSampleStoragePath) {
+    this.microarrayVcfSingleSampleStoragePath = microarrayVcfSingleSampleStoragePath;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -214,7 +265,12 @@ public class DbCdrVersion {
         wgsBigqueryDataset,
         hasFitbitData,
         hasCopeSurveyData,
-        allSamplesWgsDataBucket);
+        allSamplesWgsDataBucket,
+        storageBasePath,
+        wgsVcfMergedStoragePath,
+        wgsHailStoragePath,
+        microarrayHailStoragePath,
+        microarrayVcfSingleSampleStoragePath);
   }
 
   @Override
@@ -227,10 +283,10 @@ public class DbCdrVersion {
     }
     DbCdrVersion that = (DbCdrVersion) o;
     return cdrVersionId == that.cdrVersionId
-        && isDefault == that.isDefault
         && releaseNumber == that.releaseNumber
         && archivalStatus == that.archivalStatus
         && numParticipants == that.numParticipants
+        && Objects.equals(isDefault, that.isDefault)
         && Objects.equals(name, that.name)
         && Objects.equals(accessTier, that.accessTier)
         && Objects.equals(bigqueryProject, that.bigqueryProject)
@@ -240,6 +296,13 @@ public class DbCdrVersion {
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
-        && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket);
+        && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket)
+        && Objects.equals(singleSampleArrayDataBucket, that.singleSampleArrayDataBucket)
+        && Objects.equals(storageBasePath, that.storageBasePath)
+        && Objects.equals(wgsVcfMergedStoragePath, that.wgsVcfMergedStoragePath)
+        && Objects.equals(wgsHailStoragePath, that.wgsHailStoragePath)
+        && Objects.equals(microarrayHailStoragePath, that.microarrayHailStoragePath)
+        && Objects.equals(
+            microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath);
   }
 }
