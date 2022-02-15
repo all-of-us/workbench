@@ -19,7 +19,7 @@ import {
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
 
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import {
   ClrIcon,
   ControlledTierBadge,
@@ -273,18 +273,27 @@ export const TierBadgesMaybe = (props: {
   moduleName: AccessModule;
 }) => {
   const { profile, moduleName } = props;
+
+  const rtMaybe = (moduleName === AccessModule.ERACOMMONS
+    ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
+    : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
+    <RegisteredTierBadge style={{ gridArea: 'badge' }} />
+  );
+
+  const ctMaybe = (moduleName === AccessModule.ERACOMMONS
+    ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
+    : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
+    <ControlledTierBadge style={{ gridArea: 'badge' }} />
+  );
+
+  // give the badges a little space
+  const spacer = <div style={{ width: '20%' }} />;
+
   return (
     <FlexRow style={{ justifyContent: 'center' }}>
-      {(moduleName === AccessModule.ERACOMMONS
-        ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-        : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
-        <RegisteredTierBadge style={{ gridArea: 'badge' }} />
-      )}
-      {(moduleName === AccessModule.ERACOMMONS
-        ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-        : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
-        <ControlledTierBadge style={{ gridArea: 'badge' }} />
-      )}
+      {rtMaybe}
+      {rtMaybe && ctMaybe && spacer}
+      {ctMaybe}
     </FlexRow>
   );
 };
