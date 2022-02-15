@@ -354,7 +354,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
               updatedProfile,
               moduleName
             ),
-            accessTierBadge: (
+            accessTierBadges: (
               <TierBadgesMaybe
                 profile={props.updatedProfile}
                 moduleName={moduleName}
@@ -386,7 +386,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       <Column field='moduleStatus' header='Status' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />
-      <Column field='accessTierBadge' header='Required for tier access' />
+      <Column field='accessTierBadges' header='Required for tier access' />
       <Column field='bypassToggle' header='Bypass' />
     </DataTable>
   );
