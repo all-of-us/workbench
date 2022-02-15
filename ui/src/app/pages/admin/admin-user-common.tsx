@@ -19,7 +19,7 @@ import {
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
 
-import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   ClrIcon,
   ControlledTierBadge,
@@ -87,14 +87,11 @@ export const commonStyles = reactStyles({
     borderRadius: '18px',
     transform: 'rotate(270deg)',
   },
-  incompleteModule: {
-    color: colorWithWhiteness(colors.highlight, -0.2),
+  incompleteOrExpiringModule: {
+    color: colors.warning,
   },
   expiredModule: {
     color: colors.danger,
-  },
-  expiringSoonModule: {
-    color: colorWithWhiteness(colors.warning, -0.3),
   },
   completeModule: {
     color: colors.black,
@@ -181,16 +178,13 @@ const getModuleStatus = (profile, moduleName) =>
 const moduleStatusStyle = (moduleStatus) =>
   cond(
     [
-      moduleStatus === AccessModulesStatus.INCOMPLETE,
-      () => commonStyles.incompleteModule,
+      moduleStatus === AccessModulesStatus.INCOMPLETE ||
+        moduleStatus === AccessModulesStatus.EXPIRING_SOON,
+      () => commonStyles.incompleteOrExpiringModule,
     ],
     [
       moduleStatus === AccessModulesStatus.EXPIRED,
       () => commonStyles.expiredModule,
-    ],
-    [
-      moduleStatus === AccessModulesStatus.EXPIRING_SOON,
-      () => commonStyles.expiringSoonModule,
     ],
     () => commonStyles.completeModule
   );
