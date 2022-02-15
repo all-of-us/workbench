@@ -93,6 +93,9 @@
       "hasCopeSurveyData": true,
       "allSamplesWgsDataBucket": "5/wgs/vcf/merged/",
       "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/",
+      "storageBasePath": "5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled"
     },
     {

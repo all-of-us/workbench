@@ -24,4 +24,9 @@ public class CdrVersionVO {
   public Boolean hasCopeSurveyData;
   public String allSamplesWgsDataBucket;
   public String singleSampleArrayDataBucket;
+  public String storageBasePath;
+  public String wgsVcfMergedStoragePath;
+  public String wgsHailStoragePath;
+  public String microarrayHailStoragePath;
+  public String microarrayVcfSingleSampleStoragePath;
 }
