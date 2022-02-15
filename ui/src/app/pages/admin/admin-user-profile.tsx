@@ -270,7 +270,6 @@ const CommonToggle = (props: CommonToggleProps) => {
       style={{ paddingBottom: 0, flexGrow: 0 }}
       height={24}
       width={50}
-      handleDiameter={22}
     />
   );
 };
