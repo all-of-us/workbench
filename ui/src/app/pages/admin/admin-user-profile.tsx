@@ -253,6 +253,28 @@ const accessModulesForTable = [
   AccessModule.PUBLICATIONCONFIRMATION,
 ];
 
+interface CommonToggleProps {
+  name: string;
+  checked: boolean;
+  dataTestId: string;
+  onToggle: () => void;
+}
+const CommonToggle = (props: CommonToggleProps) => {
+  const { name, checked, dataTestId, onToggle } = props;
+  return (
+    <Toggle
+      name={name}
+      checked={checked}
+      data-test-id={dataTestId}
+      onToggle={() => onToggle()}
+      style={{ paddingBottom: 0, flexGrow: 0 }}
+      height={24}
+      width={50}
+      handleDiameter={22}
+    />
+  );
+};
+
 interface AccessModuleTableProps {
   oldProfile: Profile;
   updatedProfile: Profile;
@@ -287,11 +309,10 @@ const ToggleForModule = (props: ToggleProps) => {
 
   return (
     <div style={highlightStyle}>
-      <Toggle
+      <CommonToggle
         name=' '
-        style={{ paddingBottom: 0, flexGrow: 0 }}
         checked={isModuleBypassed}
-        data-test-id={`${moduleName}-toggle`}
+        dataTestId={`${moduleName}-toggle`}
         onToggle={() =>
           bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
         }
@@ -376,11 +397,11 @@ const DisabledToggle = (props: {
       : {};
 
   return (
-    <div style={highlightStyle}>
-      <Toggle
-        style={{ paddingTop: '2em', paddingLeft: '2em', flexGrow: 0 }}
+    <div style={{ ...highlightStyle, paddingTop: '2.5em', paddingLeft: '2em' }}>
+      <CommonToggle
         name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
         checked={!currentlyDisabled}
+        dataTestId='user-disabled-toggle'
         onToggle={() => toggleDisabled()}
       />
     </div>

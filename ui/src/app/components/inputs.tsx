@@ -556,6 +556,7 @@ interface ToggleProps {
   style?: React.CSSProperties;
   height?: number;
   width?: number;
+  handleDiameter?: number;
 }
 
 export class Toggle extends React.Component<ToggleProps> {
@@ -564,8 +565,16 @@ export class Toggle extends React.Component<ToggleProps> {
   }
 
   render() {
-    const { name, checked, disabled, onToggle, style, height, width } =
-      this.props;
+    const {
+      name,
+      checked,
+      disabled,
+      onToggle,
+      style,
+      height,
+      width,
+      handleDiameter,
+    } = this.props;
     return (
       <label
         style={{
@@ -583,6 +592,7 @@ export class Toggle extends React.Component<ToggleProps> {
           disabled={disabled}
           height={height}
           width={width}
+          handleDiameter={handleDiameter}
         />
         <span style={{ marginLeft: '.5rem' }}>{name}</span>
       </label>
