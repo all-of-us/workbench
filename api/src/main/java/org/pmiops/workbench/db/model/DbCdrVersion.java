@@ -57,7 +57,7 @@ public class DbCdrVersion {
   @Transient
   @NotNull
   public boolean getIsDefaultNotNull() {
-    return Boolean.TRUE.equals(isDefault);
+    return Boolean.TRUE.equals(getIsDefault());
   }
 
   @Column(name = "name")
