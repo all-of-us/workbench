@@ -1,9 +1,9 @@
-import { signInWithAccessToken } from 'utils/test-utils';
+import { openTab, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import { ConceptSetSelectValue, Language } from 'app/text-labels';
+import { ConceptSetSelectValue, Language, Tabs } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
@@ -12,6 +12,8 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
+import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
+
 
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
@@ -100,9 +102,10 @@ describe('Workspace Admin lock-workspace', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
     // verify DATA & ANALYSIS tabs are accessible
-    // await dataPage.openAnalysisPage({ waitPageChange: true });
-    // await dataPage.openAboutPage({ waitPageChange: true });
+    const analysisPage = new WorkspaceAnalysisPage(page);
+    await openTab(page, Tabs.Analysis, analysisPage);
     const aboutPage = new WorkspaceAboutPage(page);
+    await openTab(page, Tabs.About, aboutPage);
     await aboutPage.waitForLoad();
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(false);
     expect(await aboutPage.getAboutLockedWorkspaceIcon()).toBeFalsy();
@@ -111,6 +114,9 @@ describe('Workspace Admin lock-workspace', () => {
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
+    await aboutPage.getAboutEditIcon();
+    const workspaceEdit = new WorkspaceEditPage(page);
+    await workspaceEdit.waitForLoad();
   });
 
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
