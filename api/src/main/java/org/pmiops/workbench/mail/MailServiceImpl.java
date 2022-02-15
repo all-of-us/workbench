@@ -23,7 +23,6 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
@@ -396,7 +395,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
             EmailSubstitutionField.NIH_FUNDED,
-            BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
+            Boolean.TRUE.equals(request.getIsNihFunded()) ? "Yes" : "No")
         .build();
   }
 

@@ -45,6 +45,7 @@ describe('ExportDatasetModal', () => {
     dataset = {
       id: 1,
       name: 'Test Dataset Name',
+      domainValuePairs: [],
     };
 
     notebooksApiStub = new NotebooksApiStub();
@@ -77,6 +78,7 @@ describe('ExportDatasetModal', () => {
     const expectedDatasetRequest: DataSetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
     };
 
     wrapper
@@ -148,6 +150,7 @@ describe('ExportDatasetModal', () => {
     const expectedDatasetRequest = {
       dataSetId: dataset.id,
       name: expectedNotebookName,
+      domainValuePairs: dataset.domainValuePairs,
     };
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
@@ -175,6 +178,7 @@ describe('ExportDatasetModal', () => {
     const expectedDatasetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
     };
     datasetApiStub.codePreview = {
       html: '<div id="notebook">print("hello world!")</div>',
@@ -267,6 +271,7 @@ describe('ExportDatasetModal', () => {
     const expectedDatasetRequest: DataSetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
     };
 
     wrapper
@@ -288,6 +293,7 @@ describe('ExportDatasetModal', () => {
     const expectedDatasetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
     };
     datasetApiStub.codePreview = {
       html: '<div id="notebook">print("hello world!")</div>',

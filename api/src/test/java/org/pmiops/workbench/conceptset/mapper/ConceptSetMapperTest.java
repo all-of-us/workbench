@@ -70,7 +70,10 @@ public class ConceptSetMapperTest {
     assertThat(clientConceptSet.getLastModifiedTime())
         .isEqualTo(dbConceptSet.getLastModifiedTime().getTime());
     assertThat(clientConceptSet.getCreator()).isEqualTo(dbConceptSet.getCreator().getUsername());
-    assertThat(clientConceptSet.getCriteriums()).isNull();
+    // DbConceptSet initializes the dbConceptSetConceptIds to empty HashSet
+    // conceptSetDao will return an empty dbConceptSetConceptIds hence an empty ConceptSet
+    // must initialize criteriums to empty and not a null object
+    assertThat(clientConceptSet.getCriteriums()).isEmpty();
   }
 
   @Test
@@ -101,6 +104,6 @@ public class ConceptSetMapperTest {
     assertThat(clientConceptSet.getLastModifiedTime())
         .isEqualTo(dbConceptSet.getLastModifiedTime().getTime());
     assertThat(clientConceptSet.getCreator()).isEqualTo(dbConceptSet.getCreator().getUsername());
-    assertThat(clientConceptSet.getCriteriums()).isNull();
+    assertThat(clientConceptSet.getCriteriums()).isEmpty();
   }
 }

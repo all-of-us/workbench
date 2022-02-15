@@ -129,11 +129,6 @@
     "clientId": "d139ec98-5c24-4076-a103-e020a558bea0",
     "logoutUrl": "https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
-  "accessRenewal": {
-    "expiryDays": 3650,
-    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
-    "lookbackPeriod": 330
-  },
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50

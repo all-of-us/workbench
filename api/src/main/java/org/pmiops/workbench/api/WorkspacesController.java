@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -420,7 +419,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
     Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
-    if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
+    if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());

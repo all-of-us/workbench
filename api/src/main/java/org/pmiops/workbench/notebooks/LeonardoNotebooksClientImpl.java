@@ -1,12 +1,17 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,8 +61,17 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+
+  // Deprecated env vars: remove once featured workspaces are updated.
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
   private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
+
+  private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
+  private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
+  private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
+  private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
+  private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY =
+      "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
@@ -183,6 +197,67 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     }
   }
 
+  private String joinStoragePaths(String... paths) {
+    final CharMatcher slashMatch = CharMatcher.is('/');
+    return Arrays.stream(paths)
+        .map(slashMatch::trimLeadingFrom)
+        .map(slashMatch::trimTrailingFrom)
+        .filter(p -> !p.isEmpty())
+        .collect(Collectors.joining("/"));
+  }
+
+  private Map<String, String> buildCdrEnvVars(DbCdrVersion cdrVersion) {
+    Map<String, String> vars = new HashMap<>();
+    vars.put(
+        WORKSPACE_CDR_ENV_KEY,
+        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
+
+    String datasetsBucket = cdrVersion.getAccessTier().getDatasetsBucket();
+    String bucketInfix = cdrVersion.getStorageBasePath();
+    if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
+      String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
+      Map<String, Optional<String>> partialStoragePaths =
+          ImmutableMap.<String, Optional<String>>builder()
+              .put(CDR_STORAGE_PATH_KEY, Optional.of("/"))
+              .put(
+                  WGS_VCF_MERGED_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsVcfMergedStoragePath()))
+              .put(
+                  WGS_HAIL_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsHailStoragePath()))
+              .put(
+                  MICROARRAY_HAIL_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getMicroarrayHailStoragePath()))
+              .put(
+                  MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getMicroarrayVcfSingleSampleStoragePath()))
+              .build();
+      vars.putAll(
+          partialStoragePaths.entrySet().stream()
+              .filter(entry -> entry.getValue().filter(p -> !p.isEmpty()).isPresent())
+              .collect(
+                  Collectors.toMap(
+                      Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue().get()))));
+    }
+
+    // TODO(calbach): Remove these env vars.
+    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
+      vars.put(
+          ALL_SAMPLES_WGS_KEY,
+          joinStoragePaths(
+              cdrVersion.getAccessTier().getDatasetsBucket(),
+              cdrVersion.getAllSamplesWgsDataBucket()));
+    }
+    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
+      vars.put(
+          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
+          joinStoragePaths(
+              cdrVersion.getAccessTier().getDatasetsBucket()
+                  + cdrVersion.getSingleSampleArrayDataBucket()));
+    }
+    return vars;
+  }
+
   @Override
   public void createRuntime(
       Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
@@ -214,25 +289,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
 
-    customEnvironmentVariables.put(
-        WORKSPACE_CDR_ENV_KEY,
-        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-
-    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
-      customEnvironmentVariables.put(
-          ALL_SAMPLES_WGS_KEY,
-          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
-              + "/"
-              + cdrVersion.getAllSamplesWgsDataBucket().replaceFirst("^/", ""));
-    }
-
-    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
-      customEnvironmentVariables.put(
-          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
-          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
-              + "/"
-              + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", ""));
-    }
+    customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     // See RW-6079
     customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");

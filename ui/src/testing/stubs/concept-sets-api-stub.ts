@@ -109,6 +109,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         description: 'Mocked for tests',
         domain: Domain.MEASUREMENT,
         lastModifiedTime: new Date().getTime(),
+        criteriums: [],
       },
       {
         id: 347,
@@ -116,6 +117,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         description: 'Mocked for tests',
         domain: Domain.CONDITION,
         lastModifiedTime: new Date().getTime() - 2000,
+        criteriums: [],
       },
       {
         id: 348,
@@ -124,6 +126,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         domain: Domain.OBSERVATION,
         survey: Surveys.OVERALLHEALTH,
         lastModifiedTime: new Date().getTime() - 2000,
+        criteriums: [],
       },
       {
         id: 349,
@@ -132,6 +135,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         domain: Domain.OBSERVATION,
         survey: Surveys.LIFESTYLE,
         lastModifiedTime: new Date().getTime() - 2000,
+        criteriums: [],
       },
       {
         id: 350,
@@ -140,6 +144,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         domain: Domain.OBSERVATION,
         survey: Surveys.LIFESTYLE,
         lastModifiedTime: new Date().getTime() - 2000,
+        criteriums: [],
       },
       {
         id: 351,
@@ -147,6 +152,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         description: 'Mocked for tests',
         domain: Domain.WHOLEGENOMEVARIANT,
         lastModifiedTime: new Date().getTime() - 2000,
+        criteriums: [],
       },
     ];
   }

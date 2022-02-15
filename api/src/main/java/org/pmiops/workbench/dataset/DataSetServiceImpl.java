@@ -459,7 +459,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(DbDataset dbDataset) {
     final boolean includesAllParticipants =
-        getBuiltinBooleanFromNullable(dbDataset.getIncludesAllParticipants());
+        Boolean.TRUE.equals(dbDataset.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
         ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dbDataset.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
@@ -1518,10 +1518,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static <T> List<T> nullableListToEmpty(List<T> nullableList) {
     return Optional.ofNullable(nullableList).orElse(new ArrayList<>());
-  }
-
-  private static boolean getBuiltinBooleanFromNullable(Boolean boo) {
-    return Optional.ofNullable(boo).orElse(false);
   }
 
   private DbConceptSet buildPrePackagedSurveyConceptSet() {

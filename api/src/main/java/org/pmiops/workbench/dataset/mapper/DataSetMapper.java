@@ -57,7 +57,7 @@ public interface DataSetMapper {
   @Mapping(target = "values", source = "domainValuePairs")
   @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
   DbDataset dataSetRequestToDb(
-      DataSetRequest dataSetRequest, @Context DbDataset dbDataSet, @Context Clock clock);
+      DataSetRequest dataSetRequest, @Context DbDataset srcDbDataset, @Context Clock clock);
 
   @Mapping(target = "id", source = "dataSetId")
   @Mapping(target = "conceptSets", source = "conceptSetIds")
@@ -68,26 +68,26 @@ public interface DataSetMapper {
 
   @AfterMapping
   default void populateFromSourceDbObject(
-      @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet, @Context Clock clock) {
-    targetDb.setInvalid(dbDataSet == null ? false : dbDataSet.getInvalid());
+      @MappingTarget DbDataset targetDb, @Context DbDataset srcDbDataset, @Context Clock clock) {
+    targetDb.setInvalid(srcDbDataset == null ? false : srcDbDataset.getInvalid());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    if (dbDataSet == null) {
+    if (srcDbDataset == null) {
       targetDb.setInvalid(false);
       targetDb.setCreationTime(now);
       targetDb.setLastModifiedTime(now);
     } else {
-      targetDb.setCreationTime(dbDataSet.getCreationTime());
-      targetDb.setDataSetId(dbDataSet.getDataSetId());
-      targetDb.setCreatorId(dbDataSet.getCreatorId());
+      targetDb.setCreationTime(srcDbDataset.getCreationTime());
+      targetDb.setDataSetId(srcDbDataset.getDataSetId());
+      targetDb.setCreatorId(srcDbDataset.getCreatorId());
       targetDb.setLastModifiedTime(now);
-    }
-    if (targetDb.getValues().isEmpty()) {
-      // In case of rename, dataSetRequest does not have cohort/Concept ID information
-      targetDb.setConceptSetIds(dbDataSet.getConceptSetIds());
-      targetDb.setCohortIds(dbDataSet.getCohortIds());
-      targetDb.setValues(dbDataSet.getValues());
-      targetDb.setIncludesAllParticipants(dbDataSet.getIncludesAllParticipants());
-      targetDb.setPrePackagedConceptSet(dbDataSet.getPrePackagedConceptSet());
+      if (targetDb.getValues().isEmpty()) {
+        // In case of rename, dataSetRequest does not have cohort/Concept ID information
+        targetDb.setConceptSetIds(srcDbDataset.getConceptSetIds());
+        targetDb.setCohortIds(srcDbDataset.getCohortIds());
+        targetDb.setValues(srcDbDataset.getValues());
+        targetDb.setIncludesAllParticipants(srcDbDataset.getIncludesAllParticipants());
+        targetDb.setPrePackagedConceptSet(srcDbDataset.getPrePackagedConceptSet());
+      }
     }
   }
 
