@@ -595,9 +595,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
        *   <li>Else: existing completion time, i.e. no change
        * </ul>
        */
-      Function<DbAccessModuleName, Optional<Timestamp>> determineCompletionTime =
-          (moduleName) -> {
-            BadgeName badgeName = accessModuleNameMapper.badgeFromModule(moduleName);
+      Function<BadgeName, Optional<Timestamp>> determineCompletionTime =
+          (badgeName) -> {
             Optional<BadgeDetailsV2> badge =
                 Optional.ofNullable(userBadgesByName.get(badgeName))
                     .filter(BadgeDetailsV2::getValid);
@@ -617,7 +616,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             Instant badgeTime = Instant.ofEpochSecond(badge.get().getLastissued());
             Instant dbCompletionTime =
                 accessModuleService
-                    .getAccessModuleStatus(dbUser, moduleName)
+                    .getAccessModuleStatus(
+                        dbUser, accessModuleNameMapper.moduleFromBadge(badgeName))
                     .map(AccessModuleStatus::getCompletionEpochMillis)
                     .map(Instant::ofEpochMilli)
                     .orElse(Instant.EPOCH);
@@ -635,8 +635,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       Map<DbAccessModuleName, Optional<Timestamp>> completionTimes =
           Arrays.stream(BadgeName.values())
-              .map(accessModuleNameMapper::moduleFromBadge)
-              .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
+              .collect(
+                  Collectors.toMap(
+                      accessModuleNameMapper::moduleFromBadge, determineCompletionTime));
 
       completionTimes.forEach(
           (accessModuleName, timestamp) ->
