@@ -1486,16 +1486,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     // ERA and 2FA once in request 2
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.ERA_COMMONS),
-            any(),
-            any());
+            eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.ERA_COMMONS), any(), any());
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH),
-            any(),
-            any());
+            eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH), any(), any());
   }
 
   @Test
