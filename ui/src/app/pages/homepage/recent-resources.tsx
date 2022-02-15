@@ -15,6 +15,7 @@ import {
   WorkspaceResponse,
 } from 'generated/fetch';
 
+import { AlertWarning } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
 import { SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
@@ -103,7 +104,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
   const [tableData, setTableData] = useState<TableData[]>();
-  const [apiError, setApiError] = useState(false);
+  const [apiLoadError, setApiLoadError] = useState<string>(null);
 
   const loadResources = async () => {
     setLoading(true);
@@ -111,7 +112,9 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       .getUserRecentResources()
       .then(setResources)
       .catch(() => {
-        setApiError(true);
+        setApiLoadError(
+          'Error loading recent resources. Request cannot be completed.'
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -201,20 +204,18 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
 
   return cond(
     [
-      apiError && !loading,
+      apiLoadError && !loading,
       () => (
         <React.Fragment>
-          <div style={{ ...styles.error }}>
+          <AlertWarning style={{ fontSize: 14 }}>
             <ClrIcon
               style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
               className='is-solid'
               shape='exclamation-triangle'
               size='30'
             />
-            <div>
-              Error loading recent resources. Request cannot be completed.
-            </div>
-          </div>
+            {apiLoadError}
+          </AlertWarning>
         </React.Fragment>
       ),
     ],
