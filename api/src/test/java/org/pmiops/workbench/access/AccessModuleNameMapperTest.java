@@ -59,4 +59,21 @@ public class AccessModuleNameMapperTest {
       assertThat(mapper.badgeFromModule(dbName)).isEqualTo(name);
     }
   }
+
+  @Test
+  public void testBadgesForComplianceOnly() {
+    List<DbAccessModuleName> compliance =
+        ImmutableList.of(
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+
+    for (DbAccessModuleName name : DbAccessModuleName.values()) {
+      BadgeName badgeName = mapper.badgeFromModule(name);
+      if (compliance.contains(name)) {
+        assertThat(badgeName).isNotNull();
+        assertThat(mapper.badgeFromModule(name)).isEqualTo(badgeName);
+      } else {
+        assertThat(badgeName).isNull();
+      }
+    }
+  }
 }
