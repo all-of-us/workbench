@@ -16,9 +16,9 @@ const WorkspaceCardSelector = {
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
   dateTimeXpath:
     './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-access-level"]/following-sibling::div',
-  lockedIconXpath: 
-    './/*[@data-test-id="workspace-card"]'
-    + '//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]'
+  lockedIconXpath:
+    './/*[@data-test-id="workspace-card"]' +
+    '//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]'
 };
 
 /**
