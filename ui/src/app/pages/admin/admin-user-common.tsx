@@ -281,7 +281,7 @@ export const TierBadgesMaybe = (props: {
   );
 
   // give the badges a little space
-  const spacer = <div style={{ width: '20%' }} />;
+  const spacer = <div style={{ width: '5%' }} />;
 
   return (
     <FlexRow style={{ justifyContent: 'center' }}>
