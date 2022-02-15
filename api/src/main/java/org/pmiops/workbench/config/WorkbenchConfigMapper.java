@@ -7,7 +7,7 @@ import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.pmiops.workbench.access.AccessModuleMapper;
+import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.AccessModuleConfig;
@@ -17,7 +17,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {AccessModuleMapper.class})
+    uses = {AccessModuleNameMapper.class})
 public interface WorkbenchConfigMapper {
   default RuntimeImage dataprocToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);

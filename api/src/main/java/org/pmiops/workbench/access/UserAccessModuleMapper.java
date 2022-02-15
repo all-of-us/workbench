@@ -16,7 +16,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, AccessModuleMapper.class},
+    uses = {CommonMappers.class, AccessModuleNameMapper.class},
     nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface UserAccessModuleMapper {
   @Mapping(target = "moduleName", source = "accessModule.name")

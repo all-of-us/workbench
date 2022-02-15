@@ -10,7 +10,7 @@ import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
-public interface AccessModuleMapper {
+public interface AccessModuleNameMapper {
   @ValueMapping(source = "COMPLIANCE_TRAINING", target = "RT_COMPLIANCE_TRAINING")
   @ValueMapping(source = "RAS_LINK_LOGIN_GOV", target = "RAS_LOGIN_GOV")
   DbAccessModuleName clientAccessModuleToStorage(AccessModule source);

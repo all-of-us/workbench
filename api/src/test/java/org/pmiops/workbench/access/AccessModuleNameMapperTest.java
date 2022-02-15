@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@Import(AccessModuleMapperImpl.class)
+@Import(AccessModuleNameMapperImpl.class)
 @SpringJUnitConfig
-public class AccessModuleMapperTest {
-  @Autowired private AccessModuleMapper mapper;
+public class AccessModuleNameMapperTest {
+  @Autowired private AccessModuleNameMapper mapper;
 
   @Test
   public void test() {

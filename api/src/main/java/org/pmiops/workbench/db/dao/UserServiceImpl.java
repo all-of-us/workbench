@@ -28,7 +28,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
-import org.pmiops.workbench.access.AccessModuleMapper;
+import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final AccessTierService accessTierService;
-  private final AccessModuleMapper accessModuleMapper;
+  private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessModuleService accessModuleService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       AdminActionHistoryDao adminActionHistoryDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
-      AccessModuleMapper accessModuleMapper,
+      AccessModuleNameMapper accessModuleNameMapper,
       AccessModuleService accessModuleService,
       FireCloudService fireCloudService,
       ComplianceService complianceService,
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.adminActionHistoryDao = adminActionHistoryDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
-    this.accessModuleMapper = accessModuleMapper;
+    this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessModuleService = accessModuleService;
     this.fireCloudService = fireCloudService;
     this.complianceService = complianceService;
@@ -597,7 +597,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
        */
       Function<DbAccessModuleName, Optional<Timestamp>> determineCompletionTime =
           (moduleName) -> {
-            BadgeName badgeName = accessModuleMapper.badgeFromModule(moduleName);
+            BadgeName badgeName = accessModuleNameMapper.badgeFromModule(moduleName);
             Optional<BadgeDetailsV2> badge =
                 Optional.ofNullable(userBadgesByName.get(badgeName))
                     .filter(BadgeDetailsV2::getValid);
@@ -635,7 +635,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       Map<DbAccessModuleName, Optional<Timestamp>> completionTimes =
           Arrays.stream(BadgeName.values())
-              .map(accessModuleMapper::moduleFromBadge)
+              .map(accessModuleNameMapper::moduleFromBadge)
               .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
 
       completionTimes.forEach(
