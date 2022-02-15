@@ -27,7 +27,7 @@ import {
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, withCdrVersions } from 'app/utils';
+import { cond, reactStyles, withCdrVersions } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { getDisplayName, isNotebook } from 'app/utils/resources';
@@ -199,57 +199,82 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     }
   }, [resources, wsMap]);
 
-  return resources && wsMap && !loading ? (
-    <React.Fragment>
-      <SmallHeader>Recently Accessed Items</SmallHeader>
-      {apiError ? (
-        <div>
-          <ClrIcon
-            style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
-            className='is-solid'
-            shape='exclamation-triangle'
-            size='30'
-          />
-          <div style={{ ...styles.error }}>
-            Error loading recent resources. Request cannot be completed.
+  return cond(
+    [
+      apiError && !loading,
+      () => (
+        <React.Fragment>
+          <div>
+            <ClrIcon
+              style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
+              className='is-solid'
+              shape='exclamation-triangle'
+              size='30'
+            />
+            <div style={{ ...styles.error }}>
+              Error loading recent resources. Request cannot be completed.
+            </div>
           </div>
-        </div>
+        </React.Fragment>
+      ),
+    ],
+    () =>
+      resources && wsMap && !loading ? (
+        <React.Fragment>
+          <SmallHeader>Recently Accessed Items</SmallHeader>
+          {apiError ? (
+            <div>
+              <ClrIcon
+                style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
+                className='is-solid'
+                shape='exclamation-triangle'
+                size='30'
+              />
+              <div style={{ ...styles.error }}>
+                Error loading recent resources. Request cannot be completed.
+              </div>
+            </div>
+          ) : (
+            <div data-test-id='recent-resources-table'>
+              <DataTable
+                value={tableData}
+                scrollable={true}
+                paginator={true}
+                paginatorTemplate='CurrentPageReport'
+                currentPageReportTemplate='Showing {totalRecords} most recent items'
+              >
+                <Column field='menu' style={styles.menu} />
+                <Column
+                  field='resourceType'
+                  header='Item type'
+                  style={styles.typeColumn}
+                />
+                <Column
+                  field='resourceName'
+                  header='Name'
+                  style={styles.column}
+                />
+                <Column
+                  field='workspaceName'
+                  header='Workspace name'
+                  style={styles.column}
+                />
+                <Column
+                  field='formattedLastModified'
+                  header='Last changed'
+                  style={styles.column}
+                />
+                <Column
+                  field='cdrVersionName'
+                  header='Dataset'
+                  style={styles.column}
+                />
+              </DataTable>
+            </div>
+          )}
+        </React.Fragment>
       ) : (
-        <div data-test-id='recent-resources-table'>
-          <DataTable
-            value={tableData}
-            scrollable={true}
-            paginator={true}
-            paginatorTemplate='CurrentPageReport'
-            currentPageReportTemplate='Showing {totalRecords} most recent items'
-          >
-            <Column field='menu' style={styles.menu} />
-            <Column
-              field='resourceType'
-              header='Item type'
-              style={styles.typeColumn}
-            />
-            <Column field='resourceName' header='Name' style={styles.column} />
-            <Column
-              field='workspaceName'
-              header='Workspace name'
-              style={styles.column}
-            />
-            <Column
-              field='formattedLastModified'
-              header='Last changed'
-              style={styles.column}
-            />
-            <Column
-              field='cdrVersionName'
-              header='Dataset'
-              style={styles.column}
-            />
-          </DataTable>
-        </div>
-      )}
-    </React.Fragment>
-  ) : (
-    loading && <SpinnerOverlay />
+        loading && <SpinnerOverlay />
+      )
   );
 });
