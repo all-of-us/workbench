@@ -52,10 +52,11 @@ public class AccessModuleServiceTest {
   private static List<DbAccessModule> accessModules;
 
   @Import({
-    FakeClockConfiguration.class,
+    AccessModuleNameMapperImpl.class,
     AccessModuleServiceImpl.class,
-    UserAccessModuleMapperImpl.class,
     CommonMappers.class,
+    FakeClockConfiguration.class,
+    UserAccessModuleMapperImpl.class,
   })
   @TestConfiguration
   static class Configuration {
