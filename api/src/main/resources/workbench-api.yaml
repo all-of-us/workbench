@@ -5085,6 +5085,7 @@ definitions:
     type: object
     required:
     - name
+    - criteriums
     properties:
       id:
         type: integer
@@ -5176,6 +5177,7 @@ definitions:
     type: object
     required:
     - name
+    - domainValuePairs
     properties:
       dataSetId:
         type: integer
