@@ -14,7 +14,8 @@ end
 WGS_TABLE_PREFIXES = [
   "alt_allele",
   "filter_set_",
-  "pet_",
+  "pet_", # v1 schema only
+  "ref_ranges_", #v2 schema only
   "sample_info",
   "vet_"
 ]
@@ -219,7 +220,15 @@ def publish_cdr_wgs(cmd_name, args)
      ->(opts, v) { opts.tier = v},
      "The access tier associated with this CDR, e.g. controlled." +
      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
-   )
+  )
+  op.add_option(
+    "--table-prefixes [prefix1,prefix2,...]",
+    ->(opts, v) { opts.table_prefixes = v},
+    "Optional comma-delimited list of table prefixes to filter the publish " +
+    "by, e.g. myfilter_,sample_info. This should only be used in special situations e.g. " +
+    "if there was an issue with the publish. In general, CDRs should be treated as " +
+    "immutable after the initial publish."
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
@@ -236,8 +245,14 @@ def publish_cdr_wgs(cmd_name, args)
   end
   extraction_proxy_group = must_get_wgs_proxy_group(op.opts.project)
 
+  table_match_filter = WGS_TABLE_FILTER
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    table_match_filter = "^\\(#{prefixes.join("\\|")}\\)"
+  end
+
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, op.opts.tier, source_project, op.opts.bq_dataset, WGS_TABLE_FILTER)
+    bq_ingest(tier, op.opts.tier, source_project, op.opts.bq_dataset, table_match_filter)
 
     bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, _existing_users|
       if existing_groups.include?(extraction_proxy_group)
