@@ -29,8 +29,6 @@ public class WorkbenchConfig {
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
   public RasConfig ras;
-  @Deprecated // moved inside AccessConfig.  will remove as part of RW-7828
-  public AccessRenewalConfig accessRenewal;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
 
@@ -39,8 +37,7 @@ public class WorkbenchConfig {
     WorkbenchConfig config = new WorkbenchConfig();
     config.access = new AccessConfig();
     config.access.currentDuccVersions = new ArrayList<>();
-    config.access.renewal = new AccessRenewalConfig();
-    config.accessRenewal = new AccessRenewalConfig();
+    config.access.renewal = new AccessConfig.Renewal();
     config.actionAudit = new ActionAuditConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
@@ -225,7 +222,16 @@ public class WorkbenchConfig {
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
 
-    public AccessRenewalConfig renewal;
+    public static class Renewal {
+      // Days a user's module completion is good for until it expires
+      public Long expiryDays;
+      // Lookback period - the point when we give users the option to update their compliance items
+      public Long lookbackPeriod;
+      // Thresholds for sending warning emails based on approaching module expiration, in days
+      public List<Long> expiryDaysWarningThresholds;
+    }
+
+    public Renewal renewal;
   }
 
   public static class FeatureFlagsConfig {
@@ -306,16 +312,6 @@ public class WorkbenchConfig {
     public String clientId;
     // The URL that can sign out RAS login session.
     public String logoutUrl;
-  }
-
-  // Note: migrating this to live inside AccessConfig soon as part of RW-7828
-  public static class AccessRenewalConfig {
-    // Days a user's module completion is good for until it expires
-    public Long expiryDays;
-    // Lookback period - the point when we give users the option to update their compliance items
-    public Long lookbackPeriod;
-    // Thresholds for sending warning emails based on approaching module expiration, in days
-    public List<Long> expiryDaysWarningThresholds;
   }
 
   public static class OfflineBatchConfig {
