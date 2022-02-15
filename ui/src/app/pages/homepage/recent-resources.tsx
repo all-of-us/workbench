@@ -207,7 +207,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       apiLoadError && !loading,
       () => (
         <React.Fragment>
-          <AlertWarning style={{ fontSize: 14 }}>
+          <AlertWarning style={{ fontSize: 30 }}>
             <ClrIcon
               style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
               className='is-solid'
