@@ -17,6 +17,7 @@ import {
 
 import { Clickable } from 'app/components/buttons';
 import { SmallHeader } from 'app/components/headers';
+import { ExclamationTriangle } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { renderResourceCard } from 'app/components/render-resource-card';
 import {
@@ -29,6 +30,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { displayDateWithoutHours } from 'app/utils/dates';
+import { convertAPIError } from 'app/utils/errors';
 import { getDisplayName, isNotebook } from 'app/utils/resources';
 
 const styles = reactStyles({
@@ -47,6 +49,15 @@ const styles = reactStyles({
     fontSize: '14px',
     letterSpacing: 0,
     lineHeight: '22px',
+  },
+  error: {
+    width: '99%',
+    marginTop: '2.75rem',
+    padding: '0.25rem',
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    borderRadius: '5px',
   },
 });
 
@@ -93,12 +104,18 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
   const [tableData, setTableData] = useState<TableData[]>();
+  const [apiError, setApiError] = useState(false);
 
   const loadResources = async () => {
     setLoading(true);
     await userMetricsApi()
       .getUserRecentResources()
       .then(setResources)
+      .catch(async (e) => {
+        const response = await convertAPIError(e);
+        console.error(response.message);
+        setApiError(true);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -188,38 +205,50 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   return resources && wsMap && !loading ? (
     <React.Fragment>
       <SmallHeader>Recently Accessed Items</SmallHeader>
-      <div data-test-id='recent-resources-table'>
-        <DataTable
-          value={tableData}
-          scrollable={true}
-          paginator={true}
-          paginatorTemplate='CurrentPageReport'
-          currentPageReportTemplate='Showing {totalRecords} most recent items'
-        >
-          <Column field='menu' style={styles.menu} />
-          <Column
-            field='resourceType'
-            header='Item type'
-            style={styles.typeColumn}
+      {apiError ? (
+        <div>
+          <ExclamationTriangle
+            color={colors.warning}
+            style={{ height: '1.5rem', width: '1.5rem' }}
           />
-          <Column field='resourceName' header='Name' style={styles.column} />
-          <Column
-            field='workspaceName'
-            header='Workspace name'
-            style={styles.column}
-          />
-          <Column
-            field='formattedLastModified'
-            header='Last changed'
-            style={styles.column}
-          />
-          <Column
-            field='cdrVersionName'
-            header='Dataset'
-            style={styles.column}
-          />
-        </DataTable>
-      </div>
+          <div style={{ ...styles.error }}>
+            Sorry, loading of recent resources request cannot be completed.
+          </div>
+        </div>
+      ) : (
+        <div data-test-id='recent-resources-table'>
+          <DataTable
+            value={tableData}
+            scrollable={true}
+            paginator={true}
+            paginatorTemplate='CurrentPageReport'
+            currentPageReportTemplate='Showing {totalRecords} most recent items'
+          >
+            <Column field='menu' style={styles.menu} />
+            <Column
+              field='resourceType'
+              header='Item type'
+              style={styles.typeColumn}
+            />
+            <Column field='resourceName' header='Name' style={styles.column} />
+            <Column
+              field='workspaceName'
+              header='Workspace name'
+              style={styles.column}
+            />
+            <Column
+              field='formattedLastModified'
+              header='Last changed'
+              style={styles.column}
+            />
+            <Column
+              field='cdrVersionName'
+              header='Dataset'
+              style={styles.column}
+            />
+          </DataTable>
+        </div>
+      )}
     </React.Fragment>
   ) : (
     loading && <SpinnerOverlay />

@@ -216,6 +216,7 @@ interface State {
   firstVisit: boolean;
   firstVisitTraining: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
+  recentResourcesLoadError: boolean;
 }
 
 export const Homepage = fp.flow(
@@ -233,6 +234,7 @@ export const Homepage = fp.flow(
         firstVisit: undefined,
         firstVisitTraining: true,
         userWorkspacesResponse: undefined,
+        recentResourcesLoadError: false,
       };
     }
 
