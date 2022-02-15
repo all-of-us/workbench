@@ -42,12 +42,12 @@ public class AccessModuleNameMapperTest {
     List<DbAccessModuleName> unbypassable =
         ImmutableList.of(
             DbAccessModuleName.PROFILE_CONFIRMATION, DbAccessModuleName.PUBLICATION_CONFIRMATION);
-    unbypassable.forEach(name -> assertThat(mapper.auditAccessModuleFromStorage(name)).isNull());
+    unbypassable.forEach(name -> assertThat(mapper.bypassAuditPropertyFromStorage(name)).isNull());
 
     assertThat(
             Arrays.stream(DbAccessModuleName.values())
                 .filter(name -> !unbypassable.contains(name))
-                .allMatch(name -> mapper.auditAccessModuleFromStorage(name) != null))
+                .allMatch(name -> mapper.bypassAuditPropertyFromStorage(name) != null))
         .isTrue();
   }
 

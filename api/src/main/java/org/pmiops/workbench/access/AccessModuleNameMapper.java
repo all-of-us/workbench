@@ -22,8 +22,9 @@ public interface AccessModuleNameMapper {
   // these modules cannot be bypassed
   @ValueMapping(source = "PROFILE_CONFIRMATION", target = MappingConstants.NULL)
   @ValueMapping(source = "PUBLICATION_CONFIRMATION", target = MappingConstants.NULL)
-  BypassTimeTargetProperty auditAccessModuleFromStorage(DbAccessModuleName source);
+  BypassTimeTargetProperty bypassAuditPropertyFromStorage(DbAccessModuleName source);
 
+  // only compliance training modules have associated badges
   @ValueMapping(source = "RT_COMPLIANCE_TRAINING", target = "REGISTERED_TIER_TRAINING")
   @ValueMapping(source = "CT_COMPLIANCE_TRAINING", target = "CONTROLLED_TIER_TRAINING")
   @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)

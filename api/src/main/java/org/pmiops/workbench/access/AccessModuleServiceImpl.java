@@ -95,7 +95,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     userAccessModuleDao.save(userAccessModuleToUpdate);
     userServiceAuditor.fireAdministrativeBypassTime(
         user.getUserId(),
-        accessModuleNameMapper.auditAccessModuleFromStorage(accessModule.getName()),
+        accessModuleNameMapper.bypassAuditPropertyFromStorage(accessModule.getName()),
         Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
         Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
   }
