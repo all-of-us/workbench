@@ -113,7 +113,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       .then(setResources)
       .catch(() => {
         setApiLoadError(
-          'Error loading recent resources. Request cannot be completed.'
+          'An error occurred while loading recent resources. Please refresh the page to reload.'
         );
       })
       .finally(() => setLoading(false));
