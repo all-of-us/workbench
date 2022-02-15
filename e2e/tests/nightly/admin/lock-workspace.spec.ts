@@ -65,8 +65,8 @@ describe('Workspace Admin lock-workspace', () => {
     const aboutLockedIcon = aboutPage.getAboutLockedWorkspaceIcon();
     expect(aboutLockedIcon).toBeTruthy();
     // verify DATA & ANALYSIS tabs are disabled
-    await aboutPage.openDataPage({ waitPageChange: false });
-    await aboutPage.openAnalysisPage({ waitPageChange: false });
+    // await aboutPage.openDataPage({ waitPageChange: false });
+    // await aboutPage.openAnalysisPage({ waitPageChange: false });
     // verify share button is disabled
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(true);
     await aboutPage.verifyLockedWorkspaceActionOptions();
@@ -100,8 +100,8 @@ describe('Workspace Admin lock-workspace', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
     // verify DATA & ANALYSIS tabs are accessible
-    await dataPage.openAnalysisPage({ waitPageChange: true });
-    await dataPage.openAboutPage({ waitPageChange: true });
+    // await dataPage.openAnalysisPage({ waitPageChange: true });
+    // await dataPage.openAboutPage({ waitPageChange: true });
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(false);
