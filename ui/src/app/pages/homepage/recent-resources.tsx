@@ -204,14 +204,14 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       apiError && !loading,
       () => (
         <React.Fragment>
-          <div>
+          <div style={{ ...styles.error }}>
             <ClrIcon
               style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
               className='is-solid'
               shape='exclamation-triangle'
               size='30'
             />
-            <div style={{ ...styles.error }}>
+            <div>
               Error loading recent resources. Request cannot be completed.
             </div>
           </div>
@@ -222,56 +222,42 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       resources && wsMap && !loading ? (
         <React.Fragment>
           <SmallHeader>Recently Accessed Items</SmallHeader>
-          {apiError ? (
-            <div>
-              <ClrIcon
-                style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
-                className='is-solid'
-                shape='exclamation-triangle'
-                size='30'
+          <div data-test-id='recent-resources-table'>
+            <DataTable
+              value={tableData}
+              scrollable={true}
+              paginator={true}
+              paginatorTemplate='CurrentPageReport'
+              currentPageReportTemplate='Showing {totalRecords} most recent items'
+            >
+              <Column field='menu' style={styles.menu} />
+              <Column
+                field='resourceType'
+                header='Item type'
+                style={styles.typeColumn}
               />
-              <div style={{ ...styles.error }}>
-                Error loading recent resources. Request cannot be completed.
-              </div>
-            </div>
-          ) : (
-            <div data-test-id='recent-resources-table'>
-              <DataTable
-                value={tableData}
-                scrollable={true}
-                paginator={true}
-                paginatorTemplate='CurrentPageReport'
-                currentPageReportTemplate='Showing {totalRecords} most recent items'
-              >
-                <Column field='menu' style={styles.menu} />
-                <Column
-                  field='resourceType'
-                  header='Item type'
-                  style={styles.typeColumn}
-                />
-                <Column
-                  field='resourceName'
-                  header='Name'
-                  style={styles.column}
-                />
-                <Column
-                  field='workspaceName'
-                  header='Workspace name'
-                  style={styles.column}
-                />
-                <Column
-                  field='formattedLastModified'
-                  header='Last changed'
-                  style={styles.column}
-                />
-                <Column
-                  field='cdrVersionName'
-                  header='Dataset'
-                  style={styles.column}
-                />
-              </DataTable>
-            </div>
-          )}
+              <Column
+                field='resourceName'
+                header='Name'
+                style={styles.column}
+              />
+              <Column
+                field='workspaceName'
+                header='Workspace name'
+                style={styles.column}
+              />
+              <Column
+                field='formattedLastModified'
+                header='Last changed'
+                style={styles.column}
+              />
+              <Column
+                field='cdrVersionName'
+                header='Dataset'
+                style={styles.column}
+              />
+            </DataTable>
+          </div>
         </React.Fragment>
       ) : (
         loading && <SpinnerOverlay />
