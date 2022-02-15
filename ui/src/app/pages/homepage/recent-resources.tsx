@@ -50,15 +50,6 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '22px',
   },
-  error: {
-    width: '99%',
-    marginTop: '2.75rem',
-    padding: '0.25rem',
-    background: colors.warning,
-    color: colors.white,
-    fontSize: '12px',
-    borderRadius: '5px',
-  },
 });
 
 interface NavProps {
