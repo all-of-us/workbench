@@ -95,6 +95,7 @@ const styles = reactStyles({
     borderRadius: '9px',
     backgroundColor: colorWithWhiteness(colors.light, 0.23),
     paddingTop: '1em',
+    marginRight: '20px',
   },
   editableFields: {
     width: '601px',
