@@ -67,7 +67,7 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 'bold',
-    paddingLeft: '1em',
+    paddingLeft: '0.85em',
   },
   tableHeader: {
     color: colors.primary,
