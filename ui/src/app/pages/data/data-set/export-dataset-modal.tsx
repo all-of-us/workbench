@@ -84,6 +84,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
             domainValuePairs: dataset.domainValuePairs,
             prePackagedConceptSet: dataset.prePackagedConceptSet,
           }),
+      domainValuePairs: [],
     };
   }
 

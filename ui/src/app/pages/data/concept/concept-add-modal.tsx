@@ -178,6 +178,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
           name,
           description: newSetDescription,
           domain,
+          criteriums: [],
         };
         const request: CreateConceptSetRequest = {
           conceptSet,
