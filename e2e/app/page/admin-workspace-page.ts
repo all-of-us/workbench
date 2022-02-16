@@ -74,15 +74,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     await button.click();
   }
 
-  //click "Lock Workspace" button
-  // async clickLockWorkspaceButton1(): Promise<LockWorkspaceModal> {
-  //   const button = this.getLockWorkspaceButton1();
-  //   await button.click();
-  //   const modal = new LockWorkspaceModal(this.page);
-  //   await modal.waitForLoad();
-  //   return modal;
-  // }
-
   // extract only the Workspace Namespace text for verification
   async getWorkspaceNamespaceText(): Promise<string> {
     const xpath = '//label[contains(normalize-space(),"Workspace Namespace")]//following-sibling::div';
