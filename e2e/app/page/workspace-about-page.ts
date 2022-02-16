@@ -6,6 +6,8 @@ import Button from 'app/element/button';
 import ShareModal from 'app/modal/share-modal';
 import BaseElement from 'app/element/base-element';
 import WorkspaceEditPage from './workspace-edit-page';
+import Tab from 'app/element/tab';
+import { Tabs } from 'app/text-labels';
 
 export const PageTitle = 'View Workspace Details';
 
@@ -109,5 +111,11 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     await edit.click();
     const editPage = new WorkspaceEditPage(page);
     return await editPage.waitForLoad();
+  }
+
+  // get the tab attribute to verify the tabs state
+  async getTabsAttribute(page: Page, tabName: Tabs, attribute: string): Promise<string> {
+    const tab = new Tab(page, tabName);
+    return await tab.getAttribute(attribute);
   }
 }
