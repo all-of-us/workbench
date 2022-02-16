@@ -33,9 +33,6 @@ describe('Updating runtime status', () => {
 
     // Select detachable disk, start.
     await runtimePanel.pickDetachableDisk();
-
-    // TODO(calbach): Investigate why 110GB -> 120GB causes issues.
-    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
     await runtimePanel.createRuntime({ waitForComplete: false });
 
     // Run notebook to write a file to disk.
@@ -55,7 +52,7 @@ describe('Updating runtime status', () => {
     // Create a new runtime, reattaching the PD and increasing the size.
     await runtimePanel.open();
     await runtimePanel.pickDetachableDisk();
-    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 50);
+    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
     await runtimePanel.createRuntime({ waitForComplete: false });
 
     // Run notebook to verify file is still on disk; check new disk size.
