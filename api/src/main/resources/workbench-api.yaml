@@ -6772,12 +6772,15 @@ definitions:
 
   InstitutionMembershipRequirement:
     type: string
-    description: 'Type of Institution requirement for member to access a tier.
-      It can be matching email address, email domains or no access'
+    description: 'Institution email matching requirements for tier access.
+      We can match on email DOMAINS or individual email ADDRESSES.  NO_ACCESS indicates that the
+      institution does not provide access to the tier at all, and UNINITIALIZED is for unsaved
+      institutions in the admin UI.'
     enum:
       - DOMAINS
       - ADDRESSES
       - NO_ACCESS
+      - UNINITIALIZED
 
   InstitutionalRole:
     type: string

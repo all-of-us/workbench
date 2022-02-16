@@ -449,7 +449,8 @@ export const AdminInstitutionEdit = fp.flow(
           tierConfigs: [
             {
               ...defaultTierConfig(AccessTierShortNames.Registered),
-              membershipRequirement: null, // the default is NOACCESS which also means "don't render the card"
+              membershipRequirement:
+                InstitutionMembershipRequirement.UNINITIALIZED,
             },
           ],
         },
@@ -524,15 +525,12 @@ export const AdminInstitutionEdit = fp.flow(
       );
     }
 
-    private setEnableControlledTier(
-      accessTierShortName: string,
-      enableControlled: boolean
-    ) {
-      const { tierConfigs } = this.state.institution;
+    private setEnableControlledTier(enableControlled: boolean) {
+      const { institution, institutionBeforeEdits } = this.state;
       this.setTierConfigs(
         updateEnableControlledTier(
-          tierConfigs,
-          accessTierShortName,
+          institution.tierConfigs,
+          institutionBeforeEdits?.tierConfigs,
           enableControlled
         )
       );
@@ -899,7 +897,7 @@ export const AdminInstitutionEdit = fp.flow(
                   accessTierShortName={accessTierShortName}
                   institution={institution}
                   setEnableControlledTier={(value) =>
-                    this.setEnableControlledTier(accessTierShortName, value)
+                    this.setEnableControlledTier(value)
                   }
                   setEraRequired={(value) =>
                     this.setRequireEra(accessTierShortName, value)
