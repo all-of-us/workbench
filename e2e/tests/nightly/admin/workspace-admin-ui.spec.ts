@@ -14,6 +14,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
+  const reasonText = 'locking this workspace';
   let workspaceNamespace = '';
 
   beforeEach(async () => {
@@ -53,7 +54,7 @@ describe('Workspace Admin', () => {
     const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton(workspaceStatus.Lock);
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
 
-    await lockWorkspaceModal.createLockWorkspaceReason();
+    await lockWorkspaceModal.createLockWorkspaceReason(reasonText);
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
     await lockWorkspaceModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
