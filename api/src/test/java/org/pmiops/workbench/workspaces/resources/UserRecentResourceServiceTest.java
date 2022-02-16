@@ -454,6 +454,9 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testDeleteDependentCohortReviewOnDeletingCohort() {
+    // Add the following entry in user_recently_modified_resource:
+    // 1) Cohort
+    // 2) Cohort Review that is using the Cohort
     userRecentResourceService.updateCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
     userRecentResourceService.updateCohortReviewEntry(
@@ -461,12 +464,11 @@ public class UserRecentResourceServiceTest {
 
     List<DbUserRecentlyModifiedResource> resources =
         userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
-
     assertThat(resources.size()).isEqualTo(2);
 
+    // Deleting Cohort should delete the Cohort Review using it
     userRecentResourceService.deleteCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
-
     resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
 
     assertThat(resources.size()).isEqualTo(0);
@@ -474,6 +476,9 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testDeleteDependentDataSetOnDeletingCohort() {
+    // Add the following entry in user_recently_modified_resource:
+    // 1) Cohort
+    // 2) Data Set that is using the Cohort
     userRecentResourceService.updateCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
 
@@ -487,12 +492,16 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.deleteCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
 
+    // Deleting Cohort should delete the dataSet using it
     resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
     assertThat(resources.size()).isEqualTo(0);
   }
 
   @Test
   public void testDeleteDependentDataSetOnDeletingConceptSet() {
+    // Add the following entry in user_recently_modified_resource:
+    // 1) Concept Set
+    // 2) Data Set that is using the Concept Set
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
 
@@ -506,8 +515,8 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.deleteConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
 
+    // Deleting Concept Set should also delete the data Set entry that is using the Concept Set
     resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
-    // Deleting Concept Set should delete the dataSet using it
     assertThat(resources.size()).isEqualTo(0);
   }
 }

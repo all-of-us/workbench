@@ -134,10 +134,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   /** Deletes cohort entry from user_recently_modified_resource */
   /**
    * Since user_recently_modified_resource does not hold FK constraints, hence we have to explicitly
-   * delete COHORT REVIEWs and DATA SETs that are using the deleted cohort id
+   * delete COHORT REVIEWS and DATA SETs that are using the deleted cohort id
    */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
+    // The logic to delete Cohort Review/DataSet used by deleted conceptSet is to be done
+    // for the new table (user_recently_modified_resource) only, hence execute it only if the
+    // feature flag enableDSCREntryInRecentModified is set to TRUE
+
     if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       List<Long> cohortReviewIds =
           cohortReviewDao.findAllByCohortId(cohortId).stream()
@@ -149,7 +153,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       }
 
       List<Long> datasetIds =
-          datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
+          datasetDao.findDbDataSetsByCohortIdAndWorkspaceId(cohortId, workspaceId).stream()
               .map(DbDataset::getDataSetId)
               .collect(Collectors.toList());
 
@@ -167,14 +171,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   /** Deletes concept set entry from user_recently_modified_resource */
   /**
    * Since user_recently_modified_resource does not hold FK hence we have to explicitly delete
-   * DATA_SET using the deleted concept set id Since this is the case only for the new table, the
-   * logic will be behind the feature flag
+   * DATA_SET using the deleted concept set id
    */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
+    // The logic to delete dataSet used by deleted conceptSet is to be done for the new table
+    // (user_recently_modified_resource)
+    // execute it only if the feature flag enableDSCREntryInRecentModified is set to TRUE
     if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       List<Long> datasetIds =
-          datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
+          datasetDao.findDbDatasetsByConceptSetIdAndWorkspaceId(conceptSetId, workspaceId).stream()
               .map(DbDataset::getDataSetId)
               .collect(Collectors.toList());
 

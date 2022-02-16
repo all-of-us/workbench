@@ -1,12 +1,13 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   List<DbDataset> findByWorkspaceIdAndInvalid(long workspaceId, boolean invalid);
@@ -14,9 +15,9 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   List<DbDataset> findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
       long cohortId, long workspaceId, boolean dirty);
 
-  List<DbDataset> findDbDataSetsByCohortIdsAndWorkspaceId(long cohortId, long workspaceId);
+  List<DbDataset> findDbDataSetsByCohortIdAndWorkspaceId(long cohortId, long workspaceId);
 
-  List<DbDataset> findDbDatasetsByConceptSetIdsAndWorkspaceId(long conceptId, long workspaceId);
+  List<DbDataset> findDbDatasetsByConceptSetIdAndWorkspaceId(long conceptId, long workspaceId);
 
   List<DbDataset> findDataSetsByConceptSetIdsAndWorkspaceIdAndInvalid(
       long conceptId, long workspaceId, boolean dirty);
