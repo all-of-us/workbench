@@ -6,10 +6,8 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
 
 import {
-  Institution,
   InstitutionApi,
   InstitutionMembershipRequirement,
-  OrganizationType,
 } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
