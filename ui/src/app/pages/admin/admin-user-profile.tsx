@@ -38,7 +38,6 @@ import {
   displayModuleCompletionDate,
   displayModuleExpirationDate,
   displayModuleStatus,
-  displayTierBadgeByRequiredModule,
   ErrorsTooltip,
   getEraNote,
   getInitalCreditsUsage,
@@ -49,6 +48,7 @@ import {
   InstitutionDropdown,
   isBypassed,
   profileNeedsUpdate,
+  TierBadgesMaybe,
   updateAccountProperties,
   UserAdminTableLink,
   UserAuditLink,
@@ -67,7 +67,7 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 'bold',
-    paddingLeft: '1em',
+    paddingLeft: '0.85em',
   },
   tableHeader: {
     color: colors.primary,
@@ -95,6 +95,7 @@ const styles = reactStyles({
     borderRadius: '9px',
     backgroundColor: colorWithWhiteness(colors.light, 0.23),
     paddingTop: '1em',
+    marginRight: '20px',
   },
   editableFields: {
     width: '601px',
@@ -252,6 +253,27 @@ const accessModulesForTable = [
   AccessModule.PUBLICATIONCONFIRMATION,
 ];
 
+interface CommonToggleProps {
+  name: string;
+  checked: boolean;
+  dataTestId: string;
+  onToggle: () => void;
+}
+const CommonToggle = (props: CommonToggleProps) => {
+  const { name, checked, dataTestId, onToggle } = props;
+  return (
+    <Toggle
+      name={name}
+      checked={checked}
+      data-test-id={dataTestId}
+      onToggle={() => onToggle()}
+      style={{ paddingBottom: 0, flexGrow: 0 }}
+      height={24}
+      width={50}
+    />
+  );
+};
+
 interface AccessModuleTableProps {
   oldProfile: Profile;
   updatedProfile: Profile;
@@ -285,17 +307,21 @@ const ToggleForModule = (props: ToggleProps) => {
       : {};
 
   return (
-    <div style={highlightStyle}>
-      <Toggle
+    <FlexRow
+      style={{
+        ...highlightStyle,
+        justifyContent: 'center',
+      }}
+    >
+      <CommonToggle
         name=' '
-        style={{ paddingBottom: 0, flexGrow: 0 }}
         checked={isModuleBypassed}
-        data-test-id={`${moduleName}-toggle`}
+        dataTestId={`${moduleName}-toggle`}
         onToggle={() =>
           bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
         }
       />
-    </div>
+    </FlexRow>
   );
 };
 
@@ -327,9 +353,11 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
               updatedProfile,
               moduleName
             ),
-            accessTierBadge: displayTierBadgeByRequiredModule(
-              props.updatedProfile,
-              moduleName
+            accessTierBadges: (
+              <TierBadgesMaybe
+                profile={props.updatedProfile}
+                moduleName={moduleName}
+              />
             ),
             bypassToggle: bypassable && (
               <ToggleForModule moduleName={moduleName} {...props} />
@@ -357,7 +385,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       <Column field='moduleStatus' header='Status' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />
-      <Column field='accessTierBadge' header='Required for tier access' />
+      <Column field='accessTierBadges' header='Required for tier access' />
       <Column field='bypassToggle' header='Bypass' />
     </DataTable>
   );
@@ -375,13 +403,15 @@ const DisabledToggle = (props: {
       : {};
 
   return (
-    <div style={highlightStyle}>
-      <Toggle
-        style={{ paddingTop: '2em', paddingLeft: '2em', flexGrow: 0 }}
-        name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
-        checked={!currentlyDisabled}
-        onToggle={() => toggleDisabled()}
-      />
+    <div style={{ paddingTop: '2.5em', paddingLeft: '2em' }}>
+      <div style={highlightStyle}>
+        <CommonToggle
+          name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
+          checked={!currentlyDisabled}
+          dataTestId='user-disabled-toggle'
+          onToggle={() => toggleDisabled()}
+        />
+      </div>
     </div>
   );
 };
