@@ -25,7 +25,7 @@ describe('Workspace Admin lock-workspace', () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
   });
 
-  test('verify if workspace is locked', async () => {
+  test.only('verify if workspace is locked', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
@@ -65,9 +65,9 @@ describe('Workspace Admin lock-workspace', () => {
     expect(aboutLockReason).toEqual(reasonText);
     const aboutLockedIcon = aboutPage.getAboutLockedWorkspaceIcon();
     expect(aboutLockedIcon).toBeTruthy();
-    // verify DATA & ANALYSIS tabs are disabled
-    // await aboutPage.openDataPage({ waitPageChange: false });
-    // await aboutPage.openAnalysisPage({ waitPageChange: false });
+    // verify DATA & ANALYSIS tabs are inactive for locked workspace
+    expect(await aboutPage.getTabsAttribute(page, Tabs.Analysis, 'aria-selected')).toEqual('false');
+    expect(await aboutPage.getTabsAttribute(page, Tabs.Data, 'aria-selected')).toEqual('false');
     // verify share button is disabled
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(true);
     await aboutPage.verifyLockedWorkspaceActionOptions();
