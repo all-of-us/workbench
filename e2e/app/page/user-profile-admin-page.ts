@@ -7,7 +7,7 @@ import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
-import Switch, { defaultSwitchXpath } from 'app/element/switch';
+import Switch, { defaultSwitchXpath } from 'app/component/switch';
 import StaticText from 'app/element/staticText';
 import { parseForNumbericalString } from 'utils/test-utils';
 import DataTable from 'app/component/data-table';
@@ -64,14 +64,6 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
     const words = text.split('\n')[1];
     const currencies = parseForNumbericalString(words);
     return [parseInt(currencies[0]), parseInt(currencies[1])];
-  }
-
-  async contactEmailBugWorkaround(text: string): Promise<void> {
-    await this.page.$eval(
-      'input[data-test-id="contactEmail"]',
-      (el: HTMLInputElement, value: string) => (el.value = value),
-      text
-    );
   }
 
   getContactEmail(): Textbox {

@@ -1,4 +1,4 @@
-import BaseElement from './base-element';
+import BaseElement from 'app/element/base-element';
 import { Page } from 'puppeteer';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import Container from 'app/container';
@@ -44,6 +44,6 @@ export default class Switch extends BaseElement {
   async isOn(): Promise<boolean> {
     const labelElement = await this.asElementHandle();
     const [input] = await labelElement.$x('.//input[@type="checkbox" and @role="switch"]');
-    return !!(await getPropValue<boolean>(input, 'checked'));
+    return await getPropValue<boolean>(input, 'checked');
   }
 }
