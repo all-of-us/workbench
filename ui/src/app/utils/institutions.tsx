@@ -17,7 +17,7 @@ import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 import { isAbortError } from './errors';
-import { isBlank, switchCase } from './index';
+import { cond, isBlank, switchCase } from './index';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
@@ -212,51 +212,71 @@ export function updateRequireEra(
   });
 }
 
-// initialize the CT config depending on the RT config:
+// initialize a new CT config depending on the RT config:
 // RT = DOMAINS -> copy the DOMAINS list to CT
 // RT = ADDRESSES -> use ADDRESSES in CT but do not copy the list
 // RT = UNINITIALIZED (add mode) -> CT is also UNINITIALIZED
-export function updateEnableControlledTier(
-  tierConfigs: Array<InstitutionTierConfig>,
-  enableCtAccess: boolean
-): Array<InstitutionTierConfig> {
+const initControlledTierConfig = (
+  tierConfigs: InstitutionTierConfig[]
+): InstitutionTierConfig => {
   const rtConfig = tierConfigs.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Registered
   );
 
-  const ctConfig = !enableCtAccess
-    ? // if we are disabling CT access, choose the default (no-render) config
-      defaultTierConfig(AccessTierShortNames.Controlled)
-    : switchCase(
-        rtConfig.membershipRequirement,
-        [
-          // if RT is DOMAINS, copy RT to CT
-          InstitutionMembershipRequirement.DOMAINS,
-          () => ({
-            ...rtConfig,
-            accessTierShortName: AccessTierShortNames.Controlled,
-          }),
-        ],
-        [
-          // if RT is ADDRESSES, copy RT to CT but clear the address list
-          InstitutionMembershipRequirement.ADDRESSES,
-          () => ({
-            ...rtConfig,
-            accessTierShortName: AccessTierShortNames.Controlled,
-            emailAddresses: [],
-          }),
-        ],
-        [
-          // if RT is UNINITIALIZED, copy UNINITIALIZED RT to CT
-          InstitutionMembershipRequirement.UNINITIALIZED,
-          () => ({
-            ...rtConfig,
-            accessTierShortName: AccessTierShortNames.Controlled,
-          }),
-        ]
-      );
+  return switchCase(
+    rtConfig.membershipRequirement,
+    [
+      // if RT is DOMAINS, copy RT to CT
+      InstitutionMembershipRequirement.DOMAINS,
+      () => ({
+        ...rtConfig,
+        accessTierShortName: AccessTierShortNames.Controlled,
+      }),
+    ],
+    [
+      // if RT is ADDRESSES, copy RT to CT but clear the address list
+      InstitutionMembershipRequirement.ADDRESSES,
+      () => ({
+        ...rtConfig,
+        accessTierShortName: AccessTierShortNames.Controlled,
+        emailAddresses: [],
+      }),
+    ],
+    [
+      // if RT is UNINITIALIZED, copy UNINITIALIZED RT to CT
+      InstitutionMembershipRequirement.UNINITIALIZED,
+      () => ({
+        ...rtConfig,
+        accessTierShortName: AccessTierShortNames.Controlled,
+      }),
+    ]
+  );
+};
 
-  return mergeTierConfigs(tierConfigs, ctConfig);
+// 3 scenarios here:
+// disable CT -> use the default no-render tier config for CT
+// enable CT for the first time -> initControlledTierConfig() from RT
+// re-enable CT after disabling without saving -> use the pre-changes CT
+export function updateEnableControlledTier(
+  tierConfigs: InstitutionTierConfig[],
+  tierConfigsBeforeEditing: InstitutionTierConfig[],
+  enableCtAccess: boolean
+): InstitutionTierConfig[] {
+  // if the before-editing institution had a CT and we are restoring it, use the before-editing CT
+  const previousCtConfig = tierConfigsBeforeEditing?.find(
+    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
+  );
+
+  const newCtConfig = cond(
+    [!enableCtAccess, () => defaultTierConfig(AccessTierShortNames.Controlled)],
+    [enableCtAccess && !!previousCtConfig, () => previousCtConfig],
+    [
+      enableCtAccess && !previousCtConfig,
+      () => initControlledTierConfig(tierConfigs),
+    ]
+  );
+
+  return mergeTierConfigs(tierConfigs, newCtConfig);
 }
 
 export function getTierBadge(accessTierShortName: string): () => JSX.Element {

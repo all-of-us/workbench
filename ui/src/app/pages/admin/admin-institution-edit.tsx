@@ -526,9 +526,13 @@ export const AdminInstitutionEdit = fp.flow(
     }
 
     private setEnableControlledTier(enableControlled: boolean) {
-      const { tierConfigs } = this.state.institution;
+      const { institution, institutionBeforeEdits } = this.state;
       this.setTierConfigs(
-        updateEnableControlledTier(tierConfigs, enableControlled)
+        updateEnableControlledTier(
+          institution.tierConfigs,
+          institutionBeforeEdits?.tierConfigs,
+          enableControlled
+        )
       );
     }
 

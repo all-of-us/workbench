@@ -78,10 +78,6 @@ export const VERILY_WITHOUT_CT: Institution = {
       eraRequired: true,
       emailDomains: ['verily.com', 'google.com'],
     },
-    {
-      accessTierShortName: 'controlled',
-      membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
-    },
   ],
   userInstructions: 'Verily User Instruction',
 };

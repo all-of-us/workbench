@@ -6,8 +6,10 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
 
 import {
+  Institution,
   InstitutionApi,
   InstitutionMembershipRequirement,
+  OrganizationType,
 } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -151,14 +153,17 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
 
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
 
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), false);
     expect(findCTEnabled(wrapper).props.checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
 
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {
