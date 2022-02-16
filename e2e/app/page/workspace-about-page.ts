@@ -113,9 +113,11 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     return await editPage.waitForLoad();
   }
 
-  // get the tab attribute to verify the tabs state
-  async getTabsAttribute(page: Page, tabName: Tabs, attribute: string): Promise<string> {
-    const tab = new Tab(page, tabName);
-    return await tab.getAttribute(attribute);
+  // verify the state of the inactive tabs
+  async getTabState(page: Page, tabName: Tabs): Promise<boolean>{
+      const tab = new Tab(page, tabName);
+      await tab.isSelected();
+      return false;
   }
+
 }
