@@ -32,9 +32,9 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 public class DbWorkspace {
   /**
    * Deprecated database migration field. The column is preserved for historical reference, but
-   * forced to 2 (NEW) for all workspaces going forward.
+   * forced to 1 (NEW) for all workspaces going forward.
    */
-  public static final short BILLING_MIGRATION_NEW_STATUS = 2;
+  public static final short BILLING_MIGRATION_NEW_STATUS = 1;
 
   private short billingMigrationStatus = BILLING_MIGRATION_NEW_STATUS;
   private String firecloudUuid;
