@@ -197,12 +197,10 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     [
       apiLoadError && !loading,
       () => (
-        <React.Fragment>
-          <AlertWarning style={{ fontSize: 14 }}>
-            <ClrIcon className='is-solid' shape='exclamation-triangle' />
-            {apiLoadError}
-          </AlertWarning>
-        </React.Fragment>
+        <AlertWarning style={{ fontSize: 14 }}>
+          <ClrIcon className='is-solid' shape='exclamation-triangle' />
+          {apiLoadError}
+        </AlertWarning>
       ),
     ],
     [
