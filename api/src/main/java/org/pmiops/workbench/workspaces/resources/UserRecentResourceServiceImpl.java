@@ -153,7 +153,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       }
 
       List<Long> datasetIds =
-          datasetDao.findDbDataSetsByCohortIdAndWorkspaceId(cohortId, workspaceId).stream()
+          datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
               .map(DbDataset::getDataSetId)
               .collect(Collectors.toList());
 
@@ -180,7 +180,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     // execute it only if the feature flag enableDSCREntryInRecentModified is set to TRUE
     if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       List<Long> datasetIds =
-          datasetDao.findDbDatasetsByConceptSetIdAndWorkspaceId(conceptSetId, workspaceId).stream()
+          datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
               .map(DbDataset::getDataSetId)
               .collect(Collectors.toList());
 
