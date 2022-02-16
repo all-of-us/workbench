@@ -62,6 +62,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -82,6 +83,7 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -114,6 +116,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.annotation.Propagation;
@@ -159,6 +163,8 @@ public class CohortsControllerTest {
           .countValue(789L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
+  public static final String UPDATED_COHORT_NAME = "updatedCohortName";
+  public static final String DUPLICATED_COHORT_NAME = "Duplicated Cohort Name";
 
   private static DbUser currentUser;
 
@@ -359,14 +365,8 @@ public class CohortsControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspace2 = workspacesController.createWorkspace(workspace2).getBody();
 
-    stubGetWorkspace(
-        workspace.getNamespace(), WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspaceAcl(
-        workspace.getNamespace(), WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspaceAcl(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace2, WorkspaceAccessLevel.OWNER);
   }
 
   private JSONObject createDemoCriteria() {
@@ -401,7 +401,15 @@ public class CohortsControllerTest {
         .thenReturn(workspaceAccessLevelResponse);
   }
 
-  public Cohort createDefaultCohort() {
+  private void stubWorkspaceAccessLevelWithCreatorEmail(
+      Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, workspaceAccessLevel);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), workspace.getName(), CREATOR_EMAIL, workspaceAccessLevel);
+  }
+
+  private Cohort createDefaultCohort() {
     Cohort cohort = new Cohort();
     cohort.setName(COHORT_NAME);
     cohort.setCriteria(cohortCriteria);
@@ -427,6 +435,56 @@ public class CohortsControllerTest {
   }
 
   @Test
+  public void testCreateCohortOwner() {
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.OWNER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    assertThat(saved.getCriteria()).isEqualTo(createDefaultCohort().getCriteria());
+    assertThat(saved.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(saved.getCreationTime()).isNotNull();
+    assertThat(saved.getCreationTime()).isEqualTo(saved.getLastModifiedTime());
+  }
+
+  @Test
+  public void testCreateCohortWriter() {
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    assertThat(saved.getCriteria()).isEqualTo(createDefaultCohort().getCriteria());
+    assertThat(saved.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(saved.getCreationTime()).isNotNull();
+    assertThat(saved.getCreationTime()).isEqualTo(saved.getLastModifiedTime());
+  }
+
+  @Test
+  public void testCreateCohortReader() {
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.createCohort(
+                    workspace.getNamespace(), workspace.getId(), createDefaultCohort()));
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void testCreateCohortNoAccess() {
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.createCohort(
+                    workspace.getNamespace(), workspace.getId(), createDefaultCohort()));
+    assertForbiddenException(exception);
+  }
+
+  @Test
   public void testCreateCohortBadCriteria() {
     assertThrows(
         ServerErrorException.class,
@@ -440,61 +498,266 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testUpdateCohort() throws Exception {
-    Cohort cohort = createDefaultCohort();
-    cohort =
+  public void testUpdateCohortOwner() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
         cohortsController
-            .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
             .getBody();
-
-    cohort.setName("updated-name");
+    // change access, update and check
+    CLOCK.increment(1000); // lets say time ticked 1 sec past
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.OWNER);
     Cohort updated =
         cohortsController
-            .updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort)
+            .updateCohort(
+                workspace.getNamespace(),
+                workspace.getId(),
+                saved.getId(),
+                saved.name(UPDATED_COHORT_NAME))
             .getBody();
-    cohort.setEtag(updated.getEtag());
-    assertThat(updated).isEqualTo(cohort);
-
-    cohort.setName("updated-name2");
-    updated =
-        cohortsController
-            .updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort)
-            .getBody();
-    cohort.setEtag(updated.getEtag());
-    assertThat(updated).isEqualTo(cohort);
-
-    Cohort got =
-        cohortsController
-            .getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId())
-            .getBody();
-    assertThat(got).isEqualTo(cohort);
+    // assert
+    assertThat(updated.getName()).isEqualTo(UPDATED_COHORT_NAME);
+    assertThat(updated.getCriteria()).isEqualTo(saved.getCriteria());
+    assertThat(updated.getCreationTime()).isEqualTo(saved.getCreationTime());
+    assertThat(updated.getLastModifiedTime()).isGreaterThan(saved.getLastModifiedTime());
   }
 
   @Test
-  public void testDuplicateCohort() {
-    Cohort originalCohort = createDefaultCohort();
-    originalCohort =
+  public void testUpdateCohortWriter() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
         cohortsController
-            .createCohort(workspace.getNamespace(), workspace.getId(), originalCohort)
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
             .getBody();
-
-    DuplicateCohortRequest params = new DuplicateCohortRequest();
-    params.setNewName("New Cohort Name");
-    params.setOriginalCohortId(originalCohort.getId());
-
-    Cohort newCohort =
+    // change access, update and check
+    CLOCK.increment(1000); // lets say time ticked 1 sec past
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort updated =
         cohortsController
-            .duplicateCohort(workspace.getNamespace(), workspace.getId(), params)
+            .updateCohort(
+                workspace.getNamespace(),
+                workspace.getId(),
+                saved.getId(),
+                saved.name(UPDATED_COHORT_NAME))
             .getBody();
-    newCohort =
-        cohortsController
-            .getCohort(workspace.getNamespace(), workspace.getId(), newCohort.getId())
-            .getBody();
+    // assert
+    assertThat(updated.getName()).isEqualTo(UPDATED_COHORT_NAME);
+    assertThat(updated.getCriteria()).isEqualTo(saved.getCriteria());
+    assertThat(updated.getCreationTime()).isEqualTo(saved.getCreationTime());
+    assertThat(updated.getLastModifiedTime()).isGreaterThan(saved.getLastModifiedTime());
+  }
 
-    assertThat(newCohort.getName()).isEqualTo(params.getNewName());
-    assertThat(newCohort.getCriteria()).isEqualTo(originalCohort.getCriteria());
-    assertThat(newCohort.getType()).isEqualTo(originalCohort.getType());
-    assertThat(newCohort.getDescription()).isEqualTo(originalCohort.getDescription());
+  @Test
+  public void testUpdateCohortReader() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, update and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.updateCohort(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    saved.getId(),
+                    saved.name(UPDATED_COHORT_NAME)));
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void testUpdateCohortNoAccess() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, update and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.updateCohort(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    saved.getId(),
+                    saved.name(UPDATED_COHORT_NAME)));
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void testDeleteCohortOwner() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, delete and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.OWNER);
+    ResponseEntity<EmptyResponse> response =
+        cohortsController.deleteCohort(workspace.getNamespace(), workspace.getId(), saved.getId());
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  public void testDeleteCohortWriter() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, delete and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    ResponseEntity<EmptyResponse> response =
+        cohortsController.deleteCohort(workspace.getNamespace(), workspace.getId(), saved.getId());
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  public void testDeleteCohortReader() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, delete and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.deleteCohort(
+                    workspace.getNamespace(), workspace.getId(), saved.getId()));
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void testDeleteCohortNoAccess() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort saved =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, delete and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.deleteCohort(
+                    workspace.getNamespace(), workspace.getId(), saved.getId()));
+    assertForbiddenException(exception);
+  }
+
+  private void assertForbiddenException(Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
+  }
+
+  @Test
+  public void testDuplicateCohortOwner() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort original =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, duplicate and check
+    CLOCK.increment(1000L); // increment clock before duplicating
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.OWNER);
+    DuplicateCohortRequest duplicateCohortRequest =
+        new DuplicateCohortRequest()
+            .newName(DUPLICATED_COHORT_NAME)
+            .originalCohortId(original.getId());
+    Cohort duplicated =
+        cohortsController
+            .duplicateCohort(workspace.getNamespace(), workspace.getId(), duplicateCohortRequest)
+            .getBody();
+    assertDuplicatedCohort(original, duplicated);
+  }
+
+  @Test
+  public void testDuplicateCohortWriter() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort original =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, duplicate and check
+    CLOCK.increment(1000L); // increment clock before duplicating
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    DuplicateCohortRequest duplicateCohortRequest =
+        new DuplicateCohortRequest()
+            .newName(DUPLICATED_COHORT_NAME)
+            .originalCohortId(original.getId());
+    Cohort duplicated =
+        cohortsController
+            .duplicateCohort(workspace.getNamespace(), workspace.getId(), duplicateCohortRequest)
+            .getBody();
+    assertDuplicatedCohort(original, duplicated);
+  }
+
+  @Test
+  public void testDuplicateCohortReader() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort original =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, duplicate and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.READER);
+    DuplicateCohortRequest duplicateCohortRequest =
+        new DuplicateCohortRequest()
+            .newName(DUPLICATED_COHORT_NAME)
+            .originalCohortId(original.getId());
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.duplicateCohort(
+                    workspace.getNamespace(), workspace.getId(), duplicateCohortRequest));
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void testDuplicateCohortNoAccess() {
+    // minimal access to create
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.WRITER);
+    Cohort original =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getId(), createDefaultCohort())
+            .getBody();
+    // change access, duplicate and check
+    stubWorkspaceAccessLevelWithCreatorEmail(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    DuplicateCohortRequest duplicateCohortRequest =
+        new DuplicateCohortRequest()
+            .newName(DUPLICATED_COHORT_NAME)
+            .originalCohortId(original.getId());
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortsController.duplicateCohort(
+                    workspace.getNamespace(), workspace.getId(), duplicateCohortRequest));
+    assertForbiddenException(exception);
   }
 
   @Test
@@ -892,5 +1155,14 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
+  }
+
+  private void assertDuplicatedCohort(Cohort original, Cohort duplicated) {
+    assertThat(duplicated.getName()).isEqualTo(DUPLICATED_COHORT_NAME);
+    assertThat(duplicated.getCreationTime()).isEqualTo(duplicated.getLastModifiedTime());
+    assertThat(duplicated.getCreationTime()).isGreaterThan(original.getCreationTime());
+    assertThat(duplicated.getCriteria()).isEqualTo(original.getCriteria());
+    assertThat(duplicated.getType()).isEqualTo(original.getType());
+    assertThat(duplicated.getDescription()).isEqualTo(original.getDescription());
   }
 }

@@ -396,10 +396,6 @@ export default class RuntimePanel extends BaseSidebar {
 
   async clickDeleteEnvironmentButton(): Promise<void> {
     await this.clickButton(LinkText.DeleteEnvironment);
-    // Select "Delete gce runtime and pd" radiobutton when PD-disk is enabled.
-    if (config.ENABLED_PERSISTENT_DISK) {
-      await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
-    }
     await this.clickButton(LinkText.Delete);
   }
 }

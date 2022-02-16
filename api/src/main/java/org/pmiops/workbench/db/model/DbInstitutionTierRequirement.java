@@ -19,6 +19,7 @@ public class DbInstitutionTierRequirement {
     DOMAINS,
     ADDRESSES,
     NO_ACCESS,
+    UNINITIALIZED
   }
 
   private long institutionTierRequirementId;

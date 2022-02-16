@@ -566,6 +566,11 @@ export class Toggle extends React.Component<ToggleProps> {
   render() {
     const { name, checked, disabled, onToggle, style, height, width } =
       this.props;
+
+    // the minimum of height and width to ensure the handle is inside the toggle
+    // minus a 1-pixel gap on both sides
+    const handleDiameter = height && width && Math.min(height, width) - 2;
+
     return (
       <label
         style={{
@@ -583,6 +588,7 @@ export class Toggle extends React.Component<ToggleProps> {
           disabled={disabled}
           height={height}
           width={width}
+          handleDiameter={handleDiameter}
         />
         <span style={{ marginLeft: '.5rem' }}>{name}</span>
       </label>
