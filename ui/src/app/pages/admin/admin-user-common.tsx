@@ -149,7 +149,7 @@ export const getInitialCreditLimitOptions = (
   );
 };
 
-export const getInitalCreditsUsage = (profile: Profile): string => {
+export const getInitialCreditsUsage = (profile: Profile): string => {
   const { freeTierDollarQuota, freeTierUsage } = profile;
   return `${formatInitialCreditsUSD(
     freeTierUsage

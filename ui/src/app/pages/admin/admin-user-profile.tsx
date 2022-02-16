@@ -40,7 +40,7 @@ import {
   displayModuleStatus,
   ErrorsTooltip,
   getEraNote,
-  getInitalCreditsUsage,
+  getInitialCreditsUsage,
   getPublicInstitutionDetails,
   InitialCreditsDropdown,
   InstitutionalRoleDropdown,
@@ -131,7 +131,7 @@ const UneditableFields = (props: { profile: Profile }) => {
         <UneditableField label='Name' value={`${givenName} ${familyName}`} />
         <UneditableField
           label='Initial Credits Used'
-          value={getInitalCreditsUsage(props.profile)}
+          value={getInitialCreditsUsage(props.profile)}
         />
       </FlexColumn>
       <FlexColumn style={{ paddingLeft: '80px' }}>
