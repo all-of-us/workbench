@@ -53,9 +53,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
   }
 
-  // getLockWorkspaceButton(): Button {
-  //   return Button.findByName(this.page, { normalizeSpace: LinkText.LockWorkspace });
-  // }
 
   getLockWorkspaceButton(status: workspaceStatus): Button {
     return Button.findByName(this.page, { normalizeSpace: status });

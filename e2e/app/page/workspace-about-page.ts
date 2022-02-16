@@ -114,10 +114,9 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   // verify the state of the inactive tabs
-  async getTabState(page: Page, tabName: Tabs): Promise<boolean>{
-      const tab = new Tab(page, tabName);
-      await tab.isSelected();
-      return false;
+  async getTabState(page: Page, tabName: Tabs): Promise<boolean> {
+    const tab = new Tab(page, tabName);
+    await tab.isSelected();
+    return false;
   }
-
 }
