@@ -8,6 +8,7 @@ import WorkspacesPage from './workspaces-page';
 import { getAttrValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { makeDateTimeStr } from 'utils/str-utils';
+import { takeScreenshot } from 'utils/save-file-utils';
 
 export const PageTitle = 'Homepage';
 
