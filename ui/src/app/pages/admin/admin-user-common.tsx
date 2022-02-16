@@ -89,9 +89,11 @@ export const commonStyles = reactStyles({
   },
   incompleteOrExpiringModule: {
     color: colors.warning,
+    fontWeight: 'bold',
   },
   expiredModule: {
     color: colors.danger,
+    fontWeight: 'bold',
   },
   completeModule: {
     color: colors.black,
