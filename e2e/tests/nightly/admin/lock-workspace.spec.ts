@@ -25,7 +25,7 @@ describe('Workspace Admin lock-workspace', () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
   });
 
-  test.only('verify if workspace is locked', async () => {
+  test('verify if workspace is locked', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
@@ -43,31 +43,35 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceAdminPage.waitForLoad();
     //click on the LOCK WORKSPACE button
     const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton(workspaceStatus.Lock);
+    // verify the lock-workspace is enables only after the locking-reason is typed
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
     await lockWorkspaceModal.createLockWorkspaceReason(reasonText);
-    //const lockWorkspaceReason = await lockWorkspaceModal.createLockWorkspaceReason();
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
+
     await lockWorkspaceModal.clickModalLockWorkspace();
     await workspaceAdminPage.waitForLoad();
+
     // verify the button now displays label "UNLOCK WORKSPACE"
     expect(workspaceAdminPage.getLockWorkspaceButton(workspaceStatus.Unlock));
-    //await new WorkspacesPage(page).load();
     await new HomePage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     const lockedIcon = workspaceCard.getWorkspaceLockedIcon();
     expect(lockedIcon).toBeTruthy();
+    // verify only the edit option is enabled on the snowmenu
     await workspaceCard.verifyLockedWorkspaceMenuOptions();
     await workspaceCard.clickLockedWorkspaceName(true);
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
-    // verify the workspace-locked banner displays
+    // verify the banner includes the locking reason
     const aboutLockReason = await aboutPage.extractReasonMessage();
     expect(aboutLockReason).toEqual(reasonText);
+    // verify the lock icon is displaying for the locked workspace
     const aboutLockedIcon = aboutPage.getAboutLockedWorkspaceIcon();
     expect(aboutLockedIcon).toBeTruthy();
+
     // verify DATA & ANALYSIS tabs are inactive for locked workspace
-    expect(await aboutPage.getTabsAttribute(page, Tabs.Analysis, 'aria-selected')).toEqual('false');
-    expect(await aboutPage.getTabsAttribute(page, Tabs.Data, 'aria-selected')).toEqual('false');
+    expect(await aboutPage.getTabState(page, Tabs.Analysis)).toBe(false);
+    expect(await aboutPage.getTabState(page, Tabs.Data)).toBe(false);
     // verify share button is disabled
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(true);
     await aboutPage.verifyLockedWorkspaceActionOptions();
@@ -100,7 +104,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceCard.clickWorkspaceName(true);
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
-    // verify DATA & ANALYSIS tabs are accessible
+    // verify DATA & ANALYSIS tabs are aactive and accessible
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
     const aboutPage = new WorkspaceAboutPage(page);
