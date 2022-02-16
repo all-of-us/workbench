@@ -63,11 +63,11 @@ describe('User Admin', () => {
     adminTab = await searchTestUser(page, testUserEmail);
   });
 
-  xtest('Verify Researcher Information renders correctly', async () => {
+  test('Verify Researcher Information renders correctly', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
-    // SAVE and CANCEL buttons are disabled
+    // SAVE and CANCEL buttons should be disabled
     const saveButton = userProfileAdminPage.getSaveButton();
     const cancelButton = userProfileAdminPage.getCancelButton();
     await verifyButtonEnabled(cancelButton, false);
@@ -123,10 +123,10 @@ describe('User Admin', () => {
     // Verify Credits Used
     const [usedAmount, creditsLimitAmount] = await userProfileAdminPage.getInitialCreditsUsed();
     expect(usedAmount).toEqual(0);
-    expect(creditsLimitAmount).toEqual(credits); // Match value in Initial Credit Limit Select dropdown
+    expect(creditsLimitAmount).toEqual(credits); // Matches Initial Credit Limit selected value
   });
 
-  xtest('Verify Access Status table render correctly', async () => {
+  test('Verify Access Status table render correctly', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
@@ -146,7 +146,7 @@ describe('User Admin', () => {
     // $x('//*[@id="Controlled-user"]')
   });
 
-  xtest('Verify CANCEL and SAVE buttons work correctly', async () => {
+  test('Verify CANCEL and SAVE buttons work correctly', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
@@ -160,11 +160,12 @@ describe('User Admin', () => {
     await verifyButtonEnabled(cancelButton, false);
     await verifyButtonEnabled(saveButton, false);
 
+    // Turn off Account Access toggle
     await accountAccessSwitch.turnOff();
     label = await accountAccessSwitch.getLabel();
     expect(label).toEqual('Account disabled');
 
-    // Undo switch change
+    // Undo toggle change
     await accountAccessSwitch.turnOn();
     label = await accountAccessSwitch.getLabel();
     expect(label).toEqual('Account enabled');
@@ -177,7 +178,7 @@ describe('User Admin', () => {
     const oldCreditLimit = await initialCreditLimit.getSelectedValue();
     await initialCreditLimit.select('$400.00');
 
-    // Verify background color has changed
+    // Verify background color in Select has changed
     const [styleElement] = await (await initialCreditLimit.asElement()).$x('./preceding-sibling::style');
     const styleText = await getPropValue<string>(styleElement, 'innerText');
     expect(styleText).toContain('background-color: #F8C954;');
@@ -215,7 +216,7 @@ describe('User Admin', () => {
     // SAVE buttons is disabled due to error in page
     await verifyButtonEnabled(saveButton, false);
 
-    // Undo changes
+    // Undo all changes
     await cancelButton.click();
     await cancelButton.waitUntilDisabled();
 
@@ -245,7 +246,7 @@ describe('User Admin', () => {
     expect(newVerifiedInstitution).toEqual(oldInstitution);
   });
 
-  xtest('Can go to User Audit page', async () => {
+  test('Can go to User Audit page', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
@@ -263,7 +264,7 @@ describe('User Admin', () => {
     await new UserAdminPage(adminTab).waitForLoad();
   });
 
-  xtest('Can bypass Google 2-Step Verification module', async () => {
+  test('Can bypass Google 2-Step Verification module', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
@@ -325,7 +326,7 @@ describe('User Admin', () => {
     }
   });
 
-  xtest('Can bypass Controlled Tier training module', async () => {
+  test('Can bypass Controlled Tier training module', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
