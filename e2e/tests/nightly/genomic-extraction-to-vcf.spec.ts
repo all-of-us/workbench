@@ -1,14 +1,7 @@
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {
-  AgeSelectionRadioButton,
-  AnalysisTool,
-  ConceptSetSelectValue,
-  DatasetValueSelect,
-  Language,
-  LinkText
-} from 'app/text-labels';
+import { AgeSelectionRadioButton, AnalysisTool, ConceptSets, DataSets, Language, LinkText } from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
@@ -77,13 +70,13 @@ describe('Genomics Extraction Test', () => {
     // Step 1: select user created cohort.
     await datasetPage.selectCohorts([cohortName]);
     // Step 2: select "All whole genome sequence variant data".
-    await datasetPage.selectConceptSets([ConceptSetSelectValue.WholeGenomeSequenceVariantData]);
+    await datasetPage.selectConceptSets([ConceptSets.WholeGenomeSequenceVariantData]);
     // Step 3: make sure "VCF Files(s)" is selected.
-    await datasetPage.selectValues([DatasetValueSelect.VCFFile]);
+    await datasetPage.selectValues([DataSets.VCFFile]);
 
     // Save dataset.
     const createModal = await datasetPage.clickCreateButton();
-    const datasetName = await createModal.createDataset();
+    const datasetName = await createModal.create();
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // CREATING NOTEBOOK RUNTIME.

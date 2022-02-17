@@ -181,11 +181,11 @@ export enum HeaderName {
   UserEmailInstruction = 'User Email Instruction'
 }
 
-export const CohortsSelectValue = {
+export const Cohorts = {
   AllParticipants: 'All Participants'
 };
 
-export const ConceptSetSelectValue = {
+export const ConceptSets = {
   AllSurveys: 'All Surveys',
   Demographics: 'Demographics',
   FitbitActivitySummary: 'Fitbit Activity Summary',
@@ -195,7 +195,7 @@ export const ConceptSetSelectValue = {
   WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
 };
 
-export const DatasetValueSelect = {
+export const DataSets = {
   VCFFile: 'VCF Files',
   PersonID: 'person_id',
   GenderConceptId: 'gender_concept_id'

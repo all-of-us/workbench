@@ -1,11 +1,13 @@
-import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
-import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
-import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
-import { ConceptSetSelectValue, Language, ResourceCard, Tabs } from 'app/text-labels';
-import { Page } from 'puppeteer';
+import {
+  findOrCreateCohort,
+  findOrCreateDataset,
+  findOrCreateWorkspace,
+  openTab,
+  signInWithAccessToken
+} from 'utils/test-utils';
+import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataResourceCard from 'app/component/data-resource-card';
@@ -14,27 +16,28 @@ import DatasetBuildPage from 'app/page/dataset-build-page';
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
 
+const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
+const workspaceName = 'e2eDatasetExportToNotebookTest';
+
 describe('Export Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
-
-  const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
-  const workspaceName = 'e2eDatasetToNotebookTest';
-  const cohortName = makeRandomName('auotest', { includeHyphen: false });
-  const datasetName = makeRandomName('auotest', { includeHyphen: false });
 
   /**
    * Test:
    * - Export dataset to a notebook. Run the notebook code and verify run results.
    * (Cohort and Dataset are saved and reused)
    */
-  test.each(KernelLanguages)('Export to %s kernel notebook', async (kernelLanguage) => {
+  test.each(KernelLanguages)('Export to %s Jupyter notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
-    await findOrCreateCohort(page, cohortName);
-    const datasetBuildPage = await findOrCreateDataset(page, datasetName);
+    const cohortName = await findOrCreateCohort(page);
+    const datasetName = await findOrCreateDataset(page, { cohortNames: [cohortName], openEditPage: true });
 
-    const exportModal = await datasetBuildPage.clickAnalyzeButton();
+    await new DataResourceCard(page).findCard(datasetName, ResourceCard.Dataset);
+    const buildPage = new DatasetBuildPage(page);
+    await buildPage.waitForLoad();
+    const exportModal = await buildPage.clickAnalyzeButton();
 
     const notebookName = makeRandomName();
     await exportModal.enterNotebookName(notebookName);
@@ -92,60 +95,4 @@ describe('Export Notebook Test', () => {
     await openTab(page, Tabs.Analysis, analysisPage);
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   });
-
-  // Find an existing Cohort or create a new cohort to use in new dataset.
-  async function findOrCreateCohort(page: Page, cohortName: string): Promise<void> {
-    const dataPage = new WorkspaceDataPage(page);
-
-    // Search for Cohort first. If found, return Cohort card.
-    const existingCohortsCard = await dataPage.findCohortCard(cohortName);
-    if (existingCohortsCard) {
-      return;
-    }
-
-    // Create new.
-    const cohortBuildPage = await dataPage.clickAddCohortsButton();
-
-    // Include Participants Group 1: Add Criteria: Ethnicity.
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeEthnicity([Ethnicity.Skip]);
-    // Include Participants Group 1: Add a second criteria.
-    await group1.includeGenderIdentity([Sex.MALE]);
-
-    // Save new cohort
-    await cohortBuildPage.createCohort(cohortName);
-
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-
-    await openTab(page, Tabs.Data, dataPage);
-  }
-
-  // Find an existing dataset or create a new dataset.
-  async function findOrCreateDataset(page: Page, datasetName: string): Promise<DatasetBuildPage> {
-    let datasetBuildPage: DatasetBuildPage;
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-
-    const datasetCard = await new DataResourceCard(page).findCard(datasetName, ResourceCard.Dataset);
-    if (datasetCard !== null) {
-      await datasetCard.clickResourceName();
-      datasetBuildPage = new DatasetBuildPage(page);
-      await datasetBuildPage.waitForLoad();
-      return datasetBuildPage;
-    }
-
-    datasetBuildPage = await dataPage.clickAddDatasetButton();
-
-    // Step 1: select user created cohort.
-    await datasetBuildPage.selectCohorts([cohortName]);
-    // Step 2: select demographics concept sets.
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
-
-    const createModal = await datasetBuildPage.clickCreateButton();
-    await createModal.createDataset();
-    await datasetBuildPage.waitForLoad();
-    return datasetBuildPage;
-  }
 });

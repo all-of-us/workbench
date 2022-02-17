@@ -79,7 +79,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await openTab(this.page, Tabs.Cohorts);
     if (cohortName) {
       // find Concept Set that match specified name.
-      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, timeout);
+      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, { timeout });
     }
     // if Cohort name isn't specified, find any existing Cohort.
     return new DataResourceCard(this.page).findAnyCard(ResourceCard.Cohort);
