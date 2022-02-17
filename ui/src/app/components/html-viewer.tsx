@@ -36,7 +36,6 @@ export const HtmlViewer = withWindowSize()(
     componentDidUpdate({}, { hasReadEntireDoc }) {
       const { onLastPage = () => false } = this.props;
       if (!hasReadEntireDoc && this.state.hasReadEntireDoc) {
-        console.log('success');
         onLastPage();
       }
     }
@@ -53,7 +52,7 @@ export const HtmlViewer = withWindowSize()(
         body.appendChild(endOfPage);
 
         const elements = iframeDocument.querySelectorAll('.MsoNormal');
-        const last = elements[Object.keys(elements).length - 1];
+        const last = elements[Object.keys(elements).pop()];
 
         const observer = new IntersectionObserver(
           // The callback receives a list of entries - since we only have one intersection entry (threshold: 0.1)
