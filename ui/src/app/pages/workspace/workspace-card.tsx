@@ -182,6 +182,13 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       }
     }
 
+    workspaceCardNameTarget() {
+      const { tierAccessDisabled, workspace } = this.props;
+      return tierAccessDisabled
+        ? ' #'
+        : '/workspaces/' + workspace.namespace + '/' + workspace.id + '/data';
+    }
+
     render() {
       const {
         workspace,
@@ -288,15 +295,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           }
                           data-test-id='workspace-card-name'
                           onClick={() => this.trackWorkspaceNavigation()}
-                          href={
-                            tierAccessDisabled
-                              ? ' #'
-                              : '/workspaces/' +
-                                workspace.namespace +
-                                '/' +
-                                workspace.id +
-                                '/data'
-                          }
+                          href={this.workspaceCardNameTarget()}
                         >
                           {workspace.name}
                         </a>
