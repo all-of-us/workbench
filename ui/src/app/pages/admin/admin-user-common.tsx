@@ -87,14 +87,11 @@ export const commonStyles = reactStyles({
     borderRadius: '18px',
     transform: 'rotate(270deg)',
   },
-  incompleteModule: {
-    color: colorWithWhiteness(colors.highlight, -0.2),
+  incompleteOrExpiringModule: {
+    color: colors.warning,
   },
   expiredModule: {
     color: colors.danger,
-  },
-  expiringSoonModule: {
-    color: colorWithWhiteness(colors.warning, -0.3),
   },
   completeModule: {
     color: colors.black,
@@ -181,16 +178,13 @@ const getModuleStatus = (profile, moduleName) =>
 const moduleStatusStyle = (moduleStatus) =>
   cond(
     [
-      moduleStatus === AccessModulesStatus.INCOMPLETE,
-      () => commonStyles.incompleteModule,
+      moduleStatus === AccessModulesStatus.INCOMPLETE ||
+        moduleStatus === AccessModulesStatus.EXPIRING_SOON,
+      () => commonStyles.incompleteOrExpiringModule,
     ],
     [
       moduleStatus === AccessModulesStatus.EXPIRED,
       () => commonStyles.expiredModule,
-    ],
-    [
-      moduleStatus === AccessModulesStatus.EXPIRING_SOON,
-      () => commonStyles.expiringSoonModule,
     ],
     () => commonStyles.completeModule
   );
@@ -268,23 +262,33 @@ const isEraRequiredForTier = (
   );
 };
 
-export const displayTierBadgeByRequiredModule = (
-  profile: Profile,
-  moduleName: AccessModule
-) => {
+export const TierBadgesMaybe = (props: {
+  profile: Profile;
+  moduleName: AccessModule;
+}) => {
+  const { profile, moduleName } = props;
+
+  const rtMaybe = (moduleName === AccessModule.ERACOMMONS
+    ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
+    : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
+    <RegisteredTierBadge style={{ gridArea: 'badge' }} />
+  );
+
+  const ctMaybe = (moduleName === AccessModule.ERACOMMONS
+    ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
+    : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
+    <ControlledTierBadge style={{ gridArea: 'badge' }} />
+  );
+
+  // give the badges a little space
+  const spacer = <div style={{ width: '5%' }} />;
+
   return (
-    <div>
-      {(moduleName === AccessModule.ERACOMMONS
-        ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-        : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
-        <RegisteredTierBadge style={{ gridArea: 'badge' }} />
-      )}
-      {(moduleName === AccessModule.ERACOMMONS
-        ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-        : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
-        <ControlledTierBadge style={{ gridArea: 'badge' }} />
-      )}
-    </div>
+    <FlexRow style={{ justifyContent: 'center' }}>
+      {rtMaybe}
+      {rtMaybe && ctMaybe && spacer}
+      {ctMaybe}
+    </FlexRow>
   );
 };
 
