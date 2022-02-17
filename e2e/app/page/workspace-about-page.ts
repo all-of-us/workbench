@@ -115,7 +115,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
 
   // get the state of the  tabs
   async getTabState(tabName: Tabs): Promise<boolean> {
-    const tab = new Tab(page, tabName);
+    const tab = new Tab(this.page, tabName);
     const tabState = await tab.isSelected();
     return tabState;
   }
