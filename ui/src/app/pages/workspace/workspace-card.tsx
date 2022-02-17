@@ -5,12 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourceType, Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
-import {
-  Button,
-  Clickable,
-  SnowmanButton,
-  StyledRouterLink,
-} from 'app/components/buttons';
+import { Button, Clickable, SnowmanButton } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -68,6 +63,8 @@ const styles = reactStyles({
     marginBottom: '0.5rem',
     fontSize: 18,
     wordBreak: 'break-all',
+    pointerEvents: 'none',
+    cursor: 'default',
   },
   permissionBox: {
     color: colors.white,
@@ -185,15 +182,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       }
     }
 
-    onWorkspaceNameClick() {
-      const { workspace } = this.props;
-      if (this.trackWorkspaceNavigation()) {
-        return (
-          '/workspaces/' + workspace.namespace + '/' + workspace.id + '/data'
-        );
-      }
-    }
-
     render() {
       const {
         workspace,
@@ -292,18 +280,26 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           )
                         }
                       >
-                        <StyledRouterLink
+                        <a
                           style={
                             tierAccessDisabled
                               ? styles.workspaceNameDisabled
                               : styles.workspaceName
                           }
-                          disabled={tierAccessDisabled}
                           data-test-id='workspace-card-name'
-                          path={this.onWorkspaceNameClick()}
+                          onClick={() => this.trackWorkspaceNavigation()}
+                          href={
+                            tierAccessDisabled
+                              ? ' #'
+                              : '/workspaces/' +
+                                workspace.namespace +
+                                '/' +
+                                workspace.id +
+                                '/data'
+                          }
                         >
                           {workspace.name}
-                        </StyledRouterLink>
+                        </a>
                       </TooltipTrigger>
                     </Clickable>
                   </FlexRow>
