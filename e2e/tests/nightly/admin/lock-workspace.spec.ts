@@ -14,6 +14,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 
+
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
   const reasonText = 'locking this workspace';
@@ -25,7 +26,7 @@ describe('Workspace Admin lock-workspace', () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
   });
 
-  test('verify if workspace is locked', async () => {
+  test.only('verify if workspace is locked', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
@@ -68,10 +69,14 @@ describe('Workspace Admin lock-workspace', () => {
     // verify the lock icon is displaying for the locked workspace
     const aboutLockedIcon = aboutPage.getAboutLockedWorkspaceIcon();
     expect(aboutLockedIcon).toBeTruthy();
-
+    // expect(await aboutPage.getTabState(page, Tabs.Analysis)).toBe(false);
+    // expect(await aboutPage.getTabState(page, Tabs.Data)).toBe(false);
     // verify DATA & ANALYSIS tabs are inactive for locked workspace
-    expect(await aboutPage.getTabState(page, Tabs.Analysis)).toBe(false);
-    expect(await aboutPage.getTabState(page, Tabs.Data)).toBe(false);
+    const analysisTab = await aboutPage.getTabState(Tabs.Analysis);
+    expect(analysisTab).toBe(false);
+    const dataTab = await aboutPage.getTabState(Tabs.Data);
+    expect(dataTab).toBe(false);
+    
     // verify share button is disabled
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(true);
     await aboutPage.verifyLockedWorkspaceActionOptions();
