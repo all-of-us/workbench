@@ -476,6 +476,12 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testDeleteDependentDataSetOnDeletingCohort() {
+    // Confirm the table has no recent modified resources
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+
     // Add the following entry in user_recently_modified_resource:
     // 1) Cohort
     // 2) Data Set that is using the Cohort
@@ -485,20 +491,24 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateDataSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
 
-    List<DbUserRecentlyModifiedResource> resources =
-        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
     assertThat(resources.size()).isEqualTo(2);
 
+    // Deleting Cohort should delete the dataSet using it
     userRecentResourceService.deleteCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
 
-    // Deleting Cohort should delete the dataSet using it
     resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
     assertThat(resources.size()).isEqualTo(0);
   }
 
   @Test
   public void testDeleteDependentDataSetOnDeletingConceptSet() {
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+
     // Add the following entry in user_recently_modified_resource:
     // 1) Concept Set
     // 2) Data Set that is using the Concept Set
@@ -508,14 +518,13 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateDataSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
 
-    List<DbUserRecentlyModifiedResource> resources =
-        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
     assertThat(resources.size()).isEqualTo(2);
 
+    // Deleting Concept Set should also delete the data Set entry that is using the Concept Set
     userRecentResourceService.deleteConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
 
-    // Deleting Concept Set should also delete the data Set entry that is using the Concept Set
     resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
     assertThat(resources.size()).isEqualTo(0);
   }

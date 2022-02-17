@@ -133,8 +133,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   /** Deletes cohort entry from user_recently_modified_resource */
   /**
-   * Since user_recently_modified_resource does not hold FK constraints, hence we have to explicitly
-   * delete COHORT REVIEWS and DATA SETs that are using the deleted cohort id
+   * Deleting Cohort resource in workbench, deletes all the cohort reviews that is using the cohort
+   * as well mark the DataSet using the deleted cohort as INVALID. Therefore, as part of
+   * deleteCohortEntry method, delete not just the Cohort entry from
+   * user_recently_modified_resource, but also all the cohort review/dataSet that references the
+   * deleted cohort
    */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
@@ -168,10 +171,13 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         String.valueOf(cohortId));
   }
 
-  /** Deletes concept set entry from user_recently_modified_resource */
   /**
-   * Since user_recently_modified_resource does not hold FK hence we have to explicitly delete
-   * DATA_SET using the deleted concept set id
+   * Deletes concept set entry from user_recently_modified_resource
+   *
+   * <p>Deleting ConceptSet from database will mark the dataSet, using the concept Set, as invalid
+   * which removes the dataset from the user resources list So as part of deleteConceptSetEntry,
+   * apart from deleting the concept set entry check all the dataSet using the concept set and
+   * delete them as well so they do not appear in user recent resource list
    */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
