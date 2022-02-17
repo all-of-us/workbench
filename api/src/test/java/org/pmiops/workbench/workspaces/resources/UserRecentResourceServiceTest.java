@@ -454,6 +454,12 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testDeleteDependentCohortReviewOnDeletingCohort() {
+    // Confirm the table has no recent modified resources
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+
     // Add the following entry in user_recently_modified_resource:
     // 1) Cohort
     // 2) Cohort Review that is using the Cohort
@@ -462,11 +468,10 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateCohortReviewEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
 
-    List<DbUserRecentlyModifiedResource> resources =
-        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    // Deleting Cohort should delete the Cohort Review using it
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
     assertThat(resources.size()).isEqualTo(2);
 
-    // Deleting Cohort should delete the Cohort Review using it
     userRecentResourceService.deleteCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
     resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
