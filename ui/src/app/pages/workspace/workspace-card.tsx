@@ -5,7 +5,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourceType, Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { Button, Clickable, SnowmanButton } from 'app/components/buttons';
+import {
+  Button,
+  Clickable,
+  SnowmanButton,
+  StyledRouterLink,
+} from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -153,23 +158,39 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       ]);
     }
 
-    onClick() {
+    trackWorkspaceNavigation() {
       const { workspace } = this.props;
       if (
         serverConfigStore.get().config.enableResearchReviewPrompt &&
         workspace.researchPurpose.needsReviewPrompt
       ) {
         this.setState({ showResearchPurposeReviewModal: true });
-      } else {
-        workspace.published
-          ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
-          : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+        return false;
+      }
+      workspace.published
+        ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
+        : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+      return true;
+    }
+
+    onClick() {
+      const { workspace } = this.props;
+      if (this.trackWorkspaceNavigation()) {
         this.props.navigate([
           'workspaces',
           workspace.namespace,
           workspace.id,
           'data',
         ]);
+      }
+    }
+
+    onWorkspaceNameClick() {
+      const { workspace } = this.props;
+      if (this.trackWorkspaceNavigation()) {
+        return (
+          '/workspaces/' + workspace.namespace + '/' + workspace.id + '/data'
+        );
       }
     }
 
@@ -271,16 +292,18 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           )
                         }
                       >
-                        <div
+                        <StyledRouterLink
                           style={
                             tierAccessDisabled
                               ? styles.workspaceNameDisabled
                               : styles.workspaceName
                           }
+                          disabled={tierAccessDisabled}
                           data-test-id='workspace-card-name'
+                          path={this.onWorkspaceNameClick()}
                         >
                           {workspace.name}
-                        </div>
+                        </StyledRouterLink>
                       </TooltipTrigger>
                     </Clickable>
                   </FlexRow>
