@@ -15,7 +15,7 @@ import UserAuditPage from 'app/page/admin-user-audit-page';
 import { isBlank } from 'utils/str-utils';
 import fp from 'lodash/fp';
 
-describe('User Admin', () => {
+describe('User Profile Admin', () => {
   enum TableColumns {
     ACCESS_MODULE = 'Access Module',
     STATUS = 'Status',
