@@ -4,9 +4,13 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { withWindowSize } from 'app/utils';
 import { WindowSizeProps } from 'app/utils';
 
+// for query selection of the last document element
+const MS_WORD_PARAGRAPH_CLASS = '.MsoNormal';
+
 export interface Props extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
   onLastPage: () => void;
+  lastElementQuerySelector: string;
   filePath: string;
   ariaLabel: string;
 }
@@ -42,17 +46,14 @@ export const HtmlViewer = withWindowSize()(
 
     private handleIframeLoaded() {
       try {
+        const { lastElementQuerySelector = MS_WORD_PARAGRAPH_CLASS } =
+          this.props;
         const iframeDocument = this.iframeRef.current.contentDocument;
         const { body } = iframeDocument;
         const openLinksInNewTab = iframeDocument.createElement('base');
-        const endOfPage = iframeDocument.createElement('div');
 
         openLinksInNewTab.setAttribute('target', '_blank');
         body.prepend(openLinksInNewTab);
-        body.appendChild(endOfPage);
-
-        const elements = iframeDocument.querySelectorAll('.MsoNormal');
-        const last = elements[Object.keys(elements).pop()];
 
         const observer = new IntersectionObserver(
           // The callback receives a list of entries - since we only have one intersection entry (threshold: 0.1)
@@ -63,7 +64,13 @@ export const HtmlViewer = withWindowSize()(
             this.setState({ hasReadEntireDoc: true }),
           { root: null, threshold: 0.1 }
         );
-        observer.observe(last);
+
+        const selectedElements = iframeDocument.querySelectorAll(
+          lastElementQuerySelector
+        );
+        const lastElement =
+          selectedElements[Object.keys(selectedElements).pop()];
+        observer.observe(lastElement);
       } catch (e) {
         this.setState({ iframeFailed: true });
       } finally {
