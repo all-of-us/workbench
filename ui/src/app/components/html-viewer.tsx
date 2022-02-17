@@ -6,12 +6,14 @@ import { WindowSizeProps } from 'app/utils';
 
 export interface Props extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
+  onFirstScroll: () => void;
   onLastPage: () => void;
   filePath: string;
   ariaLabel: string;
 }
 
 interface State {
+  hasBegunScrolling: boolean;
   hasReadEntireDoc: boolean;
   iframeFailed: boolean;
   loading: boolean;
@@ -25,6 +27,7 @@ export const HtmlViewer = withWindowSize()(
       super(props);
 
       this.state = {
+        hasBegunScrolling: false,
         hasReadEntireDoc: false,
         iframeFailed: false,
         loading: true,
@@ -33,8 +36,12 @@ export const HtmlViewer = withWindowSize()(
       this.iframeRef = React.createRef();
     }
 
-    componentDidUpdate({}, { hasReadEntireDoc }) {
-      const { onLastPage = () => false } = this.props;
+    componentDidUpdate({}, { hasReadEntireDoc, hasBegunScrolling }) {
+      const { onFirstScroll = () => false, onLastPage = () => false } =
+        this.props;
+      if (!hasBegunScrolling && this.state.hasBegunScrolling) {
+        onFirstScroll();
+      }
       if (!hasReadEntireDoc && this.state.hasReadEntireDoc) {
         onLastPage();
       }
@@ -50,6 +57,16 @@ export const HtmlViewer = withWindowSize()(
         openLinksInNewTab.setAttribute('target', '_blank');
         body.prepend(openLinksInNewTab);
         body.appendChild(endOfPage);
+
+        const setHasBegunScrolling = () => {
+          if (!this.state.hasBegunScrolling) {
+            this.setState({ hasBegunScrolling: true });
+          }
+        };
+
+        iframeDocument.addEventListener('scroll', function () {
+          setHasBegunScrolling();
+        });
 
         const observer = new IntersectionObserver(
           // The callback receives a list of entries - since we only have one intersection entry (threshold: 1.0)
