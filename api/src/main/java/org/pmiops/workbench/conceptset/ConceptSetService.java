@@ -81,6 +81,10 @@ public class ConceptSetService {
   public ConceptSet createConceptSet(
       CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
     DbConceptSet dbConceptSet = conceptSetMapper.clientToDbModel(request, workspaceId, creator);
+    if (dbConceptSet.getConceptSetConceptIds().size() > MAX_CONCEPTS_PER_SET) {
+      throw new ConflictException(
+          String.format("Exceeded %d concept set limit", MAX_CONCEPTS_PER_SET));
+    }
     return saveDbConceptSet(dbConceptSet);
   }
 
