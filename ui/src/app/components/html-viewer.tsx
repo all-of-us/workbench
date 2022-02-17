@@ -36,6 +36,7 @@ export const HtmlViewer = withWindowSize()(
     componentDidUpdate({}, { hasReadEntireDoc }) {
       const { onLastPage = () => false } = this.props;
       if (!hasReadEntireDoc && this.state.hasReadEntireDoc) {
+        console.log('success');
         onLastPage();
       }
     }
@@ -51,16 +52,19 @@ export const HtmlViewer = withWindowSize()(
         body.prepend(openLinksInNewTab);
         body.appendChild(endOfPage);
 
+        const elements = iframeDocument.querySelectorAll('.MsoNormal');
+        const last = elements[Object.keys(elements).length - 1];
+
         const observer = new IntersectionObserver(
-          // The callback receives a list of entries - since we only have one intersection entry (threshold: 1.0)
+          // The callback receives a list of entries - since we only have one intersection entry (threshold: 0.1)
           // we can destructure the first item of the array and determine whether it is intersecting or not
           ([{ isIntersecting }]) =>
             isIntersecting &&
             !this.state.hasReadEntireDoc &&
             this.setState({ hasReadEntireDoc: true }),
-          { root: null, threshold: 1.0 }
+          { root: null, threshold: 0.1 }
         );
-        observer.observe(endOfPage);
+        observer.observe(last);
       } catch (e) {
         this.setState({ iframeFailed: true });
       } finally {
