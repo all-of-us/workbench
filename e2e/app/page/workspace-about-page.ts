@@ -9,7 +9,6 @@ import WorkspaceEditPage from './workspace-edit-page';
 import Tab from 'app/element/tab';
 import { Tabs } from 'app/text-labels';
 
-
 export const PageTitle = 'View Workspace Details';
 
 export default class WorkspaceAboutPage extends WorkspaceBase {
@@ -120,5 +119,4 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     const tabState = await tab.isSelected();
     return tabState;
   }
-
 }
