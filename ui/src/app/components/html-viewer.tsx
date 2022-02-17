@@ -4,9 +4,13 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { withWindowSize } from 'app/utils';
 import { WindowSizeProps } from 'app/utils';
 
+// for query selection of the last document element
+const MS_WORD_PARAGRAPH_CLASS = '.MsoNormal';
+
 export interface Props extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
   onLastPage: () => void;
+  lastElementQuerySelector: string;
   filePath: string;
   ariaLabel: string;
 }
@@ -42,25 +46,31 @@ export const HtmlViewer = withWindowSize()(
 
     private handleIframeLoaded() {
       try {
+        const { lastElementQuerySelector = MS_WORD_PARAGRAPH_CLASS } =
+          this.props;
         const iframeDocument = this.iframeRef.current.contentDocument;
         const { body } = iframeDocument;
         const openLinksInNewTab = iframeDocument.createElement('base');
-        const endOfPage = iframeDocument.createElement('div');
 
         openLinksInNewTab.setAttribute('target', '_blank');
         body.prepend(openLinksInNewTab);
-        body.appendChild(endOfPage);
 
         const observer = new IntersectionObserver(
-          // The callback receives a list of entries - since we only have one intersection entry (threshold: 1.0)
+          // The callback receives a list of entries - since we only have one intersection entry (threshold: 0.1)
           // we can destructure the first item of the array and determine whether it is intersecting or not
           ([{ isIntersecting }]) =>
             isIntersecting &&
             !this.state.hasReadEntireDoc &&
             this.setState({ hasReadEntireDoc: true }),
-          { root: null, threshold: 1.0 }
+          { root: null, threshold: 0.1 }
         );
-        observer.observe(endOfPage);
+
+        const selectedElements = iframeDocument.querySelectorAll(
+          lastElementQuerySelector
+        );
+        const lastElement =
+          selectedElements[Object.keys(selectedElements).pop()];
+        observer.observe(lastElement);
       } catch (e) {
         this.setState({ iframeFailed: true });
       } finally {
