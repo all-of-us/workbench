@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { CohortReview, CriteriaType, Domain } from 'generated/fetch';
+import {
+  CohortReview,
+  CriteriaType,
+  Domain,
+  Modifier,
+  SearchGroup,
+  SearchParameter,
+} from 'generated/fetch';
 
 import { domainToTitle } from 'app/cohort-search/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -50,6 +57,19 @@ const styles = reactStyles({
   },
 });
 
+const showParameterType = (domain: string) =>
+  domain === Domain.CONDITION.toString() &&
+  domain === Domain.DRUG.toString() &&
+  domain === Domain.PROCEDURE.toString();
+
+const showParameterParent = (domain: string) =>
+  domain !== Domain.DRUG.toString() && domain !== Domain.SURVEY.toString();
+
+interface ParamItem {
+  domain: Domain;
+  items: string;
+}
+
 export class CohortDefinition extends React.Component<
   { review: CohortReview },
   { definition: any }
@@ -81,10 +101,10 @@ export class CohortDefinition extends React.Component<
     this.setState({ definition });
   }
 
-  mapGroup(group: any) {
+  mapGroup(group: SearchGroup) {
     const mappedItems = [];
     group.items.forEach(({ modifiers, searchParameters, type }) => {
-      const domain = type as Domain;
+      const domain = Domain[type];
       if (
         (domain === Domain.CONDITION || domain === Domain.PROCEDURE) &&
         searchParameters.some((param) => param.domain !== domain)
@@ -110,83 +130,45 @@ export class CohortDefinition extends React.Component<
     return mappedItems;
   }
 
-  mapParams(params: Array<any>, mod) {
-    const groupedData = this.getGroupedData(params, 'type');
-    let paramList;
-    if (mod.length) {
-      paramList = this.getModifierFormattedData(groupedData, params, mod);
-    } else {
-      paramList = this.getOtherTreeFormattedData(groupedData, params);
-    }
-    return paramList;
+  mapParams(parameters: Array<SearchParameter>, modifiers: Array<Modifier>) {
+    const groupedParameters = parameters.reduce((parameterList, parameter) => {
+      const { domain, group, name, type } = parameter;
+      const displayName =
+        group && showParameterParent(domain) ? `Parent ${name}` : name;
+      if (parameterList[type]) {
+        parameterList[type].items += `, ${displayName}`;
+      } else {
+        parameterList[type] = {
+          domain,
+          items: `${domainToTitle(domain)}${
+            showParameterType(domain) ? ` | ${type}` : ''
+          } | ${displayName}`,
+        };
+      }
+      return parameterList;
+    }, {} as ParamItem);
+    return modifiers.length > 0
+      ? Object.values(groupedParameters).map((param) => {
+          param.items += ` | ${this.getModifierName(modifiers)}`;
+          return param;
+        })
+      : Object.values(groupedParameters);
   }
 
-  getModifierFormattedData(groupedData, params, modifiers) {
-    const modArray = params.map(({ domain, type }) => {
-      const typeMatched = groupedData.find((matched) => matched.group === type);
-      const modifierName = modifiers.reduce((acc, m) => {
-        const concatOperand = m.operands.reduce((final, o) => {
-          return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
-        }, '');
-        return acc !== ''
-          ? `${acc} ,  ${this.operatorConversion(m.name)}
+  getModifierName(modifiers: Array<Modifier>) {
+    return modifiers.reduce((acc, m) => {
+      const concatOperand = m.operands.reduce((final, o) => {
+        return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
+      }, '');
+      return acc !== ''
+        ? `${acc} ,  ${this.operatorConversion(m.name)}
             ${this.operatorConversion(m.operator)}
             ${concatOperand}`
-          : `${this.operatorConversion(m.name)} ${this.operatorConversion(
-              m.operator
-            )}
+        : `${this.operatorConversion(m.name)} ${this.operatorConversion(
+            m.operator
+          )}
             ${concatOperand}`;
-      }, '');
-      return domain === Domain.CONDITION || domain === Domain.PROCEDURE
-        ? {
-            items: `${domainToTitle(domain)} | ${type} | ${
-              typeMatched.customString
-            } | ${modifierName}`,
-            domain,
-          }
-        : {
-            items: `${domainToTitle(domain)} | ${
-              typeMatched.customString
-            } | ${modifierName}`,
-            domain,
-          };
-    });
-    return this.removeDuplicates(modArray);
-  }
-
-  getOtherTreeFormattedData(groupedData, params) {
-    const noModArray = params.map(({ domain, name, type }) => {
-      const typeMatched = groupedData.find((matched) => matched.group === type);
-      if (domain === Domain.PERSON) {
-        return {
-          items:
-            type === CriteriaType.DECEASED
-              ? `${domainToTitle(domain)}
-                      | ${name}`
-              : `${domainToTitle(domain)}
-                      | ${this.operatorConversion(type)} | ${name}`,
-          domain: domain,
-        };
-      } else if (domain === Domain.VISIT) {
-        return {
-          items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
-          domain,
-        };
-      } else {
-        return domain === Domain.CONDITION || domain === Domain.PROCEDURE
-          ? {
-              items: `${domainToTitle(domain)} | ${type} | ${
-                typeMatched.customString
-              }`,
-              domain,
-            }
-          : {
-              items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
-              domain,
-            };
-      }
-    });
-    return this.removeDuplicates(noModArray);
+    }, '');
   }
 
   // utils
