@@ -9,6 +9,7 @@ import WorkspaceEditPage from './workspace-edit-page';
 import Tab from 'app/element/tab';
 import { Tabs } from 'app/text-labels';
 
+
 export const PageTitle = 'View Workspace Details';
 
 export default class WorkspaceAboutPage extends WorkspaceBase {
@@ -113,10 +114,11 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     return await editPage.waitForLoad();
   }
 
-  // verify the state of the inactive tabs
-  async getTabState(page: Page, tabName: Tabs): Promise<boolean> {
+  // get the state of the  tabs
+  async getTabState(tabName: Tabs): Promise<boolean> {
     const tab = new Tab(page, tabName);
-    await tab.isSelected();
-    return false;
+    const tabState = await tab.isSelected();
+    return tabState;
   }
+
 }
