@@ -15,13 +15,13 @@ import DatasetBuildPage from 'app/page/dataset-build-page';
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
 
-const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
-const workspaceName = 'e2eDatasetExportToNotebookTest';
-
 describe('Export Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
+
+  const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
+  const workspaceName = 'e2eDatasetExportToNotebookTest';
 
   /**
    * Test:

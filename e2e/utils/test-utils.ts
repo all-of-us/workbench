@@ -410,7 +410,6 @@ export async function findOrCreateDataset(
   const { cohortNames, openEditPage } = opts;
   const cohorts = cohortNames && cohortNames.length > 0 ? cohortNames : undefined;
   const dataset = await findDataset(page, { openEditPage });
-  console.log(`dataset: ${dataset}`);
   return dataset ? dataset : createDataset(page, { cohorts, returnToDataPage: !openEditPage });
 }
 
