@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +47,6 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -72,7 +70,6 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -107,6 +104,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptSetsControllerTest {
 
+  public static final String UPDATED_DESC = "Updated Desc";
   private static final Criteria CRITERIA_CONDITION_1 =
       new Criteria()
           .conceptId(123L)
@@ -175,9 +173,11 @@ public class ConceptSetsControllerTest {
 
   public static final String CONCEPT_SET_NAME_1 = "concept set 1";
   public static final String CONCEPT_SET_DESC_1 = "desc 1";
+  public static final String UPDATED_NAME = "Updated Name";
   private static DbUser currentUser;
   private Workspace workspace;
   private Workspace workspace2;
+  private ConceptSet defaultConceptSet;
 
   @Autowired AccessTierDao accessTierDao;
 
@@ -269,6 +269,9 @@ public class ConceptSetsControllerTest {
 
   @BeforeEach
   public void setUp() throws Exception {
+    // reset after every test
+    ConceptSetService.MAX_CONCEPTS_PER_SET = 1000; // original value
+
     TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
     TestMockFactory.stubPollCloudBillingLinked(cloudBillingClient, "billing-account");
@@ -295,13 +298,19 @@ public class ConceptSetsControllerTest {
             WorkspaceAccessLevel.OWNER);
     // save different criteria (there is no workspace associated with criteria
     saveAllTestCriteria();
+    // create concept set as owner or writer in workspace
+    defaultConceptSet =
+        createTestConceptSet(
+            workspace,
+            CONCEPT_SET_NAME_1,
+            CONCEPT_SET_DESC_1,
+            Domain.CONDITION,
+            CRITERIA_CONDITION_1);
   }
 
-  //////////// savedConceptSet tests ////////////
+  //////////// createConceptSet tests ////////////
   @Test
-  public void createConceptSetOwnerAddMultipleCriteria() {
-    // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+  public void createConceptSetAddMany() {
     ConceptSet conceptSet =
         new ConceptSet()
             .domain(Domain.CONDITION)
@@ -322,6 +331,36 @@ public class ConceptSetsControllerTest {
 
     assertConceptSetAndCriteria(
         savedConceptSet, CRITERIA_CONDITION_1, CRITERIA_CONDITION_2, CRITERIA_CONDITION_3);
+  }
+
+  @Test
+  public void createConceptSetAddTooMany() {
+    // define too many
+    ConceptSetService.MAX_CONCEPTS_PER_SET = 2;
+    ConceptSet conceptSet =
+        new ConceptSet()
+            .domain(Domain.CONDITION)
+            .description(CONCEPT_SET_DESC_1)
+            .name(CONCEPT_SET_NAME_1);
+    // add 3 concepts
+    CreateConceptSetRequest createConceptSetRequest =
+        buildCreateConceptSetRequest(
+            conceptSet,
+            CRITERIA_CONDITION_1.getConceptId(),
+            CRITERIA_CONDITION_2.getConceptId(),
+            CRITERIA_CONDITION_3.getConceptId());
+
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                conceptSetsController.createConceptSet(
+                    workspace.getNamespace(), WORKSPACE_NAME, createConceptSetRequest));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch(
+            String.format("Exceeded %d concept set limit", ConceptSetService.MAX_CONCEPTS_PER_SET));
   }
 
   @Test
@@ -415,20 +454,14 @@ public class ConceptSetsControllerTest {
   //////////// deleteConceptSet tests ////////////
   @Test
   public void deleteConceptSetOwner() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
+
     // change access, create and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
 
     ResponseEntity<EmptyResponse> response =
         conceptSetsController.deleteConceptSet(
-            workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId());
+            workspace.getNamespace(), WORKSPACE_NAME, defaultConceptSet.getId());
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -437,27 +470,20 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), conceptSet.getId()));
+                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
 
-    assertNotFoundException(exception, conceptSet.getId());
+    assertNotFoundException(exception, defaultConceptSet.getId());
   }
 
   @Test
   public void deleteConceptSetWriter() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, create and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     ResponseEntity<EmptyResponse> response =
         conceptSetsController.deleteConceptSet(
-            workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId());
+            workspace.getNamespace(), WORKSPACE_NAME, defaultConceptSet.getId());
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -466,20 +492,14 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), conceptSet.getId()));
-    assertNotFoundException(exception, conceptSet.getId());
+                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+
+    assertNotFoundException(exception, defaultConceptSet.getId());
   }
 
   @Test
   public void deleteConceptSetReader() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, create and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
 
@@ -488,20 +508,14 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.deleteConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId()));
+                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+
     assertForbiddenException(exception);
   }
 
   @Test
   public void deleteConceptSetNoAccess() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, create and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
 
@@ -510,7 +524,8 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.deleteConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId()));
+                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+
     assertForbiddenException(exception);
   }
 
@@ -522,127 +537,96 @@ public class ConceptSetsControllerTest {
         assertThrows(
             NotFoundException.class,
             () ->
-                conceptSetsController.getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L));
+                conceptSetsController.getConceptSet(
+                    workspace2.getNamespace(), workspace2.getId(), 1L));
+
     assertNotFoundException(exception, 1L);
   }
 
   @Test
   public void getConceptSetWrongWorkspace() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // check access from different workspace
     Throwable exception =
         assertThrows(
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace2.getNamespace(), workspace2.getId(), conceptSet.getId()));
+                    workspace2.getNamespace(), workspace2.getId(), defaultConceptSet.getId()));
+
     assertNotFoundException(exception, 1L);
   }
 
   @Test
   public void getConceptSetWrongConceptId() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.OBSERVATION,
-            CRITERIA_SURVEY_1);
+    // use defaultConceptSet
     // check for incorrect conceptId
-    Long wrongConceptSetId = conceptSet.getId() + 100L;
-    Throwable exception = assertThrows(
-        NotFoundException.class,
-        () ->
-            conceptSetsController.getConceptSet(workspace.getNamespace(), workspace.getId(), wrongConceptSetId));
+    Long wrongConceptSetId = defaultConceptSet.getId() + 100L;
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                conceptSetsController.getConceptSet(
+                    workspace.getNamespace(), workspace.getId(), wrongConceptSetId));
+
     assertNotFoundException(exception, wrongConceptSetId);
   }
 
   @Test
   public void getConceptSetOwner() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, get and chaeck
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     ConceptSet retrieved =
         conceptSetsController
-            .getConceptSet(workspace.getNamespace(), workspace.getId(), conceptSet.getId())
+            .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(conceptSet);
+    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
   }
 
   @Test
   public void getConceptSetWriter() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, get and chaeck
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+
     ConceptSet retrieved =
         conceptSetsController
-            .getConceptSet(workspace.getNamespace(), workspace.getId(), conceptSet.getId())
+            .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(conceptSet);
+    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
   }
 
   @Test
   public void getConceptSetReader() {
     // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
-    // change access, get and chaeck
+    // use defaultConceptSet
+    // change access, get and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+
     ConceptSet retrieved =
         conceptSetsController
-            .getConceptSet(workspace.getNamespace(), workspace.getId(), conceptSet.getId())
+            .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(conceptSet);
+    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
   }
 
   @Test
   public void getConceptSetNoAccess() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, get and chaeck
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+
     Throwable exception =
         assertThrows(
             ForbiddenException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), conceptSet.getId()));
+                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
 
     assertForbiddenException(exception);
   }
@@ -653,7 +637,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetsInWorkspaceEmpty() {
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getId())
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -661,33 +645,20 @@ public class ConceptSetsControllerTest {
 
   @Test
   public void getConceptSetsInWorkspaceOne() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getItems();
+
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(conceptSet));
+    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
   public void getConceptSetsInWorkspaceMany() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     ConceptSet conceptSet2 =
         createTestConceptSet(
             workspace,
@@ -711,112 +682,82 @@ public class ConceptSetsControllerTest {
             CONCEPT_SET_DESC_1 + "4",
             Domain.OBSERVATION,
             CRITERIA_SURVEY_1);
+
     // check for 4 conceptSets
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getItems();
+
     assertThat(response.size()).isEqualTo(4);
     assertThat(response)
-        .containsAllIn(ImmutableList.of(conceptSet, conceptSet2, conceptSet3, conceptSet4));
+        .containsAllIn(ImmutableList.of(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4));
   }
 
   @Test
   public void getConceptSetsInWorkspaceWrongWorkspace() {
-    // create concept set as owner or writer in workspace
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // access from workspace2 check is empty
     assertThat(
-        conceptSetsController
-            .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getId())
-            .getBody()
-            .getItems())
+            conceptSetsController
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getId())
+                .getBody()
+                .getItems())
         .isEmpty();
   }
 
   @Test
   public void getConceptSetsInWorkspaceOwner() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
 
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getItems();
+
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(conceptSet));
+    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
   public void getConceptSetsInWorkspaceWriter() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getItems();
+
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(conceptSet));
+    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
   public void getConceptSetsInWorkspaceReader() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
 
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getItems();
+
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(conceptSet));
+    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
   public void getConceptSetsInWorkspaceNoAccess() {
-    // create concept set as owner or writer
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
 
@@ -825,7 +766,8 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.getConceptSetsInWorkspace(
-                    workspace.getNamespace(), WORKSPACE_NAME));
+                    workspace.getNamespace(), workspace.getId()));
+
     assertForbiddenException(exception);
   }
 
@@ -840,88 +782,228 @@ public class ConceptSetsControllerTest {
     conceptSet.setId(1L);
     conceptSet.setEtag(Etags.fromVersion(1));
 
-    Throwable exception = assertThrows(
-        NotFoundException.class,
-        () ->
-            conceptSetsController.updateConceptSet(
-                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                conceptSetsController.updateConceptSet(
+                    workspace2.getNamespace(), workspace2.getId(), conceptSet.getId(), conceptSet));
+
     assertNotFoundException(exception, conceptSet.getId());
   }
 
   @Test
   public void updateConceptSetWrongWorkspace() {
-    // create concept set as owner or writer in workspace
-    ConceptSet conceptSet =
-        createTestConceptSet(
-            workspace,
-            CONCEPT_SET_NAME_1,
-            CONCEPT_SET_DESC_1,
-            Domain.CONDITION,
-            CRITERIA_CONDITION_1);
+    // use defaultConceptSet
     // check update in workspace2
-    Throwable exception = assertThrows(
-        NotFoundException.class,
-        () ->
-            conceptSetsController.updateConceptSet(
-                workspace2.getNamespace(), workspace2.getId(), conceptSet.getId(), conceptSet));
-    assertNotFoundException(exception,conceptSet.getId());
-  }
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                conceptSetsController.updateConceptSet(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    defaultConceptSet.getId(),
+                    defaultConceptSet));
 
-  @Test
-  public void updateConceptSet() {
-    // create conceptSet
-    ConceptSet conceptSet = makeConceptSet1();
-
-    conceptSet.setDescription("new description");
-    conceptSet.setName("new name");
-    Instant newInstant = NOW.plusMillis(1);
-    fakeClock.setInstant(newInstant);
-    ConceptSet updatedConceptSet =
-        conceptSetsController
-            .updateConceptSet(
-                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet)
-            .getBody();
-    assertThat(updatedConceptSet.getCreator()).isEqualTo(USER_EMAIL);
-    assertThat(updatedConceptSet.getCriteriums()).isNotNull();
-    assertThat(updatedConceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(updatedConceptSet.getDescription()).isEqualTo("new description");
-    assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
-    assertThat(updatedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(2));
-    assertThat(updatedConceptSet.getLastModifiedTime()).isEqualTo(newInstant.toEpochMilli());
-    assertThat(conceptSet.getName()).isEqualTo("new name");
+    assertNotFoundException(exception, defaultConceptSet.getId());
   }
 
   @Test
   public void testUpdateConceptSetDomainChange() {
-    ConceptSet conceptSet = makeConceptSet1();
-    conceptSet.setDescription("new description");
-    conceptSet.setName("new name");
-    conceptSet.setDomain(Domain.DEATH);
-    assertThrows(
-        ConflictException.class,
-        () ->
-            conceptSetsController.updateConceptSet(
-                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
+    // use defaultConceptSet
+    // change domain when updating
+    defaultConceptSet.setDescription(UPDATED_DESC);
+    defaultConceptSet.setName(UPDATED_NAME);
+    defaultConceptSet.domain(Domain.PROCEDURE);
+
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                conceptSetsController.updateConceptSet(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    defaultConceptSet));
+
+    assertThat(exception).hasMessageThat().containsMatch("Concept Set is not the same domain");
   }
 
   @Test
   public void testUpdateConceptSetWrongEtag() {
-    ConceptSet conceptSet = makeConceptSet1();
-    conceptSet.setDescription("new description");
-    conceptSet.setName("new name");
-    conceptSet.setEtag(Etags.fromVersion(2));
+    // use defaultConceptSet
+    defaultConceptSet.setDescription(UPDATED_DESC);
+    defaultConceptSet.setName(UPDATED_NAME);
+    defaultConceptSet.setEtag(Etags.fromVersion(2));
 
-    assertThrows(
-        ConflictException.class,
-        () ->
-            conceptSetsController.updateConceptSet(
-                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                conceptSetsController.updateConceptSet(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    defaultConceptSet));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch("Attempted to modify outdated concept set version");
+  }
+
+  @Test
+  public void updateConceptSetOwner() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    fakeClock.increment(1000L);
+
+    ConceptSet updatedConceptSet =
+        conceptSetsController
+            .updateConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                defaultConceptSet.getId(),
+                defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME))
+            .getBody();
+
+    assertConceptSets(updatedConceptSet, defaultConceptSet);
+  }
+
+  @Test
+  public void updateConceptSetWriter() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    fakeClock.increment(1000L);
+
+    ConceptSet updatedConceptSet =
+        conceptSetsController
+            .updateConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                defaultConceptSet.getId(),
+                defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME))
+            .getBody();
+
+    assertConceptSets(updatedConceptSet, defaultConceptSet);
+  }
+
+  @Test
+  public void updateConceptSetReader() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    fakeClock.increment(1000L);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                conceptSetsController.updateConceptSet(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME)));
+
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void updateConceptSetNoAccess() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    fakeClock.increment(1000L);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                conceptSetsController.updateConceptSet(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME)));
+
+    assertForbiddenException(exception);
   }
 
   //////////// updateConceptSetConcepts tests ////////////
 
   @Test
-  public void updateConceptSetConceptsWrongDomain() {
+  public void updateConceptSetConceptsWrongEtag() {
+    // use defaultConceptSet
+    // build request with incorrect eTag version
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                conceptSetsController.updateConceptSetConcepts(
+                    workspace.getNamespace(),
+                    WORKSPACE_NAME,
+                    defaultConceptSet.getId(),
+                    buildUpdateConceptsRequest(
+                        Etags.fromVersion(2), CRITERIA_CONDITION_2.getConceptId())));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch("Attempted to modify outdated concept set version");
+  }
+
+  @Test
+  public void updateConceptSetConceptsWrongCriteriaDomain() {
+    // use defaultConceptSet
+    // check update concept for incorrect criteria domain
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(defaultConceptSet.getEtag(), CRITERIA_SURVEY_1.getConceptId());
+
+    ConceptSet updated =
+        conceptSetsController
+            .updateConceptSetConcepts(
+                workspace.getNamespace(),
+                workspace.getId(),
+                defaultConceptSet.getId(),
+                updateConceptSetRequest)
+            .getBody();
+
+    // incorrect criteria domain is-not-added
+    assertThat(updated.getEtag()).isNotEqualTo(defaultConceptSet.getEtag());
+    updated.setEtag(defaultConceptSet.getEtag());
+    assertThat(updated).isEqualTo(defaultConceptSet);
+  }
+
+  @Test
+  public void updateConceptSetConceptsAddMany() {
+    // use defaultConceptSet
+    // check update concept set - add criteriums same domain
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(
+            defaultConceptSet.getEtag(),
+            CRITERIA_CONDITION_2.getConceptId(),
+            CRITERIA_CONDITION_3.getConceptId());
+    fakeClock.increment(1000L);
+
+    ConceptSet updated =
+        conceptSetsController
+            .updateConceptSetConcepts(
+                workspace.getNamespace(),
+                workspace.getId(),
+                defaultConceptSet.getId(),
+                updateConceptSetRequest)
+            .getBody();
+
+    assertUpdatedConceptSetConcepts(
+        defaultConceptSet,
+        updated,
+        CRITERIA_CONDITION_1,
+        CRITERIA_CONDITION_2,
+        CRITERIA_CONDITION_3);
+  }
+
+  @Test
+  public void updateConceptSetConceptsAddAndRemove() {
     // create concept set as owner or writer in workspace
     ConceptSet conceptSet =
         createTestConceptSet(
@@ -929,331 +1011,382 @@ public class ConceptSetsControllerTest {
             CONCEPT_SET_NAME_1,
             CONCEPT_SET_DESC_1,
             Domain.CONDITION,
-            CRITERIA_CONDITION_1);
-    // check update concept from incorrect domain for conceptSet
-    UpdateConceptSetRequest updateConceptSetRequestWithSurvey = buildUpdateConceptsRequest(conceptSet.getEtag(), CRITERIA_SURVEY_1.getConceptId());
+            CRITERIA_CONDITION_1,
+            CRITERIA_CONDITION_2);
+    // check update concept set - add new concept and remove an existing concept
+    UpdateConceptSetRequest updateConceptSetRequest =
+        new UpdateConceptSetRequest().etag(conceptSet.getEtag());
+    // add
+    ConceptSetConceptId addedConcept3 =
+        new ConceptSetConceptId()
+            .conceptId(CRITERIA_CONDITION_3.getConceptId())
+            .standard(CRITERIA_CONDITION_3.getIsStandard());
+    updateConceptSetRequest.addAddedConceptSetConceptIdsItem(addedConcept3);
+    // remove
+    ConceptSetConceptId removedConcept1 =
+        new ConceptSetConceptId()
+            .conceptId(CRITERIA_CONDITION_1.getConceptId())
+            .standard(CRITERIA_CONDITION_1.getIsStandard());
+    updateConceptSetRequest.addRemovedConceptSetConceptIdsItem(removedConcept1);
+    fakeClock.increment(1000L);
 
-    ConceptSet updated = conceptSetsController.updateConceptSetConcepts(
-        workspace.getNamespace(),
-        workspace.getId(),
-        conceptSet.getId(),
-        updateConceptSetRequestWithSurvey).getBody();
-    assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    updated.setEtag(conceptSet.getEtag());
-    assertThat(updated).isEqualTo(conceptSet);
-  }
-
-  @Test
-  public void testUpdateConceptSetConceptsAddAndRemove() {
-    saveAllTestCriteria();
-    DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_1.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_2.getConceptId())
-            .addStandard(true)
-            .build();
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1)))
-        .thenReturn(123);
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(246);
-    ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                WORKSPACE_NAME,
+                workspace.getId(),
                 conceptSet.getId(),
-                buildUpdateConceptsRequest(
-                    conceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId()))
+                updateConceptSetRequest)
             .getBody();
-    assertThat(updated.getCriteriums()).hasSize(2);
-    assertThat(updated.getCriteriums().get(0).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_1.getConceptId());
-    assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
 
-    ConceptSet removed =
-        conceptSetsController
-            .updateConceptSetConcepts(
-                workspace.getNamespace(),
-                WORKSPACE_NAME,
-                conceptSet.getId(),
-                buildRemoveConceptsRequest(updated.getEtag(), CRITERIA_CONDITION_2.getConceptId()))
-            .getBody();
-    assertThat(removed.getCriteriums()).hasSize(1);
-    assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+    // updated should contain only cond_2 (cond_1 removed) and cond_3 (added)
+    assertUpdatedConceptSetConcepts(
+        conceptSet, updated, CRITERIA_CONDITION_2, CRITERIA_CONDITION_3);
   }
 
   @Test
-  public void testUpdateConceptSetConceptsAddMany() {
-    saveAllTestCriteria();
-    DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_1.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_2.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId3 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_3.getConceptId())
-            .addStandard(true)
-            .build();
-    ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            ImmutableSet.of(
-                dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
-        .thenReturn(456);
-    ConceptSet conceptSet = makeConceptSet1();
-    ConceptSet updated =
-        conceptSetsController
-            .updateConceptSetConcepts(
-                workspace.getNamespace(),
-                WORKSPACE_NAME,
-                conceptSet.getId(),
-                buildUpdateConceptsRequest(
-                    conceptSet.getEtag(),
-                    CRITERIA_CONDITION_1.getConceptId(),
-                    CRITERIA_CONDITION_2.getConceptId(),
-                    CRITERIA_CONDITION_3.getConceptId()))
-            .getBody();
-    assertThat(updated.getCriteriums()).hasSize(3);
-    assertThat(updated.getCriteriums().get(0).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_1.getConceptId());
-    assertThat(updated.getCriteriums().get(1).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_3.getConceptId());
-    assertThat(updated.getCriteriums().get(2).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_2.getConceptId());
-    assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1)))
-        .thenReturn(123);
-    ConceptSet removed =
-        conceptSetsController
-            .updateConceptSetConcepts(
-                workspace.getNamespace(),
-                WORKSPACE_NAME,
-                conceptSet.getId(),
-                buildRemoveConceptsRequest(
-                    updated.getEtag(),
-                    CRITERIA_CONDITION_2.getConceptId(),
-                    CRITERIA_CONDITION_3.getConceptId()))
-            .getBody();
-    assertThat(removed.getCriteriums()).hasSize(1);
-    assertThat(removed.getCriteriums().get(0).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_1.getConceptId());
-    assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
-  }
-
-  @Test
-  public void testUpdateConceptSetConceptsAddManyOnCreate() {
-    saveAllTestCriteria();
-    DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_1.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_2.getConceptId())
-            .addStandard(true)
-            .build();
-    DbConceptSetConceptId dbConceptSetConceptId3 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CRITERIA_CONDITION_3.getConceptId())
-            .addStandard(true)
-            .build();
-    when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            ImmutableSet.of(
-                dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
-        .thenReturn(456);
-    ConceptSet conceptSet =
-        makeConceptSet1(
-            CRITERIA_CONDITION_1.getConceptId(),
+  public void updateConceptSetConceptsAddTooMany() {
+    // use defaultConceptSet
+    // set max concepts ot add
+    ConceptSetService.MAX_CONCEPTS_PER_SET = 2;
+    // check update concept set - add new concept and remove an existing concept
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(
+            defaultConceptSet.getEtag(),
             CRITERIA_CONDITION_2.getConceptId(),
             CRITERIA_CONDITION_3.getConceptId());
-    assertThat(conceptSet.getCriteriums()).hasSize(3);
-    assertThat(conceptSet.getCriteriums().get(0).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_1.getConceptId());
-    assertThat(conceptSet.getCriteriums().get(1).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_3.getConceptId());
-    assertThat(conceptSet.getCriteriums().get(2).getConceptId())
-        .isEqualTo(CRITERIA_CONDITION_2.getConceptId());
-  }
+    fakeClock.increment(1000L);
 
-  @Test
-  public void testUpdateConceptSetConceptsAddTooMany() {
-    saveAllTestCriteria();
-    ConceptSet conceptSet = makeConceptSet1();
-    ConceptSetService.MAX_CONCEPTS_PER_SET = 2;
-
-    assertThrows(
-        ConflictException.class,
-        () ->
-            conceptSetsController
-                .updateConceptSetConcepts(
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                conceptSetsController.updateConceptSetConcepts(
                     workspace.getNamespace(),
-                    WORKSPACE_NAME,
-                    conceptSet.getId(),
-                    buildUpdateConceptsRequest(
-                        conceptSet.getEtag(),
-                        CRITERIA_CONDITION_1.getConceptId(),
-                        CRITERIA_CONDITION_2.getConceptId(),
-                        CRITERIA_CONDITION_3.getConceptId()))
-                .getBody());
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    updateConceptSetRequest));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch(
+            String.format("Exceeded %d concept set limit", ConceptSetService.MAX_CONCEPTS_PER_SET));
   }
 
   @Test
-  public void testUpdateConceptSetConceptsWrongEtag() {
-    saveAllTestCriteria();
-    ConceptSet conceptSet = makeConceptSet1();
+  public void updateConceptSetConceptsOwner() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(
+            defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
+    fakeClock.increment(1000L);
 
-    assertThrows(
-        ConflictException.class,
-        () ->
-            conceptSetsController.updateConceptSetConcepts(
+    ConceptSet updated =
+        conceptSetsController
+            .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                WORKSPACE_NAME,
-                conceptSet.getId(),
-                buildUpdateConceptsRequest(
-                    Etags.fromVersion(2), CRITERIA_CONDITION_1.getConceptId())));
+                workspace.getId(),
+                defaultConceptSet.getId(),
+                updateConceptSetRequest)
+            .getBody();
+
+    assertUpdatedConceptSetConcepts(
+        defaultConceptSet, updated, CRITERIA_CONDITION_1, CRITERIA_CONDITION_2);
+  }
+
+  @Test
+  public void updateConceptSetConceptsWriter() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(
+            defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
+    fakeClock.increment(1000L);
+
+    ConceptSet updated =
+        conceptSetsController
+            .updateConceptSetConcepts(
+                workspace.getNamespace(),
+                workspace.getId(),
+                defaultConceptSet.getId(),
+                updateConceptSetRequest)
+            .getBody();
+
+    assertUpdatedConceptSetConcepts(
+        defaultConceptSet, updated, CRITERIA_CONDITION_1, CRITERIA_CONDITION_2);
+  }
+
+  @Test
+  public void updateConceptSetConceptsReader() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(
+            defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
+    fakeClock.increment(1000L);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                conceptSetsController.updateConceptSetConcepts(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    updateConceptSetRequest));
+
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void updateConceptSetConceptsNoAccess() {
+    // use defaultConceptSet
+    // change access, update and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    UpdateConceptSetRequest updateConceptSetRequest =
+        buildUpdateConceptsRequest(
+            defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
+    fakeClock.increment(1000L);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                conceptSetsController.updateConceptSetConcepts(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    defaultConceptSet.getId(),
+                    updateConceptSetRequest));
+
+    assertForbiddenException(exception);
   }
 
   //////////// copyConceptSet tests ////////////
 
   @Test
-  public void testCopyConceptSetOwnerToOwner() {
-    // owner: to workspace has no permission to write
-    testCopyConceptSetForAccessLevels(workspace, workspace2);
+  public void copyConceptSetOwner() {
+    // from: workspace
+    ConceptSet conceptSet =
+        createTestConceptSet(
+            workspace,
+            CONCEPT_SET_NAME_1 + "+2",
+            CONCEPT_SET_DESC_1 + "+2",
+            Domain.CONDITION,
+            CRITERIA_CONDITION_1,
+            CRITERIA_CONDITION_2,
+            CRITERIA_CONDITION_3);
+    // copy to: workspace2 owner
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.OWNER);
+    CopyRequest copyRequest =
+        new CopyRequest()
+            .newName(conceptSet.getName() + "_copy")
+            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceNamespace(workspace2.getNamespace());
+
+    ConceptSet conceptSetCopy =
+        conceptSetsController
+            .copyConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                String.valueOf(conceptSet.getId()),
+                copyRequest)
+            .getBody();
+
+    assertThat(conceptSetCopy.getName()).contains(conceptSet.getName());
+    assertThat(conceptSetCopy.getName()).contains("_copy");
+    assertThat(conceptSetCopy.getDescription()).isEqualTo(conceptSet.getDescription());
+    assertThat(conceptSet.getCriteriums()).containsAllIn(conceptSetCopy.getCriteriums()).inOrder();
   }
 
   @Test
-  public void testCopyConceptSetWriterToWriter() {
-    // writer: minimal access level to create and copy conceptSet
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+  public void copyConceptSetWriter() {
+    // from: workspace
+    ConceptSet conceptSet =
+        createTestConceptSet(
+            workspace,
+            CONCEPT_SET_NAME_1 + "+2",
+            CONCEPT_SET_DESC_1 + "+2",
+            Domain.CONDITION,
+            CRITERIA_CONDITION_1,
+            CRITERIA_CONDITION_2,
+            CRITERIA_CONDITION_3);
+    // copy to: workspace2 writer
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    CopyRequest copyRequest =
+        new CopyRequest()
+            .newName(conceptSet.getName() + "_copy")
+            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceNamespace(workspace2.getNamespace());
 
-    testCopyConceptSetForAccessLevels(workspace, workspace2);
+    ConceptSet conceptSetCopy =
+        conceptSetsController
+            .copyConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                String.valueOf(conceptSet.getId()),
+                copyRequest)
+            .getBody();
+
+    assertThat(conceptSetCopy.getName()).contains(conceptSet.getName());
+    assertThat(conceptSetCopy.getName()).contains("_copy");
+    assertThat(conceptSetCopy.getDescription()).isEqualTo(conceptSet.getDescription());
+    assertThat(conceptSet.getCriteriums()).containsAllIn(conceptSetCopy.getCriteriums()).inOrder();
   }
 
   @Test
-  public void testCopyConceptSetOwnerToWriter() {
-    // writer: to workspace has permission to write
-    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
-    stubGetWorkspaceAcl(
-        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
-    testCopyConceptSetForAccessLevels(workspace, workspace2);
-  }
+  public void copyConceptSetReader() {
+    // from: workspace
+    // use defaultConceptSet
+    // copy to: workspace2 reader
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    CopyRequest copyRequest =
+        new CopyRequest()
+            .newName(defaultConceptSet.getName() + "_copy")
+            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceNamespace(workspace2.getNamespace());
 
-  @Test
-  public void testCopyConceptSetOwnerToReaderFail() {
-    // reader: to workspace has no permission to write
-    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.READER);
-    stubGetWorkspaceAcl(
-        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.READER);
     Throwable exception =
         assertThrows(
             ForbiddenException.class,
-            () -> testCopyConceptSetForAccessLevels(workspace, workspace2));
-    assertThat(exception)
-        .hasMessageThat()
-        .contains(
-            String.format(
-                "You do not have sufficient permissions to access workspace %s/%s",
-                workspace2.getNamespace(), workspace2.getId()));
-  }
+            () ->
+                conceptSetsController.copyConceptSet(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    String.valueOf(defaultConceptSet.getId()),
+                    copyRequest));
 
-  @Test
-  public void testCopyConceptSetOwnerToNoAccessFail() {
-    // no access: to workspace has no permission to write
-    stubGetWorkspace(
-        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.NO_ACCESS);
-    stubGetWorkspaceAcl(
-        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.NO_ACCESS);
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () -> testCopyConceptSetForAccessLevels(workspace, workspace2));
     assertForbiddenException(exception);
   }
 
   @Test
-  public void validateCreateConceptSetRequest() {
-    // just conceptSet not enough also need non null set of conceptSet ids
+  public void copyConceptSetNoAccess() {
+    // from: workspace
+    // use defaultConceptSet
+    // copy to: workspace2 reader
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.NO_ACCESS);
+    CopyRequest copyRequest =
+        new CopyRequest()
+            .newName(defaultConceptSet.getName() + "_copy")
+            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceNamespace(workspace2.getNamespace());
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                conceptSetsController.copyConceptSet(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    String.valueOf(defaultConceptSet.getId()),
+                    copyRequest));
+
+    assertForbiddenException(exception);
+  }
+
+  //////////// validate* tests ////////////
+  @Test
+  public void validateCreateConceptSetRequestNoConcepts() {
+    // just defaultConceptSet not enough also need non null set of defaultConceptSet ids
     final CreateConceptSetRequest createConceptSetRequest =
         new CreateConceptSetRequest().conceptSet(new ConceptSet().domain(Domain.CONDITION));
+
     Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest),
             "Expected BadRequestException not thrown");
+
     assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
+  }
+
+  @Test
+  public void validateCreateConceptSetRequestEmptyConcepts() {
     // also need non-emptyList of conceptSetIds
-    final CreateConceptSetRequest createConceptSetRequest2 =
-        createConceptSetRequest.addedConceptSetConceptIds(new ArrayList<>());
-    exception =
+    final CreateConceptSetRequest createConceptSetRequest =
+        new CreateConceptSetRequest()
+            .conceptSet(new ConceptSet().domain(Domain.CONDITION))
+            .addedConceptSetConceptIds(new ArrayList<>());
+
+    Throwable exception =
         assertThrows(
             BadRequestException.class,
-            () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest2),
+            () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest),
             "Expected BadRequestException not thrown");
+
     assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
-    // add a single conceptSetConceptId to List
-    final CreateConceptSetRequest createConceptSetRequest3 =
-        createConceptSetRequest.addAddedConceptSetConceptIdsItem(
-            new ConceptSetConceptId().conceptId(1000L));
+  }
+
+  @Test
+  public void validateCreateConceptSetWithOneConceptId() {
+    // also need non-emptyList of conceptSetIds
+    final CreateConceptSetRequest createConceptSetRequest =
+        new CreateConceptSetRequest()
+            .conceptSet(new ConceptSet().domain(Domain.CONDITION))
+            .addAddedConceptSetConceptIdsItem(new ConceptSetConceptId().conceptId(1L));
+
     assertDoesNotThrow(
-        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest3),
-        "BadRequestException is not expected to be thrown");
-    // add a multiple conceptSetConceptIds to list
-    final CreateConceptSetRequest createConceptSetRequest4 =
-        createConceptSetRequest.addedConceptSetConceptIds(
-            Arrays.asList(
-                new ConceptSetConceptId().conceptId(1000L),
-                new ConceptSetConceptId().conceptId(2000L)));
-    assertDoesNotThrow(
-        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest4),
+        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest),
         "BadRequestException is not expected to be thrown");
   }
 
   @Test
-  public void validateUpdateConceptSet() {
+  public void validateCreateConceptSetWithManyConceptIds() {
+    // also need non-emptyList of conceptSetIds
+    final CreateConceptSetRequest createConceptSetRequest =
+        new CreateConceptSetRequest()
+            .conceptSet(new ConceptSet().domain(Domain.CONDITION))
+            .addedConceptSetConceptIds(
+                ImmutableList.of(
+                    new ConceptSetConceptId().conceptId(1L),
+                    new ConceptSetConceptId().conceptId(2L)));
+
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest),
+        "BadRequestException is not expected to be thrown");
+  }
+
+  @Test
+  public void validateUpdateConceptSetMissingEtagAndDomain() {
     // invalid empty object need etag and domain
     Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> conceptSetsController.validateUpdateConceptSet(new ConceptSet()),
             "Expected BadRequestException not thrown");
+
     assertThat(exception).hasMessageThat().contains("missing required update field 'etag'");
-    // just add etag
+  }
+
+  @Test
+  public void validateUpdateConceptSetMissingDomain() {
+    // invalid empty object need etag and domain
     final ConceptSet conceptSet = new ConceptSet().etag("testEtag");
-    exception =
+
+    Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> conceptSetsController.validateUpdateConceptSet(conceptSet),
             "Expected BadRequestException not thrown");
+
     assertThat(exception).hasMessageThat().contains("Domain cannot be null");
+  }
+
+  @Test
+  public void validateUpdateConceptSetWithEtagAndDomain() {
     // add etag and domain
-    final ConceptSet conceptSet2 = new ConceptSet().etag("testEtag").domain(Domain.CONDITION);
+    final ConceptSet conceptSet = new ConceptSet().etag("testEtag").domain(Domain.CONDITION);
+
     assertDoesNotThrow(
-        () -> conceptSetsController.validateUpdateConceptSet(conceptSet2),
+        () -> conceptSetsController.validateUpdateConceptSet(conceptSet),
         "BadRequestException is not expected to be thrown");
   }
 
   @Test
-  public void validateUpdateConceptSetConcepts() {
+  public void validateUpdateConceptSetConceptsEmptyRequest() {
     // invalid empty object
     Throwable exception =
         assertThrows(
@@ -1262,14 +1395,99 @@ public class ConceptSetsControllerTest {
                 conceptSetsController.validateUpdateConceptSetConcepts(
                     new UpdateConceptSetRequest()),
             "Expected BadRequestException not thrown");
+
     assertThat(exception).hasMessageThat().contains("missing required update field 'etag'");
-    // just add etag which is required
+  }
+
+  @Test
+  public void validateUpdateConceptSetConceptsWithEtag() {
+    // add etag which is required
     assertDoesNotThrow(
         () ->
             conceptSetsController.validateUpdateConceptSetConcepts(
-                buildUpdateConceptsRequest("eTagTest", 1000L, 1001L)),
+                new UpdateConceptSetRequest().etag("testEtag")),
         "BadRequestException is not expected to be thrown");
   }
+
+  //////////// assertion helpers ////////////
+
+  private void assertConceptSets(ConceptSet actual, ConceptSet expected) {
+    assertThat(actual.getCriteriums()).containsAllIn(expected.getCriteriums());
+    assertThat(actual.getDescription()).isEqualTo(UPDATED_DESC);
+    assertThat(actual.getName()).isEqualTo(UPDATED_NAME);
+    assertThat(actual.getDomain()).isEqualTo(expected.getDomain());
+    assertThat(actual.getCreationTime()).isEqualTo(expected.getCreationTime());
+    assertThat(actual.getLastModifiedTime()).isGreaterThan(expected.getLastModifiedTime());
+    assertThat(actual.getEtag()).isEqualTo(Etags.fromVersion(2));
+  }
+
+  private void assertForbiddenException(Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch("You do not have sufficient permissions to access");
+  }
+
+  private void assertNotFoundException(Throwable exception, Long conceptId) {
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch(
+            String.format("ConceptSet not found for workspaceId.*and conceptSetId: %d", conceptId));
+  }
+
+  private void assertUpdatedConceptSetConcepts(
+      ConceptSet initial, ConceptSet updated, Criteria... expectedCriteria) {
+    assertThat(updated.getCreationTime()).isEqualTo(initial.getCreationTime());
+    assertThat(updated.getLastModifiedTime()).isGreaterThan(initial.getLastModifiedTime());
+    assertThat(updated.getEtag()).isNotEqualTo(initial.getEtag());
+    assertThat(updated.getCriteriums().size()).isEqualTo(expectedCriteria.length);
+    // since unsaved criteria CRITERIA_* has null id, parentId, set those to null in updated
+    updated
+        .getCriteriums()
+        .forEach(
+            o -> {
+              o.setId(null);
+              o.setParentId(null);
+            });
+    // since we could pass saved criteria.. reset id, parentId to null in expectedCriteria also
+    Arrays.stream(expectedCriteria)
+        .iterator()
+        .forEachRemaining(
+            o -> {
+              o.setId(null);
+              o.setParentId(null);
+            });
+    assertThat(updated.getCriteriums()).containsAllIn(expectedCriteria);
+  }
+
+  private void assertConceptSetAndCriteria(ConceptSet conceptSet, Criteria... expectedCriteria) {
+    assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(conceptSet.getDescription()).isEqualTo(CONCEPT_SET_DESC_1);
+    assertThat(conceptSet.getDomain()).isEqualTo(Domain.CONDITION);
+    assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
+    assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(conceptSet.getName()).isEqualTo(CONCEPT_SET_NAME_1);
+    assertThat(conceptSet.getCriteriums().size()).isEqualTo(expectedCriteria.length);
+    // since unsaved criteria CRITERIA_* has null id, parentId, set those to null in
+    // defaultConceptSet
+    conceptSet
+        .getCriteriums()
+        .forEach(
+            o -> {
+              o.setId(null);
+              o.setParentId(null);
+            });
+    // since we could pass saved criteria.. reset id, parentId to null in expectedCriteria also
+    Arrays.stream(expectedCriteria)
+        .iterator()
+        .forEachRemaining(
+            o -> {
+              o.setId(null);
+              o.setParentId(null);
+            });
+    assertThat(conceptSet.getCriteriums()).containsAllIn(expectedCriteria);
+  }
+
+  //////////// other helpers for setup and intermediate objects ////////////
 
   private ConceptSet createTestConceptSet(
       Workspace workspace,
@@ -1292,93 +1510,7 @@ public class ConceptSetsControllerTest {
             conceptSet, domainConceptIds.toArray(new Long[domainConceptIds.size()]));
 
     return conceptSetsController
-        .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, createConceptSetRequest)
-        .getBody();
-  }
-
-  private void assertForbiddenException(Throwable exception) {
-    assertThat(exception)
-        .hasMessageThat()
-        .containsMatch("You do not have sufficient permissions to access");
-  }
-
-  private void assertNotFoundException(Throwable exception, Long conceptId) {
-    assertThat(exception)
-        .hasMessageThat()
-        .containsMatch(
-            String.format("ConceptSet not found for workspaceId.*and conceptSetId: %d", conceptId));
-  }
-
-  private void assertConceptSetAndCriteria(ConceptSet conceptSet, Criteria... expectedCriteria) {
-    assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(conceptSet.getDescription()).isEqualTo(CONCEPT_SET_DESC_1);
-    assertThat(conceptSet.getDomain()).isEqualTo(Domain.CONDITION);
-    assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
-    assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(conceptSet.getName()).isEqualTo(CONCEPT_SET_NAME_1);
-    List<Criteria> actualCriteriums = conceptSet.getCriteriums();
-    assertThat(actualCriteriums.size()).isEqualTo(expectedCriteria.length);
-    for (Criteria criteria : actualCriteriums) {
-      criteria.setId(null);
-      criteria.setParentId(null);
-    }
-    assertThat(actualCriteriums).containsAllIn(expectedCriteria);
-  }
-
-  private void testCopyConceptSetForAccessLevels(Workspace fromWs, Workspace toWs) {
-    ConceptSet conceptSet =
-        createDbConceptSetForWorkspace(
-            fromWs.getNamespace(),
-            fromWs.getId(),
-            "From_3-Cnditions_Concept_set",
-            "From_Cond_CS",
-            CRITERIA_CONDITION_1,
-            CRITERIA_CONDITION_2,
-            CRITERIA_CONDITION_3);
-
-    assertThat(conceptSet.getCriteriums().size()).isEqualTo(3);
-    CopyRequest copyRequest =
-        new CopyRequest()
-            .newName("from_concept_set_copy")
-            .toWorkspaceName(toWs.getId())
-            .toWorkspaceNamespace(toWs.getNamespace());
-    ConceptSet conceptSetCopy =
-        conceptSetsController
-            .copyConceptSet(
-                fromWs.getNamespace(),
-                fromWs.getId(),
-                String.valueOf(conceptSet.getId()),
-                copyRequest)
-            .getBody();
-    assertThat(conceptSet.getCriteriums()).containsAllIn(conceptSetCopy.getCriteriums()).inOrder();
-  }
-
-  private ConceptSet createDbConceptSetForWorkspace(
-      String workspaceName, String workspaceId, String desc, String name, Criteria... criteria) {
-    // only domain of the 1st in the list is used
-    List<ConceptSetConceptId> conceptSetConceptIdList = new ArrayList<>();
-    Domain domain = Domain.valueOf(criteria[0].getDomainId());
-    for (Criteria criterium : criteria) {
-      if (domain.toString().equals(criterium.getDomainId())) {
-        cbCriteriaDao.save(makeDbCriteria(criterium));
-        conceptSetConceptIdList.add(
-            new ConceptSetConceptId()
-                .conceptId(criterium.getConceptId())
-                .standard(criterium.getIsStandard()));
-      }
-    }
-    ConceptSet conceptSet = new ConceptSet();
-    conceptSet.setDescription(desc);
-    conceptSet.setName(name);
-    conceptSet.setDomain(domain);
-
-    return conceptSetsController
-        .createConceptSet(
-            workspaceName,
-            workspaceId,
-            new CreateConceptSetRequest()
-                .conceptSet(conceptSet)
-                .addedConceptSetConceptIds(conceptSetConceptIdList))
+        .createConceptSet(workspace.getNamespace(), workspace.getId(), createConceptSetRequest)
         .getBody();
   }
 
@@ -1408,79 +1540,6 @@ public class ConceptSetsControllerTest {
               return conceptSetConceptId;
             })
         .collect(Collectors.toList());
-  }
-
-  private UpdateConceptSetRequest buildRemoveConceptsRequest(String etag, Long... conceptIds) {
-    List<ConceptSetConceptId> conceptSetConceptIdList = buildConceptSetConceptIdList(conceptIds);
-    UpdateConceptSetRequest request = new UpdateConceptSetRequest();
-    request.setEtag(etag);
-    request.setRemovedConceptSetConceptIds(conceptSetConceptIdList);
-    return request;
-  }
-
-  private ConceptSet makeSurveyConceptSet1(Long... addedIds) {
-    List<ConceptSetConceptId> conceptSetConceptIdList = buildConceptSetConceptIdList(addedIds);
-    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-    conceptSetConceptId.setConceptId(CRITERIA_SURVEY_1.getConceptId());
-    conceptSetConceptId.setStandard(true);
-    ConceptSet conceptSet = new ConceptSet();
-    conceptSet.setDescription("description 1");
-    conceptSet.setName("Survey Concept set 1");
-    conceptSet.setDomain(Domain.OBSERVATION);
-    conceptSet.setSurvey(Surveys.THE_BASICS);
-    CreateConceptSetRequest request =
-        new CreateConceptSetRequest()
-            .conceptSet(conceptSet)
-            .addAddedConceptSetConceptIdsItem(conceptSetConceptId);
-    if (addedIds.length > 0) {
-      request = request.addedConceptSetConceptIds(conceptSetConceptIdList);
-    }
-    return conceptSetsController
-        .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, request)
-        .getBody();
-  }
-
-  private ConceptSet makeConceptSet1(Long... addedIds) {
-    List<ConceptSetConceptId> conceptSetConceptIdList =
-        Arrays.stream(addedIds)
-            .map(c -> new ConceptSetConceptId().conceptId(c).standard(true))
-            .collect(Collectors.toList());
-    ConceptSet conceptSet = new ConceptSet();
-    conceptSet.setDescription(CONCEPT_SET_DESC_1);
-    conceptSet.setName(CONCEPT_SET_NAME_1);
-    conceptSet.setDomain(Domain.CONDITION);
-    CreateConceptSetRequest request =
-        new CreateConceptSetRequest()
-            .conceptSet(conceptSet)
-            .addAddedConceptSetConceptIdsItem(
-                new ConceptSetConceptId()
-                    .conceptId(CRITERIA_CONDITION_1.getConceptId())
-                    .standard(true));
-    if (addedIds.length > 0) {
-      request = request.addedConceptSetConceptIds(conceptSetConceptIdList);
-    }
-    return conceptSetsController
-        .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, request)
-        .getBody();
-  }
-
-  private ConceptSet makeConceptSet(
-      Criteria criteria, Domain domain, String nameSpace, String workspaceName) {
-    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-    conceptSetConceptId.setConceptId(criteria.getConceptId());
-    conceptSetConceptId.setStandard(true);
-    ConceptSet conceptSet = new ConceptSet();
-    conceptSet.setDescription("desc 2");
-    conceptSet.setName("concept set 2");
-    conceptSet.setDomain(domain);
-    return conceptSetsController
-        .createConceptSet(
-            nameSpace,
-            workspaceName,
-            new CreateConceptSetRequest()
-                .conceptSet(conceptSet)
-                .addAddedConceptSetConceptIdsItem(conceptSetConceptId))
-        .getBody();
   }
 
   private void stubWorkspaceAccessLevel(
