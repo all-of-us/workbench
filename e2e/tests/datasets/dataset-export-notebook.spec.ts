@@ -10,7 +10,6 @@ import {
 import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import DataResourceCard from 'app/component/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
@@ -32,9 +31,8 @@ describe('Export Notebook Test', () => {
   test.each(KernelLanguages)('Export to %s Jupyter notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
     const cohortName = await findOrCreateCohort(page);
-    const datasetName = await findOrCreateDataset(page, { cohortNames: [cohortName], openEditPage: true });
+    await findOrCreateDataset(page, { cohortNames: [cohortName], openEditPage: true });
 
-    await new DataResourceCard(page).findCard(datasetName, ResourceCard.Dataset);
     const buildPage = new DatasetBuildPage(page);
     await buildPage.waitForLoad();
     const exportModal = await buildPage.clickAnalyzeButton();
