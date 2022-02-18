@@ -12,8 +12,8 @@ public interface AccessTierService {
   String CONTROLLED_TIER_SHORT_NAME = "controlled";
 
   /**
-   * Return all access tiers in the database, in alphabetical order by shortName. To return only
-   * the tiers which are visible to users, use getAllTiersVisibleToUsers().
+   * Return all access tiers in the database, in alphabetical order by shortName. To return only the
+   * tiers which are visible to users, use getAllTiersVisibleToUsers().
    *
    * @return the List of all DbAccessTiers in the database
    */
@@ -23,16 +23,16 @@ public interface AccessTierService {
    * Return all access tiers in the database which are visible to users, in alphabetical order by
    * shortName. To return all tiers, use getAllTiers().
    *
-   * @return the List of all DbAccessTiers in the database
+   * @return the List of all DbAccessTiers in the database which are visible to users
    */
   List<DbAccessTier> getAllTiersVisibleToUsers();
 
-    /**
-     * Add memberships to all tiers for a user if they don't exist by inserting DB row(s) set to
-     * ENABLED. For any memberships which exist and are DISABLED, set them to ENABLED.
-     *
-     * @param user the DbUser in the user-accessTier mappings we're updating
-     */
+  /**
+   * Add memberships to all tiers for a user if they don't exist by inserting DB row(s) set to
+   * ENABLED. For any memberships which exist and are DISABLED, set them to ENABLED.
+   *
+   * @param user the DbUser in the user-accessTier mappings we're updating
+   */
   void addUserToAllTiers(DbUser user);
 
   /**
