@@ -14,8 +14,11 @@ describe('Updating runtime compute type', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspaceName = 'e2eGceToDataprocTest';
+
   test('Switch from GCE to dataproc', async () => {
     await createWorkspace(page, {
+      workspaceName,
       cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });

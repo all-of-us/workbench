@@ -10,7 +10,7 @@ import {
   LinkText
 } from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { makeRandomName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import RuntimePanel, { AutoPauseIdleTime, ComputeType } from 'app/sidebar/runtime-panel';
@@ -31,7 +31,7 @@ describe('Genomics Extraction Test', () => {
   });
 
   const maxWaitTime = 50 * 60 * 1000;
-  const workspaceName = makeWorkspaceName();
+  const workspaceName = 'e2eGenomicExtractionToVcfTest';
   const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
