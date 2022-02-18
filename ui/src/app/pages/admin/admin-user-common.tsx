@@ -280,20 +280,16 @@ export const TierBadgesMaybe = (props: {
       ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
       : getAccessModuleConfig(moduleName)?.requiredForCTAccess;
 
-  const rt = (
-    <div style={{ width: '30px' }}>{rtRequired && <RegisteredTierBadge />}</div>
-  );
-
-  const ct = (
-    <div style={{ width: '30px' }}>{ctRequired && <ControlledTierBadge />}</div>
-  );
-
   // fake a sub-table to keep RTs aligned with RTs
   return (
     <FlexRow style={{ justifyContent: 'center' }}>
-      {rt}
+      <div style={{ width: '30px' }}>
+        {rtRequired && <RegisteredTierBadge />}
+      </div>
       <div style={{ width: '30px' }} />
-      {ct}
+      <div style={{ width: '30px' }}>
+        {ctRequired && <ControlledTierBadge />}
+      </div>
     </FlexRow>
   );
 };
