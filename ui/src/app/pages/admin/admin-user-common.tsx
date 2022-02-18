@@ -270,26 +270,30 @@ export const TierBadgesMaybe = (props: {
 }) => {
   const { profile, moduleName } = props;
 
-  const rtMaybe = (moduleName === AccessModule.ERACOMMONS
-    ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-    : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
-    <RegisteredTierBadge style={{ gridArea: 'badge' }} />
+  const rtRequired =
+    moduleName === AccessModule.ERACOMMONS
+      ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
+      : getAccessModuleConfig(moduleName)?.requiredForRTAccess;
+
+  const ctRequired =
+    moduleName === AccessModule.ERACOMMONS
+      ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
+      : getAccessModuleConfig(moduleName)?.requiredForCTAccess;
+
+  const rt = (
+    <div style={{ width: '30px' }}>{rtRequired && <RegisteredTierBadge />}</div>
   );
 
-  const ctMaybe = (moduleName === AccessModule.ERACOMMONS
-    ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-    : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
-    <ControlledTierBadge style={{ gridArea: 'badge' }} />
+  const ct = (
+    <div style={{ width: '30px' }}>{ctRequired && <ControlledTierBadge />}</div>
   );
 
-  // give the badges a little space
-  const spacer = <div style={{ width: '5%' }} />;
-
+  // fake a sub-table to keep RTs aligned with RTs
   return (
     <FlexRow style={{ justifyContent: 'center' }}>
-      {rtMaybe}
-      {rtMaybe && ctMaybe && spacer}
-      {ctMaybe}
+      {rt}
+      <div style={{ width: '30px' }} />
+      {ct}
     </FlexRow>
   );
 };
