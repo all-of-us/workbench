@@ -5,7 +5,7 @@ import { withWindowSize } from 'app/utils';
 import { WindowSizeProps } from 'app/utils';
 
 // for query selection of the last document element
-const MS_WORD_PARAGRAPH_CLASS = '.MsoNormal';
+export const MS_WORD_PARAGRAPH_CLASS = '.MsoNormal';
 
 export interface Props extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
