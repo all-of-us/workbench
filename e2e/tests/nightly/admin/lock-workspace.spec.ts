@@ -30,7 +30,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
+    // await dataPage.waitForLoad();
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
     //create the dataset and notebook
@@ -61,7 +61,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceCard.verifyLockedWorkspaceMenuOptions();
     await workspaceCard.clickLockedWorkspaceName(true);
     const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.waitForLoad();
+    // await aboutPage.waitForLoad();
     // verify the banner includes the locking reason
     const aboutLockReason = await aboutPage.extractReasonMessage();
     expect(aboutLockReason).toEqual(reasonText);
@@ -81,7 +81,7 @@ describe('Workspace Admin lock-workspace', () => {
     // verify the user is able to navigate to edit page to update the description
     await aboutPage.getAboutEditIcon();
     const workspaceEdit = new WorkspaceEditPage(page);
-    await workspaceEdit.waitForLoad();
+    // await workspaceEdit.waitForLoad();
     // verify user is able to edit the locked workspace
     workspaceEditedName = await workspaceEdit.fillOutRequiredDuplicationFields();
     const updateButton = workspaceEdit.getUpdateWorkspaceButton();
@@ -112,7 +112,7 @@ describe('Workspace Admin lock-workspace', () => {
     await openTab(page, Tabs.Analysis, analysisPage);
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);
-    await aboutPage.waitForLoad();
+    // the share button is enabled
     expect(await aboutPage.getShareButton().isCursorNotAllowed()).toBe(false);
     expect(await aboutPage.getAboutLockedWorkspaceIcon()).toBeFalsy();
     const snowmanMenu = await aboutPage.getWorkspaceActionMenu();

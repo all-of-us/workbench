@@ -109,7 +109,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     const xpath = '//div[contains(text(), "Primary purpose of project")]/div[@role="button"]';
     const edit = new Button(this.page, xpath);
     await edit.click();
-    const editPage = new WorkspaceEditPage(page);
+    const editPage = new WorkspaceEditPage(this.page);
     return await editPage.waitForLoad();
   }
 
