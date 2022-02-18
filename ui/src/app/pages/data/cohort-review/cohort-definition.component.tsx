@@ -8,6 +8,7 @@ import {
   Domain,
   Modifier,
   ModifierType,
+  Operator,
   SearchGroup,
   SearchParameter,
 } from 'generated/fetch';
@@ -70,9 +71,37 @@ const showParameterType = (domain: string) =>
 const showParameterParent = (domain: string) =>
   domain !== Domain.DRUG.toString() && domain !== Domain.SURVEY.toString();
 
+const modifierTypeDisplay = (modifierType: ModifierType) => {
+  switch (modifierType) {
+    case ModifierType.AGEATEVENT:
+      return 'Age at Event';
+    case ModifierType.ENCOUNTERS:
+      return 'During Visit Type - ';
+    case ModifierType.EVENTDATE:
+      return 'Event Date';
+    case ModifierType.NUMOFOCCURRENCES:
+      return 'Num of Occurrences';
+  }
+};
+
+const modifierOperatorDisplay = (operator: Operator) => {
+  switch (operator) {
+    case Operator.BETWEEN:
+      return 'Between';
+    case Operator.EQUAL:
+      return '=';
+    case Operator.GREATERTHANOREQUALTO:
+      return '>=';
+    case Operator.IN:
+      return '';
+    case Operator.LESSTHANOREQUALTO:
+      return '<=';
+  }
+};
+
 interface ParamItem {
+  display: string;
   domain: Domain;
-  items: string;
 }
 
 interface Props extends RouteComponentProps<MatchParams> {
@@ -86,7 +115,7 @@ interface State {
 
 export const CohortDefinition = withRouter(
   class extends React.Component<Props, State> {
-    constructor(props: any) {
+    constructor(props: Props) {
       super(props);
       this.state = { definition: undefined, visits: undefined };
     }
@@ -156,11 +185,11 @@ export const CohortDefinition = withRouter(
           const displayName =
             group && showParameterParent(domain) ? `Parent ${name}` : name;
           if (parameterList[type]) {
-            parameterList[type].items += `, ${displayName}`;
+            parameterList[type].display += `, ${displayName}`;
           } else {
             parameterList[type] = {
               domain,
-              items: `${domainToTitle(domain)}${
+              display: `${domainToTitle(domain)}${
                 showParameterType(domain) ? ` | ${type}` : ''
               } | ${displayName}`,
             };
@@ -171,119 +200,27 @@ export const CohortDefinition = withRouter(
       );
       return modifiers.length > 0
         ? Object.values(groupedParameters).map((param) => {
-            param.items += ` | ${this.getModifierName(modifiers)}`;
+            param.display += ` | ${this.getModifierDisplay(modifiers)}`;
             return param;
           })
         : Object.values(groupedParameters);
     }
 
-    getModifierName(modifiers: Array<Modifier>) {
-      const modifiersArray = modifiers.reduce((modsArray, modifier) => {
+    getModifierDisplay(modifiers: Array<Modifier>) {
+      const modifiersDisplay = modifiers.reduce((modifiersArray, modifier) => {
         const operands =
           modifier.name === ModifierType.ENCOUNTERS
             ? this.state.visits.find(
                 (visit) => visit.conceptId.toString() === modifier.operands[0]
               )?.name || ''
             : modifier.operands.join(' & ');
-        modsArray.push(`${this.operatorConversion(
+        modifiersArray.push(`${modifierTypeDisplay(
           modifier.name
-        )} ${this.operatorConversion(modifier.operator)}
+        )} ${modifierOperatorDisplay(modifier.operator)}
               ${operands}`);
-        return modsArray;
+        return modifiersArray;
       }, []);
-      return modifiersArray.join(', ');
-    }
-
-    // utils
-    getGroupedData(p, t) {
-      const groupedData = p.reduce((acc, i) => {
-        const key = i[t];
-        acc[key] = acc[key] || { data: [] };
-        acc[key].data.push(i);
-        return acc;
-      }, {});
-      return Object.keys(groupedData).map((k) => {
-        return Object.assign(
-          {},
-          {
-            group: k,
-            data: groupedData[k].data,
-            customString: groupedData[k].data.reduce((acc, d) => {
-              return this.getFormattedString(acc, d);
-            }, ''),
-          }
-        );
-      });
-    }
-
-    getFormattedString(acc, d) {
-      if (d.domain === Domain.DRUG) {
-        if (d.group === false) {
-          return acc === '' ? `RXNORM | ${d.name}` : `${acc}, ${d.name}`;
-        } else {
-          return acc === '' ? `ATC | ${d.name}` : `${acc}, ${d.name}`;
-        }
-      } else if (
-        d.domain === Domain.PHYSICALMEASUREMENT ||
-        d.domain === Domain.VISIT
-      ) {
-        return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
-      } else if (d.domain === Domain.SURVEY) {
-        if (!d.group) {
-          return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
-        } else if (d.group && !d.conceptId) {
-          return acc === ''
-            ? `Survey - ${d.name}`
-            : `${acc}, Survey - ${d.name}`;
-        } else {
-          return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
-        }
-      } else {
-        if (d.group === false) {
-          return acc === '' ? d.name : `${acc}, ${d.name}`;
-        } else {
-          return acc === '' ? `Parent ${d.name}` : `${acc}, Parent ${d.name}`;
-        }
-      }
-    }
-
-    removeDuplicates(arr) {
-      return arr.filter(
-        (thing, index, self) =>
-          index ===
-          self.findIndex(
-            (t) => t.items === thing.items && t.domain === thing.domain
-          )
-      );
-    }
-
-    operatorConversion(operator) {
-      switch (operator) {
-        case 'GREATER_THAN_OR_EQUAL_TO':
-          return '>=';
-        case 'LESS_THAN_OR_EQUAL_TO':
-          return '<=';
-        case 'EQUAL':
-          return '=';
-        case 'BETWEEN':
-          return 'Between';
-        case 'IN':
-          return '';
-        case 'ETHNICITY':
-          return 'Ethnicity';
-        case 'RACE':
-          return 'Race';
-        case 'AGE':
-          return 'Age';
-        case 'GENDER':
-          return 'Gender';
-        case 'AGE_AT_EVENT':
-          return 'Age at Event';
-        case 'NUM_OF_OCCURRENCES':
-          return 'Num of Occurrences';
-        case 'ENCOUNTERS':
-          return 'During Visit Type - ';
-      }
+      return modifiersDisplay.join(', ');
     }
 
     render() {
@@ -292,40 +229,30 @@ export const CohortDefinition = withRouter(
         <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           <style>{css}</style>
           <div style={styles.defTitle}>Cohort Definition</div>
-          {definition?.map((group, g) => (
-            <React.Fragment key={g}>
-              {group.role === 'excludes' && (
+          {definition?.map((role, r) => (
+            <React.Fragment key={r}>
+              {role.role === 'excludes' && (
                 <div className='page-break' style={styles.wrapper}>
                   <div style={styles.exclude}>EXCLUDING</div>
                 </div>
               )}
-              {group.groups.map((item, i) => (
-                <React.Fragment key={i}>
-                  {i > 0 && (
+              {role.groups.map((group, g) => (
+                <React.Fragment key={g}>
+                  {g > 0 && (
                     <div className='page-break' style={styles.wrapper}>
                       <div style={styles.andCircle}>AND</div>
                     </div>
                   )}
                   <div style={styles.groupBackground}>
-                    {item.map((param, p) => (
-                      <React.Fragment key={p}>
-                        {p > 0 && <div>OR</div>}
-                        <div>
-                          {param.map((crit, c) => (
-                            <React.Fragment key={c}>
-                              {c > 0 && (
-                                <React.Fragment>
-                                  {crit.domain === Domain.PERSON ? (
-                                    <div>AND</div>
-                                  ) : (
-                                    <div>OR</div>
-                                  )}
-                                </React.Fragment>
-                              )}
-                              <div>{crit.items}</div>
-                            </React.Fragment>
-                          ))}
-                        </div>
+                    {group.map((item, i) => (
+                      <React.Fragment key={i}>
+                        {i > 0 && <div>OR</div>}
+                        {item.map((parameter, p) => (
+                          <React.Fragment key={p}>
+                            {p > 0 && <div>OR</div>}
+                            <div>{parameter.display}</div>
+                          </React.Fragment>
+                        ))}
                       </React.Fragment>
                     ))}
                   </div>
