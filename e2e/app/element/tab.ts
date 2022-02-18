@@ -20,9 +20,12 @@ export default class Tab extends BaseElement {
 
   async isSelected(): Promise<boolean> {
     const element = await this.asElementHandle();
-    const selected = await getPropValue<boolean>(element, 'aria-selected');
-    return selected ? selected : !!(await getStyleValue<string>(this.page, element, 'border-bottom'));
+    const selected = await getPropValue<string>(element, 'ariaSelected');
+    return selected !== undefined
+      ? selected === 'true'
+      : (await getStyleValue<string>(this.page, element, 'border-bottom')) !== null;
   }
+
 
   async waitFor(page: AuthenticatedPage): Promise<void> {
     await page.waitForLoad();
