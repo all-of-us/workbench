@@ -17,7 +17,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -1319,7 +1318,9 @@ export const WorkspaceEdit = fp.flow(
 
     // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
     enableAccessTierSelection(): boolean {
-      return environment.accessTiersVisibleToUsers.length > 1;
+      return (
+        serverConfigStore.get().config.accessTiersVisibleToUsers.length > 1
+      );
     }
 
     onAccessTierChange(
@@ -1482,13 +1483,15 @@ export const WorkspaceEdit = fp.flow(
                           }
                           disabled={!this.isMode(WorkspaceEditMode.Create)}
                         >
-                          {environment.accessTiersVisibleToUsers.map(
-                            (shortName) => (
-                              <option key={shortName} value={shortName}>
-                                {displayNameForTier(shortName)}
-                              </option>
-                            )
-                          )}
+                          {serverConfigStore
+                            .get()
+                            .config.accessTiersVisibleToUsers.map(
+                              (shortName) => (
+                                <option key={shortName} value={shortName}>
+                                  {displayNameForTier(shortName)}
+                                </option>
+                              )
+                            )}
                         </select>
                       </div>
                     </TooltipTrigger>

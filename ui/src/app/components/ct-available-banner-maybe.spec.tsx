@@ -4,7 +4,6 @@ import { mount } from 'enzyme';
 
 import { CdrVersionTier, Profile, UserTierEligibility } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 import { cdrVersionStore, profileStore } from 'app/utils/stores';
@@ -12,6 +11,7 @@ import { cdrVersionStore, profileStore } from 'app/utils/stores';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import { updateVisibleTiers } from 'testing/test-utils';
 
 import { CTAvailableBannerMaybe } from './ct-available-banner-maybe';
 
@@ -63,10 +63,10 @@ describe('CTAvailableBannerMaybe', () => {
 
   const fulfillAllBannerRequirements = () => {
     // the environment allows users to see the CT (in the UI)
-    environment.accessTiersVisibleToUsers = [
+    updateVisibleTiers([
       AccessTierShortNames.Registered,
       AccessTierShortNames.Controlled,
-    ];
+    ]);
 
     // the user is eligible for the CT
     const newTierEligibilities: UserTierEligibility[] = [
@@ -121,7 +121,7 @@ describe('CTAvailableBannerMaybe', () => {
   });
 
   const ctNotVisible = () => {
-    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+    updateVisibleTiers([AccessTierShortNames.Registered]);
   };
   const userIneligible = () => {
     const newTierEligibilities: UserTierEligibility[] = [

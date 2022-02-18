@@ -6,13 +6,6 @@ export enum ZendeskEnv {
   Sandbox = 'sandbox',
 }
 
-// A copy of utils/access-tiers.tsx AccessTierShortNames, so there's no circular dependency.
-// TODO: remove this after accessTiersVisibleToUsers is removed
-export enum EnvAccessTierShortNames {
-  Registered = 'registered',
-  Controlled = 'controlled',
-}
-
 export interface EnvironmentBase {
   // Permanent environment variables.
   //
@@ -72,9 +65,6 @@ export interface EnvironmentBase {
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
-
-  // which access tiers do we expose to the users via the UI?  likely temporary - until CT is fully rolled out
-  accessTiersVisibleToUsers: string[];
 }
 
 export interface Environment extends EnvironmentBase {

@@ -9,6 +9,7 @@ import { ProfileComponent } from 'app/pages/profile/profile-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -57,6 +58,7 @@ describe('ProfilePageComponent', () => {
 
     serverConfigStore.set({
       config: {
+        ...defaultServerConfig,
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
