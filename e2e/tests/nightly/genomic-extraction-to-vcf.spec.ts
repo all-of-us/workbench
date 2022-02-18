@@ -1,4 +1,4 @@
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {
@@ -35,9 +35,9 @@ describe('Genomics Extraction Test', () => {
   const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
-    await createWorkspace(page, {
+    await findOrCreateWorkspace(page, {
       workspaceName,
-      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      cdrVersion: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });
 
