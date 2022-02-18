@@ -188,10 +188,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     }
 
     workspaceCardNameTarget() {
-      const { tierAccessDisabled, workspace } = this.props;
-      return tierAccessDisabled
-        ? '#'
-        : `/workspaces/${workspace.namespace}/${workspace.id}/data`;
+      const {
+        tierAccessDisabled,
+        workspace: { id, namespace },
+      } = this.props;
+      return tierAccessDisabled ? '#' : `/workspaces/${namespace}/${id}/data`;
     }
 
     render() {
