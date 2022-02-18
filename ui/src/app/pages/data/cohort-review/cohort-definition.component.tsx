@@ -99,11 +99,6 @@ const modifierOperatorDisplay = (operator: Operator) => {
   }
 };
 
-interface ParamItem {
-  display: string;
-  domain: Domain;
-}
-
 interface Props extends RouteComponentProps<MatchParams> {
   review: CohortReview;
 }
@@ -185,22 +180,19 @@ export const CohortDefinition = withRouter(
           const displayName =
             group && showParameterParent(domain) ? `Parent ${name}` : name;
           if (parameterList[type]) {
-            parameterList[type].display += `, ${displayName}`;
+            parameterList[type] += `, ${displayName}`;
           } else {
-            parameterList[type] = {
-              domain,
-              display: `${domainToTitle(domain)}${
-                showParameterType(domain) ? ` | ${type}` : ''
-              } | ${displayName}`,
-            };
+            parameterList[type] = `${domainToTitle(domain)}${
+              showParameterType(domain) ? ` | ${type}` : ''
+            } | ${displayName}`;
           }
           return parameterList;
         },
-        {} as ParamItem
+        {}
       );
       return modifiers.length > 0
         ? Object.values(groupedParameters).map((param) => {
-            param.display += ` | ${this.getModifierDisplay(modifiers)}`;
+            param += ` | ${this.getModifierDisplay(modifiers)}`;
             return param;
           })
         : Object.values(groupedParameters);
@@ -250,7 +242,7 @@ export const CohortDefinition = withRouter(
                         {item.map((parameter, p) => (
                           <React.Fragment key={p}>
                             {p > 0 && <div>OR</div>}
-                            <div>{parameter.display}</div>
+                            <div>{parameter}</div>
                           </React.Fragment>
                         ))}
                       </React.Fragment>
