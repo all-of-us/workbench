@@ -155,7 +155,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       ]);
     }
 
-    trackWorkspaceNavigation() {
+    // If enableResearchReviewPrompt is true and workspace needs Review:
+    // show the research purpose review modal and return false, to stop further navigation
+    // Else:
+    // Tracks the Analytics Event, Navigate to Featured workspace or Navigate to User workspace
+    // and return true to continue navigate to workspace detail page
+    trackWorkspaceNavigation(): boolean {
       const { workspace } = this.props;
       if (
         serverConfigStore.get().config.enableResearchReviewPrompt &&
@@ -185,8 +190,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     workspaceCardNameTarget() {
       const { tierAccessDisabled, workspace } = this.props;
       return tierAccessDisabled
-        ? ' #'
-        : '/workspaces/' + workspace.namespace + '/' + workspace.id + '/data';
+        ? '#'
+        : `/workspaces/${workspace.namespace}/${workspace.id}/data`;
     }
 
     render() {
