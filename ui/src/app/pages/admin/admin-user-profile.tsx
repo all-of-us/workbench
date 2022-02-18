@@ -434,7 +434,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {
     config: { gsuiteDomain },
   } = useStore(serverConfigStore);
-  const { profile } = profileStore.get();
   const { usernameWithoutGsuiteDomain } = useParams<MatchParams>();
   const [oldProfile, setOldProfile] = useState<Profile>(null);
   const [updatedProfile, setUpdatedProfile] = useState<Profile>(null);
@@ -576,6 +575,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   };
 
   const isCurrentUser = (userProfile: Profile): boolean => {
+    const { profile } = profileStore.get();
     return userProfile?.userId === profile?.userId;
   };
 
