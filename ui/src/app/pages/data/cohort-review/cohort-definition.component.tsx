@@ -28,7 +28,7 @@ const css = `
 `;
 
 const styles = reactStyles({
-  defTitle: {
+  definitionTitle: {
     fontSize: '16px',
     fontWeight: 600,
     color: colors.primary,
@@ -117,6 +117,7 @@ export const CohortDefinition = withRouter(
 
     async componentDidMount() {
       const { ns, wsid } = this.props.match.params;
+      // Get list of Visit criteria for displaying Visit Type modifiers
       const visits = await cohortBuilderApi().findCriteriaBy(
         ns,
         wsid,
@@ -148,6 +149,7 @@ export const CohortDefinition = withRouter(
       const mappedItems = [];
       group.items.forEach(({ modifiers, searchParameters, type }) => {
         const domain = Domain[type];
+        // Check for multiple domains for Conditions and Procedures items (possible with source concepts)
         if (
           (domain === Domain.CONDITION || domain === Domain.PROCEDURE) &&
           searchParameters.some((param) => param.domain !== domain)
@@ -163,6 +165,7 @@ export const CohortDefinition = withRouter(
             }
             return acc;
           }, []);
+          // Add a separate parameter list for each domain
           multipleDomains.forEach((params) =>
             mappedItems.push(this.mapParams(params, modifiers))
           );
@@ -177,8 +180,10 @@ export const CohortDefinition = withRouter(
       const groupedParameters = parameters.reduce(
         (parameterList, parameter) => {
           const { domain, group, name, type } = parameter;
+          // Add 'Parent' on the front of the names of parent nodes
           const displayName =
             group && showParameterParent(domain) ? `Parent ${name}` : name;
+          // Group parameters by criteria type for display
           if (parameterList[type]) {
             parameterList[type] += `, ${displayName}`;
           } else {
@@ -200,12 +205,13 @@ export const CohortDefinition = withRouter(
 
     getModifierDisplay(modifiers: Array<Modifier>) {
       const modifiersDisplay = modifiers.reduce((modifiersArray, modifier) => {
+        // For ModifierType.ENCOUNTERS, get the name from the visit criteria in state
         const operands =
           modifier.name === ModifierType.ENCOUNTERS
             ? this.state.visits.find(
                 (visit) => visit.conceptId.toString() === modifier.operands[0]
-              )?.name || ''
-            : modifier.operands.join(' & ');
+              )?.name || '' // Use an empty string if for some reason the visit isn't found
+            : modifier.operands.join(' & '); // Should only have multiple operands for BETWEEN operator, separate with '&'
         modifiersArray.push(`${modifierTypeDisplay(
           modifier.name
         )} ${modifierOperatorDisplay(modifier.operator)}
@@ -220,7 +226,7 @@ export const CohortDefinition = withRouter(
       return (
         <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           <style>{css}</style>
-          <div style={styles.defTitle}>Cohort Definition</div>
+          <div style={styles.definitionTitle}>Cohort Definition</div>
           {definition?.map((role, r) => (
             <React.Fragment key={r}>
               {role.role === 'excludes' && (
