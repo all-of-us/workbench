@@ -402,13 +402,18 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   );
 };
 
+const isCurrentUser = (userProfile: Profile): boolean => {
+  const { profile } = profileStore.get();
+  return userProfile?.username === profile?.username;
+};
+
 const DisabledToggle = (props: {
   currentlyDisabled: boolean;
   previouslyDisabled: boolean;
+  profile: Profile;
   toggleDisabled: () => void;
-  disabled?: boolean;
 }) => {
-  const { currentlyDisabled, previouslyDisabled, toggleDisabled, disabled } =
+  const { currentlyDisabled, previouslyDisabled, profile, toggleDisabled } =
     props;
   const highlightStyle =
     currentlyDisabled !== previouslyDisabled
@@ -423,7 +428,7 @@ const DisabledToggle = (props: {
           checked={!currentlyDisabled}
           dataTestId='user-disabled-toggle'
           onToggle={() => toggleDisabled()}
-          disabled={disabled}
+          disabled={isCurrentUser(profile)}
         />
       </div>
     </div>
@@ -574,11 +579,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };
 
-  const isCurrentUser = (userProfile: Profile): boolean => {
-    const { profile } = profileStore.get();
-    return userProfile?.userId === profile?.userId;
-  };
-
   const errors = validate(
     {
       contactEmail: !isBlank(updatedProfile?.contactEmail),
@@ -675,7 +675,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                       toggleDisabled={() =>
                         updateProfile({ disabled: !updatedProfile.disabled })
                       }
-                      disabled={isCurrentUser(updatedProfile)}
+                      profile={updatedProfile}
                     />
                   </div>
                 </TooltipTrigger>
