@@ -13,6 +13,7 @@ import WorkspaceBase, { UseFreeCredits } from './workspace-base';
 import { config } from 'resources/workbench-config';
 import BaseElement from 'app/element/base-element';
 import { makeWorkspaceName } from 'utils/str-utils';
+import WorkspaceDataPage from './workspace-data-page';
 
 const faker = require('faker/locale/en_US');
 
@@ -502,5 +503,13 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await this.fillOutWorkspaceName(workspaceName);
     await this.requestForReviewRadiobutton(false);
     return workspaceName;
+  }
+
+  // click cancel button on edit page and navigate to dataPage
+  async clickCancelButton(): Promise<WorkspaceDataPage> {
+    const button = this.getCancelButton();
+    await button.click();
+    const dataPage = new WorkspaceDataPage(this.page);
+    return dataPage;
   }
 }

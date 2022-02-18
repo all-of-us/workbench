@@ -14,6 +14,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 
+
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
   const reasonText = 'locking this workspace';
@@ -25,7 +26,7 @@ describe('Workspace Admin lock-workspace', () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
   });
 
-  test.only('verify if workspace is locked', async () => {
+  test('verify if workspace is locked', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
@@ -68,8 +69,7 @@ describe('Workspace Admin lock-workspace', () => {
     // verify the lock icon is displaying for the locked workspace
     const aboutLockedIcon = aboutPage.getAboutLockedWorkspaceIcon();
     expect(aboutLockedIcon).toBeTruthy();
-    // expect(await aboutPage.getTabState(page, Tabs.Analysis)).toBe(false);
-    // expect(await aboutPage.getTabState(page, Tabs.Data)).toBe(false);
+
     // verify DATA & ANALYSIS tabs are inactive for locked workspace
     const analysisTab = await aboutPage.getTabState(Tabs.Analysis);
     expect(analysisTab).toBe(false);
@@ -124,8 +124,12 @@ describe('Workspace Admin lock-workspace', () => {
     await aboutPage.getAboutEditIcon();
     const workspaceEdit = new WorkspaceEditPage(page);
     await workspaceEdit.waitForLoad();
+    await workspaceEdit.clickCancelButton();
+    // cleanup
+    await dataPage.deleteWorkspace();
   });
 
+  // function to create cohort, dataset and notebook
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
