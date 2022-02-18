@@ -3,7 +3,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // This test could take a long time to run
@@ -17,9 +17,9 @@ describe('Updating runtime compute type', () => {
   const workspaceName = 'e2eDataprocToGceTest';
 
   test('Switch from dataproc to GCE', async () => {
-    await createWorkspace(page, {
+    await findOrCreateWorkspace(page, {
       workspaceName,
-      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      cdrVersion: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });
 

@@ -1,6 +1,6 @@
 import RuntimePanel, { ComputeType } from 'app/sidebar/runtime-panel';
 import { config } from 'resources/workbench-config';
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
@@ -18,9 +18,9 @@ describe('Updating runtime compute type', () => {
   const notebookName = makeRandomName('py');
 
   test('Switch from GCE to dataproc', async () => {
-    await createWorkspace(page, {
+    await findOrCreateWorkspace(page, {
       workspaceName,
-      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      cdrVersion: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });
 
