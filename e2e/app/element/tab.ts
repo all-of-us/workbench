@@ -26,7 +26,6 @@ export default class Tab extends BaseElement {
       : (await getStyleValue<string>(this.page, element, 'border-bottom')) !== null;
   }
 
-
   async waitFor(page: AuthenticatedPage): Promise<void> {
     await page.waitForLoad();
   }
