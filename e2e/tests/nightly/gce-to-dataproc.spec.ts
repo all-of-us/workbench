@@ -14,8 +14,12 @@ describe('Updating runtime compute type', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspaceName = 'e2eGceToDataprocTest';
+  const notebookName = makeRandomName('py');
+
   test('Switch from GCE to dataproc', async () => {
     await createWorkspace(page, {
+      workspaceName,
       cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });
@@ -30,7 +34,6 @@ describe('Updating runtime compute type', () => {
 
     // Open a Python notebook
     const dataPage = new WorkspaceDataPage(page);
-    const notebookName = makeRandomName('py');
     const notebook = await dataPage.createNotebook(notebookName);
 
     // Run some Python commands to validate the VM configuration
@@ -88,6 +91,5 @@ describe('Updating runtime compute type', () => {
     // Delete notebook
     const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();
     await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
-    await workspaceAnalysisPage.deleteWorkspace();
   });
 });

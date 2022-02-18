@@ -14,8 +14,11 @@ describe('Updating runtime compute type', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspaceName = 'e2eDataprocToGceTest';
+
   test('Switch from dataproc to GCE', async () => {
     await createWorkspace(page, {
+      workspaceName,
       cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });
@@ -85,6 +88,5 @@ describe('Updating runtime compute type', () => {
     // Delete notebook
     const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();
     await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
-    await workspaceAnalysisPage.deleteWorkspace();
   });
 });
