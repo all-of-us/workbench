@@ -1,7 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -73,6 +73,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -507,66 +508,118 @@ public class CohortReviewControllerTest {
                     stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
+  ////////// createCohortReview  //////////
   @Test
   public void createCohortReviewLessThanMinSize() {
-    try {
-      cohortReviewController.createCohortReview(
-          workspace.getNamespace(),
-          workspace.getId(),
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          new CreateReviewRequest().size(0));
-      Assertions.fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
-    }
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    cdrVersion.getCdrVersionId(),
+                    new CreateReviewRequest().size(0)),
+            "Expected BadRequestException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
   }
 
   @Test
   public void createCohortReviewMoreThanMaxSize() {
-    try {
-      cohortReviewController.createCohortReview(
-          workspace.getNamespace(),
-          workspace.getId(),
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          new CreateReviewRequest().size(10001));
-      Assertions.fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
-    }
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    cdrVersion.getCdrVersionId(),
+                    new CreateReviewRequest().size(10001)),
+            "Expected BadRequestException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
   }
 
   @Test
   public void createCohortReviewAlreadyExists() {
     stubBigQueryCohortCalls();
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
-    try {
-      cohortReviewController.createCohortReview(
-          workspace.getNamespace(),
-          workspace.getId(),
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          new CreateReviewRequest().size(1));
-      Assertions.fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // success
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: Cohort Review already created for cohortId: "
-                  + cohort.getCohortId()
-                  + ", cdrVersionId: "
-                  + cdrVersion.getCdrVersionId());
-    }
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    cdrVersion.getCdrVersionId(),
+                    new CreateReviewRequest().size(1)),
+            "Expected BadRequestException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Bad Request: Cohort Review already created for cohortId: %d, cdrVersionId: %d",
+                cohort.getCohortId(), cdrVersion.getCdrVersionId()));
   }
 
   @Test
-  public void createCohortReview() {
+  public void createCohortReviewNoCohortException() {
+    long cohortId = 99;
     stubBigQueryCohortCalls();
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortId,
+                    cdrVersion.getCdrVersionId(),
+                    new CreateReviewRequest().size(1)),
+            "Expected NotFoundException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
+  }
+
+  @Test
+  public void createCohortReviewOwner() {
+    stubBigQueryCohortCalls();
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+
+    CohortReview cohortReview =
+        cohortReviewController
+            .createCohortReview(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortWithoutReview.getCohortId(),
+                cdrVersion.getCdrVersionId(),
+                new CreateReviewRequest().size(1))
+            .getBody();
+
+    assertNewlyCreatedCohortReview(cohortReview);
+  }
+
+  @Test
+  public void createCohortReviewWriter() {
+    stubBigQueryCohortCalls();
+    // change access, call and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     CohortReview cohortReview =
@@ -579,6 +632,52 @@ public class CohortReviewControllerTest {
                 new CreateReviewRequest().size(1))
             .getBody();
 
+    assertNewlyCreatedCohortReview(cohortReview);
+  }
+
+  @Test
+  public void createCohortReviewReaderFail() {
+    stubBigQueryCohortCalls();
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortWithoutReview.getCohortId(),
+                    cdrVersion.getCdrVersionId(),
+                    new CreateReviewRequest().size(1)),
+            "Ecpected ForbiddenException not thrown");
+
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void createCohortReviewNoAccessFail() {
+    stubBigQueryCohortCalls();
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortWithoutReview.getCohortId(),
+                    cdrVersion.getCdrVersionId(),
+                    new CreateReviewRequest().size(1)),
+            "Ecpected ForbiddenException not thrown");
+
+    assertForbiddenException(exception);
+  }
+
+  private void assertNewlyCreatedCohortReview(CohortReview cohortReview) {
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
     assertThat(cohortReview.getCohortName()).isEqualTo(cohortWithoutReview.getName());
     assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
@@ -588,40 +687,100 @@ public class CohortReviewControllerTest {
         .isEqualTo(CohortStatus.NOT_REVIEWED);
   }
 
+  ////////// updateCohortReview  //////////
   @Test
-  public void createCohortReviewNoCohortException() {
-    long cohortId = 99;
-    stubBigQueryCohortCalls();
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+  public void updateCohortReviewNoEtag() {
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
 
-    try {
-      cohortReviewController
-          .createCohortReview(
-              workspace.getNamespace(),
-              workspace.getId(),
-              cohortId,
-              cdrVersion.getCdrVersionId(),
-              new CreateReviewRequest().size(1))
-          .getBody();
-      Assertions.fail("Should have thrown NotFoundException!");
-    } catch (NotFoundException nfe) {
-      assertThat(nfe.getMessage())
-          .isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
-    }
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId()).etag(null);
+
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.updateCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    requestCohortReview.getCohortReviewId(),
+                    requestCohortReview),
+            "Expected ConflictException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "missing required update field 'etag'");
   }
 
   @Test
-  public void updateCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+  public void updateCohortReviewEtagDifferent() {
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId()).etag(Etags.fromVersion(cohortReview.getVersion()+10));
+
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.updateCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    requestCohortReview.getCohortReviewId(),
+                    requestCohortReview),
+            "Expected ConflictException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Attempted to modify outdated cohort review version");
+  }
+
+  @Test
+  public void updateCohortReviewWrongWorkspace() {
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
 
     CohortReview requestCohortReview =
         new CohortReview()
             .cohortReviewId(cohortReview.getCohortReviewId())
             .cohortId(cohortReview.getCohortId())
             .etag(Etags.fromVersion(cohortReview.getVersion()));
-    requestCohortReview.setCohortName("blahblah");
-    requestCohortReview.setDescription("new desc");
-    CohortReview responseCohortReview =
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.updateCohortReview(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    requestCohortReview.getCohortReviewId(),
+                    requestCohortReview),
+            "Expected NotFoundException not thrown");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Not Found: No CohortReview exists for cohortReviewId: %d and cohortId: %d",
+                requestCohortReview.getCohortReviewId(), requestCohortReview.getCohortId()));
+  }
+
+  @Test
+  public void updateCohortReviewOwner() {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
+    requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
+    CohortReview updated =
         cohortReviewController
             .updateCohortReview(
                 workspace.getNamespace(),
@@ -630,12 +789,86 @@ public class CohortReviewControllerTest {
                 requestCohortReview)
             .getBody();
 
-    assertThat(responseCohortReview.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
-    assertThat(responseCohortReview.getDescription())
-        .isEqualTo(requestCohortReview.getDescription());
-    assertThat(responseCohortReview.getLastModifiedTime()).isNotNull();
+    assertThat(updated.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
+    assertThat(updated.getDescription()).isEqualTo(requestCohortReview.getDescription());
+    assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
   }
 
+  @Test
+  public void updateCohortReviewWriter() {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
+    requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
+    CohortReview updated =
+        cohortReviewController
+            .updateCohortReview(
+                workspace.getNamespace(),
+                workspace.getId(),
+                requestCohortReview.getCohortReviewId(),
+                requestCohortReview)
+            .getBody();
+
+    assertThat(updated.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
+    assertThat(updated.getDescription()).isEqualTo(requestCohortReview.getDescription());
+    assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
+  }
+
+  @Test
+  public void updateCohortReviewReader() {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
+    requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
+
+    Throwable exception = assertThrows(ForbiddenException.class, () ->
+        cohortReviewController
+            .updateCohortReview(
+                workspace.getNamespace(),
+                workspace.getId(),
+                requestCohortReview.getCohortReviewId(),
+                requestCohortReview), "Expected ForbiddenException not thrown");
+
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void updateCohortReviewNoAccess() {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
+    requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
+
+    Throwable exception = assertThrows(ForbiddenException.class, () ->
+        cohortReviewController
+            .updateCohortReview(
+                workspace.getNamespace(),
+                workspace.getId(),
+                requestCohortReview.getCohortReviewId(),
+                requestCohortReview), "Expected ForbiddenException not thrown");
+
+    assertForbiddenException(exception);
+  }
+
+  ////////// deleteCohortReview  //////////
   @Test
   public void deleteCohortReviewWrongWorkspace() {
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
@@ -703,28 +936,6 @@ public class CohortReviewControllerTest {
                 workspace2.getId(),
                 cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId()));
-  }
-
-  @Test
-  public void updateCohortReviewWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
-
-    CohortReview requestCohortReview =
-        new CohortReview()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .cohortId(cohortReview.getCohortId())
-            .etag(Etags.fromVersion(cohortReview.getVersion()));
-    requestCohortReview.setCohortName("blahblah");
-    requestCohortReview.setDescription("new desc");
-
-    assertThrows(
-        NotFoundException.class,
-        () ->
-            cohortReviewController.updateCohortReview(
-                workspace2.getNamespace(),
-                workspace2.getId(),
-                requestCohortReview.getCohortReviewId(),
-                requestCohortReview));
   }
 
   @Test
@@ -1044,6 +1255,12 @@ public class CohortReviewControllerTest {
             .getBody();
 
     assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
+  }
+
+  private void assertForbiddenException(Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch("You do not have sufficient permissions to access");
   }
 
   /** Helper method to consolidate assertions for all the {@link AnnotationType}s. */
