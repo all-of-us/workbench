@@ -89,9 +89,11 @@ export const commonStyles = reactStyles({
   },
   incompleteOrExpiringModule: {
     color: colors.warning,
+    fontWeight: 'bold',
   },
   expiredModule: {
     color: colors.danger,
+    fontWeight: 'bold',
   },
   completeModule: {
     color: colors.black,
@@ -149,7 +151,7 @@ export const getInitialCreditLimitOptions = (
   );
 };
 
-export const getInitalCreditsUsage = (profile: Profile): string => {
+export const getInitialCreditsUsage = (profile: Profile): string => {
   const { freeTierDollarQuota, freeTierUsage } = profile;
   return `${formatInitialCreditsUSD(
     freeTierUsage
