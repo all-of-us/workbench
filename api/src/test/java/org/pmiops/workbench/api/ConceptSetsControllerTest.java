@@ -329,8 +329,27 @@ public class ConceptSetsControllerTest {
             .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, createConceptSetRequest)
             .getBody();
 
-    assertConceptSetAndCriteria(
-        savedConceptSet, CRITERIA_CONDITION_1, CRITERIA_CONDITION_2, CRITERIA_CONDITION_3);
+    List<Criteria> expectedCriteriums =
+        createExpectedCriteria(
+            savedConceptSet.getCriteriums(),
+            ImmutableList.of(CRITERIA_CONDITION_1, CRITERIA_CONDITION_2, CRITERIA_CONDITION_3));
+
+    assertConceptSetAndCriteria(savedConceptSet, expectedCriteriums);
+  }
+
+  private List<Criteria> createExpectedCriteria(
+      List<Criteria> actualCriteriums, List<Criteria> expectedCriteriums) {
+    expectedCriteriums.forEach(
+        expected -> {
+          actualCriteriums.forEach(
+              actual -> {
+                if (actual.getConceptId().equals(expected.getConceptId())) {
+                  expected.id(actual.getId()).parentId(actual.getParentId());
+                }
+              });
+        });
+    return expectedCriteriums;
+  }
   }
 
   @Test
