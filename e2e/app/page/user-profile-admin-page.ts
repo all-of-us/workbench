@@ -9,7 +9,7 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Switch, { defaultSwitchXpath } from 'app/component/switch';
 import StaticText from 'app/element/staticText';
-import { parseForNumbericalString } from 'utils/test-utils';
+import { parseForNumericalString } from 'utils/test-utils';
 import DataTable from 'app/component/data-table';
 import { getPropValue } from 'utils/element-utils';
 import Cell from 'app/component/cell';
@@ -62,7 +62,7 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
     const creditsUsed = StaticText.findByName(this.page, { name: 'Initial Credits Used' });
     const text = await creditsUsed.getText();
     const words = text.split('\n')[1];
-    const currencies = parseForNumbericalString(words);
+    const currencies = parseForNumericalString(words);
     return [parseInt(currencies[0]), parseInt(currencies[1])];
   }
 

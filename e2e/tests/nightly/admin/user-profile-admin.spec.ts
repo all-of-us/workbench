@@ -1,5 +1,5 @@
 import UserAdminPage from 'app/page/admin-user-list-page';
-import { parseForNumbericalString, signInWithAccessToken } from 'utils/test-utils';
+import { parseForNumericalString, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
@@ -9,7 +9,6 @@ import { Page } from 'puppeteer';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
-import Button from 'app/element/button';
 import Cell from 'app/component/cell';
 import UserAuditPage from 'app/page/admin-user-audit-page';
 import { isBlank } from 'utils/str-utils';
@@ -56,6 +55,7 @@ describe('User Profile Admin', () => {
     AccessModules.PUBLICATION
   ];
 
+  const CHANGED_BACKGROUND_COLOR = 'rgb(248, 201, 84)';
   const testUserEmail = 'admin_test';
   let adminTab: Page;
 
@@ -63,15 +63,15 @@ describe('User Profile Admin', () => {
     adminTab = await searchTestUser(page, testUserEmail);
   });
 
-  test('Verify Researcher Information renders correctly', async () => {
+  test('Verify Researcher Information and Edit Information render correctly', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
     // SAVE and CANCEL buttons should be disabled
     const saveButton = userProfileAdminPage.getSaveButton();
     const cancelButton = userProfileAdminPage.getCancelButton();
-    await verifyButtonEnabled(cancelButton, false);
-    await verifyButtonEnabled(saveButton, false);
+    await cancelButton.expectEnabled(false);
+    await saveButton.expectEnabled(false);
 
     // Verify Verified Institution
     const verifiedInstitution = userProfileAdminPage.getVerifiedInstitution();
@@ -91,7 +91,7 @@ describe('User Profile Admin', () => {
 
     // Get Initial Credits Limit
     const creditLimit = userProfileAdminPage.getInitialCreditLimit();
-    const credits = parseInt(parseForNumbericalString(await creditLimit.getSelectedValue())[0]);
+    const credits = parseInt(parseForNumericalString(await creditLimit.getSelectedValue())[0]);
 
     // Verify Initial Credits Limit dropdown is not empty. Checks existence of some Select options.
     options = await creditLimit.getAllOptionTexts();
@@ -105,7 +105,7 @@ describe('User Profile Admin', () => {
     options = await institutionRole.getAllOptionTexts();
     expect(options).toEqual(
       expect.arrayContaining([
-        InstitutionRole.UndergraduteStudent,
+        InstitutionRole.UndergraduateStudent,
         InstitutionRole.Teacher,
         InstitutionRole.ResearchAssistant
       ])
@@ -134,12 +134,10 @@ describe('User Profile Admin', () => {
     const accountAccessTable = userProfileAdminPage.getAccessStatusTable();
     const columnNames = await accountAccessTable.getColumnNames();
     expect(columnNames.sort()).toEqual(accessStatusTableColumns.sort());
-    expect(columnNames.length).toEqual(accessStatusTableColumns.length);
 
     // Verify Access module names displayed correctly
     const moduleNames = await accountAccessTable.getRowValues(1);
     expect(moduleNames.sort()).toEqual(accessModules.sort());
-    expect(moduleNames.length).toEqual(accessModules.length);
 
     // check badges
     // $x('//*[@id="Registered-user"]')
@@ -157,21 +155,24 @@ describe('User Profile Admin', () => {
 
     const saveButton = userProfileAdminPage.getSaveButton();
     const cancelButton = userProfileAdminPage.getCancelButton();
-    await verifyButtonEnabled(cancelButton, false);
-    await verifyButtonEnabled(saveButton, false);
+    await cancelButton.expectEnabled(false);
+    await saveButton.expectEnabled(false);
 
     // Turn off Account Access toggle
     await accountAccessSwitch.turnOff();
     label = await accountAccessSwitch.getLabel();
     expect(label).toEqual('Account disabled');
 
+    await cancelButton.expectEnabled(true);
+    await saveButton.expectEnabled(true);
+
     // Undo toggle change
     await accountAccessSwitch.turnOn();
     label = await accountAccessSwitch.getLabel();
     expect(label).toEqual('Account enabled');
 
-    await verifyButtonEnabled(cancelButton, false);
-    await verifyButtonEnabled(saveButton, false);
+    await cancelButton.expectEnabled(false);
+    await saveButton.expectEnabled(false);
 
     // Change Initial Credits Limit to $400
     const initialCreditLimit = userProfileAdminPage.getInitialCreditLimit();
@@ -183,8 +184,8 @@ describe('User Profile Admin', () => {
     const styleText = await getPropValue<string>(styleElement, 'innerText');
     expect(styleText).toContain('background-color: #F8C954;');
 
-    await verifyButtonEnabled(cancelButton, true);
-    await verifyButtonEnabled(saveButton, true);
+    await cancelButton.expectEnabled(true);
+    await saveButton.expectEnabled(true);
 
     // Change Contact Email
     const contactEmail = userProfileAdminPage.getContactEmail();
@@ -203,18 +204,19 @@ describe('User Profile Admin', () => {
 
     // Input background color changed
     backgroundColor = await getStyleValue<string>(adminTab, await contactEmail.asElementHandle(), 'background-color');
-    expect(backgroundColor).toEqual('rgb(248, 201, 84)');
+    expect(backgroundColor).toEqual(CHANGED_BACKGROUND_COLOR);
 
-    // Find email error
+    // Find email error because modified email address is not a user in institution "Admin testing".
+    // Institution matches exact email addresses.
     const emailErrorMsg = await userProfileAdminPage.getEmailErrorMessage();
     expect(emailErrorMsg).toContain('The institution has authorized access only to select members');
 
     await verifyInstitutionAgreementPage(adminTab);
     await adminTab.bringToFront();
 
-    await verifyButtonEnabled(cancelButton, true);
+    await cancelButton.expectEnabled(true);
     // SAVE buttons is disabled due to error in page
-    await verifyButtonEnabled(saveButton, false);
+    await saveButton.expectEnabled(false);
 
     // Undo all changes
     await cancelButton.click();
@@ -228,9 +230,9 @@ describe('User Profile Admin', () => {
     // Check error when Verified Institution and Contact Email domains do not match
     await waitForText(adminTab, 'Your email does not match your institution');
 
-    await verifyButtonEnabled(cancelButton, true);
-    // SAVE buttons is disabled due to error in page
-    await verifyButtonEnabled(saveButton, false);
+    await cancelButton.expectEnabled(true);
+    // SAVE buttons is disabled due to an error in page
+    await saveButton.expectEnabled(false);
 
     // After click CANCEL button, unsaved changes are automatically discarded
     await cancelButton.click();
@@ -268,7 +270,7 @@ describe('User Profile Admin', () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
-    const accessStatusTable = await userProfileAdminPage.getAccessStatusTable();
+    const accessStatusTable = userProfileAdminPage.getAccessStatusTable();
 
     // Last completed on is a dash
     const lastCompletedOnCell = await accessStatusTable.getCellByValue(
@@ -306,7 +308,7 @@ describe('User Profile Admin', () => {
     await verifyToggleSwitchNewBackgroundColor(adminTab, bypassSwitchCell);
 
     const saveButton = userProfileAdminPage.getSaveButton();
-    await verifyButtonEnabled(saveButton, true);
+    await saveButton.expectEnabled(true);
     await saveButton.click();
     await userProfileAdminPage.waitForLoad();
 
@@ -330,12 +332,12 @@ describe('User Profile Admin', () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
-    const accessStatusTable = await userProfileAdminPage.getAccessStatusTable();
+    const accessStatusTable = userProfileAdminPage.getAccessStatusTable();
     const expiresOnCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.EXPIRES_ON);
     const expiresOn = await expiresOnCell.getCellValue();
     expect(expiresOn).toEqual('-');
 
-    // Change Bypass for Google 2-step verification module
+    // Change Bypass for Controlled Tier training module
     const statusCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.STATUS);
     const oldStatus = await statusCell.getCellValue();
 
@@ -352,7 +354,7 @@ describe('User Profile Admin', () => {
     await verifyToggleSwitchNewBackgroundColor(adminTab, bypassSwitchCell);
 
     const saveButton = userProfileAdminPage.getSaveButton();
-    await verifyButtonEnabled(saveButton, true);
+    await saveButton.expectEnabled(true);
     await saveButton.click();
     await userProfileAdminPage.waitForLoad();
 
@@ -380,7 +382,9 @@ describe('User Profile Admin', () => {
     const institutionRole = userProfileAdminPage.getInstitutionalRole();
     const oldRole = await institutionRole.getSelectedValue();
 
-    let options = (await institutionRole.getAllOptionTexts()).filter((role) => role !== oldRole);
+    let options = (await institutionRole.getAllOptionTexts()).filter(
+      (role) => role !== oldRole && role !== 'Other (free text)'
+    );
     const randRole = fp.shuffle(options)[0];
     await institutionRole.select(randRole);
 
@@ -393,9 +397,9 @@ describe('User Profile Admin', () => {
     await initialCreditLimit.select(randCreditLimit);
 
     // Initial Credit Limit remains unchanged before save
-    const creditLimitNumber = parseInt(parseForNumbericalString(await initialCreditLimit.getSelectedValue())[0]);
+    const creditLimitNumber = parseInt(parseForNumericalString(await initialCreditLimit.getSelectedValue())[0]);
     expect(isNaN(creditLimitNumber)).toBeFalsy();
-    expect(creditLimitNumber).not.toEqual(parseInt(parseForNumbericalString(oldCreditLimit)[0]));
+    expect(creditLimitNumber).not.toEqual(parseInt(parseForNumericalString(oldCreditLimit)[0]));
 
     // Save and verify changes
     const saveButton = userProfileAdminPage.getSaveButton();
@@ -409,61 +413,53 @@ describe('User Profile Admin', () => {
     const newCreditLimit = await initialCreditLimit.getSelectedValue();
     expect(newCreditLimit).toEqual(randCreditLimit);
   });
+
+  async function verifyToggleSwitchNewBackgroundColor(page: Page, cell: Cell): Promise<void> {
+    const divXpath = `${cell.getXpath()}/div`;
+    const background = await getStyleValue<string>(page, await page.waitForXPath(divXpath), 'background-color');
+    expect(background).toEqual(CHANGED_BACKGROUND_COLOR);
+  }
+
+  async function searchTestUser(page: Page, userName: string): Promise<Page> {
+    await signInWithAccessToken(page, config.ADMIN_TEST_USER);
+    await navigation.navMenu(page, NavLink.USER_ADMIN);
+
+    const userAdminPage = new UserAdminPage(page);
+    await userAdminPage.waitForLoad();
+
+    // Search for user
+    await userAdminPage.searchUser(userName);
+
+    const adminTable = new AdminTable(page);
+    const nameColumnIndex = await adminTable.getNameColindex();
+    // Click name to navigate to User Profile Admin page
+    await userAdminPage.clickUserName(1, nameColumnIndex);
+
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newPage = await newTarget.page();
+
+    await new UserProfileInfo(newPage).waitForLoad();
+
+    // Go to url users-tmp page
+    const tmpUrl = replaceWithTmpUrl(newPage.url());
+    await newPage.goto(tmpUrl, { waitUntil: ['load', 'networkidle0'] });
+
+    return newPage;
+  }
+
+  async function verifyInstitutionAgreementPage(page: Page): Promise<void> {
+    const userProfileAdminPage = new UserProfileAdminPage(page);
+    await userProfileAdminPage.getEmailErrorMessageLink().then((link) => link.click());
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newPage = await newTarget.page();
+    // SUBMIT REQUEST button exists
+    await newPage.waitForXPath('//a[text()="SUBMIT REQUEST"]', { visible: true });
+    const pageTitle = await newPage.title();
+    expect(pageTitle).toEqual('Institutional Agreements – All of Us Research Hub');
+    await newPage.close();
+  }
+
+  function replaceWithTmpUrl(url: string): string {
+    return url.replace('users', 'users-tmp');
+  }
 });
-
-async function verifyButtonEnabled(button: Button, enabled: boolean): Promise<void> {
-  expect(await button.isCursorNotAllowed()).toBe(!enabled);
-}
-
-async function verifyToggleSwitchNewBackgroundColor(page: Page, cell: Cell): Promise<void> {
-  const divXpath = `${cell.getXpath()}/div`;
-
-  const background = await getStyleValue<string>(page, await page.waitForXPath(divXpath), 'background-color');
-
-  expect(background).toEqual('rgb(248, 201, 84)');
-}
-
-async function searchTestUser(page: Page, userName: string): Promise<Page> {
-  await signInWithAccessToken(page, config.ADMIN_TEST_USER);
-  await navigation.navMenu(page, NavLink.USER_ADMIN);
-
-  const userAdminPage = new UserAdminPage(page);
-  await userAdminPage.waitForLoad();
-
-  // Search for user
-  await userAdminPage.searchUser(userName);
-
-  const adminTable = new AdminTable(page);
-  const nameColumnIndex = await adminTable.getNameColindex();
-  // Click name to navigate to User Profile Admin page
-  await userAdminPage.clickUserName(1, nameColumnIndex);
-
-  const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
-  const newPage = await newTarget.page();
-
-  await new UserProfileInfo(newPage).waitForLoad();
-
-  // Go to url users-tmp page
-  const tmpUrl = replaceWithTmpUrl(newPage.url());
-  await newPage.goto(tmpUrl, { waitUntil: ['load', 'networkidle0'] });
-
-  return newPage;
-}
-
-async function verifyInstitutionAgreementPage(page: Page): Promise<void> {
-  const userProfileAdminPage = new UserProfileAdminPage(page);
-  await userProfileAdminPage.getEmailErrorMessageLink().then((link) => {
-    link.click();
-  });
-  const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
-  const newPage = await newTarget.page();
-  // SUBMIT REQUEST button exists
-  await newPage.waitForXPath('//a[text()="SUBMIT REQUEST"]', { visible: true });
-  const pageTitle = await newPage.title();
-  expect(pageTitle).toEqual('Institutional Agreements – All of Us Research Hub');
-  await newPage.close();
-}
-
-function replaceWithTmpUrl(url: string): string {
-  return url.replace('users', 'users-tmp');
-}

@@ -484,4 +484,8 @@ export default class BaseElement {
         throw new Error(err);
       });
   }
+
+  async expectEnabled(enabled: boolean): Promise<void> {
+    expect(await this.isCursorNotAllowed()).toBe(!enabled);
+  }
 }

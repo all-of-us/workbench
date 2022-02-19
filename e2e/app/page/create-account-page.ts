@@ -191,7 +191,7 @@ export default class CreateAccountPage extends BasePage {
     }).asElementHandle();
 
     const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
-    await roleSelect.select(InstitutionRole.UndergraduteStudent);
+    await roleSelect.select(InstitutionRole.UndergraduateStudent);
   }
 
   // Step 1: Accepting Terms of Use and Privacy statement.

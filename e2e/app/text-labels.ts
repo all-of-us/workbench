@@ -177,7 +177,7 @@ export const Institution = {
 
 export const InstitutionRole = {
   EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
-  UndergraduteStudent: 'Undergraduate (Bachelor level) student',
+  UndergraduateStudent: 'Undergraduate (Bachelor level) student',
   Industry: 'Industry',
   ResearchAssistant: 'Research Assistant (pre-doctoral)',
   ResearchAssociate: 'Research associate (post-doctoral; early/mid career)',
