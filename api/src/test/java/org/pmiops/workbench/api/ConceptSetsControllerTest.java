@@ -1499,11 +1499,11 @@ public class ConceptSetsControllerTest {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     ConceptSet conceptSet = new ConceptSet().domain(domain).description(desc).name(name);
     // use only criteria that matches domain
-    List<Long> domainConceptIds =
+    Long[] domainConceptIds =
         Arrays.stream(criteriumsForDomain)
             .filter(o -> o.getDomainId().equals(domain.toString()))
             .map(Criteria::getConceptId)
-            .collect(Collectors.toList());
+            .toArray(Long[]::new);
 
     CreateConceptSetRequest createConceptSetRequest =
         buildCreateConceptSetRequest(
