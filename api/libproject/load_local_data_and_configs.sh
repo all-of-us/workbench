@@ -11,7 +11,7 @@ set -e
 # These commands should be kept in sync with the associated deployment commands, which can be
 # found under the "deploy" command in api/libproject/devstart.rb .
 
-./gradlew --daemon updateCdrConfig -PappArgs="['config/cdr_config_local.json',false]"
+./gradlew --daemon updateCdrConfig -PappArgs="['config/cdr_config_local.json',false,true]"
 ./gradlew --daemon loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
 ./gradlew --daemon loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
 ./gradlew --daemon loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
