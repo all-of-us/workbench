@@ -1506,8 +1506,7 @@ public class ConceptSetsControllerTest {
             .toArray(Long[]::new);
 
     CreateConceptSetRequest createConceptSetRequest =
-        buildCreateConceptSetRequest(
-            conceptSet, domainConceptIds.toArray(new Long[domainConceptIds.size()]));
+        buildCreateConceptSetRequest(conceptSet, domainConceptIds);
 
     return conceptSetsController
         .createConceptSet(workspace.getNamespace(), workspace.getId(), createConceptSetRequest)
