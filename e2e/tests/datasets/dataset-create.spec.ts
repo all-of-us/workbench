@@ -1,7 +1,13 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { ConceptSetSelectValue, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
+import { ConceptSets, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import {
+  createDataset,
+  findOrCreateWorkspace,
+  findWorkspaceCard,
+  openTab,
+  signInWithAccessToken
+} from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
@@ -18,34 +24,16 @@ describe('Create Dataset', () => {
   test('Create dataset with all available inputs', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    // Click Add Dataset button.
-    let dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    const datasetBuildPage = await dataPage.clickAddDatasetButton();
-
-    // Step 1 Select Cohort: Choose "All Participants"
-    await datasetBuildPage.selectCohorts(['All Participants']);
-
-    // Step 2 Select Concept Sets (Rows): select all checkboxes.
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.AllSurveys]);
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateSummary]);
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitActivitySummary]);
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateLevel]);
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
-
-    // Preview table exists and has one or more table rows.
-    const previewTable = await datasetBuildPage.getPreviewTable();
-    expect(await previewTable.exists()).toBe(true);
-    expect(await previewTable.getRowCount()).toBeGreaterThan(1);
-
-    const createModal = await datasetBuildPage.clickCreateButton();
-    datasetName = await createModal.createDataset();
-
-    // Verify dataset card in Data page.
-    dataPage = await datasetBuildPage.clickDataTab();
-    await openTab(page, Tabs.Datasets, dataPage);
+    datasetName = await createDataset(page, {
+      conceptSets: [
+        ConceptSets.Demographics,
+        ConceptSets.AllSurveys,
+        ConceptSets.FitbitHeartRateSummary,
+        ConceptSets.FitbitActivitySummary,
+        ConceptSets.FitbitHeartRateLevel,
+        ConceptSets.FitbitIntraDaySteps
+      ]
+    });
 
     const resourceCard = new DataResourceCard(page);
     const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
@@ -98,7 +86,7 @@ describe('Create Dataset', () => {
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // No matter of what has changed, the Analyze button remains disabled.
-    await dataSetEditPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
+    await dataSetEditPage.selectConceptSets([ConceptSets.FitbitIntraDaySteps]);
     await dataSetEditPage.getPreviewTableButton().click();
     await waitWhileLoading(page);
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
