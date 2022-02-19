@@ -1126,10 +1126,7 @@ const GpuConfigSelector = ({
             setHasGpu(!hasGpu);
           }}
         />
-        <a
-          target='_blank'
-          href='https://support.terra.bio/hc/en-us/articles/4403006001947'
-        >
+        <a target='_blank' href={supportUrls.gpus}>
           Learn more about GPU cost and restrictions.
         </a>
       </FlexRow>
