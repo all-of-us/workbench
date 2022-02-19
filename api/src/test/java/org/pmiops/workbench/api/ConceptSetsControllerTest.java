@@ -1478,7 +1478,7 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getCriteriums()).containsAllIn(expectedCriteria);
   }
 
-  private void assertConceptSetAndCriteria(ConceptSet conceptSet, Criteria... expectedCriteria) {
+  private void assertConceptSetAndCriteria(ConceptSet conceptSet, List<Criteria> expectedCriteria) {
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getDescription()).isEqualTo(CONCEPT_SET_DESC_1);
     assertThat(conceptSet.getDomain()).isEqualTo(Domain.CONDITION);
