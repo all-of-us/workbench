@@ -1140,8 +1140,11 @@ public class ConceptSetsControllerTest {
                 updateConceptSetRequest)
             .getBody();
 
-    assertUpdatedConceptSetConcepts(
-        defaultConceptSet, updated, CRITERIA_CONDITION_1, CRITERIA_CONDITION_2);
+    List<Criteria> expectedCriteriums =
+        createExpectedCriteria(
+            updated.getCriteriums(), ImmutableList.of(CRITERIA_CONDITION_1, CRITERIA_CONDITION_2));
+
+    assertUpdatedConceptSetConcepts(defaultConceptSet, updated, expectedCriteriums);
   }
 
   @Test
