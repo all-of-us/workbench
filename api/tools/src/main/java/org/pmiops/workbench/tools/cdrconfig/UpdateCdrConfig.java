@@ -45,9 +45,10 @@ public class UpdateCdrConfig {
       AccessTierDao accessTierDao, CdrVersionDao cdrVersionDao, CdrConfigVOMapper cdrConfigMapper)
       throws IOException {
     return (args) -> {
-      if (args.length != 3) {
+      if (args.length != 2 && args.length != 3) {
         throw new IllegalArgumentException(
-            "Expected 3 args (file, dry_run, allow_empty_tiers). Got " + Arrays.asList(args));
+            "Expected 2-3 args (file, dry_run, allow_empty_tiers=false). Got "
+                + Arrays.asList(args));
       }
 
       final Gson gson =
@@ -59,7 +60,8 @@ public class UpdateCdrConfig {
         cdrConfig = gson.fromJson(cdrConfigReader, CdrConfigVO.class);
       }
       boolean dryRun = Boolean.parseBoolean(args[1]);
-      boolean allowEmptyTiers = Boolean.parseBoolean(args[2]);
+      // RW-7931 consider removal of this option after CT rollout is complete
+      boolean allowEmptyTiers = args.length > 2 && Boolean.parseBoolean(args[2]);
 
       preCheck(cdrConfig, allowEmptyTiers);
 
