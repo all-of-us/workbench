@@ -1486,23 +1486,6 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo(CONCEPT_SET_NAME_1);
     assertThat(conceptSet.getCriteriums().size()).isEqualTo(expectedCriteria.length);
-    // since unsaved criteria CRITERIA_* has null id, parentId, set those to null in
-    // defaultConceptSet
-    conceptSet
-        .getCriteriums()
-        .forEach(
-            o -> {
-              o.setId(null);
-              o.setParentId(null);
-            });
-    // since we could pass saved criteria.. reset id, parentId to null in expectedCriteria also
-    Arrays.stream(expectedCriteria)
-        .iterator()
-        .forEachRemaining(
-            o -> {
-              o.setId(null);
-              o.setParentId(null);
-            });
     assertThat(conceptSet.getCriteriums()).containsAllIn(expectedCriteria);
   }
 
