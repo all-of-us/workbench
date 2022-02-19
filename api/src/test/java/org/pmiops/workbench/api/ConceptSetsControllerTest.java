@@ -337,21 +337,6 @@ public class ConceptSetsControllerTest {
     assertConceptSetAndCriteria(savedConceptSet, expectedCriteriums);
   }
 
-  private List<Criteria> createExpectedCriteria(
-      List<Criteria> actualCriteriums, List<Criteria> expectedCriteriums) {
-    expectedCriteriums.forEach(
-        expected -> {
-          actualCriteriums.forEach(
-              actual -> {
-                if (actual.getConceptId().equals(expected.getConceptId())) {
-                  expected.id(actual.getId()).parentId(actual.getParentId());
-                }
-              });
-        });
-    return expectedCriteriums;
-  }
-  }
-
   @Test
   public void createConceptSetAddTooMany() {
     // define too many
@@ -400,7 +385,10 @@ public class ConceptSetsControllerTest {
             .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, createConceptSetRequest)
             .getBody();
 
-    assertConceptSetAndCriteria(savedConceptSet, CRITERIA_CONDITION_1);
+    List<Criteria> expectedCriteriums =
+        createExpectedCriteria(
+            savedConceptSet.getCriteriums(), ImmutableList.of(CRITERIA_CONDITION_1));
+    assertConceptSetAndCriteria(savedConceptSet, expectedCriteriums);
   }
 
   @Test
@@ -421,7 +409,10 @@ public class ConceptSetsControllerTest {
             .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, createConceptSetRequest)
             .getBody();
 
-    assertConceptSetAndCriteria(savedConceptSet, CRITERIA_CONDITION_1);
+    List<Criteria> expectedCriteriums =
+        createExpectedCriteria(
+            savedConceptSet.getCriteriums(), ImmutableList.of(CRITERIA_CONDITION_1));
+    assertConceptSetAndCriteria(savedConceptSet, expectedCriteriums);
   }
 
   @Test
@@ -1439,6 +1430,20 @@ public class ConceptSetsControllerTest {
 
   //////////// assertion helpers ////////////
 
+  private List<Criteria> createExpectedCriteria(
+      List<Criteria> actualCriteriums, List<Criteria> expectedCriteriums) {
+    expectedCriteriums.forEach(
+        expected -> {
+          actualCriteriums.forEach(
+              actual -> {
+                if (actual.getConceptId().equals(expected.getConceptId())) {
+                  expected.id(actual.getId()).parentId(actual.getParentId());
+                }
+              });
+        });
+    return expectedCriteriums;
+  }
+
   private void assertConceptSets(ConceptSet actual, ConceptSet expected) {
     assertThat(actual.getCriteriums()).containsAllIn(expected.getCriteriums());
     assertThat(actual.getDescription()).isEqualTo(UPDATED_DESC);
@@ -1463,11 +1468,11 @@ public class ConceptSetsControllerTest {
   }
 
   private void assertUpdatedConceptSetConcepts(
-      ConceptSet initial, ConceptSet updated, Criteria... expectedCriteria) {
+      ConceptSet initial, ConceptSet updated, List<Criteria> expectedCriteria) {
     assertThat(updated.getCreationTime()).isEqualTo(initial.getCreationTime());
     assertThat(updated.getLastModifiedTime()).isGreaterThan(initial.getLastModifiedTime());
     assertThat(updated.getEtag()).isNotEqualTo(initial.getEtag());
-    assertThat(updated.getCriteriums().size()).isEqualTo(expectedCriteria.length);
+    assertThat(updated.getCriteriums().size()).isEqualTo(expectedCriteria.size());
     assertThat(updated.getCriteriums()).containsAllIn(expectedCriteria);
   }
 
@@ -1478,7 +1483,7 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo(CONCEPT_SET_NAME_1);
-    assertThat(conceptSet.getCriteriums().size()).isEqualTo(expectedCriteria.length);
+    assertThat(conceptSet.getCriteriums().size()).isEqualTo(expectedCriteria.size());
     assertThat(conceptSet.getCriteriums()).containsAllIn(expectedCriteria);
   }
 
