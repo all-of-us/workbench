@@ -1523,11 +1523,9 @@ public class ConceptSetsControllerTest {
   }
 
   private UpdateConceptSetRequest buildUpdateConceptsRequest(String etag, Long... conceptIds) {
-    List<ConceptSetConceptId> conceptSetConceptIdList = buildConceptSetConceptIdList(conceptIds);
-    UpdateConceptSetRequest request = new UpdateConceptSetRequest();
-    request.setEtag(etag);
-    request.setAddedConceptSetConceptIds(conceptSetConceptIdList);
-    return request;
+    return new UpdateConceptSetRequest()
+        .etag(etag)
+        .addedConceptSetConceptIds(buildConceptSetConceptIdList(conceptIds));
   }
 
   private List<ConceptSetConceptId> buildConceptSetConceptIdList(Long... conceptIds) {
