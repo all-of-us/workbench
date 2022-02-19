@@ -1516,10 +1516,9 @@ public class ConceptSetsControllerTest {
 
   private CreateConceptSetRequest buildCreateConceptSetRequest(
       ConceptSet conceptSet, Long... conceptIds) {
-    List<ConceptSetConceptId> conceptSetConceptIdList = buildConceptSetConceptIdList(conceptIds);
     return new CreateConceptSetRequest()
         .conceptSet(conceptSet)
-        .addedConceptSetConceptIds(conceptSetConceptIdList);
+        .addedConceptSetConceptIds(buildConceptSetConceptIdList(conceptIds));
   }
 
   private UpdateConceptSetRequest buildUpdateConceptsRequest(String etag, Long... conceptIds) {
