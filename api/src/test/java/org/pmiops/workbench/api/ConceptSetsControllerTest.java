@@ -1532,13 +1532,7 @@ public class ConceptSetsControllerTest {
 
   private List<ConceptSetConceptId> buildConceptSetConceptIdList(Long... conceptIds) {
     return Arrays.stream(conceptIds)
-        .map(
-            c -> {
-              ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-              conceptSetConceptId.setConceptId(c);
-              conceptSetConceptId.setStandard(true);
-              return conceptSetConceptId;
-            })
+        .map(c -> new ConceptSetConceptId().conceptId(c).standard(true))
         .collect(Collectors.toList());
   }
 
