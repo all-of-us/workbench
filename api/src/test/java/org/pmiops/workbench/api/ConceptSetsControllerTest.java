@@ -593,7 +593,7 @@ public class ConceptSetsControllerTest {
             .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
+    assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
   }
 
   @Test
