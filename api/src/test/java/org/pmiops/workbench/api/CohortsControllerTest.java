@@ -662,15 +662,6 @@ public class CohortsControllerTest {
     assertForbiddenException(exception);
   }
 
-  private void assertForbiddenException(Throwable exception) {
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "You do not have sufficient permissions to access workspace %s/workspace",
-                workspace.getNamespace()));
-  }
-
   @Test
   public void testDuplicateCohortOwner() {
     // minimal access to create
@@ -1156,6 +1147,15 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
+  }
+
+  private void assertForbiddenException(Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "You do not have sufficient permissions to access workspace %s/workspace",
+                workspace.getNamespace()));
   }
 
   private void assertDuplicatedCohort(Cohort original, Cohort duplicated) {
