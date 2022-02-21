@@ -83,7 +83,6 @@ import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -190,8 +189,6 @@ public class DataSetControllerTest {
   private Cohort cohort;
   private Cohort noAccessCohort;
   private ConceptSet conceptSet1;
-  private ConceptSet conceptSet2;
-  private ConceptSet surveyConceptSet;
   private ConceptSet noAccessConceptSet;
   private DataSet noAccessDataSet;
   private DbCdrVersion cdrVersion;
@@ -202,7 +199,6 @@ public class DataSetControllerTest {
   @Autowired private ConceptSetsController conceptSetsController;
   @Autowired private DataSetController dataSetController;
   @Autowired private UserDao userDao;
-  @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
@@ -433,27 +429,6 @@ public class DataSetControllerTest {
             .countValue(123L)
             .prevalence(0.2F)
             .conceptSynonyms(new ArrayList<>()));
-
-    surveyConceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name(CONCEPT_SET_SURVEY_NAME).domain(Domain.OBSERVATION))
-                    .addedConceptSetConceptIds(conceptSetConceptIds))
-            .getBody();
-
-    conceptSet2 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(new ConceptSet().name(CONCEPT_SET_TWO_NAME).domain(Domain.DRUG))
-                    .addedConceptSetConceptIds(conceptSetConceptIds))
-            .getBody();
 
     noAccessDataSet =
         dataSetController
