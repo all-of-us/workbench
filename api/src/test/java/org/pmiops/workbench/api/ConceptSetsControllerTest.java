@@ -599,7 +599,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void getConceptSetWriter() {
     // use defaultConceptSet
-    // change access, get and chaeck
+    // change access, get and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     ConceptSet retrieved =
