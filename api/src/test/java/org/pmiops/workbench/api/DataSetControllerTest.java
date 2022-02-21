@@ -497,8 +497,6 @@ public class DataSetControllerTest {
             });
     // Allow access initially for setup, update the mocks after initialization to remove access.
     stubWorkspaceAccessLevel(noAccessWorkspace, WorkspaceAccessLevel.NO_ACCESS);
-    //    stubGetWorkspace(noAccessWorkspace.getNamespace(), noAccessWorkspace.getName());
-    //    stubGetWorkspaceAcl(noAccessWorkspace, WorkspaceAccessLevel.OWNER);
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
