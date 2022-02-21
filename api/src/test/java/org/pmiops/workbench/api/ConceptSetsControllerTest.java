@@ -785,12 +785,13 @@ public class ConceptSetsControllerTest {
 
   @Test
   public void updateConceptSetNotExists() {
-    ConceptSet conceptSet = new ConceptSet();
-    conceptSet.setDescription(CONCEPT_SET_DESC_1);
-    conceptSet.setName(CONCEPT_SET_NAME_1);
-    conceptSet.setDomain(Domain.CONDITION);
-    conceptSet.setId(1L);
-    conceptSet.setEtag(Etags.fromVersion(1));
+    ConceptSet conceptSet =
+        new ConceptSet()
+            .description(CONCEPT_SET_DESC_1)
+            .name(CONCEPT_SET_NAME_1)
+            .domain(Domain.CONDITION)
+            .id(1L)
+            .etag(Etags.fromVersion(1));
 
     Throwable exception =
         assertThrows(
