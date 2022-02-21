@@ -984,70 +984,182 @@ public class CohortReviewControllerTest {
   }
 
   @Test
-  public void createParticipantCohortAnnotationNoAnnotationValue() {
+  public void createParticipantCohortAnnotationAllTypesNoAnnotationValue() {
+    Long cohortReviewId = cohortReview.getCohortReviewId();
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    assertConflictExceptionForAnnotationType(
-        participantId, stringAnnotationDefinition.getCohortAnnotationDefinitionId(), "STRING");
-    assertConflictExceptionForAnnotationType(
-        participantId, enumAnnotationDefinition.getCohortAnnotationDefinitionId(), "ENUM");
-    assertConflictExceptionForAnnotationType(
-        participantId, dateAnnotationDefinition.getCohortAnnotationDefinitionId(), "DATE");
-    assertConflictExceptionForAnnotationType(
-        participantId, booleanAnnotationDefinition.getCohortAnnotationDefinitionId(), "BOOLEAN");
-    assertConflictExceptionForAnnotationType(
-        participantId, integerAnnotationDefinition.getCohortAnnotationDefinitionId(), "INTEGER");
+    // for different AnnotationType(s)
+    for (AnnotationType annotationType : AnnotationType.values()) {
+      ParticipantCohortAnnotation request =
+          buildNoValueParticipantCohortAnnotationForType(
+              cohortReviewId, participantId, annotationType);
+      Throwable exception =
+          assertThrows(
+              ConflictException.class,
+              () ->
+                  cohortReviewController.createParticipantCohortAnnotation(
+                      workspace.getNamespace(),
+                      workspace.getId(),
+                      cohortReviewId,
+                      participantId,
+                      request),
+              "Expected ConflictException not thrown");
+
+      assertThat(exception)
+          .hasMessageThat()
+          .isEqualTo(
+              String.format(
+                  "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
+                  annotationType, request.getCohortAnnotationDefinitionId()));
+    }
   }
 
   @Test
-  public void createParticipantCohortAnnotation() {
+  public void createParticipantCohortAnnotationExists() {
+    Long cohortReviewId = cohortReview.getCohortReviewId();
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    participantCohortAnnotationDao.delete(participantAnnotation);
 
-    assertCreateParticipantCohortAnnotation(
-        participantId,
-        stringAnnotationDefinition.getCohortAnnotationDefinitionId(),
-        new ParticipantCohortAnnotation()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .participantId(participantId)
-            .annotationValueString("test")
-            .cohortAnnotationDefinitionId(
-                stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
-    assertCreateParticipantCohortAnnotation(
-        participantId,
-        enumAnnotationDefinition.getCohortAnnotationDefinitionId(),
-        new ParticipantCohortAnnotation()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .participantId(participantId)
-            .annotationValueEnum("test")
-            .cohortAnnotationDefinitionId(
-                enumAnnotationDefinition.getCohortAnnotationDefinitionId()));
-    assertCreateParticipantCohortAnnotation(
-        participantId,
-        dateAnnotationDefinition.getCohortAnnotationDefinitionId(),
-        new ParticipantCohortAnnotation()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .participantId(participantId)
-            .annotationValueDate("2018-02-02")
-            .cohortAnnotationDefinitionId(
-                dateAnnotationDefinition.getCohortAnnotationDefinitionId()));
-    assertCreateParticipantCohortAnnotation(
-        participantId,
-        booleanAnnotationDefinition.getCohortAnnotationDefinitionId(),
-        new ParticipantCohortAnnotation()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .participantId(participantId)
-            .annotationValueBoolean(true)
-            .cohortAnnotationDefinitionId(
-                booleanAnnotationDefinition.getCohortAnnotationDefinitionId()));
-    assertCreateParticipantCohortAnnotation(
-        participantId,
-        integerAnnotationDefinition.getCohortAnnotationDefinitionId(),
-        new ParticipantCohortAnnotation()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .participantId(participantId)
-            .annotationValueInteger(1)
-            .cohortAnnotationDefinitionId(
-                integerAnnotationDefinition.getCohortAnnotationDefinitionId()));
+    ParticipantCohortAnnotation request =
+        buildValidParticipantCohortAnnotationForType(
+            cohortReviewId, participantId, AnnotationType.STRING);
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.createParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantId,
+                    request),
+            "Expected ConflictException not thrown");
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Cohort annotation definition exists for id: %d",
+                request.getCohortAnnotationDefinitionId()));
+  }
+
+  @Test
+  public void createParticipantCohortAnnotationAllTypes() {
+    participantCohortAnnotationDao.delete(participantAnnotation);
+    Long cohortReviewId = cohortReview.getCohortReviewId();
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    // for different AnnotationType(s)
+    for (AnnotationType annotationType : AnnotationType.values()) {
+      ParticipantCohortAnnotation request =
+          buildValidParticipantCohortAnnotationForType(
+              cohortReviewId, participantId, annotationType);
+      ParticipantCohortAnnotation response =
+          cohortReviewController
+              .createParticipantCohortAnnotation(
+                  workspace.getNamespace(),
+                  workspace.getId(),
+                  cohortReviewId,
+                  participantId,
+                  request)
+              .getBody();
+
+      assertCreatedParticipantCohortAnnotation(response, request);
+    }
+  }
+
+  @Test
+  public void createParticipantCohortAnnotationOwner() {
+    participantCohortAnnotationDao.delete(participantAnnotation);
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+
+    Long cohortReviewId = cohortReview.getCohortReviewId();
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    // use stringAnnotationType
+    ParticipantCohortAnnotation request =
+        buildValidParticipantCohortAnnotationForType(
+            cohortReviewId, participantId, AnnotationType.STRING);
+    ParticipantCohortAnnotation response =
+        cohortReviewController
+            .createParticipantCohortAnnotation(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReview.getCohortReviewId(),
+                participantId,
+                request)
+            .getBody();
+
+    assertCreatedParticipantCohortAnnotation(response, request);
+  }
+
+  @Test
+  public void createParticipantCohortAnnotationWriter() {
+    participantCohortAnnotationDao.delete(participantAnnotation);
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+
+    Long cohortReviewId = cohortReview.getCohortReviewId();
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    // use stringAnnotationType
+    ParticipantCohortAnnotation request =
+        buildValidParticipantCohortAnnotationForType(
+            cohortReviewId, participantId, AnnotationType.STRING);
+    ParticipantCohortAnnotation response =
+        cohortReviewController
+            .createParticipantCohortAnnotation(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReview.getCohortReviewId(),
+                participantId,
+                request)
+            .getBody();
+
+    assertCreatedParticipantCohortAnnotation(response, request);
+  }
+
+  @Test
+  public void createParticipantCohortAnnotationReader() {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+
+    Long cohortReviewId = cohortReview.getCohortReviewId();
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    // use stringAnnotationType
+    ParticipantCohortAnnotation request =
+        buildValidParticipantCohortAnnotationForType(
+            cohortReviewId, participantId, AnnotationType.STRING);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.createParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantId,
+                    request));
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void createParticipantCohortAnnotationNoAccess() {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+
+    Long cohortReviewId = cohortReview.getCohortReviewId();
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    // use stringAnnotationType
+    ParticipantCohortAnnotation request =
+        buildValidParticipantCohortAnnotationForType(
+            cohortReviewId, participantId, AnnotationType.STRING);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.createParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantId,
+                    request));
+    assertForbiddenException(exception);
   }
 
   ////////// updateParticipantCohortAnnotation  //////////
@@ -1347,28 +1459,67 @@ public class CohortReviewControllerTest {
   }
 
   /** Helper method to consolidate assertions for all the {@link AnnotationType}s. */
-  private void assertCreateParticipantCohortAnnotation(
-      Long participantId, Long annotationDefinitionId, ParticipantCohortAnnotation request) {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+  private void assertCreatedParticipantCohortAnnotation(
+      ParticipantCohortAnnotation response, ParticipantCohortAnnotation expected) {
+    assertThat(response.getAnnotationValueString()).isEqualTo(expected.getAnnotationValueString());
+    assertThat(response.getAnnotationValueBoolean())
+        .isEqualTo(expected.getAnnotationValueBoolean());
+    assertThat(response.getAnnotationValueEnum()).isEqualTo(expected.getAnnotationValueEnum());
+    assertThat(response.getAnnotationValueDate()).isEqualTo(expected.getAnnotationValueDate());
+    assertThat(response.getAnnotationValueInteger())
+        .isEqualTo(expected.getAnnotationValueInteger());
+    assertThat(response.getParticipantId()).isEqualTo(expected.getParticipantId());
+    assertThat(response.getCohortReviewId()).isEqualTo(expected.getCohortReviewId());
+    assertThat(response.getCohortAnnotationDefinitionId())
+        .isEqualTo(expected.getCohortAnnotationDefinitionId());
+  }
 
-    ParticipantCohortAnnotation response =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId(),
-                participantId,
-                request)
-            .getBody();
+  private ParticipantCohortAnnotation buildNoValueParticipantCohortAnnotationForType(
+      Long cohortReviewId, Long participantId, AnnotationType annotationType) {
+    ParticipantCohortAnnotation participantCohortAnnotation =
+        new ParticipantCohortAnnotation()
+            .cohortReviewId(cohortReviewId)
+            .participantId(participantId);
+    switch (annotationType) {
+      case STRING:
+        return participantCohortAnnotation.cohortAnnotationDefinitionId(
+            stringAnnotationDefinition.getCohortAnnotationDefinitionId());
+      case BOOLEAN:
+        return participantCohortAnnotation.cohortAnnotationDefinitionId(
+            booleanAnnotationDefinition.getCohortAnnotationDefinitionId());
+      case INTEGER:
+        return participantCohortAnnotation.cohortAnnotationDefinitionId(
+            integerAnnotationDefinition.getCohortAnnotationDefinitionId());
+      case ENUM:
+        return participantCohortAnnotation.cohortAnnotationDefinitionId(
+            enumAnnotationDefinition.getCohortAnnotationDefinitionId());
+      case DATE:
+        return participantCohortAnnotation.cohortAnnotationDefinitionId(
+            dateAnnotationDefinition.getCohortAnnotationDefinitionId());
+      default:
+    }
+    return participantCohortAnnotation;
+  }
 
-    assertThat(response.getAnnotationValueString()).isEqualTo(request.getAnnotationValueString());
-    assertThat(response.getAnnotationValueBoolean()).isEqualTo(request.getAnnotationValueBoolean());
-    assertThat(response.getAnnotationValueEnum()).isEqualTo(request.getAnnotationValueEnum());
-    assertThat(response.getAnnotationValueDate()).isEqualTo(request.getAnnotationValueDate());
-    assertThat(response.getAnnotationValueInteger()).isEqualTo(request.getAnnotationValueInteger());
-    assertThat(response.getParticipantId()).isEqualTo(participantId);
-    assertThat(response.getCohortReviewId()).isEqualTo(cohortReview.getCohortReviewId());
-    assertThat(response.getCohortAnnotationDefinitionId()).isEqualTo(annotationDefinitionId);
+  private ParticipantCohortAnnotation buildValidParticipantCohortAnnotationForType(
+      Long cohortReviewId, Long participantId, AnnotationType annotationType) {
+    ParticipantCohortAnnotation participantCohortAnnotation =
+        buildNoValueParticipantCohortAnnotationForType(
+            cohortReviewId, participantId, annotationType);
+    switch (annotationType) {
+      case STRING:
+        return participantCohortAnnotation.annotationValueString("test");
+      case BOOLEAN:
+        return participantCohortAnnotation.annotationValueBoolean(true);
+      case INTEGER:
+        return participantCohortAnnotation.annotationValueInteger(1);
+      case ENUM:
+        return participantCohortAnnotation.annotationValueEnum("test");
+      case DATE:
+        return participantCohortAnnotation.annotationValueDate("2022-02-21");
+      default:
+    }
+    return participantCohortAnnotation;
   }
 
   /**
