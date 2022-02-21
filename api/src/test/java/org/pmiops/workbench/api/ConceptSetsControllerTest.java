@@ -586,20 +586,20 @@ public class ConceptSetsControllerTest {
   @Test
   public void getConceptSetOwner() {
     // use defaultConceptSet
-    // change access, get and chaeck
+    // change access, get and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     ConceptSet retrieved =
         conceptSetsController
             .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
+    assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
   }
 
   @Test
   public void getConceptSetWriter() {
     // use defaultConceptSet
-    // change access, get and chaeck
+    // change access, get and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     ConceptSet retrieved =
@@ -607,7 +607,7 @@ public class ConceptSetsControllerTest {
             .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
+    assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
   }
 
   @Test
@@ -622,7 +622,7 @@ public class ConceptSetsControllerTest {
             .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
             .getBody();
 
-    assertThat(retrieved.participantCount(null)).isEqualTo(defaultConceptSet);
+    assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
   }
 
   @Test
