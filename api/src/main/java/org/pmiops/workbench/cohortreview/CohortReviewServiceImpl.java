@@ -615,7 +615,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
       String annotationType, Long cohortAnnotationDefinitionId) {
     return new ConflictException(
         String.format(
-            "Conflict Exception: Please provide a valid %s value for annotation defintion id: %s",
+            "Conflict Exception: Please provide a valid %s value for annotation definition id: %s",
             annotationType, cohortAnnotationDefinitionId));
   }
 
