@@ -586,7 +586,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void getConceptSetOwner() {
     // use defaultConceptSet
-    // change access, get and chaeck
+    // change access, get and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     ConceptSet retrieved =
         conceptSetsController
