@@ -3,21 +3,22 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import { ConceptSetSelectValue, Language, Tabs } from 'app/text-labels';
+// import { ConceptSetSelectValue, Language, Tabs } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Page } from 'puppeteer';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
+// import { Page } from 'puppeteer';
+// import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
+import { Tabs } from 'app/text-labels';
 
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
   const reasonText = 'locking this workspace';
-  const pyNotebookName = 'e2eLockWorkspaceNotebook';
+  // const pyNotebookName = 'e2eLockWorkspaceNotebook';
   let workspaceNamespace = '';
   let workspaceEditedName = '';
 
@@ -30,11 +31,10 @@ describe('Workspace Admin lock-workspace', () => {
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
     const dataPage = new WorkspaceDataPage(page);
-    // await dataPage.waitForLoad();
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
     //create the dataset and notebook
-    await createDatasetNotebook(page, pyNotebookName);
+    // await createDatasetNotebook(page, pyNotebookName);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
@@ -61,7 +61,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceCard.verifyLockedWorkspaceMenuOptions();
     await workspaceCard.clickLockedWorkspaceName(true);
     const aboutPage = new WorkspaceAboutPage(page);
-    // await aboutPage.waitForLoad();
+   
     // verify the banner includes the locking reason
     const aboutLockReason = await aboutPage.extractReasonMessage();
     expect(aboutLockReason).toEqual(reasonText);
@@ -81,7 +81,7 @@ describe('Workspace Admin lock-workspace', () => {
     // verify the user is able to navigate to edit page to update the description
     await aboutPage.getAboutEditIcon();
     const workspaceEdit = new WorkspaceEditPage(page);
-    // await workspaceEdit.waitForLoad();
+    
     // verify user is able to edit the locked workspace
     workspaceEditedName = await workspaceEdit.fillOutRequiredDuplicationFields();
     const updateButton = workspaceEdit.getUpdateWorkspaceButton();
@@ -129,26 +129,26 @@ describe('Workspace Admin lock-workspace', () => {
   });
 
   // function to create cohort, dataset and notebook
-  async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    const datasetBuildPage = await dataPage.clickAddDatasetButton();
+  // async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
+  //   const dataPage = new WorkspaceDataPage(page);
+  //   await dataPage.waitForLoad();
+  //   const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
-    // Step 1 Select Cohort: Choose "All Participants"
-    await datasetBuildPage.selectCohorts(['All Participants']);
+  //   // Step 1 Select Cohort: Choose "All Participants"
+  //   await datasetBuildPage.selectCohorts(['All Participants']);
 
-    // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
+  //   // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
+  //   await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
 
-    const createModal = await datasetBuildPage.clickCreateButton();
-    await createModal.createDataset();
+  //   const createModal = await datasetBuildPage.clickCreateButton();
+  //   await createModal.createDataset();
 
-    const exportModal = await datasetBuildPage.clickAnalyzeButton();
+  //   const exportModal = await datasetBuildPage.clickAnalyzeButton();
 
-    await exportModal.enterNotebookName(pyNotebookName);
-    await exportModal.pickLanguage(Language.Python);
-    await exportModal.clickExportButton();
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    return await notebookPreviewPage.waitForLoad();
-  }
+  //   await exportModal.enterNotebookName(pyNotebookName);
+  //   await exportModal.pickLanguage(Language.Python);
+  //   await exportModal.clickExportButton();
+  //   const notebookPreviewPage = new NotebookPreviewPage(page);
+  //   return await notebookPreviewPage.waitForLoad();
+  // }
 });

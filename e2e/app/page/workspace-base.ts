@@ -25,7 +25,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async deleteResource(resourceName: string, resourceType: ResourceCard): Promise<string[]> {
     const resourceCard = new DataResourceCard(this.page);
-    const card = await resourceCard.findCard(resourceName, resourceType, 60 * 1000);
+    const card = await resourceCard.findCard(resourceName, resourceType, { timeout: 30 * 1000 });
     if (!card) {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }

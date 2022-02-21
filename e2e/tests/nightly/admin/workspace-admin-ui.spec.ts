@@ -1,8 +1,8 @@
-import { signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateDataset, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
-import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import { ConceptSetSelectValue, CloudStorageHeader, Language } from 'app/text-labels';
+import WorkspaceAdminPage from 'app/page/admin-workspace-page';
+import { CloudStorageHeader, Language } from 'app/text-labels';
 import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -10,6 +10,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 import { Page } from 'puppeteer';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import DatasetBuildPage from 'app/page/dataset-build-page';
 
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
@@ -65,7 +66,7 @@ describe('Workspace Admin', () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
 
     //verify that the Notebook Preview button is disabled
@@ -130,19 +131,9 @@ describe('Workspace Admin', () => {
   });
 
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    const datasetBuildPage = await dataPage.clickAddDatasetButton();
+    await findOrCreateDataset(page, { openEditPage: true });
 
-    // Step 1 Select Cohort: Choose "All Participants"
-    await datasetBuildPage.selectCohorts(['All Participants']);
-
-    // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
-
-    const createModal = await datasetBuildPage.clickCreateButton();
-    await createModal.createDataset();
-
+    const datasetBuildPage = new DatasetBuildPage(page);
     const exportModal = await datasetBuildPage.clickAnalyzeButton();
 
     await exportModal.enterNotebookName(pyNotebookName);
