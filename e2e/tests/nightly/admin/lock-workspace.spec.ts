@@ -3,7 +3,7 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import {  Language, Tabs } from 'app/text-labels';
+import { Language, Tabs } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
@@ -62,7 +62,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceCard.verifyLockedWorkspaceMenuOptions();
     await workspaceCard.clickLockedWorkspaceName(true);
     const aboutPage = new WorkspaceAboutPage(page);
-   
+
     // verify the banner includes the locking reason
     const aboutLockReason = await aboutPage.extractReasonMessage();
     expect(aboutLockReason).toEqual(reasonText);
@@ -82,7 +82,7 @@ describe('Workspace Admin lock-workspace', () => {
     // verify the user is able to navigate to edit page to update the description
     await aboutPage.getAboutEditIcon();
     const workspaceEdit = new WorkspaceEditPage(page);
-    
+
     // verify user is able to edit the locked workspace
     workspaceEditedName = await workspaceEdit.fillOutRequiredDuplicationFields();
     const updateButton = workspaceEdit.getUpdateWorkspaceButton();
@@ -129,7 +129,6 @@ describe('Workspace Admin lock-workspace', () => {
     await dataPage.deleteWorkspace();
   });
 
-
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
     await findOrCreateDataset(page, { openEditPage: true });
 
@@ -142,5 +141,4 @@ describe('Workspace Admin lock-workspace', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     return await notebookPreviewPage.waitForLoad();
   }
-  
 });
