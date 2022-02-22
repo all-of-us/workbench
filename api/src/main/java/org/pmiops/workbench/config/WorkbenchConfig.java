@@ -232,6 +232,10 @@ public class WorkbenchConfig {
     }
 
     public Renewal renewal;
+
+    // which Access Tiers are visible to users?  This is intended to allow Institution Admins to
+    // configure CT institutions before CT launch, and can likely be removed after that time.
+    public List<String> tiersVisibleToUsers;
   }
 
   public static class FeatureFlagsConfig {
