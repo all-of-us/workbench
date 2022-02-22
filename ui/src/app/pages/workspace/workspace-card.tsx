@@ -155,29 +155,36 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       ]);
     }
 
-    // If enableResearchReviewPrompt is true and workspace needs Review:
-    // show the research purpose review modal and return false, to stop further navigation
-    // Else:
-    // Tracks the Analytics Event, Navigate to Featured workspace or Navigate to User workspace
-    // and return true to continue navigate to workspace detail page
-    trackWorkspaceNavigation(): boolean {
+    // If enableResearchReviewPrompt flag is ON and workspace required reviewPrompt
+    // Show the researchPurposeReviewModal and stop navigation
+    doesWorkspaceNeedsReview(): boolean {
       const { workspace } = this.props;
       if (
         serverConfigStore.get().config.enableResearchReviewPrompt &&
         workspace.researchPurpose.needsReviewPrompt
       ) {
         this.setState({ showResearchPurposeReviewModal: true });
-        return false;
+        return true;
       }
-      workspace.published
-        ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
-        : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-      return true;
+      return false;
+    }
+
+    // If the workspace does not require researchPurposeReview, track the navigation to workspace
+    trackWorkspaceNavigation() {
+      const { workspace } = this.props;
+      if (!this.doesWorkspaceNeedsReview()) {
+        workspace.published
+          ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
+          : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+      }
     }
 
     onClick() {
       const { workspace } = this.props;
-      if (this.trackWorkspaceNavigation()) {
+      if (!this.doesWorkspaceNeedsReview()) {
+        workspace.published
+          ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
+          : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
         this.props.navigate([
           'workspaces',
           workspace.namespace,
