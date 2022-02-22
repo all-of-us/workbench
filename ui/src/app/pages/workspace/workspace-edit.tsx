@@ -1318,9 +1318,11 @@ export const WorkspaceEdit = fp.flow(
 
     // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
     enableAccessTierSelection(): boolean {
-      return (
-        serverConfigStore.get().config.accessTiersVisibleToUsers.length > 1
-      );
+      const {
+        config: { accessTiersVisibleToUsers },
+      } = serverConfigStore.get();
+
+      return accessTiersVisibleToUsers.length > 1;
     }
 
     onAccessTierChange(
@@ -1349,6 +1351,9 @@ export const WorkspaceEdit = fp.flow(
     }
 
     render() {
+      const {
+        config: { accessTiersVisibleToUsers },
+      } = serverConfigStore.get();
       const {
         workspace: {
           name,
@@ -1483,15 +1488,11 @@ export const WorkspaceEdit = fp.flow(
                           }
                           disabled={!this.isMode(WorkspaceEditMode.Create)}
                         >
-                          {serverConfigStore
-                            .get()
-                            .config.accessTiersVisibleToUsers.map(
-                              (shortName) => (
-                                <option key={shortName} value={shortName}>
-                                  {displayNameForTier(shortName)}
-                                </option>
-                              )
-                            )}
+                          {accessTiersVisibleToUsers.map((shortName) => (
+                            <option key={shortName} value={shortName}>
+                              {displayNameForTier(shortName)}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </TooltipTrigger>
