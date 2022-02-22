@@ -83,7 +83,6 @@ import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -190,8 +189,6 @@ public class DataSetControllerTest {
   private Cohort cohort;
   private Cohort noAccessCohort;
   private ConceptSet conceptSet1;
-  private ConceptSet conceptSet2;
-  private ConceptSet surveyConceptSet;
   private ConceptSet noAccessConceptSet;
   private DataSet noAccessDataSet;
   private DbCdrVersion cdrVersion;
@@ -202,7 +199,6 @@ public class DataSetControllerTest {
   @Autowired private ConceptSetsController conceptSetsController;
   @Autowired private DataSetController dataSetController;
   @Autowired private UserDao userDao;
-  @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
@@ -339,8 +335,7 @@ public class DataSetControllerTest {
             .billingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName());
-    stubGetWorkspaceAcl(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
 
     noAccessWorkspace =
         new Workspace()
@@ -351,8 +346,8 @@ public class DataSetControllerTest {
 
     noAccessWorkspace = workspacesController.createWorkspace(noAccessWorkspace).getBody();
     // Allow access initially for setup, update the mocks after initialization to remove access.
-    stubGetWorkspace(noAccessWorkspace.getNamespace(), noAccessWorkspace.getName());
-    stubGetWorkspaceAcl(noAccessWorkspace, WorkspaceAccessLevel.OWNER);
+    // see end of inotialization block
+    stubWorkspaceAccessLevel(noAccessWorkspace, WorkspaceAccessLevel.OWNER);
 
     noAccessCohort =
         cohortsController
@@ -363,6 +358,7 @@ public class DataSetControllerTest {
                     .name("noAccessCohort")
                     .criteria(new Gson().toJson(SearchRequests.allGenders())))
             .getBody();
+
     cohort =
         cohortsController
             .createCohort(
@@ -434,27 +430,6 @@ public class DataSetControllerTest {
             .prevalence(0.2F)
             .conceptSynonyms(new ArrayList<>()));
 
-    surveyConceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name(CONCEPT_SET_SURVEY_NAME).domain(Domain.OBSERVATION))
-                    .addedConceptSetConceptIds(conceptSetConceptIds))
-            .getBody();
-
-    conceptSet2 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(new ConceptSet().name(CONCEPT_SET_TWO_NAME).domain(Domain.DRUG))
-                    .addedConceptSetConceptIds(conceptSetConceptIds))
-            .getBody();
-
     noAccessDataSet =
         dataSetController
             .createDataSet(
@@ -479,10 +454,6 @@ public class DataSetControllerTest {
                 .addNamedParameter(NAMED_PARAMETER_ARRAY_NAME, NAMED_PARAMETER_ARRAY_VALUE)
                 .build());
 
-    when(fireCloudService.getWorkspace(
-            noAccessWorkspace.getNamespace(), noAccessWorkspace.getName()))
-        .thenThrow(new ForbiddenException());
-
     // This is not great, but due to the interaction of mocks and bigquery, it is
     // exceptionally hard to fix it so that it calls the real filterBitQueryConfig
     // but _does not_ call the real methods in the rest of the bigQueryService.
@@ -499,6 +470,8 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+    // Allow access initially for setup, update the mocks after initialization to remove access.
+    stubWorkspaceAccessLevel(noAccessWorkspace, WorkspaceAccessLevel.NO_ACCESS);
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -510,7 +483,13 @@ public class DataSetControllerTest {
         .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
   }
 
-  private void stubGetWorkspace(String ns, String name) {
+  private void stubWorkspaceAccessLevel(
+      Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
+    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
+  }
+
+  private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
     FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
@@ -518,18 +497,18 @@ public class DataSetControllerTest {
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(workspaceAccessLevel.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
-  private void stubGetWorkspaceAcl(Workspace w, WorkspaceAccessLevel accessLevel) {
+  private void stubGetWorkspaceAcl(String ns, String name, WorkspaceAccessLevel accessLevel) {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
         new FirecloudWorkspaceAccessEntry().accessLevel(accessLevel.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(w.getNamespace(), w.getName()))
+    when(fireCloudService.getWorkspaceAclAsService(ns, name))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
@@ -695,14 +674,17 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_noAccess() {
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.exportToNotebook(
-                noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
-                new DataSetExportRequest()
-                    .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    noAccessWorkspace.getNamespace(),
+                    noAccessWorkspace.getName(),
+                    new DataSetExportRequest()
+                        .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
+
+    assertForbiddenException(exception);
   }
 
   @Test
@@ -729,11 +711,16 @@ public class DataSetControllerTest {
 
     DataSetExportRequest request = new DataSetExportRequest();
 
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.exportToNotebook(
-                workspace.getNamespace(), workspace.getName(), request));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch("Workspace.*is in an inactive billing state");
   }
 
   @Test
@@ -769,15 +756,18 @@ public class DataSetControllerTest {
 
   @Test
   public void generateCode_noAccess() {
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.previewExportToNotebook(
-                noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
-                new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
-                    .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.previewExportToNotebook(
+                    noAccessWorkspace.getNamespace(),
+                    noAccessWorkspace.getName(),
+                    new DataSetExportRequest()
+                        .kernelType(KernelTypeEnum.PYTHON)
+                        .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
+
+    assertForbiddenException(exception);
   }
 
   @Test
@@ -1009,35 +999,39 @@ public class DataSetControllerTest {
             .createDataSet(
                 workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
             .getBody();
+    // No_Access
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () -> {
+              dataSetController.extractGenomicData(
+                  workspace.getNamespace(), workspace.getName(), dataSet.getId());
+            });
+    assertForbiddenException(exception);
 
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          dataSetController.extractGenomicData(
-              workspace.getNamespace(), workspace.getName(), dataSet.getId());
-        });
+    // Reader
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    Throwable exception1 =
+        assertThrows(
+            ForbiddenException.class,
+            () -> {
+              dataSetController.extractGenomicData(
+                  workspace.getNamespace(), workspace.getName(), dataSet.getId());
+            });
+    assertForbiddenException(exception1);
 
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          dataSetController.extractGenomicData(
-              workspace.getNamespace(), workspace.getName(), dataSet.getId());
-        });
-
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
+    // Writer
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
 
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+    // Owner
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
 
+    // Project Owner ?
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
     dataSetController.extractGenomicData(
@@ -1090,26 +1084,31 @@ public class DataSetControllerTest {
 
   @Test
   public void testAbortGenomicExtractionJob_readerCannotAbort() {
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.abortGenomicExtractionJob(
-                workspace.getNamespace(), workspace.getName(), "lol"));
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.abortGenomicExtractionJob(
+                    workspace.getNamespace(), workspace.getName(), "lol"));
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
+
+    assertForbiddenException(exception);
   }
 
   @Test
   public void testAbortGenomicExtractionJob_noAccess() {
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.abortGenomicExtractionJob(
-                workspace.getNamespace(), workspace.getName(), "lol"));
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.abortGenomicExtractionJob(
+                    workspace.getNamespace(), workspace.getName(), "lol"));
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
+
+    assertForbiddenException(exception);
   }
 
   @Test
@@ -1139,25 +1138,31 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetDataSet_noAccess() {
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.getDataSet(
-                noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
-                noAccessDataSet.getId()));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.getDataSet(
+                    noAccessWorkspace.getNamespace(),
+                    noAccessWorkspace.getName(),
+                    noAccessDataSet.getId()));
+
+    assertForbiddenException(exception);
   }
 
   @Test
   public void testUpdateDataSet_noAccess() {
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.updateDataSet(
-                noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
-                noAccessDataSet.getId(),
-                new DataSetRequest().etag("1")));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.updateDataSet(
+                    noAccessWorkspace.getNamespace(),
+                    noAccessWorkspace.getName(),
+                    noAccessDataSet.getId(),
+                    new DataSetRequest().etag("1")));
+
+    assertForbiddenException(exception);
   }
 
   @Test
@@ -1174,13 +1179,16 @@ public class DataSetControllerTest {
 
   @Test
   public void testDeleteDataSet_noAccess() {
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            dataSetController.deleteDataSet(
-                noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
-                noAccessDataSet.getId()));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.deleteDataSet(
+                    noAccessWorkspace.getNamespace(),
+                    noAccessWorkspace.getName(),
+                    noAccessDataSet.getId()));
+
+    assertForbiddenException(exception);
   }
 
   @Test
@@ -1249,12 +1257,15 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testCreateMinimalDataset() {
+  public void testCreateDatasetMinimalOwner() {
     DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
     dataSetRequest.setConceptSetIds(ImmutableList.of(conceptSet1.getId()));
     dataSetRequest.setCohortIds(ImmutableList.of(cohort.getId()));
     dataSetRequest.setDomainValuePairs(
         ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+
     DataSet dataset =
         dataSetController
             .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
@@ -1266,6 +1277,69 @@ public class DataSetControllerTest {
     assertThat(dataset.getCohorts()).contains(cohort);
     assertThat(dataset.getDomainValuePairs())
         .contains(new DomainValuePair().domain(Domain.CONDITION).value("some condition1"));
+  }
+
+  @Test
+  public void testCreateDatasetMinimalWriter() {
+    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
+    dataSetRequest.setConceptSetIds(ImmutableList.of(conceptSet1.getId()));
+    dataSetRequest.setCohortIds(ImmutableList.of(cohort.getId()));
+    dataSetRequest.setDomainValuePairs(
+        ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+
+    DataSet dataset =
+        dataSetController
+            .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
+            .getBody();
+    // criteriums must be empty and not null, since
+    // conceptSetDao will return an empty hashSet for dbConceptEtConceptIds
+    // fix workbench-api.yml#ConceptSet#criteriums array to be required
+    assertThat(dataset.getConceptSets()).contains(conceptSet1);
+    assertThat(dataset.getCohorts()).contains(cohort);
+    assertThat(dataset.getDomainValuePairs())
+        .contains(new DomainValuePair().domain(Domain.CONDITION).value("some condition1"));
+  }
+
+  @Test
+  public void testCreateDatasetMinimalReader() {
+    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
+    dataSetRequest.setConceptSetIds(ImmutableList.of(conceptSet1.getId()));
+    dataSetRequest.setCohortIds(ImmutableList.of(cohort.getId()));
+    dataSetRequest.setDomainValuePairs(
+        ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.createDataSet(
+                    workspace.getNamespace(), workspace.getId(), dataSetRequest));
+
+    assertForbiddenException(exception);
+  }
+
+  @Test
+  public void testCreateDatasetMinimalNoAccess() {
+    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
+    dataSetRequest.setConceptSetIds(ImmutableList.of(conceptSet1.getId()));
+    dataSetRequest.setCohortIds(ImmutableList.of(cohort.getId()));
+    dataSetRequest.setDomainValuePairs(
+        ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION).value("some condition1")));
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                dataSetController.createDataSet(
+                    workspace.getNamespace(), workspace.getId(), dataSetRequest));
+
+    assertForbiddenException(exception);
   }
 
   @Disabled(
@@ -1283,7 +1357,13 @@ public class DataSetControllerTest {
     // part of DataSetControllerTest#createDataSetMissingArguments
   }
 
-  DataSetRequest buildValidDataSetRequest() {
+  private void assertForbiddenException(Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .containsMatch("You do not have sufficient permissions to access");
+  }
+
+  private DataSetRequest buildValidDataSetRequest() {
     return buildEmptyDataSetRequest()
         .name("blah")
         .addCohortIdsItem(cohort.getId())
@@ -1291,7 +1371,7 @@ public class DataSetControllerTest {
         .domainValuePairs(mockDomainValuePair());
   }
 
-  DataSetExportRequest setUpValidDataSetExportRequest() {
+  private DataSetExportRequest setUpValidDataSetExportRequest() {
     DataSetRequest dataSet = buildValidDataSetRequest();
 
     ArrayList<String> tables = new ArrayList<>();
