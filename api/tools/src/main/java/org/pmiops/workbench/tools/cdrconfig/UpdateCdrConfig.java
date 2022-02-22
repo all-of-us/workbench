@@ -87,14 +87,11 @@ public class UpdateCdrConfig {
    *   <li>have an archived default version
    *   <li>belong to a tier which is not also present in this file
    *   <li>have more than one default version per tier
+   *   <li>have fewer than one default version per tier (unless allowEmptyTiers is set and the tier
+   *       is empty)
    * </ul>
    *
-   * <p>Unless allowEmptyTiers is set, CDR Versions must:
-   *
-   * <ul>
-   *   <li>have at least one version per tier
-   *   <li>have exactly one default version per tier
-   * </ul>
+   * <p>Unless allowEmptyTiers is set, CDR Versions must also have at least one version per tier
    */
   private void preCheck(CdrConfigVO cdrConfig, boolean allowEmptyTiers) {
     Set<Long> accessTierIds = new HashSet<>();
