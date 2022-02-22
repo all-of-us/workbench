@@ -103,7 +103,7 @@ public class AccessTierServiceTest {
   @Test
   public void test_getAllTiersVisibleToUsers_RTnotCT() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    TestMockFactory.createControlledTierForTests(accessTierDao);
 
     config.access.tiersVisibleToUsers = Collections.singletonList(registeredTier.getShortName());
 
