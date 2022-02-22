@@ -33,10 +33,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -552,46 +553,41 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.BOOLEAN)) {
       if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
         throw createConflictException(
-            AnnotationType.BOOLEAN.name(),
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            AnnotationType.BOOLEAN, participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.STRING)) {
       if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueString())) {
         throw createConflictException(
-            AnnotationType.STRING.name(),
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            AnnotationType.STRING, participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.DATE)) {
       if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueDateString())) {
         throw createConflictException(
-            AnnotationType.DATE.name(),
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            AnnotationType.DATE, participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
       try {
         Date date =
-            new Date(
-                sdf.parse(participantCohortAnnotation.getAnnotationValueDateString()).getTime());
+            Date.valueOf(
+                LocalDate.parse(
+                    participantCohortAnnotation.getAnnotationValueDateString(),
+                    DateTimeFormatter.ISO_DATE));
         participantCohortAnnotation.setAnnotationValueDate(date);
-      } catch (ParseException e) {
+      } catch (DateTimeParseException e) {
         throw new BadRequestException(
             String.format(
-                "Bad Request: Please provide a valid %s value (%s) for annotation defintion id: %s",
-                AnnotationType.DATE.name(),
-                sdf.toPattern(),
+                "Bad Request: Please provide a valid %s value (yyyy-MM-dd) for annotation definition id: %s",
+                AnnotationType.DATE,
                 participantCohortAnnotation.getCohortAnnotationDefinitionId()));
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.INTEGER)) {
       if (participantCohortAnnotation.getAnnotationValueInteger() == null) {
         throw createConflictException(
-            AnnotationType.INTEGER.name(),
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            AnnotationType.INTEGER, participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.ENUM)) {
       if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueEnum())) {
         throw createConflictException(
-            AnnotationType.ENUM.name(),
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            AnnotationType.ENUM, participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
       List<DbCohortAnnotationEnumValue> enumValues =
           cohortAnnotationDefinition.getEnumValues().stream()
@@ -603,8 +599,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
               .collect(Collectors.toList());
       if (enumValues.isEmpty()) {
         throw createConflictException(
-            AnnotationType.ENUM.name(),
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            AnnotationType.ENUM, participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
       participantCohortAnnotation.setCohortAnnotationEnumValue(enumValues.get(0));
     }
@@ -612,7 +607,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   /** Helper method that creates a {@link ConflictException} from the specified parameters. */
   private ConflictException createConflictException(
-      String annotationType, Long cohortAnnotationDefinitionId) {
+      AnnotationType annotationType, Long cohortAnnotationDefinitionId) {
     return new ConflictException(
         String.format(
             "Conflict Exception: Please provide a valid %s value for annotation definition id: %s",
