@@ -558,7 +558,7 @@ paths:
           to update the user to.
         schema:
           "$ref": "#/definitions/UpdateUserDisabledRequest"
-      summary: '[DEPRECATED - use admin/users/updateAccount] enable/disable a user to an auth domain 
+      summary: '[DEPRECATED - use admin/users/updateAccount] enable/disable a user to an auth domain
         if you have ID verification authority'
       operationId: updateUserDisabledStatus
   "/v1/userSearch/{accessTierShortName}/{term}":
@@ -9229,7 +9229,7 @@ definitions:
         type: boolean
         description: |-
           Disease-focused research: The primary purpose of the research is to learn more about
-          a particular disease or disorder (for example, type 2 diabetes), a trait (for example,
+          a particular disease or disorder (e.g. type 2 diabetes), a trait (for example,
           blood pressure), or a set of related conditions (for example, autoimmune diseases,
           psychiatric disorders).
       rpDiseaseOfFocus:
@@ -9240,7 +9240,7 @@ definitions:
       rpDrugDevelopment:
         type: boolean
         description: |-
-          Drug/Therapeutics Development Research selected. Primary focus of the research
+          Drug/Therapeutics Development Research selected. The primary focus of the research
           is drug/therapeutics development. The data will be used to understand treatment-gene
           interactions or treatment outcomes relevant to the therapeutic(s) of interest.
       rpEducational:
@@ -9252,7 +9252,7 @@ definitions:
         type: boolean
         description: |-
           Ethical, Legal, and Social Implications (ELSI) Research: this
-          research focuses on ethical, legal, and social implications (ELSI) of, or related to design,
+          research focuses on ethical, legal, and social implications (ELSI) of or related to design,
           conduct, and translation of research.
       rpIntendedStudy:
         type: string
