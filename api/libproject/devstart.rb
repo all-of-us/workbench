@@ -2372,7 +2372,7 @@ def update_cdr_config_options(cmd_name, args)
   op.opts.allow_empty_tiers = false
   op.add_option(
       "--allow_empty_tiers",
-      ->(opts, _) { opts.allow_empty_tiers = "false"},
+      ->(opts, _) { opts.allow_empty_tiers = "true"},
       "Allow access tiers to be empty (no CDR versions).")
   return op
 end
@@ -2771,7 +2771,7 @@ def deploy(cmd_name, args)
   op.opts.allow_empty_tiers = false
     op.add_option(
         "--allow_empty_tiers",
-        ->(opts, _) { opts.allow_empty_tiers = "false"},
+        ->(opts, _) { opts.allow_empty_tiers = "true"},
         "Allow access tiers to be empty (no CDR versions).")
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
 
