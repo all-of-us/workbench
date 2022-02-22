@@ -94,9 +94,9 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: (
       <div>
         The primary purpose of the research is to learn more about a particular
-        disease or disorder (for example, type 2 diabetes), a trait (for
-        example, blood pressure), or a set of related conditions (for example,
-        autoimmune diseases, psychiatric disorders).
+        disease or disorder (e.g. type 2 diabetes), a trait (e.g. blood
+        pressure), or a set of related conditions (e.g. autoimmune diseases,
+        psychiatric disorders).
       </div>
     ),
   },
@@ -160,7 +160,7 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: (
       <div>
         This research focuses on ethical, legal, and social implications (ELSI)
-        of, or related to design, conduct, and translation of research.
+        of or related to design, conduct, and translation of research.
       </div>
     ),
   },
@@ -169,8 +169,8 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     shortDescription: 'Drug/Therapeutics Development Research',
     longDescription: (
       <div>
-        Primary focus of the research is drug/therapeutics development. The data
-        will be used to understand treatment-gene interactions or treatment
+        The primary focus of the research is drug/therapeutics development. The
+        data will be used to understand treatment-gene interactions or treatment
         outcomes relevant to the therapeutic(s) of interest.
       </div>
     ),
