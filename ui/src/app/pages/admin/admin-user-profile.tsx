@@ -20,6 +20,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
+import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
@@ -29,7 +30,12 @@ import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
-import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
+import {
+  MatchParams,
+  profileStore,
+  serverConfigStore,
+  useStore,
+} from 'app/utils/stores';
 
 import {
   adminGetProfile,
@@ -261,9 +267,10 @@ interface CommonToggleProps {
   checked: boolean;
   dataTestId: string;
   onToggle: () => void;
+  disabled?: boolean;
 }
 const CommonToggle = (props: CommonToggleProps) => {
-  const { name, checked, dataTestId, onToggle } = props;
+  const { name, checked, dataTestId, disabled, onToggle } = props;
   return (
     <Toggle
       name={name}
@@ -273,6 +280,7 @@ const CommonToggle = (props: CommonToggleProps) => {
       style={{ paddingBottom: 0, flexGrow: 0 }}
       height={24}
       width={50}
+      disabled={disabled}
     />
   );
 };
@@ -394,12 +402,19 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   );
 };
 
+const isLoggedInUser = (userProfile: Profile): boolean => {
+  const { profile } = profileStore.get();
+  return userProfile?.username === profile?.username;
+};
+
 const DisabledToggle = (props: {
   currentlyDisabled: boolean;
   previouslyDisabled: boolean;
+  profile: Profile;
   toggleDisabled: () => void;
 }) => {
-  const { currentlyDisabled, previouslyDisabled, toggleDisabled } = props;
+  const { currentlyDisabled, previouslyDisabled, profile, toggleDisabled } =
+    props;
   const highlightStyle =
     currentlyDisabled !== previouslyDisabled
       ? { background: colors.highlight }
@@ -413,6 +428,7 @@ const DisabledToggle = (props: {
           checked={!currentlyDisabled}
           dataTestId='user-disabled-toggle'
           onToggle={() => toggleDisabled()}
+          disabled={isLoggedInUser(profile)}
         />
       </div>
     </div>
@@ -648,13 +664,21 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             <FlexColumn>
               <FlexRow>
                 <div style={styles.tableHeader}>Access status</div>
-                <DisabledToggle
-                  currentlyDisabled={updatedProfile.disabled}
-                  previouslyDisabled={oldProfile.disabled}
-                  toggleDisabled={() =>
-                    updateProfile({ disabled: !updatedProfile.disabled })
-                  }
-                />
+                <TooltipTrigger
+                  disabled={!isLoggedInUser(updatedProfile)}
+                  content={'Cannot change your own Access Status'}
+                >
+                  <div>
+                    <DisabledToggle
+                      currentlyDisabled={updatedProfile.disabled}
+                      previouslyDisabled={oldProfile.disabled}
+                      toggleDisabled={() =>
+                        updateProfile({ disabled: !updatedProfile.disabled })
+                      }
+                      profile={updatedProfile}
+                    />
+                  </div>
+                </TooltipTrigger>
               </FlexRow>
               <AccessModuleTable
                 oldProfile={oldProfile}
