@@ -1,12 +1,14 @@
 package org.pmiops.workbench.tools.cdrconfig;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,9 +45,10 @@ public class UpdateCdrConfig {
       AccessTierDao accessTierDao, CdrVersionDao cdrVersionDao, CdrConfigVOMapper cdrConfigMapper)
       throws IOException {
     return (args) -> {
-      if (args.length != 2) {
+      if (args.length != 2 && args.length != 3) {
         throw new IllegalArgumentException(
-            "Expected 2 args (file, dry_run). Got " + Arrays.asList(args));
+            "Expected 2-3 args (file, dry_run, allow_empty_tiers=false). Got "
+                + Arrays.asList(args));
       }
 
       final Gson gson =
@@ -57,8 +60,10 @@ public class UpdateCdrConfig {
         cdrConfig = gson.fromJson(cdrConfigReader, CdrConfigVO.class);
       }
       boolean dryRun = Boolean.parseBoolean(args[1]);
+      // RW-7931 consider removal of this option after CT rollout is complete
+      boolean allowEmptyTiers = args.length > 2 && Boolean.parseBoolean(args[2]);
 
-      preCheck(cdrConfig);
+      preCheck(cdrConfig, allowEmptyTiers);
 
       updateDB(dryRun, cdrConfig, gson, accessTierDao, cdrVersionDao, cdrConfigMapper);
     };
@@ -81,10 +86,14 @@ public class UpdateCdrConfig {
    *   <li>duplicate IDs (or lack one)
    *   <li>have an archived default version
    *   <li>belong to a tier which is not also present in this file
-   *   <li>have more or less than one default version per tier
+   *   <li>have more than one default version per tier
+   *   <li>have fewer than one default version per tier (unless allowEmptyTiers is set and the tier
+   *       is empty)
    * </ul>
+   *
+   * <p>Unless allowEmptyTiers is set, CDR Versions must also have at least one version per tier
    */
-  private void preCheck(CdrConfigVO cdrConfig) {
+  private void preCheck(CdrConfigVO cdrConfig, boolean allowEmptyTiers) {
     Set<Long> accessTierIds = new HashSet<>();
     Set<String> accessTierShortNames = new HashSet<>();
     Set<String> accessTierDisplayNames = new HashSet<>();
@@ -119,6 +128,7 @@ public class UpdateCdrConfig {
     }
 
     Set<Long> cdrVersionIds = new HashSet<>();
+    Map<String, Set<Long>> cdrVersionsPerTier = new HashMap<>();
     Map<String, Long> cdrDefaultVersionPerTier = new HashMap<>();
     for (CdrVersionVO v : cdrConfig.cdrVersions) {
       long id = v.cdrVersionId;
@@ -144,6 +154,7 @@ public class UpdateCdrConfig {
                 id, accessTier));
       }
 
+      cdrVersionsPerTier.merge(v.accessTier, Collections.singleton(v.cdrVersionId), Sets::union);
       if (v.isDefault != null && v.isDefault) {
         if (v.archivalStatus != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
           throw new IllegalArgumentException(
@@ -163,7 +174,14 @@ public class UpdateCdrConfig {
 
     accessTierShortNames.forEach(
         t -> {
-          if (!cdrDefaultVersionPerTier.containsKey(t)) {
+          if (!allowEmptyTiers && !cdrVersionsPerTier.containsKey(t)) {
+            throw new IllegalArgumentException(
+                String.format("No CDR versions are present for Access Tier '%s'.", t));
+          }
+
+          // check if a tier has CDR Versions but no default
+          // (empty is OK if it passed the previous check)
+          if (cdrVersionsPerTier.containsKey(t) && !cdrDefaultVersionPerTier.containsKey(t)) {
             throw new IllegalArgumentException(
                 String.format("Missing default CDR version for Access Tier '%s'.", t));
           }

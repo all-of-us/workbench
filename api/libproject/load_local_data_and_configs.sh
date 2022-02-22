@@ -11,7 +11,11 @@ set -e
 # These commands should be kept in sync with the associated deployment commands, which can be
 # found under the "deploy" command in api/libproject/devstart.rb .
 
-./gradlew --daemon updateCdrConfig -PappArgs="['config/cdr_config_local.json',false]"
+DRY_RUN=false
+# RW-7931 consider switching to false or removal of this option after CT rollout is complete
+ALLOW_EMPTY_TIER=true
+./gradlew --daemon updateCdrConfig -PappArgs="['config/cdr_config_local.json',${DRY_RUN},${ALLOW_EMPTY_TIER}]"
+
 ./gradlew --daemon loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
 ./gradlew --daemon loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
 ./gradlew --daemon loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
