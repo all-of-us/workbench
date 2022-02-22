@@ -402,7 +402,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   );
 };
 
-const isCurrentUser = (userProfile: Profile): boolean => {
+const isLoggedInUser = (userProfile: Profile): boolean => {
   const { profile } = profileStore.get();
   return userProfile?.username === profile?.username;
 };
@@ -428,7 +428,7 @@ const DisabledToggle = (props: {
           checked={!currentlyDisabled}
           dataTestId='user-disabled-toggle'
           onToggle={() => toggleDisabled()}
-          disabled={isCurrentUser(profile)}
+          disabled={isLoggedInUser(profile)}
         />
       </div>
     </div>
@@ -665,7 +665,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               <FlexRow>
                 <div style={styles.tableHeader}>Access status</div>
                 <TooltipTrigger
-                  disabled={!isCurrentUser(updatedProfile)}
+                  disabled={!isLoggedInUser(updatedProfile)}
                   content={'Cannot change your own Access Status'}
                 >
                   <div>
