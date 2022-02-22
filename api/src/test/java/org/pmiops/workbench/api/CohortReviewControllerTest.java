@@ -166,6 +166,7 @@ public class CohortReviewControllerTest {
   DbCohortAnnotationDefinition booleanAnnotationDefinition;
   DbCohortAnnotationDefinition integerAnnotationDefinition;
   DbParticipantCohortAnnotation participantAnnotation;
+  DbParticipantCohortAnnotation participantAnnotationDate;
 
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired AccessTierDao accessTierDao;
@@ -508,6 +509,15 @@ public class CohortReviewControllerTest {
                 .annotationValueString("test")
                 .cohortAnnotationDefinitionId(
                     stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
+
+    participantAnnotationDate =
+        participantCohortAnnotationDao.save(
+            new DbParticipantCohortAnnotation()
+                .cohortReviewId(cohortReview.getCohortReviewId())
+                .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
+                .annotationValueDateString("2022-02-21")
+                .cohortAnnotationDefinitionId(
+                    dateAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
   ////////// createCohortReview  //////////
@@ -1163,6 +1173,178 @@ public class CohortReviewControllerTest {
   }
 
   ////////// updateParticipantCohortAnnotation  //////////
+  @Test
+  public void updateParticipantCohortAnnotationNoCohortReview() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    Long badCohortReviewId = 99L;
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    badCohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    participantAnnotation.getAnnotationId(),
+                    new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Not Found: Cohort Review does not exist for cohortReviewId: %d",
+                badCohortReviewId));
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationNoParticipantCohortStatus() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    Long badParticipantId = 99L;
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    badParticipantId,
+                    participantAnnotation.getAnnotationId(),
+                    new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Not Found: Participant Cohort Status does not exist for cohortReviewId: %d, participantId: %d",
+                cohortReview.getCohortReviewId(), badParticipantId));
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationNoAnnotation() {
+    long badAnnotationId = 99;
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    badAnnotationId,
+                    new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Not Found: Participant Cohort Annotation does not exist for annotationId: %d, cohortReviewId: %d, participantId: %d",
+                badAnnotationId,
+                cohortReview.getCohortReviewId(),
+                participantCohortStatus1.getParticipantKey().getParticipantId()));
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationIncorrectTypeForString() {
+    // participationAnnotation.getAnnotationId is for String type
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    participantAnnotation.getAnnotationId(),
+                    new ModifyParticipantCohortAnnotationRequest()
+                        .annotationValueDate("2022-02-21")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
+                AnnotationType.STRING,
+                stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationIncorrectDateString() {
+    // participationAnnotationDate.getAnnotationId is for date-string
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    participantAnnotationDate.getAnnotationId(),
+                    new ModifyParticipantCohortAnnotationRequest()
+                        .annotationValueDate("02-21-2022")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
+                AnnotationType.DATE,
+                dateAnnotationDefinition.getCohortAnnotationDefinitionId()));
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationStringNull() {
+    // participationAnnotation.getAnnotationId is for String type
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    participantAnnotation.getAnnotationId(),
+                    new ModifyParticipantCohortAnnotationRequest().annotationValueString(null)));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
+                AnnotationType.STRING,
+                stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationStringEmpty() {
+    // participationAnnotation.getAnnotationId is for String type
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                cohortReviewController.updateParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    participantAnnotation.getAnnotationId(),
+                    new ModifyParticipantCohortAnnotationRequest().annotationValueString("   ")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
+                AnnotationType.STRING,
+                stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
+  }
 
   @Test
   public void updateParticipantCohortAnnotation() {
@@ -1180,33 +1362,6 @@ public class CohortReviewControllerTest {
             .getBody();
 
     assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
-  }
-
-  @Test
-  public void updateParticipantCohortAnnotationNoAnnotationForIdException() {
-    long badAnnotationId = 99;
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    try {
-      cohortReviewController
-          .updateParticipantCohortAnnotation(
-              workspace.getNamespace(),
-              workspace.getId(),
-              cohortReview.getCohortReviewId(),
-              participantCohortStatus1.getParticipantKey().getParticipantId(),
-              badAnnotationId,
-              new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
-          .getBody();
-    } catch (NotFoundException nfe) {
-      assertThat(nfe.getMessage())
-          .isEqualTo(
-              "Not Found: Participant Cohort Annotation does not exist for annotationId: "
-                  + badAnnotationId
-                  + ", cohortReviewId: "
-                  + cohortReview.getCohortReviewId()
-                  + ", participantId: "
-                  + participantCohortStatus1.getParticipantKey().getParticipantId());
-    }
   }
 
   ////////// deleteParticipantCohortAnnotation  //////////
