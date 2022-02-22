@@ -32,7 +32,8 @@ import {
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
+export const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST =
+  'CURRENT_COHORT_SEARCH_REQUEST';
 
 const styles = reactStyles({
   cohortError: {

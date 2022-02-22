@@ -8,13 +8,15 @@ import {
   CdrVersionTiersResponse,
   Cohort,
   GenderOrSexType,
-  ResourceType,
+  ResourceType, SearchRequest,
   TemporalTime,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { ClearCohortModal } from 'app/cohort-search/clear-cohort-modal';
+import { LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST } from 'app/cohort-search/cohort-page/cohort-page.component';
 import { GenderChart } from 'app/cohort-search/gender-chart/gender-chart.component';
-import { searchRequestStore } from 'app/cohort-search/search-state.service';
+import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {
   ageTypeToText,
   genderOrSexTypeToText,
@@ -35,7 +37,12 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
-import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
+import {
+  currentCohortSearchContextStore,
+  currentCohortStore,
+  currentWorkspaceStore,
+  NavigationProps,
+} from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -144,6 +151,7 @@ interface State {
   apiCallCheck: number;
   apiError: boolean;
   chartData: any;
+  clearCohort: boolean;
   currentGraphOptions: {
     ageType: AgeType;
     genderOrSexType: GenderOrSexType;
@@ -177,6 +185,7 @@ export const ListOverview = fp.flow(
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
+        clearCohort: false,
         currentGraphOptions: {
           ageType: AgeType.AGEATCDR,
           genderOrSexType: GenderOrSexType.GENDER,
@@ -403,6 +412,26 @@ export const ListOverview = fp.flow(
         .catch((error) => console.error(error));
     };
 
+    onCohortClear = () => {
+      const {
+        history,
+        match: {
+          params: { ns, wsid },
+        },
+      } = this.props;
+      idsInUse.next(new Set());
+      currentCohortStore.next(undefined);
+      currentCohortSearchContextStore.next(undefined);
+      searchRequestStore.next({
+        includes: [],
+        excludes: [],
+        dataFilters: [],
+      } as SearchRequest);
+      localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
+      this.setState({ clearCohort: false });
+      history.push(`/workspaces/${ns}/${wsid}/data/cohorts/build`)
+    }
+
     cancelDelete = () => {
       this.setState({ deleting: false });
     };
@@ -524,11 +553,12 @@ export const ListOverview = fp.flow(
     }
 
     render() {
-      const { cohort } = this.props;
+      const { cohort, workspace } = this.props;
       const {
         ageType,
         apiError,
         chartData,
+        clearCohort,
         currentGraphOptions,
         deleting,
         genderOrSexType,
@@ -604,6 +634,24 @@ export const ListOverview = fp.flow(
                     onClick={() => this.navigateTo('review')}
                   >
                     <ClrIcon shape='copy' className='is-solid' size={30} />
+                  </Clickable>
+                </TooltipTrigger>
+                <TooltipTrigger
+                  content={<div>Clear all cohort selections</div>}
+                >
+                  <Clickable
+                    style={
+                      loading
+                        ? { ...styles.actionIcon, ...styles.disabled }
+                        : styles.actionIcon
+                    }
+                    onClick={() => this.setState({ clearCohort: true })}
+                  >
+                    <ClrIcon
+                      shape='times-circle'
+                      className='is-solid'
+                      size={30}
+                    />
                   </Clickable>
                 </TooltipTrigger>
               </div>
@@ -751,6 +799,12 @@ export const ListOverview = fp.flow(
               resourceType={ResourceType.COHORT}
               receiveDelete={this.delete}
               resourceName={cohort.name}
+            />
+          )}
+          {clearCohort && (
+            <ClearCohortModal
+              onClear={() => this.onCohortClear()}
+              onClose={() => this.setState({ clearCohort: false })}
             />
           )}
         </React.Fragment>
