@@ -175,19 +175,20 @@ public class UpdateCdrConfig {
       }
     }
 
-    if (!allowEmptyTiers) {
-      accessTierShortNames.forEach(
-          t -> {
-            if (!cdrVersionsPerTier.containsKey(t)) {
-              throw new IllegalArgumentException(
-                  String.format("No CDR versions are present for Access Tier '%s'.", t));
-            }
-            if (!cdrDefaultVersionPerTier.containsKey(t)) {
-              throw new IllegalArgumentException(
-                  String.format("Missing default CDR version for Access Tier '%s'.", t));
-            }
-          });
-    }
+    accessTierShortNames.forEach(
+        t -> {
+          if (!allowEmptyTiers && !cdrVersionsPerTier.containsKey(t)) {
+            throw new IllegalArgumentException(
+                String.format("No CDR versions are present for Access Tier '%s'.", t));
+          }
+
+          // check if a tier has CDR Versions but no default
+          // (empty is OK if it passed the previous check)
+          if (cdrVersionsPerTier.containsKey(t) && !cdrDefaultVersionPerTier.containsKey(t)) {
+            throw new IllegalArgumentException(
+                String.format("Missing default CDR version for Access Tier '%s'.", t));
+          }
+        });
   }
 
   /**
