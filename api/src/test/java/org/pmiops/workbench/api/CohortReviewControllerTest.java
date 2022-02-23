@@ -49,6 +49,7 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -180,7 +181,7 @@ public class CohortReviewControllerTest {
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   @Autowired ParticipantCohortAnnotationDao participantCohortAnnotationDao;
   @Autowired ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
-
+  @Autowired ParticipantCohortStatusMapper participantCohortStatusMapper;
   @Autowired FireCloudService fireCloudService;
   @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CloudBillingClient cloudBillingClient;
@@ -243,9 +244,9 @@ public class CohortReviewControllerTest {
     CommonMappers.class,
     CohortQueryBuilder.class,
     ReviewQueryBuilder.class,
-    ParticipantCohortStatusMapperImpl.class,
     CohortReviewMapperImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
+    ParticipantCohortStatusMapperImpl.class,
     // workspaceController
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
@@ -1491,24 +1492,50 @@ public class CohortReviewControllerTest {
 
     assertForbiddenException(exception);
   }
+
   ////////// getParticipantCohortStatus  //////////
   @Test
   public void getParticipantCohortStatusWrongWorkspace() {
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
 
-    assertThrows(
-        NotFoundException.class,
-        () ->
-            cohortReviewController.getParticipantCohortStatus(
-                workspace2.getNamespace(),
-                workspace2.getId(),
-                cohortReview.getCohortReviewId(),
-                participantCohortStatus1.getParticipantKey().getParticipantId()));
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCohortStatus(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId()));
+
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
   }
 
   @Test
-  public void getParticipantCohortStatus() {
+  public void getParticipantCohortStatusNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCohortStatus(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId()));
+
+    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+  }
+
+  @ParameterizedTest(name = "getParticipantCohortStatusAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getParticipantCohortStatusAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     ParticipantCohortStatus response =
         cohortReviewController
@@ -1532,6 +1559,25 @@ public class CohortReviewControllerTest {
         .isEqualTo(participantCohortStatus1.getSexAtBirthConceptId());
   }
 
+  @ParameterizedTest(name = "getParticipantCohortStatusForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getParticipantCohortStatusForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception = assertThrows(ForbiddenException.class, () ->
+        cohortReviewController
+            .getParticipantCohortStatus(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReview.getCohortReviewId(),
+                participantCohortStatus1.getParticipantKey().getParticipantId()));
+
+    assertForbiddenException(exception);
+  }
+  ////////// getParticipantCohortStatuses  //////////
   @Test
   public void getParticipantCohortStatuses() {
     int page = 0;
@@ -1676,37 +1722,6 @@ public class CohortReviewControllerTest {
       default:
     }
     return participantCohortAnnotation;
-  }
-
-  /**
-   * Helper method to consolidate assertions for {@link ConflictException}s for all {@link
-   * AnnotationType}s.
-   */
-  private void assertConflictExceptionForAnnotationType(
-      Long participantId, Long cohortAnnotationDefId, String type) {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    Throwable exception =
-        assertThrows(
-            ConflictException.class,
-            () ->
-                cohortReviewController.createParticipantCohortAnnotation(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    participantId,
-                    new ParticipantCohortAnnotation()
-                        .cohortReviewId(cohortReview.getCohortReviewId())
-                        .participantId(participantId)
-                        .cohortAnnotationDefinitionId(cohortAnnotationDefId)),
-            "Expected ConflictException not thrown");
-
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
-                type, cohortAnnotationDefId));
   }
 
   /**
