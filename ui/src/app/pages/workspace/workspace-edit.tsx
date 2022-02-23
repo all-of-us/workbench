@@ -1827,7 +1827,7 @@ export const WorkspaceEdit = fp.flow(
                 </label>
               </div>
               <div style={{ ...styles.text, marginLeft: '1.2rem' }}>
-                <strong>If "Yes,"</strong>&nbsp;please indicate your
+                If <strong>"Yes,"</strong>&nbsp;please indicate your
                 underrepresented population(s) of interest:
                 <FlexRow style={{ flex: '1 1 0', marginTop: '0.5rem' }}>
                   <FlexColumn>
