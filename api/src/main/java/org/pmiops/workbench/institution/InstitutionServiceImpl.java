@@ -7,7 +7,7 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsB
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
 
 import com.google.common.base.Strings;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -399,46 +400,32 @@ public class InstitutionServiceImpl implements InstitutionService {
         .collect(Collectors.toList());
   }
 
+  private static UserTierEligibility toEligibility(
+      InstitutionTierConfig tierConfig, boolean eligible) {
+    return new UserTierEligibility()
+        .accessTierShortName(tierConfig.getAccessTierShortName())
+        .eraRequired(tierConfig.getEraRequired())
+        .eligible(eligible);
+  }
+
   @Override
   public List<UserTierEligibility> getUserTierEligibilities(DbUser user) {
-    List<UserTierEligibility> userTierEligibilities = new ArrayList<>();
-
-    Optional<Institution> institution = getByUser(user);
-    if (!institution.isPresent()) {
-      return userTierEligibilities;
-    }
-
-    //    Optional<Stream<Optional<InstitutionTierConfig>>> foo =
-    //    getByUser(user).map(inst -> accessTierService.getAllTiersVisibleToUsers().stream()
-    //        .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName())));
-    //
-    //    Optional<Stream<Optional<UserTierEligibility>>> bar =
-    //        getByUser(user).map(inst -> accessTierService.getAllTiersVisibleToUsers().stream()
-    //            .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
-    //            .map(tier -> new UserTierEligibility()
-    //                .accessTierShortName(tier.get().getAccessTierShortName())
-    //                .eraRequired(tier.get().getEraRequired())
-    //                .eligible(
-    //                    validateInstitutionalEmail(
-    //                        institution.get(), user.getContactEmail(),
-    // tier.get().getAccessTierShortName()))));
-    //
-    for (String tierName :
-        accessTierService.getAllTiersVisibleToUsers().stream()
-            .map(DbAccessTier::getShortName)
-            .collect(Collectors.toList())) {
-      getTierConfigByTier(institution.get(), tierName)
-          .ifPresent(
-              t ->
-                  userTierEligibilities.add(
-                      new UserTierEligibility()
-                          .accessTierShortName(tierName)
-                          .eraRequired(t.getEraRequired())
-                          .eligible(
-                              validateInstitutionalEmail(
-                                  institution.get(), user.getContactEmail(), tierName))));
-    }
-    return userTierEligibilities;
+    return getByUser(user)
+        .map(
+            inst ->
+                accessTierService.getAllTiersVisibleToUsers().stream()
+                    .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
+                    .flatMap(tier -> tier.map(Stream::of).orElse(Stream.empty()))
+                    .map(
+                        tierConfig ->
+                            toEligibility(
+                                tierConfig,
+                                validateInstitutionalEmail(
+                                    inst,
+                                    user.getContactEmail(),
+                                    tierConfig.getAccessTierShortName())))
+                    .collect(Collectors.toList()))
+        .orElse(Collections.emptyList());
   }
 
   private Institution toModel(DbInstitution dbInstitution) {

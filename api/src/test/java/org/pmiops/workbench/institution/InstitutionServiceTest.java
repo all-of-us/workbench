@@ -3,6 +3,7 @@ package org.pmiops.workbench.institution;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.common.collect.ImmutableList;
@@ -14,6 +15,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -24,6 +27,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierConfig;
@@ -33,8 +37,13 @@ import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 @Import({
@@ -44,6 +53,10 @@ import org.springframework.context.annotation.Import;
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
   InstitutionTierConfigMapperImpl.class,
+  AccessTierServiceImpl.class,
+})
+@MockBean({
+  FireCloudService.class,
 })
 public class InstitutionServiceTest {
 
@@ -51,6 +64,17 @@ public class InstitutionServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
+  private static WorkbenchConfig providedWorkbenchConfig;
+
+  @TestConfiguration
+  static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getWorkbenchConfig() {
+      return providedWorkbenchConfig;
+    }
+  }
 
   private final Institution testInst =
       new Institution()
@@ -74,6 +98,10 @@ public class InstitutionServiceTest {
 
   @BeforeEach
   public void setUp() {
+    providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+    providedWorkbenchConfig.access.tiersVisibleToUsers =
+        ImmutableList.of(REGISTERED_TIER_SHORT_NAME, CONTROLLED_TIER_SHORT_NAME);
+
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -1057,6 +1085,39 @@ public class InstitutionServiceTest {
                             .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
                             .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName()))));
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true));
+  }
+
+  @Test
+  public void testEligibleTiers_institutionHasRtAndCt_onlyRtIsVisible() {
+    providedWorkbenchConfig.access.tiersVisibleToUsers =
+        ImmutableList.of(REGISTERED_TIER_SHORT_NAME);
+
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com")),
+                        ctTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(true)
+                            .accessTierShortName(controlledTier.getShortName())
+                            .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
     assertThat(service.getUserTierEligibilities(user))
