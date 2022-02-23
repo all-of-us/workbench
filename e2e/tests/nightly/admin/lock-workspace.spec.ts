@@ -12,7 +12,6 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 
-
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
   const reasonText = 'locking this workspace';
@@ -126,5 +125,4 @@ describe('Workspace Admin lock-workspace', () => {
     // cleanup
     await dataPage.deleteWorkspace();
   });
-
 });

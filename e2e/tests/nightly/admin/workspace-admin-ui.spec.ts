@@ -9,7 +9,6 @@ import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 
-
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
@@ -127,5 +126,4 @@ describe('Workspace Admin', () => {
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
   });
-
 });
