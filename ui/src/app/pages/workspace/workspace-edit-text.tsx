@@ -309,13 +309,13 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
     header:
       'What are the scientific approaches you plan to use for your study? Describe the ' +
       'datasets, research methods, and tools you will use to answer your scientific question(s). \n',
-    description: <div>Free text; 1000 character limit</div>,
+    description: <div>(Free text; 1000 character limit)</div>,
   },
   {
     header:
       'What are the anticipated findings from the study? How would your findings ' +
       'contribute to the body of scientific knowledge in the field?',
-    description: <div>Free text; 1000 character limit</div>,
+    description: <div>(Free text; 1000 character limit)</div>,
   },
   {
     header: (

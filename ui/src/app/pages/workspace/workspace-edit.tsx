@@ -706,14 +706,16 @@ export const WorkspaceEdit = fp.flow(
             {' '}
             &nbsp;this article
           </StyledExternalLink>{' '}
-          to learn more about the initial credit program and how it can be used
-          .
+          to learn more about the initial credit program and how it can be used.{' '}
           <div style={{ display: 'inline' }}>
             Once you have used up your initial credits, you can either select a
             shared billing account or create a new one using either Google Cloud
-            Platform or a Google billing partner. Please note: If creating a
-            billing account via a Google billing partner, it may take a few days
-            to show up in the <b>Select account</b> dropdown.
+            Platform or a Google billing partner.
+          </div>
+          <div>
+            Please note: If creating a billing account via a Google billing
+            partner, it may take a few days to show up in the{' '}
+            <b>Select account</b> dropdown.
           </div>
         </div>
       );
