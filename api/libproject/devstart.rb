@@ -2368,14 +2368,20 @@ def update_cdr_config_options(cmd_name, args)
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
+  # RW-7931 consider removing this option after Controlled Tier is fully rolled out
+  op.opts.allow_empty_tiers = false
+  op.add_option(
+      "--allow_empty_tiers",
+      ->(opts, _) { opts.allow_empty_tiers = "true"},
+      "Allow access tiers to be empty (no CDR versions).")
   return op
 end
 
-def update_cdr_config_for_project(cdr_config_file, dry_run)
+def update_cdr_config_for_project(cdr_config_file, dry_run, allow_empty_tiers)
   common = Common.new
   common.run_inline %W{
     ./gradlew updateCdrConfig
-   -PappArgs=['#{cdr_config_file}',#{dry_run}]}
+   -PappArgs=['#{cdr_config_file}',#{dry_run},#{allow_empty_tiers}]}
 end
 
 def update_cdr_config(cmd_name, *args)
@@ -2386,7 +2392,7 @@ def update_cdr_config(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run, op.opts.allow_empty_tiers)
   end
 end
 
@@ -2401,7 +2407,10 @@ def update_cdr_config_local(cmd_name, *args)
   op = update_cdr_config_options(cmd_name, args)
   op.parse.validate
   cdr_config_file = 'config/cdr_config_local.json'
-  app_args = ["-PappArgs=['" + cdr_config_file + "',false]"]
+  dry_run = false
+  # RW-7931 consider switching to false or removal of this option after CT rollout is complete
+  allow_empty_tiers = true
+  app_args = ["-PappArgs=['#{cdr_config_file}',#{dry_run},#{allow_empty_tiers}]"]
   common = Common.new
   common.run_inline %W{./gradlew updateCdrConfig} + app_args
 end
@@ -2759,6 +2768,11 @@ def deploy(cmd_name, args)
     ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
+  op.opts.allow_empty_tiers = false
+    op.add_option(
+        "--allow_empty_tiers",
+        ->(opts, _) { opts.allow_empty_tiers = "true"},
+        "Allow access tiers to be empty (no CDR versions).")
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
 
   gcc = GcloudContextV2.new(op)
@@ -2771,7 +2785,7 @@ def deploy(cmd_name, args)
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run, op.opts.allow_empty_tiers)
 
     # Keep the cloud proxy context open for the service account credentials.
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
