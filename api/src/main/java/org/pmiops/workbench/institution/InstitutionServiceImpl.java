@@ -409,7 +409,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
                     .flatMap(tier -> tier.map(Stream::of).orElse(Stream.empty()))
                     .map(
-                        tierConfig -> institutionMapper.toEligibility(
+                        tierConfig ->
+                            institutionMapper.toEligibility(
                                 tierConfig,
                                 validateInstitutionalEmail(
                                     inst,
