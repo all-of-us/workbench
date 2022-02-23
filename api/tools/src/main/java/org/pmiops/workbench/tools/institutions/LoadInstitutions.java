@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @Import({
   AccessTierServiceImpl.class,
-  FakeFireCloudService.class,
   InstitutionMapperImpl.class,
   InstitutionServiceImpl.class,
   InstitutionTierConfigMapperImpl.class,
