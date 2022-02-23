@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
@@ -60,7 +60,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
-  private final AccessTierDao accessTierDao;
+  private final AccessTierService accessTierService;
 
   private final InstitutionDao institutionDao;
   private final InstitutionEmailDomainDao institutionEmailDomainDao;
@@ -76,7 +76,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Autowired
   InstitutionServiceImpl(
-      AccessTierDao accessTierDao,
+      AccessTierService accessTierService,
       InstitutionDao institutionDao,
       InstitutionEmailDomainDao institutionEmailDomainDao,
       InstitutionEmailAddressDao institutionEmailAddressDao,
@@ -87,7 +87,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       InstitutionTierConfigMapper institutionTierConfigMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
-    this.accessTierDao = accessTierDao;
+    this.accessTierService = accessTierService;
     this.institutionDao = institutionDao;
     this.institutionEmailDomainDao = institutionEmailDomainDao;
     this.institutionEmailAddressDao = institutionEmailAddressDao;
@@ -408,8 +408,23 @@ public class InstitutionServiceImpl implements InstitutionService {
       return userTierEligibilities;
     }
 
+    //    Optional<Stream<Optional<InstitutionTierConfig>>> foo =
+    //    getByUser(user).map(inst -> accessTierService.getAllTiersVisibleToUsers().stream()
+    //        .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName())));
+    //
+    //    Optional<Stream<Optional<UserTierEligibility>>> bar =
+    //        getByUser(user).map(inst -> accessTierService.getAllTiersVisibleToUsers().stream()
+    //            .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
+    //            .map(tier -> new UserTierEligibility()
+    //                .accessTierShortName(tier.get().getAccessTierShortName())
+    //                .eraRequired(tier.get().getEraRequired())
+    //                .eligible(
+    //                    validateInstitutionalEmail(
+    //                        institution.get(), user.getContactEmail(),
+    // tier.get().getAccessTierShortName()))));
+    //
     for (String tierName :
-        accessTierDao.findAll().stream()
+        accessTierService.getAllTiersVisibleToUsers().stream()
             .map(DbAccessTier::getShortName)
             .collect(Collectors.toList())) {
       getTierConfigByTier(institution.get(), tierName)
@@ -432,7 +447,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private void populateAuxTables(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
-    List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
+    List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
     setInstitutionEmailDomains(modelInstitution, dbInstitution, dbAccessTiers);
     setInstitutionEmailAddresses(modelInstitution, dbInstitution, dbAccessTiers);
     setInstitutionTierRequirement(modelInstitution, dbInstitution, dbAccessTiers);
@@ -541,7 +556,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // All tier need to be present in API if tier requirement is present.
     if (institutionRequest.getTierConfigs() != null) {
-      List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
       for (InstitutionTierConfig institutionTierConfig : institutionRequest.getTierConfigs()) {
         if (institutionTierConfig.getMembershipRequirement()
             == InstitutionMembershipRequirement.NO_ACCESS) {
@@ -551,7 +565,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
         // All tier need to be present in API if tier requirement is present.
         getAccessTierByShortNameOrThrow(
-            dbAccessTiers, institutionTierConfig.getAccessTierShortName());
+            accessTierService.getAllTiers(), institutionTierConfig.getAccessTierShortName());
         // Each Email address in all tiers is valid.
         if (institutionTierConfig.getMembershipRequirement()
             == InstitutionMembershipRequirement.ADDRESSES) {
