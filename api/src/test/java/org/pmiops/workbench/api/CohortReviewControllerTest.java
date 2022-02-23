@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -103,6 +104,8 @@ import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
+import org.pmiops.workbench.model.ParticipantDataCountResponse;
+import org.pmiops.workbench.model.ParticipantDataListResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
@@ -1559,7 +1562,8 @@ public class CohortReviewControllerTest {
         .isEqualTo(participantCohortStatus1.getSexAtBirthConceptId());
   }
 
-  @ParameterizedTest(name = "getParticipantCohortStatusForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "getParticipantCohortStatusForbiddenAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
@@ -1567,16 +1571,282 @@ public class CohortReviewControllerTest {
       WorkspaceAccessLevel workspaceAccessLevel) {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
-    Throwable exception = assertThrows(ForbiddenException.class, () ->
-        cohortReviewController
-            .getParticipantCohortStatus(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId(),
-                participantCohortStatus1.getParticipantKey().getParticipantId()));
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getParticipantCohortStatus(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId()));
 
     assertForbiddenException(exception);
   }
+  ////////// getParticipantCount  //////////
+  @Test
+  public void getParticipantCountWrongWorkspace() {
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCount(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(Domain.CONDITION)));
+
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
+  }
+
+  @Test
+  public void getParticipantCountNoCohortReview() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCount(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(Domain.CONDITION)));
+
+    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+  }
+
+  @Test
+  public void getParticipantCountNullDomain() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.getParticipantCount(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(null)));
+    assertThat(exception).hasMessageThat().isEqualTo("Domain cannot be null");
+  }
+
+  @ParameterizedTest(name = "getParticipantCountByUnsupportedDomain Domain={0}")
+  @EnumSource(
+      value = Domain.class,
+      mode = Mode.EXCLUDE,
+      names = {
+        "SURVEY",
+        "ALL_EVENTS",
+        "CONDITION",
+        "DEVICE",
+        "DRUG",
+        "LAB",
+        "OBSERVATION",
+        "PHYSICAL_MEASUREMENT",
+        "PROCEDURE",
+        "VISIT",
+        "VITAL"
+      })
+  public void getParticipantCountByUnsupportedDomain(Domain domain) {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.getParticipantCount(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(domain)));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Not supported for domain named: " + domain);
+  }
+
+  @ParameterizedTest(name = "getParticipantCountAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getParticipantCountAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+    stubBigQueryCohortCalls();
+    ParticipantDataCountResponse actual =
+        cohortReviewController
+            .getParticipantCount(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReviewId,
+                participantCohortStatus1.getParticipantKey().getParticipantId(),
+                new PageFilterRequest().domain(Domain.CONDITION))
+            .getBody();
+
+    assertThat(actual.getCount()).isEqualTo(0L);
+  }
+
+  @ParameterizedTest(name = "getParticipantCountForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getParticipantCountForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getParticipantCount(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(Domain.CONDITION)));
+    assertForbiddenException(exception);
+  }
+
+  ////////// getParticipantData  //////////
+  @Test
+  public void getParticipantDataWrongWorkspace() {
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantData(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(Domain.CONDITION)));
+
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
+  }
+
+  @Test
+  public void getParticipantDataNoCohortReview() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantData(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(Domain.CONDITION)));
+
+    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+  }
+
+  public void getParticipantDataNullDomain() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.getParticipantData(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(null)));
+    assertThat(exception).hasMessageThat().isEqualTo("Domain cannot be null");
+  }
+
+  @ParameterizedTest(name = "getParticipantCountByUnsupportedDomain Domain={0}")
+  @EnumSource(
+      value = Domain.class,
+      mode = Mode.EXCLUDE,
+      names = {
+        "SURVEY",
+        "ALL_EVENTS",
+        "CONDITION",
+        "DEVICE",
+        "DRUG",
+        "LAB",
+        "OBSERVATION",
+        "PHYSICAL_MEASUREMENT",
+        "PROCEDURE",
+        "VISIT",
+        "VITAL"
+      })
+  public void getParticipantDataByUnsupportedDomain(Domain domain) {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.getParticipantData(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(domain)));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Not supported for domain named: " + domain);
+  }
+
+  @ParameterizedTest(name = "getParticipantDataAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getParticipantDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+    stubBigQueryCohortCalls();
+    ParticipantDataListResponse actual =
+        cohortReviewController
+            .getParticipantData(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReviewId,
+                participantCohortStatus1.getParticipantKey().getParticipantId(),
+                new PageFilterRequest().domain(Domain.SURVEY))
+            .getBody();
+    assertThat(actual.getItems().size()).isEqualTo(1);
+  }
+
+  @ParameterizedTest(name = "getParticipantDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getParticipantDataForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    long cohortReviewId = cohortReview.getCohortReviewId();
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getParticipantData(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    new PageFilterRequest().domain(Domain.SURVEY)));
+    assertForbiddenException(exception);
+  }
+
   ////////// getParticipantCohortStatuses  //////////
   @Test
   public void getParticipantCohortStatuses() {
@@ -1760,6 +2030,7 @@ public class CohortReviewControllerTest {
         () -> {
           List<FieldValue> list = new ArrayList<>();
           list.add(null);
+          // list.add(FieldValue.of(Attribute.PRIMITIVE,"person_id"));
           return list.iterator();
         };
     Map<String, Integer> rm =
@@ -1772,6 +2043,10 @@ public class CohortReviewControllerTest {
             .put("sex_at_birth_concept_id", 5)
             .put("count", 6)
             .put("deceased", 7)
+            .put(FilterColumns.START_DATETIME.toString(), 8)
+            .put(FilterColumns.SURVEY_NAME.toString(), 29)
+            .put(FilterColumns.QUESTION.toString(), 30)
+            .put(FilterColumns.ANSWER.toString(), 31)
             .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -1786,6 +2061,12 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getLong(null, 4)).thenReturn(0L);
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
     when(bigQueryService.getLong(null, 6)).thenReturn(0L);
+    when(bigQueryService.getLong(null, 7)).thenReturn(0L);
+    // SURVEY
+    when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
+    when(bigQueryService.getString(null, 29)).thenReturn("1");
+    when(bigQueryService.getString(null, 30)).thenReturn("1");
+    when(bigQueryService.getString(null, 31)).thenReturn("1");
   }
 
   private CohortReview createCohortReview(
