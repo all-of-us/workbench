@@ -27,6 +27,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
@@ -156,8 +159,6 @@ public class CohortReviewControllerTest {
   DbParticipantCohortStatus participantCohortStatus2;
   Workspace workspace;
   Workspace workspace2;
-  //  DbWorkspace dbWorkspace;
-  //  DbWorkspace dbWorkspace2;
 
   DbCohortAnnotationDefinition stringAnnotationDefinition;
   DbCohortAnnotationDefinition enumAnnotationDefinition;
@@ -584,7 +585,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReviewNoCohortException() {
-    long cohortId = 99;
+    Long cohortId = cohort.getCohortId() + 99L;
     stubBigQueryCohortCalls();
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
@@ -602,11 +603,14 @@ public class CohortReviewControllerTest {
     assertNotFoundExceptionNoCohort(cohortId, exception);
   }
 
-  @Test
-  public void createCohortReviewOwner() {
+  @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void createCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
     stubBigQueryCohortCalls();
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview cohortReview =
         cohortReviewController
@@ -621,50 +625,15 @@ public class CohortReviewControllerTest {
     assertNewlyCreatedCohortReview(cohortReview);
   }
 
-  @Test
-  public void createCohortReviewWriter() {
-    stubBigQueryCohortCalls();
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    CohortReview cohortReview =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                new CreateReviewRequest().size(1))
-            .getBody();
-
-    assertNewlyCreatedCohortReview(cohortReview);
-  }
-
-  @Test
-  public void createCohortReviewReader() {
+  @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void createCohortReviewAllowedForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     stubBigQueryCohortCalls();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.createCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortWithoutReview.getCohortId(),
-                    cdrVersion.getCdrVersionId(),
-                    new CreateReviewRequest().size(1)));
-
-    assertForbiddenException(exception);
-  }
-
-  @Test
-  public void createCohortReviewNoAccess() {
-    stubBigQueryCohortCalls();
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
 
     Throwable exception =
         assertThrows(
@@ -753,10 +722,13 @@ public class CohortReviewControllerTest {
         requestCohortReview.getCohortReviewId(), exception);
   }
 
-  @Test
-  public void updateCohortReviewOwner() {
+  @ParameterizedTest(name = "updateCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void updateCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -765,6 +737,7 @@ public class CohortReviewControllerTest {
             .etag(Etags.fromVersion(cohortReview.getVersion()));
     requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
     requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
+
     CohortReview updated =
         cohortReviewController
             .updateCohortReview(
@@ -779,62 +752,13 @@ public class CohortReviewControllerTest {
     assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
   }
 
-  @Test
-  public void updateCohortReviewWriter() {
+  @ParameterizedTest(name = "updateCohortReviewForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void updateCohortReviewForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    CohortReview requestCohortReview =
-        new CohortReview()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .cohortId(cohortReview.getCohortId())
-            .etag(Etags.fromVersion(cohortReview.getVersion()));
-    requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
-    requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
-    CohortReview updated =
-        cohortReviewController
-            .updateCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                requestCohortReview.getCohortReviewId(),
-                requestCohortReview)
-            .getBody();
-
-    assertThat(updated.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
-    assertThat(updated.getDescription()).isEqualTo(requestCohortReview.getDescription());
-    assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
-  }
-
-  @Test
-  public void updateCohortReviewReader() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    CohortReview requestCohortReview =
-        new CohortReview()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .cohortId(cohortReview.getCohortId())
-            .etag(Etags.fromVersion(cohortReview.getVersion()));
-    requestCohortReview.setCohortName(cohortReview.getCohortName() + "_Updated");
-    requestCohortReview.setDescription(cohortReview.getDescription() + "_Updated");
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.updateCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    requestCohortReview.getCohortReviewId(),
-                    requestCohortReview));
-
-    assertForbiddenException(exception);
-  }
-
-  @Test
-  public void updateCohortReviewNoAccess() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -880,9 +804,12 @@ public class CohortReviewControllerTest {
         requestCohortReview.getCohortReviewId(), exception);
   }
 
-  @Test
-  public void deleteCohortReviewOwner() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+  @ParameterizedTest(name = "deleteCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void deleteCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -895,45 +822,12 @@ public class CohortReviewControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
-  @Test
-  public void deleteCohortReviewWriter() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    CohortReview requestCohortReview =
-        new CohortReview()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .etag(Etags.fromVersion(cohortReview.getVersion()));
-    ResponseEntity<EmptyResponse> response =
-        cohortReviewController.deleteCohortReview(
-            workspace.getNamespace(), workspace.getId(), requestCohortReview.getCohortReviewId());
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-  }
-
-  @Test
-  public void deleteCohortReviewReader() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    CohortReview requestCohortReview =
-        new CohortReview()
-            .cohortReviewId(cohortReview.getCohortReviewId())
-            .etag(Etags.fromVersion(cohortReview.getVersion()));
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.deleteCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    requestCohortReview.getCohortReviewId()));
-
-    assertForbiddenException(exception);
-  }
-
-  @Test
-  public void deleteCohortReviewNoAccess() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+  @ParameterizedTest(name = "deleteCohortReviewForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void deleteCohortReviewForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -1034,35 +928,36 @@ public class CohortReviewControllerTest {
                 request.getCohortAnnotationDefinitionId()));
   }
 
-  @Test
-  public void createParticipantCohortAnnotationAllTypes() {
-    Long cohortReviewId = cohortReview.getCohortReviewId();
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+  @ParameterizedTest(name = "createParticipantCohortAnnotationForAnnotationType AnnotationType={0}")
+  @EnumSource(value = AnnotationType.class)
+  public void createParticipantCohortAnnotationForAnnotationType(AnnotationType annotationType) {
     // for different AnnotationType(s)
-    for (AnnotationType annotationType : AnnotationType.values()) {
-      deleteExistingParticipantCohortAnnotations();
-      ParticipantCohortAnnotation request =
-          buildValidParticipantCohortAnnotationForType(
-              cohortReviewId, participantId, annotationType);
-      ParticipantCohortAnnotation response =
-          cohortReviewController
-              .createParticipantCohortAnnotation(
-                  workspace.getNamespace(),
-                  workspace.getId(),
-                  cohortReviewId,
-                  participantId,
-                  request)
-              .getBody();
+    Long cohortReviewId = cohortReview.getCohortReviewId();
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
 
-      assertCreatedParticipantCohortAnnotation(response, request);
-    }
+    deleteExistingParticipantCohortAnnotations();
+
+    ParticipantCohortAnnotation request =
+        buildValidParticipantCohortAnnotationForType(cohortReviewId, participantId, annotationType);
+    ParticipantCohortAnnotation response =
+        cohortReviewController
+            .createParticipantCohortAnnotation(
+                workspace.getNamespace(), workspace.getId(), cohortReviewId, participantId, request)
+            .getBody();
+
+    assertCreatedParticipantCohortAnnotation(response, request);
   }
 
-  @Test
-  public void createParticipantCohortAnnotationOwner() {
+  @ParameterizedTest(
+      name = "createParticipantCohortAnnotationAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void createParticipantCohortAnnotationAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     deleteExistingParticipantCohortAnnotations();
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Long cohortReviewId = cohortReview.getCohortReviewId();
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
@@ -1083,59 +978,15 @@ public class CohortReviewControllerTest {
     assertCreatedParticipantCohortAnnotation(response, request);
   }
 
-  @Test
-  public void createParticipantCohortAnnotationWriter() {
-    deleteExistingParticipantCohortAnnotations();
+  @ParameterizedTest(
+      name = "createParticipantCohortAnnotationForbiddenAccessLevels WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void createParticipantCohortAnnotationForbiddenAccessLevels(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    Long cohortReviewId = cohortReview.getCohortReviewId();
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    // use stringAnnotationType
-    ParticipantCohortAnnotation request =
-        buildValidParticipantCohortAnnotationForType(
-            cohortReviewId, participantId, AnnotationType.STRING);
-    ParticipantCohortAnnotation response =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId(),
-                participantId,
-                request)
-            .getBody();
-
-    assertCreatedParticipantCohortAnnotation(response, request);
-  }
-
-  @Test
-  public void createParticipantCohortAnnotationReader() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    Long cohortReviewId = cohortReview.getCohortReviewId();
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    // use stringAnnotationType
-    ParticipantCohortAnnotation request =
-        buildValidParticipantCohortAnnotationForType(
-            cohortReviewId, participantId, AnnotationType.STRING);
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.createParticipantCohortAnnotation(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    participantId,
-                    request));
-    assertForbiddenException(exception);
-  }
-
-  @Test
-  public void createParticipantCohortAnnotationNoAccess() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Long cohortReviewId = cohortReview.getCohortReviewId();
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
@@ -1160,7 +1011,7 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortAnnotationNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-    Long badCohortReviewId = 99L;
+    Long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1168,23 +1019,19 @@ public class CohortReviewControllerTest {
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    badCohortReviewId,
+                    cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
                     new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
 
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Not Found: Cohort Review does not exist for cohortReviewId: %d",
-                badCohortReviewId));
+    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
   }
 
   @Test
   public void updateParticipantCohortAnnotationNoParticipantCohortStatus() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-    Long badParticipantId = 99L;
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId() + 99L;
+    Long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1192,22 +1039,17 @@ public class CohortReviewControllerTest {
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    badParticipantId,
+                    cohortReviewId,
+                    participantId,
                     participantAnnotation.getAnnotationId(),
                     new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
 
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Not Found: Participant Cohort Status does not exist for cohortReviewId: %d, participantId: %d",
-                cohortReview.getCohortReviewId(), badParticipantId));
+    assertNotFoundExceptionParticipantCohortStatus(cohortReviewId, participantId, exception);
   }
 
   @Test
   public void updateParticipantCohortAnnotationNoAnnotation() {
-    long badAnnotationId = 99;
+    long badAnnotationId = participantAnnotation.getAnnotationId() + 99L;
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     Throwable exception =
@@ -1281,8 +1123,9 @@ public class CohortReviewControllerTest {
                 AnnotationType.DATE, dateAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
-  @Test
-  public void updateParticipantCohortAnnotationStringNull() {
+  @ParameterizedTest(name = "updateParticipantCohortAnnotationStringNullOrEmpty value={0}")
+  @NullAndEmptySource
+  public void updateParticipantCohortAnnotationStringNullOrEmpty(String value) {
     // participationAnnotation.getAnnotationId is for String type
     Throwable exception =
         assertThrows(
@@ -1294,7 +1137,7 @@ public class CohortReviewControllerTest {
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
-                    new ModifyParticipantCohortAnnotationRequest().annotationValueString(null)));
+                    new ModifyParticipantCohortAnnotationRequest().annotationValueString(value)));
 
     assertThat(exception)
         .hasMessageThat()
@@ -1305,34 +1148,15 @@ public class CohortReviewControllerTest {
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
-  @Test
-  public void updateParticipantCohortAnnotationStringEmpty() {
-    // participationAnnotation.getAnnotationId is for String type
-    Throwable exception =
-        assertThrows(
-            ConflictException.class,
-            () ->
-                cohortReviewController.updateParticipantCohortAnnotation(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    participantCohortStatus1.getParticipantKey().getParticipantId(),
-                    participantAnnotation.getAnnotationId(),
-                    new ModifyParticipantCohortAnnotationRequest().annotationValueString("   ")));
-
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Conflict Exception: Please provide a valid %s value for annotation definition id: %d",
-                AnnotationType.STRING,
-                stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
-  }
-
-  @Test
-  public void updateParticipantCohortAnnotationOwner() {
+  @ParameterizedTest(
+      name = "updateParticipantCohortAnnotationAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void updateParticipantCohortAnnotationAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     ParticipantCohortAnnotation participantCohortAnnotation =
         cohortReviewController
@@ -1348,29 +1172,15 @@ public class CohortReviewControllerTest {
     assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
   }
 
-  @Test
-  public void updateParticipantCohortAnnotationWriter() {
+  @ParameterizedTest(
+      name = "updateParticipantCohortAnnotationForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void updateParticipantCohortAnnotationForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    ParticipantCohortAnnotation participantCohortAnnotation =
-        cohortReviewController
-            .updateParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId(),
-                participantCohortStatus1.getParticipantKey().getParticipantId(),
-                participantAnnotation.getAnnotationId(),
-                new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
-            .getBody();
-
-    assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
-  }
-
-  @Test
-  public void updateParticipantCohortAnnotationReader() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Throwable exception =
         assertThrows(
@@ -1387,25 +1197,6 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
-  @Test
-  public void updateParticipantCohortAnnotationNoAccess() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.updateParticipantCohortAnnotation(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    participantCohortStatus1.getParticipantKey().getParticipantId(),
-                    participantAnnotation.getAnnotationId(),
-                    new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
-
-    assertForbiddenException(exception);
-  }
   ////////// deleteParticipantCohortAnnotation  //////////
   @Test
   public void deleteParticipantCohortAnnotationWrongWorkspace() {
@@ -1436,7 +1227,8 @@ public class CohortReviewControllerTest {
   @Test
   public void deleteParticipantCohortAnnotationNoAnnotation() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    Long annotationId = 9999L;
+    DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
+    Long annotationId = annotation.getAnnotationId() + 99L;
 
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
@@ -1462,11 +1254,16 @@ public class CohortReviewControllerTest {
                 + participantId);
   }
 
-  @Test
-  public void deleteParticipantCohortAnnotationOwner() {
+  @ParameterizedTest(
+      name = "deleteParticipantCohortAnnotationAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void deleteParticipantCohortAnnotationAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     ResponseEntity<EmptyResponse> response =
         cohortReviewController.deleteParticipantCohortAnnotation(
@@ -1479,48 +1276,16 @@ public class CohortReviewControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
-  @Test
-  public void deleteParticipantCohortAnnotationWriter() {
+  @ParameterizedTest(
+      name = "deleteParticipantCohortAnnotationForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void deleteParticipantCohortAnnotationForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    ResponseEntity<EmptyResponse> response =
-        cohortReviewController.deleteParticipantCohortAnnotation(
-            workspace.getNamespace(),
-            workspace.getId(),
-            cohortReview.getCohortReviewId(),
-            participantCohortStatus1.getParticipantKey().getParticipantId(),
-            annotation.getAnnotationId());
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-  }
-
-  @Test
-  public void deleteParticipantCohortAnnotationReader() {
-    DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.deleteParticipantCohortAnnotation(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    participantCohortStatus1.getParticipantKey().getParticipantId(),
-                    annotation.getAnnotationId()));
-
-    assertForbiddenException(exception);
-  }
-
-  @Test
-  public void deleteParticipantCohortAnnotationNoAccess() {
-    DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Throwable exception =
         assertThrows(
@@ -1553,15 +1318,6 @@ public class CohortReviewControllerTest {
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
 
     assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
-    //    assertThat(exception)
-    //        .hasMessageThat()
-    //        .isEqualTo(
-    //            String.format(
-    //                "Not Found: Participant Cohort Annotation does not exist for annotationId: %d,
-    // cohortReviewId: %d, participantId: %d",
-    //                badAnnotationId,
-    //                cohortReview.getCohortReviewId(),
-    //                participantCohortStatus1.getParticipantKey().getParticipantId()));
   }
 
   @Test
@@ -1579,11 +1335,7 @@ public class CohortReviewControllerTest {
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
 
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Not Found: Cohort Review does not exist for cohortReviewId: %d", cohortReviewId));
+    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
   }
 
   @Test
@@ -1602,18 +1354,18 @@ public class CohortReviewControllerTest {
                     participantId,
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
 
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Not Found: Participant Cohort Status does not exist for cohortReviewId: %d, participantId: %d",
-                cohortReviewId, participantId));
+    assertNotFoundExceptionParticipantCohortStatus(cohortReviewId, participantId, exception);
   }
 
-  @Test
-  public void updateParticipantCohortStatusOwner() {
+  @ParameterizedTest(
+      name = "updateParticipantCohortStatusAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER"})
+  public void updateParticipantCohortStatusAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     ParticipantCohortStatus participantCohortStatus =
         cohortReviewController
@@ -1628,47 +1380,14 @@ public class CohortReviewControllerTest {
     assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
   }
 
-  @Test
-  public void updateParticipantCohortStatusWriter() {
+  @ParameterizedTest(name = "updateParticipantCohortStatusForbiddenLevels WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER", "NO_ACCESS"})
+  public void updateParticipantCohortStatusForbiddenLevels(
+      WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-
-    ParticipantCohortStatus participantCohortStatus =
-        cohortReviewController
-            .updateParticipantCohortStatus(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId(),
-                participantCohortStatus1.getParticipantKey().getParticipantId(),
-                new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED))
-            .getBody();
-
-    assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
-  }
-
-  @Test
-  public void updateParticipantCohortStatusReader() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.updateParticipantCohortStatus(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId(),
-                    participantCohortStatus1.getParticipantKey().getParticipantId(),
-                    new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
-
-    assertForbiddenException(exception);
-  }
-
-  @Test
-  public void updateParticipantCohortStatusNoAccess() {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Throwable exception =
         assertThrows(
@@ -1689,14 +1408,35 @@ public class CohortReviewControllerTest {
   public void getParticipantCohortAnnotationsWrongWorkspace() {
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
 
-    assertThrows(
-        NotFoundException.class,
-        () ->
-            cohortReviewController.getParticipantCohortAnnotations(
-                workspace2.getNamespace(),
-                workspace2.getId(),
-                cohortReview.getCohortReviewId(),
-                participantCohortStatus1.getParticipantKey().getParticipantId()));
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCohortAnnotations(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId()));
+
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
+  }
+
+  @Test
+  public void getParticipantCohortAnnotationsNoCohortReview() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCohortAnnotations(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReviewId,
+                    participantCohortStatus1.getParticipantKey().getParticipantId()));
+
+    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
   }
 
   @Test
@@ -1803,6 +1543,23 @@ public class CohortReviewControllerTest {
         .isEqualTo(CohortStatus.NOT_REVIEWED);
   }
 
+  private void assertNotFoundExceptionParticipantCohortStatus(
+      Long cohortReviewId, Long participantId, Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Not Found: Participant Cohort Status does not exist for cohortReviewId: "
+                + cohortReviewId
+                + ", participantId: "
+                + participantId);
+  }
+
+  private void assertNotFoundExceptionCohortReview(Long cohortReviewId, Throwable exception) {
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Not Found: Cohort Review does not exist for cohortReviewId: " + cohortReviewId);
+  }
+
   private void assertNotFoundExceptionNoCohort(Long cohortId, Throwable exception) {
     assertThat(exception)
         .hasMessageThat()
@@ -1814,9 +1571,9 @@ public class CohortReviewControllerTest {
     assertThat(exception)
         .hasMessageThat()
         .containsMatch(
-            String.format(
-                "Not Found: No CohortReview exists for cohortReviewId: %d and cohortId:.*",
-                cohortReviewId));
+            "Not Found: No CohortReview exists for cohortReviewId: "
+                + cohortReviewId
+                + " and cohortId:.*");
   }
 
   private void assertForbiddenException(Throwable exception) {
