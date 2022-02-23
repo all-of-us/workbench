@@ -47,13 +47,13 @@ import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 @Import({
-  FakeClockConfiguration.class,
-  InstitutionServiceImpl.class,
-  InstitutionMapperImpl.class,
-  PublicInstitutionDetailsMapperImpl.class,
-  InstitutionUserInstructionsMapperImpl.class,
-  InstitutionTierConfigMapperImpl.class,
   AccessTierServiceImpl.class,
+  FakeClockConfiguration.class,
+  InstitutionMapperImpl.class,
+  InstitutionServiceImpl.class,
+  InstitutionTierConfigMapperImpl.class,
+  InstitutionUserInstructionsMapperImpl.class,
+  PublicInstitutionDetailsMapperImpl.class,
 })
 @MockBean({
   FireCloudService.class,
