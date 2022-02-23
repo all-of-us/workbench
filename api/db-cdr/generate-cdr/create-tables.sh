@@ -24,7 +24,11 @@ do
     table_name=${json_name%.json}
     echo "Deleting $table_name"
     bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
-    if [[ "$table_name" == 'cb_search_all_events' ]]
+    if [[ "$table_name" == 'cb_person' ]]
+    then
+      echo "Skipping cb_person"
+      continue
+    elif [[ "$table_name" == 'cb_search_all_events' ]]
     then
       echo "Creating $table_name"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields concept_id "$BQ_DATASET.$table_name"
