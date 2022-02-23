@@ -244,9 +244,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     Optional<DbCohortReview> dbCohortReview = dbCohort.getCohortReviews().stream().findFirst();
     long count =
-        dbCohortReview.isPresent()
-            ? dbCohortReview.get().getMatchedParticipantCount()
-            : cohortReviewService.participationCount(dbCohort);
+        dbCohortReview
+            .map(DbCohortReview::getMatchedParticipantCount)
+            .orElseGet(() -> cohortReviewService.participationCount(dbCohort));
 
     return ResponseEntity.ok(
         new CohortChartDataListResponse()

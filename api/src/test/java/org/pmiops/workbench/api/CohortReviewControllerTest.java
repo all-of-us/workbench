@@ -47,6 +47,7 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -178,6 +179,7 @@ public class CohortReviewControllerTest {
   @Autowired ParticipantCohortStatusDao participantCohortStatusDao;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   @Autowired ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+  @Autowired ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
 
   @Autowired FireCloudService fireCloudService;
   @Autowired CloudStorageClient cloudStorageClient;
@@ -1439,9 +1441,15 @@ public class CohortReviewControllerTest {
     assertNotFoundExceptionCohortReview(cohortReviewId, exception);
   }
 
-  @Test
-  public void getParticipantCohortAnnotations() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+  @ParameterizedTest(
+      name = "getParticipantCohortAnnotationsAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getParticipantCohortAnnotationsAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     ParticipantCohortAnnotationListResponse response =
         cohortReviewController
@@ -1452,13 +1460,37 @@ public class CohortReviewControllerTest {
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
-    assertThat(response.getItems().size()).isEqualTo(1);
-    assertThat(response.getItems().get(0).getCohortReviewId())
-        .isEqualTo(cohortReview.getCohortReviewId());
-    assertThat(response.getItems().get(0).getParticipantId())
-        .isEqualTo(participantCohortStatus1.getParticipantKey().getParticipantId());
+    assertThat(response.getItems().size()).isEqualTo(2);
+    List<ParticipantCohortAnnotation> expected =
+        ImmutableList.of(
+            participantCohortAnnotationMapper.dbModelToClient(participantAnnotation),
+            participantCohortAnnotationMapper.dbModelToClient(participantAnnotationDate));
+
+    assertThat(response.getItems()).containsAllIn(expected);
   }
 
+  @ParameterizedTest(
+      name = "getParticipantCohortAnnotationsForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getParticipantCohortAnnotationsForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getParticipantCohortAnnotations(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId()));
+
+    assertForbiddenException(exception);
+  }
   ////////// getParticipantCohortStatus  //////////
   @Test
   public void getParticipantCohortStatusWrongWorkspace() {
