@@ -1,25 +1,23 @@
-import { findOrCreateDataset, openTab, signInWithAccessToken } from 'utils/test-utils';
+import { createDatasetNotebook, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import { Language, Tabs } from 'app/text-labels';
+import { Tabs } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Page } from 'puppeteer';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import DatasetBuildPage from 'app/page/dataset-build-page';
+
 
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
   const reasonText = 'locking this workspace';
   const pyNotebookName = 'e2eLockWorkspaceNotebook';
-  let workspaceNamespace = '';
+  let workspaceNamespace = 'aou-rw-test-94cfc175';
   let workspaceEditedName = '';
 
   beforeEach(async () => {
@@ -34,7 +32,6 @@ describe('Workspace Admin lock-workspace', () => {
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
     //create the dataset and notebook
-    // await createDatasetNotebook(page, pyNotebookName);
     await createDatasetNotebook(page, pyNotebookName);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
@@ -102,6 +99,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceAdminPage.waitForLoad();
     expect(workspaceAdminPage.getLockWorkspaceButton(workspaceStatus.Lock));
     await new HomePage(page).load();
+    // find the edited-unlocked workspace
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceEditedName);
     expect(await workspaceCard.getWorkspaceLockedIcon()).toBeFalsy();
     await workspaceCard.verifyWorkspaceCardMenuOptions();
@@ -129,16 +127,4 @@ describe('Workspace Admin lock-workspace', () => {
     await dataPage.deleteWorkspace();
   });
 
-  async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
-    await findOrCreateDataset(page, { openEditPage: true });
-
-    const datasetBuildPage = new DatasetBuildPage(page);
-    const exportModal = await datasetBuildPage.clickAnalyzeButton();
-
-    await exportModal.enterNotebookName(pyNotebookName);
-    await exportModal.pickLanguage(Language.Python);
-    await exportModal.clickExportButton();
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    return await notebookPreviewPage.waitForLoad();
-  }
 });

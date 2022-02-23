@@ -1,16 +1,14 @@
-import { findOrCreateDataset, signInWithAccessToken } from 'utils/test-utils';
+import { createDatasetNotebook, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import { CloudStorageHeader, Language } from 'app/text-labels';
+import { CloudStorageHeader } from 'app/text-labels';
 import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
-import { Page } from 'puppeteer';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import DatasetBuildPage from 'app/page/dataset-build-page';
+
 
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
@@ -130,16 +128,4 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
   });
 
-  async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
-    await findOrCreateDataset(page, { openEditPage: true });
-
-    const datasetBuildPage = new DatasetBuildPage(page);
-    const exportModal = await datasetBuildPage.clickAnalyzeButton();
-
-    await exportModal.enterNotebookName(pyNotebookName);
-    await exportModal.pickLanguage(Language.Python);
-    await exportModal.clickExportButton();
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    return await notebookPreviewPage.waitForLoad();
-  }
 });

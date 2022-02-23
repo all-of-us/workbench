@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import { ElementHandle, Page } from 'puppeteer';
 import WorkspaceCard from 'app/component/workspace-card';
-import { Cohorts, ConceptSets, PageUrl, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import { Cohorts, ConceptSets, Language, PageUrl, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { isBlank, makeWorkspaceName } from './str-utils';
@@ -24,6 +24,7 @@ import DatasetBuildPage from 'app/page/dataset-build-page';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -471,4 +472,18 @@ export async function findOrCreateCohort(page: Page, opts: { returnToDataPage?: 
   const { returnToDataPage } = opts;
   const cohort = await findCohort(page);
   return cohort ? cohort : createCohort(page, { returnToDataPage });
+}
+
+// create notebook - function used for workspace admin test
+export async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
+  await findOrCreateDataset(page, { openEditPage: true });
+
+  const datasetBuildPage = new DatasetBuildPage(page);
+  const exportModal = await datasetBuildPage.clickAnalyzeButton();
+
+  await exportModal.enterNotebookName(pyNotebookName);
+  await exportModal.pickLanguage(Language.Python);
+  await exportModal.clickExportButton();
+  const notebookPreviewPage = new NotebookPreviewPage(page);
+  return await notebookPreviewPage.waitForLoad();
 }
