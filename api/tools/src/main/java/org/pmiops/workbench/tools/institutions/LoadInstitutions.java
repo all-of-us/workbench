@@ -10,10 +10,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
-import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
-import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
-import org.pmiops.workbench.google.CloudBillingClientImpl;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -22,6 +19,7 @@ import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.tools.CommandLineToolConfig;
+import org.pmiops.workbench.tools.fakebeans.FakeFireCloudService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,10 +29,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @Import({
   AccessTierServiceImpl.class,
-  CloudBillingClientImpl.class,
-  FireCloudConfig.class,
-  FireCloudServiceImpl.class,
-  FirecloudApiClientFactory.class,
+  FakeFireCloudService.class,
   InstitutionMapperImpl.class,
   InstitutionServiceImpl.class,
   InstitutionTierConfigMapperImpl.class,
@@ -43,6 +38,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 })
 @EnableTransactionManagement
 public class LoadInstitutions {
+  // not used by LoadInstitutions but required by AccessTierServiceImpl
+  @Bean
+  FireCloudService unused() {
+    return FakeFireCloudService.fake();
+  }
 
   private static final Logger log = Logger.getLogger(LoadInstitutions.class.getName());
   private static final ObjectMapper mapper = new ObjectMapper();
