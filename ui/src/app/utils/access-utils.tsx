@@ -405,11 +405,9 @@ const withInvalidDateHandling = (date) => {
   }
 };
 
-export const computeRenewalDisplayDates = ({
-  completionEpochMillis,
-  expirationEpochMillis,
-  bypassEpochMillis,
-}: AccessModuleStatus) => {
+export const computeRenewalDisplayDates = (status: AccessModuleStatus) => {
+  const { completionEpochMillis, expirationEpochMillis, bypassEpochMillis } =
+    status || {};
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
   const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);

@@ -165,6 +165,22 @@ describe('computeRenewalDisplayDates', () => {
     });
   });
 
+  it('returns Unavailable/Incomplete when the module is undefined', () => {
+    expect(computeRenewalDisplayDates(undefined)).toStrictEqual({
+      lastConfirmedDate: 'Unavailable (not completed)',
+      nextReviewDate: 'Unavailable (not completed)',
+      moduleStatus: AccessModulesStatus.INCOMPLETE,
+    });
+  });
+
+  it('returns Unavailable/Incomplete when the module is null', () => {
+    expect(computeRenewalDisplayDates(null)).toStrictEqual({
+      lastConfirmedDate: 'Unavailable (not completed)',
+      nextReviewDate: 'Unavailable (not completed)',
+      moduleStatus: AccessModulesStatus.INCOMPLETE,
+    });
+  });
+
   it('returns Unavailable/Incomplete when the module is incomplete, regardless of expiration date', () => {
     const expirationDate = nowPlusDays(25);
     const status: AccessModuleStatus = {
