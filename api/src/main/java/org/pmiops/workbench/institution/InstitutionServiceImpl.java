@@ -400,23 +400,23 @@ public class InstitutionServiceImpl implements InstitutionService {
         .collect(Collectors.toList());
   }
 
+  private List<UserTierEligibility> getTierEligibilities(Institution inst, String contactEmail) {
+    return accessTierService.getAllTiersVisibleToUsers().stream()
+        .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
+        .flatMap(tierConfigMaybe -> tierConfigMaybe.map(Stream::of).orElse(Stream.empty()))
+        .map(
+            tierConfig ->
+                institutionMapper.toEligibility(
+                    tierConfig,
+                    validateInstitutionalEmail(
+                        inst, contactEmail, tierConfig.getAccessTierShortName())))
+        .collect(Collectors.toList());
+  }
+
   @Override
   public List<UserTierEligibility> getUserTierEligibilities(DbUser user) {
     return getByUser(user)
-        .map(
-            inst ->
-                accessTierService.getAllTiersVisibleToUsers().stream()
-                    .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
-                    .flatMap(tier -> tier.map(Stream::of).orElse(Stream.empty()))
-                    .map(
-                        tierConfig ->
-                            institutionMapper.toEligibility(
-                                tierConfig,
-                                validateInstitutionalEmail(
-                                    inst,
-                                    user.getContactEmail(),
-                                    tierConfig.getAccessTierShortName())))
-                    .collect(Collectors.toList()))
+        .map(inst -> getTierEligibilities(inst, user.getContactEmail()))
         .orElse(Collections.emptyList());
   }
 
