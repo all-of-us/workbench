@@ -9,6 +9,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -25,11 +27,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @Import({
-  InstitutionServiceImpl.class,
+  AccessTierServiceImpl.class,
+  FireCloudServiceImpl.class,
   InstitutionMapperImpl.class,
+  InstitutionServiceImpl.class,
+  InstitutionTierConfigMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
-  InstitutionTierConfigMapperImpl.class,
 })
 @EnableTransactionManagement
 public class LoadInstitutions {
