@@ -14,7 +14,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import {
-  AccessModulesStatus,
+  AccessRenewalStatus,
   buildRasRedirectUrl,
   computeRenewalDisplayDates,
   getTwoFactorSetupUrl,
@@ -161,7 +161,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates({})).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
-      moduleStatus: AccessModulesStatus.INCOMPLETE,
+      moduleStatus: AccessRenewalStatus.INCOMPLETE,
     });
   });
 
@@ -169,7 +169,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(undefined)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
-      moduleStatus: AccessModulesStatus.INCOMPLETE,
+      moduleStatus: AccessRenewalStatus.INCOMPLETE,
     });
   });
 
@@ -177,7 +177,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(null)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
-      moduleStatus: AccessModulesStatus.INCOMPLETE,
+      moduleStatus: AccessRenewalStatus.INCOMPLETE,
     });
   });
 
@@ -190,7 +190,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
-      moduleStatus: AccessModulesStatus.INCOMPLETE,
+      moduleStatus: AccessRenewalStatus.INCOMPLETE,
     });
   });
 
@@ -203,7 +203,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
-      moduleStatus: AccessModulesStatus.BYPASSED,
+      moduleStatus: AccessRenewalStatus.BYPASSED,
     });
   });
 
@@ -224,7 +224,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
-      moduleStatus: AccessModulesStatus.BYPASSED,
+      moduleStatus: AccessRenewalStatus.BYPASSED,
     });
   });
 
@@ -250,7 +250,7 @@ describe('computeRenewalDisplayDates', () => {
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
       } days)`,
-      moduleStatus: AccessModulesStatus.EXPIRING_SOON,
+      moduleStatus: AccessRenewalStatus.EXPIRING_SOON,
     });
   });
 
@@ -276,7 +276,7 @@ describe('computeRenewalDisplayDates', () => {
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
       } days)`,
-      moduleStatus: AccessModulesStatus.CURRENT,
+      moduleStatus: AccessRenewalStatus.CURRENT,
     });
   });
 
@@ -294,7 +294,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (expired)`,
-      moduleStatus: AccessModulesStatus.EXPIRED,
+      moduleStatus: AccessRenewalStatus.EXPIRED,
     });
   });
 });
