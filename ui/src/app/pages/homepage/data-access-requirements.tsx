@@ -944,7 +944,7 @@ const ControlledTierCard = (props: {
         </FlexRow>
         {isEligible ? (
           <div data-test-id='eligible-text' style={styles.dataDetails}>
-            You are eligible to access {ctDisplayName} data
+            You are eligible to access {ctDisplayName} data.
           </div>
         ) : (
           <div>
