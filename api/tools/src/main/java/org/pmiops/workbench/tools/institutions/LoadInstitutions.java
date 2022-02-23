@@ -10,9 +10,10 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
-import org.pmiops.workbench.google.GoogleConfig;
+import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -30,9 +31,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @Import({
   AccessTierServiceImpl.class,
+  CloudBillingClientImpl.class,
+  FireCloudConfig.class,
   FireCloudServiceImpl.class,
   FirecloudApiClientFactory.class,
-  GoogleConfig.class,
   InstitutionMapperImpl.class,
   InstitutionServiceImpl.class,
   InstitutionTierConfigMapperImpl.class,
