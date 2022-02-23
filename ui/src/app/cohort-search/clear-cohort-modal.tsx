@@ -14,15 +14,15 @@ interface Props {
 }
 
 export const ClearCohortModal = (props: Props) => {
-  const {
-    onClear,
-    onClose,
-  } = props;
+  const { onClear, onClose } = props;
 
   return (
     <Modal>
-      <ModalTitle>Warning — All unsaved progress will be lost.</ModalTitle>
-      <ModalBody>Are you sure you want to clear this cohort?</ModalBody>
+      <ModalTitle>Warning!</ModalTitle>
+      <ModalBody>
+        Any unsaved progress will be lost. Are you sure you want to clear this
+        cohort?
+      </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={onClose}>
           Cancel

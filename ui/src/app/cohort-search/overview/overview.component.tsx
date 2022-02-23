@@ -8,15 +8,14 @@ import {
   CdrVersionTiersResponse,
   Cohort,
   GenderOrSexType,
-  ResourceType, SearchRequest,
+  ResourceType,
   TemporalTime,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
 import { ClearCohortModal } from 'app/cohort-search/clear-cohort-modal';
-import { LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST } from 'app/cohort-search/cohort-page/cohort-page.component';
 import { GenderChart } from 'app/cohort-search/gender-chart/gender-chart.component';
-import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
+import { searchRequestStore } from 'app/cohort-search/search-state.service';
 import {
   ageTypeToText,
   genderOrSexTypeToText,
@@ -37,12 +36,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
-import {
-  currentCohortSearchContextStore,
-  currentCohortStore,
-  currentWorkspaceStore,
-  NavigationProps,
-} from 'app/utils/navigation';
+import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -139,6 +133,7 @@ const styles = reactStyles({
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
+  onCohortClear: Function;
   searchRequest: any;
   updateCount: any;
   updating: Function;
@@ -413,24 +408,9 @@ export const ListOverview = fp.flow(
     };
 
     onCohortClear = () => {
-      const {
-        history,
-        match: {
-          params: { ns, wsid },
-        },
-      } = this.props;
-      idsInUse.next(new Set());
-      currentCohortStore.next(undefined);
-      currentCohortSearchContextStore.next(undefined);
-      searchRequestStore.next({
-        includes: [],
-        excludes: [],
-        dataFilters: [],
-      } as SearchRequest);
-      localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
       this.setState({ clearCohort: false });
-      history.push(`/workspaces/${ns}/${wsid}/data/cohorts/build`)
-    }
+      this.props.onCohortClear();
+    };
 
     cancelDelete = () => {
       this.setState({ deleting: false });
@@ -553,7 +533,7 @@ export const ListOverview = fp.flow(
     }
 
     render() {
-      const { cohort, workspace } = this.props;
+      const { cohort } = this.props;
       const {
         ageType,
         apiError,
@@ -637,7 +617,7 @@ export const ListOverview = fp.flow(
                   </Clickable>
                 </TooltipTrigger>
                 <TooltipTrigger
-                  content={<div>Clear all cohort selections</div>}
+                  content={<div>Clear current cohort selections</div>}
                 >
                   <Clickable
                     style={
