@@ -400,14 +400,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         .collect(Collectors.toList());
   }
 
-  private static UserTierEligibility toEligibility(
-      InstitutionTierConfig tierConfig, boolean eligible) {
-    return new UserTierEligibility()
-        .accessTierShortName(tierConfig.getAccessTierShortName())
-        .eraRequired(tierConfig.getEraRequired())
-        .eligible(eligible);
-  }
-
   @Override
   public List<UserTierEligibility> getUserTierEligibilities(DbUser user) {
     return getByUser(user)
@@ -417,8 +409,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
                     .flatMap(tier -> tier.map(Stream::of).orElse(Stream.empty()))
                     .map(
-                        tierConfig ->
-                            toEligibility(
+                        tierConfig -> institutionMapper.toEligibility(
                                 tierConfig,
                                 validateInstitutionalEmail(
                                     inst,
