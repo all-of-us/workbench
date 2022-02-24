@@ -53,6 +53,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
@@ -98,6 +99,7 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
@@ -164,6 +166,7 @@ public class CohortReviewControllerTest {
 
   DbCdrVersion cdrVersion;
   DbCohortReview cohortReview;
+  DbCohortReview cohortReview2;
   DbCohort cohort;
   DbCohort cohortWithoutReview;
   DbParticipantCohortStatus participantCohortStatus1;
@@ -191,6 +194,7 @@ public class CohortReviewControllerTest {
   @Autowired ParticipantCohortAnnotationDao participantCohortAnnotationDao;
   @Autowired ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
   @Autowired ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @Autowired CohortReviewMapper cohortReviewMapper;
   @Autowired FireCloudService fireCloudService;
   @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CloudBillingClient cloudBillingClient;
@@ -253,7 +257,6 @@ public class CohortReviewControllerTest {
     CommonMappers.class,
     CohortQueryBuilder.class,
     ReviewQueryBuilder.class,
-    CohortReviewMapperImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
     ParticipantCohortStatusMapperImpl.class,
     // workspaceController
@@ -438,6 +441,14 @@ public class CohortReviewControllerTest {
                 .cohortId(cohort.getCohortId())
                 .cdrVersionId(cdrVersion.getCdrVersionId())
                 .reviewSize(2)
+                .creationTime(today));
+
+    cohortReview2 =
+        cohortReviewDao.save(
+            new DbCohortReview()
+                .cohortId(cohort.getCohortId())
+                .cdrVersionId(cdrVersion.getCdrVersionId())
+                .reviewSize(0)
                 .creationTime(today));
 
     DbParticipantCohortStatusKey key1 =
@@ -1982,6 +1993,51 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
+  ////////// getCohortReviewsInWorkspace  //////////
+  @ParameterizedTest(
+      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getCohortReviewsInWorkspaceAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    List<CohortReview> expected = ImmutableList.of(cohortReviewMapper.dbModelToClient(cohortReview),
+        cohortReviewMapper.dbModelToClient(cohortReview2));
+
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    List<CohortReview> actual =
+        cohortReviewController
+            .getCohortReviewsInWorkspace(
+                workspace.getNamespace(),
+                workspace.getId())
+            .getBody().getItems();
+
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @ParameterizedTest(
+      name = "getCohortReviewsInWorkspaceForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getCohortReviewsInWorkspaceForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    List<CohortReview> expected = ImmutableList.of(cohortReviewMapper.dbModelToClient(cohortReview),
+        cohortReviewMapper.dbModelToClient(cohortReview2));
+
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception = assertThrows(ForbiddenException.class, () ->
+        cohortReviewController
+            .getCohortReviewsInWorkspace(
+                workspace.getNamespace(),
+                workspace.getId()));
+
+    assertForbiddenException(exception);
+  }
   ////////// helper methods  //////////
 
   private static Stream<Arguments> paramsSortByFilterColumn() {
