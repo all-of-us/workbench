@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -18,6 +19,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +28,14 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -459,7 +465,7 @@ public class CohortReviewControllerTest {
     participantCohortStatus2 =
         participantCohortStatusDao.save(
             new DbParticipantCohortStatus()
-                .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NOT_REVIEWED))
+                .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NEEDS_FURTHER_REVIEW))
                 .participantKey(key2)
                 .genderConceptId(TestConcepts.FEMALE.getConceptId())
                 .raceConceptId(TestConcepts.WHITE.getConceptId())
@@ -1754,6 +1760,7 @@ public class CohortReviewControllerTest {
     assertNotFoundExceptionCohortReview(cohortReviewId, exception);
   }
 
+  @Test
   public void getParticipantDataNullDomain() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
     long cohortReviewId = cohortReview.getCohortReviewId();
@@ -1849,37 +1856,167 @@ public class CohortReviewControllerTest {
 
   ////////// getParticipantCohortStatuses  //////////
   @Test
-  public void getParticipantCohortStatuses() {
-    int page = 0;
-    int pageSize = 25;
-    CohortReview expectedReview1 =
-        createCohortReview(
-            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
-    CohortReview expectedReview2 =
-        createCohortReview(
-            cohortReview, ImmutableList.of(participantCohortStatus2, participantCohortStatus1));
-    CohortReview expectedReview3 =
-        createCohortReview(
-            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
-    CohortReview expectedReview4 =
-        createCohortReview(
-            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
+  public void getParticipantCohortStatusesWrongWorkspace() {
+    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
 
+    Long cohortId = cohort.getCohortId();
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCohortStatuses(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortId,
+                    cdrVersion.getCdrVersionId(),
+                    new PageFilterRequest()));
+
+    assertNotFoundExceptionNoCohort(cohortId, exception);
+  }
+
+  @Test
+  public void getParticipantCohortStatusesNoCohort() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
 
-    assertParticipantCohortStatuses(
-        expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
+    Long cohortId = cohort.getCohortId() + 99L;
 
-    assertParticipantCohortStatuses(
-        expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
-    assertParticipantCohortStatuses(expectedReview3, null, null, null, FilterColumns.STATUS);
-    assertParticipantCohortStatuses(expectedReview4, null, null, SortOrder.ASC, null);
-    assertParticipantCohortStatuses(expectedReview4, null, pageSize, null, null);
-    assertParticipantCohortStatuses(expectedReview4, page, null, null, null);
-    assertParticipantCohortStatuses(expectedReview4, null, null, null, null);
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getParticipantCohortStatuses(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortId,
+                    cdrVersion.getCdrVersionId(),
+                    new PageFilterRequest()));
+
+    assertNotFoundExceptionNoCohort(cohortId, exception);
+  }
+
+  @ParameterizedTest(
+      name = "getParticipantCohortStatusesSortByFilterColumn SortOrder={0}, FilterColumns={1}")
+  @MethodSource("paramsSortByFilterColumn")
+  public void getParticipantCohortStatusesSortByFilterColumn(
+      SortOrder sortOrder, FilterColumns filterColumns) {
+    CohortReview expectedReview =
+        createCohortReview(
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
+    // default filterColumn=participant_id
+    PageFilterRequest pageFilterRequest =
+        new PageFilterRequest().sortOrder(sortOrder).sortColumn(filterColumns);
+
+    CohortReview actualReview =
+        cohortReviewController
+            .getParticipantCohortStatuses(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohort.getCohortId(),
+                cdrVersion.getCdrVersionId(),
+                pageFilterRequest)
+            .getBody()
+            .getCohortReview();
+
+    verify(userRecentResourceService, atLeastOnce())
+        .updateCohortEntry(anyLong(), anyLong(), anyLong());
+    assertCohortReviewParticipantCohortStatuses(
+        actualReview, expectedReview, filterColumns, sortOrder);
+  }
+
+  @ParameterizedTest(
+      name = "getParticipantCohortStatusesAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getParticipantCohortStatusesAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    CohortReview expectedReview =
+        createCohortReview(
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
+
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    CohortReview actualReview =
+        cohortReviewController
+            .getParticipantCohortStatuses(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohort.getCohortId(),
+                cdrVersion.getCdrVersionId(),
+                new PageFilterRequest())
+            .getBody()
+            .getCohortReview();
+
+    verify(userRecentResourceService, atLeastOnce())
+        .updateCohortEntry(anyLong(), anyLong(), anyLong());
+    // PageFilterRequest defaults to participantId, ascending (if not given)
+    assertCohortReviewParticipantCohortStatuses(
+        actualReview, expectedReview, FilterColumns.PARTICIPANTID, SortOrder.ASC);
+  }
+
+  @ParameterizedTest(name = "getParticipantDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getParticipantCohortStatusesForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    createCohortReview(
+        cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
+
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getParticipantCohortStatuses(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    cdrVersion.getCdrVersionId(),
+                    new PageFilterRequest()));
+
+    assertForbiddenException(exception);
   }
 
   ////////// helper methods  //////////
+
+  private static Stream<Arguments> paramsSortByFilterColumn() {
+    List<Arguments> argsList =
+        Arrays.asList(
+            arguments(SortOrder.ASC, FilterColumns.PARTICIPANTID),
+            arguments(SortOrder.ASC, FilterColumns.STATUS),
+            arguments(SortOrder.DESC, FilterColumns.PARTICIPANTID),
+            arguments(SortOrder.DESC, FilterColumns.STATUS));
+    Collections.shuffle(argsList);
+    return argsList.stream();
+  }
+
+  private void assertCohortReviewParticipantCohortStatuses(
+      CohortReview actual, CohortReview expected, FilterColumns filterColumn, SortOrder sortOrder) {
+    // change expected based on sortOrder and filterColumn
+    if (SortOrder.DESC == sortOrder && FilterColumns.PARTICIPANTID == filterColumn) {
+      expected
+          .getParticipantCohortStatuses()
+          .sort(Comparator.comparing(ParticipantCohortStatus::getParticipantId).reversed());
+    } else if (SortOrder.DESC == sortOrder && FilterColumns.STATUS == filterColumn) {
+      expected
+          .getParticipantCohortStatuses()
+          .sort(Comparator.comparing(ParticipantCohortStatus::getStatus).reversed());
+    } else if (SortOrder.ASC == sortOrder && FilterColumns.PARTICIPANTID == filterColumn) {
+      expected
+          .getParticipantCohortStatuses()
+          .sort(Comparator.comparing(ParticipantCohortStatus::getParticipantId));
+    } else if (SortOrder.ASC == sortOrder && FilterColumns.STATUS == filterColumn) {
+      expected
+          .getParticipantCohortStatuses()
+          .sort(Comparator.comparing(ParticipantCohortStatus::getStatus));
+    }
+    assertThat(actual).isEqualTo(expected);
+  }
 
   private void assertNewlyCreatedCohortReview(CohortReview cohortReview) {
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
