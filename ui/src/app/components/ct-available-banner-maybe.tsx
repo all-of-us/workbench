@@ -38,7 +38,7 @@ const shouldShowBanner = (
   const shouldShow =
     profile &&
     ctCdrVersions &&
-    // the environment allows users to see the CT (in the UI)
+    // the environment allows users to see the CT
     accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled) &&
     // the user is eligible for the CT
     eligibleForTier(profile, AccessTierShortNames.Controlled) &&
