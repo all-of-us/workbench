@@ -27,6 +27,7 @@ import {
   accessRenewalModules,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
+  getAccessModuleStatusByNameOrEmpty,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
   syncModulesExternal,
@@ -137,14 +138,14 @@ export const hasExpired = (expiration: number): boolean =>
   !!expiration && getWholeDaysFromNow(expiration) < 0;
 
 // The module can either be expired or is expiring
-export const isExpiring = (expiration?: number): boolean =>
+export const isExpiring = (expiration: number): boolean =>
   expiration
     ? getWholeDaysFromNow(expiration) <=
       serverConfigStore.get().config.accessRenewalLookback
     : false;
 
 const isModuleExpiring = (status: AccessModuleStatus): boolean =>
-  isExpiring(status.expirationEpochMillis);
+  isExpiring(status?.expirationEpochMillis);
 
 export const isExpiringNotBypassed = (moduleStatus: AccessModuleStatus) => {
   return isModuleExpiring(moduleStatus) && !moduleStatus.bypassEpochMillis;
@@ -154,15 +155,15 @@ const isExpiringAndNotBypassed = (
   moduleName: AccessModule,
   modules: AccessModuleStatus[]
 ) => {
-  const status = modules.find((m) => m.moduleName === moduleName);
+  const status = modules?.find((m) => m.moduleName === moduleName);
   return isExpiringNotBypassed(status);
 };
 
 const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
-  const isComplete = !!status.completionEpochMillis;
-  const wasBypassed = !!status.bypassEpochMillis;
+  const isComplete = !!status?.completionEpochMillis;
+  const wasBypassed = !!status?.bypassEpochMillis;
   return (
-    wasBypassed || (isComplete && !isExpiring(status.expirationEpochMillis))
+    wasBypassed || (isComplete && !isExpiring(status?.expirationEpochMillis))
   );
 };
 
@@ -203,7 +204,7 @@ const ActionButton = ({
   disabled,
   style,
 }: ActionButtonInterface) => {
-  const wasBypassed = !!moduleStatus.bypassEpochMillis;
+  const wasBypassed = !!moduleStatus?.bypassEpochMillis;
   return bypassedOrCompleteAndNotExpiring(moduleStatus) ? (
     <CompletedOrBypassedButton
       completedText={completedButtonText}
@@ -401,8 +402,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
           {/* Profile */}
           <RenewalCard
             step={1}
-            moduleStatus={modules.find(
-              (m) => m.moduleName === AccessModule.PROFILECONFIRMATION
+            moduleStatus={getAccessModuleStatusByNameOrEmpty(
+              modules,
+              AccessModule.PROFILECONFIRMATION
             )}
           >
             <div style={{ marginBottom: '0.5rem' }}>
@@ -416,8 +418,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
             <ActionButton
               actionButtonText='Review'
               completedButtonText='Confirmed'
-              moduleStatus={modules.find(
-                (m) => m.moduleName === AccessModule.PROFILECONFIRMATION
+              moduleStatus={getAccessModuleStatusByNameOrEmpty(
+                modules,
+                AccessModule.PROFILECONFIRMATION
               )}
               onClick={() =>
                 navigateByUrl('profile', { queryParams: { renewal: 1 } })
@@ -427,8 +430,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
           {/* Publications */}
           <RenewalCard
             step={2}
-            moduleStatus={modules.find(
-              (m) => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+            moduleStatus={getAccessModuleStatusByNameOrEmpty(
+              modules,
+              AccessModule.PUBLICATIONCONFIRMATION
             )}
           >
             <div>
@@ -450,8 +454,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               <ActionButton
                 actionButtonText='Confirm'
                 completedButtonText='Confirmed'
-                moduleStatus={modules.find(
-                  (m) => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+                moduleStatus={getAccessModuleStatusByNameOrEmpty(
+                  modules,
+                  AccessModule.PUBLICATIONCONFIRMATION
                 )}
                 onClick={async () => {
                   setLoading(true);
@@ -465,9 +470,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 id={noReportId}
                 disabled={
                   !isModuleExpiring(
-                    modules.find(
-                      (m) =>
-                        m.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+                    getAccessModuleStatusByNameOrEmpty(
+                      modules,
+                      AccessModule.PUBLICATIONCONFIRMATION
                     )
                   )
                 }
@@ -483,9 +488,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 id={reportId}
                 disabled={
                   !isModuleExpiring(
-                    modules.find(
-                      (m) =>
-                        m.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+                    getAccessModuleStatusByNameOrEmpty(
+                      modules,
+                      AccessModule.PUBLICATIONCONFIRMATION
                     )
                   )
                 }
@@ -500,8 +505,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
           {enableComplianceTraining && (
             <RenewalCard
               step={3}
-              moduleStatus={modules.find(
-                (m) => m.moduleName === AccessModule.COMPLIANCETRAINING
+              moduleStatus={getAccessModuleStatusByNameOrEmpty(
+                modules,
+                AccessModule.COMPLIANCETRAINING
               )}
             >
               <div>
@@ -523,8 +529,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 <ActionButton
                   actionButtonText='Complete Training'
                   completedButtonText='Completed'
-                  moduleStatus={modules.find(
-                    (m) => m.moduleName === AccessModule.COMPLIANCETRAINING
+                  moduleStatus={getAccessModuleStatusByNameOrEmpty(
+                    modules,
+                    AccessModule.COMPLIANCETRAINING
                   )}
                   onClick={() => {
                     setRefreshButtonDisabled(false);
@@ -557,8 +564,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
           {/* DUCC */}
           <RenewalCard
             step={enableComplianceTraining ? 4 : 3}
-            moduleStatus={modules.find(
-              (m) => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT
+            moduleStatus={getAccessModuleStatusByNameOrEmpty(
+              modules,
+              AccessModule.DATAUSERCODEOFCONDUCT
             )}
           >
             <div>
@@ -568,8 +576,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
             <ActionButton
               actionButtonText='View & Sign'
               completedButtonText='Completed'
-              moduleStatus={modules.find(
-                (m) => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT
+              moduleStatus={getAccessModuleStatusByNameOrEmpty(
+                modules,
+                AccessModule.DATAUSERCODEOFCONDUCT
               )}
               onClick={() =>
                 navigateByUrl('data-code-of-conduct', {
