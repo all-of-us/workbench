@@ -30,14 +30,14 @@ const shouldShowBanner = (
   cdrVersionTiers: CdrVersionTier[],
   accessTiersVisibleToUsers: string[]
 ) => {
-  const ct = cdrVersionTiers?.find(
+  const ctCdrVersions = cdrVersionTiers?.find(
     (v) => v.accessTierShortName === AccessTierShortNames.Controlled
   );
 
   // all of the following must be true
   const shouldShow =
     profile &&
-    ct &&
+    ctCdrVersions &&
     // the environment allows users to see the CT (in the UI)
     accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled) &&
     // the user is eligible for the CT
@@ -45,7 +45,7 @@ const shouldShowBanner = (
     // the user does not currently have CT access
     !profile.accessTierShortNames.includes(AccessTierShortNames.Controlled) &&
     // the user's first sign-in time was before the release of the default CT CDR Version
-    profile.firstSignInTime < ct.defaultCdrVersionCreationTime &&
+    profile.firstSignInTime < ctCdrVersions.defaultCdrVersionCreationTime &&
     // the user is not currently visiting the DAR page
     window.location.pathname !== DATA_ACCESS_REQUIREMENTS_PATH;
 
