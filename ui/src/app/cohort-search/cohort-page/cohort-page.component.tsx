@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { Cohort, SearchRequest } from 'generated/fetch';
 
+import { ClearCohortModal } from 'app/cohort-search/clear-cohort-modal';
 import { CohortSearch } from 'app/cohort-search/cohort-search/cohort-search.component';
 import { ListOverview } from 'app/cohort-search/overview/overview.component';
 import { SearchGroupList } from 'app/cohort-search/search-group-list/search-group-list.component';
@@ -76,18 +77,19 @@ interface Props
 }
 
 interface State {
-  loading: boolean;
-  overview: boolean;
-  criteria: SearchRequest;
-  updateCount: number;
   cohort: Cohort;
-  cohortError: boolean;
-  minHeight: string;
-  updateGroupListsCount: number;
   cohortChanged: boolean;
-  userClickedSaveRequest: boolean;
-  unsavedSelections: boolean;
+  cohortError: boolean;
+  criteria: SearchRequest;
+  loading: boolean;
+  minHeight: string;
+  overview: boolean;
   searchContext: any;
+  showClearCohortModal: boolean;
+  unsavedSelections: boolean;
+  updateCount: number;
+  updateGroupListsCount: number;
+  userClickedSaveRequest: boolean;
 }
 
 export const CohortPage = fp.flow(
@@ -102,18 +104,19 @@ export const CohortPage = fp.flow(
     constructor(props: any) {
       super(props);
       this.state = {
-        loading: false,
-        overview: false,
-        criteria: { dataFilters: [], includes: [], excludes: [] },
-        updateCount: 0,
         cohort: undefined,
-        cohortError: false,
-        minHeight: '10rem',
-        updateGroupListsCount: 0,
         cohortChanged: false,
-        userClickedSaveRequest: false,
-        unsavedSelections: false,
+        cohortError: false,
+        criteria: { dataFilters: [], includes: [], excludes: [] },
+        loading: false,
+        minHeight: '10rem',
+        overview: false,
         searchContext: undefined,
+        showClearCohortModal: false,
+        unsavedSelections: false,
+        updateCount: 0,
+        updateGroupListsCount: 0,
+        userClickedSaveRequest: false,
       };
     }
 
@@ -245,6 +248,7 @@ export const CohortPage = fp.flow(
             type: '',
           },
           cohortChanged: false,
+          showClearCohortModal: false,
           unsavedSelections: false,
         },
         () => {
@@ -301,6 +305,7 @@ export const CohortPage = fp.flow(
         criteria,
         loading,
         overview,
+        showClearCohortModal,
         updateCount,
         updateGroupListsCount,
       } = this.state;
@@ -370,7 +375,9 @@ export const CohortPage = fp.flow(
                       <ListOverview
                         cohort={cohort}
                         cohortChanged={cohortChanged}
-                        onCohortClear={() => this.onCohortClear()}
+                        onCohortClear={() =>
+                          this.setState({ showClearCohortModal: true })
+                        }
                         searchRequest={criteria}
                         updateCount={updateCount}
                         updating={() =>
@@ -391,6 +398,12 @@ export const CohortPage = fp.flow(
               </React.Fragment>
             )}
           </div>
+          {showClearCohortModal && (
+            <ClearCohortModal
+              onClear={() => this.onCohortClear()}
+              onClose={() => this.setState({ showClearCohortModal: false })}
+            />
+          )}
         </React.Fragment>
       );
     }

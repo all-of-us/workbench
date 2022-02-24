@@ -13,7 +13,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { ClearCohortModal } from 'app/cohort-search/clear-cohort-modal';
 import { GenderChart } from 'app/cohort-search/gender-chart/gender-chart.component';
 import { searchRequestStore } from 'app/cohort-search/search-state.service';
 import {
@@ -146,7 +145,6 @@ interface State {
   apiCallCheck: number;
   apiError: boolean;
   chartData: any;
-  clearCohort: boolean;
   currentGraphOptions: {
     ageType: AgeType;
     genderOrSexType: GenderOrSexType;
@@ -180,7 +178,6 @@ export const ListOverview = fp.flow(
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
-        clearCohort: false,
         currentGraphOptions: {
           ageType: AgeType.AGEATCDR,
           genderOrSexType: GenderOrSexType.GENDER,
@@ -407,11 +404,6 @@ export const ListOverview = fp.flow(
         .catch((error) => console.error(error));
     };
 
-    onCohortClear = () => {
-      this.setState({ clearCohort: false });
-      this.props.onCohortClear();
-    };
-
     cancelDelete = () => {
       this.setState({ deleting: false });
     };
@@ -533,12 +525,11 @@ export const ListOverview = fp.flow(
     }
 
     render() {
-      const { cohort } = this.props;
+      const { cohort, onCohortClear } = this.props;
       const {
         ageType,
         apiError,
         chartData,
-        clearCohort,
         currentGraphOptions,
         deleting,
         genderOrSexType,
@@ -625,13 +616,9 @@ export const ListOverview = fp.flow(
                         ? { ...styles.actionIcon, ...styles.disabled }
                         : styles.actionIcon
                     }
-                    onClick={() => this.setState({ clearCohort: true })}
+                    onClick={() => onCohortClear()}
                   >
-                    <ClrIcon
-                      shape='times-circle'
-                      className='is-solid'
-                      size={30}
-                    />
+                    <ClrIcon shape='refresh' className='is-solid' size={26} />
                   </Clickable>
                 </TooltipTrigger>
               </div>
@@ -779,12 +766,6 @@ export const ListOverview = fp.flow(
               resourceType={ResourceType.COHORT}
               receiveDelete={this.delete}
               resourceName={cohort.name}
-            />
-          )}
-          {clearCohort && (
-            <ClearCohortModal
-              onClear={() => this.onCohortClear()}
-              onClose={() => this.setState({ clearCohort: false })}
             />
           )}
         </React.Fragment>
