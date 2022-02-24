@@ -663,7 +663,7 @@ public class CohortReviewControllerTest {
       WorkspaceAccessLevel workspaceAccessLevel) {
     stubBigQueryCohortCalls();
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Throwable exception =
         assertThrows(
@@ -2032,10 +2032,6 @@ public class CohortReviewControllerTest {
       names = {"NO_ACCESS"})
   public void getCohortReviewsInWorkspaceForbiddenAccessLevel(
       WorkspaceAccessLevel workspaceAccessLevel) {
-    List<CohortReview> expected =
-        ImmutableList.of(
-            cohortReviewMapper.dbModelToClient(cohortReview),
-            cohortReviewMapper.dbModelToClient(cohortReview2));
 
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -2329,36 +2325,6 @@ public class CohortReviewControllerTest {
       default:
     }
     return participantCohortAnnotation;
-  }
-
-  /**
-   * Helper method to assert results for {@link
-   * CohortReviewController#getParticipantCohortStatuses(String, String, Long, Long,
-   * PageFilterRequest)}.
-   */
-  private void assertParticipantCohortStatuses(
-      CohortReview expectedReview,
-      Integer page,
-      Integer pageSize,
-      SortOrder sortOrder,
-      FilterColumns sortColumn) {
-    CohortReview actualReview =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                new PageFilterRequest()
-                    .sortColumn(sortColumn)
-                    .page(page)
-                    .pageSize(pageSize)
-                    .sortOrder(sortOrder))
-            .getBody()
-            .getCohortReview();
-    verify(userRecentResourceService, atLeastOnce())
-        .updateCohortEntry(anyLong(), anyLong(), anyLong());
-    assertThat(actualReview).isEqualTo(expectedReview);
   }
 
   private void stubBigQueryCohortCalls() {
