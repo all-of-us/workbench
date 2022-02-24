@@ -5,24 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
@@ -43,6 +25,25 @@ import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 @Service
 public class MailServiceImpl implements MailService {
   private final Provider<MandrillApi> mandrillApiProvider;
@@ -53,6 +54,7 @@ public class MailServiceImpl implements MailService {
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
+  private static final String WELCOME_RESOURCE_CT = "emails/welcomeemail/content_ct.html";
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
@@ -91,8 +93,14 @@ public class MailServiceImpl implements MailService {
       final String contactEmail, final String password, final String username)
       throws MessagingException {
 
+    // Send updated WELCOME EMAIL containing CT information if Controlled tier is visible to the
+    // user
+    String welcomeEmail = WELCOME_RESOURCE;
+    if (workbenchConfigProvider.get().access.tiersVisibleToUsers.contains("controlled")) {
+      welcomeEmail = WELCOME_RESOURCE_CT;
+    }
     final String htmlMessage =
-        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, username));
+        buildHtml(welcomeEmail, welcomeMessageSubstitutionMap(password, username));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),

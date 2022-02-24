@@ -24,13 +24,16 @@
           line-height: 25px;
           font-style: 'Montserrat SemiBold';
       }
+
       .text {
           color: #262262;
           font-size: 16px;
           font-weight: 300;
           line-height: 22px;
           margin-bottom: 1rem;
+          word-wrap: normal;
       }
+
       .user-field-padding {
           display: inline-block;
       }
@@ -40,23 +43,22 @@
           border-radius: 8px;
           background-color: rgba(33,111,180,0.1);
           padding-left: 1.5rem;
-          padding-top:0.8rem
-      }
-      .section2 {
-          padding-bottom: 1.6rem;
-          padding-top: 1rem
+          padding-top:1rem
       }
       .stepCard {
           height: 126px;
-          width: 513px;
+          width: 613px;
           border-radius: 8px;
           background-color: #FFFFFF;
       }
       .step2 {
           height: auto;
+          padding-top: 0.1rem
+      }
+      .step3 {
+          height: auto;
           width: 513px;
           padding-bottom: 0.5rem;
-          padding-left: 40px;
       }
       .completeRegistrationBtn {
           padding-left: 140px;
@@ -168,7 +170,7 @@
       <div class="text user-info">${USERNAME}</div>
     </td>
   </tr>
-  <tr style="padding-top: 0.1rem">
+  <tr>
     <td colspan="2" style="padding-left: 1rem">
       <div class="text bold-user-label">Your Temporary Password: </div>
     </td>
@@ -191,9 +193,18 @@
             </ul>
           </div>
         </div>
-        <div class="section2">
+        <div style="padding-bottom: 0.6rem; padding-top: 1rem">
           <div class="text bold-user-label">Step 2</div>
-          <div class="stepCard step2">
+          <div class="stepCard" style="height: auto; padding-top: 0.1rem">
+            <ul style="padding-bottom: 1rem">
+              <li>Sign an institutional agreement</li>
+              <li>All of Us program operational use must allow you to access Controlled Tier data</li>
+            </ul>
+          </div>
+        </div>
+        <div style="padding-bottom: 1.6rem">
+          <div class="text bold-user-label">Step 3</div>
+          <div class="stepCard step3" style="padding-left: 40px;">
             <div style="padding-top: 0.5rem">Sign data user code of conduct</div>
           </div>
         </div>
