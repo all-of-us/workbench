@@ -98,8 +98,8 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
@@ -109,6 +109,7 @@ import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
+import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
@@ -427,6 +428,11 @@ public class CohortReviewControllerTest {
     cohort.setCriteria(criteria);
     cohortDao.save(cohort);
 
+    DbCohort cohort2 = new DbCohort();
+    cohort2.setWorkspaceId(1L);
+    cohort2.setCriteria(criteria);
+    cohortDao.save(cohort2);
+
     cohortWithoutReview = new DbCohort();
     cohortWithoutReview.setWorkspaceId(1L);
     cohortWithoutReview.setName("test");
@@ -446,7 +452,7 @@ public class CohortReviewControllerTest {
     cohortReview2 =
         cohortReviewDao.save(
             new DbCohortReview()
-                .cohortId(cohort.getCohortId())
+                .cohortId(cohort2.getCohortId())
                 .cdrVersionId(cdrVersion.getCdrVersionId())
                 .reviewSize(0)
                 .creationTime(today));
@@ -2001,18 +2007,19 @@ public class CohortReviewControllerTest {
       names = {"OWNER", "WRITER", "READER"})
   public void getCohortReviewsInWorkspaceAllowedAccessLevel(
       WorkspaceAccessLevel workspaceAccessLevel) {
-    List<CohortReview> expected = ImmutableList.of(cohortReviewMapper.dbModelToClient(cohortReview),
-        cohortReviewMapper.dbModelToClient(cohortReview2));
+    List<CohortReview> expected =
+        ImmutableList.of(
+            cohortReviewMapper.dbModelToClient(cohortReview),
+            cohortReviewMapper.dbModelToClient(cohortReview2));
 
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     List<CohortReview> actual =
         cohortReviewController
-            .getCohortReviewsInWorkspace(
-                workspace.getNamespace(),
-                workspace.getId())
-            .getBody().getItems();
+            .getCohortReviewsInWorkspace(workspace.getNamespace(), workspace.getId())
+            .getBody()
+            .getItems();
 
     assertThat(actual).isEqualTo(expected);
   }
@@ -2024,17 +2031,115 @@ public class CohortReviewControllerTest {
       names = {"NO_ACCESS"})
   public void getCohortReviewsInWorkspaceForbiddenAccessLevel(
       WorkspaceAccessLevel workspaceAccessLevel) {
-    List<CohortReview> expected = ImmutableList.of(cohortReviewMapper.dbModelToClient(cohortReview),
-        cohortReviewMapper.dbModelToClient(cohortReview2));
+    List<CohortReview> expected =
+        ImmutableList.of(
+            cohortReviewMapper.dbModelToClient(cohortReview),
+            cohortReviewMapper.dbModelToClient(cohortReview2));
 
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
-    Throwable exception = assertThrows(ForbiddenException.class, () ->
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getCohortReviewsInWorkspace(
+                    workspace.getNamespace(), workspace.getId()));
+
+    assertForbiddenException(exception);
+  }
+
+  ////////// getCohortChartData - See CohortReviewControllerBQTest   //////////
+  @ParameterizedTest(name = "getCohortChartDataAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getCohortChartDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    stubBigQueryCohortCalls();
+
+    List<CohortChartData> actual =
         cohortReviewController
-            .getCohortReviewsInWorkspace(
+            .getCohortChartData(
                 workspace.getNamespace(),
-                workspace.getId()));
+                workspace.getId(),
+                cohortReview.getCohortId(),
+                Domain.CONDITION.toString(),
+                1)
+            .getBody()
+            .getItems();
+
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @ParameterizedTest(name = "getCohortChartDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getCohortChartDataForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getCohortChartData(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    Domain.CONDITION.toString(),
+                    1));
+
+    assertForbiddenException(exception);
+  }
+
+  ////////// getParticipantChartData - See CohortReviewControllerBQTest   //////////
+  @ParameterizedTest(name = "getParticipantChartDataAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getParticipantChartDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    stubBigQueryCohortCalls();
+
+    List<ParticipantChartData> actual =
+        cohortReviewController
+            .getParticipantChartData(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReview.getCohortReviewId(),
+                participantCohortStatus1.getParticipantKey().getParticipantId(),
+                Domain.CONDITION.toString(),
+                1)
+            .getBody()
+            .getItems();
+
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @ParameterizedTest(name = "getParticipantChartDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getParticipantChartDataForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getParticipantChartData(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId(),
+                    participantCohortStatus1.getParticipantKey().getParticipantId(),
+                    Domain.CONDITION.toString(),
+                    1));
 
     assertForbiddenException(exception);
   }
@@ -2223,7 +2328,6 @@ public class CohortReviewControllerTest {
         () -> {
           List<FieldValue> list = new ArrayList<>();
           list.add(null);
-          // list.add(FieldValue.of(Attribute.PRIMITIVE,"person_id"));
           return list.iterator();
         };
     Map<String, Integer> rm =
@@ -2240,6 +2344,15 @@ public class CohortReviewControllerTest {
             .put(FilterColumns.SURVEY_NAME.toString(), 29)
             .put(FilterColumns.QUESTION.toString(), 30)
             .put(FilterColumns.ANSWER.toString(), 31)
+            // chartData
+            .put("name", 0)
+            .put("conceptId", 1)
+            // participantChartData
+            .put("standardName", 0)
+            .put("standardVocabulary", 1)
+            .put("startDate", 2)
+            .put("ageAtEvent", 3)
+            .put("rank", 4)
             .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -2255,11 +2368,23 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
     when(bigQueryService.getLong(null, 6)).thenReturn(0L);
     when(bigQueryService.getLong(null, 7)).thenReturn(0L);
-    // SURVEY
+    // get participantCohortStatus - SURVEY
     when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
     when(bigQueryService.getString(null, 29)).thenReturn("1");
     when(bigQueryService.getString(null, 30)).thenReturn("1");
     when(bigQueryService.getString(null, 31)).thenReturn("1");
+    // chart data - 0-string, 1-long, 2-long
+    when(bigQueryService.getString(null, 0)).thenReturn("1");
+    when(bigQueryService.getLong(null, 1)).thenReturn(1L);
+    // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
+    when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
+
+    //        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+    //        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
+    //        .startDate(bigQueryService.getDate(row, rm.get("startDate")))
+    //        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+    //        .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
+
   }
 
   private CohortReview createCohortReview(
