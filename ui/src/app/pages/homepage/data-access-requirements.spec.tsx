@@ -9,7 +9,6 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import {
   profileApi,
   registerApiClient,
@@ -27,6 +26,7 @@ import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
+import { updateVisibleTiers } from 'testing/test-utils';
 
 import {
   allModules,
@@ -915,10 +915,10 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should display the CT card when the environment has a Controlled Tier', async () => {
-    environment.accessTiersVisibleToUsers = [
+    updateVisibleTiers([
       AccessTierShortNames.Registered,
       AccessTierShortNames.Controlled,
-    ];
+    ]);
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -926,7 +926,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should not display the CT card when the environment does not have a Controlled Tier', async () => {
-    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+    updateVisibleTiers([AccessTierShortNames.Registered]);
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -937,10 +937,10 @@ describe('DataAccessRequirements', () => {
     'Should display eraCommons module in CT card ' +
       'when the user institution has signed agreement and CT requires eraCommons and RT does not',
     async () => {
-      environment.accessTiersVisibleToUsers = [
+      updateVisibleTiers([
         AccessTierShortNames.Registered,
         AccessTierShortNames.Controlled,
-      ];
+      ]);
       let wrapper = component();
       await waitOneTickAndUpdate(wrapper);
 
