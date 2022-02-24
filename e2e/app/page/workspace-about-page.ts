@@ -92,7 +92,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   async getLockedWorkspaceReason(): Promise<string> {
     const xpath = '//*[@data-test-id="lock-workspace-msg"]//child::div[2]/div[1]/b';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
-    const textContent = element.getTextContent();
+    const textContent = await element.getTextContent();
     return textContent;
   }
 
