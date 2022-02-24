@@ -2158,9 +2158,7 @@ public class CohortReviewControllerTest {
     List<Vocabulary> actual =
         cohortReviewController
             .getVocabularies(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId())
+                workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId())
             .getBody()
             .getItems();
 
@@ -2171,8 +2169,7 @@ public class CohortReviewControllerTest {
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
-  public void getVocabulariesForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getVocabulariesForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -2181,9 +2178,7 @@ public class CohortReviewControllerTest {
             ForbiddenException.class,
             () ->
                 cohortReviewController.getVocabularies(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohortReview.getCohortReviewId()));
+                    workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId()));
 
     assertForbiddenException(exception);
   }
@@ -2428,9 +2423,9 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
     // vocabularies 0-string, 1-string, 2-string
     when(bigQueryService.getString(null, 2)).thenReturn("1");
-//         .domain(bigQueryService.getString(row, rm.get("domain")))
-//        .type(bigQueryService.getString(row, rm.get("type")))
-//        .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
+    //         .domain(bigQueryService.getString(row, rm.get("domain")))
+    //        .type(bigQueryService.getString(row, rm.get("type")))
+    //        .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
 
   }
 
