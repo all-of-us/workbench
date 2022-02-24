@@ -147,7 +147,14 @@ public class WorkbenchConfig {
     public String extractionPetServiceAccount;
     public String extractionMethodConfigurationNamespace;
     public String extractionMethodConfigurationName;
+    // This is the Agora snapshot identifier, returned when running create-terra-method-snapshot.
+    // This may be different across environments, as the method configurations are independently
+    // defined.
     public Integer extractionMethodConfigurationVersion;
+    // This is a logical workflow version used by the RW server. This should be incremented when
+    // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
+    // are added.
+    public Integer extractionMethodLogicalVersion;
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
