@@ -17,7 +17,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { capStringWithEllipsis, reactStyles } from 'app/utils';
 import { orderedAccessTierShortNames } from 'app/utils/access-tiers';
 import { getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
@@ -117,6 +117,10 @@ export const AdminInstitution = fp.flow(withNavigation)(
       )(orderedAccessTierShortNames);
     }
 
+    renderInstitutionInstructions(institution: Institution) {
+      return capStringWithEllipsis(institution.userInstructions, 300);
+    }
+
     render() {
       const { institutions, institutionLoadError, loadingInstitutions } =
         this.state;
@@ -181,6 +185,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
               <Column
                 field='userInstructions'
                 header='User Email Instruction'
+                body={this.renderInstitutionInstructions}
                 bodyStyle={styles.text}
                 headerStyle={{ ...styles.header, width: '5rem' }}
               />
