@@ -95,12 +95,12 @@ public class MailServiceImpl implements MailService {
 
     // Send updated WELCOME EMAIL containing CT information if Controlled tier is visible to the
     // user
-    String welcomeEmail = WELCOME_RESOURCE;
+    String welcomeEmailResource = WELCOME_RESOURCE;
     if (workbenchConfigProvider.get().access.tiersVisibleToUsers.contains("controlled")) {
-      welcomeEmail = WELCOME_RESOURCE_CT;
+      welcomeEmailResource = WELCOME_RESOURCE_CT;
     }
     final String htmlMessage =
-        buildHtml(welcomeEmail, welcomeMessageSubstitutionMap(password, username));
+        buildHtml(welcomeEmailResource, welcomeMessageSubstitutionMap(password, username));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
