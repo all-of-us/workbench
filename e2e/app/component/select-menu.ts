@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import Container from 'app/container';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType, XPathOptions } from 'app/xpath-options';
@@ -42,9 +42,16 @@ export default class SelectMenu extends BaseMenu {
    * Returns selected value in Select.
    */
   async getSelectedValue(): Promise<string> {
-    const selector = this.xpath + '//*[contains(normalize-space(@class), "p-inputtext")]';
-    const displayedValue = await this.page.waitForXPath(selector, { visible: true });
+    const displayedValue = await this.getInputElement();
     return getPropValue<string>(displayedValue, 'innerText');
+  }
+
+  /**
+   * Returns selected value in Select.
+   */
+  async getInputElement(): Promise<ElementHandle> {
+    const selector = this.xpath + '//*[contains(normalize-space(@class), "p-inputtext")]';
+    return this.page.waitForXPath(selector, { visible: true });
   }
 
   /**

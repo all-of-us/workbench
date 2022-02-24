@@ -1,10 +1,10 @@
 import UserAdminPage from 'app/page/admin-user-list-page';
-import { asyncFilter, parseForNumericalString, signInWithAccessToken } from 'utils/test-utils';
+import { asyncFilter, parseForNumericalStrings, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
-import UserProfileAdminPage from 'app/page/user-profile-admin-page';
+import UserProfileAdminPage from 'app/page/admin/user-profile-admin-page';
 import { ElementHandle, Page } from 'puppeteer';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { Institution, InstitutionRole } from 'app/text-labels';
@@ -64,6 +64,8 @@ describe('User Profile Admin', () => {
   }
 
   const CHANGED_BACKGROUND_COLOR = 'rgb(248, 201, 84)';
+  const BACKGROUND_COLOR = 'rgb(255, 255, 255)';
+  const PROP_BACKGROUND_COLOR = 'background-color: #F8C954;';
   const testUserEmail = 'admin_test';
   let adminTab: Page;
 
@@ -99,7 +101,7 @@ describe('User Profile Admin', () => {
 
     // Get Initial Credits Limit
     const creditLimit = userProfileAdminPage.getInitialCreditLimit();
-    const credits = parseInt(parseForNumericalString(await creditLimit.getSelectedValue())[0]);
+    const credits = parseInt(parseForNumericalStrings(await creditLimit.getSelectedValue())[0]);
 
     // Verify Initial Credits Limit dropdown is not empty. Checks existence of some Select options.
     options = await creditLimit.getAllOptionTexts();
@@ -180,6 +182,7 @@ describe('User Profile Admin', () => {
           expect(await cell.getText()).toEqual('May 12, 2031');
           break;
         default:
+          expect(await cell.getText()).toEqual('-');
           break;
       }
     }
@@ -200,7 +203,7 @@ describe('User Profile Admin', () => {
     await saveButton.expectEnabled(false);
 
     // Turn off Account Access toggle
-    await accountAccessSwitch.turnOff();
+    await accountAccessSwitch.toggleOff();
     label = await accountAccessSwitch.getLabel();
     expect(label).toEqual('Account disabled');
 
@@ -208,7 +211,7 @@ describe('User Profile Admin', () => {
     await saveButton.expectEnabled(true);
 
     // Undo toggle change
-    await accountAccessSwitch.turnOn();
+    await accountAccessSwitch.toggleOn();
     label = await accountAccessSwitch.getLabel();
     expect(label).toEqual('Account enabled');
 
@@ -218,12 +221,16 @@ describe('User Profile Admin', () => {
     // Change Initial Credits Limit to $400
     const initialCreditLimit = userProfileAdminPage.getInitialCreditLimit();
     const oldCreditLimit = await initialCreditLimit.getSelectedValue();
-    await initialCreditLimit.select('$400.00');
+
+    const creditLimitsOptions = (await initialCreditLimit.getAllOptionTexts()).filter(
+      (role) => role !== oldCreditLimit
+    );
+    await initialCreditLimit.select(fp.shuffle(creditLimitsOptions)[0]);
 
     // Verify background color in Select has changed
     const [styleElement] = await (await initialCreditLimit.asElement()).$x('./preceding-sibling::style');
     const styleText = await getPropValue<string>(styleElement, 'innerText');
-    expect(styleText).toContain('background-color: #F8C954;');
+    expect(styleText).toContain(PROP_BACKGROUND_COLOR);
 
     await cancelButton.expectEnabled(true);
     await saveButton.expectEnabled(true);
@@ -237,7 +244,7 @@ describe('User Profile Admin', () => {
       await contactEmail.asElementHandle(),
       'background-color'
     );
-    expect(backgroundColor).toEqual('rgb(255, 255, 255)');
+    expect(backgroundColor).toEqual(BACKGROUND_COLOR);
 
     // Type in modified email
     const invalidContactEmail = 'mod-' + oldContactEmail;
@@ -296,8 +303,8 @@ describe('User Profile Admin', () => {
     // Check AUDIT link is working
     await userProfileAdminPage.getAuditLink().click();
     const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
-    const newPage2 = await newTarget.page();
-    await new UserAuditPage(newPage2).waitForLoad();
+    const userAuditPage = await newTarget.page();
+    await new UserAuditPage(userAuditPage).waitForLoad();
 
     await adminTab.bringToFront();
     await userProfileAdminPage.waitForLoad();
@@ -308,6 +315,7 @@ describe('User Profile Admin', () => {
   });
 
   test('Can bypass Google 2-Step Verification module', async () => {
+    // Chose Google 2-step Verification module arbitrarily
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
@@ -330,11 +338,11 @@ describe('User Profile Admin', () => {
     if (oldStatus === 'Bypassed') {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
       expect(await bypassSwitch.isOn()).toBe(true);
-      await bypassSwitch.turnOff();
+      await bypassSwitch.toggleOff();
     } else {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('No data access');
       expect(await bypassSwitch.isOn()).toBe(false);
-      await bypassSwitch.turnOn();
+      await bypassSwitch.toggleOn();
     }
 
     const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, 'Bypass');
@@ -355,13 +363,14 @@ describe('User Profile Admin', () => {
     }
 
     if (newStatus === 'Incomplete') {
-      await bypassSwitch.turnOn();
+      await bypassSwitch.toggleOn();
       await saveButton.click();
       await userProfileAdminPage.waitForLoad();
     }
   });
 
   test('Can bypass Controlled Tier training module', async () => {
+    // Chose Controlled Tier training arbitrarily
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
@@ -377,10 +386,10 @@ describe('User Profile Admin', () => {
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.CT_TRAINING);
     if (oldStatus === 'Bypassed') {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
-      await bypassSwitch.turnOff();
+      await bypassSwitch.toggleOff();
     } else {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
-      await bypassSwitch.turnOn();
+      await bypassSwitch.toggleOn();
     }
 
     const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, 'Bypass');
@@ -401,7 +410,7 @@ describe('User Profile Admin', () => {
     }
 
     if (newStatus === 'Incomplete') {
-      await bypassSwitch.turnOn();
+      await bypassSwitch.toggleOn();
       await saveButton.click();
       await userProfileAdminPage.waitForLoad();
     }
@@ -415,6 +424,8 @@ describe('User Profile Admin', () => {
     const institutionRole = userProfileAdminPage.getInstitutionalRole();
     const oldRole = await institutionRole.getSelectedValue();
 
+    // Select a different institution role:
+    // Role is not the one already selected and not Other (which requires entering other text)
     let options = (await institutionRole.getAllOptionTexts()).filter(
       (role) => role !== oldRole && role !== 'Other (free text)'
     );
@@ -430,9 +441,9 @@ describe('User Profile Admin', () => {
     await initialCreditLimit.select(randCreditLimit);
 
     // Initial Credit Limit remains unchanged before save
-    const creditLimitNumber = parseInt(parseForNumericalString(await initialCreditLimit.getSelectedValue())[0]);
+    const creditLimitNumber = parseInt(parseForNumericalStrings(await initialCreditLimit.getSelectedValue())[0]);
     expect(isNaN(creditLimitNumber)).toBeFalsy();
-    expect(creditLimitNumber).not.toEqual(parseInt(parseForNumericalString(oldCreditLimit)[0]));
+    expect(creditLimitNumber).not.toEqual(parseInt(parseForNumericalStrings(oldCreditLimit)[0]));
 
     // Save and verify changes
     const saveButton = userProfileAdminPage.getSaveButton();

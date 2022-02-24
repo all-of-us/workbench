@@ -1,23 +1,20 @@
-import AuthenticatedPage from './authenticated-page';
 import { ElementHandle, Page } from 'puppeteer';
 import { waitForDocumentTitle, waitForText, waitWhileLoading } from 'utils/waits-utils';
-import Link from 'app/element/link';
 import Textbox from 'app/element/textbox';
-import SelectMenu from 'app/component/select-menu';
-import { ElementType } from 'app/xpath-options';
-import Button from 'app/element/button';
-import { LinkText } from 'app/text-labels';
 import Switch, { defaultSwitchXpath } from 'app/component/switch';
 import StaticText from 'app/element/staticText';
-import { parseForNumericalString } from 'utils/test-utils';
+import { parseForNumericalStrings } from 'utils/test-utils';
 import DataTable from 'app/component/data-table';
 import { getPropValue } from 'utils/element-utils';
 import Cell from 'app/component/cell';
+import { BaseAdminPage } from 'app/page/admin/base-admin-page';
+import SelectMenu from 'app/component/select-menu';
 import ClrIconLink from 'app/element/clr-icon-link';
+import Link from 'app/element/link';
 
 const pageTitle = 'User Profile Admin';
 
-export default class UserProfileAdminPage extends AuthenticatedPage {
+export default class UserProfileAdminPage extends BaseAdminPage {
   constructor(page: Page) {
     super(page);
   }
@@ -41,65 +38,27 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
   }
 
   async getName(): Promise<string> {
-    const name = StaticText.findByName(this.page, { name: 'Name' });
-    const text = await name.getText();
-    return text.split('\n')[1];
+    return this.getStaticText('Name');
   }
 
   async getUserName(): Promise<string> {
-    const userName = StaticText.findByName(this.page, { name: 'User name' });
-    const text = await userName.getText();
-    return text.split('\n')[1];
+    return this.getStaticText('User name');
   }
 
   async getDataAccessTiers(): Promise<string> {
-    const tiers = StaticText.findByName(this.page, { name: 'Data Access Tiers' });
-    const text = await tiers.getText();
-    return text.split('\n')[1];
+    return this.getStaticText('Data Access Tiers');
   }
 
   async getInitialCreditsUsed(): Promise<[number, number]> {
     const creditsUsed = StaticText.findByName(this.page, { name: 'Initial Credits Used' });
     const text = await creditsUsed.getText();
     const words = text.split('\n')[1];
-    const currencies = parseForNumericalString(words);
+    const currencies = parseForNumericalStrings(words);
     return [parseInt(currencies[0]), parseInt(currencies[1])];
   }
 
   getContactEmail(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: 'contactEmail' });
-  }
-
-  getInitialCreditLimit(): SelectMenu {
-    return SelectMenu.findByName(this.page, {
-      type: ElementType.Dropdown,
-      dataTestId: 'initial-credits-dropdown',
-      ancestorLevel: 0
-    });
-  }
-
-  getInstitutionalRole(): SelectMenu {
-    return SelectMenu.findByName(this.page, {
-      type: ElementType.Dropdown,
-      dataTestId: 'institutionalRole',
-      ancestorLevel: 0
-    });
-  }
-
-  getVerifiedInstitution(): SelectMenu {
-    return SelectMenu.findByName(this.page, {
-      type: ElementType.Dropdown,
-      dataTestId: 'verifiedInstitution',
-      ancestorLevel: 0
-    });
-  }
-
-  getSaveButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.Save });
-  }
-
-  getCancelButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.Cancel });
   }
 
   getAccountAccessSwitch(): Switch {
@@ -111,6 +70,18 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
     // Append to table xpath with xpath that check for table title. There's another data table in same page. It's the Egress Alert table.
     table.setXpath(`${table.getXpath()}[./preceding-sibling::*[contains(., "Access status")]]`);
     return table;
+  }
+
+  getInitialCreditLimit(): SelectMenu {
+    return this.getSelectMenu('initial-credits-dropdown');
+  }
+
+  getInstitutionalRole(): SelectMenu {
+    return this.getSelectMenu('institutionalRole');
+  }
+
+  getVerifiedInstitution(): SelectMenu {
+    return this.getSelectMenu('verifiedInstitution');
   }
 
   async getEmailErrorMessage(): Promise<string> {

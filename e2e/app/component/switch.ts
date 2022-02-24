@@ -27,14 +27,14 @@ export default class Switch extends BaseElement {
     await this.click();
   }
 
-  async turnOff(): Promise<void> {
+  async toggleOff(): Promise<void> {
     const checked = await this.isOn();
     if (checked) {
       await this.toggle();
     }
   }
 
-  async turnOn(): Promise<void> {
+  async toggleOn(): Promise<void> {
     const checked = await this.isOn();
     if (!checked) {
       await this.toggle();
