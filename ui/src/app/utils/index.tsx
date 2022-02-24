@@ -588,3 +588,6 @@ export const cond = <T extends unknown>(
 export const usernameWithoutDomain = (username: string) => {
   return username ? username.substring(0, username.indexOf('@')) : '';
 };
+
+export const capStringWithEllipsis = (value: string, maxLength: number) =>
+  value?.length > maxLength ? value.slice(0, maxLength) + '...' : value;

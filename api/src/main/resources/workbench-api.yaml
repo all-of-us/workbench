@@ -4344,6 +4344,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AccessModuleConfig"
+      accessTiersVisibleToUsers:
+        type: array
+        description: The shortnames of the access tiers which are visible to users in this environment.
+        items:
+          type: string
   RuntimeImage:
     type: object
     properties:
