@@ -41,8 +41,8 @@ import {
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import {
-  AccessModulesStatus,
   accessRenewalModules,
+  AccessRenewalStatus,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -173,19 +173,22 @@ export const getUpdatedProfileValue = (
   }
 };
 
-const getModuleStatus = (profile, moduleName) =>
+const getModuleStatus = (
+  profile: Profile,
+  moduleName: AccessModule
+): AccessRenewalStatus =>
   computeRenewalDisplayDates(getAccessModuleStatusByName(profile, moduleName))
     .moduleStatus;
 
 const moduleStatusStyle = (moduleStatus) =>
   cond(
     [
-      moduleStatus === AccessModulesStatus.INCOMPLETE ||
-        moduleStatus === AccessModulesStatus.EXPIRING_SOON,
+      moduleStatus === AccessRenewalStatus.INCOMPLETE ||
+        moduleStatus === AccessRenewalStatus.EXPIRING_SOON,
       () => commonStyles.incompleteOrExpiringModule,
     ],
     [
-      moduleStatus === AccessModulesStatus.EXPIRED,
+      moduleStatus === AccessRenewalStatus.EXPIRED,
       () => commonStyles.expiredModule,
     ],
     () => commonStyles.completeModule
@@ -270,26 +273,26 @@ export const TierBadgesMaybe = (props: {
 }) => {
   const { profile, moduleName } = props;
 
-  const rtMaybe = (moduleName === AccessModule.ERACOMMONS
-    ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-    : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
-    <RegisteredTierBadge style={{ gridArea: 'badge' }} />
-  );
+  const rtRequired =
+    moduleName === AccessModule.ERACOMMONS
+      ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
+      : getAccessModuleConfig(moduleName)?.requiredForRTAccess;
 
-  const ctMaybe = (moduleName === AccessModule.ERACOMMONS
-    ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-    : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
-    <ControlledTierBadge style={{ gridArea: 'badge' }} />
-  );
+  const ctRequired =
+    moduleName === AccessModule.ERACOMMONS
+      ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
+      : getAccessModuleConfig(moduleName)?.requiredForCTAccess;
 
-  // give the badges a little space
-  const spacer = <div style={{ width: '5%' }} />;
-
+  // fake a sub-table to keep RTs aligned with RTs
   return (
     <FlexRow style={{ justifyContent: 'center' }}>
-      {rtMaybe}
-      {rtMaybe && ctMaybe && spacer}
-      {ctMaybe}
+      <div style={{ width: '30px' }}>
+        {rtRequired && <RegisteredTierBadge />}
+      </div>
+      <div style={{ width: '30px' }} />
+      <div style={{ width: '30px' }}>
+        {ctRequired && <ControlledTierBadge />}
+      </div>
     </FlexRow>
   );
 };

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { environment } from 'environments/environment';
 import { FlexRow } from 'app/components/flex';
 import {
   CheckCircle,
@@ -17,16 +16,20 @@ import {
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
+import { serverConfigStore, useStore } from 'app/utils/stores';
 
 interface TierProps {
   shortName: string;
   userHasAccess: boolean;
 }
 const Tier = (props: TierProps) => {
+  const {
+    config: { accessTiersVisibleToUsers },
+  } = useStore(serverConfigStore);
   const { shortName, userHasAccess } = props;
   const displayName = displayNameForTier(shortName);
 
-  return environment.accessTiersVisibleToUsers.includes(shortName) ? (
+  return accessTiersVisibleToUsers.includes(shortName) ? (
     <div style={styles.dataAccessTier}>
       {shortName === AccessTierShortNames.Registered ? (
         <RegisteredTierBadge style={{ gridArea: 'badge' }} />

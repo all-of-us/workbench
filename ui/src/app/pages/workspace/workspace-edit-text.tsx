@@ -94,9 +94,9 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: (
       <div>
         The primary purpose of the research is to learn more about a particular
-        disease or disorder (for example, type 2 diabetes), a trait (for
-        example, blood pressure), or a set of related conditions (for example,
-        autoimmune diseases, psychiatric disorders).
+        disease or disorder (e.g. type 2 diabetes), a trait (e.g. blood
+        pressure), or a set of related conditions (e.g. autoimmune diseases,
+        psychiatric disorders).
       </div>
     ),
   },
@@ -160,7 +160,7 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: (
       <div>
         This research focuses on ethical, legal, and social implications (ELSI)
-        of, or related to design, conduct, and translation of research.
+        of or related to design, conduct, and translation of research.
       </div>
     ),
   },
@@ -169,8 +169,8 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     shortDescription: 'Drug/Therapeutics Development Research',
     longDescription: (
       <div>
-        Primary focus of the research is drug/therapeutics development. The data
-        will be used to understand treatment-gene interactions or treatment
+        The primary focus of the research is drug/therapeutics development. The
+        data will be used to understand treatment-gene interactions or treatment
         outcomes relevant to the therapeutic(s) of interest.
       </div>
     ),
@@ -309,13 +309,13 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
     header:
       'What are the scientific approaches you plan to use for your study? Describe the ' +
       'datasets, research methods, and tools you will use to answer your scientific question(s). \n',
-    description: <div>Free text; 1000 character limit</div>,
+    description: <div>(Free text; 1000 character limit)</div>,
   },
   {
     header:
       'What are the anticipated findings from the study? How would your findings ' +
       'contribute to the body of scientific knowledge in the field?',
-    description: <div>Free text; 1000 character limit</div>,
+    description: <div>(Free text; 1000 character limit)</div>,
   },
   {
     header: (

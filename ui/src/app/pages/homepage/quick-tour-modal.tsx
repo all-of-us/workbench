@@ -32,7 +32,7 @@ export const panels = [
         Welcome to the <AoU /> Researcher Workbench!
         <br />
         <br />
-        All workbench analyses happen in a “Workspace.” Within a Workspace you
+        All workbench analyses happen in a “Workspace.” Within a workspace you
         can select participants using the “Cohort Builder” tool. Another tool,
         the “Concept Set Builder,” allows you to select data types for analysis.
         The cohorts and concept sets you make can then be accessed from
@@ -49,8 +49,8 @@ export const panels = [
     shortTitle: 'Workspaces',
     content: (
       <div>
-        A Workspace is your place to store and analyze data for a specific
-        project. You can share this Workspace with other users, allowing them to
+        A workspace is your place to store and analyze data for a specific
+        project. You can share this workspace with other users, allowing them to
         view or edit your work. The dataset referenced by a workspace is in{' '}
         <StyledExternalLink href={OMOPDataSetLink} target='_blank'>
           OMOP common data model
@@ -62,11 +62,11 @@ export const panels = [
         to understand OMOP data model.
         <br />
         <br />
-        When you create your Workspace, you will be prompted to state your
+        When you create your workspace, you will be prompted to state your
         research purpose. For example, when you create a Workspace to study Type
-        2 Diabetes, for research purpose you could enter: “I will use this
-        Workspace to investigate the impact of Geography on use of different
-        medications to treat Type 2Diabetes.”
+        2 diabetes, for research purpose you could enter: “I will use this
+        workspace to investigate the impact of Geography on use of different
+        medications to treat Type 2 diabetes.”
       </div>
     ),
     image: workspaces,
@@ -98,17 +98,17 @@ export const panels = [
     content: (
       <div>
         Concepts describe information in a patient’s medical record, such as a
-        condition they have, a prescription they are taking or their physical
-        measurements. In the Workbench we refer to subject areas such as
+        condition they have, a prescription they are taking, or their physical
+        measurements. In the workbench we refer to subject areas such as
         conditions, drugs, measurements etc. as “domains.” You can search for
         and save collections of concepts from a particular domain as a “Concept
         Set.”
         <br />
         <br />
-        For example, if you want to select height, weight and blood pressure
-        information (concepts) from your “diabetes cases” Cohort, you can search
+        For example, if you want to select height, weight, and blood pressure
+        information (concepts) from your “diabetes cases” cohort, you can search
         for the 3 concepts from the “Labs and Measurements” domain and call it
-        “biometrics” Concept Set. You can then use Notebooks to extract that
+        “biometrics” concept set. You can then use notebooks to extract that
         information from your cohort.
       </div>
     ),
@@ -137,16 +137,16 @@ export const panels = [
     shortTitle: 'Notebooks',
     content: (
       <div>
-        A Notebook is a computational environment where you can analyze data
+        A notebook is a computational environment where you can analyze data
         with basic programming knowledge in R or Python. Several template
-        Notebooks and resources are available within your Workspace that will
-        guide you how to import your Cohort(s) and Concept Set(s) into the
+        notebooks and resources are available within your workspace that will
+        guide you how to import your cohort(s) and concept set(s) into the
         Notebook and can assist with basic analyses.
         <br />
         <br />
-        For example, you can launch a Notebook to import your “diabetes cases”
-        Cohort and then select your “biometrics” Concept Set, to get biometrics
-        data for the participants in your Cohort. You can then analyze the data
+        For example, you can launch a notebook to import your “diabetes cases”
+        cohort and then select your “biometrics” concept set, to get biometrics
+        data for the participants in your cohort. You can then analyze the data
         to study correlation between hypertension and diabetes.
       </div>
     ),

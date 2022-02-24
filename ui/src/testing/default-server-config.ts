@@ -4,6 +4,8 @@ import {
   ConfigResponse,
 } from 'generated/fetch/api';
 
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+
 const defaultAccessModuleConfig: AccessModuleConfig[] = [
   {
     name: AccessModule.TWOFACTORAUTH,
@@ -81,6 +83,10 @@ const defaultServerConfig: ConfigResponse = {
   accessRenewalLookback: 330,
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
+  accessTiersVisibleToUsers: [
+    AccessTierShortNames.Registered,
+    AccessTierShortNames.Controlled,
+  ],
 };
 
 export default defaultServerConfig;

@@ -37,7 +37,7 @@ import {
 } from './dates';
 import { cond, switchCase } from './index';
 
-export enum AccessModulesStatus {
+export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
   CURRENT = 'Current',
   EXPIRING_SOON = 'Expiring Soon',
@@ -405,26 +405,31 @@ const withInvalidDateHandling = (date) => {
   }
 };
 
-export const computeRenewalDisplayDates = ({
-  completionEpochMillis,
-  expirationEpochMillis,
-  bypassEpochMillis,
-}: AccessModuleStatus) => {
+interface RenewalDisplayDates {
+  lastConfirmedDate: string;
+  nextReviewDate: string;
+  moduleStatus: AccessRenewalStatus;
+}
+export const computeRenewalDisplayDates = (
+  status: AccessModuleStatus
+): RenewalDisplayDates => {
+  const { completionEpochMillis, expirationEpochMillis, bypassEpochMillis } =
+    status || {};
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
   const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function getCompleteOrExpireModuleStatus(): AccessModulesStatus {
+  function getCompleteOrExpireModuleStatus(): AccessRenewalStatus {
     return cond(
-      [!expirationEpochMillis, () => AccessModulesStatus.NEVER_EXPIRES],
-      [hasExpired(expirationEpochMillis), () => AccessModulesStatus.EXPIRED],
+      [!expirationEpochMillis, () => AccessRenewalStatus.NEVER_EXPIRES],
+      [hasExpired(expirationEpochMillis), () => AccessRenewalStatus.EXPIRED],
       [
         isExpiringNotBypassed({ expirationEpochMillis }),
-        () => AccessModulesStatus.EXPIRING_SOON,
+        () => AccessRenewalStatus.EXPIRING_SOON,
       ],
-      [!!expirationEpochMillis, () => AccessModulesStatus.CURRENT]
+      [!!expirationEpochMillis, () => AccessRenewalStatus.CURRENT]
     );
   }
 
@@ -435,7 +440,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: `${bypassDate}`,
         nextReviewDate: 'Unavailable (bypassed)',
-        moduleStatus: AccessModulesStatus.BYPASSED,
+        moduleStatus: AccessRenewalStatus.BYPASSED,
       }),
     ],
     // User never completed training
@@ -444,7 +449,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: 'Unavailable (not completed)',
         nextReviewDate: 'Unavailable (not completed)',
-        moduleStatus: AccessModulesStatus.INCOMPLETE,
+        moduleStatus: AccessRenewalStatus.INCOMPLETE,
       }),
     ],
     // User completed training; covers expired, within-lookback, and after-lookback cases.
