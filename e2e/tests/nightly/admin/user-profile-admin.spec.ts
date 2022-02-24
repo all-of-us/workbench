@@ -1,19 +1,22 @@
 import UserAdminPage from 'app/page/admin-user-list-page';
-import { parseForNumericalString, signInWithAccessToken } from 'utils/test-utils';
+import { asyncFilter, parseForNumericalString, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
 import UserProfileAdminPage from 'app/page/user-profile-admin-page';
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
-import Cell from 'app/component/cell';
+import Cell, { CellContent } from 'app/component/cell';
 import UserAuditPage from 'app/page/admin-user-audit-page';
 import { isBlank } from 'utils/str-utils';
 import fp from 'lodash/fp';
 
+/**
+ * Tests works for Verified Institution "Admin testing" and user "admin_test@fake-research-aou.org"
+ */
 describe('User Profile Admin', () => {
   enum TableColumns {
     ACCESS_MODULE = 'Access Module',
@@ -54,6 +57,11 @@ describe('User Profile Admin', () => {
     AccessModules.UPDATE_PROFILE,
     AccessModules.PUBLICATION
   ];
+
+  enum Tiers {
+    RT = 'Registered Tier',
+    CT = 'Controlled tier'
+  }
 
   const CHANGED_BACKGROUND_COLOR = 'rgb(248, 201, 84)';
   const testUserEmail = 'admin_test';
@@ -139,9 +147,42 @@ describe('User Profile Admin', () => {
     const moduleNames = await accountAccessTable.getRowValues(1);
     expect(moduleNames.sort()).toEqual(accessModules.sort());
 
-    // check badges
-    // $x('//*[@id="Registered-user"]')
-    // $x('//*[@id="Controlled-user"]')
+    // Verify Tier Badges displayed correctly
+    for (const accessModule of accessModules) {
+      const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.REQUIRED_FOR_TIER);
+      expect(await hasTierBadge(cell, Tiers.CT)).toBe(true);
+      accessModule === AccessModules.CT_TRAINING
+        ? expect(await hasTierBadge(cell, Tiers.RT)).toBe(false)
+        : expect(await hasTierBadge(cell, Tiers.RT)).toBe(true);
+    }
+
+    // Verify Status displayed correctly
+    for (const accessModule of accessModules) {
+      const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.STATUS);
+      accessModule === AccessModules.UPDATE_PROFILE || accessModule === AccessModules.PUBLICATION
+        ? expect(await cell.getText()).toBe('Current')
+        : expect(await cell.getText()).toBe('Bypassed');
+    }
+
+    // Verify values in "Expires on" column
+    for (const accessModule of accessModules) {
+      const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.EXPIRES_ON);
+      switch (accessModule) {
+        case AccessModules.GOOGLE_VERIFICATION:
+        case AccessModules.ERA:
+        case AccessModules.LOGIN_GOV:
+          // Match Never
+          expect(await cell.getText()).toEqual('Never');
+          break;
+        case AccessModules.UPDATE_PROFILE:
+        case AccessModules.PUBLICATION:
+          // Match date
+          expect(await cell.getText()).toEqual('May 12, 2031');
+          break;
+        default:
+          break;
+      }
+    }
   });
 
   test('Verify CANCEL and SAVE buttons work correctly', async () => {
@@ -277,20 +318,12 @@ describe('User Profile Admin', () => {
       AccessModules.GOOGLE_VERIFICATION,
       TableColumns.LAST_COMPLETED_ON
     );
-    const completedOn = await lastCompletedOnCell.getCellValue();
+    const completedOn = await lastCompletedOnCell.getText();
     expect(completedOn).toEqual('-');
-
-    // Expires on is NEVER for Google 2-step verification module
-    const expiresOnCell = await accessStatusTable.getCellByValue(
-      AccessModules.GOOGLE_VERIFICATION,
-      TableColumns.EXPIRES_ON
-    );
-    const expiresOn = await expiresOnCell.getCellValue();
-    expect(expiresOn).toEqual('Never');
 
     // Change Bypass for Google 2-step verification module
     const statusCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, TableColumns.STATUS);
-    const oldStatus = await statusCell.getCellValue();
+    const oldStatus = await statusCell.getText();
 
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.GOOGLE_VERIFICATION);
 
@@ -312,7 +345,7 @@ describe('User Profile Admin', () => {
     await saveButton.click();
     await userProfileAdminPage.waitForLoad();
 
-    const newStatus = await statusCell.getCellValue();
+    const newStatus = await statusCell.getText();
     if (oldStatus === 'Bypassed') {
       expect(newStatus).toBe('Incomplete');
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('No data access');
@@ -334,12 +367,12 @@ describe('User Profile Admin', () => {
 
     const accessStatusTable = userProfileAdminPage.getAccessStatusTable();
     const expiresOnCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.EXPIRES_ON);
-    const expiresOn = await expiresOnCell.getCellValue();
+    const expiresOn = await expiresOnCell.getText();
     expect(expiresOn).toEqual('-');
 
     // Change Bypass for Controlled Tier training module
     const statusCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.STATUS);
-    const oldStatus = await statusCell.getCellValue();
+    const oldStatus = await statusCell.getText();
 
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.CT_TRAINING);
     if (oldStatus === 'Bypassed') {
@@ -358,7 +391,7 @@ describe('User Profile Admin', () => {
     await saveButton.click();
     await userProfileAdminPage.waitForLoad();
 
-    const newStatus = await statusCell.getCellValue();
+    const newStatus = await statusCell.getText();
     if (oldStatus === 'Bypassed') {
       expect(newStatus).toBe('Incomplete');
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
@@ -457,6 +490,15 @@ describe('User Profile Admin', () => {
     const pageTitle = await newPage.title();
     expect(pageTitle).toEqual('Institutional Agreements – All of Us Research Hub');
     await newPage.close();
+  }
+
+  async function hasTierBadge(cell: Cell, tier: Tiers): Promise<boolean> {
+    const elements: ElementHandle[] = await cell.getContent(CellContent.SVG);
+    const svg: ElementHandle[] = await asyncFilter(
+      elements,
+      async (svg: ElementHandle) => tier === (await getPropValue<string>(svg, 'textContent'))
+    );
+    return svg.length > 0;
   }
 
   function replaceWithTmpUrl(url: string): string {

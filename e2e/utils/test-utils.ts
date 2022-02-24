@@ -473,7 +473,6 @@ export async function findOrCreateCohort(page: Page, opts: { returnToDataPage?: 
   return cohort ? cohort : createCohort(page, { returnToDataPage });
 }
 
-export function parseForNumbericalString(text: string): RegExpMatchArray | null {
 export function parseForNumericalString(text: string): RegExpMatchArray | null {
   return text.match(/(\d|\.)+/g);
 }
