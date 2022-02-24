@@ -118,6 +118,7 @@ import org.pmiops.workbench.model.ParticipantDataListResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
+import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
@@ -2143,6 +2144,49 @@ public class CohortReviewControllerTest {
 
     assertForbiddenException(exception);
   }
+
+  ////////// getVocabularies - See CohortReviewControllerBQTest   //////////
+  @ParameterizedTest(name = "getVocabulariesAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getVocabulariesAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    stubBigQueryCohortCalls();
+
+    List<Vocabulary> actual =
+        cohortReviewController
+            .getVocabularies(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohortReview.getCohortReviewId())
+            .getBody()
+            .getItems();
+
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @ParameterizedTest(name = "getVocabulariesForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getVocabulariesForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getVocabularies(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohortReview.getCohortReviewId()));
+
+    assertForbiddenException(exception);
+  }
   ////////// helper methods  //////////
 
   private static Stream<Arguments> paramsSortByFilterColumn() {
@@ -2353,6 +2397,10 @@ public class CohortReviewControllerTest {
             .put("startDate", 2)
             .put("ageAtEvent", 3)
             .put("rank", 4)
+            // vocabularies
+            .put("domain", 0)
+            .put("type", 1)
+            .put("vocabulary", 2)
             .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -2378,12 +2426,11 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getLong(null, 1)).thenReturn(1L);
     // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
     when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
-
-    //        .standardName(bigQueryService.getString(row, rm.get("standardName")))
-    //        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-    //        .startDate(bigQueryService.getDate(row, rm.get("startDate")))
-    //        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-    //        .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
+    // vocabularies 0-string, 1-string, 2-string
+    when(bigQueryService.getString(null, 2)).thenReturn("1");
+//         .domain(bigQueryService.getString(row, rm.get("domain")))
+//        .type(bigQueryService.getString(row, rm.get("type")))
+//        .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
 
   }
 
