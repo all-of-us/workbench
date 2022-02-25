@@ -169,16 +169,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       return false;
     }
 
-    // If the workspace does not require researchPurposeReview, track the navigation to workspace
-    trackWorkspaceNavigation() {
-      const { workspace } = this.props;
-      if (!this.doesWorkspaceNeedsReview()) {
-        workspace.published
-          ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
-          : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-      }
-    }
-
     onClick() {
       const { workspace } = this.props;
       if (!this.doesWorkspaceNeedsReview()) {
@@ -194,12 +184,28 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       }
     }
 
+    restrictWorkspaceCardNameNavigation() {
+      const { tierAccessDisabled } = this.props;
+      return this.doesWorkspaceNeedsReview() || tierAccessDisabled;
+    }
+
     workspaceCardNameTarget() {
       const {
-        tierAccessDisabled,
         workspace: { id, namespace },
       } = this.props;
-      return tierAccessDisabled ? '#' : `/workspaces/${namespace}/${id}/data`;
+      return this.restrictWorkspaceCardNameNavigation()
+        ? '#'
+        : `/workspaces/${namespace}/${id}/data`;
+    }
+
+    // If the workspace does not require researchPurposeReview, track the navigation to workspace
+    trackWorkspaceNavigation() {
+      const { workspace } = this.props;
+      if (!this.doesWorkspaceNeedsReview()) {
+        workspace.published
+          ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
+          : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+      }
     }
 
     render() {
