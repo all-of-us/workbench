@@ -299,13 +299,13 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
 
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
     useEffect(() => {
-      const expiringModules = expirableModules
+      const expiringModuleNames: AccessModule[] = expirableModules
         .filter((status) => isExpiring(status.expirationEpochMillis))
         .map((status) => status.moduleName);
 
       const onMount = async () => {
         setLoading(true);
-        await syncModulesExternal(expiringModules);
+        await syncModulesExternal(expiringModuleNames);
         await reloadProfile();
         setLoading(false);
         spinnerProps.hideSpinner();
