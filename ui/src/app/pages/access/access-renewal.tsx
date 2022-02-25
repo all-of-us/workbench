@@ -28,7 +28,7 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByNameOrEmpty,
-  isExpiring,
+  isExpiringOrExpired,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
   syncModulesExternal,
@@ -148,14 +148,18 @@ const isExpiringAndNotBypassed = (
   modules: AccessModuleStatus[]
 ) => {
   const status = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
-  return isExpiring(status?.expirationEpochMillis) && !status.bypassEpochMillis;
+  return (
+    isExpiringOrExpired(status?.expirationEpochMillis) &&
+    !status.bypassEpochMillis
+  );
 };
 
 const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
   const isComplete = !!status?.completionEpochMillis;
   const wasBypassed = !!status?.bypassEpochMillis;
   return (
-    wasBypassed || (isComplete && !isExpiring(status?.expirationEpochMillis))
+    wasBypassed ||
+    (isComplete && !isExpiringOrExpired(status?.expirationEpochMillis))
   );
 };
 
@@ -292,7 +296,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
     useEffect(() => {
       const expiringModuleNames: AccessModule[] = expirableModules
-        .filter((status) => isExpiring(status.expirationEpochMillis))
+        .filter((status) => isExpiringOrExpired(status.expirationEpochMillis))
         .map((status) => status.moduleName);
 
       const onMount = async () => {

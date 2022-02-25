@@ -417,10 +417,9 @@ const withInvalidDateHandling = (date) => {
 
 // The module has already expired
 const hasExpired = (expiration: number): boolean =>
-  !!expiration && getWholeDaysFromNow(expiration) < 0;
+  expiration && getWholeDaysFromNow(expiration) < 0;
 
-// The module can either be expired or is expiring
-export const isExpiring = (expiration: number): boolean =>
+export const isExpiringOrExpired = (expiration: number): boolean =>
   expiration
     ? getWholeDaysFromNow(expiration) <=
       serverConfigStore.get().config.accessRenewalLookback
