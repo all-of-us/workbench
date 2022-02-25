@@ -4,6 +4,7 @@ import { Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
 import ReactSelect from 'app/element/react-select';
+import { getPropValue } from 'utils/element-utils';
 
 const modalTitle = 'Copy to Workspace';
 
@@ -72,5 +73,11 @@ export default class CopyToWorkspaceModal extends Modal {
 
     const option = await selectMenu.waitForOption(workspaceName);
     await option.click({ delay: 20 });
+  }
+
+  async getCdrMismatchError(): Promise<string> {
+    const xpath = `${this.getXpath()}//*[@data-test-id="concept-set-cdr-mismatch-error"]`;
+    const element = await this.page.waitForXPath(xpath, { visible: true });
+    return getPropValue<string>(element, 'textContent');
   }
 }
