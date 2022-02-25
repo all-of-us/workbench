@@ -1255,7 +1255,7 @@ public class CohortReviewControllerTest {
   @Test
   public void deleteParticipantCohortAnnotationNoAnnotation() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
+    saveTestParticipantCohortAnnotation();
     Long wrongAnnotationId = -1L;
 
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
