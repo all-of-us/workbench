@@ -1,10 +1,20 @@
-import { LinkText, MenuOption, WorkspaceAccessLevel, Tabs } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
+import { LinkText, MenuOption, WorkspaceAccessLevel, Tabs, ConceptSets, ResourceCard } from 'app/text-labels';
+import {
+  createDataset,
+  findOrCreateWorkspace,
+  findWorkspaceCard,
+  openTab,
+  signInWithAccessToken
+} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { makeWorkspaceName } from 'utils/str-utils';
+import { makeRandomName } from 'utils/str-utils';
+import DataResourceCard from 'app/component/data-resource-card';
+import DatasetBuildPage from 'app/page/dataset-build-page';
+import { waitWhileLoading } from 'utils/waits-utils';
+import { Page } from 'puppeteer';
 
 describe('Workspace Reader and Writer Permission Test', () => {
   const assignAccess = [
@@ -18,11 +28,16 @@ describe('Workspace Reader and Writer Permission Test', () => {
     }
   ];
 
-  const workspace = makeWorkspaceName();
+  const workspace = makeRandomName('e2eShareWorkspace');
+  let datasetName;
 
   test('Share workspace to READER and WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
+
+    datasetName = await createDataset(page, {
+      conceptSets: [ConceptSets.Demographics, ConceptSets.AllSurveys]
+    });
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
@@ -32,7 +47,6 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     for (const assign of assignAccess) {
       await aboutPage.shareWorkspaceWithUser(assign.userEmail, assign.accessRole);
-      await aboutPage.waitForLoad();
     }
 
     await reloadAboutPage();
@@ -48,7 +62,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
-  test.each(assignAccess)('Verify WRITER and READER cannot share, edit or delete workspace', async (assign) => {
+  test.each(assignAccess)('WRITER and READER cannot share, edit or delete workspace', async (assign) => {
     await signInWithAccessToken(page, assign.userEmail);
 
     // Find workspace created by previous test. If not found, test will fail.
@@ -72,12 +86,57 @@ describe('Workspace Reader and Writer Permission Test', () => {
     const modal = await aboutPage.openShareModal();
     const searchInput = modal.waitForSearchBox();
     expect(await searchInput.isDisabled()).toBe(true);
-    expect(await modal.getSaveButton().isCursorNotAllowed()).toBe(true);
+    await modal.getSaveButton().expectEnabled(false);
     await modal.clickButton(LinkText.Cancel, { waitForClose: true });
     await aboutPage.waitForLoad();
 
     // Verify Workspace Actions menu: READER or WRITER cannot Share, Edit or Delete workspace.
-    await verifyWorkspaceActionMenuOptions();
+    await verifyWorkspaceActionMenuOptions(page);
+  });
+
+  test('READER cannot edit dataset', async () => {
+    await signInWithAccessToken(page, config.READER_USER);
+
+    // Find workspace created by previous test. If not found, test will fail.
+    const workspaceCard = await findWorkspaceCard(page, workspace);
+    await workspaceCard.clickWorkspaceName(true);
+
+    const readerDataPage = new WorkspaceDataPage(page);
+    await readerDataPage.waitForLoad();
+
+    // Create Cohorts and Datasets button are disabled.
+    await readerDataPage.getAddDatasetButton().expectEnabled(false);
+    await readerDataPage.getAddCohortsButton().expectEnabled(false);
+
+    await openTab(page, Tabs.Datasets, readerDataPage);
+
+    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
+    const resourceCard = new DataResourceCard(page);
+    const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
+    expect(dataSetCard).toBeTruthy();
+
+    const snowmanMenu = await dataSetCard.getSnowmanMenu();
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+
+    // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
+    await dataSetCard.clickResourceName();
+    const dataSetEditPage = new DatasetBuildPage(page);
+    await dataSetEditPage.waitForLoad();
+
+    // Analyze and Save buttons are disabled.
+    const analyzeButton = dataSetEditPage.getAnalyzeButton();
+    await analyzeButton.expectEnabled(false);
+    const saveButton = dataSetEditPage.getSaveButton();
+    await saveButton.expectEnabled(false);
+
+    // No matter of what has changed, the Analyze button remains disabled.
+    await dataSetEditPage.selectConceptSets([ConceptSets.FitbitIntraDaySteps]);
+    await dataSetEditPage.getPreviewTableButton().click();
+    await waitWhileLoading(page);
+    await analyzeButton.expectEnabled(false);
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
@@ -109,11 +168,12 @@ describe('Workspace Reader and Writer Permission Test', () => {
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);
   }
-  async function verifyWorkspaceActionMenuOptions(): Promise<void> {
+
+  async function verifyWorkspaceActionMenuOptions(page: Page): Promise<void> {
     const dataPage = new WorkspaceDataPage(page);
     const snowmanMenu = await dataPage.getWorkspaceActionMenu();
-    const links = await snowmanMenu.getAllOptionTexts();
-    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
+    const options = await snowmanMenu.getAllOptionTexts();
+    expect(options).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
 
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);

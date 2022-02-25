@@ -52,7 +52,8 @@ export function makeWorkspaceName(opts: { includeHyphen?: boolean } = {}): strin
 export function makeRandomName(prefix?: string, opts: { includeHyphen?: boolean } = {}): string {
   const { includeHyphen = true } = opts;
   prefix = prefix || 'aoutest';
-  return `${prefix}${includeHyphen ? '-' : ''}${Math.floor(Math.random() * 10000000000)}`;
+  prefix = includeHyphen ? `${prefix}-` : prefix;
+  return `${prefix}${Math.floor(Math.random() * 1000000)}${Math.floor(Date.now() / 1000)}`;
 }
 
 export const extractPageName = async (page: Page): Promise<string> => {
