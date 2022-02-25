@@ -5,15 +5,20 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.HttpMethod;
 import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Provider;
+import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
+import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
+import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,22 +29,27 @@ public class TaskQueueService {
   private static final String AUDIT_PROJECTS_PATH = BASE_PATH + "/auditProjectAccess";
   private static final String SYNCHRONIZE_ACCESS_PATH = BASE_PATH + "/synchronizeUserAccess";
   private static final String EGRESS_EVENT_PATH = BASE_PATH + "/processEgressEvent";
+  private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
 
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
+  private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
 
   private WorkbenchLocationConfigService locationConfigService;
   private Provider<CloudTasksClient> cloudTasksClientProvider;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private Provider<UserAuthentication> userAuthenticationProvider;
 
   public TaskQueueService(
       WorkbenchLocationConfigService locationConfigService,
       Provider<CloudTasksClient> cloudTasksClientProvider,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      Provider<UserAuthentication> userAuthenticationProvider) {
     this.locationConfigService = locationConfigService;
     this.cloudTasksClientProvider = cloudTasksClientProvider;
     this.workbenchConfigProvider = configProvider;
+    this.userAuthenticationProvider = userAuthenticationProvider;
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds) {
@@ -103,7 +113,21 @@ public class TaskQueueService {
         new ProcessEgressEventRequest().eventId(eventId));
   }
 
+  public void pushCreateWorkspaceTask(String operationId, Workspace workspace) {
+    createAndPushTask(
+        CREATE_WORKSPACE_QUEUE_NAME,
+        CREATE_WORKSPACE_PATH,
+        new CreateWorkspaceTaskRequest().operationId(operationId).workspace(workspace),
+        ImmutableMap.of(
+            "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
+  }
+
   private String createAndPushTask(String queueName, String taskUri, Object jsonBody) {
+    return createAndPushTask(queueName, taskUri, jsonBody, ImmutableMap.of());
+  }
+
+  private String createAndPushTask(
+      String queueName, String taskUri, Object jsonBody, Map<String, String> extraHeaders) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     String queuePath =
         QueueName.of(
@@ -122,7 +146,8 @@ public class TaskQueueService {
                         .setRelativeUri(taskUri)
                         .setBody(ByteString.copyFromUtf8(body))
                         .setHttpMethod(HttpMethod.POST)
-                        .putHeaders("Content-type", "application/json"))
+                        .putHeaders("Content-type", "application/json")
+                        .putAllHeaders(extraHeaders))
                 .build())
         .getName();
   }

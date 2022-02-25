@@ -15,6 +15,8 @@ import {
   SpecificPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceOperation,
+  WorkspaceOperationStatus,
 } from 'generated/fetch';
 
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
@@ -1057,9 +1059,18 @@ export const WorkspaceEdit = fp.flow(
         }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = await workspacesApi().createWorkspace(
+          let workspaceOp = await workspacesApi().createWorkspaceAsync(
             this.state.workspace
           );
+          while (workspaceOp.status === WorkspaceOperationStatus.PENDING) {
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            workspaceOp = await workspacesApi().getWorkspaceOperation(workspaceOp.id);
+            console.log(workspaceOp);
+          }
+          if (workspaceOp.status === WorkspaceOperationStatus.ERROR) {
+            throw Error('workspace op failed');
+          }
+          workspace = workspaceOp.workspace;
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
             this.props.workspace.namespace,
