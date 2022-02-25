@@ -355,6 +355,13 @@ public class GenomicExtractionService {
     // keeping overhead low and limiting footprint on shared extraction quota.
     int scatter =
         Ints.constrainToRange(personIds.size() / 2, MIN_EXTRACTION_SCATTER, MAX_EXTRACTION_SCATTER);
+
+    Map<String, String> maybeInputs = new HashMap<>();
+    if (cohortExtractionConfig.extractionMethodLogicalVersion != null
+        && cohortExtractionConfig.extractionMethodLogicalVersion >= 2) {
+      // Added in https://github.com/broadinstitute/gatk/pull/7698
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
+    }
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
             .get()
@@ -410,6 +417,7 @@ public class GenomicExtractionService {
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gatk_override",
                                 "\"" + cohortExtractionConfig.gatkJarUri + "\"")
+                            .putAll(maybeInputs)
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)

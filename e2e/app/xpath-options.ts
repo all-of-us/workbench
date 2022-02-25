@@ -21,5 +21,7 @@ export enum ElementType {
   Select = 'select',
   Dropdown = 'dropdown',
   Tab = 'Tab',
-  Number = 'number'
+  Number = 'number',
+  Switch = 'switch',
+  StaticText = 'statictext'
 }

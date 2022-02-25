@@ -45,6 +45,7 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-stable",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
     "extractionMethodConfigurationVersion": 3,
+    "extractionMethodLogicalVersion": 1,
     "extractionCohortsDataset": "fc-aou-cdr-stable-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-stable-ct.wgs_extraction_temp_tables",
