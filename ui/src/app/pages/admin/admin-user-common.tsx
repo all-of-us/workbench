@@ -46,6 +46,7 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
+  getAccessModuleStatusByNameOrEmpty,
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
 import { getRoleOptions } from 'app/utils/institutions';
@@ -672,12 +673,10 @@ export const AccessModuleExpirations = ({ profile }: ExpirationProps) => {
         Data Access Status: {accessStatus}
       </label>
       {moduleNames.map((moduleName, zeroBasedStep) => {
-        // return the status if found; init an empty status with the moduleName if not
-        const status: AccessModuleStatus = modules.find(
-          (s) => s.moduleName === moduleName
-        ) || { moduleName };
         const { lastConfirmedDate, nextReviewDate } =
-          computeRenewalDisplayDates(status);
+          computeRenewalDisplayDates(
+            getAccessModuleStatusByNameOrEmpty(modules, moduleName)
+          );
         const { AARTitleComponent } = getAccessModuleConfig(moduleName);
         return (
           <FlexRow key={zeroBasedStep} style={{ marginTop: '0.5rem' }}>

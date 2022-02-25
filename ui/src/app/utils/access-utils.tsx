@@ -365,7 +365,7 @@ export const getAccessModuleStatusByNameOrEmpty = (
   moduleName: AccessModule
 ): AccessModuleStatus => {
   return (
-    modules.find((a) => a.moduleName === moduleName) || {
+    modules.find((status) => status.moduleName === moduleName) || {
       moduleName,
     }
   );
