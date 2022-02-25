@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +19,7 @@ import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -41,6 +44,7 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
@@ -53,6 +57,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
+import org.pmiops.workbench.model.WorkspaceOperation;
+import org.pmiops.workbench.model.WorkspaceOperationStatus;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -85,6 +91,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
   private final IamService iamService;
+  private final TaskQueueService taskQueueService;
 
   @Autowired
   public WorkspacesController(
@@ -102,7 +109,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService,
-      IamService iamService) {
+      IamService iamService,
+      TaskQueueService taskQueueService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -118,6 +126,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.iamService = iamService;
+    this.taskQueueService = taskQueueService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -189,6 +198,52 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  // TODO: Temporary hack for POC. This should write to the database instead.
+  private static Map<String, WorkspaceOperation> operations =
+      Collections.synchronizedMap(new HashMap<>());
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> createWorkspaceAsync(Workspace workspace) {
+    // Basic request validation.
+    validateWorkspaceApiModel(workspace);
+    getLiveCdrVersionId(workspace.getCdrVersionId());
+
+    // TODO: enforce access level check here? Not strictly necessary, but may make sense as
+    // belt/suspenders check.
+    WorkspaceOperation op =
+        new WorkspaceOperation()
+            .status(WorkspaceOperationStatus.PENDING)
+            .id(UUID.randomUUID().toString().substring(0, 10));
+    operations.put(op.getId(), op);
+
+    taskQueueService.pushCreateWorkspaceTask(op.getId(), workspace);
+    return ResponseEntity.ok(op);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(String id) {
+    if (!operations.containsKey(id)) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok().body(operations.get(id));
+  }
+
+  @Override
+  public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
+    WorkspaceOperation result = new WorkspaceOperation().id(request.getOperationId());
+
+    try {
+      Workspace w = this.createWorkspace(request.getWorkspace()).getBody();
+      result.status(WorkspaceOperationStatus.SUCCESS).workspace(w);
+    } catch (Exception e) {
+      result.status(WorkspaceOperationStatus.ERROR);
+      throw e;
+    } finally {
+      operations.put(result.getId(), result);
+    }
+    return ResponseEntity.ok().build();
   }
 
   private DbWorkspace createDbWorkspace(
@@ -452,6 +507,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> cloneWorkspaceAsync(
+      String workspaceNamespace, String workspaceId, CloneWorkspaceRequest body) {
+    // TODO
+    return null;
   }
 
   /** Gets a FireCloud Billing project. */
