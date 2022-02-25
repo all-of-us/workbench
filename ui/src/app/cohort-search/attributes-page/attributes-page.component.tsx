@@ -954,7 +954,7 @@ export const AttributesPage = fp.flow(
                             padding: '0 0.25rem',
                             ...(this.hasUnits ? { width: '70%' } : {}),
                           }}
-                          value={attr.operands[0] || ''}
+                          value={attr.operands[0]}
                           min={attr.MIN}
                           max={attr.MAX}
                           onChange={(v) => this.inputChange(v, a, 0)}
@@ -974,7 +974,7 @@ export const AttributesPage = fp.flow(
                               padding: '0 0.25rem',
                               ...(this.hasUnits ? { width: '70%' } : {}),
                             }}
-                            value={attr.operands[1] || ''}
+                            value={attr.operands[1]}
                             min={attr.MIN}
                             max={attr.MAX}
                             onChange={(v) => this.inputChange(v, a, 1)}
