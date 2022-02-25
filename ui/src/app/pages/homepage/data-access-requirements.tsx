@@ -261,10 +261,10 @@ export const requiredModules: AccessModule[] = [...rtModules, duccModule];
 
 export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
 
-const isCompleted = (status: AccessModuleStatus) =>
-  status && !!status.completionEpochMillis;
-const isBypassed = (status: AccessModuleStatus) =>
-  status && !!status.bypassEpochMillis;
+const isCompleted = (status: AccessModuleStatus): boolean =>
+  !!status?.completionEpochMillis;
+const isBypassed = (status: AccessModuleStatus): boolean =>
+  !!status?.bypassEpochMillis;
 const isCompliant = (status: AccessModuleStatus) =>
   isCompleted(status) || isBypassed(status);
 
