@@ -261,7 +261,6 @@ public class CohortReviewControllerTest {
     ReviewQueryBuilder.class,
     ParticipantCohortAnnotationMapperImpl.class,
     ParticipantCohortStatusMapperImpl.class,
-    // workspaceController
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
@@ -687,8 +686,7 @@ public class CohortReviewControllerTest {
     CohortReview requestCohortReview =
         new CohortReview()
             .cohortReviewId(cohortReview.getCohortReviewId())
-            .cohortId(cohortReview.getCohortId())
-            .etag(null);
+            .cohortId(cohortReview.getCohortId());
 
     Throwable exception =
         assertThrows(
@@ -1041,7 +1039,7 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortAnnotationNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-    Long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+    Long wrongCohorReviewId = -1L;
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1049,18 +1047,18 @@ public class CohortReviewControllerTest {
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReviewId,
+                    wrongCohorReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
                     new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
 
-    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohorReviewId, exception);
   }
 
   @Test
   public void updateParticipantCohortAnnotationNoParticipantCohortStatus() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId() + 99L;
+    Long wrongParticipantId = -1L;
     Long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
         assertThrows(
@@ -1070,16 +1068,16 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortReviewId,
-                    participantId,
+                    wrongParticipantId,
                     participantAnnotation.getAnnotationId(),
                     new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
 
-    assertNotFoundExceptionParticipantCohortStatus(cohortReviewId, participantId, exception);
+    assertNotFoundExceptionParticipantCohortStatus(cohortReviewId, wrongParticipantId, exception);
   }
 
   @Test
   public void updateParticipantCohortAnnotationNoAnnotation() {
-    long badAnnotationId = participantAnnotation.getAnnotationId() + 99L;
+    long wrongAnnotationId = -1L;
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     Throwable exception =
@@ -1091,7 +1089,7 @@ public class CohortReviewControllerTest {
                     workspace.getId(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
-                    badAnnotationId,
+                    wrongAnnotationId,
                     new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
 
     assertThat(exception)
@@ -1099,7 +1097,7 @@ public class CohortReviewControllerTest {
         .isEqualTo(
             String.format(
                 "Not Found: Participant Cohort Annotation does not exist for annotationId: %d, cohortReviewId: %d, participantId: %d",
-                badAnnotationId,
+                wrongAnnotationId,
                 cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId()));
   }
@@ -1258,7 +1256,7 @@ public class CohortReviewControllerTest {
   public void deleteParticipantCohortAnnotationNoAnnotation() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
     DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
-    Long annotationId = annotation.getAnnotationId() + 99L;
+    Long wrongAnnotationId = -1L;
 
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
@@ -1271,13 +1269,13 @@ public class CohortReviewControllerTest {
                     workspace.getId(),
                     cohortReview.getCohortReviewId(),
                     participantId,
-                    annotationId));
+                    wrongAnnotationId));
 
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
             "Not Found: No participant cohort annotation found for annotationId: "
-                + annotationId
+                + wrongAnnotationId
                 + ", cohortReviewId: "
                 + cohortReview.getCohortReviewId()
                 + ", participantId: "
@@ -1353,7 +1351,7 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortStatusNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-    Long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+    Long wrongCohortReviewId = -1L;
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1361,18 +1359,18 @@ public class CohortReviewControllerTest {
                 cohortReviewController.updateParticipantCohortStatus(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReviewId,
+                    wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
 
-    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
   @Test
   public void updateParticipantCohortStatusNoParticipantId() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
     Long cohortReviewId = cohortReview.getCohortReviewId();
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId() + 99L;
+    Long wrongParticipantId = -1L;
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1381,10 +1379,10 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortReviewId,
-                    participantId,
+                    wrongParticipantId,
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
 
-    assertNotFoundExceptionParticipantCohortStatus(cohortReviewId, participantId, exception);
+    assertNotFoundExceptionParticipantCohortStatus(cohortReviewId, wrongParticipantId, exception);
   }
 
   @ParameterizedTest(
@@ -1454,7 +1452,7 @@ public class CohortReviewControllerTest {
   @Test
   public void getParticipantCohortAnnotationsNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+    long wrongCohortReviewId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -1463,10 +1461,10 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortAnnotations(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReviewId,
+                    wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
-    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
   @ParameterizedTest(
@@ -1541,7 +1539,7 @@ public class CohortReviewControllerTest {
   @Test
   public void getParticipantCohortStatusNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+    long wrongCohortReviewId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -1550,10 +1548,10 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortStatus(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReviewId,
+                    wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
-    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
   @ParameterizedTest(name = "getParticipantCohortStatusAllowedAccessLevel WorkspaceAccessLevel={0}")
@@ -1629,7 +1627,7 @@ public class CohortReviewControllerTest {
   @Test
   public void getParticipantCountNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+    long wrongCohortReviewId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -1638,11 +1636,11 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCount(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReviewId,
+                    wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
 
-    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
   @Test
@@ -1762,7 +1760,7 @@ public class CohortReviewControllerTest {
   @Test
   public void getParticipantDataNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-    long cohortReviewId = cohortReview.getCohortReviewId() + 99L;
+    long wrongCohortReviewId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -1771,11 +1769,11 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantData(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortReviewId,
+                    wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
 
-    assertNotFoundExceptionCohortReview(cohortReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
   @Test
@@ -1897,7 +1895,7 @@ public class CohortReviewControllerTest {
   public void getParticipantCohortStatusesNoCohort() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
 
-    Long cohortId = cohort.getCohortId() + 99L;
+    Long worngCohortId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -1906,11 +1904,11 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortStatuses(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohortId,
+                    worngCohortId,
                     cdrVersion.getCdrVersionId(),
                     new PageFilterRequest()));
 
-    assertNotFoundExceptionNoCohort(cohortId, exception);
+    assertNotFoundExceptionNoCohort(worngCohortId, exception);
   }
 
   @ParameterizedTest(
@@ -2389,10 +2387,6 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
     // vocabularies 0-string, 1-string, 2-string
     when(bigQueryService.getString(null, 2)).thenReturn("1");
-    //         .domain(bigQueryService.getString(row, rm.get("domain")))
-    //        .type(bigQueryService.getString(row, rm.get("type")))
-    //        .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
-
   }
 
   private CohortReview createCohortReview(
