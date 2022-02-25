@@ -426,7 +426,6 @@ describe('buildRasRedirectUrl', () => {
 });
 
 describe('isExpiring', () => {
-  const ONE_MINUTE_IN_MILLIS = 1000 * 60;
   const LOOKBACK_PERIOD = 99; // arbitrary for testing; actual prod value is 330
   const EXPIRATION_DAYS = 123; // arbitrary for testing; actual prod value is 365
 

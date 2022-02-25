@@ -15,8 +15,8 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { accessRenewalModules, isExpiring } from 'app/utils/access-utils';
-import { nowPlusDays, plusDays } from 'app/utils/dates';
+import { accessRenewalModules } from 'app/utils/access-utils';
+import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
