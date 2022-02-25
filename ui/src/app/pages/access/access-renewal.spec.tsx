@@ -10,12 +10,12 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
-import { AccessRenewal, isExpiring } from 'app/pages/access/access-renewal';
+import { AccessRenewal } from 'app/pages/access/access-renewal';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { accessRenewalModules } from 'app/utils/access-utils';
+import { accessRenewalModules, isExpiring } from 'app/utils/access-utils';
 import { nowPlusDays, plusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
@@ -540,72 +540,5 @@ describe('Access Renewal Page', () => {
     wrapper.find('[data-test-id="report-submitted"]').first().simulate('click');
 
     expectButtonEnabled(findNodesByExactText(wrapper, 'Confirm').parent());
-  });
-});
-
-describe('isExpiring', () => {
-  const ONE_MINUTE_IN_MILLIS = 1000 * 60;
-  const LOOKBACK_PERIOD = 99; // arbitrary for testing; actual prod value is 330
-  const EXPIRATION_DAYS = 123; // arbitrary for testing; actual prod value is 365
-
-  beforeEach(() => {
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        accessRenewalLookback: LOOKBACK_PERIOD,
-      },
-    });
-  });
-
-  it('should return isExpiring=true if a module has expired', () => {
-    const completionDaysPast = 555; // arbitrary for test; completed this many days ago
-
-    // add 1 minute so we don't hit the boundary *exactly*
-    const completionDate =
-      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
-    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
-
-    // sanity-check: this test is checking an expiration in the past
-    expect(expirationDate).toBeLessThan(Date.now());
-
-    expect(isExpiring(expirationDate)).toEqual(true);
-  });
-
-  it('should return isExpiring=true if a module will expire in the future and within the lookback period', () => {
-    const completionDaysPast = 44; // arbitrary for test; completed this many days ago
-
-    // add 1 minute so we don't hit the boundary *exactly*
-    const completionDate =
-      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
-    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
-
-    // sanity-check: this test is checking a date within the lookback
-    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
-    expect(expirationDate).toBeLessThan(endOfLookback);
-
-    expect(isExpiring(expirationDate)).toEqual(true);
-  });
-
-  it('should return isExpiring=false if a module will expire in the future beyond the lookback period', () => {
-    const completionDaysPast = 3; // arbitrary for test; completed this many days ago
-
-    // add 1 minute so we don't hit the boundary *exactly*
-    const completionDate =
-      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
-    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
-
-    // sanity-check: this test is checking a date beyond the lookback
-    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
-    expect(expirationDate).toBeGreaterThan(endOfLookback);
-
-    expect(isExpiring(expirationDate)).toEqual(false);
-  });
-
-  it('should return isExpiring=false if a module has a null expiration', () => {
-    expect(isExpiring(null)).toEqual(false);
-  });
-
-  it('should return isExpiring=false if a module has an undefined expiration', () => {
-    expect(isExpiring(undefined)).toEqual(false);
   });
 });
