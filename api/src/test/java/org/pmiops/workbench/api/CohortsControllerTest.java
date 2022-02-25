@@ -284,7 +284,6 @@ public class CohortsControllerTest {
     TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
     TestMockFactory.stubPollCloudBillingLinked(cloudBillingClient, "billing-account");
-
     DbUser user = new DbUser();
     user.setUsername(CREATOR_EMAIL);
     user.setUserId(123L);
