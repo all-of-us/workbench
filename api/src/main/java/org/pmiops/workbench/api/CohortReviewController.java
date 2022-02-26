@@ -244,9 +244,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     Optional<DbCohortReview> dbCohortReview = dbCohort.getCohortReviews().stream().findFirst();
     long count =
-        dbCohortReview.isPresent()
-            ? dbCohortReview.get().getMatchedParticipantCount()
-            : cohortReviewService.participationCount(dbCohort);
+        dbCohortReview
+            .map(DbCohortReview::getMatchedParticipantCount)
+            .orElseGet(() -> cohortReviewService.participationCount(dbCohort));
 
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
@@ -406,6 +406,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    Optional.ofNullable(request.getDomain())
+        .orElseThrow(() -> new BadRequestException("Domain cannot be null"));
+
     CohortReview cohortReview =
         cohortReviewService.findCohortReviewForWorkspace(
             dbWorkspace.getWorkspaceId(), cohortReviewId);
@@ -429,6 +433,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    Optional.ofNullable(request.getDomain())
+        .orElseThrow(() -> new BadRequestException("Domain cannot be null"));
+
     CohortReview cohortReview =
         cohortReviewService.findCohortReviewForWorkspace(
             dbWorkspace.getWorkspaceId(), cohortReviewId);

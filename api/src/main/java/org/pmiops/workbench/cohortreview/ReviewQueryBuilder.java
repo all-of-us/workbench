@@ -253,7 +253,8 @@ public class ReviewQueryBuilder {
         params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
         break;
       default:
-        throw new BadRequestException("There is no domain named: " + domain.toString());
+        // Not supported for other domain(s) : MEASUREMENT, DEATH, FITBIT....
+        throw new BadRequestException("Not supported for domain named: " + domain);
     }
     return QueryJobConfiguration.newBuilder(finalSql)
         .setNamedParameters(params)
