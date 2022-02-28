@@ -31,7 +31,7 @@ public class DbWorkspaceOperation {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
+  @Column(name = "id", nullable = false)
   public long getId() {
     return id;
   }
@@ -41,7 +41,7 @@ public class DbWorkspaceOperation {
     return this;
   }
 
-  @Column(name = "creator_id")
+  @Column(name = "creator_id", nullable = false)
   public long getCreatorId() {
     return creatorId;
   }
@@ -73,7 +73,7 @@ public class DbWorkspaceOperation {
   }
 
   @CreatedDate
-  @Column(name = "creation_time")
+  @Column(name = "creation_time", nullable = false)
   public Timestamp getCreationTime() {
     return creationTime;
   }
@@ -84,7 +84,7 @@ public class DbWorkspaceOperation {
   }
 
   @LastModifiedDate
-  @Column(name = "creator_id")
+  @Column(name = "creator_id", nullable = false)
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
@@ -103,9 +103,11 @@ public class DbWorkspaceOperation {
       return false;
     }
     DbWorkspaceOperation that = (DbWorkspaceOperation) o;
-    return id == that.id && creatorId == that.creatorId && Objects.equals(workspaceId,
-        that.workspaceId) && creationTime.equals(that.creationTime) && lastModifiedTime.equals(
-        that.lastModifiedTime);
+    return id == that.id
+        && creatorId == that.creatorId
+        && Objects.equals(workspaceId, that.workspaceId)
+        && creationTime.equals(that.creationTime)
+        && lastModifiedTime.equals(that.lastModifiedTime);
   }
 
   @Override

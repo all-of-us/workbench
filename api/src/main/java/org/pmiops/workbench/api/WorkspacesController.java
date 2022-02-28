@@ -5,11 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,14 +21,16 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.DbWorkspaceOperation;
+import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -58,7 +58,6 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
 import org.pmiops.workbench.model.WorkspaceOperation;
-import org.pmiops.workbench.model.WorkspaceOperationStatus;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -66,6 +65,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -80,18 +80,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
+  private final IamService iamService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserDao userDao;
-  private final UserService userService;
-  private final WorkspaceAuditor workspaceAuditor;
-  private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceResourcesService workspaceResourcesService;
-  private final WorkspaceDao workspaceDao;
-  private final WorkspaceService workspaceService;
-  private final WorkspaceAuthService workspaceAuthService;
-  private final IamService iamService;
   private final TaskQueueService taskQueueService;
+  private final UserDao userDao;
+  private final WorkspaceAuditor workspaceAuditor;
+  private final WorkspaceAuthService workspaceAuthService;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceOperationDao workspaceOperationDao;
+  private final WorkspaceOperationMapper workspaceOperationMapper;
+  private final WorkspaceResourcesService workspaceResourcesService;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   public WorkspacesController(
@@ -99,34 +100,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
+      IamService iamService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      TaskQueueService taskQueueService,
       UserDao userDao,
-      UserService userService,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper,
-      WorkspaceResourcesService workspaceResourcesService,
-      WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService,
-      IamService iamService,
-      TaskQueueService taskQueueService) {
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper,
+      WorkspaceOperationDao workspaceOperationDao,
+      WorkspaceOperationMapper workspaceOperationMapper,
+      WorkspaceResourcesService workspaceResourcesService,
+      WorkspaceService workspaceService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
-    this.userDao = userDao;
-    this.userProvider = userProvider;
-    this.userService = userService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceAuditor = workspaceAuditor;
-    this.workspaceMapper = workspaceMapper;
-    this.workspaceResourcesService = workspaceResourcesService;
-    this.workspaceService = workspaceService;
-    this.workspaceAuthService = workspaceAuthService;
-    this.workspaceDao = workspaceDao;
     this.iamService = iamService;
     this.taskQueueService = taskQueueService;
+    this.userDao = userDao;
+    this.userProvider = userProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceAuditor = workspaceAuditor;
+    this.workspaceAuthService = workspaceAuthService;
+    this.workspaceDao = workspaceDao;
+    this.workspaceMapper = workspaceMapper;
+    this.workspaceOperationDao = workspaceOperationDao;
+    this.workspaceOperationMapper = workspaceOperationMapper;
+    this.workspaceResourcesService = workspaceResourcesService;
+    this.workspaceService = workspaceService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -200,10 +203,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(createdWorkspace);
   }
 
-  // TODO: Temporary hack for POC. This should write to the database instead.
-  private static Map<String, WorkspaceOperation> operations =
-      Collections.synchronizedMap(new HashMap<>());
-
   @Override
   public ResponseEntity<WorkspaceOperation> createWorkspaceAsync(Workspace workspace) {
     // Basic request validation.
@@ -212,36 +211,49 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // TODO: enforce access level check here? Not strictly necessary, but may make sense as
     // belt/suspenders check.
-    WorkspaceOperation op =
-        new WorkspaceOperation()
-            .status(WorkspaceOperationStatus.PENDING)
-            .id(UUID.randomUUID().toString().substring(0, 10));
-    operations.put(op.getId(), op);
 
-    taskQueueService.pushCreateWorkspaceTask(op.getId(), workspace);
-    return ResponseEntity.ok(op);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    DbWorkspaceOperation operation =
+        new DbWorkspaceOperation()
+            .setCreatorId(userProvider.get().getUserId())
+            .setStatus(DbWorkspaceOperationStatus.PENDING)
+            .setCreationTime(now)
+            .setLastModifiedTime(now);
+    operation = workspaceOperationDao.save(operation);
+
+    taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
+    return ResponseEntity.ok(workspaceOperationMapper.toModel(operation));
   }
 
   @Override
-  public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(String id) {
-    if (!operations.containsKey(id)) {
-      return ResponseEntity.notFound().build();
-    }
-    return ResponseEntity.ok().body(operations.get(id));
+  public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
+    return workspaceOperationDao
+        .findById(id)
+        .map(op -> ResponseEntity.ok().body(workspaceOperationMapper.toModel(op)))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @Override
   public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
-    WorkspaceOperation result = new WorkspaceOperation().id(request.getOperationId());
-
+    DbWorkspaceOperation operation =
+        workspaceOperationDao
+            .findById(request.getOperationId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace Operation '%d' not found", request.getOperationId())));
     try {
       Workspace w = this.createWorkspace(request.getWorkspace()).getBody();
-      result.status(WorkspaceOperationStatus.SUCCESS).workspace(w);
+      // careful: w.getId() refers to the Terra Name, not the DB ID
+      long dbId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();
+      operation.setStatus(DbWorkspaceOperationStatus.SUCCESS).setWorkspaceId(dbId);
     } catch (Exception e) {
-      result.status(WorkspaceOperationStatus.ERROR);
+      operation.setStatus(DbWorkspaceOperationStatus.ERROR);
       throw e;
     } finally {
-      operations.put(result.getId(), result);
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      operation = workspaceOperationDao.save(operation.setLastModifiedTime(now));
     }
     return ResponseEntity.ok().build();
   }

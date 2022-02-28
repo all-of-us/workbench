@@ -915,7 +915,8 @@ paths:
     parameters:
     - in: path
       name: id
-      type: string
+      type: integer
+      format: int64
       description: The workspace operation ID
       required: true
     get:
@@ -4807,7 +4808,8 @@ definitions:
     properties:
       id:
         description: The identifier for this operation
-        type: string
+        type: integer
+        format: int64
       status:
         description: The status of the async operation
         "$ref": "#/definitions/WorkspaceOperationStatus"
@@ -8701,7 +8703,8 @@ definitions:
     properties:
       operationId:
         description: 'Workspace operation ID'
-        type: string
+        type: integer
+        format: int64
       workspace:
         description: 'Requested workspace to create'
         "$ref": "#/definitions/Workspace"

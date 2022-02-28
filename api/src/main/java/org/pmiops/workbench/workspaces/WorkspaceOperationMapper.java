@@ -8,16 +8,7 @@ import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.model.WorkspaceOperationStatus;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(
-    config = MapStructConfig.class
-//    collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
-//    uses = {
-//        CommonMappers.class,
-//        DbStorageEnums.class,
-//        FirecloudMapper.class,
-//        WorkspaceResourceMapper.class,
-//    })
-)
+@Mapper(config = MapStructConfig.class)
 public interface WorkspaceOperationMapper {
   WorkspaceOperationStatus toModelStatus(DbWorkspaceOperationStatus source);
 

@@ -113,7 +113,7 @@ public class TaskQueueService {
         new ProcessEgressEventRequest().eventId(eventId));
   }
 
-  public void pushCreateWorkspaceTask(String operationId, Workspace workspace) {
+  public void pushCreateWorkspaceTask(long operationId, Workspace workspace) {
     createAndPushTask(
         CREATE_WORKSPACE_QUEUE_NAME,
         CREATE_WORKSPACE_PATH,
