@@ -1064,11 +1064,12 @@ export const WorkspaceEdit = fp.flow(
           );
           while (workspaceOp.status === WorkspaceOperationStatus.PENDING) {
             await new Promise((resolve) => setTimeout(resolve, 5000));
-            workspaceOp = await workspacesApi().getWorkspaceOperation(workspaceOp.id);
-            console.log(workspaceOp);
+            workspaceOp = await workspacesApi().getWorkspaceOperation(
+              workspaceOp.id
+            );
           }
           if (workspaceOp.status === WorkspaceOperationStatus.ERROR) {
-            throw Error('workspace op failed');
+            throw Error('Workspace creation failed');
           }
           workspace = workspaceOp.workspace;
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
