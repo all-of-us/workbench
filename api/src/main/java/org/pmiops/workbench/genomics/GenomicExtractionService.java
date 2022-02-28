@@ -364,6 +364,9 @@ public class GenomicExtractionService {
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
     }
     if (!Strings.isNullOrEmpty(cohortExtractionConfig.extractionFilterSetName)) {
+      // If set, apply a joint callset filter during the extraction. There may be multiple such
+      // filters defined within a GVS BigQuery dataset (see the filter_set table to view options).
+      // Typically, we will want to specify a filter set.
       maybeInputs.put(
           EXTRACT_WORKFLOW_NAME + ".filter_set_name",
           "\"" + cohortExtractionConfig.extractionFilterSetName + "\"");
