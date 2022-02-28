@@ -229,6 +229,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
     return workspaceOperationDao
         .findById(id)
+        .filter(op -> op.getCreatorId() == userProvider.get().getUserId())
         .map(op -> ResponseEntity.ok().body(workspaceOperationMapper.toModel(op)))
         .orElse(ResponseEntity.notFound().build());
   }
