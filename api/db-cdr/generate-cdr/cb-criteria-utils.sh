@@ -12,5 +12,5 @@ function cpToMainThenRmTmpTable(){
      "$BQ_DATASET.$1" "$BQ_DATASET.$tbl_to")
   echo $res >&2
   echo "Deleting temp table $1"
-  bq rm --force --project_id=$BQ_PROJECT "$BQ_DATASET.$1"
+  bq rm --force --project_id="$BQ_PROJECT" "$BQ_DATASET.$1"
 }
