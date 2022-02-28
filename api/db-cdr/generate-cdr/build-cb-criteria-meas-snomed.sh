@@ -364,11 +364,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 1
     and x.is_group = 1"
 
-#wait for process to end before copying
-wait
-## copy temp tables back to main tables, and delete temp?
-cpToMain "$TBL_CBC" &
-cpToMain "$TBL_PAS" &
-cpToMain "$TBL_PCA" &
-wait
-
+# copy temp tables back to main tables in parallel then delete temp tables
+cpToMainThenRmTmpTable "$TBL_CBC" &
+cpToMainThenRmTmpTable "$TBL_PAS" &
+cpToMainThenRmTmpTable "$TBL_PCA" &
