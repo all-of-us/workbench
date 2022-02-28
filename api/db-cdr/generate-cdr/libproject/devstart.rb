@@ -44,11 +44,11 @@ def service_account_context_for_bq(project, account)
 end
 
 # By default, skip empty lines only.
-def bq_ingest(tier, tier_name, source_project, dataset_name, table_match_filter="", table_skip_filter="^$")
+def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter="", table_skip_filter="^$")
   common = Common.new
-  source_fq_dataset = "#{source_project}:#{dataset_name}"
-  ingest_fq_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{dataset_name}"
-  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dataset_name}"
+  source_fq_dataset = "#{source_project}:#{source_dataset_name}"
+  ingest_fq_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{dest_dataset_name}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dest_dataset_name}"
   common.status "Copying from '#{source_fq_dataset}' -> '#{ingest_fq_dataset}' -> '#{dest_fq_dataset}'"
 
   # If you receive an error from "bq" like "Invalid JWT Signature", you may
@@ -166,7 +166,7 @@ def publish_cdr(cmd_name, args)
   dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+    bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
 
     bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
       auth_domain_group_email = tier.fetch(:auth_domain_group_email)
@@ -203,10 +203,16 @@ def publish_cdr_wgs(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
 
   op.add_option(
-    "--bq-dataset [dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BigQuery dataset name for the CDR version (project not included), e.g. " +
+    "--source-bq-dataset [dataset]",
+    ->(opts, v) { opts.source_bq_dataset = v},
+    "BigQuery source dataset name for the CDR version (project not included), e.g. " +
     "'2019Q4R3'. Required."
+  )
+  op.add_option(
+    "--dest-bq-dataset [dataset]",
+    ->(opts, v) { opts.dest_bq_dataset = v},
+    "Destination BigQuery dataset name for the CDR version (project not included), e.g. " +
+    "'2019Q4R3'. Defaults to --source-bq-dataset."
   )
   op.add_option(
     "--project [project]",
@@ -229,15 +235,20 @@ def publish_cdr_wgs(cmd_name, args)
     "if there was an issue with the publish. In general, CDRs should be treated as " +
     "immutable after the initial publish."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.source_bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
 
+  # Allowing divergence lets us effectively rename the dataset, if desired.
+  unless op.opts.dest_bq_dataset
+    op.opts.dest_bq_dataset = op.opts.source_bq_dataset
+  end
+
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   tier = env.fetch(:accessTiers)[op.opts.tier]
-  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.dest_bq_dataset}"
 
   source_project = env.fetch(:source_cdr_wgs_project)
   unless source_project
@@ -252,7 +263,7 @@ def publish_cdr_wgs(cmd_name, args)
   end
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, op.opts.tier, source_project, op.opts.bq_dataset, table_match_filter)
+    bq_ingest(tier, op.opts.tier, source_project, op.opts.source_bq_dataset, op.opts.dest_bq_dataset, table_match_filter)
 
     bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, _existing_users|
       if existing_groups.include?(extraction_proxy_group)
