@@ -1,6 +1,7 @@
 package org.pmiops.workbench.genomics;
 
 import com.google.cloud.storage.Blob;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
@@ -361,6 +362,14 @@ public class GenomicExtractionService {
         && cohortExtractionConfig.extractionMethodLogicalVersion >= 2) {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
+    }
+    if (!Strings.isNullOrEmpty(cohortExtractionConfig.extractionFilterSetName)) {
+      // If set, apply a joint callset filter during the extraction. There may be multiple such
+      // filters defined within a GVS BigQuery dataset (see the filter_set table to view options).
+      // Typically, we will want to specify a filter set.
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".filter_set_name",
+          "\"" + cohortExtractionConfig.extractionFilterSetName + "\"");
     }
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
