@@ -591,11 +591,7 @@ and descendant_concept_id in
         FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
     )"
 
-#wait for process to end before copying
-wait
-## copy temp tables back to main tables, and delete temp?
-cpToMain "$TBL_CBC" &
-cpToMain "$TBL_PCA" &
-cpToMain "$TBL_CBA" &
-wait
-
+# copy temp tables back to main tables in parallel then delete temp tables
+cpToMainThenRmTmpTable "$TBL_CBC" &
+cpToMainThenRmTmpTable "$TBL_PCA" &
+cpToMainThenRmTmpTable "$TBL_CBA" &
