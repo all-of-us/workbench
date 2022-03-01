@@ -52,7 +52,7 @@ public class DbWorkspaceOperation {
   }
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "requirement_enum", nullable = false)
+  @Column(name = "status", nullable = false)
   public DbWorkspaceOperationStatus getStatus() {
     return status;
   }
