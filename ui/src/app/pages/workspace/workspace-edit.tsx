@@ -15,7 +15,6 @@ import {
   SpecificPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceOperation,
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 

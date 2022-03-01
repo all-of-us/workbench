@@ -84,7 +84,7 @@ public class DbWorkspaceOperation {
   }
 
   @LastModifiedDate
-  @Column(name = "creator_id", nullable = false)
+  @Column(name = "last_modified_time", nullable = false)
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
