@@ -487,3 +487,7 @@ export async function createDatasetNotebook(page: Page, pyNotebookName: string):
   const notebookPreviewPage = new NotebookPreviewPage(page);
   return await notebookPreviewPage.waitForLoad();
 }
+
+export function parseForNumericalStrings(text: string): RegExpMatchArray | null {
+  return text.match(/(\d|\.)+/g);
+}

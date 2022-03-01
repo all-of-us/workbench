@@ -8,17 +8,18 @@ from io import StringIO
 from os import listdir
 from os.path import isfile, join
 
-# These are redcap files for all surveys except cope
-# Note: We only read in the Winter Minute Survey since all prior survey
-#   versions are contained in the Winter version. No merge if versioned
-#   files is needed, unlike cope surveys
+# these are the column names for the controlled and registered output files
 surveys = ['ENGLISHBasics_DataDictionary',
            'ENGLISHLifestyle_DataDictionary',
            'ENGLISHOverallHealth_DataDictionary',
            'ENGLISHPersonalMedicalHistory_DataDictionary',
            'ENGLISHHealthCareAccessUtiliza_DataDictionary',
-           'ENGLISHWinterMinuteSurveyOnCOV_DataDictionary',
-           'ENGLISHSocialDeterminantsOfHea_DataDictionary']
+           'ENGLISHMay2020Covid19Participa_DataDictionary',
+           'ENGLISHJune2020Covid19Particip_DataDictionary',
+           'ENGLISHJuly2020Covid19Particip_DataDictionary',
+           'ENGLISHNovember2020COVID19Part_DataDictionary',
+           'ENGLISHDecember2020COVID19Part_DataDictionary',
+           'ENGLISHFebruary2021COVID19Part_DataDictionary']
 
 # these are the column names for the controlled and registered output files
 headers = ['concept_code', 'survey_name', 'topic', 'answers']
@@ -48,12 +49,17 @@ def main():
         shutil.rmtree(home_dir)
     os.mkdir(home_dir)
 
+    # open your file writers for this survey and write headers
+    # csv_writer, csv_file = open_writers_with_headers("prep_survey_staged")
+    master_cope_dictionary = OrderedDict()
+
     for name in surveys:
         rows = read_csv(get_filename(name, date))
         file_name = name.replace("ENGLISH", "").replace("_DataDictionary",
                                                         "").lower()
-        csv_writer, csv_file = open_writers_with_headers(
-            file_name + "_staged")
+        if "covid" not in name.lower():
+            csv_writer, csv_file = open_writers_with_headers(
+                file_name + "_staged")
         print("Reading & Parsing... " + name)
         previous_concept_code = None
 
@@ -70,15 +76,39 @@ def main():
             if not list(filter(concept_code.endswith, exclude_list)):
                 survey_name = name.replace("ENGLISH", "") \
                     .replace("_DataDictionary", "")
-                if survey_name == "WinterMinuteSurveyOnCOV":
-                    topic = None
                 new_entry = {'concept_code': concept_code,
                              'survey_name': survey_name,
                              'topic': topic,
                              'answers': answers}
-                csv_writer.writerow(new_entry)
+                if "covid" not in name.lower():
+                    csv_writer.writerow(new_entry)
+                else:
+                    if "may2020" in name.lower():
+                        if len(master_cope_dictionary) == 0:
+                            cope_entry = {'concept_code': 'cope',
+                                          'survey_name': survey_name,
+                                          'topic': None,
+                                          'answers': None}
+                            master_cope_dictionary['cope'] = cope_entry
+                        master_cope_dictionary[concept_code] = new_entry
+                    else:
+                        if master_cope_dictionary.get(concept_code) is None:
+                            if concept_code == "c19corset_59":
+                                previous_concept_code = "ukmh_j3"
+                            master_cope_dictionary = rewrite_dictionary(
+                                master_cope_dictionary,
+                                previous_concept_code,
+                                new_entry)
+                        else:
+                            master_cope_dictionary[concept_code] = new_entry
             previous_concept_code = concept_code
-        flush_and_close_files(csv_file)
+        if "covid" not in name.lower():
+            flush_and_close_files(csv_file)
+
+    csv_writer, csv_file = open_writers_with_headers("cope_staged")
+    for key in master_cope_dictionary:
+        csv_writer.writerow(master_cope_dictionary.get(key))
+    flush_and_close_files(csv_file)
 
     # copy local output files and upload it to the bucket
     storage_client = storage.Client.from_service_account_json(
@@ -89,13 +119,9 @@ def main():
         blob = bucket.blob(dataset + '/cdr_csv_files/' + f)
         blob.upload_from_filename(home_dir + "/" + f)
 
-    # These files are static and never change moving forward
     bucket.copy_blob(bucket.blob('redcap/familyhealthhistory_staged.csv'),
                      bucket,
                      dataset + '/cdr_csv_files/familyhealthhistory_staged.csv')
-    bucket.copy_blob(bucket.blob('redcap/cope_staged.csv'),
-                     bucket,
-                     dataset + '/cdr_csv_files/cope_staged.csv')
 
     # when done remove directory and all files
     shutil.rmtree(home_dir)

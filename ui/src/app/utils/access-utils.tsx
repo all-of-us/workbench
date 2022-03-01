@@ -364,11 +364,25 @@ export const useIsUserDisabled = () => {
   return disabled;
 };
 
+export const getAccessModuleStatusByNameOrEmpty = (
+  modules: AccessModuleStatus[],
+  moduleName: AccessModule
+): AccessModuleStatus => {
+  return (
+    modules.find((a) => a.moduleName === moduleName) || {
+      moduleName,
+    }
+  );
+};
+
 export const getAccessModuleStatusByName = (
   profile: Profile,
   moduleName: AccessModule
 ): AccessModuleStatus => {
-  return profile.accessModules.modules.find((a) => a.moduleName === moduleName);
+  return getAccessModuleStatusByNameOrEmpty(
+    profile.accessModules.modules,
+    moduleName
+  );
 };
 
 export const bypassAll = async (

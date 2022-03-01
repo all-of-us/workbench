@@ -11,19 +11,10 @@ import { Frame, Page } from 'puppeteer';
 import { defaultFieldValues } from 'resources/data/user-registration-data';
 import { config } from 'resources/workbench-config';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText, InstitutionSelectValue } from 'app/text-labels';
+import { LinkText, Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 
 const faker = require('faker/locale/en_US');
-
-export const InstitutionRoleSelectValue = {
-  EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
-  UndergraduteStudent: 'Undergraduate (Bachelor level) student',
-  Industry: 'Industry',
-  ResearchAssistant: 'Research Assistant (pre-doctoral)',
-  ResearchAssociate: 'Research associate (post-doctoral; early/mid career)',
-  SeniorResearcher: 'Senior Researcher (PI/Team Lead, senior scientist)'
-};
 
 export const EducationLevelValue = {
   Doctorate: 'Doctorate'
@@ -188,7 +179,7 @@ export default class CreateAccountPage extends BasePage {
   async fillOutInstitution(): Promise<void> {
     await Promise.all([waitForText(this.page, 'complete Step 1 of 3'), waitWhileLoading(this.page)]);
 
-    await this.selectInstitution(InstitutionSelectValue.Broad);
+    await this.selectInstitution(Institution.Broad);
     await this.getInstitutionValue();
     const emailAddressTextbox = Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.INSTITUTION_CONTACT_EMAIL);
@@ -200,7 +191,7 @@ export default class CreateAccountPage extends BasePage {
     }).asElementHandle();
 
     const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
-    await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
+    await roleSelect.select(InstitutionRole.UndergraduateStudent);
   }
 
   // Step 1: Accepting Terms of Use and Privacy statement.

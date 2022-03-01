@@ -80,9 +80,11 @@ def start_local_db_service()
   bm = Benchmark.measure {
     common.run_inline %W{docker-compose up -d db}
 
+    root_pass = Workbench.read_vars_file("db/vars.env")["MYSQL_ROOT_PASSWORD"]
+
     common.status "waiting up to #{deadlineSec}s for mysql service to start..."
     start = Time.now
-    until (common.run %W{docker-compose exec -T db mysqladmin ping --silent}).success?
+    until (common.run "docker-compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
       if Time.now - start >= deadlineSec
         raise("mysql docker service did not become available after #{deadlineSec}s")
       end
@@ -2520,7 +2522,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     run_with_redirects(
       "docker run -i -t --rm --network host --entrypoint '' " +
       "-v $(pwd)/libproject/with-mysql-login.sh:/with-mysql-login.sh " +
-      "mysql:5.7.27 /bin/bash -c " +
+      "mariadb:10.2 /bin/bash -c " +
       "'export MYSQL_HOME=$(./with-mysql-login.sh root #{password}); /bin/bash'", password)
   end
 end

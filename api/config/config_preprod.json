@@ -44,11 +44,13 @@
     "extractionPetServiceAccount": "pet-110393474898566940625@aouwgscohortextraction-preprod.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-preprod",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 2,
+    "extractionMethodConfigurationVersion": 4,
+    "extractionMethodLogicalVersion": 2,
     "extractionCohortsDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_temp_tables",
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-357-gc79075c-SNAPSHOT-local.jar",
+    "extractionFilterSetName": "beta2_99k_row_10",
+    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-464-g86f1116-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
   "cdr": {
