@@ -18,6 +18,7 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -1084,9 +1085,8 @@ export const WorkspaceEdit = fp.flow(
           workspace.researchPurpose.populationDetails = [];
         }
 
-        const async = false;
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = async
+          workspace = environment.enableAsyncWorkspaceOperations
             ? await this.apiCreateWorkspaceAsync()
             : await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
