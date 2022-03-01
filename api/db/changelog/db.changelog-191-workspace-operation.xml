@@ -16,12 +16,8 @@
         <constraints nullable="false"/>
       </column>
       <column name="workspace_id" type="bigint"/>
-      <column name="creation_time" type="timestamp">
-        <constraints nullable="false"/>
-      </column>
-      <column name="last_modified_time" type="timestamp">
-        <constraints nullable="false"/>
-      </column>
+      <column name="creation_time" type="timestamp"/>
+      <column name="last_modified_time" type="timestamp"/>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="creator_id"
                              baseTableName="workspace_operation"
