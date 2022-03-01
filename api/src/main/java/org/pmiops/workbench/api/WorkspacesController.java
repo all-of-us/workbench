@@ -45,6 +45,7 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
+import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
@@ -258,6 +259,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } finally {
       operation = workspaceOperationDao.save(operation);
     }
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> processDuplicateWorkspaceTask(DuplicateWorkspaceTaskRequest request) {
     return ResponseEntity.ok().build();
   }
 
@@ -522,6 +528,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> duplicateWorkspaceAsync(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest request) {
+
+    // Basic request validation.
+    validateWorkspaceApiModel(request.getWorkspace());
+    getLiveCdrVersionId(request.getWorkspace().getCdrVersionId());
+
+    // Verify the caller has read access to the source workspace.
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+
+    // TODO: enforce access level check here? Not strictly necessary, but may make sense as
+    // belt/suspenders check.
+
+    DbWorkspaceOperation operation =
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.PENDING));
+
+    taskQueueService.pushDuplicateWorkspaceTask(
+        operation.getId(),
+        fromWorkspaceNamespace,
+        fromWorkspaceId,
+        request.getIncludeUserRoles(),
+        request.getWorkspace());
+    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
   }
 
   /** Gets a FireCloud Billing project. */
