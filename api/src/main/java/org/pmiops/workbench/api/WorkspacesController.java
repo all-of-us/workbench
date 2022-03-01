@@ -222,7 +222,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     operation = workspaceOperationDao.save(operation);
 
     taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
-    return ResponseEntity.ok(workspaceOperationMapper.toModel(operation));
+    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
   }
 
   @Override
@@ -230,7 +230,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return workspaceOperationDao
         .findById(id)
         .filter(op -> op.getCreatorId() == userProvider.get().getUserId())
-        .map(op -> ResponseEntity.ok().body(workspaceOperationMapper.toModel(op)))
+        .map(
+            op ->
+                ResponseEntity.ok()
+                    .body(
+                        workspaceOperationMapper.toModelWithWorkspace(
+                            op, workspaceDao, workspaceMapper)))
         .orElse(ResponseEntity.notFound().build());
   }
 
