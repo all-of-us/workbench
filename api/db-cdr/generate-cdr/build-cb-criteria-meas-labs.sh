@@ -518,7 +518,10 @@ WHERE x.type = 'LOINC'
     and x.subtype = 'LAB'
     and x.name = 'Uncategorized'"
 
-# copy temp tables back to main tables in parallel then delete temp tables
-cpToMainThenRmTmpTable "$TBL_CBC" &
-cpToMainThenRmTmpTable "$TBL_PAS" &
-cpToMainThenRmTmpTable "$TBL_PCA" &
+#wait for process to end before copying
+wait
+cpToMain "$TBL_CBC" &
+cpToMain "$TBL_PAS" &
+cpToMain "$TBL_PCA" &
+wait
+

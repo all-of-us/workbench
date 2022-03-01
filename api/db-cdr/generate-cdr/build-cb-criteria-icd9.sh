@@ -471,8 +471,12 @@ and is_selectable = 1"
 
 # TODO there are still some parents that don't actually have any children and never will. WHAT TO DO?
 
-# copy temp tables back to main tables in parallel then delete temp tables
-cpToMainThenRmTmpTable "$TBL_CBC" &
-cpToMainThenRmTmpTable "$TBL_CBA" &
-cpToMainThenRmTmpTable "$TBL_PAS" &
-cpToMainThenRmTmpTable "$TBL_PCA" &
+#wait for process to end before copying
+wait
+## copy temp tables back to main tables, and delete temp?
+cpToMain "$TBL_CBC" &
+cpToMain "$TBL_CBA" &
+cpToMain "$TBL_PAS" &
+cpToMain "$TBL_PCA" &
+wait
+
