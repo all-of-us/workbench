@@ -3,6 +3,7 @@ import { waitWhileLoading } from 'utils/waits-utils';
 import * as fp from 'lodash/fp';
 import { LinkText } from 'app/text-labels';
 import Button from 'app/element/button';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 /**
  * This is the super base class.
@@ -81,5 +82,24 @@ export default class Container {
     const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
     await button.waitUntilEnabled();
     return button;
+  }
+
+  async waitFor(authenticatedPage: AuthenticatedPage, opts: { reloadIfFail?: boolean } = {}): Promise<void> {
+    const { reloadIfFail = false } = opts;
+    const wait = async (p: AuthenticatedPage): Promise<boolean> => {
+      return p
+        .waitForLoad()
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+    };
+    const success = await wait(authenticatedPage);
+    if (!success && reloadIfFail) {
+      await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'] });
+      await wait(authenticatedPage);
+    }
   }
 }

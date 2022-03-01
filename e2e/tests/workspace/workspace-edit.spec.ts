@@ -22,9 +22,8 @@ describe('Editing workspace via workspace card snowman menu', () => {
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
 
-    await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
-
     const workspaceEditPage = new WorkspaceEditPage(page);
+    await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true, pageExpected: workspaceEditPage });
 
     // Data Access Tier is readonly.
     const accessTierSelect = workspaceEditPage.getDataAccessTierSelect();

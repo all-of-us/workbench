@@ -1,7 +1,8 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { MenuOption } from 'app/text-labels';
 import Container from 'app/container';
-import SnowmanMenu, { snowmanIconXpath } from './snowman-menu';
+import SnowmanMenu, { snowmanIconXpath } from 'app/component/snowman-menu';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 export default abstract class BaseCard extends Container {
   protected cardElement: ElementHandle;
@@ -46,7 +47,16 @@ export default abstract class BaseCard extends Container {
     return snowmanMenu;
   }
 
-  async selectSnowmanMenu(options: MenuOption, opt: { waitForNav?: boolean } = {}): Promise<void> {
-    return this.getSnowmanMenu().then((menu) => menu.select(options, opt));
+  async selectSnowmanMenu(
+    options: MenuOption,
+    opt: { waitForNav?: boolean; pageExpected?: AuthenticatedPage } = {}
+  ): Promise<void> {
+    const { waitForNav, pageExpected } = opt;
+    const menu = await this.getSnowmanMenu();
+    await menu.select(options, { waitForNav });
+    // Workaround for https://precisionmedicineinitiative.atlassian.net/browse/RW-7928
+    if (pageExpected !== undefined) {
+      await this.waitFor(pageExpected);
+    }
   }
 }
