@@ -65,9 +65,6 @@ export interface EnvironmentBase {
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
-
-  // RW-7973 whether we should use async operations for Create and Duplicate Workspace
-  enableAsyncWorkspaceOperations: boolean;
 }
 
 export interface Environment extends EnvironmentBase {

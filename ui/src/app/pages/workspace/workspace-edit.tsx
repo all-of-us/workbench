@@ -15,10 +15,8 @@ import {
   SpecificPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceOperationStatus,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -232,10 +230,6 @@ const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
 // to Sam (as part of Postgres migration).
 const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
-
-// Poll parameters for checking the result of an async Workspace Create operation
-const CREATE_WORKSPACE_TIMEOUT_MS = 3 * 60 * 1000;
-const CREATE_WORKSPACE_INTERVAL_MS = 5 * 1000;
 
 export enum WorkspaceEditMode {
   Create = 1,
@@ -1054,29 +1048,6 @@ export const WorkspaceEdit = fp.flow(
       this.saveWorkspace();
     }
 
-    private async apiCreateWorkspaceAsync() {
-      let pollTimedOut = false;
-      setTimeout(() => (pollTimedOut = true), CREATE_WORKSPACE_TIMEOUT_MS);
-      let workspaceOp = await workspacesApi().createWorkspaceAsync(
-        this.state.workspace
-      );
-      while (
-        !pollTimedOut &&
-        workspaceOp.status === WorkspaceOperationStatus.PENDING
-      ) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, CREATE_WORKSPACE_INTERVAL_MS)
-        );
-        workspaceOp = await workspacesApi().getWorkspaceOperation(
-          workspaceOp.id
-        );
-      }
-      if (workspaceOp.status === WorkspaceOperationStatus.ERROR) {
-        throw Error('Workspace creation failed');
-      }
-      return workspaceOp.workspace;
-    }
-
     async saveWorkspace() {
       try {
         this.setState({ loading: true });
@@ -1086,9 +1057,9 @@ export const WorkspaceEdit = fp.flow(
         }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = environment.enableAsyncWorkspaceOperations
-            ? await this.apiCreateWorkspaceAsync()
-            : await workspacesApi().createWorkspace(this.state.workspace);
+          workspace = await workspacesApi().createWorkspace(
+            this.state.workspace
+          );
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
             this.props.workspace.namespace,
