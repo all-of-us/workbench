@@ -15,7 +15,7 @@
       "displayName": "Controlled Tier",
       "servicePerimeter": "terra_prod_aou_prod_2",
       "authDomainName": "all-of-us-controlled-prod",
-      "authDomainGroupEmail": "all-of-us-controlled-stable@firecloud.org",
+      "authDomainGroupEmail": "all-of-us-controlled-prod@firecloud.org",
       "datasetsBucket": "gs://fc-aou-datasets-controlled/",
       "enableUserWorkflows": true
     }
