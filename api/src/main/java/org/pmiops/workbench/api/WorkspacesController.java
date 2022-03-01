@@ -214,12 +214,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspaceOperation operation =
-        new DbWorkspaceOperation()
-            .setCreatorId(userProvider.get().getUserId())
-            .setStatus(DbWorkspaceOperationStatus.PENDING)
-            .setCreationTime(now)
-            .setLastModifiedTime(now);
-    operation = workspaceOperationDao.save(operation);
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.PENDING)
+                .setCreationTime(now)
+                .setLastModifiedTime(now));
 
     taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
     return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
