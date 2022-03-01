@@ -230,12 +230,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return workspaceOperationDao
         .findById(id)
         .filter(op -> op.getCreatorId() == userProvider.get().getUserId())
-        .map(
-            op ->
-                ResponseEntity.ok()
-                    .body(
-                        workspaceOperationMapper.toModelWithWorkspace(
-                            op, workspaceDao, workspaceMapper)))
+        .map(op -> workspaceOperationMapper.toModelWithWorkspace(op, workspaceDao, workspaceMapper))
+        .map(op -> ResponseEntity.ok().body(op))
         .orElse(ResponseEntity.notFound().build());
   }
 
