@@ -71,5 +71,9 @@ FROM
         GROUP BY 1,2,3,4
     ) x"
 
-# copy temp table back to main table then delete temp table
-cpToMainThenRmTmpTable "$TBL_CBC"
+#wait for process to end before copying
+wait
+## copy temp tables back to main tables, and delete temp?
+cpToMain "$TBL_CBC" &
+wait
+
