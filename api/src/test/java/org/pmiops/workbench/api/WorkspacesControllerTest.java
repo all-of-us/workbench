@@ -57,6 +57,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -175,6 +176,7 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
@@ -299,8 +301,8 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortMaterializationService.class,
     CohortQueryBuilder.class,
-    ConceptBigQueryService.class,
     CohortService.class,
+    ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
     LeonardoNotebooksClient.class,
@@ -308,9 +310,11 @@ public class WorkspacesControllerTest {
     MailService.class,
     MonitoringService.class,
     NotebooksService.class,
+    TaskQueueService.class,
     UserRecentResourceService.class,
     UserService.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    WorkspaceOperationMapper.class,
   })
   static class Configuration {
     @Bean
