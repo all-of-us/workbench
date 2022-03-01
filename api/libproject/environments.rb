@@ -98,6 +98,11 @@ ENVIRONMENTS = {
         :dest_cdr_project => "fc-aou-cdr-synth-stable",
         :auth_domain_group_email => "GROUP_all-of-us-registered-stable@firecloud.org",
       },
+      "controlled" => {
+        :ingest_cdr_project => "fc-aou-vpc-ingest-stable-ct",
+        :dest_cdr_project => "fc-aou-cdr-stable-ct",
+        :auth_domain_group_email => "all-of-us-controlled-stable@firecloud.org",
+      }
     }
   }),
   "all-of-us-rw-preprod" => env_with_defaults("preprod", {
@@ -136,7 +141,6 @@ ENVIRONMENTS = {
         :dest_cdr_project => "fc-aou-cdr-prod-ct",
         :auth_domain_group_email => "all-of-us-controlled-prod@firecloud.org",
       }
-
     }
   })
 }
