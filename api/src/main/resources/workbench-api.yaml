@@ -898,7 +898,7 @@ paths:
       - workspaces
       consumes:
       - application/json
-      description: Creates a workspace
+      description: Creates a workspace asynchronously
       operationId: createWorkspaceAsync
       parameters:
       - in: body
@@ -908,7 +908,7 @@ paths:
           "$ref": "#/definitions/Workspace"
       responses:
         200:
-          description: The workspace that was created.
+          description: The workspace has been scheduled for creation.
           schema:
             "$ref": "#/definitions/WorkspaceOperation"
   "/v1/workspaces/operations/{id}":
