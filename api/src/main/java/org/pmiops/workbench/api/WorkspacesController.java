@@ -212,14 +212,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // TODO: enforce access level check here? Not strictly necessary, but may make sense as
     // belt/suspenders check.
 
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspaceOperation operation =
         workspaceOperationDao.save(
             new DbWorkspaceOperation()
                 .setCreatorId(userProvider.get().getUserId())
                 .setStatus(DbWorkspaceOperationStatus.PENDING));
-                //.setCreationTime(now)
-                //.setLastModifiedTime(now));
 
     taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
     return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
@@ -254,8 +251,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       operation.setStatus(DbWorkspaceOperationStatus.ERROR);
       throw e;
     } finally {
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      operation = workspaceOperationDao.save(operation);//.setLastModifiedTime(now));
+      operation = workspaceOperationDao.save(operation);
     }
     return ResponseEntity.ok().build();
   }
