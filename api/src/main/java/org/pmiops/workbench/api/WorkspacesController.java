@@ -217,9 +217,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceOperationDao.save(
             new DbWorkspaceOperation()
                 .setCreatorId(userProvider.get().getUserId())
-                .setStatus(DbWorkspaceOperationStatus.PENDING)
-                .setCreationTime(now)
-                .setLastModifiedTime(now));
+                .setStatus(DbWorkspaceOperationStatus.PENDING));
+                //.setCreationTime(now)
+                //.setLastModifiedTime(now));
 
     taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
     return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
@@ -255,7 +255,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     } finally {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      operation = workspaceOperationDao.save(operation.setLastModifiedTime(now));
+      operation = workspaceOperationDao.save(operation);//.setLastModifiedTime(now));
     }
     return ResponseEntity.ok().build();
   }

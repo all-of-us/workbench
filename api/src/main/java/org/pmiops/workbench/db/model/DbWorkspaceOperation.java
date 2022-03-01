@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -12,9 +13,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "workspace_operation")
+@EntityListeners(AuditingEntityListener.class)
 public class DbWorkspaceOperation {
   public enum DbWorkspaceOperationStatus {
     PENDING,
