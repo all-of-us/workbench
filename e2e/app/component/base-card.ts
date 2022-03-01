@@ -56,7 +56,7 @@ export default abstract class BaseCard extends Container {
     await menu.select(options, { waitForNav });
     // Workaround for https://precisionmedicineinitiative.atlassian.net/browse/RW-7928
     if (pageExpected !== undefined) {
-      await this.waitFor(pageExpected);
+      await this.waitFor(pageExpected, { reloadIfFail: true });
     }
   }
 }
