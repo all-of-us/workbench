@@ -527,13 +527,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
-  @Override
-  public ResponseEntity<WorkspaceOperation> cloneWorkspaceAsync(
-      String workspaceNamespace, String workspaceId, CloneWorkspaceRequest body) {
-    // TODO
-    return null;
-  }
-
   /** Gets a FireCloud Billing project. */
   private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
     DbUser user = userProvider.get();

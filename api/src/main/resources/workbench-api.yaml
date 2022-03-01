@@ -1119,28 +1119,6 @@ paths:
           description: Successful duplicate response
           schema:
             "$ref": "#/definitions/CloneWorkspaceResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicateAsync":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    post:
-      tags:
-      - workspaces
-      consumes:
-      - application/json
-      description: |
-        Asynchronously clone an existing workspace. Semantics otherwise match cloneWorkspace.
-      operationId: cloneWorkspaceAsync
-      parameters:
-      - in: body
-        name: body
-        schema:
-          "$ref": "#/definitions/CloneWorkspaceRequest"
-      responses:
-        200:
-          description: Successful duplicate response
-          schema:
-            "$ref": "#/definitions/WorkspaceOperation"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
