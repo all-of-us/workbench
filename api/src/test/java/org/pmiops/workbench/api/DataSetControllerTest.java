@@ -59,6 +59,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -141,6 +142,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -262,9 +264,11 @@ public class DataSetControllerTest {
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
     ReviewQueryBuilder.class,
+    TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    WorkspaceOperationMapper.class,
   })
   static class Configuration {
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
