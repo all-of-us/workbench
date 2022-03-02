@@ -10,6 +10,7 @@ import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
 import com.google.cloud.tasks.v2.stub.CloudTasksStub;
 import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -52,6 +53,7 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
         final Request apiReq =
             new Request.Builder()
                 .url(baseUrl + gaeReq.getRelativeUri())
+                .headers(Headers.of(gaeReq.getHeadersMap()))
                 .addHeader("X-AppEngine-QueueName", queueName.getQueue())
                 .post(
                     RequestBody.create(
@@ -63,7 +65,9 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
             String.format(
                 "asynchronously forwarding task request for queue '%s', to handler '%s'",
                 queueName.getQueue(), apiReq.url()));
-        new OkHttpClient()
+        OkHttpClient client = new OkHttpClient();
+        client.setReadTimeout(10, TimeUnit.MINUTES);
+        client
             .newCall(apiReq)
             .enqueue(
                 new Callback() {
