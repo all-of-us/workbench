@@ -408,9 +408,8 @@ export async function findOrCreateDataset(
   opts: { cohortNames?: string[]; openEditPage?: boolean } = {}
 ): Promise<string> {
   const { cohortNames, openEditPage } = opts;
-  const cohorts = cohortNames && cohortNames.length > 0 ? cohortNames : undefined;
   const dataset = await findDataset(page, { openEditPage });
-  return dataset ? dataset : createDataset(page, { cohorts, returnToDataPage: !openEditPage });
+  return dataset ? dataset : createDataset(page, { cohorts: cohortNames, returnToDataPage: !openEditPage });
 }
 
 // Find an existing Cohort. Returns cohort name.
