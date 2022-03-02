@@ -90,6 +90,7 @@ import {
   nextWorkspaceWarmupStore,
 } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
+import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -234,8 +235,8 @@ const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 
 // Poll parameters for checking the result of an async Workspace Create operation
-const CREATE_WORKSPACE_TIMEOUT_MS = 3 * 60 * 1000;
-const CREATE_WORKSPACE_INTERVAL_MS = 5 * 1000;
+const CREATE_WORKSPACE_POLL_TIMEOUT_MS = 3 * 60 * 1000;
+const CREATE_WORKSPACE_POLL_INTERVAL_MS = 5 * 1000;
 
 export enum WorkspaceEditMode {
   Create = 1,
@@ -1056,7 +1057,7 @@ export const WorkspaceEdit = fp.flow(
 
     private async apiCreateWorkspaceAsync() {
       let pollTimedOut = false;
-      setTimeout(() => (pollTimedOut = true), CREATE_WORKSPACE_TIMEOUT_MS);
+      setTimeout(() => (pollTimedOut = true), CREATE_WORKSPACE_POLL_TIMEOUT_MS);
       let workspaceOp = await workspacesApi().createWorkspaceAsync(
         this.state.workspace
       );
@@ -1064,14 +1065,12 @@ export const WorkspaceEdit = fp.flow(
         !pollTimedOut &&
         workspaceOp.status === WorkspaceOperationStatus.PENDING
       ) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, CREATE_WORKSPACE_INTERVAL_MS)
-        );
+        await delay(CREATE_WORKSPACE_POLL_INTERVAL_MS);
         workspaceOp = await workspacesApi().getWorkspaceOperation(
           workspaceOp.id
         );
       }
-      if (workspaceOp.status === WorkspaceOperationStatus.ERROR) {
+      if (workspaceOp.status !== WorkspaceOperationStatus.SUCCESS) {
         throw Error('Workspace creation failed');
       }
       return workspaceOp.workspace;
