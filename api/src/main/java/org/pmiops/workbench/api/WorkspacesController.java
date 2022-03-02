@@ -236,9 +236,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
-    // TODO: enforce access level check here? Not strictly necessary, but may make sense as
-    // belt/suspenders check.
-
     DbWorkspaceOperation operation =
         workspaceOperationDao.save(
             new DbWorkspaceOperation()
