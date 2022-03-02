@@ -71,7 +71,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
     const link = Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
-    await link.clickAndWait();
+    await link.clickAndWait({ timeout: 3 * 60 * 1000 });
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
     return workspaceEdit;

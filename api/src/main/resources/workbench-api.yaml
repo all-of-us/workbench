@@ -892,6 +892,43 @@ paths:
           description: The workspace that was created.
           schema:
             "$ref": "#/definitions/Workspace"
+  "/v1/workspaces/createAsync":
+    post:
+      tags:
+      - workspaces
+      consumes:
+      - application/json
+      description: Creates a workspace asynchronously
+      operationId: createWorkspaceAsync
+      parameters:
+      - in: body
+        name: workspace
+        description: workspace definition
+        schema:
+          "$ref": "#/definitions/Workspace"
+      responses:
+        200:
+          description: The workspace has been scheduled for creation.
+          schema:
+            "$ref": "#/definitions/WorkspaceOperation"
+  "/v1/workspaces/operations/{id}":
+    parameters:
+    - in: path
+      name: id
+      type: integer
+      format: int64
+      description: The workspace operation ID
+      required: true
+    get:
+      tags:
+      - workspaces
+      description: Returns a workspace operation, only accessible to the creator of the operation.
+      operationId: getWorkspaceOperation
+      responses:
+        200:
+          description: The asynchronous workspace operation.
+          schema:
+            "$ref": "#/definitions/WorkspaceOperation"
   "/v1/workspaces/published":
     get:
       tags:
@@ -2796,6 +2833,27 @@ paths:
       responses:
         200:
           description: 'Egress event processed successfully'
+  "/v1/cloudTask/createWorkspace":
+    post:
+      tags:
+      - workspaces
+      - cloudTask
+      description: >
+        Asynchronously creates a workspace. Note: unlike other cloud tasks,
+        this task requires passing along the user's auth credential header.
+      operationId: processCreateWorkspaceTask
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Workspace creation task to process.
+        schema:
+          "$ref": "#/definitions/CreateWorkspaceTaskRequest"
+      responses:
+        200:
+          description: 'Workspace created'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -4723,6 +4781,19 @@ definitions:
       workspace:
         "$ref": "#/definitions/Workspace"
         description: The newly created workspace duplicate.
+  WorkspaceOperation:
+    type: object
+    properties:
+      id:
+        description: The identifier for this operation
+        type: integer
+        format: int64
+      status:
+        description: The status of the async operation
+        "$ref": "#/definitions/WorkspaceOperationStatus"
+      workspace:
+        description: The newly created workspace
+        "$ref": "#/definitions/Workspace"
   UpdateWorkspaceRequest:
     type: object
     required:
@@ -4745,6 +4816,13 @@ definitions:
     enum:
     - ACTIVE
     - DELETED
+  WorkspaceOperationStatus:
+    type: string
+    description: ''
+    enum:
+    - PENDING
+    - ERROR
+    - SUCCESS
   ResearchPurpose:
     type: object
     required:
@@ -8595,6 +8673,19 @@ definitions:
         description: 'Egress event ID to be processed'
         type: integer
         format: int64
+
+  CreateWorkspaceTaskRequest:
+    type: object
+    required:
+      - operationId
+    properties:
+      operationId:
+        description: 'Workspace operation ID'
+        type: integer
+        format: int64
+      workspace:
+        description: 'Requested workspace to create'
+        "$ref": "#/definitions/Workspace"
 
   WorkspaceAuditLogQueryResponse:
     type: object

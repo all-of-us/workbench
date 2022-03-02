@@ -107,6 +107,7 @@ def setup_and_enter_docker(cmd_name, opts)
   ServiceAccountContext.new(
     opts.project, opts.account, key_file.path).run do
     common.run_inline %W{docker-compose build deploy}
+    # TODO(RW-7931): rm --allow_empty_tiers
     common.run_inline %W{
       docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
@@ -115,6 +116,7 @@ def setup_and_enter_docker(cmd_name, opts)
       --account #{opts.account}
       --project #{opts.project}
       #{opts.promote ? "--promote" : "--no-promote"}
+      --allow_empty_tiers
       --app-version #{opts.app_version}
       --git-version #{opts.git_version}
       --key-file #{DOCKER_KEY_FILE_PATH}

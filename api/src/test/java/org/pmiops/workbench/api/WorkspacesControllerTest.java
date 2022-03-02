@@ -57,6 +57,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -132,6 +133,7 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -155,6 +157,8 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
+import org.pmiops.workbench.model.WorkspaceOperation;
+import org.pmiops.workbench.model.WorkspaceOperationStatus;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
@@ -175,6 +179,7 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
@@ -251,7 +256,6 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CdrVersionService.class,
     CohortAnnotationDefinitionController.class,
     CohortAnnotationDefinitionMapperImpl.class,
@@ -265,11 +269,12 @@ public class WorkspacesControllerTest {
     CohortsController.class,
     CommonMappers.class,
     ConceptSetMapperImpl.class,
-    ConceptSetsController.class,
     ConceptSetService.class,
+    ConceptSetsController.class,
     DataSetController.class,
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
     LeonardoMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
@@ -277,13 +282,14 @@ public class WorkspacesControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     UserMapperImpl.class,
+    WorkspaceAdminServiceImpl.class,
     WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
+    WorkspaceOperationMapperImpl.class,
     WorkspaceResourceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
-    WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceAdminServiceImpl.class
+    WorkspacesController.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -299,8 +305,8 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortMaterializationService.class,
     CohortQueryBuilder.class,
-    ConceptBigQueryService.class,
     CohortService.class,
+    ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
     LeonardoNotebooksClient.class,
@@ -308,9 +314,10 @@ public class WorkspacesControllerTest {
     MailService.class,
     MonitoringService.class,
     NotebooksService.class,
+    TaskQueueService.class,
     UserRecentResourceService.class,
     UserService.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
   })
   static class Configuration {
     @Bean
@@ -637,7 +644,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspaceAlreadyApproved() {
+  public void testCreateWorkspace_alreadyApproved() {
     Workspace workspace = createWorkspace();
     workspace.getResearchPurpose().setApproved(true);
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -709,6 +716,30 @@ public class WorkspacesControllerTest {
         workspacesController.createWorkspace(requestedWorkspace).getBody();
     assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
     verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(DEFAULT_GOOGLE_PROJECT);
+  }
+
+  @Test
+  public void testCreateWorkspaceAsync() {
+    Workspace workspace = createWorkspace();
+    WorkspaceOperation operation = workspacesController.createWorkspaceAsync(workspace).getBody();
+    assertThat(operation.getId()).isNotNull();
+    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.PENDING);
+    assertThat(operation.getWorkspace()).isNull();
+  }
+
+  // TODO RW-7973
+  //  @Test
+  //  public void testProcessCreateWorkspaceTask() {
+  //
+  //  }
+
+  @Test
+  public void testProcessCreateWorkspaceTask_notFound() {
+    Workspace workspace = createWorkspace();
+    CreateWorkspaceTaskRequest request =
+        new CreateWorkspaceTaskRequest().operationId(-1L).workspace(workspace);
+    assertThrows(
+        NotFoundException.class, () -> workspacesController.processCreateWorkspaceTask(request));
   }
 
   @Test
