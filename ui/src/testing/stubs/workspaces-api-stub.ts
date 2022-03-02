@@ -95,11 +95,19 @@ export class WorkspacesApiStub extends WorkspacesApi {
       workspace.id = `created-${++this.newWorkspaceCount}`;
       this.workspaces.push(workspace);
       this.workspaceAccess.set(workspace.id, WorkspaceAccessLevel.OWNER);
-      resolve({
+      const operation = {
         id: ++this.newWorkspaceOperationCount,
         status: WorkspaceOperationStatus.SUCCESS,
         workspace,
-      });
+      };
+      this.workspaceOperations.push(operation);
+      resolve(operation);
+    });
+  }
+
+  public getWorkspaceOperation(id: number): Promise<WorkspaceOperation> {
+    return new Promise((resolve) => {
+      resolve(this.workspaceOperations.find((op) => op.id === id));
     });
   }
 
@@ -162,6 +170,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  // imitate sync version by returning with immediate success
   duplicateWorkspaceAsync(
     workspaceNamespace: string,
     workspaceId: string,
@@ -173,11 +182,13 @@ export class WorkspacesApiStub extends WorkspacesApi {
         workspaceId,
         body
       );
-      resolve({
+      const operation = {
         id: ++this.newWorkspaceOperationCount,
         status: WorkspaceOperationStatus.SUCCESS,
         workspace: toWorkspace,
-      });
+      };
+      this.workspaceOperations.push(operation);
+      resolve(operation);
     });
   }
 
