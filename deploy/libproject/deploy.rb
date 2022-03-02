@@ -115,6 +115,7 @@ def setup_and_enter_docker(cmd_name, opts)
       --account #{opts.account}
       --project #{opts.project}
       #{opts.promote ? "--promote" : "--no-promote"}
+      --allow_empty_tiers
       --app-version #{opts.app_version}
       --git-version #{opts.git_version}
       --key-file #{DOCKER_KEY_FILE_PATH}
