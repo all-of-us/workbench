@@ -226,9 +226,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
     return workspaceOperationDao
         .findById(id)
-        .filter(op -> op.getCreatorId() == userProvider.get().getUserId())
-        .map(op -> workspaceOperationMapper.toModelWithWorkspace(op, workspaceDao, workspaceMapper))
-        .map(op -> ResponseEntity.ok().body(op))
+        // only callable by the creator
+        .filter(dbOperation -> dbOperation.getCreatorId() == userProvider.get().getUserId())
+        .map(
+            op ->
+                ResponseEntity.ok()
+                    .body(
+                        workspaceOperationMapper.toModelWithWorkspace(
+                            op, workspaceDao, fireCloudService, workspaceMapper)))
         .orElse(ResponseEntity.notFound().build());
   }
 
