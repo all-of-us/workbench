@@ -4,7 +4,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
+import com.google.apphosting.api.DeadlineExceededException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
@@ -55,9 +57,11 @@ import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -124,6 +128,28 @@ public class CohortBuilderControllerTest {
     dbWorkspace.setName("Saved workspace");
     dbWorkspace.setFirecloudName(WORKSPACE_ID);
     dbWorkspace.setCdrVersion(cdrVersion);
+  }
+
+  @Test
+  public void countParticipantsRaiseDeadlineExceededException() {
+    stubBigQueryCalls();
+    assertThrows(
+        DeadlineExceededException.class,
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, new SearchRequest()));
+  }
+
+  @Test
+  public void findDemoChartInfoRaiseDeadlineExceededException() {
+    stubBigQueryCalls();
+    assertThrows(
+        DeadlineExceededException.class,
+        () ->
+            controller.findDemoChartInfo(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                GenderOrSexType.GENDER.toString(),
+                AgeType.AGE.toString(),
+                SearchRequests.temporalRequest()));
   }
 
   @Test
@@ -1384,5 +1410,10 @@ public class CohortBuilderControllerTest {
         .conceptName(dbCriteriaAttribute.getConceptName())
         .type(dbCriteriaAttribute.getType())
         .estCount(dbCriteriaAttribute.getEstCount());
+  }
+
+  private void stubBigQueryCalls() {
+    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
+    when(bigQueryService.executeQuery(null)).thenThrow(new DeadlineExceededException());
   }
 }
