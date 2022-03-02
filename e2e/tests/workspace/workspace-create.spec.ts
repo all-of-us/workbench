@@ -17,10 +17,7 @@ describe('Creating new workspaces', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const createNewWorkspaceButton = Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
-    await createNewWorkspaceButton.clickAndWait();
-
-    const workspaceEditPage = new WorkspaceEditPage(page);
+    const workspaceEditPage = await workspacesPage.clickCreateNewWorkspace();
 
     // fill out new workspace name
     const newWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
