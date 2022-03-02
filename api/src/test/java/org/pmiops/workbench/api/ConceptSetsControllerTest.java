@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
@@ -84,6 +85,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,10 +230,10 @@ public class ConceptSetsControllerTest {
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
+    CohortQueryBuilder.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortService.class,
-    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetMapperImpl.class,
@@ -243,9 +245,11 @@ public class ConceptSetsControllerTest {
     IamService.class,
     MailService.class,
     NotebooksService.class,
+    TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
+    WorkspaceOperationMapper.class,
   })
   static class Configuration {
     @Bean

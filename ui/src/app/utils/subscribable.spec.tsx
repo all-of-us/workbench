@@ -1,8 +1,4 @@
-import { atom } from './subscribable';
-
-export const delay = (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
+import { atom, delay } from './subscribable';
 
 const promiseComplete = () => {
   let resolveHandler;
