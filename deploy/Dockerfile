@@ -1,0 +1,35 @@
+FROM openjdk:8-buster
+
+RUN apt-get update
+RUN apt-get install -yq gettext ruby default-mysql-client python3 python3-pip nodejs npm wait-for-it
+
+RUN npm install --global yarn n
+# Upgrade to Node 12, above installs 10.
+RUN n 12
+
+ENV CLOUD_SDK_VERSION 321.0.0
+
+RUN cd && \
+  wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
+  tar -xf gcloud.tgz && \
+  ./google-cloud-sdk/install.sh  --quiet && \
+  ~/google-cloud-sdk/bin/gcloud components install app-engine-java && \
+  rm -rf gcloud.tgz
+
+ENV PATH=~/node/bin:~/google-cloud-sdk/bin:$PATH
+
+RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /tmp/cloud_sql_proxy \
+  && mv /tmp/cloud_sql_proxy /usr/local/bin && chmod +x /usr/local/bin/cloud_sql_proxy
+
+# It never makes sense for Gradle to run a daemon within a docker container.
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
+
+ENV GRADLE_VERSION 6.7.1
+
+RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
+  && unzip /tmp/gradle.zip -d /opt/gradle
+ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
+
+# Force a lower concurrent-ruby version, as we only have Ruby 2.3.
+RUN gem install activesupport -v 6.1.4.6
+RUN gem install jira-ruby
