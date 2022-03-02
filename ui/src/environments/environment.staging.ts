@@ -21,4 +21,5 @@ export const environment: Environment = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
+  enableAsyncWorkspaceOperations: true,
 };
