@@ -1,11 +1,10 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import WorkspacesPage, { FieldSelector } from 'app/page/workspaces-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 import { signInWithAccessToken, performActions } from 'utils/test-utils';
-import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
-import WorkspaceEditPage, { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
