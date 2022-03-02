@@ -14,6 +14,8 @@ import {
   WorkspaceBillingUsageResponse,
   WorkspaceCreatorFreeCreditsRemainingResponse,
   WorkspaceListResponse,
+  WorkspaceOperation,
+  WorkspaceOperationStatus,
   WorkspaceResourceResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
@@ -40,10 +42,12 @@ import {
 
 export class WorkspacesApiStub extends WorkspacesApi {
   public workspaces: Workspace[];
+  public workspaceOperations: WorkspaceOperation[];
   public workspaceAccess: Map<string, WorkspaceAccessLevel>;
   workspaceUserRoles: Map<string, UserRole[]>;
   recentWorkspaces: RecentWorkspaceResponse;
   newWorkspaceCount = 0;
+  newWorkspaceOperationCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => {
@@ -85,6 +89,20 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  // imitate sync version by returning with immediate success
+  createWorkspaceAsync(workspace?: Workspace): Promise<WorkspaceOperation> {
+    return new Promise((resolve) => {
+      workspace.id = `created-${++this.newWorkspaceCount}`;
+      this.workspaces.push(workspace);
+      this.workspaceAccess.set(workspace.id, WorkspaceAccessLevel.OWNER);
+      resolve({
+        id: ++this.newWorkspaceOperationCount,
+        status: WorkspaceOperationStatus.SUCCESS,
+        workspace,
+      });
+    });
+  }
+
   updateWorkspace(
     workspaceNamespace: string,
     workspaceId: string,
@@ -105,28 +123,61 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  private duplicateWorkspaceImpl(
+    workspaceNamespace: string,
+    workspaceId: string,
+    body?: CloneWorkspaceRequest
+  ): Workspace {
+    const fromWorkspace = this.workspaces.find(
+      (w) => w.namespace === workspaceNamespace && w.id === workspaceId
+    );
+    if (!fromWorkspace) {
+      throw new Error(
+        `workspace ${workspaceNamespace}/${workspaceId} not found`
+      );
+    }
+    const toWorkspace = {
+      ...fromWorkspace,
+      ...body.workspace,
+      id: `cloned-${++this.newWorkspaceCount}`,
+    };
+    this.workspaces.push(toWorkspace);
+    this.workspaceAccess.set(toWorkspace.id, WorkspaceAccessLevel.OWNER);
+
+    return toWorkspace;
+  }
+
   cloneWorkspace(
     workspaceNamespace: string,
     workspaceId: string,
     body?: CloneWorkspaceRequest
   ): Promise<CloneWorkspaceResponse> {
     return new Promise((resolve) => {
-      const fromWorkspace = this.workspaces.find(
-        (w) => w.namespace === workspaceNamespace && w.id === workspaceId
+      const toWorkspace = this.duplicateWorkspaceImpl(
+        workspaceNamespace,
+        workspaceId,
+        body
       );
-      if (!fromWorkspace) {
-        throw new Error(
-          `workspace ${workspaceNamespace}/${workspaceId} not found`
-        );
-      }
-      const toWorkspace = {
-        ...fromWorkspace,
-        ...body.workspace,
-        id: `cloned-${++this.newWorkspaceCount}`,
-      };
-      this.workspaces.push(toWorkspace);
-      this.workspaceAccess.set(toWorkspace.id, WorkspaceAccessLevel.OWNER);
       resolve({ workspace: toWorkspace });
+    });
+  }
+
+  duplicateWorkspaceAsync(
+    workspaceNamespace: string,
+    workspaceId: string,
+    body?: CloneWorkspaceRequest
+  ): Promise<WorkspaceOperation> {
+    return new Promise((resolve) => {
+      const toWorkspace = this.duplicateWorkspaceImpl(
+        workspaceNamespace,
+        workspaceId,
+        body
+      );
+      resolve({
+        id: ++this.newWorkspaceOperationCount,
+        status: WorkspaceOperationStatus.SUCCESS,
+        workspace: toWorkspace,
+      });
     });
   }
 
