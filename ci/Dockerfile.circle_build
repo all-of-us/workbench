@@ -9,6 +9,8 @@
 # For permission to push, request to be added to the DockerHub repository.
 # Include your changes to circle.yml in the PR that uses the build image.
 
+# This image should be kept synchronized with deploy/Dockerfile.
+
 # Note: we depend on dockerize being installed on this image.
 #
 # We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
