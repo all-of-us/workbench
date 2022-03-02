@@ -86,8 +86,8 @@ export default class Container {
 
   async waitFor(authenticatedPage: AuthenticatedPage, opts: { reloadIfFail?: boolean } = {}): Promise<void> {
     const { reloadIfFail = false } = opts;
-    const wait = async (p: AuthenticatedPage): Promise<boolean> => {
-      return p
+    const wait = async (aPage: AuthenticatedPage): Promise<boolean> => {
+      return aPage
         .waitForLoad()
         .then(() => {
           return true;
@@ -98,6 +98,7 @@ export default class Container {
     };
     const success = await wait(authenticatedPage);
     if (!success && reloadIfFail) {
+      await this.page.waitForTimeout(5000);
       await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'] });
       await wait(authenticatedPage);
     }

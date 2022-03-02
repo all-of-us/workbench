@@ -17,8 +17,11 @@ export default abstract class BaseMenu extends Container {
    * @param menuSelections
    * @param opt
    */
-  async select(menuSelections: string | MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
-    const { waitForNav = false } = opt;
+  async select(
+    menuSelections: string | MenuOption | MenuOption[],
+    opt: { waitForNav?: boolean; waitForLoadingStop?: boolean } = {}
+  ): Promise<void> {
+    const { waitForNav = false, waitForLoadingStop = true } = opt;
 
     let maxAttempts = 3;
     const click = async (menuItem: string, xpath: string, waitForNav = false): Promise<void> => {
@@ -64,9 +67,11 @@ export default abstract class BaseMenu extends Container {
       rootXpath = `${rootXpath}/ul`; // submenu xpath
     }
 
-    // Wait for menu close and disappear.
+    // Wait until menu dropdown is closed.
     await this.waitUntilClose();
-    await waitWhileLoading(this.page);
+    if (waitForLoadingStop) {
+      await waitWhileLoading(this.page);
+    }
   }
 
   /**

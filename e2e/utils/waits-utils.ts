@@ -394,7 +394,9 @@ export async function waitWhileSpinnerDisplayed(
     }
     const spentTime = Date.now() - startTime;
     if (spentTime > maxTime) {
-      logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinnerCss}"`);
+      logger.error(
+        `ERROR: Waiting for loading spinner to stop has exceeded max wait-time. Spinner css: '${spinnerCss}'`
+      );
       logger.error(error.stack);
       await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
       throw new Error(error.message);

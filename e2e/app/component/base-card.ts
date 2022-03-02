@@ -53,9 +53,9 @@ export default abstract class BaseCard extends Container {
   ): Promise<void> {
     const { waitForNav, pageExpected } = opt;
     const menu = await this.getSnowmanMenu();
-    await menu.select(options, { waitForNav });
+    await menu.select(options, { waitForNav, waitForLoadingStop: !pageExpected });
     // Workaround for https://precisionmedicineinitiative.atlassian.net/browse/RW-7928
-    if (pageExpected !== undefined) {
+    if (pageExpected) {
       await this.waitFor(pageExpected, { reloadIfFail: true });
     }
   }
