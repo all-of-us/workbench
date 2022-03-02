@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -202,69 +203,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
-  }
-
-  @Override
-  public ResponseEntity<WorkspaceOperation> createWorkspaceAsync(Workspace workspace) {
-    // Basic request validation.
-    validateWorkspaceApiModel(workspace);
-    getLiveCdrVersionId(workspace.getCdrVersionId());
-
-    // TODO: enforce access level check here? Not strictly necessary, but may make sense as
-    // belt/suspenders check.
-
-    DbWorkspaceOperation operation =
-        workspaceOperationDao.save(
-            new DbWorkspaceOperation()
-                .setCreatorId(userProvider.get().getUserId())
-                .setStatus(DbWorkspaceOperationStatus.PENDING));
-
-    taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
-    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
-  }
-
-  @Override
-  public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
-    return workspaceOperationDao
-        .findById(id)
-        // only callable by the creator
-        .filter(dbOperation -> dbOperation.getCreatorId() == userProvider.get().getUserId())
-        .map(
-            op ->
-                ResponseEntity.ok()
-                    .body(
-                        workspaceOperationMapper.toModelWithWorkspace(
-                            op, workspaceDao, fireCloudService, workspaceMapper)))
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @Override
-  public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
-    DbWorkspaceOperation operation =
-        workspaceOperationDao
-            .findById(request.getOperationId())
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "Workspace Operation '%d' not found", request.getOperationId())));
-    try {
-      Workspace w = this.createWorkspace(request.getWorkspace()).getBody();
-      // careful: w.getId() refers to the Terra Name, not the DB ID
-      long dbId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();
-      operation.setStatus(DbWorkspaceOperationStatus.SUCCESS).setWorkspaceId(dbId);
-    } catch (Exception e) {
-      operation.setStatus(DbWorkspaceOperationStatus.ERROR);
-      throw e;
-    } finally {
-      operation = workspaceOperationDao.save(operation);
-    }
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> processDuplicateWorkspaceTask(DuplicateWorkspaceTaskRequest request) {
-    return ResponseEntity.ok().build();
   }
 
   private DbWorkspace createDbWorkspace(
@@ -531,6 +469,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<WorkspaceOperation> createWorkspaceAsync(Workspace workspace) {
+    // Basic request validation.
+    validateWorkspaceApiModel(workspace);
+    getLiveCdrVersionId(workspace.getCdrVersionId());
+
+    // TODO: enforce access level check here? Not strictly necessary, but may make sense as
+    // belt/suspenders check.
+
+    DbWorkspaceOperation operation =
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.PENDING));
+
+    taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
+    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
+  }
+
+  @Override
   public ResponseEntity<WorkspaceOperation> duplicateWorkspaceAsync(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest request) {
 
@@ -558,6 +515,65 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         request.getIncludeUserRoles(),
         request.getWorkspace());
     return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
+    return workspaceOperationDao
+        .findById(id)
+        // only callable by the creator
+        .filter(dbOperation -> dbOperation.getCreatorId() == userProvider.get().getUserId())
+        .map(
+            op ->
+                ResponseEntity.ok()
+                    .body(
+                        workspaceOperationMapper.toModelWithWorkspace(
+                            op, workspaceDao, fireCloudService, workspaceMapper)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  private void processWorkspaceTask(long operationId, Supplier<Workspace> workspaceAction) {
+    DbWorkspaceOperation operation =
+        workspaceOperationDao
+            .findById(operationId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Workspace Operation '%d' not found", operationId)));
+    try {
+      Workspace w = workspaceAction.get();
+      // careful: w.getId() refers to the Terra Name, not the DB ID
+      long dbId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();
+      operation.setStatus(DbWorkspaceOperationStatus.SUCCESS).setWorkspaceId(dbId);
+    } catch (Exception e) {
+      operation.setStatus(DbWorkspaceOperationStatus.ERROR);
+      throw e;
+    } finally {
+      operation = workspaceOperationDao.save(operation);
+    }
+  }
+
+  @Override
+  public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
+    processWorkspaceTask(
+        request.getOperationId(), () -> this.createWorkspace(request.getWorkspace()).getBody());
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> processDuplicateWorkspaceTask(DuplicateWorkspaceTaskRequest request) {
+    processWorkspaceTask(
+        request.getOperationId(),
+        () ->
+            this.cloneWorkspace(
+                    request.getFromWorkspaceNamespace(),
+                    request.getFromWorkspaceFirecloudName(),
+                    new CloneWorkspaceRequest()
+                        .workspace(request.getWorkspace())
+                        .includeUserRoles(request.getShouldDuplicateRoles()))
+                .getBody()
+                .getWorkspace());
+    return ResponseEntity.ok().build();
   }
 
   /** Gets a FireCloud Billing project. */
