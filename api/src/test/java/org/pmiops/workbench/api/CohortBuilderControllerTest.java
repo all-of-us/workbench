@@ -61,7 +61,6 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
-import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -136,20 +135,6 @@ public class CohortBuilderControllerTest {
     assertThrows(
         DeadlineExceededException.class,
         () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, new SearchRequest()));
-  }
-
-  @Test
-  public void findDemoChartInfoRaiseDeadlineExceededException() {
-    stubBigQueryCalls();
-    assertThrows(
-        DeadlineExceededException.class,
-        () ->
-            controller.findDemoChartInfo(
-                WORKSPACE_NAMESPACE,
-                WORKSPACE_ID,
-                GenderOrSexType.GENDER.toString(),
-                AgeType.AGE.toString(),
-                SearchRequests.temporalRequest()));
   }
 
   @Test

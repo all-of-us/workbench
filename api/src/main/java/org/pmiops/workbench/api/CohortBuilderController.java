@@ -199,17 +199,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
-    try {
-      return ResponseEntity.ok(
-          response.items(
-              cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
-    } catch (DeadlineExceededException exception) {
-      log.severe(
-          String.format(
-              "genderOrSex:%s, age:%s, searchRequest:\n%s",
-              genderOrSex, age, new Gson().toJson(request)));
-      throw exception;
-    }
+    return ResponseEntity.ok(
+        response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
   }
 
   @Override
