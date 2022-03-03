@@ -15,6 +15,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -151,6 +152,7 @@ describe('WorkspaceEdit', () => {
         gsuiteDomain: '',
       },
     });
+    environment.enableAsyncWorkspaceOperations = false;
 
     mockHasBillingScope = jest.spyOn(Authentication, 'hasBillingScope');
     mockEnsureBillingScope = jest.spyOn(Authentication, 'ensureBillingScope');
@@ -408,6 +410,12 @@ describe('WorkspaceEdit', () => {
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
     expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
+
+  // TODO RW-7973
+  // it('supports successful duplication in asynchronous mode', async () => {
+  //   workspaceEditMode = WorkspaceEditMode.Duplicate;
+  //   environment.enableAsyncWorkspaceOperations = true;
+  // });
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async () => {
     // init the workspace to a non-default CDR version value
