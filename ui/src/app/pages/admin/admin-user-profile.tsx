@@ -27,6 +27,10 @@ import { isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
 import { getAccessModuleConfig } from 'app/utils/access-utils';
 import {
+  AuthorityGuardedAction,
+  hasAuthorityForAction,
+} from 'app/utils/authorities';
+import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
@@ -187,35 +191,58 @@ const EditableFields = ({
       i.shortName ===
       updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
   );
+  const { profile } = useStore(profileStore);
+
+  // Show the link to  redirect to institution detail page,
+  // if the LOGGED IN USER has Institution admin authority and
+  // institution name is populated
+  const showGoToInstitutionLink: Boolean =
+    hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
+    !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
+
   return (
     <FlexRow style={styles.editableFields}>
       <FlexColumn>
         <div style={styles.subHeader}>Edit information</div>
         <FlexRow>
-          <ContactEmailTextInput
-            contactEmail={updatedProfile.contactEmail}
-            previousContactEmail={oldProfile.contactEmail}
-            highlightOnChange
-            onChange={(email) => onChangeEmail(email)}
-          />
-          <InstitutionDropdown
-            institutions={institutions}
-            currentInstitutionShortName={
-              updatedProfile.verifiedInstitutionalAffiliation
-                ?.institutionShortName
-            }
-            previousInstitutionShortName={
-              oldProfile.verifiedInstitutionalAffiliation?.institutionShortName
-            }
-            highlightOnChange
-            onChange={(event) => onChangeInstitution(event.value)}
-          />
+          <FlexColumn>
+            <ContactEmailTextInput
+              contactEmail={updatedProfile.contactEmail}
+              previousContactEmail={oldProfile.contactEmail}
+              highlightOnChange
+              onChange={(email) => onChangeEmail(email)}
+            />
+            {emailValidationStatus === EmailValidationStatus.INVALID && (
+              <div style={{ paddingLeft: '1em' }}>
+                {getEmailValidationErrorMessage(institution)}
+              </div>
+            )}
+          </FlexColumn>
+          <FlexColumn>
+            <InstitutionDropdown
+              institutions={institutions}
+              currentInstitutionShortName={
+                updatedProfile.verifiedInstitutionalAffiliation
+                  ?.institutionShortName
+              }
+              previousInstitutionShortName={
+                oldProfile.verifiedInstitutionalAffiliation
+                  ?.institutionShortName
+              }
+              highlightOnChange
+              onChange={(event) => onChangeInstitution(event.value)}
+            />
+            {showGoToInstitutionLink && (
+              <a
+                style={{ paddingLeft: '0.8rem' }}
+                href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
+                target='_blank'
+              >
+                Click here to go to Institution Details Page
+              </a>
+            )}
+          </FlexColumn>
         </FlexRow>
-        {emailValidationStatus === EmailValidationStatus.INVALID && (
-          <div style={{ paddingLeft: '1em' }}>
-            {getEmailValidationErrorMessage(institution)}
-          </div>
-        )}
         <FlexRow>
           <InitialCreditsDropdown
             currentLimit={updatedProfile.freeTierDollarQuota}
