@@ -92,6 +92,7 @@ import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
+import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -247,10 +248,22 @@ public class WorkspacesControllerTest {
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
 
-  @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
-  @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
-  @Autowired private WorkspacesController workspacesController;
-  @Autowired private WorkspaceAdminService workspaceAdminService;
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired BigQueryService bigQueryService;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired CloudStorageClient cloudStorageClient;
+  @Autowired CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+  @Autowired CohortDao cohortDao;
+  @Autowired CohortReviewController cohortReviewController;
+  @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired CohortsController cohortsController;
+  @Autowired ConceptBigQueryService conceptBigQueryService;
+  @Autowired ConceptSetDao conceptSetDao;
+  @Autowired ConceptSetService conceptSetService;
+  @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetController dataSetController;
+  @Autowired DataSetDao dataSetDao;
+  @Autowired DataSetService dataSetService;
   @Autowired FakeClock fakeClock;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
@@ -266,10 +279,17 @@ public class WorkspacesControllerTest {
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
   @MockBean AccessTierService accessTierService;
-  @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean CloudBillingClient mockCloudBillingClient;
+  @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
-  // @MockBean WorkspaceOperationDao workspaceOperationDao;
+
+  private static DbUser currentUser;
+  private static WorkbenchConfig workbenchConfig;
+
+  private DbAccessTier accessTier;
+  private DbCdrVersion cdrVersion;
+  private String cdrVersionId;
+  private String archivedCdrVersionId;
 
   @TestConfiguration
   @Import({
@@ -349,36 +369,6 @@ public class WorkspacesControllerTest {
       return workbenchConfig;
     }
   }
-
-  private static DbUser currentUser;
-  private static WorkbenchConfig workbenchConfig;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired private WorkspaceService workspaceService;
-  @Autowired CloudStorageClient cloudStorageClient;
-  @Autowired BigQueryService bigQueryService;
-  @SpyBean @Autowired WorkspaceDao workspaceDao;
-  @Autowired UserDao userDao;
-  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired AccessTierDao accessTierDao;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired CohortsController cohortsController;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptSetsController conceptSetsController;
-  @Autowired DataSetController dataSetController;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired DataSetService dataSetService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired CohortReviewController cohortReviewController;
-  @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-
-  private DbAccessTier accessTier;
-  private DbCdrVersion cdrVersion;
-  private String cdrVersionId;
-  private String archivedCdrVersionId;
 
   @BeforeEach
   public void setUp() throws Exception {
