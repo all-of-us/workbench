@@ -10,6 +10,11 @@ import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
 import LockWorkspaceModal from 'app/modal/lock-workspace-modal';
 
+export enum workspaceStatus {
+  Lock = 'LOCK WORKSPACE',
+  Unlock = 'UNLOCK WORKSPACE'
+}
+
 enum StatusSelectors {
   Deleting = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[text()="Deleting"]',
   Running = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[text()="Running"]'
@@ -48,17 +53,21 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
   }
 
-  getLockWorkspaceButton(): Button {
-    return Button.findByName(this.page, { normalizeSpace: LinkText.LockWorkspace });
+  getLockWorkspaceButton(status: workspaceStatus): Button {
+    return Button.findByName(this.page, { normalizeSpace: status });
   }
 
-  //click "Lock Workspace" button
-  async clickLockWorkspaceButton(): Promise<LockWorkspaceModal> {
-    const button = this.getLockWorkspaceButton();
+  async clickLockWorkspaceButton(status: workspaceStatus): Promise<LockWorkspaceModal> {
+    const button = this.getLockWorkspaceButton(status);
     await button.click();
     const modal = new LockWorkspaceModal(this.page);
     await modal.waitForLoad();
     return modal;
+  }
+
+  async clickUnlockWorkspaceButton(status: workspaceStatus): Promise<void> {
+    const button = this.getLockWorkspaceButton(status);
+    await button.click();
   }
 
   // extract only the Workspace Namespace text for verification
