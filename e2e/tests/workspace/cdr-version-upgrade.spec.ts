@@ -84,10 +84,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-
-    // Verify Delete action was successful.
-    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
+    await new WorkspaceCard(page).deleteWorkspace({ workspaceName: duplicateWorkspaceName });
   });
 });
 

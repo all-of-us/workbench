@@ -94,10 +94,17 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     // Verify Workspace Actions menu: READER or WRITER cannot Share, Edit or Delete workspace.
     await verifyWorkspaceActionMenuOptions(page);
+  });
 
-    // Check dataset permissions for READER and WRITER.
+  test.each(assignAccess)('WRITER can rename, edit or delete dataset while READER cannot', async (assign) => {
+    await signInWithAccessToken(page, assign.userEmail);
+    logger.info(`${assign.accessRole} log in`);
+
+    // Find workspace created by previous test. If not found, test will fail.
+    const workspaceCard = await findWorkspaceCard(page, workspace);
+    await workspaceCard.clickWorkspaceName();
+
     const dataPage = new WorkspaceDataPage(page);
-    await openTab(page, Tabs.Data, dataPage);
 
     // Check Create Cohorts and Datasets buttons
     switch (assign.accessRole) {
@@ -175,51 +182,6 @@ describe('Workspace Reader and Writer Permission Test', () => {
       default:
         break;
     }
-  });
-
-  xtest('READER cannot edit dataset', async () => {
-    await signInWithAccessToken(page, config.READER_USER);
-
-    // Find workspace created by previous test. If not found, test will fail.
-    const workspaceCard = await findWorkspaceCard(page, workspace);
-    await workspaceCard.clickWorkspaceName(true);
-
-    const readerDataPage = new WorkspaceDataPage(page);
-    await readerDataPage.waitForLoad();
-
-    // Create Cohorts and Datasets button are disabled.
-    await readerDataPage.getAddDatasetButton().expectEnabled(false);
-    await readerDataPage.getAddCohortsButton().expectEnabled(false);
-
-    await openTab(page, Tabs.Datasets, readerDataPage);
-
-    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
-    const resourceCard = new DataResourceCard(page);
-    const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    expect(dataSetCard).toBeTruthy();
-
-    const snowmanMenu = await dataSetCard.getSnowmanMenu();
-    expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
-
-    // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
-    await dataSetCard.clickResourceName();
-    const dataSetEditPage = new DatasetBuildPage(page);
-    await dataSetEditPage.waitForLoad();
-
-    // Analyze and Save buttons are disabled.
-    const analyzeButton = dataSetEditPage.getAnalyzeButton();
-    await analyzeButton.expectEnabled(false);
-    const saveButton = dataSetEditPage.getSaveButton();
-    await saveButton.expectEnabled(false);
-
-    // No matter of what has changed, the Analyze button remains disabled.
-    await dataSetEditPage.selectConceptSets([ConceptSets.FitbitIntraDaySteps]);
-    await dataSetEditPage.getPreviewTableButton().click();
-    await waitWhileLoading(page);
-    await analyzeButton.expectEnabled(false);
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.

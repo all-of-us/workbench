@@ -224,8 +224,9 @@ export async function findWorkspaceCard(
 ): Promise<WorkspaceCard | null> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
+
   const workspaceCard = new WorkspaceCard(page);
-  return workspaceCard.findCard(workspaceName, timeout);
+  return workspaceCard.findCard({ workspaceName, timeout });
 }
 
 /**
@@ -396,8 +397,9 @@ export async function findDataset(
 
   if (datasetCard !== null) {
     if (openEditPage) {
-      await datasetCard.clickResourceName();
+      const resourceName = await datasetCard.clickResourceName();
       await new DatasetBuildPage(page).waitForLoad();
+      return resourceName;
     }
     return name === undefined ? await datasetCard.getResourceName() : name;
   }

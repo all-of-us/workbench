@@ -3,7 +3,7 @@ import { MenuOption } from 'app/text-labels';
 import Link from 'app/element/link';
 import BaseMenu from './base-menu';
 
-export const snowmanIconXpath = '//clr-icon[@shape="ellipsis-vertical"]';
+export const snowmanIconXpath = '//*[@role="button"]/clr-icon[@shape="ellipsis-vertical"]';
 const defaultXpath = '//*[@id="popup-root"]/div[not(@class="ReactModalPortal")]'; // Exclude modal popup.
 
 export default class SnowmanMenu extends BaseMenu {

@@ -54,11 +54,11 @@ export default class DataResourceCard extends BaseCard {
     return page
       .waitForXPath(selector, { timeout })
       .then(() => {
-        logger.info(`Found data resource card: "${resourceName}"`);
+        logger.info(`Found data resource card "${resourceName}"`);
         return new DataResourceCard(page, selector);
       })
       .catch(() => {
-        logger.info(`Data resource card: "${resourceName}" is not found`);
+        logger.info(`Data resource card "${resourceName}" is not found`);
         return null;
       });
   }
@@ -82,11 +82,11 @@ export default class DataResourceCard extends BaseCard {
     return this.page
       .waitForXPath(selector, { timeout })
       .then(() => {
-        logger.info(`Found ${cardType} card: "${resourceName}"`);
+        logger.info(`Found ${cardType} card "${resourceName}"`);
         return new DataResourceCard(this.page, selector);
       })
       .catch(() => {
-        logger.info(`${cardType} card: "${resourceName}" is not found`);
+        logger.info(`${cardType} card "${resourceName}" is not found`);
         return null;
       });
   }

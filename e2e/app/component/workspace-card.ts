@@ -31,18 +31,6 @@ export default class WorkspaceCard extends BaseCard {
   // **********************
 
   /**
-   * Delete workspace via Workspace card "Delete" dropdown menu option.
-   */
-  static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
-    const card = await WorkspaceCard.findCard(page, workspaceName, 30000);
-    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
-    // Handle Delete Confirmation modal
-    const modalText = await new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
-    await WorkspaceCard.waitUntilGone(page, workspaceName, 10000);
-    return modalText;
-  }
-
-  /**
    * Find all visible Workspace Cards.
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
@@ -59,58 +47,45 @@ export default class WorkspaceCard extends BaseCard {
     });
 
     // Turn elements into WorkspaceCard objects.
-    const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map(
-      () => new WorkspaceCard(page, WorkspaceCardSelector.cardRootXpath)
+    const cardElements = await page.$x(WorkspaceCardSelector.cardRootXpath);
+    const allCards: WorkspaceCard[] = await Promise.all(
+      cardElements.map(async (c) => {
+        // Find card's name and use it to construct xpath
+        const [nameElement] = await c.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+        const name = await getPropValue<string>(nameElement, 'textContent');
+        const card = new WorkspaceCard(page);
+        card.setXpath(name);
+        return card;
+      })
     );
-    console.log(`allCards before: ${allCards}`);
+
     if (accessLevel !== undefined) {
       return asyncFilter(
         allCards,
         async (card: WorkspaceCard) => accessLevel === (await card.getWorkspaceAccessLevel())
       );
     }
-    console.log(`allCards after: ${allCards}`);
     return allCards;
   }
 
-  static async findCard(page: Page, workspaceName: string, timeout = 5000): Promise<WorkspaceCard | null> {
-    const selector =
-      `${WorkspaceCardSelector.cardRootXpath}[.//*[${WorkspaceCardSelector.cardNameXpath}` +
-      ` and normalize-space(text())="${workspaceName}"]]`;
-    return page
-      .waitForXPath(selector, { timeout, visible: true })
-      .then(() => {
-        logger.info(`Found workspace card: "${workspaceName}"`);
-        return new WorkspaceCard(page, selector);
-      })
-      .catch(() => {
-        logger.info(`Workspace card "${workspaceName}" is not found`);
-        return null;
-      });
-  }
-
-  static async waitUntilGone(page: Page, workspaceName: string, timeout = 60000): Promise<void> {
-    const selector =
-      `${WorkspaceCardSelector.cardRootXpath}//*[${WorkspaceCardSelector.cardNameXpath}` +
-      ` and normalize-space(text())="${workspaceName}"]`;
-    await page.waitForXPath(selector, { hidden: true, timeout });
+  static async findCard(page: Page, workspaceName: string, timeout?: number): Promise<WorkspaceCard | null> {
+    return new WorkspaceCard(page).findCard({ workspaceName, timeout });
   }
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }
 
-  async findCard(workspaceName: string, timeout = 5000): Promise<WorkspaceCard | null> {
-    const selector =
-      WorkspaceCardSelector.cardRootXpath +
-      `[.//*[${WorkspaceCardSelector.cardNameXpath}` +
-      ` and normalize-space(text())="${workspaceName}"]]`;
-
+  async findCard(opts: { workspaceName?: string; timeout?: number } = {}): Promise<WorkspaceCard | null> {
+    const { workspaceName, timeout } = opts;
+    if (workspaceName) {
+      this.setXpath(workspaceName);
+    }
     return this.page
-      .waitForXPath(selector, { timeout })
+      .waitForXPath(this.getXpath(), { visible: true, timeout })
       .then(() => {
         logger.info(`Found Workspace card "${workspaceName}"`);
-        return new WorkspaceCard(this.page, selector);
+        return new WorkspaceCard(this.page, this.getXpath());
       })
       .catch(() => {
         logger.info(`Workspace card "${workspaceName}" is not found`);
@@ -168,6 +143,33 @@ export default class WorkspaceCard extends BaseCard {
       await dataPage.waitForLoad();
     }
     return workspaceName;
+  }
+
+  async waitUntilHidden(opts: { workspaceName?: string; timeout?: number } = {}): Promise<void> {
+    const { workspaceName, timeout = 60 * 1000 } = opts;
+    if (workspaceName) {
+      this.setXpath(workspaceName);
+    }
+    await this.page.waitForXPath(this.getXpath(), { hidden: true, visible: false, timeout });
+  }
+
+  /**
+   * Delete workspace via Workspace card "Delete" dropdown menu option.
+   */
+  async deleteWorkspace(opts: { workspaceName?: string } = {}): Promise<string[]> {
+    const { workspaceName } = opts;
+    const card = await this.findCard({ workspaceName });
+    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
+    // Handle Delete Confirmation modal
+    const modalText = await new WorkspaceEditPage(this.page).dismissDeleteWorkspaceModal();
+    await card.waitUntilHidden({ workspaceName, timeout: 10000 });
+    return modalText;
+  }
+
+  setXpath(name: string): void {
+    this.xpath =
+      WorkspaceCardSelector.cardRootXpath +
+      `[.//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${name}"]]`;
   }
 
   private getWorkspaceNameXpath(workspaceName: string): string {

@@ -57,7 +57,7 @@ describe('Notebook and Runtime UI Test', () => {
   });
 
   async function openWorkspace(page: Page, workspaceName: string): Promise<boolean> {
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
+    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName, 2000);
     // Don't create new workspace if none found.
     if (!workspaceCard) {
       return false;

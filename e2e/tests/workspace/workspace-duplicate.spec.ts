@@ -52,9 +52,7 @@ describe('Duplicate workspace', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-    await workspacesPage.waitForLoad();
-    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
+    await new WorkspaceCard(page).deleteWorkspace({ workspaceName: duplicateWorkspaceName });
   });
 
   test('Cannot duplicate workspace with older CDR version without consent to restrictions', async () => {
@@ -101,9 +99,6 @@ describe('Duplicate workspace', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-
-    // Verify Delete action was successful.
-    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
+    await new WorkspaceCard(page).deleteWorkspace({ workspaceName: duplicateWorkspaceName });
   });
 });

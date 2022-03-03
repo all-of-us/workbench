@@ -4,20 +4,16 @@ import Container from 'app/container';
 import SnowmanMenu, { snowmanIconXpath } from './snowman-menu';
 
 export default abstract class BaseCard extends Container {
-  protected cardElement: ElementHandle;
-
   protected constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }
 
   async asElement(): Promise<ElementHandle | null> {
-    const cardElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
-    return cardElement.asElement();
+    return this.page.waitForXPath(this.getXpath(), { visible: true });
   }
 
   async clickSnowmanIcon(): Promise<this> {
-    const iconXpath = `.${snowmanIconXpath}`;
-    const [snowmanIcon] = await (await this.asElement()).$x(iconXpath);
+    const [snowmanIcon] = await (await this.asElement()).$x(`.${snowmanIconXpath}`);
     await snowmanIcon.hover();
     await snowmanIcon.click();
     await snowmanIcon.dispose();
