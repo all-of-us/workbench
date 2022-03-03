@@ -1,4 +1,4 @@
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import * as fp from 'lodash/fp';
 import { getPropValue } from 'utils/element-utils';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
@@ -34,8 +34,8 @@ export default class DataResourceCard extends BaseCard {
       return [];
     }
     const cards = await page.$x(DataResourceCardSelector.cardRootXpath);
-    // transform to WorkspaceCard object
-    const resourceCards = cards.map((card) => new DataResourceCard(page).asCard(card));
+    // transform to DataResourceCard array
+    const resourceCards = cards.map(() => new DataResourceCard(page, DataResourceCardSelector.cardRootXpath));
     return resourceCards;
   }
 
@@ -174,10 +174,5 @@ export default class DataResourceCard extends BaseCard {
     await waitWhileLoading(this.page);
     logger.info(`Deleted ${cardType} "${cardName}"`);
     return modalTextContent;
-  }
-
-  private asCard(elementHandle: ElementHandle): DataResourceCard {
-    this.cardElement = elementHandle;
-    return this;
   }
 }
