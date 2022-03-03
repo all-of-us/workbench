@@ -143,10 +143,10 @@ const UneditableFields = (props: { profile: Profile }) => {
       </FlexRow>
       <FlexRow>
         <UneditableField
-          label='Initial Credits Used'
+          label='Initial credits used'
           value={getInitialCreditsUsage(props.profile)}
         />
-        <UneditableField label='Data Access Tiers' value={accessTiers} />
+        <UneditableField label='Data access tiers' value={accessTiers} />
       </FlexRow>
     </FlexColumn>
   );
@@ -392,7 +392,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
         )
       }
     >
-      <Column field='moduleName' header='Access Module' />
+      <Column field='moduleName' header='Access module' />
       <Column field='moduleStatus' header='Status' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />

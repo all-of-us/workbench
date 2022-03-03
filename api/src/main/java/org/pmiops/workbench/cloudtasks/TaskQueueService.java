@@ -17,6 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
+import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
@@ -30,11 +31,13 @@ public class TaskQueueService {
   private static final String SYNCHRONIZE_ACCESS_PATH = BASE_PATH + "/synchronizeUserAccess";
   private static final String EGRESS_EVENT_PATH = BASE_PATH + "/processEgressEvent";
   private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
+  private static final String DUPLICATE_WORKSPACE_PATH = BASE_PATH + "/duplicateWorkspace";
 
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
   private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
+  private static final String DUPLICATE_WORKSPACE_QUEUE_NAME = "duplicateWorkspaceQueue";
 
   private WorkbenchLocationConfigService locationConfigService;
   private Provider<CloudTasksClient> cloudTasksClientProvider;
@@ -118,6 +121,25 @@ public class TaskQueueService {
         CREATE_WORKSPACE_QUEUE_NAME,
         CREATE_WORKSPACE_PATH,
         new CreateWorkspaceTaskRequest().operationId(operationId).workspace(workspace),
+        ImmutableMap.of(
+            "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
+  }
+
+  public void pushDuplicateWorkspaceTask(
+      long operationId,
+      String fromWorkspaceNamespace,
+      String fromWorkspaceFirecloudName,
+      Boolean shouldDuplicateRoles,
+      Workspace workspace) {
+    createAndPushTask(
+        DUPLICATE_WORKSPACE_QUEUE_NAME,
+        DUPLICATE_WORKSPACE_PATH,
+        new DuplicateWorkspaceTaskRequest()
+            .operationId(operationId)
+            .fromWorkspaceNamespace(fromWorkspaceNamespace)
+            .fromWorkspaceFirecloudName(fromWorkspaceFirecloudName)
+            .shouldDuplicateRoles(shouldDuplicateRoles)
+            .workspace(workspace),
         ImmutableMap.of(
             "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
   }

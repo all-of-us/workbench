@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
+import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
@@ -223,6 +225,33 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<WorkspaceOperation> duplicateWorkspaceAsync(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest request) {
+
+    // Basic request validation.
+    validateWorkspaceApiModel(request.getWorkspace());
+    getLiveCdrVersionId(request.getWorkspace().getCdrVersionId());
+
+    // Verify the caller has read access to the source workspace.
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+
+    DbWorkspaceOperation operation =
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.PENDING));
+
+    taskQueueService.pushDuplicateWorkspaceTask(
+        operation.getId(),
+        fromWorkspaceNamespace,
+        fromWorkspaceId,
+        request.getIncludeUserRoles(),
+        request.getWorkspace());
+    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
+  }
+
+  @Override
   public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
     return workspaceOperationDao
         .findById(id)
@@ -237,18 +266,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .orElse(ResponseEntity.notFound().build());
   }
 
-  @Override
-  public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
+  private void processWorkspaceTask(long operationId, Supplier<Workspace> workspaceAction) {
     DbWorkspaceOperation operation =
         workspaceOperationDao
-            .findById(request.getOperationId())
+            .findById(operationId)
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format(
-                            "Workspace Operation '%d' not found", request.getOperationId())));
+                        String.format("Workspace Operation '%d' not found", operationId)));
     try {
-      Workspace w = this.createWorkspace(request.getWorkspace()).getBody();
+      Workspace w = workspaceAction.get();
       // careful: w.getId() refers to the Terra Name, not the DB ID
       long dbId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();
       operation.setStatus(DbWorkspaceOperationStatus.SUCCESS).setWorkspaceId(dbId);
@@ -258,6 +285,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } finally {
       operation = workspaceOperationDao.save(operation);
     }
+  }
+
+  @Override
+  public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
+    processWorkspaceTask(
+        request.getOperationId(), () -> this.createWorkspace(request.getWorkspace()).getBody());
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> processDuplicateWorkspaceTask(DuplicateWorkspaceTaskRequest request) {
+    processWorkspaceTask(
+        request.getOperationId(),
+        () ->
+            this.cloneWorkspace(
+                    request.getFromWorkspaceNamespace(),
+                    request.getFromWorkspaceFirecloudName(),
+                    new CloneWorkspaceRequest()
+                        .workspace(request.getWorkspace())
+                        .includeUserRoles(request.getShouldDuplicateRoles()))
+                .getBody()
+                .getWorkspace());
     return ResponseEntity.ok().build();
   }
 

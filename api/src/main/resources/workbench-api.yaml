@@ -1119,6 +1119,28 @@ paths:
           description: Successful duplicate response
           schema:
             "$ref": "#/definitions/CloneWorkspaceResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicateAsync":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - workspaces
+      consumes:
+      - application/json
+      description: |
+        Asynchronously duplicate an existing workspace. Semantics otherwise match cloneWorkspace.
+      operationId: duplicateWorkspaceAsync
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/CloneWorkspaceRequest"
+      responses:
+        200:
+          description: Successful duplicate response
+          schema:
+            "$ref": "#/definitions/WorkspaceOperation"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2851,6 +2873,27 @@ paths:
         description: Workspace creation task to process.
         schema:
           "$ref": "#/definitions/CreateWorkspaceTaskRequest"
+      responses:
+        200:
+          description: 'Workspace created'
+  "/v1/cloudTask/duplicateWorkspace":
+    post:
+      tags:
+        - workspaces
+        - cloudTask
+      description: >
+        Asynchronously duplicates a workspace. Note: unlike other cloud tasks,
+        this task requires passing along the user's auth credential header.
+      operationId: processDuplicateWorkspaceTask
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: Workspace duplication task to process.
+          schema:
+            "$ref": "#/definitions/DuplicateWorkspaceTaskRequest"
       responses:
         200:
           description: 'Workspace created'
@@ -4783,6 +4826,9 @@ definitions:
         description: The newly created workspace duplicate.
   WorkspaceOperation:
     type: object
+    required:
+      - id
+      - status
     properties:
       id:
         description: The identifier for this operation
@@ -8678,6 +8724,7 @@ definitions:
     type: object
     required:
       - operationId
+      - workspace
     properties:
       operationId:
         description: 'Workspace operation ID'
@@ -8685,6 +8732,31 @@ definitions:
         format: int64
       workspace:
         description: 'Requested workspace to create'
+        "$ref": "#/definitions/Workspace"
+
+  DuplicateWorkspaceTaskRequest:
+    type: object
+    required:
+      - operationId
+      - fromWorkspaceNamespace
+      - fromWorkspaceFirecloudName
+      - workspace
+    properties:
+      operationId:
+        description: 'Workspace operation ID'
+        type: integer
+        format: int64
+      fromWorkspaceNamespace:
+        description: 'Namespace of the From-Workspace'
+        type: string
+      fromWorkspaceFirecloudName:
+        description: 'Firecloud Name of the From-Workspace'
+        type: string
+      shouldDuplicateRoles:
+        description: 'Should the duplicated workspace also duplicate the roles of the source'
+        type: boolean
+      workspace:
+        description: 'Requested workspace to duplicate'
         "$ref": "#/definitions/Workspace"
 
   WorkspaceAuditLogQueryResponse:
