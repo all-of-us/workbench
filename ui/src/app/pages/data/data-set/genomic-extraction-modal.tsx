@@ -106,8 +106,17 @@ export const GenomicExtractionModal = ({
           </span>
           <span>
             Genomic data extraction will run in background and you’ll be
-            notified when files are ready for analysis. VCF extraction will
-            incur cloud compute costs.
+            notified when files are ready for analysis.
+          </span>
+          <span>
+            <span style={{fontWeight: 600}}>
+              Note: VCF extraction will incur cloud cost{' '}
+            </span>
+            (billed as BigQuery analysis). Extraction typically costs{' '}
+            <span style={{fontWeight: 600}}>
+              $.02 per extracted sample
+            </span>
+            , but costs may vary.
           </span>
         </TextColumn>
       </ModalBody>
