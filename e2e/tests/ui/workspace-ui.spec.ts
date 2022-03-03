@@ -29,7 +29,7 @@ describe('Workspace UI Test', () => {
     let width;
     let height;
     for (const card of homePageCards) {
-      const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
+      const cardElem = BaseElement.asBaseElement(page, await card.asElement());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
       if (width === undefined) {
@@ -145,7 +145,7 @@ describe('Workspace UI Test', () => {
     }
 
     const workspaceCard = fp.shuffle(cards)[0];
-    await workspaceCard.asElementHandle().hover();
+    await (await workspaceCard.asElement()).hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);

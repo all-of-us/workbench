@@ -10,21 +10,9 @@ export default abstract class BaseCard extends Container {
     super(page, xpath);
   }
 
-  /**
-   * @deprecated
-   * Replace with asElement()
-   */
-  asElementHandle(): ElementHandle {
-    return this.cardElement.asElement();
-  }
-
   async asElement(): Promise<ElementHandle | null> {
-    if (this.getXpath() !== undefined) {
-      // Refresh cardElement even if cardElement is already initialized.
-      // Throws error if find fails. Error is likely caused by the element no longer exists or becomes stale.
-      this.cardElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
-    }
-    return this.cardElement.asElement();
+    const cardElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
+    return cardElement.asElement();
   }
 
   async clickSnowmanIcon(): Promise<this> {

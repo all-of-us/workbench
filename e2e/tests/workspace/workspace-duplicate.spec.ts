@@ -59,7 +59,7 @@ describe('Duplicate workspace', () => {
 
   test('Cannot duplicate workspace with older CDR version without consent to restrictions', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
-    await workspaceCard.asElementHandle().hover();
+    await (await workspaceCard.asElement()).hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);

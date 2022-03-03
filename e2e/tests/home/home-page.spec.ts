@@ -16,7 +16,7 @@ describe('Home page ui tests', () => {
     let width;
     let height;
     for (const card of allCards) {
-      const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
+      const cardElem = BaseElement.asBaseElement(page, await card.asElement());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
       expect(size).toBeTruthy();

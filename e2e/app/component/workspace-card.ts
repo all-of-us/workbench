@@ -62,13 +62,14 @@ export default class WorkspaceCard extends BaseCard {
     const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map(
       () => new WorkspaceCard(page, WorkspaceCardSelector.cardRootXpath)
     );
-
+    console.log(`allCards before: ${allCards}`);
     if (accessLevel !== undefined) {
       return asyncFilter(
         allCards,
         async (card: WorkspaceCard) => accessLevel === (await card.getWorkspaceAccessLevel())
       );
     }
+    console.log(`allCards after: ${allCards}`);
     return allCards;
   }
 
@@ -108,7 +109,7 @@ export default class WorkspaceCard extends BaseCard {
     return this.page
       .waitForXPath(selector, { timeout })
       .then(() => {
-        logger.info(`Found Workspace card: "${workspaceName}"`);
+        logger.info(`Found Workspace card "${workspaceName}"`);
         return new WorkspaceCard(this.page, selector);
       })
       .catch(() => {
@@ -146,7 +147,7 @@ export default class WorkspaceCard extends BaseCard {
   }
 
   async getLastChangedTime(): Promise<string> {
-    const [element] = await this.cardElement.$x(WorkspaceCardSelector.dateTimeXpath);
+    const element = await this.page.waitForXPath(WorkspaceCardSelector.dateTimeXpath);
     const wholeText = await getPropValue<string>(element, 'innerText');
     // datetime format is "Last Changed: 01/08/21, 05:22 PM"
     return wholeText.replace('Last Changed: ', '').trim();

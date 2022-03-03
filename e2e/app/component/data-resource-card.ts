@@ -137,11 +137,8 @@ export default class DataResourceCard extends BaseCard {
    * @param {string} cardName
    * @param {CardType} cardType
    */
-  async cardExists(cardName: string, cardType: ResourceCard): Promise<boolean> {
-    const cards = await this.getResourceCard(cardType);
-    const names = await Promise.all(cards.map((item) => item.getResourceName()));
-    const filteredList = names.filter((name) => name === cardName);
-    return filteredList.length === 1;
+  async cardExists(cardName: string, cardType: ResourceCard, opts: { timeout?: number } = {}): Promise<boolean> {
+    return (await this.findCard(cardName, cardType, opts)) !== null;
   }
 
   async delete(cardName: string, cardType: ResourceCard): Promise<string[]> {

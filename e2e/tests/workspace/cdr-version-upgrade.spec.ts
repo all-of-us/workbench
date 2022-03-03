@@ -54,7 +54,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
       workspaceName,
       cdrVersion: config.OLD_CDR_VERSION_NAME
     });
-    await workspaceCard.asElementHandle().hover();
+    await (await workspaceCard.asElement()).hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     // Fill out Workspace Name should be just enough for successful duplication
