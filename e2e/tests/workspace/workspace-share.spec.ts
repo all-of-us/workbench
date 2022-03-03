@@ -1,4 +1,4 @@
-import { LinkText, MenuOption, WorkspaceAccessLevel, Tabs, ConceptSets, ResourceCard } from 'app/text-labels';
+import { ConceptSets, LinkText, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import {
   createDataset,
   findOrCreateWorkspace,
@@ -15,6 +15,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
+import { logger } from 'libs/logger';
 
 describe('Workspace Reader and Writer Permission Test', () => {
   const assignAccess = [
@@ -61,9 +62,10 @@ describe('Workspace Reader and Writer Permission Test', () => {
     }
   });
 
-  // Test depends on previous test: Will fail when workspace is not found and share didn't work.
+  // Test depends on previous test: Will fail when workspace is not found or share has failed.
   test.each(assignAccess)('WRITER and READER cannot share, edit or delete workspace', async (assign) => {
     await signInWithAccessToken(page, assign.userEmail);
+    logger.info(`${assign.accessRole} log in`);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);
@@ -92,9 +94,90 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     // Verify Workspace Actions menu: READER or WRITER cannot Share, Edit or Delete workspace.
     await verifyWorkspaceActionMenuOptions(page);
+
+    // Check dataset permissions for READER and WRITER.
+    const dataPage = new WorkspaceDataPage(page);
+    await openTab(page, Tabs.Data, dataPage);
+
+    // Check Create Cohorts and Datasets buttons
+    switch (assign.accessRole) {
+      case WorkspaceAccessLevel.Writer:
+        await dataPage.getAddDatasetButton().expectEnabled(true);
+        await dataPage.getAddCohortsButton().expectEnabled(true);
+        break;
+      case WorkspaceAccessLevel.Reader:
+        await dataPage.getAddDatasetButton().expectEnabled(false);
+        await dataPage.getAddCohortsButton().expectEnabled(false);
+        break;
+      default:
+        break;
+    }
+
+    await openTab(page, Tabs.Datasets, dataPage);
+
+    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
+    const resourceCard = new DataResourceCard(page);
+    const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
+    expect(await dataSetCard.isVisible()).toBeTruthy();
+
+    switch (assign.accessRole) {
+      case WorkspaceAccessLevel.Reader:
+        {
+          const snowmanMenu = await dataSetCard.getSnowmanMenu();
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(true);
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(true);
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+
+          // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
+          await dataSetCard.clickResourceName();
+          const dataSetEditPage = new DatasetBuildPage(page);
+          await dataSetEditPage.waitForLoad();
+
+          // Analyze and Save buttons are disabled.
+          const analyzeButton = dataSetEditPage.getAnalyzeButton();
+          await analyzeButton.expectEnabled(false);
+          const saveButton = dataSetEditPage.getSaveButton();
+          await saveButton.expectEnabled(false);
+
+          // No matter of what has changed, the Analyze button remains disabled.
+          await dataSetEditPage.selectConceptSets([ConceptSets.FitbitIntraDaySteps]);
+          await dataSetEditPage.getPreviewTableButton().click();
+          await waitWhileLoading(page);
+          await analyzeButton.expectEnabled(false);
+        }
+        break;
+      case WorkspaceAccessLevel.Writer:
+        {
+          const snowmanMenu = await dataSetCard.getSnowmanMenu();
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(false);
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(false);
+          expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
+
+          // User can click on dataset name and see the dataset details.
+          await dataSetCard.clickResourceName();
+          const dataSetEditPage = new DatasetBuildPage(page);
+          await dataSetEditPage.waitForLoad();
+
+          // Analyze button is enabled.
+          const analyzeButton = dataSetEditPage.getAnalyzeButton();
+          await analyzeButton.expectEnabled(true);
+          // Save button is disabled because nothing has changed.
+          const saveButton = dataSetEditPage.getSaveButton();
+          await saveButton.expectEnabled(false);
+
+          // Make a change, Save button is enabled.
+          await dataSetEditPage.selectConceptSets([ConceptSets.FitbitIntraDaySteps]);
+          await saveButton.expectEnabled(true);
+        }
+        break;
+      default:
+        break;
+    }
   });
 
-  test('READER cannot edit dataset', async () => {
+  xtest('READER cannot edit dataset', async () => {
     await signInWithAccessToken(page, config.READER_USER);
 
     // Find workspace created by previous test. If not found, test will fail.

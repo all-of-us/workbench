@@ -24,15 +24,12 @@ export default abstract class BaseCard extends Container {
       // Throws error if find fails. Error is likely caused by the element no longer exists or becomes stale.
       this.cardElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
     }
-    if (this.cardElement === null || this.cardElement === undefined) {
-      throw new Error(`FAIL: Failed to find card element. Xpath: ${this.getXpath()}`);
-    }
     return this.cardElement.asElement();
   }
 
   async clickSnowmanIcon(): Promise<this> {
     const iconXpath = `.${snowmanIconXpath}`;
-    const [snowmanIcon] = await this.asElementHandle().$x(iconXpath);
+    const [snowmanIcon] = await (await this.asElement()).$x(iconXpath);
     await snowmanIcon.hover();
     await snowmanIcon.click();
     await snowmanIcon.dispose();

@@ -75,7 +75,6 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   async removeCollaborator(email: string): Promise<void> {
     const modal = await this.openShareModal();
     await modal.removeUser(email);
-    await waitWhileLoading(this.page);
     await this.waitForLoad();
   }
 

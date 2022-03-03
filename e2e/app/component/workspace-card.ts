@@ -95,30 +95,30 @@ export default class WorkspaceCard extends BaseCard {
     await page.waitForXPath(selector, { hidden: true, timeout });
   }
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, xpath?: string) {
+    super(page, xpath);
   }
 
   async findCard(workspaceName: string, timeout = 5000): Promise<WorkspaceCard | null> {
-    const selector = `.//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`;
-    try {
-      await this.page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout });
-    } catch (err) {
-      // Workspace card not found.
-      return null;
-    }
-    const elements = await this.page.$x(WorkspaceCardSelector.cardRootXpath);
-    for (const elem of elements) {
-      if ((await elem.$x(selector)).length > 0) {
-        return this.asCard(elem);
-      }
-    }
-    // WorkspaceName not found.
-    return null;
+    const selector =
+      WorkspaceCardSelector.cardRootXpath +
+      `[.//*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]]`;
+
+    return this.page
+      .waitForXPath(selector, { timeout })
+      .then(() => {
+        logger.info(`Found Workspace card: "${workspaceName}"`);
+        return new WorkspaceCard(this.page, selector);
+      })
+      .catch(() => {
+        logger.info(`Workspace card: "${workspaceName}" is not found`);
+        return null;
+      });
   }
 
   async getWorkspaceName(): Promise<string> {
-    const workspaceNameElement = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    const workspaceNameElement = await (await this.asElement()).$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     return getPropValue<string>(workspaceNameElement[0], 'innerText');
   }
 
@@ -127,7 +127,7 @@ export default class WorkspaceCard extends BaseCard {
    * @param workspaceName
    */
   async getWorkspaceAccessLevel(): Promise<string> {
-    const [element] = await this.cardElement.$x(WorkspaceCardSelector.accessLevelXpath);
+    const [element] = await (await this.asElement()).$x(WorkspaceCardSelector.accessLevelXpath);
     return getPropValue<string>(element, 'innerText');
   }
 
