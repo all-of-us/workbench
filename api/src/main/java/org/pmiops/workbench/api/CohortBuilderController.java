@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import com.google.apphosting.api.DeadlineExceededException;
+import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -113,7 +115,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, SearchRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(cohortBuilderService.countParticipants(request));
+    try {
+      return ResponseEntity.ok(cohortBuilderService.countParticipants(request));
+    } catch (DeadlineExceededException exception) {
+      log.severe("searchRequest:\n" + new Gson().toJson(request));
+      throw exception;
+    }
   }
 
   @Override
