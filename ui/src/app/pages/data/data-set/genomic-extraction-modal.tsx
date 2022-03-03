@@ -109,14 +109,12 @@ export const GenomicExtractionModal = ({
             notified when files are ready for analysis.
           </span>
           <span>
-            <span style={{fontWeight: 600}}>
+            <span style={{ fontWeight: 600 }}>
               Note: VCF extraction will incur cloud cost{' '}
             </span>
             (billed as BigQuery analysis). Extraction typically costs{' '}
-            <span style={{fontWeight: 600}}>
-              $.02 per extracted sample
-            </span>
-            , but costs may vary.
+            <span style={{ fontWeight: 600 }}>$.02 per extracted sample</span>,
+            but costs may vary.
           </span>
         </TextColumn>
       </ModalBody>
