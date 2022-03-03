@@ -131,7 +131,7 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void countParticipantsRaiseDeadlineExceededException() {
-    stubBigQueryCalls();
+    stubBigQueryCallThrowDeadlineExceededException();
     assertThrows(
         DeadlineExceededException.class,
         () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, new SearchRequest()));
@@ -1397,7 +1397,7 @@ public class CohortBuilderControllerTest {
         .estCount(dbCriteriaAttribute.getEstCount());
   }
 
-  private void stubBigQueryCalls() {
+  private void stubBigQueryCallThrowDeadlineExceededException() {
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
     when(bigQueryService.executeQuery(null)).thenThrow(new DeadlineExceededException());
   }
