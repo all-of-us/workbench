@@ -1,4 +1,4 @@
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
@@ -59,8 +59,8 @@ export default class WorkspaceCard extends BaseCard {
     });
 
     // Turn elements into WorkspaceCard objects.
-    const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
-      new WorkspaceCard(page).asCard(card)
+    const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map(
+      () => new WorkspaceCard(page, WorkspaceCardSelector.cardRootXpath)
     );
 
     if (accessLevel !== undefined) {
@@ -78,12 +78,12 @@ export default class WorkspaceCard extends BaseCard {
       ` and normalize-space(text())="${workspaceName}"]]`;
     return page
       .waitForXPath(selector, { timeout, visible: true })
-      .then((element: ElementHandle) => {
+      .then(() => {
         logger.info(`Found workspace card: "${workspaceName}"`);
-        return new WorkspaceCard(page).asCard(element);
+        return new WorkspaceCard(page, selector);
       })
       .catch(() => {
-        logger.info(`Workspace card "${workspaceName}" was not found`);
+        logger.info(`Workspace card "${workspaceName}" is not found`);
         return null;
       });
   }
@@ -112,7 +112,7 @@ export default class WorkspaceCard extends BaseCard {
         return new WorkspaceCard(this.page, selector);
       })
       .catch(() => {
-        logger.info(`Workspace card: "${workspaceName}" is not found`);
+        logger.info(`Workspace card "${workspaceName}" is not found`);
         return null;
       });
   }
@@ -167,11 +167,6 @@ export default class WorkspaceCard extends BaseCard {
       await dataPage.waitForLoad();
     }
     return workspaceName;
-  }
-
-  private asCard(elementHandle: ElementHandle): WorkspaceCard {
-    this.cardElement = elementHandle;
-    return this;
   }
 
   private getWorkspaceNameXpath(workspaceName: string): string {
