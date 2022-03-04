@@ -1,12 +1,6 @@
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
-import {
-  findOrCreateCohort,
-  findOrCreateDataset,
-  findOrCreateWorkspace,
-  openTab,
-  signInWithAccessToken
-} from 'utils/test-utils';
+import { findOrCreateDataset, findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
@@ -30,8 +24,7 @@ describe('Export Notebook Test', () => {
    */
   test.each(KernelLanguages)('Export to %s Jupyter notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
-    const cohortName = await findOrCreateCohort(page);
-    await findOrCreateDataset(page, { cohortNames: [cohortName], openEditPage: true });
+    await findOrCreateDataset(page, { openEditPage: true });
 
     const buildPage = new DatasetBuildPage(page);
     await buildPage.waitForLoad();

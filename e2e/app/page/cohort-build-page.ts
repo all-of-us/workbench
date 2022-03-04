@@ -15,6 +15,7 @@ import { getPropValue } from 'utils/element-utils';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import WorkspaceDataPage from './workspace-data-page';
 import faker from 'faker';
+import { logger } from 'libs/logger';
 
 const PageTitle = 'Build Cohort Criteria';
 
@@ -96,7 +97,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await modal.clickSaveButton();
 
     await waitForText(this.page, 'Cohort Saved Successfully');
-    console.log(`Created Cohort: "${cohortName}"`);
+    logger.info(`Created Cohort "${cohortName}"`);
     return cohortName;
   }
 
@@ -115,7 +116,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteCohort, { waitForClose: true });
     await waitWhileLoading(this.page);
-    console.log(`Delete Confirmation modal:\n${contentText}`);
+    logger.info(`Delete Confirmation modal:\n${contentText}`);
     await new WorkspaceDataPage(this.page).waitForLoad();
     return contentText;
   }

@@ -390,10 +390,9 @@ export async function findDataset(
   await dataPage.waitForLoad();
 
   await openTab(page, Tabs.Datasets, dataPage);
-  const datasetCard =
-    name === undefined
-      ? await new DataResourceCard(page).findAnyCard(ResourceCard.Dataset)
-      : await new DataResourceCard(page).findCard(name, ResourceCard.Dataset);
+  const datasetCard = name
+    ? await new DataResourceCard(page).findCard(name, ResourceCard.Dataset)
+    : await new DataResourceCard(page).findAnyCard(ResourceCard.Dataset);
 
   if (datasetCard !== null) {
     if (openEditPage) {
@@ -401,7 +400,7 @@ export async function findDataset(
       await new DatasetBuildPage(page).waitForLoad();
       return resourceName;
     }
-    return name === undefined ? await datasetCard.getResourceName() : name;
+    return name ? name : await datasetCard.getResourceName();
   }
   return null;
 }
@@ -411,9 +410,12 @@ export async function findOrCreateDataset(
   page: Page,
   opts: { cohortNames?: string[]; openEditPage?: boolean } = {}
 ): Promise<string> {
-  const { cohortNames, openEditPage } = opts;
+  const { cohortNames = [Cohorts.AllParticipants], openEditPage } = opts;
   const dataset = await findDataset(page, { openEditPage });
-  return dataset ? dataset : createDataset(page, { cohorts: cohortNames, returnToDataPage: !openEditPage });
+  if (dataset) {
+    return dataset;
+  }
+  return createDataset(page, { cohorts: cohortNames, returnToDataPage: !openEditPage });
 }
 
 // Find an existing Cohort. Returns cohort name.
@@ -423,17 +425,17 @@ export async function findCohort(page: Page, opts: { name?: string; openEditPage
   const dataPage = new WorkspaceDataPage(page);
   await dataPage.waitForLoad();
 
-  const cohortCard =
-    name === undefined
-      ? await new DataResourceCard(page).findAnyCard(ResourceCard.Cohort)
-      : await new DataResourceCard(page).findCard(name, ResourceCard.Cohort);
+  const cohortCard = name
+    ? await new DataResourceCard(page).findCard(name, ResourceCard.Cohort)
+    : await new DataResourceCard(page).findAnyCard(ResourceCard.Cohort);
 
   if (cohortCard !== null) {
     if (openEditPage) {
-      await cohortCard.clickResourceName();
+      const resourceName = await cohortCard.clickResourceName();
       await new CohortBuildPage(page).waitForLoad();
+      return resourceName;
     }
-    return name === undefined ? await cohortCard.getResourceName() : name;
+    return name ? name : await cohortCard.getResourceName();
   }
   return null;
 }
@@ -455,18 +457,18 @@ export async function createCohort(
   await group1.includeEthnicity([Ethnicity.Skip, Ethnicity.PreferNotToAnswer]);
   await group1.includeGenderIdentity([Sex.MALE, Sex.FEMALE]);
 
-  await cohortBuildPage.createCohort(name);
+  const cohortName = await cohortBuildPage.createCohort(name);
 
   const cohortActionsPage = new CohortActionsPage(page);
   await cohortActionsPage.waitForLoad();
 
   if (!returnToDataPage) {
-    return name;
+    return cohortName;
   }
 
   await openTab(page, Tabs.Data, dataPage);
   await dataPage.waitForLoad();
-  return name;
+  return cohortName;
 }
 
 // Find an existing cohort or create a cohort.

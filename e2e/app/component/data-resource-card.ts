@@ -35,11 +35,20 @@ export default class DataResourceCard extends BaseCard {
     }
     const cards = await page.$x(DataResourceCardSelector.cardRootXpath);
     // transform to DataResourceCard array
-    const resourceCards = cards.map(() => new DataResourceCard(page, DataResourceCardSelector.cardRootXpath));
+    const resourceCards: DataResourceCard[] = await Promise.all(
+      cards.map(async (c) => {
+        // Find card's name and use it to construct xpath
+        const [nameElement] = await c.$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
+        const name = await getPropValue<string>(nameElement, 'textContent');
+        const card = new DataResourceCard(page);
+        card.setXpath(name);
+        return card;
+      })
+    );
     return resourceCards;
   }
 
-  static async findAnyCard(page: Page): Promise<DataResourceCard> {
+  static async findAnyCard(page: Page): Promise<DataResourceCard | null> {
     const cards = await this.findAllCards(page);
     if (cards.length === 0) {
       return null;
@@ -67,12 +76,19 @@ export default class DataResourceCard extends BaseCard {
     super(page, xpath);
   }
 
+  setXpath(name: string): void {
+    this.xpath =
+      DataResourceCardSelector.cardRootXpath +
+      `[.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${name}"]]`;
+  }
+
   async findCard(
     resourceName: string,
     cardType: ResourceCard,
     opts: { timeout?: number } = {}
   ): Promise<DataResourceCard | null> {
     const { timeout = 2000 } = opts;
+    console.log('called findCard');
     const selector =
       DataResourceCardSelector.cardRootXpath +
       `[.//*[${DataResourceCardSelector.cardTypeXpath} and text()="${cardType}"]]` +
@@ -92,13 +108,14 @@ export default class DataResourceCard extends BaseCard {
   }
 
   async findAnyCard(cardType: ResourceCard): Promise<DataResourceCard | null> {
+    console.log('called findAnyCard');
     const cards = await this.getResourceCard(cardType);
     return cards.length ? fp.shuffle(cards)[0] : null;
   }
 
   async getResourceName(): Promise<string> {
-    const elemt = await (await this.asElement()).$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
-    return getPropValue<string>(elemt[0], 'innerText');
+    const [element] = await (await this.asElement()).$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
+    return getPropValue<string>(element, 'innerText');
   }
 
   /**
@@ -126,8 +143,8 @@ export default class DataResourceCard extends BaseCard {
    */
   async clickResourceName(): Promise<string> {
     const name = await this.getResourceName();
-    const elemts = await (await this.asElement()).$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
-    await Promise.all([this.page.waitForNavigation(), elemts[0].click()]);
+    const [element] = await (await this.asElement()).$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
+    await Promise.all([this.page.waitForNavigation(), element.click()]);
     await waitWhileLoading(this.page);
     return name;
   }
