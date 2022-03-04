@@ -19,7 +19,7 @@ import fp from 'lodash/fp';
  */
 describe('User Profile Admin', () => {
   enum TableColumns {
-    ACCESS_MODULE = 'Access Module',
+    ACCESS_MODULE = 'Access module',
     STATUS = 'Status',
     LAST_COMPLETED_ON = 'Last completed on',
     EXPIRES_ON = 'Expires on',
