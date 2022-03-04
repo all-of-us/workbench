@@ -88,7 +88,6 @@ export default class DataResourceCard extends BaseCard {
     opts: { timeout?: number } = {}
   ): Promise<DataResourceCard | null> {
     const { timeout = 2000 } = opts;
-    console.log('called findCard');
     const selector =
       DataResourceCardSelector.cardRootXpath +
       `[.//*[${DataResourceCardSelector.cardTypeXpath} and text()="${cardType}"]]` +
@@ -108,7 +107,6 @@ export default class DataResourceCard extends BaseCard {
   }
 
   async findAnyCard(cardType: ResourceCard): Promise<DataResourceCard | null> {
-    console.log('called findAnyCard');
     const cards = await this.getResourceCard(cardType);
     return cards.length ? fp.shuffle(cards)[0] : null;
   }
