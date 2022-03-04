@@ -4,6 +4,8 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import validate from 'validate.js';
+import { faLink } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessBypassRequest,
@@ -205,44 +207,45 @@ const EditableFields = ({
       <FlexColumn>
         <div style={styles.subHeader}>Edit information</div>
         <FlexRow>
-          <FlexColumn>
-            <ContactEmailTextInput
-              contactEmail={updatedProfile.contactEmail}
-              previousContactEmail={oldProfile.contactEmail}
-              highlightOnChange
-              onChange={(email) => onChangeEmail(email)}
-            />
-            {emailValidationStatus === EmailValidationStatus.INVALID && (
-              <div style={{ paddingLeft: '1em' }}>
-                {getEmailValidationErrorMessage(institution)}
-              </div>
-            )}
-          </FlexColumn>
-          <FlexColumn>
-            <InstitutionDropdown
-              institutions={institutions}
-              currentInstitutionShortName={
-                updatedProfile.verifiedInstitutionalAffiliation
-                  ?.institutionShortName
-              }
-              previousInstitutionShortName={
-                oldProfile.verifiedInstitutionalAffiliation
-                  ?.institutionShortName
-              }
-              highlightOnChange
-              onChange={(event) => onChangeInstitution(event.value)}
-            />
-            {showGoToInstitutionLink && (
+          <ContactEmailTextInput
+            contactEmail={updatedProfile.contactEmail}
+            previousContactEmail={oldProfile.contactEmail}
+            highlightOnChange
+            onChange={(email) => onChangeEmail(email)}
+          />
+          <InstitutionDropdown
+            institutions={institutions}
+            currentInstitutionShortName={
+              updatedProfile.verifiedInstitutionalAffiliation
+                ?.institutionShortName
+            }
+            previousInstitutionShortName={
+              oldProfile.verifiedInstitutionalAffiliation?.institutionShortName
+            }
+            highlightOnChange
+            onChange={(event) => onChangeInstitution(event.value)}
+          />
+          {showGoToInstitutionLink && (
+            <div style={{ paddingTop: '2.3rem', paddingLeft: '0.4rem' }}>
               <a
                 style={{ paddingLeft: '0.8rem' }}
                 href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
                 target='_blank'
               >
-                Click here to go to Institution Details Page
+                <TooltipTrigger
+                  content={`Click here to go to '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
+                >
+                  <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
+                </TooltipTrigger>
               </a>
-            )}
-          </FlexColumn>
+            </div>
+          )}
         </FlexRow>
+        {emailValidationStatus === EmailValidationStatus.INVALID && (
+          <div style={{ paddingLeft: '1em' }}>
+            {getEmailValidationErrorMessage(institution)}
+          </div>
+        )}
         <FlexRow>
           <InitialCreditsDropdown
             currentLimit={updatedProfile.freeTierDollarQuota}
