@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
@@ -204,8 +204,9 @@ export default class WorkspaceCard extends BaseCard {
     await snowmanMenu.waitUntilClose();
   }
 
-  async getWorkspaceLockedIcon(): Promise<void> {
-    await this.cardElement.$x(WorkspaceCardSelector.lockedIconXpath);
+  async getWorkspaceLockedIcon(): Promise<ElementHandle> {
+    const [element] = await (await this.asElement()).$x(WorkspaceCardSelector.lockedIconXpath);
+    return element;
   }
 
   // for a locked-workspace only the edit options is enabled
