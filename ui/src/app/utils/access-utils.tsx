@@ -416,7 +416,7 @@ const withInvalidDateHandling = (date) => {
 };
 
 // The module has already expired
-const hasExpired = (expiration: number): boolean =>
+export const hasExpired = (expiration: number): boolean =>
   expiration && getWholeDaysFromNow(expiration) < 0;
 
 export const isExpiringOrExpired = (expiration: number): boolean =>

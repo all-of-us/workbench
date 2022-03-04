@@ -18,6 +18,7 @@ import {
   buildRasRedirectUrl,
   computeRenewalDisplayDates,
   getTwoFactorSetupUrl,
+  hasExpired,
   isExpiringOrExpired,
   maybeDaysRemaining,
   NOTIFICATION_THRESHOLD_DAYS,
@@ -422,6 +423,28 @@ describe('buildRasRedirectUrl', () => {
     expect(buildRasRedirectUrl()).toMatch(
       encodeURIComponent('http://localhost' + RAS_CALLBACK_PATH)
     );
+  });
+});
+
+describe('hasExpired', () => {
+  it('should return hasExpired=true for a date in the past', () => {
+    const testTime = nowPlusDays(-10);
+    expect(hasExpired(testTime)).toBeTruthy();
+  });
+
+  it('should return hasExpired=false for a date in the future', () => {
+    const testTime = nowPlusDays(10);
+    expect(hasExpired(testTime)).toBeFalsy();
+  });
+
+  it('should return hasExpired=false for a null date', () => {
+    const testTime = nowPlusDays(null);
+    expect(hasExpired(testTime)).toBeFalsy();
+  });
+
+  it('should return hasExpired=false for an undefined date', () => {
+    const testTime = nowPlusDays(undefined);
+    expect(hasExpired(testTime)).toBeFalsy();
   });
 });
 
