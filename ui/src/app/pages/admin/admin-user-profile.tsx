@@ -232,7 +232,7 @@ const EditableFields = ({
               target='_blank'
             >
               <TooltipTrigger
-                content={`Click here to go to 
+                content={`Click here to go to the
                 '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
               >
                 <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
