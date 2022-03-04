@@ -4,6 +4,8 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import validate from 'validate.js';
+import { faLink } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessBypassRequest,
@@ -26,6 +28,10 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
 import { getAccessModuleConfig } from 'app/utils/access-utils';
+import {
+  AuthorityGuardedAction,
+  hasAuthorityForAction,
+} from 'app/utils/authorities';
 import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
@@ -187,6 +193,15 @@ const EditableFields = ({
       i.shortName ===
       updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
   );
+  const { profile } = useStore(profileStore);
+
+  // Show the link to  redirect to institution detail page,
+  // if the LOGGED IN USER has Institution admin authority and
+  // institution name is populated
+  const showGoToInstitutionLink: Boolean =
+    hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
+    !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
+
   return (
     <FlexRow style={styles.editableFields}>
       <FlexColumn>
@@ -210,6 +225,20 @@ const EditableFields = ({
             highlightOnChange
             onChange={(event) => onChangeInstitution(event.value)}
           />
+          {showGoToInstitutionLink && (
+            <a
+              style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
+              href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
+              target='_blank'
+            >
+              <TooltipTrigger
+                content={`Click here to go to the
+                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
+              >
+                <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
+              </TooltipTrigger>
+            </a>
+          )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
           <div style={{ paddingLeft: '1em' }}>
