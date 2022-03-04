@@ -226,19 +226,18 @@ const EditableFields = ({
             onChange={(event) => onChangeInstitution(event.value)}
           />
           {showGoToInstitutionLink && (
-            <div style={{ paddingTop: '2.3rem', paddingLeft: '0.4rem' }}>
-              <a
-                style={{ paddingLeft: '0.8rem' }}
-                href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
-                target='_blank'
+            <a
+              style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
+              href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
+              target='_blank'
+            >
+              <TooltipTrigger
+                content={`Click here to go to 
+                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
               >
-                <TooltipTrigger
-                  content={`Click here to go to '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
-                >
-                  <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
-                </TooltipTrigger>
-              </a>
-            </div>
+                <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
+              </TooltipTrigger>
+            </a>
           )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
