@@ -55,7 +55,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
   });
 
   // TODO(RW-7312): update and re-enable
-  test.skip('Workspace READER copy notebook to another workspace', async () => {
+  test('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_USER);
 
@@ -147,7 +147,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
   });
 
   // TODO(RW-7312): update and re-enable
-  test.skip('Workspace READER edit copy of notebook in workspace clone', async () => {
+  test('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_USER);
 
