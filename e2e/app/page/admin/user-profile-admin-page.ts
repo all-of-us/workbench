@@ -46,11 +46,11 @@ export default class UserProfileAdminPage extends BaseAdminPage {
   }
 
   async getDataAccessTiers(): Promise<string> {
-    return this.getStaticText('Data Access Tiers');
+    return this.getStaticText('Data access tiers');
   }
 
   async getInitialCreditsUsed(): Promise<[number, number]> {
-    const creditsUsed = StaticText.findByName(this.page, { name: 'Initial Credits Used' });
+    const creditsUsed = StaticText.findByName(this.page, { name: 'Initial credits used' });
     const text = await creditsUsed.getText();
     const words = text.split('\n')[1];
     const currencies = parseForNumericalStrings(words);
