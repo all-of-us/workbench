@@ -54,6 +54,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
       throw stubNotImplementedError;
     });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
+    this.workspaceOperations = [];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.workspaceUserRoles = new Map<string, UserRole[]>();
     this.workspaceUserRoles.set(
