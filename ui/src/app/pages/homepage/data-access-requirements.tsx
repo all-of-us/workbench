@@ -678,7 +678,7 @@ const MaybeModule = ({
                 />
               )}
             </div>
-            {status && isCompliant(status) && (
+            {isCompliant(status) && (
               <div style={styles.moduleDate}>{getStatusText(status)}</div>
             )}
           </FlexColumn>
@@ -745,7 +745,7 @@ const ControlledTierEraModule = (props: {
             >
               <DARTitleComponent />
             </div>
-            {status && isCompliant(status) && (
+            {isCompliant(status) && (
               <div style={styles.moduleDate}>{getStatusText(status)}</div>
             )}
           </FlexColumn>
