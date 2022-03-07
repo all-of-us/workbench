@@ -3,8 +3,18 @@
 # Keep synchronized with ci/Dockerfile.circle_build
 FROM openjdk:8-buster
 
-RUN apt-get update
-RUN apt-get install -yq gettext ruby default-mysql-client python3 python3-pip nodejs npm wait-for-it
+RUN apt-get update \
+  && apt-get install --no-install-recommends -yq \
+  gettext \
+  ruby \
+  default-mysql-client \
+  python3 \
+  python3-pip \
+  nodejs \
+  npm \
+  wait-for-it \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN npm install --global yarn n
 # Upgrade to Node 12, above installs 10.
@@ -12,16 +22,16 @@ RUN n 12
 
 ENV CLOUD_SDK_VERSION 321.0.0
 
-RUN cd && \
-  wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
+WORKDIR /root
+RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
   tar -xf gcloud.tgz && \
   ./google-cloud-sdk/install.sh  --quiet && \
-  ~/google-cloud-sdk/bin/gcloud components install app-engine-java && \
+  ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
   rm -rf gcloud.tgz
 
 ENV PATH=~/node/bin:~/google-cloud-sdk/bin:$PATH
 
-RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /tmp/cloud_sql_proxy \
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /tmp/cloud_sql_proxy \
   && mv /tmp/cloud_sql_proxy /usr/local/bin && chmod +x /usr/local/bin/cloud_sql_proxy
 
 # It never makes sense for Gradle to run a daemon within a docker container.
