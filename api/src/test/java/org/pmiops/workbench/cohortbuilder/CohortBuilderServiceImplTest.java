@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ class CohortBuilderServiceImplTest {
     MySQLStopWords mySQLStopWords = new MySQLStopWords(getStopWords());
     when(mySQLStopWordsProvider.get()).thenReturn(mySQLStopWords);
   }
-private static Map<String,String> testCases = new HashMap<String,String>();
+private static List<String> testCases = new ArrayList<>();
 
   @ParameterizedTest
   @MethodSource("getModifyTermMatchParameters")
@@ -94,10 +95,10 @@ private static Map<String,String> testCases = new HashMap<String,String>();
     String[] terms = term.split("\\W+");
     String simplified = "+" + String.join("+", terms) + "*";
 
-    testCases.put(term,actual);
+    testCases.add(String.format("|%s|%s|",term,actual));
     System.out.println("|term|modifiedTerm|");
     System.out.println("|-|-|");
-    testCases.forEach((key,value) -> System.out.println("|"+key+"|"+value+"|"));
+    testCases.forEach(System.out::println);
 
     // assertThat(actual).isEqualTo(expected);
   }
@@ -105,12 +106,22 @@ private static Map<String,String> testCases = new HashMap<String,String>();
   private static Stream<Arguments> getModifyTermMatchParameters() {
 
     return Stream.of(
+        Arguments.of("lun", "+lun*"),
+        Arguments.of("lung can", "+\"lung\"+can*"),
+        Arguments.of("001", "Like '001%'"),
+        Arguments.of("001.1", "Like '001.1%'"),
+        Arguments.of("heart attack rate", "+\"heart\"+\"attack\"+rate*"),
+        Arguments.of("lun* can*", ""),
+        Arguments.of("lun* -cancer", ""),
+        Arguments.of("lung -can", ""),
+        Arguments.of("+lung +cancer", ""),
+        Arguments.of("\"lung cancer\"", ""),
         Arguments.of("type * diabetes", "+\"type * diabetes\""),
         Arguments.of("type 2 diabetes", "+\"type\"+diabetes*"),
-        Arguments.of("type 2 diabetes and heart attack ", "+\"type\"+\"diabetes\"+\"heart\"+attack*"),
+        Arguments.of(
+            "type 2 diabetes and heart attack ", "+\"type\"+\"diabetes\"+\"heart\"+attack*"),
         Arguments.of("disorder of the eye", "+\"disorder\"+eye*"),
-        Arguments.of("disorder    of    the   eye  ", "+\"disorder\"+eye*")
-    );
+        Arguments.of("disorder    of    the   eye  ", "+\"disorder\"+eye*"));
   }
 
   private static List<String> getStopWords() {
