@@ -239,6 +239,12 @@ const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 3 * 60 * 1000;
 const WORKSPACE_OPERATION_POLL_INTERVAL_MS = 5 * 1000;
 
+const OPERATION_PENDING_STATES = [
+  WorkspaceOperationStatus.PENDING,
+  WorkspaceOperationStatus.QUEUED,
+  WorkspaceOperationStatus.PROCESSING,
+];
+
 export enum WorkspaceEditMode {
   Create = 1,
   Edit = 2,
@@ -1060,12 +1066,6 @@ export const WorkspaceEdit = fp.flow(
       operation: () => Promise<WorkspaceOperation>,
       errorText: string
     ): Promise<Workspace> {
-      const PENDING_STATES = [
-        WorkspaceOperationStatus.PENDING,
-        WorkspaceOperationStatus.QUEUED,
-        WorkspaceOperationStatus.PROCESSING,
-      ];
-
       let pollTimedOut = false;
       setTimeout(
         () => (pollTimedOut = true),
@@ -1073,7 +1073,10 @@ export const WorkspaceEdit = fp.flow(
       );
 
       let workspaceOp = await operation();
-      while (!pollTimedOut && PENDING_STATES.includes(workspaceOp.status)) {
+      while (
+        !pollTimedOut &&
+        OPERATION_PENDING_STATES.includes(workspaceOp.status)
+      ) {
         await delay(WORKSPACE_OPERATION_POLL_INTERVAL_MS);
         workspaceOp = await workspacesApi().getWorkspaceOperation(
           workspaceOp.id
