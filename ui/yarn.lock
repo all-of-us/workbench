@@ -3571,15 +3571,15 @@ browserify-zlib@^0.2.0:
     pako "~1.0.5"
 
 browserslist@4.14.2, browserslist@^4.0.0, browserslist@^4.12.0, browserslist@^4.16.5, browserslist@^4.17.5, browserslist@^4.19.1, browserslist@^4.6.2, browserslist@^4.6.4:
-  version "4.17.0"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.17.0.tgz#1fcd81ec75b41d6d4994fb0831b92ac18c01649c"
-  integrity sha512-g2BJ2a0nEYvEFQC208q8mVAhfNwpZ5Mu8BwgtCdZKO3qx98HChmeg448fPdUzld8aFmfLgVh7yymqV+q1lJZ5g==
+  version "4.20.0"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.20.0.tgz#35951e3541078c125d36df76056e94738a52ebe9"
+  integrity sha512-bnpOoa+DownbciXj0jVGENf8VYQnE2LNWomhYuCsMmmx9Jd9lwq0WXODuwpSsp8AVdKM2/HorrzxAfbKvWTByQ==
   dependencies:
-    caniuse-lite "^1.0.30001254"
-    colorette "^1.3.0"
-    electron-to-chromium "^1.3.830"
+    caniuse-lite "^1.0.30001313"
+    electron-to-chromium "^1.4.76"
     escalade "^3.1.1"
-    node-releases "^1.1.75"
+    node-releases "^2.0.2"
+    picocolors "^1.0.0"
 
 bs-logger@0.x:
   version "0.2.6"
@@ -3826,10 +3826,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001254:
-  version "1.0.30001257"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001257.tgz#150aaf649a48bee531104cfeda57f92ce587f6e5"
-  integrity sha512-JN49KplOgHSXpIsVSF+LUyhD8PUp6xPpAXeRrrcBh4KBeP7W864jHn6RvzJgDlrReyeVjMFJL3PLpPvKIxlIHA==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001313:
+  version "1.0.30001313"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001313.tgz#a380b079db91621e1b7120895874e2fd62ed2e2f"
+  integrity sha512-rI1UN0koZUiKINjysQDuRi2VeSCce3bYJNmDcj3PIKREiAmjakugBul1QSkg/fPrlULYl6oWfGg3PbgOSY9X4Q==
 
 capital-case@^1.0.4:
   version "1.0.4"
@@ -4162,7 +4162,7 @@ color@^3.0.0, color@^3.1.1:
     color-convert "^1.9.3"
     color-string "^1.6.0"
 
-colorette@^1.2.1, colorette@^1.2.2, colorette@^1.3.0:
+colorette@^1.2.1, colorette@^1.2.2:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.3.0.tgz#ff45d2f0edb244069d3b772adeb04fed38d0a0af"
   integrity sha512-ecORCqbSFP7Wm8Y6lyqMJjexBQqXSF7SSeaTyGGphogUjBlFP9m9o08wy86HL2uB7fMTxtOUzLMk7ogKcxMg1w==
@@ -5387,10 +5387,10 @@ ejs@^2.6.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.7.4.tgz#48661287573dcc53e366c7a1ae52c3a120eec9ba"
   integrity sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
 
-electron-to-chromium@^1.3.830:
-  version "1.3.838"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.838.tgz#d178b34a268c750c0444ba69e4c94d4c4fb3aa0d"
-  integrity sha512-65O6UJiyohFAdX/nc6KJ0xG/4zOn7XCO03kQNNbCeMRGxlWTLzc6Uyi0tFNQuuGWqySZJi8CD2KXPXySVYmzMA==
+electron-to-chromium@^1.4.76:
+  version "1.4.76"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.76.tgz#a0494baedaf51094b1c172999919becd9975a934"
+  integrity sha512-3Vftv7cenJtQb+k00McEBZ2vVmZ/x+HEF7pcZONZIkOsESqAqVuACmBxMv0JhzX7u0YltU0vSqRqgBSTAhFUjA==
 
 elliptic@^6.5.3:
   version "6.5.4"
@@ -9695,10 +9695,10 @@ node-notifier@^8.0.0:
     uuid "^8.3.0"
     which "^2.0.2"
 
-node-releases@^1.1.75:
-  version "1.1.75"
-  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.75.tgz#6dd8c876b9897a1b8e5a02de26afa79bb54ebbfe"
-  integrity sha512-Qe5OUajvqrqDSy6wrWFmMwfJ0jVgwiw4T3KqmbTcZ62qW0gQkheXYhcFM1+lOVcGUoRxcEcfyvFMAnDgaF1VWw==
+node-releases@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.2.tgz#7139fe71e2f4f11b47d4d2986aaf8c48699e0c01"
+  integrity sha512-XxYDdcQ6eKqp/YjI+tb2C5WM2LgjnZrfYg4vgQt49EK268b6gYCHsBLrK2qvJo4FmCtqmKezb0WZFK4fkrZNsg==
 
 normalize-package-data@^2.3.2, normalize-package-data@^2.5.0:
   version "2.5.0"
@@ -10329,6 +10329,11 @@ performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
+
+picocolors@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.0.0.tgz#cb5bdc74ff3f51892236eaf79d68bc44564ab81c"
+  integrity sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==
 
 picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.2, picomatch@^2.2.3:
   version "2.3.0"
