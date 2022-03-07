@@ -296,8 +296,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       log.info(
           String.format(
-              "processWorkspaceTask: begin processing operation %d in %s state",
-              operation.getId(), operation.getStatus().toString()));
+              "processWorkspaceTask: begin processing operation %d by transitioning from %s to %s",
+              operation.getId(), operation.getStatus().toString(), DbWorkspaceOperationStatus.PROCESSING.toString()));
       operation =
           workspaceOperationDao.save(operation.setStatus(DbWorkspaceOperationStatus.PROCESSING));
 
