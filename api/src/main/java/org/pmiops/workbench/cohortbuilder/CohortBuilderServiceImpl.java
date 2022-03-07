@@ -542,18 +542,19 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     String[] keywords = term.split("\\W+");
 
-    String ret = IntStream.range(0, keywords.length)
-        .filter(i -> keywords[i].length() >= 2)
-        .mapToObj(
-            i -> {
-              if ((i + 1) != keywords.length) {
-                return "+\"" + keywords[i] + "\"";
-              }
-              return "+" + keywords[i] + "*";
-            })
-        .collect(Collectors.joining());
+    String ret =
+        IntStream.range(0, keywords.length)
+            .filter(i -> keywords[i].length() >= 2)
+            .mapToObj(
+                i -> {
+                  if ((i + 1) != keywords.length) {
+                    return "+\"" + keywords[i] + "\"";
+                  }
+                  return "+" + keywords[i] + "*";
+                })
+            .collect(Collectors.joining());
 
-    System.out.println(String.format("term=%s, modified=%s",term, ret);
+    System.out.println(String.format("term=%s, modified=%s", term, ret));
 
     return ret;
   }
