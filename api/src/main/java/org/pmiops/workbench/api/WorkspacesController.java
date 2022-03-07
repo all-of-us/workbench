@@ -291,6 +291,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           String.format(
               "processWorkspaceTask: exiting because operation %d is in %s state instead of QUEUED",
               operation.getId(), operation.getStatus().toString()));
+      return;
     }
 
     try {
