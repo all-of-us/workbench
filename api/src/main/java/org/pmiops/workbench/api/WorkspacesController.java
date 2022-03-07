@@ -289,7 +289,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (operation.getStatus() != DbWorkspaceOperationStatus.QUEUED) {
       log.info(
           String.format(
-              "processWorkspaceTask: existing because operation %d is in %s state instead of QUEUED",
+              "processWorkspaceTask: exiting because operation %d is in %s state instead of QUEUED",
               operation.getId(), operation.getStatus().toString()));
     }
 
