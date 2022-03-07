@@ -4864,9 +4864,11 @@ definitions:
     - DELETED
   WorkspaceOperationStatus:
     type: string
-    description: ''
+    description: 'Note: PENDING is deprecated and has been replaced by QUEUED and PROCESSING'
     enum:
     - PENDING
+    - QUEUED
+    - PROCESSING
     - ERROR
     - SUCCESS
   ResearchPurpose:

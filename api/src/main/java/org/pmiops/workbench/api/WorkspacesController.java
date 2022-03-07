@@ -205,6 +205,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(createdWorkspace);
   }
 
+  private DbWorkspaceOperation initWorkspaceOperation() {
+    DbWorkspaceOperation operation =
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.QUEUED));
+    return operation;
+  }
+
   @Override
   public ResponseEntity<WorkspaceOperation> createWorkspaceAsync(Workspace workspace) {
     // Basic request validation.
@@ -214,11 +223,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // TODO: enforce access level check here? Not strictly necessary, but may make sense as
     // belt/suspenders check.
 
-    DbWorkspaceOperation operation =
-        workspaceOperationDao.save(
-            new DbWorkspaceOperation()
-                .setCreatorId(userProvider.get().getUserId())
-                .setStatus(DbWorkspaceOperationStatus.PENDING));
+    DbWorkspaceOperation operation = initWorkspaceOperation();
 
     log.info(
         String.format(
@@ -241,11 +246,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
-    DbWorkspaceOperation operation =
-        workspaceOperationDao.save(
-            new DbWorkspaceOperation()
-                .setCreatorId(userProvider.get().getUserId())
-                .setStatus(DbWorkspaceOperationStatus.PENDING));
+    DbWorkspaceOperation operation = initWorkspaceOperation();
 
     log.info(
         String.format(
@@ -284,11 +285,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 () ->
                     new NotFoundException(
                         String.format("Workspace Operation '%d' not found", operationId)));
+
+    if (operation.getStatus() != DbWorkspaceOperationStatus.QUEUED) {
+      log.info(
+          String.format(
+              "processWorkspaceTask: existing because operation %d is in %s state instead of QUEUED",
+              operation.getId(), operation.getStatus().toString()));
+    }
+
     try {
       log.info(
           String.format(
               "processWorkspaceTask: begin processing operation %d in %s state",
               operation.getId(), operation.getStatus().toString()));
+      operation =
+          workspaceOperationDao.save(operation.setStatus(DbWorkspaceOperationStatus.PROCESSING));
+
       Workspace w = workspaceAction.get();
       // careful: w.getId() refers to the Terra Name, not the DB ID
       long workspaceId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();

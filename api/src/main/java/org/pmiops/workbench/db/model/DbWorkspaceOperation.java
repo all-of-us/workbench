@@ -20,7 +20,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class DbWorkspaceOperation {
   public enum DbWorkspaceOperationStatus {
-    PENDING,
+    PENDING, // Deprecated
+    QUEUED,
+    PROCESSING,
     ERROR,
     SUCCESS
   }
