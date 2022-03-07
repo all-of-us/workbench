@@ -529,7 +529,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return Domain.SURVEY.equals(Domain.fromValue(domain));
   }
 
-  private String modifyTermMatch(String term) {
+  protected String modifyTermMatch(String term) {
     term = removeStopWords(term);
     if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
       // doesn't start with special char so find exact match
@@ -542,7 +542,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     String[] keywords = term.split("\\W+");
 
-    return IntStream.range(0, keywords.length)
+    String ret = IntStream.range(0, keywords.length)
         .filter(i -> keywords[i].length() >= 2)
         .mapToObj(
             i -> {
@@ -552,6 +552,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               return "+" + keywords[i] + "*";
             })
         .collect(Collectors.joining());
+
+    System.out.println(String.format("term=%s, modified=%s",term, ret);
+
+    return ret;
   }
 
   @NotNull
