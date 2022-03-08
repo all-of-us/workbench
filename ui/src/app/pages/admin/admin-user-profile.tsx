@@ -252,13 +252,13 @@ const EditableFields = ({
                 content={`Click here to go to the
                 '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
               >
-                <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
+                <FontAwesomeIcon icon={faLink} />
               </TooltipTrigger>
             </a>
           )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
-          <div style={{ paddingLeft: '1em' }}>
+          <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
             {getEmailValidationErrorMessage(institution)}
           </div>
         )}
@@ -739,6 +739,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           <FlexRow style={{ paddingTop: '1em' }}>
             <ErrorsTooltip errors={errors}>
               <Button
+                data-test-id='update-profile'
                 type='primary'
                 disabled={
                   !!errors ||

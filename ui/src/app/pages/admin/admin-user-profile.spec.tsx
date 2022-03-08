@@ -5,10 +5,17 @@ import { mount, ReactWrapper } from 'enzyme';
 import {
   Authority,
   EgressEventsAdminApi,
+  InstitutionApi,
   Profile,
   UserAdminApi,
 } from 'generated/fetch';
 
+import {
+  BROAD,
+  BROAD_ADDR_1,
+  BROAD_ADDR_2,
+  InstitutionApiStub,
+} from '../../../testing/stubs/institution-api-stub';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AccessTierDisplayNames,
@@ -17,7 +24,10 @@ import {
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  simulateTextInputChange,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
@@ -32,13 +42,25 @@ const ADMIN_PROFILE: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
   authorities: [Authority.ACCESSCONTROLADMIN],
 };
-const USER_PROFILE = ProfileStubVariables.PROFILE_STUB;
+const TARGET_USER_PROFILE = ProfileStubVariables.PROFILE_STUB;
+
+const updateAdminProfile = (update: Partial<Profile>) => {
+  profileStore.set({
+    profile: {
+      ...ADMIN_PROFILE,
+      ...update,
+    },
+    load,
+    reload,
+    updateCache,
+  });
+};
 
 const updateTargetProfile = (update: Partial<Profile>) => {
   registerApiClient(
     UserAdminApi,
     new UserAdminApiStub({
-      ...USER_PROFILE,
+      ...TARGET_USER_PROFILE,
       ...update,
     })
   );
@@ -72,6 +94,9 @@ describe('AdminUserProfile', () => {
 
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
+
+    // this represents the admin user who is viewing this profile,
+    // NOT the target profile being viewed
     profileStore.set({
       profile: ADMIN_PROFILE,
       load,
@@ -81,6 +106,7 @@ describe('AdminUserProfile', () => {
 
     registerApiClient(EgressEventsAdminApi, new EgressEventsAdminApiStub());
     registerApiClient(UserAdminApi, new UserAdminApiStub());
+    registerApiClient(InstitutionApi, new InstitutionApiStub());
   });
 
   it('should render', () => {
@@ -93,7 +119,7 @@ describe('AdminUserProfile', () => {
     const familyName = 'Public';
     const expectedFullName = 'John Q Public';
 
-    const username = 'a-new-email@yahoo.com';
+    const username = 'some-email@yahoo.com';
 
     const freeTierUsage = 543.21;
     const freeTierDollarQuota = 678.99;
@@ -149,4 +175,51 @@ describe('AdminUserProfile', () => {
       );
     }
   );
+
+  it("should allow editing of the user's contact email within an institution", async () => {
+    updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    const textInput = wrapper.find('[data-test-id="contactEmail"]');
+    expect(textInput.first().props().value).toEqual(BROAD_ADDR_1);
+
+    textInput.first().props().value = BROAD_ADDR_2;
+    await waitOneTickAndUpdate(wrapper);
+    expect(textInput.first().props().value).toEqual(BROAD_ADDR_2);
+    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeFalsy();
+  });
+
+  it("should prohibit editing of the user's contact email if it doesn't match their institution", async () => {
+    updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    const textInput = wrapper.find('[data-test-id="contactEmail"]');
+    expect(textInput.first().props().value).toEqual(BROAD_ADDR_1);
+
+    const nonBroadAddr = 'PI@rival-institute.net';
+    await simulateTextInputChange(textInput.first(), nonBroadAddr);
+    expect(
+      wrapper.find('[data-test-id="contactEmail"]').first().props().value
+    ).toEqual(nonBroadAddr);
+
+    const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
+    expect(invalidEmail.exists()).toBeTruthy();
+    expect(invalidEmail.text()).toContain(
+      'The institution has authorized access only to select members.'
+    );
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeTruthy();
+  });
 });

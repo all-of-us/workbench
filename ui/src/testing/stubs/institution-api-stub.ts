@@ -29,6 +29,8 @@ export const VUMC: Institution = {
   userInstructions: 'Vanderbilt User Instruction',
 };
 
+export const BROAD_ADDR_1 = 'contactEmail@broadinstitute.org';
+export const BROAD_ADDR_2 = 'broad_institution@broadinstitute.org';
 export const BROAD: Institution = {
   shortName: 'Broad',
   displayName: 'Broad Institute',
@@ -38,10 +40,7 @@ export const BROAD: Institution = {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
       eraRequired: true,
-      emailAddresses: [
-        'contactEmail@broadinstitute.org',
-        'broad_institution@broadinstitute.org',
-      ],
+      emailAddresses: [BROAD_ADDR_1, BROAD_ADDR_2],
     },
   ],
 };
