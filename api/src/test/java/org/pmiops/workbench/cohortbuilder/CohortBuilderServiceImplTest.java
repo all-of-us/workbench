@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -7,9 +8,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,44 +83,42 @@ class CohortBuilderServiceImplTest {
     MySQLStopWords mySQLStopWords = new MySQLStopWords(getStopWords());
     when(mySQLStopWordsProvider.get()).thenReturn(mySQLStopWords);
   }
-private static List<String> testCases = new ArrayList<>();
 
-  @ParameterizedTest
+  private static List<String> testCases = new ArrayList<>();
+
+  @ParameterizedTest(name = "modifyTermMatch: {0}->{1}")
   @MethodSource("getModifyTermMatchParameters")
-  void modifyTermMatch(String term, String expected) {
-
-    String actual = cohortBuilderService.modifyTermMatch(term);
-    // simplified
-    String[] terms = term.split("\\W+");
-    String simplified = "+" + String.join("+", terms) + "*";
-
-    testCases.add(String.format("|%s|%s|",term,actual));
-    System.out.println("|term|modifiedTerm|");
-    System.out.println("|-|-|");
-    testCases.forEach(System.out::println);
-
-    // assertThat(actual).isEqualTo(expected);
+  void modifyTermMatch(String testInput, String term, String expected) {
+    // modifyTermMatch() not called for numeric arguments like "001" or "001.1".
+    assertWithMessage(testInput)
+        .that(cohortBuilderService.modifyTermMatch(term))
+        .isEqualTo(expected);
   }
 
   private static Stream<Arguments> getModifyTermMatchParameters() {
 
     return Stream.of(
-        Arguments.of("lun", "+lun*"),
-        Arguments.of("lung can", "+\"lung\"+can*"),
-        Arguments.of("001", "Like '001%'"),
-        Arguments.of("001.1", "Like '001.1%'"),
-        Arguments.of("heart attack rate", "+\"heart\"+\"attack\"+rate*"),
-        Arguments.of("lun* can*", ""),
-        Arguments.of("lun* -cancer", ""),
-        Arguments.of("lung -can", ""),
-        Arguments.of("+lung +cancer", ""),
-        Arguments.of("\"lung cancer\"", ""),
-        Arguments.of("type * diabetes", "+\"type * diabetes\""),
-        Arguments.of("type 2 diabetes", "+\"type\"+diabetes*"),
+        // special chars are filtered by the UI-except ("\"", "+", "-", "*")
+        // starts with special chars
+        Arguments.of("Starts with special char '\"'", "\"lung can\"", "\"lung can\""),
+        Arguments.of("Starts with special char '+'", "+lung can", "+lung can"),
+        Arguments.of("Starts with special char '-''", "-lung can\"", "-lung can\""),
+        Arguments.of("Starts with special char '*''", "*lung can\"", "*lung can\""),
+        // does not start with special-char but contains special char
         Arguments.of(
-            "type 2 diabetes and heart attack ", "+\"type\"+\"diabetes\"+\"heart\"+attack*"),
-        Arguments.of("disorder of the eye", "+\"disorder\"+eye*"),
-        Arguments.of("disorder    of    the   eye  ", "+\"disorder\"+eye*"));
+            "Contains (not starts) special char '\"'", "lung \"can\"", "+\"lung \"can\"\""),
+        Arguments.of("Contains (not starts) special char '+'", "lung +can", "+\"lung +can\""),
+        Arguments.of("Contains (not starts) special char '-'", "lung-can", "+\"lung-can\""),
+        Arguments.of("Contains (not starts) special char '*'", "lung-can*", "+\"lung-can*\""),
+        Arguments.of(
+            "Contains (not starts) special char '*'", "type-2-diabetes", "+\"type-2-diabetes\""),
+        // does not contain special chars
+        Arguments.of("No special char in term 1 word", "lun", "+lun*"),
+        Arguments.of("No special char in term 2 words", "lung can", "+\"lung\"+can*"),
+        Arguments.of(
+            "No special char in term >2 words",
+            "heart attack rate",
+            "+\"heart\"+\"attack\"+rate*"));
   }
 
   private static List<String> getStopWords() {
