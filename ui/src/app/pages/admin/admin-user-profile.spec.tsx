@@ -10,12 +10,6 @@ import {
   UserAdminApi,
 } from 'generated/fetch';
 
-import {
-  BROAD,
-  BROAD_ADDR_1,
-  BROAD_ADDR_2,
-  InstitutionApiStub,
-} from '../../../testing/stubs/institution-api-stub';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AccessTierDisplayNames,
@@ -29,6 +23,11 @@ import {
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
+import {
+  BROAD_ADDR_1,
+  BROAD_ADDR_2,
+  InstitutionApiStub,
+} from 'testing/stubs/institution-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
@@ -186,9 +185,10 @@ describe('AdminUserProfile', () => {
     const textInput = wrapper.find('[data-test-id="contactEmail"]');
     expect(textInput.first().props().value).toEqual(BROAD_ADDR_1);
 
-    textInput.first().props().value = BROAD_ADDR_2;
-    await waitOneTickAndUpdate(wrapper);
-    expect(textInput.first().props().value).toEqual(BROAD_ADDR_2);
+    await simulateTextInputChange(textInput.first(), BROAD_ADDR_2);
+    expect(
+      wrapper.find('[data-test-id="contactEmail"]').first().props().value
+    ).toEqual(BROAD_ADDR_2);
     expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
