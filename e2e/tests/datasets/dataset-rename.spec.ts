@@ -1,4 +1,4 @@
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Cohorts, ConceptSets, LinkText, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
@@ -26,7 +26,9 @@ describe('Dataset rename', () => {
     });
 
     const resourceCard = new DataResourceCard(page);
-    let datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset, {
+    let datasetCard = await resourceCard.findCard({
+      name: datasetName,
+      cardType: ResourceCard.Dataset,
       timeout: 30000
     });
     expect(datasetCard).toBeTruthy();
@@ -63,9 +65,7 @@ describe('Dataset rename', () => {
     await openTab(page, Tabs.Datasets, dataPage);
 
     // Rename Dataset.
-    datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset, {
-      timeout: 30000
-    });
+    datasetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset, timeout: 30000 });
     await datasetCard.selectSnowmanMenu(MenuOption.RenameDataset, { waitForNav: false });
 
     const renameModal = new DatasetRenameModal(page);

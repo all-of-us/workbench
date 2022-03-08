@@ -8,7 +8,7 @@ import CdrVersionUpgradeModal from 'app/modal/cdr-version-upgrade-modal';
 import { MenuOption } from 'app/text-labels';
 import Navigation, { NavLink } from 'app/component/navigation';
 import WorkspacesPage from 'app/page/workspaces-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 
 describe('Workspace CDR Version Upgrade modal', () => {
   beforeEach(async () => {
@@ -84,7 +84,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await new WorkspaceCard(page).deleteWorkspace({ workspaceName: duplicateWorkspaceName });
+    await new WorkspaceCard(page).delete({ name: duplicateWorkspaceName });
   });
 });
 

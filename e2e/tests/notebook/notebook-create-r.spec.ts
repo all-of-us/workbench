@@ -5,7 +5,7 @@ import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import { Page } from 'puppeteer';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);

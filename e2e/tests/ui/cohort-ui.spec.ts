@@ -141,8 +141,7 @@ describe('Cohort UI Test', () => {
 
     // Open any one workspace.
     const aWorkspaceCard = fp.shuffle(allWorkspaceCards)[0];
-    const workspaceName = await aWorkspaceCard.getWorkspaceName();
-    await aWorkspaceCard.clickWorkspaceName();
+    const workspaceName = await aWorkspaceCard.clickName();
     return workspaceName;
   }
 });

@@ -4,7 +4,7 @@ import { makeRandomName } from 'utils/str-utils';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { waitForText } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
@@ -31,7 +31,7 @@ describe('Cohort review set tests', () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     const cohortCard = await findOrCreateCohortCard(page, cohortName);
-    await cohortCard.clickResourceName();
+    await cohortCard.clickName();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -71,7 +71,7 @@ describe('Cohort review set tests', () => {
 
     // Verify Cohort Review card exists
     const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findCard(cohortName, ResourceCard.CohortReview);
+    const reviewCohortCard = await resourceCard.findCard({ name: cohortName, cardType: ResourceCard.CohortReview });
     expect(reviewCohortCard).toBeTruthy();
 
     await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
@@ -261,7 +261,7 @@ describe('Cohort review set tests', () => {
     await dataPage.renameResource(cohortName, newCohortReviewName, ResourceCard.CohortReview);
 
     // Verify Rename Cohort Review is successful.
-    expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeTruthy();
+    expect(await new DataResourceCard(page).findCard({ name: newCohortReviewName })).toBeTruthy();
 
     // Delete Cohort Review
     const modalTextContent = await dataPage.deleteResource(newCohortReviewName, ResourceCard.CohortReview);
@@ -270,7 +270,7 @@ describe('Cohort review set tests', () => {
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
 
     // Verify Delete Cohort Review successful.
-    expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeFalsy();
+    expect(await new DataResourceCard(page).findCard({ name: newCohortReviewName })).toBeFalsy();
   });
 
   async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<DataResourceCard> {

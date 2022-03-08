@@ -4,7 +4,7 @@ import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/tes
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import Link from 'app/element/link';
 import { Visits } from 'app/page/cohort-participants-group';
 
@@ -58,7 +58,7 @@ describe('Editing Cohort Test', () => {
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.findCohortCard(cohortName);
-    await cohortCard.clickResourceName();
+    await cohortCard.clickName();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -86,7 +86,7 @@ describe('Editing Cohort Test', () => {
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.findCohortCard(cohortName);
-    await cohortCard.clickResourceName();
+    await cohortCard.clickName();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -114,9 +114,9 @@ describe('Editing Cohort Test', () => {
 
     const resourceCard = new DataResourceCard(page);
     // Save as cohort is gone.
-    expect(await resourceCard.findCard(newCohortName, ResourceCard.Cohort)).toBeFalsy();
+    expect(await resourceCard.findCard({ name: newCohortName, cardType: ResourceCard.Cohort })).toBeFalsy();
     // Original cohort remains.
-    expect(await resourceCard.findCard(cohortName, ResourceCard.Cohort)).toBeTruthy();
+    expect(await resourceCard.findCard({ name: cohortName, cardType: ResourceCard.Cohort })).toBeTruthy();
   });
 
   // Helper functions

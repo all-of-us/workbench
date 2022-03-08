@@ -90,10 +90,10 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
 
     // Verify Workspace Access Level is OWNER.
-    const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+    const accessLevel = await workspaceCard.getAccessLevel();
     expect(accessLevel).toBe(WorkspaceAccessLevel.Owner);
 
-    await workspaceCard.clickWorkspaceName();
+    await workspaceCard.clickName();
 
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);

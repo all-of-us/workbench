@@ -5,7 +5,7 @@ import HomePage from 'app/page/home-page';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
 import { Tabs } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
@@ -51,13 +51,13 @@ describe('Workspace Admin lock-workspace', () => {
     // verify the button now displays label "UNLOCK WORKSPACE"
     expect(workspaceAdminPage.getLockWorkspaceButton(workspaceStatus.Unlock));
     await new HomePage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName });
     const lockedIcon = workspaceCard.getWorkspaceLockedIcon();
     expect(lockedIcon).toBeTruthy();
     // verify only the edit option is enabled on the snowmenu
     await workspaceCard.verifyLockedWorkspaceMenuOptions();
-    await workspaceCard.clickLockedWorkspaceName(true);
     const aboutPage = new WorkspaceAboutPage(page);
+    await workspaceCard.clickName({ pageExpected: aboutPage });
 
     // verify the banner includes the locking reason
     const aboutLockReason = await aboutPage.extractReasonMessage();
@@ -92,20 +92,21 @@ describe('Workspace Admin lock-workspace', () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.clickUnlockWorkspaceButton(workspaceStatus.Unlock);
     await workspaceAdminPage.waitForLoad();
     expect(workspaceAdminPage.getLockWorkspaceButton(workspaceStatus.Lock));
     await new HomePage(page).load();
     // find the edited-unlocked workspace
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceEditedName);
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceEditedName });
     expect(await workspaceCard.getWorkspaceLockedIcon()).toBeFalsy();
     await workspaceCard.verifyWorkspaceCardMenuOptions();
-    await workspaceCard.clickWorkspaceName(true);
+
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    // verify DATA & ANALYSIS tabs are aactive and accessible
+    await workspaceCard.clickName({ pageExpected: dataPage });
+
+    // verify DATA & ANALYSIS tabs are active and accessible
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
     const aboutPage = new WorkspaceAboutPage(page);

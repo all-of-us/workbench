@@ -5,7 +5,7 @@ import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-pa
 import { CloudStorageHeader } from 'app/text-labels';
 import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 
@@ -92,8 +92,8 @@ describe('Workspace Admin', () => {
 
   test('Verify that admin is able to delete runtime', async () => {
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
-    await workspaceCard.clickWorkspaceName(true);
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName });
+    await workspaceCard.clickName();
     const dataPage = await new WorkspaceDataPage(page).waitForLoad();
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();

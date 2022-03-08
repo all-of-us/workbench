@@ -1,6 +1,6 @@
 import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import { signInWithAccessToken } from 'utils/test-utils';
 import { getStyleValue } from 'utils/element-utils';
 
@@ -12,7 +12,7 @@ describe('Home page ui tests', () => {
   test('Check visibility of Workspace cards', async () => {
     await checkCreateNewWorkspaceLink();
 
-    const allCards = await WorkspaceCard.findAllCards(page);
+    const allCards = await new WorkspaceCard(page).findAllCards();
     let width;
     let height;
     for (const card of allCards) {
@@ -32,7 +32,7 @@ describe('Home page ui tests', () => {
       }
 
       // check workspace name has characters
-      const cardName = await card.getWorkspaceName();
+      const cardName = await card.getName();
       await expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check Workspace Action menu for listed actions

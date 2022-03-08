@@ -11,7 +11,7 @@ import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
@@ -69,7 +69,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);
-    const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+    const accessLevel = await workspaceCard.getAccessLevel();
     // Verify Snowman menu: Share, Edit and Delete actions are not available for click.
     expect(accessLevel).toBe(assign.accessRole);
     await workspaceCard.verifyWorkspaceCardMenuOptions(assign.accessRole);
@@ -102,7 +102,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);
-    await workspaceCard.clickWorkspaceName();
+    await workspaceCard.clickName();
 
     const dataPage = new WorkspaceDataPage(page);
 
@@ -124,7 +124,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
     const resourceCard = new DataResourceCard(page);
-    const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
+    const dataSetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset });
     expect(await dataSetCard.isVisible()).toBeTruthy();
 
     switch (assign.accessRole) {
@@ -137,7 +137,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
 
           // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
-          await dataSetCard.clickResourceName();
+          await dataSetCard.clickName();
           const dataSetEditPage = new DatasetBuildPage(page);
           await dataSetEditPage.waitForLoad();
 
@@ -163,7 +163,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
 
           // User can click on dataset name and see the dataset details.
-          await dataSetCard.clickResourceName();
+          await dataSetCard.clickName();
           const dataSetEditPage = new DatasetBuildPage(page);
           await dataSetEditPage.waitForLoad();
 

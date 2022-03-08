@@ -1,4 +1,4 @@
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
@@ -28,7 +28,10 @@ describe('Dataset card snowman menu', () => {
     const datasetName = await findOrCreateDataset(page, { openEditPage: false });
 
     // Find Dataset card.
-    const datasetCard = await new DataResourceCard(page).findCard(datasetName, ResourceCard.Dataset);
+    const datasetCard = await new DataResourceCard(page).findCard({
+      name: datasetName,
+      cardType: ResourceCard.Dataset
+    });
     await datasetCard.selectSnowmanMenu(MenuOption.ExportToNotebook, { waitForNav: false });
 
     const exportModal = new ExportToNotebookModal(page);

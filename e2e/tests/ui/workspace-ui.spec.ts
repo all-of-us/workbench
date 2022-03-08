@@ -54,8 +54,8 @@ describe('Workspace UI Test', () => {
 
     // Randomly choose one card to check
     const card = fp.shuffle(workspacesPageCards)[0];
-    const workspaceName = await card.getWorkspaceName();
-    const accessLevel = await card.getWorkspaceAccessLevel();
+    const workspaceName = await card.getName();
+    const accessLevel = await card.getAccessLevel();
     const lastChangedTime = Date.parse(await card.getLastChangedTime());
 
     // Check workspace name string is made of english characters.
@@ -125,7 +125,7 @@ describe('Workspace UI Test', () => {
       // If any card exists, get its Access Level and compare with filter level.
       for (const card of cards) {
         // Check one card only. There could be a lot of cards. We don't need to check every one.
-        const workspaceAccessLevel = await card.getWorkspaceAccessLevel();
+        const workspaceAccessLevel = await card.getAccessLevel();
         expect(workspaceAccessLevel).toEqual(accessLevel.toUpperCase());
         // Verify: Share, Edit, Duplicate and Delete actions.
         await card.verifyWorkspaceCardMenuOptions(workspaceAccessLevel);

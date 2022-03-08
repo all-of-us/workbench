@@ -1,5 +1,5 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import WorkspaceCard from 'app/component/workspace-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
@@ -63,12 +63,12 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
-    const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName });
+    const accessLevel = await workspaceCard.getAccessLevel();
     expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
     // Verify notebook actions list.
-    await workspaceCard.clickWorkspaceName();
+    await workspaceCard.clickName();
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
 
@@ -77,7 +77,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Notebook snowman actions Rename, Duplicate and Delete are disabled.
     const dataResourceCard = new DataResourceCard(page);
-    let notebookCard = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook);
+    let notebookCard = await dataResourceCard.findCard({ name: notebookName, cardType: ResourceCard.Notebook });
     // open Snowman menu.
     const snowmanMenu = await notebookCard.getSnowmanMenu();
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(true);
@@ -88,7 +88,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     // close Snowman menu.
     await notebookCard.clickSnowmanIcon();
 
-    await notebookCard.clickResourceName();
+    await notebookCard.clickName();
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
 
@@ -132,7 +132,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
-    notebookCard = await dataResourceCard.findCard(copyOfNotebookName, ResourceCard.Notebook);
+    notebookCard = await dataResourceCard.findCard({ name: copyOfNotebookName, cardType: ResourceCard.Notebook });
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
@@ -153,8 +153,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
-    await workspaceCard.clickWorkspaceName();
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName });
+    await workspaceCard.clickName();
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
@@ -176,7 +176,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Notebook snowman actions Rename, Duplicate and Delete are enabled.
     const dataResourceCard = new DataResourceCard(page);
-    const notebookCard = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook);
+    const notebookCard = await dataResourceCard.findCard({ name: notebookName, cardType: ResourceCard.Notebook });
     // open Snowman menu.
     const snowmanMenu = await notebookCard.getSnowmanMenu();
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
@@ -187,7 +187,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await notebookCard.clickSnowmanIcon();
 
     // Click notebook name.
-    await notebookCard.clickResourceName();
+    await notebookCard.clickName();
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
 
