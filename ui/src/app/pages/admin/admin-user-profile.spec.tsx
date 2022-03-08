@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import { mount, ReactWrapper } from 'enzyme';
+import { Dropdown } from 'primereact/dropdown';
 
 import {
   Authority,
   EgressEventsAdminApi,
+  InstitutionalRole,
   InstitutionApi,
   Profile,
   UserAdminApi,
@@ -19,6 +21,7 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  simulateComponentChange,
   simulateTextInputChange,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -28,10 +31,12 @@ import {
   BROAD_ADDR_2,
   InstitutionApiStub,
   VERILY,
+  VERILY_WITHOUT_CT,
 } from 'testing/stubs/institution-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
+import { InstitutionalRoleDropdown } from './admin-user-common';
 import { AdminUserProfile } from './admin-user-profile';
 
 const load = jest.fn();
@@ -76,6 +81,13 @@ const getUneditableFieldText = (
   expect(divs.length).toEqual(3);
   return divs.at(2).text();
 };
+
+const findDropdown = (wrapper: ReactWrapper, dataTestId: string): Dropdown =>
+  wrapper
+    .find(`[data-test-id="${dataTestId}"]`)
+    .find(Dropdown)
+    .first()
+    .instance() as Dropdown;
 
 describe('AdminUserProfile', () => {
   const component = (
@@ -176,7 +188,7 @@ describe('AdminUserProfile', () => {
     }
   );
 
-  it("should allow editing of the user's contact email within an institution", async () => {
+  it('should allow updating contactEmail within an institution', async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
     const wrapper = component();
@@ -225,12 +237,13 @@ describe('AdminUserProfile', () => {
   });
 
   it("should prohibit updating contactEmail if it doesn't match institution DOMAINS", async () => {
+    const originalAddress = 'researcher@verily.com';
     updateTargetProfile({
       verifiedInstitutionalAffiliation: {
         ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
         institutionShortName: VERILY.shortName,
       },
-      contactEmail: 'researcher@verily.com',
+      contactEmail: originalAddress,
     });
 
     const wrapper = component();
@@ -238,7 +251,7 @@ describe('AdminUserProfile', () => {
     await waitOneTickAndUpdate(wrapper);
 
     const textInput = wrapper.find('[data-test-id="contactEmail"]');
-    expect(textInput.first().props().value).toEqual('researcher@verily.com');
+    expect(textInput.first().props().value).toEqual(originalAddress);
 
     const nonVerilyAddr = 'PI@rival-institute.net';
     await simulateTextInputChange(textInput.first(), nonVerilyAddr);
@@ -255,5 +268,49 @@ describe('AdminUserProfile', () => {
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
     expect(saveButton.exists()).toBeTruthy();
     expect(saveButton.props().disabled).toBeTruthy();
+  });
+
+  it('should allow updating institution if the email continues to match', async () => {
+    const contactEmail = 'user1@google.com';
+    updateTargetProfile({
+      verifiedInstitutionalAffiliation: {
+        ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
+        institutionShortName: VERILY.shortName,
+      },
+      contactEmail,
+    });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+      VERILY.shortName
+    );
+
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'verifiedInstitution'),
+      VERILY_WITHOUT_CT.shortName
+    );
+    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+      VERILY_WITHOUT_CT.shortName
+    );
+    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+
+    // also need to set the Institutional Role
+
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'institutionalRole'),
+      InstitutionalRole.POSTDOCTORAL
+    );
+    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+      InstitutionalRole.POSTDOCTORAL
+    );
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeFalsy();
   });
 });
