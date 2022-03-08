@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -243,6 +244,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     super.setUp();
 
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
+    config.access.tiersVisibleToUsers = Arrays.asList("registered");
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);

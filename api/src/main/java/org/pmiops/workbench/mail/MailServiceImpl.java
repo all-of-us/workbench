@@ -54,8 +54,8 @@ public class MailServiceImpl implements MailService {
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
-  private static final String WELCOME_RESOURCE_CT = "emails/welcomeemail/content_ct.html";
-  private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
+  private static final String WELCOME_RESOURCE = "emails/welcomeemail/content_ct.html";
+  private static final String WELCOME_RESOURCE_OLD = "emails/welcomeemail/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
@@ -71,6 +71,19 @@ public class MailServiceImpl implements MailService {
       "emails/egress_remediation_email/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_EMAIL =
       "emails/workspace_admin_locking_email/content.html";
+
+  private static final String OPEN_LI_TAG = "<li>";
+  private static final String CLOSE_LI_TAG = "</li>";
+
+  // RT Steps
+  private static final String TWO_STEP_VERIFICATION = "Turn on Google 2-Step Verification";
+  private static final String CT_INSTITUTION_CHECK = "Check that %s allows Controlled Tier access";
+  private static final String ERA_COMMON = "Connect your eRA Commons account";
+  private static final String RT_TRAINING = "Complete All of Us Registered Tier Training";
+  private static final String LOGIN_GOV = "Verify your identity with Login.gov";
+
+  // CT Steps
+  private static final String CT_TRAINING = "Complete All of Us Controlled Tier Training";
 
   private enum Status {
     REJECTED,
@@ -92,15 +105,33 @@ public class MailServiceImpl implements MailService {
   public void sendWelcomeEmail(
       final String contactEmail, final String password, final String username)
       throws MessagingException {
-
-    // Send updated WELCOME EMAIL containing CT information if Controlled tier is visible to the
-    // user
-    String welcomeEmailResource = WELCOME_RESOURCE;
-    if (workbenchConfigProvider.get().access.tiersVisibleToUsers.contains("controlled")) {
-      welcomeEmailResource = WELCOME_RESOURCE_CT;
-    }
     final String htmlMessage =
-        buildHtml(welcomeEmailResource, welcomeMessageSubstitutionMap(password, username));
+        buildHtml(
+            WELCOME_RESOURCE_OLD,
+            welcomeMessageSubstitutionMap(password, username, "", null, null));
+
+    sendWithRetries(
+        Collections.singletonList(contactEmail),
+        Collections.emptyList(),
+        "Your new All of Us Researcher Workbench Account",
+        String.format("Welcome for %s", username),
+        htmlMessage);
+  }
+
+  @Override
+  public void sendWelcomeEmail(
+      final String contactEmail,
+      final String password,
+      final String username,
+      final String institutionName,
+      Boolean rtRequired,
+      final Boolean ctRequired)
+      throws MessagingException {
+    final String htmlMessage =
+        buildHtml(
+            WELCOME_RESOURCE,
+            welcomeMessageSubstitutionMap(
+                password, username, institutionName, rtRequired, ctRequired));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -311,7 +342,11 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
-      final String password, final String username) {
+      final String password,
+      final String username,
+      final String institution,
+      final Boolean eraRequiredForRT,
+      final Boolean eraRequiredForCT) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, username)
@@ -323,7 +358,34 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
         .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
+        .put(EmailSubstitutionField.RT_STEPS, getRTSteps(eraRequiredForRT))
+        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(eraRequiredForCT, institution))
         .build();
+  }
+
+  private String getRTSteps(Boolean eraRequiredForRT) {
+    StringBuffer rtSteps = new StringBuffer();
+    addLiTag(rtSteps, TWO_STEP_VERIFICATION);
+    addLiTag(rtSteps, LOGIN_GOV);
+    if (eraRequiredForRT != null && eraRequiredForRT) {
+      addLiTag(rtSteps, ERA_COMMON);
+    }
+    addLiTag(rtSteps, RT_TRAINING);
+    return rtSteps.toString();
+  }
+
+  private String getCTSteps(Boolean eraRequiredForCT, String institution) {
+    StringBuffer ctSteps = new StringBuffer();
+    addLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institution));
+    if (eraRequiredForCT != null && eraRequiredForCT) {
+      addLiTag(ctSteps, ERA_COMMON);
+    }
+    addLiTag(ctSteps, CT_TRAINING);
+    return ctSteps.toString();
+  }
+
+  private StringBuffer addLiTag(StringBuffer steps, String step) {
+    return steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
