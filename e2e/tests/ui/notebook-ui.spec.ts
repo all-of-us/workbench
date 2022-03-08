@@ -8,7 +8,7 @@ import { logger } from 'libs/logger';
 import WorkspaceCard from 'app/component/card/workspace-card';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import HomePage from 'app/page/home-page';
-import WorkspaceDataPage from '../../app/page/workspace-data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Notebook and Runtime UI Test', () => {
   beforeEach(async () => {
