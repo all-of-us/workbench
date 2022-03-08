@@ -297,7 +297,8 @@ const EditableFields = ({
 };
 
 // list the access modules in the desired order
-const accessModulesForTable = [
+// exported for testing
+export const accessModulesForTable = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
@@ -426,6 +427,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
 
   return (
     <DataTable
+      data-test-id='access-module-table'
       rowHover
       style={{ paddingTop: '1em' }}
       value={tableData}
