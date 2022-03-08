@@ -27,6 +27,7 @@ import {
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import {
+  BROAD,
   BROAD_ADDR_1,
   BROAD_ADDR_2,
   InstitutionApiStub,
@@ -36,7 +37,6 @@ import {
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
-import { InstitutionalRoleDropdown } from './admin-user-common';
 import { AdminUserProfile } from './admin-user-profile';
 
 const load = jest.fn();
@@ -88,6 +88,9 @@ const findDropdown = (wrapper: ReactWrapper, dataTestId: string): Dropdown =>
     .find(Dropdown)
     .first()
     .instance() as Dropdown;
+
+const findContactEmail = (wrapper: ReactWrapper) =>
+  wrapper.find('[data-test-id="contactEmail"]').first();
 
 describe('AdminUserProfile', () => {
   const component = (
@@ -195,13 +198,10 @@ describe('AdminUserProfile', () => {
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
 
-    const textInput = wrapper.find('[data-test-id="contactEmail"]');
-    expect(textInput.first().props().value).toEqual(BROAD_ADDR_1);
+    expect(findContactEmail(wrapper).props().value).toEqual(BROAD_ADDR_1);
 
-    await simulateTextInputChange(textInput.first(), BROAD_ADDR_2);
-    expect(
-      wrapper.find('[data-test-id="contactEmail"]').first().props().value
-    ).toEqual(BROAD_ADDR_2);
+    await simulateTextInputChange(findContactEmail(wrapper), BROAD_ADDR_2);
+    expect(findContactEmail(wrapper).props().value).toEqual(BROAD_ADDR_2);
     expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
@@ -216,14 +216,11 @@ describe('AdminUserProfile', () => {
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
 
-    const textInput = wrapper.find('[data-test-id="contactEmail"]');
-    expect(textInput.first().props().value).toEqual(BROAD_ADDR_1);
+    expect(findContactEmail(wrapper).props().value).toEqual(BROAD_ADDR_1);
 
     const nonBroadAddr = 'PI@rival-institute.net';
-    await simulateTextInputChange(textInput.first(), nonBroadAddr);
-    expect(
-      wrapper.find('[data-test-id="contactEmail"]').first().props().value
-    ).toEqual(nonBroadAddr);
+    await simulateTextInputChange(findContactEmail(wrapper), nonBroadAddr);
+    expect(findContactEmail(wrapper).props().value).toEqual(nonBroadAddr);
 
     const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
     expect(invalidEmail.exists()).toBeTruthy();
@@ -250,14 +247,11 @@ describe('AdminUserProfile', () => {
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
 
-    const textInput = wrapper.find('[data-test-id="contactEmail"]');
-    expect(textInput.first().props().value).toEqual(originalAddress);
+    expect(findContactEmail(wrapper).props().value).toEqual(originalAddress);
 
     const nonVerilyAddr = 'PI@rival-institute.net';
-    await simulateTextInputChange(textInput.first(), nonVerilyAddr);
-    expect(
-      wrapper.find('[data-test-id="contactEmail"]').first().props().value
-    ).toEqual(nonVerilyAddr);
+    await simulateTextInputChange(findContactEmail(wrapper), nonVerilyAddr);
+    expect(findContactEmail(wrapper).props().value).toEqual(nonVerilyAddr);
 
     const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
     expect(invalidEmail.exists()).toBeTruthy();
@@ -308,6 +302,100 @@ describe('AdminUserProfile', () => {
     expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
       InstitutionalRole.POSTDOCTORAL
     );
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeFalsy();
+  });
+
+  it('should not allow updating institution if the email no longer matches', async () => {
+    const contactEmail = 'user1@google.com';
+    updateTargetProfile({
+      verifiedInstitutionalAffiliation: {
+        ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
+        institutionShortName: VERILY.shortName,
+      },
+      contactEmail,
+    });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+      VERILY.shortName
+    );
+
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'verifiedInstitution'),
+      BROAD.shortName
+    );
+    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+      BROAD.shortName
+    );
+    expect(
+      wrapper.find('[data-test-id="email-invalid"]').exists()
+    ).toBeTruthy();
+
+    // also need to set the Institutional Role
+
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'institutionalRole'),
+      InstitutionalRole.POSTDOCTORAL
+    );
+    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+      InstitutionalRole.POSTDOCTORAL
+    );
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeTruthy();
+  });
+
+  it('should not allow updating both email and institution if they match each other', async () => {
+    const contactEmail = 'user1@google.com';
+    updateTargetProfile({
+      verifiedInstitutionalAffiliation: {
+        ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
+        institutionShortName: VERILY.shortName,
+      },
+      contactEmail,
+    });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+      VERILY.shortName
+    );
+
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'verifiedInstitution'),
+      BROAD.shortName
+    );
+    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+      BROAD.shortName
+    );
+
+    // also need to set the Institutional Role
+
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'institutionalRole'),
+      InstitutionalRole.POSTDOCTORAL
+    );
+    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+      InstitutionalRole.POSTDOCTORAL
+    );
+
+    await simulateTextInputChange(findContactEmail(wrapper), BROAD_ADDR_1);
+    expect(findContactEmail(wrapper).props().value).toEqual(BROAD_ADDR_1);
+
+    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
     expect(saveButton.exists()).toBeTruthy();
