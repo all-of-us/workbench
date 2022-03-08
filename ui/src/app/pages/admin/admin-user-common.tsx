@@ -573,7 +573,7 @@ export const InstitutionalRoleOtherTextInput = ({
 }: InstitutionalRoleOtherTextProps) => {
   return affiliation?.institutionalRoleEnum === InstitutionalRole.OTHER ? (
     <TextInputWithLabel
-      dataTestId={'institutionalRoleOtherText'}
+      inputId={'institutionalRoleOtherText'}
       labelText={'Institutional role description'}
       value={affiliation?.institutionalRoleOtherText}
       previousValue={previousOtherText}
