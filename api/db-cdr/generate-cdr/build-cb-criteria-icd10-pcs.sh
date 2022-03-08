@@ -334,9 +334,7 @@ and is_standard = 0
 and is_group = 0
 and is_selectable = 1"
 
-# copy temp tables back to main tables in parallel then delete temp tables
-cpToMainThenRmTmpTable "$TBL_CBC" &
-cpToMainThenRmTmpTable "$TBL_CBA" &
-cpToMainThenRmTmpTable "$TBL_PAS" &
-cpToMainThenRmTmpTable "$TBL_PCA" &
-
+## wait for process to end before copying
+wait
+## copy tmp tables back to main tables and delete tmp
+cpToMainAndDeleteTmp "$TBL_CBC" "$TBL_CBA" "$TBL_PAS" "$TBL_PCA"

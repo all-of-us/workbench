@@ -71,5 +71,7 @@ JOIN
         GROUP BY 1
     ) b on a.concept_id = b.measurement_source_concept_id"
 
-# copy temp table back to main table then delete temp table
-cpToMainThenRmTmpTable "$TBL_CBC"
+## wait for process to end before copying
+wait
+## copy tmp tables back to main tables and delete tmp
+cpToMainAndDeleteTmp "$TBL_CBC"
