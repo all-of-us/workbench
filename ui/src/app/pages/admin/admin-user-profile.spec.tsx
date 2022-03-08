@@ -27,6 +27,7 @@ import {
   BROAD_ADDR_1,
   BROAD_ADDR_2,
   InstitutionApiStub,
+  VERILY,
 } from 'testing/stubs/institution-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
@@ -196,7 +197,7 @@ describe('AdminUserProfile', () => {
     expect(saveButton.props().disabled).toBeFalsy();
   });
 
-  it("should prohibit editing of the user's contact email if it doesn't match their institution", async () => {
+  it("should prohibit updating contactEmail if it doesn't match institution ADDRESSES", async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
     const wrapper = component();
@@ -216,6 +217,39 @@ describe('AdminUserProfile', () => {
     expect(invalidEmail.exists()).toBeTruthy();
     expect(invalidEmail.text()).toContain(
       'The institution has authorized access only to select members.'
+    );
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeTruthy();
+  });
+
+  it("should prohibit updating contactEmail if it doesn't match institution DOMAINS", async () => {
+    updateTargetProfile({
+      verifiedInstitutionalAffiliation: {
+        ...TARGET_USER_PROFILE.verifiedInstitutionalAffiliation,
+        institutionShortName: VERILY.shortName,
+      },
+      contactEmail: 'researcher@verily.com',
+    });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    const textInput = wrapper.find('[data-test-id="contactEmail"]');
+    expect(textInput.first().props().value).toEqual('researcher@verily.com');
+
+    const nonVerilyAddr = 'PI@rival-institute.net';
+    await simulateTextInputChange(textInput.first(), nonVerilyAddr);
+    expect(
+      wrapper.find('[data-test-id="contactEmail"]').first().props().value
+    ).toEqual(nonVerilyAddr);
+
+    const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
+    expect(invalidEmail.exists()).toBeTruthy();
+    expect(invalidEmail.text()).toContain(
+      'Your email does not match your institution'
     );
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
