@@ -22,9 +22,13 @@ export default abstract class BaseCard extends Container {
     return this.page.waitForXPath(this.getXpath(), { visible: true });
   }
 
+  getSnowmanMenuIcon(): Link {
+    const xpath = `${this.getXpath()}${snowmanIconXpath}`;
+    return new Link(this.page, xpath);
+  }
+
   async clickSnowmanIcon(): Promise<this> {
-    const [snowmanIcon] = await (await this.asElement()).$x(`.${snowmanIconXpath}`);
-    await snowmanIcon.hover();
+    const snowmanIcon = this.getSnowmanMenuIcon();
     await snowmanIcon.click();
     await snowmanIcon.dispose();
     return this;

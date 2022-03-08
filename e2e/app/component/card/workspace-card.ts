@@ -68,7 +68,10 @@ export default class WorkspaceCard extends BaseCard {
 
   async findCard(opts: { name?: string; timeout?: number } = {}): Promise<WorkspaceCard | null> {
     const { name, timeout } = opts;
-    const selector = name && this.getXpath() === null ? this.getRootXpath() + this.getNameXpath(name) : this.getXpath();
+    const selector = name ? `${this.getRootXpath()}${this.getNameXpath(name)}` : this.getXpath();
+    if (selector === null || selector.length === 0) {
+      throw new Error('INVALID XPATH: Workspace card xpath is invalid.');
+    }
 
     return this.page
       .waitForXPath(selector, { visible: true, timeout })

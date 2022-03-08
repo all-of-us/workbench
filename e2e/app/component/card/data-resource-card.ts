@@ -75,7 +75,6 @@ export default class DataResourceCard extends BaseCard {
       throw new Error('INVALID XPATH: Resource card xpath is invalid.');
     }
 
-    console.log(`findCard selector: ${selector}`);
     return this.page
       .waitForXPath(selector, { timeout, visible: true })
       .then(() => {
