@@ -77,7 +77,7 @@ public class CohortQueryBuilder {
   private static final String OFFSET_SUFFIX = " OFFSET ";
 
   private static final String ID_SQL_TEMPLATE =
-      "SELECT person_id\n FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n WHERE\n";
+      "SELECT distinct person_id\n FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n WHERE\n";
 
   private static final String UNION_TEMPLATE = "UNION ALL\n";
 

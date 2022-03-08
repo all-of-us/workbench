@@ -13,10 +13,11 @@ import WorkspaceBase, { UseFreeCredits } from './workspace-base';
 import { config } from 'resources/workbench-config';
 import BaseElement from 'app/element/base-element';
 import { makeWorkspaceName } from 'utils/str-utils';
+import WorkspaceDataPage from './workspace-data-page';
 
 const faker = require('faker/locale/en_US');
 
-export const PageTitle = 'Create|Duplicate Workspace';
+export const PageTitle = 'Create|Duplicate|Edit Workspace';
 
 export const LabelAlias = {
   SELECT_BILLING: 'Select a current billing account', // Select a current billing account
@@ -484,7 +485,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     const modal = new NewWorkspaceModal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.Confirm, { waitForClose: true, waitForNav: true, timeout: 90000 });
+    await modal.clickButton(LinkText.Confirm, { waitForClose: true, waitForNav: true, timeout: 3 * 60 * 1000 });
     await waitWhileLoading(this.page);
     return modalTextContent;
   }
@@ -502,5 +503,13 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await this.fillOutWorkspaceName(workspaceName);
     await this.requestForReviewRadiobutton(false);
     return workspaceName;
+  }
+
+  // click cancel button on edit page and navigate to dataPage
+  async clickCancelButton(): Promise<WorkspaceDataPage> {
+    const button = this.getCancelButton();
+    await button.click();
+    const dataPage = new WorkspaceDataPage(this.page);
+    return dataPage;
   }
 }

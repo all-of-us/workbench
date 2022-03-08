@@ -8,7 +8,7 @@
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "test-AoU-RW",
-    "timeoutInSeconds": 60,
+    "timeoutInSeconds": 180,
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.11",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
@@ -49,6 +49,7 @@
     "extractionCohortsDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",
     "extractionTempTablesDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_temp_tables",
+    "extractionFilterSetName": "example",
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-464-g86f1116-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },

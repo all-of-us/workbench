@@ -48,6 +48,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -133,6 +134,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,27 +275,28 @@ public class CohortReviewControllerTest {
     AccessTierServiceImpl.class,
   })
   @MockBean({
+    AccessModuleService.class,
+    AccessTierService.class,
     BigQueryService.class,
     CdrVersionService.class,
-    CohortBuilderMapper.class,
-    FireCloudService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
+    CohortBuilderMapper.class,
+    ComplianceService.class,
     DataSetService.class,
     DirectoryService.class,
+    FireCloudService.class,
     FreeTierBillingService.class,
-    LeonardoNotebooksClient.class,
     IamService.class,
+    LeonardoNotebooksClient.class,
     MailService.class,
-    UserRecentResourceService.class,
-    WorkspaceService.class,
-    AccessTierService.class,
-    AccessModuleService.class,
+    TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
+    WorkspaceOperationMapper.class,
     WorkspaceResourcesService.class,
-    ComplianceService.class
+    WorkspaceService.class,
   })
   static class Configuration {
     @Bean

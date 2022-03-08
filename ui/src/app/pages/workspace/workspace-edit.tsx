@@ -15,8 +15,11 @@ import {
   SpecificPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceOperation,
+  WorkspaceOperationStatus,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -88,6 +91,7 @@ import {
   nextWorkspaceWarmupStore,
 } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
+import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -230,6 +234,10 @@ const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
 // to Sam (as part of Postgres migration).
 const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
+
+// Poll parameters for checking the result of an async Workspace Create or Duplicate operation
+const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 3 * 60 * 1000;
+const WORKSPACE_OPERATION_POLL_INTERVAL_MS = 5 * 1000;
 
 export enum WorkspaceEditMode {
   Create = 1,
@@ -1048,6 +1056,70 @@ export const WorkspaceEdit = fp.flow(
       this.saveWorkspace();
     }
 
+    private async pollForAsyncWorkspaceOperation(
+      operation: () => Promise<WorkspaceOperation>,
+      errorText: string
+    ): Promise<Workspace> {
+      let pollTimedOut = false;
+      setTimeout(
+        () => (pollTimedOut = true),
+        WORKSPACE_OPERATION_POLL_TIMEOUT_MS
+      );
+
+      let workspaceOp = await operation();
+      while (
+        !pollTimedOut &&
+        workspaceOp.status === WorkspaceOperationStatus.PENDING
+      ) {
+        await delay(WORKSPACE_OPERATION_POLL_INTERVAL_MS);
+        workspaceOp = await workspacesApi().getWorkspaceOperation(
+          workspaceOp.id
+        );
+      }
+
+      if (workspaceOp.status !== WorkspaceOperationStatus.SUCCESS) {
+        throw Error(errorText);
+      }
+      return workspaceOp.workspace;
+    }
+
+    private async apiCreateWorkspaceAsync(): Promise<Workspace> {
+      return this.pollForAsyncWorkspaceOperation(
+        async () =>
+          await workspacesApi().createWorkspaceAsync(this.state.workspace),
+        'Workspace creation failed'
+      );
+    }
+
+    private async apiDuplicateWorkspaceAsync(): Promise<Workspace> {
+      return this.pollForAsyncWorkspaceOperation(
+        async () =>
+          await workspacesApi().duplicateWorkspaceAsync(
+            this.props.workspace.namespace,
+            this.props.workspace.id,
+            {
+              includeUserRoles: this.state.cloneUserRole,
+              workspace: this.state.workspace,
+            }
+          ),
+        'Workspace duplication failed'
+      );
+    }
+
+    // the API endpoint is synchronous in that it waits for the Terra call
+    // but we still need an `async` method to call it here
+    private async apiDuplicateWorkspace(): Promise<Workspace> {
+      const duplicateResponse = await workspacesApi().cloneWorkspace(
+        this.props.workspace.namespace,
+        this.props.workspace.id,
+        {
+          includeUserRoles: this.state.cloneUserRole,
+          workspace: this.state.workspace,
+        }
+      );
+      return duplicateResponse.workspace;
+    }
+
     async saveWorkspace() {
       try {
         this.setState({ loading: true });
@@ -1057,19 +1129,13 @@ export const WorkspaceEdit = fp.flow(
         }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = await workspacesApi().createWorkspace(
-            this.state.workspace
-          );
+          workspace = environment.enableAsyncWorkspaceOperations
+            ? await this.apiCreateWorkspaceAsync()
+            : await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          const cloneWorkspace = await workspacesApi().cloneWorkspace(
-            this.props.workspace.namespace,
-            this.props.workspace.id,
-            {
-              includeUserRoles: this.state.cloneUserRole,
-              workspace: this.state.workspace,
-            }
-          );
-          workspace = cloneWorkspace.workspace;
+          workspace = environment.enableAsyncWorkspaceOperations
+            ? await this.apiDuplicateWorkspaceAsync()
+            : await this.apiDuplicateWorkspace();
         } else {
           workspace.researchPurpose.needsReviewPrompt = false;
           workspace = await workspacesApi().updateWorkspace(

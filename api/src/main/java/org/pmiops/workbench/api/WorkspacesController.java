@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,17 +18,20 @@ import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceOperationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.DbWorkspaceOperation;
+import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -41,6 +45,8 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
+import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
@@ -53,6 +59,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
+import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -60,6 +67,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -74,17 +82,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
+  private final IamService iamService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final TaskQueueService taskQueueService;
   private final UserDao userDao;
-  private final UserService userService;
   private final WorkspaceAuditor workspaceAuditor;
-  private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceResourcesService workspaceResourcesService;
-  private final WorkspaceDao workspaceDao;
-  private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
-  private final IamService iamService;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceOperationDao workspaceOperationDao;
+  private final WorkspaceOperationMapper workspaceOperationMapper;
+  private final WorkspaceResourcesService workspaceResourcesService;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   public WorkspacesController(
@@ -92,32 +102,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
+      IamService iamService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      TaskQueueService taskQueueService,
       UserDao userDao,
-      UserService userService,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper,
-      WorkspaceResourcesService workspaceResourcesService,
-      WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService,
-      IamService iamService) {
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper,
+      WorkspaceOperationDao workspaceOperationDao,
+      WorkspaceOperationMapper workspaceOperationMapper,
+      WorkspaceResourcesService workspaceResourcesService,
+      WorkspaceService workspaceService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
+    this.iamService = iamService;
+    this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.userProvider = userProvider;
-    this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
-    this.workspaceMapper = workspaceMapper;
-    this.workspaceResourcesService = workspaceResourcesService;
-    this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
-    this.iamService = iamService;
+    this.workspaceMapper = workspaceMapper;
+    this.workspaceOperationDao = workspaceOperationDao;
+    this.workspaceOperationMapper = workspaceOperationMapper;
+    this.workspaceResourcesService = workspaceResourcesService;
+    this.workspaceService = workspaceService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -189,6 +203,144 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> createWorkspaceAsync(Workspace workspace) {
+    // Basic request validation.
+    validateWorkspaceApiModel(workspace);
+    getLiveCdrVersionId(workspace.getCdrVersionId());
+
+    // TODO: enforce access level check here? Not strictly necessary, but may make sense as
+    // belt/suspenders check.
+
+    DbWorkspaceOperation operation =
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.PENDING));
+
+    log.info(
+        String.format(
+            "Create Workspace Async: created operation %d in %s state",
+            operation.getId(), operation.getStatus().toString()));
+
+    taskQueueService.pushCreateWorkspaceTask(operation.getId(), workspace);
+    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> duplicateWorkspaceAsync(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest request) {
+
+    // Basic request validation.
+    validateWorkspaceApiModel(request.getWorkspace());
+    getLiveCdrVersionId(request.getWorkspace().getCdrVersionId());
+
+    // Verify the caller has read access to the source workspace.
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+
+    DbWorkspaceOperation operation =
+        workspaceOperationDao.save(
+            new DbWorkspaceOperation()
+                .setCreatorId(userProvider.get().getUserId())
+                .setStatus(DbWorkspaceOperationStatus.PENDING));
+
+    log.info(
+        String.format(
+            "Duplicate Workspace Async: created operation %d in %s state",
+            operation.getId(), operation.getStatus().toString()));
+
+    taskQueueService.pushDuplicateWorkspaceTask(
+        operation.getId(),
+        fromWorkspaceNamespace,
+        fromWorkspaceId,
+        request.getIncludeUserRoles(),
+        request.getWorkspace());
+    return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
+    return workspaceOperationDao
+        .findById(id)
+        // only callable by the creator
+        .filter(dbOperation -> dbOperation.getCreatorId() == userProvider.get().getUserId())
+        .map(
+            op ->
+                ResponseEntity.ok()
+                    .body(
+                        workspaceOperationMapper.toModelWithWorkspace(
+                            op, workspaceDao, fireCloudService, workspaceMapper)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  private void processWorkspaceTask(long operationId, Supplier<Workspace> workspaceAction) {
+    DbWorkspaceOperation operation =
+        workspaceOperationDao
+            .findById(operationId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Workspace Operation '%d' not found", operationId)));
+    try {
+      log.info(
+          String.format(
+              "processWorkspaceTask: begin processing operation %d in %s state",
+              operation.getId(), operation.getStatus().toString()));
+      Workspace w = workspaceAction.get();
+      // careful: w.getId() refers to the Terra Name, not the DB ID
+      long workspaceId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();
+      log.info(
+          String.format(
+              "processWorkspaceTask: recording SUCCESS for operation %d - workspace ID %d",
+              operation.getId(), workspaceId));
+      operation.setStatus(DbWorkspaceOperationStatus.SUCCESS).setWorkspaceId(workspaceId);
+    } catch (Exception e) {
+      log.info(
+          String.format(
+              "processWorkspaceTask: recording ERROR for operation %d", operation.getId()));
+      operation.setStatus(DbWorkspaceOperationStatus.ERROR);
+      throw e;
+    } finally {
+      operation = workspaceOperationDao.save(operation);
+    }
+  }
+
+  @Override
+  public ResponseEntity<Void> processCreateWorkspaceTask(CreateWorkspaceTaskRequest request) {
+    processWorkspaceTask(
+        request.getOperationId(),
+        () -> {
+          log.info(
+              String.format(
+                  "processCreateWorkspaceTask: creating workspace for operation %d",
+                  request.getOperationId()));
+          return this.createWorkspace(request.getWorkspace()).getBody();
+        });
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> processDuplicateWorkspaceTask(DuplicateWorkspaceTaskRequest request) {
+    processWorkspaceTask(
+        request.getOperationId(),
+        () -> {
+          log.info(
+              String.format(
+                  "processDuplicateWorkspaceTask: duplicating workspace for operation %d",
+                  request.getOperationId()));
+          return this.cloneWorkspace(
+                  request.getFromWorkspaceNamespace(),
+                  request.getFromWorkspaceFirecloudName(),
+                  new CloneWorkspaceRequest()
+                      .workspace(request.getWorkspace())
+                      .includeUserRoles(request.getShouldDuplicateRoles()))
+              .getBody()
+              .getWorkspace();
+        });
+    return ResponseEntity.ok().build();
   }
 
   private DbWorkspace createDbWorkspace(

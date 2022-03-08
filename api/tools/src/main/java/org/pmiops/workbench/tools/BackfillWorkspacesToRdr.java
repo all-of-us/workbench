@@ -65,7 +65,8 @@ public class BackfillWorkspacesToRdr {
       WorkbenchLocationConfigService locationConfigService,
       Provider<CloudTasksClient> cloudTasksClientProvider,
       Provider<WorkbenchConfig> configProvider) {
-    return new TaskQueueService(locationConfigService, cloudTasksClientProvider, configProvider);
+    return new TaskQueueService(
+        locationConfigService, cloudTasksClientProvider, configProvider, () -> null);
   }
 
   @Bean
