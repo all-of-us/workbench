@@ -87,7 +87,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async goToAllWorkspacesPage(): Promise<WorkspacesPage> {
-    await this.getCreateNewWorkspaceLink().clickAndWait();
+    await this.getSeeAllWorkspacesLink().clickAndWait();
     const workspacesPage = new WorkspacesPage(this.page);
     await workspacesPage.waitForLoad();
     return workspacesPage;

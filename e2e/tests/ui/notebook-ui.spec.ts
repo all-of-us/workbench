@@ -7,6 +7,7 @@ import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import WorkspaceCard from 'app/component/workspace-card';
 import DataResourceCard from 'app/component/data-resource-card';
+import HomePage from 'app/page/home-page';
 
 describe('Notebook and Runtime UI Test', () => {
   beforeEach(async () => {
@@ -57,6 +58,7 @@ describe('Notebook and Runtime UI Test', () => {
   });
 
   async function openWorkspace(page: Page, workspaceName: string): Promise<boolean> {
+    await new HomePage(page).goToAllWorkspacesPage();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName, 2000);
     // Don't create new workspace if none found.
     if (!workspaceCard) {
