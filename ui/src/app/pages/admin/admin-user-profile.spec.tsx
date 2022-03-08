@@ -49,18 +49,6 @@ const ADMIN_PROFILE: Profile = {
 };
 const TARGET_USER_PROFILE = ProfileStubVariables.PROFILE_STUB;
 
-const updateAdminProfile = (update: Partial<Profile>) => {
-  profileStore.set({
-    profile: {
-      ...ADMIN_PROFILE,
-      ...update,
-    },
-    load,
-    reload,
-    updateCache,
-  });
-};
-
 const updateTargetProfile = (update: Partial<Profile>) => {
   registerApiClient(
     UserAdminApi,
@@ -474,6 +462,30 @@ describe('AdminUserProfile', () => {
     ).toEqual(roleDetails);
 
     saveButton = wrapper.find('[data-test-id="update-profile"]');
+    expect(saveButton.exists()).toBeTruthy();
+    expect(saveButton.props().disabled).toBeFalsy();
+  });
+
+  it('should allow updating initial credit limit', async () => {
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(
+      findDropdown(wrapper, 'initial-credits-dropdown').props.value
+    ).toEqual(TARGET_USER_PROFILE.freeTierDollarQuota);
+
+    const newLimit = 800.0;
+    await simulateComponentChange(
+      wrapper,
+      findDropdown(wrapper, 'initial-credits-dropdown'),
+      newLimit
+    );
+    expect(
+      findDropdown(wrapper, 'initial-credits-dropdown').props.value
+    ).toEqual(newLimit);
+
+    const saveButton = wrapper.find('[data-test-id="update-profile"]');
     expect(saveButton.exists()).toBeTruthy();
     expect(saveButton.props().disabled).toBeFalsy();
   });
