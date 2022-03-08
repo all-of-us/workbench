@@ -116,10 +116,14 @@ const styles = reactStyles({
 });
 
 const UneditableField = (props: {
+  dataTestId: string;
   label: string;
   value: string | JSX.Element;
 }) => (
-  <FlexColumn style={{ paddingTop: '1em', width: '300px' }}>
+  <FlexColumn
+    data-test-id={props.dataTestId}
+    style={{ paddingTop: '1em', width: '300px' }}
+  >
     <div style={styles.label}>{props.label}</div>
     <div style={styles.value}>{props.value}</div>
   </FlexColumn>
@@ -144,15 +148,28 @@ const UneditableFields = (props: { profile: Profile }) => {
         <div style={styles.uneditableFieldsSpacer} />
       </FlexRow>
       <FlexRow>
-        <UneditableField label='Name' value={`${givenName} ${familyName}`} />
-        <UneditableField label='User name' value={username} />
+        <UneditableField
+          dataTestId='name'
+          label='Name'
+          value={`${givenName} ${familyName}`}
+        />
+        <UneditableField
+          dataTestId='user-name'
+          label='User name'
+          value={username}
+        />
       </FlexRow>
       <FlexRow>
         <UneditableField
+          dataTestId='initial-credits-used'
           label='Initial credits used'
           value={getInitialCreditsUsage(props.profile)}
         />
-        <UneditableField label='Data access tiers' value={accessTiers} />
+        <UneditableField
+          dataTestId='data-access-tiers'
+          label='Data access tiers'
+          value={accessTiers}
+        />
       </FlexRow>
     </FlexColumn>
   );
