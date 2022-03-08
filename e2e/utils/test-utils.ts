@@ -187,14 +187,13 @@ export async function findOrCreateWorkspace(
     openDataPage?: boolean;
   } = {}
 ): Promise<string> {
-  const { workspaceName, cdrVersion, dataAccessTier, openDataPage } = opts;
+  const { workspaceName, cdrVersion, dataAccessTier, openDataPage = true } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const card = await findWorkspaceCard(page, workspaceName, 2000);
     if (card != null) {
-      logger.info(`Found Workspace card ${workspaceName}`);
       // TODO workspace CDR version and Data Access Tier are not verified
-      return openDataPage ? card.clickName() : workspaceName;
+      return openDataPage ? card.clickName({ pageExpected: new WorkspaceDataPage(page) }) : workspaceName;
     }
     return createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion, dataAccessTier });
   }

@@ -70,8 +70,12 @@ export default class DataResourceCard extends BaseCard {
     const appendCardTypeXpath = cardType ? this.getCardTypeXpath(cardType) : '';
     const appendNameXpath = name ? this.getNameXpath(name) : '';
     const selector =
-      this.getXpath() !== null ? this.getXpath() : this.getRootXpath() + appendCardTypeXpath + appendNameXpath;
+      name || cardType ? `${this.getRootXpath()}${appendCardTypeXpath}${appendNameXpath}` : this.getXpath();
+    if (selector === null || selector.length === 0) {
+      throw new Error('INVALID XPATH: Resource card xpath is invalid.');
+    }
 
+    console.log(`findCard selector: ${selector}`);
     return this.page
       .waitForXPath(selector, { timeout, visible: true })
       .then(() => {

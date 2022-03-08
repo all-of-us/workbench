@@ -6,23 +6,6 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { logger } from 'libs/logger';
 import { asyncFilter } from 'utils/test-utils';
 
-const WorkspaceCardSelector = {
-  accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
-  dateTimeXpath:
-    './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-access-level"]/following-sibling::div',
-  lockedIconXpath:
-    './/*[@data-test-id="workspace-card"]' +
-    '//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]'
-};
-
-export enum CardXpaths {
-  rootXpath = './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
-  nameXpath = '@data-test-id="workspace-card-name"',
-  accessLevelXpath = '//*[@data-test-id="workspace-access-level"]',
-  dateTimeXpath = '//*[@data-test-id="workspace-access-level"]/following-sibling::div',
-  lockedIconXpath = '//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]'
-}
-
 /**
  * WorkspaceCard represents workspace card user found on Home and All Workspaces pages.
  * A Workspace Card is element that contains a child element with attribute: @data-test-id='workspace-card'
@@ -45,7 +28,11 @@ export default class WorkspaceCard extends BaseCard {
   }
 
   getDateTimeXpath(): string {
-    return `${this.getRootXpath}//*[${this.getAccessLevelTestId()}]/following-sibling::div`;
+    return `${this.getRootXpath()}//*[${this.getAccessLevelTestId()}]/following-sibling::div`;
+  }
+
+  getLockedIconXpath(): string {
+    return `${this.getRootXpath()}//*[@data-test-id="workspace-lock"]//*[local-name()="svg" and @data-icon="lock-alt"]`;
   }
 
   /**
@@ -151,7 +138,7 @@ export default class WorkspaceCard extends BaseCard {
   }
 
   async getWorkspaceLockedIcon(): Promise<ElementHandle> {
-    const [element] = await (await this.asElement()).$x(WorkspaceCardSelector.lockedIconXpath);
+    const [element] = await (await this.asElement()).$x(this.getLockedIconXpath());
     return element;
   }
 

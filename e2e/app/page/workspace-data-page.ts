@@ -63,18 +63,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return cohortBuildPage;
   }
 
-  /**
-   * Export Dataset to notebook thru the Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName Dataset name.
-   * @param {string} notebookName Notebook name.
-   */
-  async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
-    const resourceCard = new DataResourceCard(this.page);
-    const datasetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset });
-    await datasetCard.selectSnowmanMenu(MenuOption.ExportToNotebook, { waitForNav: false });
-    console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
-  }
-
   async findCohortCard(cohortName?: string, timeout?: number): Promise<DataResourceCard> {
     await openTab(this.page, Tabs.Cohorts);
     if (cohortName) {

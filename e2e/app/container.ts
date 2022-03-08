@@ -46,9 +46,14 @@ export default class Container {
    */
   async clickButton(
     buttonLabel: LinkText,
-    waitOptions: { waitForNav?: boolean; waitForClose?: boolean; timeout?: number } = {}
+    waitOptions: {
+      waitForNav?: boolean;
+      waitForClose?: boolean;
+      timeout?: number;
+      waitForLoadingSpinner?: boolean;
+    } = {}
   ): Promise<void> {
-    const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
+    const { waitForNav = false, waitForClose = false, timeout, waitForLoadingSpinner = true } = waitOptions;
 
     const button = await this.findButton(buttonLabel);
     await Promise.all(
@@ -71,6 +76,9 @@ export default class Container {
         }
       ])
     );
+    if (waitForLoadingSpinner) {
+      await waitWhileLoading(this.page);
+    }
   }
 
   async asElement(): Promise<ElementHandle | null> {

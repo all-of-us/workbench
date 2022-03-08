@@ -65,7 +65,7 @@ describe('Dataset rename', () => {
     await openTab(page, Tabs.Datasets, dataPage);
 
     // Rename Dataset.
-    datasetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset, timeout: 30000 });
+    datasetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset });
     await datasetCard.selectSnowmanMenu(MenuOption.RenameDataset, { waitForNav: false });
 
     const renameModal = new DatasetRenameModal(page);
@@ -88,7 +88,7 @@ describe('Dataset rename', () => {
     const newDatasetExists = await resourceCard.cardExists(newDatasetName, ResourceCard.Dataset);
     expect(newDatasetExists).toBe(true);
 
-    const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
+    const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset, { timeout: 1000 });
     expect(oldDatasetExists).toBe(false);
 
     await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);

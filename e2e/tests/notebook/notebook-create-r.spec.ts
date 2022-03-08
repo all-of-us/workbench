@@ -6,6 +6,7 @@ import expect from 'expect';
 import { Page } from 'puppeteer';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataResourceCard from 'app/component/card/data-resource-card';
+import { logger } from 'libs/logger';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -96,13 +97,14 @@ describe('Create R kernel notebook', () => {
 
   // Helper functions: Load previously saved URL instead clicks thru links to open workspace data page.
   async function loadWorkspace(page: Page, workspaceName?: string): Promise<string> {
-    if (workspaceUrl) {
+    if (workspaceUrl !== undefined) {
       await page.goto(workspaceUrl, { waitUntil: ['load', 'networkidle0'] });
+      logger.info(`Goto workspace URL: ${workspaceUrl}`);
+      await new WorkspaceDataPage(page).waitForLoad();
       return;
     }
 
     workspaceName = await findOrCreateWorkspace(page, { workspaceName });
-
     workspaceUrl = page.url(); // Save URL for load workspace directly without search.
     return workspaceName;
   }
