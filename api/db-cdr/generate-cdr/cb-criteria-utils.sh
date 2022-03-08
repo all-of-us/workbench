@@ -20,14 +20,14 @@ function cpToMainAndDeleteTmp(){
   for tmpTbl in "$@"
   do
     ## copy to main
-    cpToMain tmpTbl &
+    cpToMain "$tmpTbl" &
   done
   ## wait for copy to complete
   wait
   for tmpTbl in "$@"
   do
     ## delete tmp table
-    rmTmpTable tmpTbl &
+    rmTmpTable "$tmpTbl" &
   done
   ## wait for delete to complete before exiting
   wait
