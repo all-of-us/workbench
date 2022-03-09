@@ -68,6 +68,7 @@ public interface WorkbenchConfigMapper {
       source = "config.featureFlags.enableGenomicExtraction")
   @Mapping(target = "enableGpu", source = "config.featureFlags.enableGpu")
   @Mapping(target = "enablePersistentDisk", source = "config.featureFlags.enablePersistentDisk")
+  @Mapping(target = "enableUniversalSearch", source = "config.featureFlags.enableUniversalSearch")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")

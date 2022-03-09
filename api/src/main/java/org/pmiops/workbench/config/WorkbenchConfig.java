@@ -271,6 +271,8 @@ public class WorkbenchConfig {
     // of multiple PR and we want to ensure that when then functionality is ready, the new table
     // user_recently_modified table is still same as previously used table user_Recent_resource
     public boolean enableDSCREntryInRecentModified;
+    // If true, enable Universal Search for both backend and UI
+    public boolean enableUniversalSearch;
   }
 
   public static class ActionAuditConfig {
