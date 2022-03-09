@@ -129,6 +129,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :gae_vars => make_gae_vars(8, 64, 'F4'),
     :source_cdr_project => "aou-res-curation-output-prod",
+    :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
