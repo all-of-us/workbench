@@ -5,8 +5,10 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
-import WorkspaceCard from 'app/component/workspace-card';
-import DataResourceCard from 'app/component/data-resource-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
+import HomePage from 'app/page/home-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Notebook and Runtime UI Test', () => {
   beforeEach(async () => {
@@ -30,7 +32,7 @@ describe('Notebook and Runtime UI Test', () => {
       return;
     }
 
-    pyNotebookName = await pyNotebookCard.getResourceName();
+    pyNotebookName = await pyNotebookCard.getName();
 
     // Attempt to create another notebook with same name. It should be blocked.
     const analysisPage = new WorkspaceAnalysisPage(page);
@@ -57,13 +59,14 @@ describe('Notebook and Runtime UI Test', () => {
   });
 
   async function openWorkspace(page: Page, workspaceName: string): Promise<boolean> {
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
+    await new HomePage(page).goToAllWorkspacesPage();
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName, timeout: 2000 });
     // Don't create new workspace if none found.
     if (!workspaceCard) {
       return false;
     }
 
-    await workspaceCard.clickWorkspaceName();
+    await workspaceCard.clickName({ pageExpected: new WorkspaceDataPage(page) });
     return true;
   }
 

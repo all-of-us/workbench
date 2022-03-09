@@ -1,5 +1,5 @@
 import { Domain } from 'app/component/concept-domain-card';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptSetPage from 'app/page/conceptset-page';
 import { SaveOption } from 'app/modal/conceptset-save-modal';
@@ -47,7 +47,7 @@ describe('Copy Concept Set to another workspace', () => {
    */
   test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
     // Create a source and a destination workspace with the same CDR version name.
-    await findOrCreateWorkspace(page, { workspaceName: destWorkspace });
+    await findOrCreateWorkspace(page, { workspaceName: destWorkspace, openDataPage: false });
     const srcWorkspace = await createWorkspace(page);
 
     const { dataPage, conceptSetName } = await createConceptSet();
@@ -91,7 +91,7 @@ describe('Copy Concept Set to another workspace', () => {
    */
   test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
     // Create a source and a destination workspace with differing CDR Versions.
-    await findOrCreateWorkspace(page, { workspaceName: destWorkspace });
+    await findOrCreateWorkspace(page, { workspaceName: destWorkspace, openDataPage: false });
     await createWorkspace(page, {
       cdrVersionName: config.OLD_CDR_VERSION_NAME
     });

@@ -11,8 +11,8 @@ import Button from 'app/element/button';
 export default class Container {
   constructor(protected readonly page: Page, protected xpath?: string) {}
 
-  getXpath(): string {
-    return this.xpath === undefined ? '' : this.xpath;
+  getXpath(): string | null {
+    return this.xpath?.length > 0 ? this.xpath : null;
   }
 
   setXpath(xpath: string): void {
@@ -46,9 +46,14 @@ export default class Container {
    */
   async clickButton(
     buttonLabel: LinkText,
-    waitOptions: { waitForNav?: boolean; waitForClose?: boolean; timeout?: number } = {}
+    waitOptions: {
+      waitForNav?: boolean;
+      waitForClose?: boolean;
+      timeout?: number;
+      waitForLoadingSpinner?: boolean;
+    } = {}
   ): Promise<void> {
-    const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
+    const { waitForNav = false, waitForClose = false, timeout, waitForLoadingSpinner = true } = waitOptions;
 
     const button = await this.findButton(buttonLabel);
     await Promise.all(
@@ -71,6 +76,9 @@ export default class Container {
         }
       ])
     );
+    if (waitForLoadingSpinner) {
+      await waitWhileLoading(this.page);
+    }
   }
 
   async asElement(): Promise<ElementHandle | null> {

@@ -1,5 +1,5 @@
 import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
 import Link from 'app/element/link';
 import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
@@ -108,7 +108,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    * @param {string} notebookName The notebook name to clone from.
    */
   async duplicateNotebook(notebookName: string): Promise<string> {
-    const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
+    const notebookCard = await new DataResourceCard(this.page).findCard({ name: notebookName });
     await notebookCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: false });
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
@@ -127,7 +127,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   ): Promise<void> {
     // Open Copy modal
     const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
+    const notebookCard = await resourceCard.findCard({ name: notebookName, cardType: ResourceCard.Notebook });
     await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { waitForNav: false });
     // Fill out modal fields.
     const copyModal = new CopyToWorkspaceModal(this.page);
@@ -141,7 +141,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    */
   async findNotebookCard(notebookName?: string): Promise<DataResourceCard | null> {
     if (notebookName) {
-      return new DataResourceCard(this.page).findCard(notebookName, ResourceCard.Notebook);
+      return new DataResourceCard(this.page).findCard({ name: notebookName, cardType: ResourceCard.Notebook });
     }
     // if notebook name isn't specified, find any existing notebook.
     return new DataResourceCard(this.page).findAnyCard(ResourceCard.Notebook);

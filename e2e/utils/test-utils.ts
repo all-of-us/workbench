@@ -7,7 +7,7 @@ import { ElementType, XPathOptions } from 'app/xpath-options';
 import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import { ElementHandle, Page } from 'puppeteer';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import { Cohorts, ConceptSets, Language, PageUrl, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
@@ -19,7 +19,7 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 import Tab from 'app/element/tab';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
@@ -180,17 +180,20 @@ export async function createWorkspace(
  */
 export async function findOrCreateWorkspace(
   page: Page,
-  opts: { cdrVersion?: string; workspaceName?: string; dataAccessTier?: AccessTierDisplayNames } = {}
+  opts: {
+    cdrVersion?: string;
+    workspaceName?: string;
+    dataAccessTier?: AccessTierDisplayNames;
+    openDataPage?: boolean;
+  } = {}
 ): Promise<string> {
-  const { workspaceName, cdrVersion, dataAccessTier } = opts;
+  const { workspaceName, cdrVersion, dataAccessTier, openDataPage = true } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
-    const cardFound = await findWorkspaceCard(page, workspaceName, 2000);
-    if (cardFound != null) {
-      logger.info(`Found workspace card name: ${workspaceName}`);
+    const card = await findWorkspaceCard(page, workspaceName, 2000);
+    if (card != null) {
       // TODO workspace CDR version and Data Access Tier are not verified
-      await cardFound.clickWorkspaceName();
-      return workspaceName; // Found Workspace card matching workspace name
+      return openDataPage ? card.clickName({ pageExpected: new WorkspaceDataPage(page) }) : workspaceName;
     }
     return createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion, dataAccessTier });
   }
@@ -204,10 +207,10 @@ export async function findOrCreateWorkspace(
 
   // Return one random Workspace card
   const randomCard: WorkspaceCard = fp.shuffle(olderWorkspaceCards).pop();
-  const cardName = await randomCard.getWorkspaceName();
+  const cardName = await randomCard.getName();
   const lastChangedTime = await randomCard.getLastChangedTime();
   logger.info(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
-  await randomCard.clickWorkspaceName();
+  await randomCard.clickName();
   return cardName;
 }
 
@@ -224,8 +227,9 @@ export async function findWorkspaceCard(
 ): Promise<WorkspaceCard | null> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
+
   const workspaceCard = new WorkspaceCard(page);
-  return workspaceCard.findCard(workspaceName, timeout);
+  return workspaceCard.findCard({ name: workspaceName, timeout });
 }
 
 /**
@@ -263,7 +267,8 @@ export async function findOrCreateWorkspaceCard(
  * Find a suitable workspace among existing workspaces with OWNER role and older than specified time difference.
  */
 export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Promise<WorkspaceCard[]> {
-  const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, {
+  const workspaceCard = new WorkspaceCard(page);
+  const existingCards: WorkspaceCard[] = await workspaceCard.findAllCards({
     accessLevel: WorkspaceAccessLevel.Owner
   });
   // Filter to exclude Workspaces younger than 30 minutes.
@@ -339,7 +344,8 @@ export function generate2FACode(secret: string): string {
 export async function openTab<T extends AuthenticatedPage>(page: Page, tabName: Tabs, pageExpected?: T): Promise<void> {
   const tab = new Tab(page, tabName);
   await tab.click();
-  if (pageExpected !== undefined) {
+  await tab.waitUntilSelected();
+  if (pageExpected) {
     await tab.waitFor(pageExpected);
   }
 }
@@ -388,17 +394,17 @@ export async function findDataset(
   await dataPage.waitForLoad();
 
   await openTab(page, Tabs.Datasets, dataPage);
-  const datasetCard =
-    name === undefined
-      ? await new DataResourceCard(page).findAnyCard(ResourceCard.Dataset)
-      : await new DataResourceCard(page).findCard(name, ResourceCard.Dataset);
+  const datasetCard = name
+    ? await new DataResourceCard(page).findCard({ name, cardType: ResourceCard.Dataset })
+    : await new DataResourceCard(page).findAnyCard(ResourceCard.Dataset);
 
   if (datasetCard !== null) {
     if (openEditPage) {
-      await datasetCard.clickResourceName();
+      const resourceName = await datasetCard.clickName();
       await new DatasetBuildPage(page).waitForLoad();
+      return resourceName;
     }
-    return name === undefined ? await datasetCard.getResourceName() : name;
+    return name ? name : await datasetCard.getName();
   }
   return null;
 }
@@ -408,9 +414,12 @@ export async function findOrCreateDataset(
   page: Page,
   opts: { cohortNames?: string[]; openEditPage?: boolean } = {}
 ): Promise<string> {
-  const { cohortNames, openEditPage } = opts;
+  const { cohortNames = [Cohorts.AllParticipants], openEditPage } = opts;
   const dataset = await findDataset(page, { openEditPage });
-  return dataset ? dataset : createDataset(page, { cohorts: cohortNames, returnToDataPage: !openEditPage });
+  if (dataset) {
+    return dataset;
+  }
+  return createDataset(page, { cohorts: cohortNames, returnToDataPage: !openEditPage });
 }
 
 // Find an existing Cohort. Returns cohort name.
@@ -420,17 +429,17 @@ export async function findCohort(page: Page, opts: { name?: string; openEditPage
   const dataPage = new WorkspaceDataPage(page);
   await dataPage.waitForLoad();
 
-  const cohortCard =
-    name === undefined
-      ? await new DataResourceCard(page).findAnyCard(ResourceCard.Cohort)
-      : await new DataResourceCard(page).findCard(name, ResourceCard.Cohort);
+  const cohortCard = name
+    ? await new DataResourceCard(page).findCard({ name, cardType: ResourceCard.Cohort })
+    : await new DataResourceCard(page).findAnyCard(ResourceCard.Cohort);
 
   if (cohortCard !== null) {
     if (openEditPage) {
-      await cohortCard.clickResourceName();
+      const resourceName = await cohortCard.clickName();
       await new CohortBuildPage(page).waitForLoad();
+      return resourceName;
     }
-    return name === undefined ? await cohortCard.getResourceName() : name;
+    return name ? name : await cohortCard.getName();
   }
   return null;
 }
@@ -452,18 +461,18 @@ export async function createCohort(
   await group1.includeEthnicity([Ethnicity.Skip, Ethnicity.PreferNotToAnswer]);
   await group1.includeGenderIdentity([Sex.MALE, Sex.FEMALE]);
 
-  await cohortBuildPage.createCohort(name);
+  const cohortName = await cohortBuildPage.createCohort(name);
 
   const cohortActionsPage = new CohortActionsPage(page);
   await cohortActionsPage.waitForLoad();
 
   if (!returnToDataPage) {
-    return name;
+    return cohortName;
   }
 
   await openTab(page, Tabs.Data, dataPage);
   await dataPage.waitForLoad();
-  return name;
+  return cohortName;
 }
 
 // Find an existing cohort or create a cohort.

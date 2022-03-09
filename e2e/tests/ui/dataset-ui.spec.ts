@@ -21,7 +21,7 @@ describe('Dataset UI Test', () => {
 
     // Open one workspace.
     const aWorkspaceCard = fp.shuffle(allWorkspaceCards)[0];
-    await aWorkspaceCard.clickWorkspaceName();
+    await aWorkspaceCard.clickName();
 
     // Click Add Dataset button.
     const dataPage = new WorkspaceDataPage(page);

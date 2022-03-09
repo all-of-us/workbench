@@ -8,7 +8,7 @@ import CdrVersionUpgradeModal from 'app/modal/cdr-version-upgrade-modal';
 import { MenuOption } from 'app/text-labels';
 import Navigation, { NavLink } from 'app/component/navigation';
 import WorkspacesPage from 'app/page/workspaces-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 
 describe('Workspace CDR Version Upgrade modal', () => {
   beforeEach(async () => {
@@ -54,7 +54,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
       workspaceName,
       cdrVersion: config.OLD_CDR_VERSION_NAME
     });
-    await workspaceCard.asElementHandle().hover();
+    await (await workspaceCard.asElement()).hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     // Fill out Workspace Name should be just enough for successful duplication
@@ -84,10 +84,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-
-    // Verify Delete action was successful.
-    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
+    await new WorkspaceCard(page).delete({ name: duplicateWorkspaceName });
   });
 });
 

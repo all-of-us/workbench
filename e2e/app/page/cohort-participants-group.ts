@@ -133,7 +133,7 @@ export default class CohortParticipantsGroup {
   }
 
   async clickGroupSnowmanIcon(): Promise<void> {
-    const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
+    const iconXpath = `${this.rootXpath}${snowmanIconXpath}[not(ancestor::*[@data-test-id="item-list"])]`;
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
   }
 

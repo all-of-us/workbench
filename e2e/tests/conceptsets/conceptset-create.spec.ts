@@ -1,5 +1,4 @@
 import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
-import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
@@ -139,8 +138,6 @@ describe('Create Concept Sets from Domains', () => {
     expect(measurementRowValues.name).toBe(measurementName);
 
     await conceptSearchPage.reviewAndSaveConceptSet();
-
-    // Save
     const conceptSet2 = await conceptSearchPage.saveConceptSet();
 
     // Create new Dataset with two new Concept Sets
@@ -153,10 +150,6 @@ describe('Create Concept Sets from Domains', () => {
     // Verify Dataset created successful.
     await openTab(page, Tabs.Data, dataPage);
     await openTab(page, Tabs.Datasets, dataPage);
-
-    const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(dataSetExists).toBe(true);
 
     // Delete Dataset.
     const textContent = await dataPage.deleteResource(datasetName, ResourceCard.Dataset);

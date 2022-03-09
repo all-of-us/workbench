@@ -3,7 +3,7 @@ import { Tabs } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import BaseElement from './base-element';
-import { waitWhileLoading } from 'utils/waits-utils';
+import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
 import AuthenticatedPage from 'app/page/authenticated-page';
 
@@ -28,5 +28,9 @@ export default class Tab extends BaseElement {
 
   async waitFor(page: AuthenticatedPage): Promise<void> {
     await page.waitForLoad();
+  }
+
+  async waitUntilSelected(): Promise<void> {
+    await waitForFn(async () => await this.isSelected());
   }
 }
