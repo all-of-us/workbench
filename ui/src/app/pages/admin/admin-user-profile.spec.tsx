@@ -10,7 +10,6 @@ import {
   EgressEventsAdminApi,
   InstitutionalRole,
   InstitutionApi,
-  InstitutionTierConfig,
   Profile,
   UserAdminApi,
   UserTierEligibility,
