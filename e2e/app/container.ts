@@ -1,6 +1,5 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
-import * as fp from 'lodash/fp';
 import { LinkText } from 'app/text-labels';
 import Button from 'app/element/button';
 
@@ -47,35 +46,21 @@ export default class Container {
   async clickButton(
     buttonLabel: LinkText,
     waitOptions: {
-      waitForNav?: boolean;
       waitForClose?: boolean;
       timeout?: number;
       waitForLoadingSpinner?: boolean;
     } = {}
   ): Promise<void> {
-    const { waitForNav = false, waitForClose = false, timeout, waitForLoadingSpinner = true } = waitOptions;
+    const { waitForClose = false, timeout, waitForLoadingSpinner = true } = waitOptions;
 
     const button = await this.findButton(buttonLabel);
-    await Promise.all(
-      fp.flow(
-        fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
-        fp.map((item) => item.waitFn()),
-        fp.concat([button.click({ delay: 10 })])
-      )([
-        {
-          shouldWait: waitForNav,
-          waitFn: () => {
-            this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
-          }
-        },
-        {
-          shouldWait: waitForClose,
-          waitFn: () => {
-            this.waitUntilClose(timeout);
-          }
-        }
-      ])
-    );
+    if (waitForClose) {
+      const waitForClosePromise = this.waitUntilClose(timeout);
+      await button.click({ delay: 10 });
+      await waitForClosePromise;
+    } else {
+      await button.click({ delay: 10 });
+    }
     if (waitForLoadingSpinner) {
       await waitWhileLoading(this.page);
     }
