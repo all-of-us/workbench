@@ -125,14 +125,14 @@ public class MailServiceImpl implements MailService {
       final String password,
       final String username,
       final String institutionName,
-      final Boolean rtRequiresEra,
-      final Boolean ctRequiresEra)
+      final Boolean showEraStepInRt,
+      final Boolean showEraStepInCt)
       throws MessagingException {
     final String htmlMessage =
         buildHtml(
             WELCOME_RESOURCE,
             welcomeMessageSubstitutionMap(
-                password, username, institutionName, rtRequiresEra, ctRequiresEra));
+                password, username, institutionName, showEraStepInRt, showEraStepInCt));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -346,8 +346,8 @@ public class MailServiceImpl implements MailService {
       final String password,
       final String username,
       final String institutionName,
-      final Boolean eraRequiredForRT,
-      final Boolean eraRequiredForCT) {
+      final Boolean showEraStepInRT,
+      final Boolean showEraStepInCT) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, username)
@@ -359,26 +359,26 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
         .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
-        .put(EmailSubstitutionField.RT_STEPS, getRTSteps(eraRequiredForRT))
-        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(eraRequiredForCT, institutionName))
+        .put(EmailSubstitutionField.RT_STEPS, getRTSteps(showEraStepInRT))
+        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(showEraStepInCT, institutionName))
         .build();
   }
 
-  private String getRTSteps(Boolean eraRequiredForRT) {
+  private String getRTSteps(Boolean showEraStepInRT) {
     StringBuffer rtSteps = new StringBuffer();
     encloseInLiTag(rtSteps, TWO_STEP_VERIFICATION);
     encloseInLiTag(rtSteps, LOGIN_GOV);
-    if (eraRequiredForRT) {
+    if (showEraStepInRT) {
       encloseInLiTag(rtSteps, ERA_COMMON);
     }
     encloseInLiTag(rtSteps, RT_TRAINING);
     return rtSteps.toString();
   }
 
-  private String getCTSteps(Boolean eraRequiredForCT, String institutionName) {
+  private String getCTSteps(Boolean showEraStepInCT, String institutionName) {
     StringBuffer ctSteps = new StringBuffer();
     encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institutionName));
-    if (eraRequiredForCT) {
+    if (showEraStepInCT) {
       encloseInLiTag(ctSteps, ERA_COMMON);
     }
     encloseInLiTag(ctSteps, CT_TRAINING);

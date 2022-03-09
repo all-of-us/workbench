@@ -295,11 +295,11 @@ public class ProfileController implements ProfileApiDelegate {
           .tiersVisibleToUsers
           .contains(AccessTierService.CONTROLLED_TIER_SHORT_NAME)) {
 
-        boolean eraRequiredForRT =
+        boolean showEraStepInRT =
             eraRequiredForTier(userInstitution, AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
-        boolean eraRequiredForCT =
-            !eraRequiredForRT
+        boolean showEraStepInCT =
+            !showEraStepInRT
                 && eraRequiredForTier(
                     userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
 
@@ -308,8 +308,8 @@ public class ProfileController implements ProfileApiDelegate {
             googleUser.getPassword(),
             user.getUsername(),
             userInstitution.getDisplayName(),
-            eraRequiredForRT,
-            eraRequiredForCT);
+            showEraStepInRT,
+            showEraStepInCT);
       } else {
         mail.sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), user.getUsername());
       }

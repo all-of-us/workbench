@@ -17,8 +17,8 @@ public interface MailService {
       final String password,
       final String username,
       final String institutionName,
-      final Boolean rtRequiresEra,
-      final Boolean ctRequiresEra)
+      final Boolean showEraStepInRt,
+      final Boolean showEraStepInCt)
       throws MessagingException;
 
   void sendInstitutionUserInstructions(
