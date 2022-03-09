@@ -74,7 +74,7 @@ public class MailServiceImplTest {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
     assertThrows(
         MessagingException.class,
-        () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
+        () -> service.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
     verify(mandrillApi, times(1)).send(any());
   }
 
@@ -83,7 +83,7 @@ public class MailServiceImplTest {
     doThrow(ApiException.class).when(mandrillApi).send(any());
     assertThrows(
         MessagingException.class,
-        () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
+        () -> service.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
     verify(mandrillApi, times(3)).send(any());
   }
 
@@ -91,12 +91,12 @@ public class MailServiceImplTest {
   public void testSendWelcomeEmail_invalidEmail() throws MessagingException {
     assertThrows(
         ServerErrorException.class,
-        () -> service.sendWelcomeEmail("Nota valid email", PASSWORD, FULL_USER_NAME));
+        () -> service.sendWelcomeEmail_deprecated("Nota valid email", PASSWORD, FULL_USER_NAME));
   }
 
   @Test
   public void testSendWelcomeEmail() throws MessagingException, ApiException {
-    service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME);
+    service.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME);
     verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
