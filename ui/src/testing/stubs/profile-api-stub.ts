@@ -11,6 +11,8 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
+import { BROAD } from './institution-api-stub';
+
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
     username: 'tester@fake-research-aou.org',
@@ -37,8 +39,8 @@ export class ProfileStubVariables {
       zipCode: '02142',
     },
     verifiedInstitutionalAffiliation: {
-      institutionShortName: 'Broad',
-      institutionDisplayName: 'The Broad Institute',
+      institutionShortName: BROAD.shortName,
+      institutionDisplayName: BROAD.displayName,
       institutionalRoleEnum: InstitutionalRole.FELLOW,
     },
     accessModules: {
