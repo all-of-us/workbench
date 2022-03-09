@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -33,12 +32,10 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.institution.InstitutionUtils;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -290,21 +287,19 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
+      // If CT Is enabled on the environment, send the new welcome emails else send the existing
+      // welcome email
       if (workbenchConfigProvider
           .get()
           .access
           .tiersVisibleToUsers
           .contains(AccessTierService.CONTROLLED_TIER_SHORT_NAME)) {
-        Optional<InstitutionTierConfig> ctTierConfig =
-            InstitutionUtils.getTierConfigByTier(
-                userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
 
         boolean eraRequiredForRT =
             eraRequiredForTier(userInstitution, AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
         boolean eraRequiredForCT =
             !eraRequiredForRT
-                && ctTierConfig.isPresent()
                 && eraRequiredForTier(
                     userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
 

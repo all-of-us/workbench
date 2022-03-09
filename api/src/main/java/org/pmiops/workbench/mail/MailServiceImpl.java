@@ -107,7 +107,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             WELCOME_RESOURCE_OLD,
-            welcomeMessageSubstitutionMap(password, username, "", null, null));
+            welcomeMessageSubstitutionMap(password, username, "", false, false));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -123,14 +123,14 @@ public class MailServiceImpl implements MailService {
       final String password,
       final String username,
       final String institutionName,
-      Boolean rtRequired,
-      final Boolean ctRequired)
+      final Boolean rtRequiresEra,
+      final Boolean ctRequiresEra)
       throws MessagingException {
     final String htmlMessage =
         buildHtml(
             WELCOME_RESOURCE,
             welcomeMessageSubstitutionMap(
-                password, username, institutionName, rtRequired, ctRequired));
+                password, username, institutionName, rtRequiresEra, ctRequiresEra));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -364,26 +364,26 @@ public class MailServiceImpl implements MailService {
 
   private String getRTSteps(Boolean eraRequiredForRT) {
     StringBuffer rtSteps = new StringBuffer();
-    addLiTag(rtSteps, TWO_STEP_VERIFICATION);
-    addLiTag(rtSteps, LOGIN_GOV);
-    if (eraRequiredForRT != null && eraRequiredForRT) {
-      addLiTag(rtSteps, ERA_COMMON);
+    encloseInLiTag(rtSteps, TWO_STEP_VERIFICATION);
+    encloseInLiTag(rtSteps, LOGIN_GOV);
+    if (eraRequiredForRT) {
+      encloseInLiTag(rtSteps, ERA_COMMON);
     }
-    addLiTag(rtSteps, RT_TRAINING);
+    encloseInLiTag(rtSteps, RT_TRAINING);
     return rtSteps.toString();
   }
 
   private String getCTSteps(Boolean eraRequiredForCT, String institution) {
     StringBuffer ctSteps = new StringBuffer();
-    addLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institution));
-    if (eraRequiredForCT != null && eraRequiredForCT) {
-      addLiTag(ctSteps, ERA_COMMON);
+    encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institution));
+    if (eraRequiredForCT) {
+      encloseInLiTag(ctSteps, ERA_COMMON);
     }
-    addLiTag(ctSteps, CT_TRAINING);
+    encloseInLiTag(ctSteps, CT_TRAINING);
     return ctSteps.toString();
   }
 
-  private StringBuffer addLiTag(StringBuffer steps, String step) {
+  private StringBuffer encloseInLiTag(StringBuffer steps, String step) {
     return steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
   }
 
