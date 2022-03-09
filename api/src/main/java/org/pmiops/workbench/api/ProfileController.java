@@ -442,8 +442,12 @@ public class ProfileController implements ProfileApiDelegate {
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
     User googleUser = directoryService.resetUserPassword(username);
     try {
-      Institution userInstitution = institutionService.getByUser(user).get();
-      sendWelcomeEmail(user, googleUser, userInstitution);
+      institutionService
+          .getByUser(user)
+          .ifPresent(
+              userInstitution -> {
+                sendWelcomeEmail(user, googleUser, userInstitution);
+              });
     } catch (WorkbenchException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
