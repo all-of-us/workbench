@@ -518,10 +518,7 @@ WHERE x.type = 'LOINC'
     and x.subtype = 'LAB'
     and x.name = 'Uncategorized'"
 
-#wait for process to end before copying
+## wait for process to end before copying
 wait
-cpToMain "$TBL_CBC" &
-cpToMain "$TBL_PAS" &
-cpToMain "$TBL_PCA" &
-wait
-
+## copy tmp tables back to main tables and delete tmp
+cpToMainAndDeleteTmp "$TBL_CBC" "$TBL_PAS" "$TBL_PCA"
