@@ -32,17 +32,6 @@ export default class ShareModal extends Modal {
     };
     const addIcon = findCollaboratorAddIcon(userName);
 
-    const existsDropDown = async (timeout: number): Promise<boolean> => {
-      return this.page
-        .waitForXPath(this.getEmailsDropdownXpath(), { visible: true, timeout })
-        .then(() => {
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
-    };
-
     const waitForDropDownClose = async (): Promise<void> => {
       await waitWhileLoading(this.page);
       await this.page.waitForXPath(this.getEmailsDropdownXpath(), { hidden: true, visible: false });
@@ -71,7 +60,7 @@ export default class ShareModal extends Modal {
         await input.type(chars, { delay: 0 });
         // Wait for GET /userSearch request to finish. Sometimes it takes several seconds.
         await waitForResponsePromise;
-        if (await existsDropDown(timeout)) {
+        if (await this.existsUsersDropdown(timeout)) {
           if (await addIcon.exists(1000)) {
             await addIcon.click();
             // Test playback runs fast. Wait until dropdown disappears so it is not interfering with next click.
@@ -138,7 +127,7 @@ export default class ShareModal extends Modal {
     return this.page.waitForXPath(`//*[starts-with(@id,"react-select") and text()="${levelText}"]`, { visible: true });
   }
 
-  async existsUser(email: string): Promise<boolean> {
+  async userExists(email: string): Promise<boolean> {
     const timeout = 10000;
     const noSearchResultsXpath =
       this.getXpath() + '//*[@data-test-id="drop-down"]//*[text()="No results based on your search"]';

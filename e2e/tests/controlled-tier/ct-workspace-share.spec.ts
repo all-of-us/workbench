@@ -13,7 +13,7 @@ import DataAccessRequirementsPage from 'app/page/data-access-requirements-page';
 
 describe('Share Controlled Tier Workspace', () => {
   const hasCTAccessUser = config.WRITER_USER;
-  const notCTUser = config.EGRESS_TEST_USER;
+  const notCTUser = config.EGRESS_TEST_USER; // Without CT access
 
   const workspaceName = makeRandomName('e2eShareControlledTierWorkspace');
 
@@ -56,9 +56,10 @@ describe('Share Controlled Tier Workspace', () => {
     let shareModal = new ShareModal(page);
     await shareModal.waitForLoad();
 
-    // User without CT access cannot be found in Share modal.
-    const userFound = await shareModal.existsUser(notCTUser);
+    // Search for user without CT access returns empty result in Share modal.
+    const userFound = await shareModal.userExists(notCTUser);
     expect(userFound).toBe(false);
+
     await shareModal.clickButton(LinkText.Cancel, { waitForClose: true });
     await waitWhileLoading(page);
 
@@ -68,25 +69,28 @@ describe('Share Controlled Tier Workspace', () => {
     await shareModal.shareWithUser(hasCTAccessUser, WorkspaceAccessLevel.Writer);
   });
 
-  test('Writer with CT access can access CT workspace', async () => {
+  test('Writer can open and duplicate CT workspace', async () => {
     await signInWithAccessToken(page, hasCTAccessUser);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspaceName);
-    const accessLevel = await workspaceCard.getAccessLevel();
 
-    // Verify Snowman menu: Share, Edit, Duplicate and Delete actions are disabled
+    expect(await workspaceCard.controlledTiersIconExists()).toBe(true);
+
+    const accessLevel = await workspaceCard.getAccessLevel();
     expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
+
+    // Verify Snowman menu: Share, Edit and Delete actions are disabled.
     await workspaceCard.verifyWorkspaceCardMenuOptions(WorkspaceAccessLevel.Writer);
 
     const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
 
     const collaboratorList = await aboutPage.findUsersInCollaboratorList();
-    // Verify OWNER first in Collaborators list
+    // Verify OWNER exists in Collaborators list
     expect(collaboratorList.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
       true
     );
-    // Verify WRITER next Collaborators list
+    // Verify WRITER exists Collaborators list
     expect(collaboratorList.get(WorkspaceAccessLevel.Writer).some((item) => item.includes(hasCTAccessUser))).toBe(true);
   });
 });

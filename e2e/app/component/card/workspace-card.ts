@@ -103,6 +103,16 @@ export default class WorkspaceCard extends BaseCard {
     return wholeText.replace('Last Changed: ', '').trim();
   }
 
+  async controlledTiersIconExists(): Promise<boolean> {
+    const xpath = `${this.getXpath()}//*[local-name()="svg" and child::*[text()="Controlled Tier"]]`;
+    try {
+      await this.page.waitForXPath(xpath, { visible: true, timeout: 1000 });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
   /**
    * Delete workspace via Workspace card "Delete" dropdown menu option.
    */
