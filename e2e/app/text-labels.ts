@@ -1,5 +1,6 @@
 import { config } from 'resources/workbench-config';
 import { IPageUrl } from 'types';
+
 const { LOGIN_URL_DOMAIN_NAME, WORKSPACES_URL_PATH, ADMIN_URL_PATH, PROFILE_URL_PATH } = config;
 
 export const PageUrl: IPageUrl = {
@@ -102,6 +103,7 @@ export enum LinkText {
   ExtractAndContinue = 'Extract & Continue',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
+  GetStarted = 'Get Started',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
