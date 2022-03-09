@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { DataSet, GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import {
   Modal,
@@ -20,6 +20,7 @@ import {
   updateGenomicExtractionStore,
   useStore,
 } from 'app/utils/stores';
+import { supportUrls } from 'app/utils/zendesk';
 import moment from 'moment';
 
 const { useState } = React;
@@ -112,9 +113,16 @@ export const GenomicExtractionModal = ({
             <span style={{ fontWeight: 600 }}>
               Note: VCF extraction will incur cloud cost{' '}
             </span>
-            (billed as BigQuery analysis). Extraction typically costs{' '}
+            . Extraction typically costs{' '}
             <span style={{ fontWeight: 600 }}>$.02 per extracted sample</span>,
-            but costs may vary.
+            but costs may vary.{' '}
+            <StyledExternalLink
+              href={supportUrls.genomicExtraction}
+              target='_blank'
+            >
+              Find out more about genomic extraction and costs
+            </StyledExternalLink>
+            .
           </span>
         </TextColumn>
       </ModalBody>
