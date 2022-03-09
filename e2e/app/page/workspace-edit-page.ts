@@ -487,7 +487,6 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     const modalTextContent = await modal.getTextContent();
     await modal.clickButton(LinkText.Confirm, {
       waitForClose: true,
-      waitForNav: true,
       waitForLoadingSpinner: false,
       timeout: 3 * 60 * 1000
     });

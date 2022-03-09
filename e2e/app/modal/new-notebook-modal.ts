@@ -35,7 +35,6 @@ export default class NewNotebookModal extends Modal {
     await radio.select();
     return this.clickButton(LinkText.CreateNotebook, {
       waitForClose: true,
-      waitForNav: true,
       waitForLoadingSpinner: false
     });
   }

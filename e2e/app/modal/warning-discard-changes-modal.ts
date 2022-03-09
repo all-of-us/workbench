@@ -17,13 +17,13 @@ export default class WarningDiscardChangesModal extends Modal {
 
   async clickDiscardChangesButton(): Promise<string[]> {
     const contentText = await this.getTextContent();
-    await this.clickButton(LinkText.DiscardChanges, { waitForNav: true, waitForClose: true });
+    await this.clickButton(LinkText.DiscardChanges, { waitForClose: true });
     return contentText;
   }
 
   async clickYesDeleteButton(): Promise<string[]> {
     const contentText = await this.getTextContent();
-    await this.clickButton(LinkText.YesDelete, { waitForNav: false, waitForClose: true });
+    await this.clickButton(LinkText.YesDelete, { waitForClose: true });
     return contentText;
   }
 }

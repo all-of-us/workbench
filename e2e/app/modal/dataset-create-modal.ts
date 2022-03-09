@@ -34,7 +34,7 @@ export default class DatasetCreateModal extends Modal {
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
-    await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
+    await this.clickButton(LinkText.Save, { waitForClose: true });
     await waitWhileLoading(this.page);
 
     logger.info(`Created Dataset "${newDatasetName}"`);
