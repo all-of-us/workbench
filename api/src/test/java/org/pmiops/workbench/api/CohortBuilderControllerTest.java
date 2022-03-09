@@ -69,7 +69,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -140,22 +139,6 @@ public class CohortBuilderControllerTest {
     dbWorkspace.setName("Saved workspace");
     dbWorkspace.setFirecloudName(WORKSPACE_ID);
     dbWorkspace.setCdrVersion(cdrVersion);
-  }
-
-  @Test
-  public void testUniversalSearch_feature() {
-    workbenchConfig.featureFlags.enableUniversalSearch = false;
-    assertThat(
-        controller
-            .isEnabledUniversalSearch()
-            .getStatusCode())
-        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
-    workbenchConfig.featureFlags.enableUniversalSearch = true;
-    assertThat(
-        controller
-            .isEnabledUniversalSearch()
-            .getStatusCode())
-        .isEqualTo(HttpStatus.OK);
   }
 
   @Test
