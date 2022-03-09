@@ -258,15 +258,17 @@ public class ProfileController implements ProfileApiDelegate {
 
     userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
     String institutionShortName =
-        request.getProfile().getVerifiedInstitutionalAffiliation().getInstitutionShortName();
-    Institution institution = institutionService.getInstitution(institutionShortName).get();
-
-    sendWelcomeEmail(user, googleUser, institution);
+        profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();
+    institutionService
+        .getInstitution(institutionShortName)
+        .ifPresent(
+            institution -> {
+              sendWelcomeEmail(user, googleUser, institution);
+            });
 
     final MailService mail = mailServiceProvider.get();
     institutionService
-        .getInstitutionUserInstructions(
-            profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
+        .getInstitutionUserInstructions(institutionShortName)
         .ifPresent(
             instructions -> {
               try {
