@@ -476,6 +476,8 @@ describe('AdminUserProfile', () => {
     ).toEqual(TARGET_USER_PROFILE.freeTierDollarQuota);
 
     const newLimit = 800.0;
+    expect(newLimit).not.toEqual(TARGET_USER_PROFILE.freeTierDollarQuota); // sanity check
+
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'initial-credits-dropdown'),
