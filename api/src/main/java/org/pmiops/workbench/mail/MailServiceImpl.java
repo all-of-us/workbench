@@ -100,6 +100,8 @@ public class MailServiceImpl implements MailService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
+  // This will be called for all the environments were Controlled Tier is not enabled
+  // We can delete this method once CT is enabled on all enivornment for some time
   @Override
   public void sendWelcomeEmail(
       final String contactEmail, final String password, final String username)
