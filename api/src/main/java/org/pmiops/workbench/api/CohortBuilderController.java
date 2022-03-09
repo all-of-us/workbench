@@ -32,6 +32,7 @@ import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,6 +55,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.configProvider = configProvider;
     this.cohortBuilderService = cohortBuilderService;
     this.workspaceAuthService = workspaceAuthService;
+  }
+
+  public ResponseEntity<String> isEnabledUniversalSearch() {
+    if (!configProvider.get().featureFlags.enableUniversalSearch) {
+      System.out.println("Not yet implemented");
+      return new ResponseEntity<String>("Not yet implemented", HttpStatus.NOT_IMPLEMENTED);
+    }
+    System.out.println("Is implemented");
+    return new ResponseEntity<String>("Is implemented", HttpStatus.OK);
   }
 
   @Override

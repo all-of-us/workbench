@@ -66,7 +66,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -75,6 +78,7 @@ import org.springframework.test.annotation.DirtiesContext;
 public class CohortBuilderControllerTest {
 
   private CohortBuilderController controller;
+  private static WorkbenchConfig workbenchConfig;
 
   @Mock private BigQueryService bigQueryService;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
@@ -87,14 +91,20 @@ public class CohortBuilderControllerTest {
   @Autowired private SurveyModuleDao surveyModuleDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
+  @Autowired private Provider<WorkbenchConfig> configProvider;
   @Mock private WorkspaceAuthService workspaceAuthService;
-  @Mock private Provider<WorkbenchConfig> configProvider;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CohortBuilderMapperImpl.class})
   @MockBean({WorkspaceAuthService.class})
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    @Scope("prototype")
+    WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
+  }
 
   private static final String WORKSPACE_ID = "workspaceId";
   private static final String WORKSPACE_NAMESPACE = "workspaceNS";
@@ -115,6 +125,9 @@ public class CohortBuilderControllerTest {
             surveyModuleDao,
             cohortBuilderMapper,
             mySQLStopWordsProvider);
+
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+
     controller =
         new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
 
@@ -127,6 +140,22 @@ public class CohortBuilderControllerTest {
     dbWorkspace.setName("Saved workspace");
     dbWorkspace.setFirecloudName(WORKSPACE_ID);
     dbWorkspace.setCdrVersion(cdrVersion);
+  }
+
+  @Test
+  public void testUniversalSearch_feature() {
+    workbenchConfig.featureFlags.enableUniversalSearch = false;
+    assertThat(
+        controller
+            .isEnabledUniversalSearch()
+            .getStatusCode())
+        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
+    workbenchConfig.featureFlags.enableUniversalSearch = true;
+    assertThat(
+        controller
+            .isEnabledUniversalSearch()
+            .getStatusCode())
+        .isEqualTo(HttpStatus.OK);
   }
 
   @Test
