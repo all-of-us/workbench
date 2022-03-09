@@ -343,7 +343,7 @@ public class MailServiceImpl implements MailService {
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
       final String password,
       final String username,
-      final String institution,
+      final String institutionName,
       final Boolean eraRequiredForRT,
       final Boolean eraRequiredForCT) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
@@ -358,7 +358,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
         .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
         .put(EmailSubstitutionField.RT_STEPS, getRTSteps(eraRequiredForRT))
-        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(eraRequiredForCT, institution))
+        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(eraRequiredForCT, institutionName))
         .build();
   }
 
@@ -373,9 +373,9 @@ public class MailServiceImpl implements MailService {
     return rtSteps.toString();
   }
 
-  private String getCTSteps(Boolean eraRequiredForCT, String institution) {
+  private String getCTSteps(Boolean eraRequiredForCT, String institutionName) {
     StringBuffer ctSteps = new StringBuffer();
-    encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institution));
+    encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institutionName));
     if (eraRequiredForCT) {
       encloseInLiTag(ctSteps, ERA_COMMON);
     }
