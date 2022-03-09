@@ -116,6 +116,25 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 8,
+      "name": "All of Us Controlled Tier Dataset v5",
+      "isDefault": true,
+      "bigqueryProject": "fc-aou-cdr-prod-ct",
+      "bigqueryDataset": "C2021Q3R6",
+      "creationTime": "2021-08-10 00:00:00Z",
+      "releaseNumber": 6,
+      "numParticipants": 331382,
+      "cdrDbName": "c_2021q3_9",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "controlled",
+      "storageBasePath": "v5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsHailStoragePath": "wgs/hail.mt",
+      "microarrayHailStoragePath": "microarray/hail.mt",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
     }
   ]
 }
