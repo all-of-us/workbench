@@ -256,13 +256,18 @@ public class ProfileController implements ProfileApiDelegate {
     userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
     String institutionShortName =
         profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();
-    institutionService
-        .getInstitution(institutionShortName)
-        .ifPresent(
-            institution -> {
-              sendWelcomeEmail(user, googleUser, institution);
-            });
-
+    try {
+      Institution userInstitution =
+          institutionService
+              .getInstitution(institutionShortName)
+              .orElseThrow(() -> new BadRequestException("User Institution cannot be found"));
+      sendWelcomeEmail(user, googleUser, userInstitution);
+    } catch (BadRequestException ex) {
+      log.log(
+          Level.SEVERE,
+          "Exception while resending sending welcome email: " + ex.getLocalizedMessage());
+      throw ex;
+    }
     final MailService mail = mailServiceProvider.get();
     institutionService
         .getInstitutionUserInstructions(institutionShortName)
@@ -311,7 +316,8 @@ public class ProfileController implements ProfileApiDelegate {
             showEraStepInRT,
             showEraStepInCT);
       } else {
-        mail.sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), user.getUsername());
+        mail.sendWelcomeEmail_deprecated(
+            user.getContactEmail(), googleUser.getPassword(), user.getUsername());
       }
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
@@ -442,12 +448,16 @@ public class ProfileController implements ProfileApiDelegate {
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
     User googleUser = directoryService.resetUserPassword(username);
     try {
-      institutionService
-          .getByUser(user)
-          .ifPresent(
-              userInstitution -> {
-                sendWelcomeEmail(user, googleUser, userInstitution);
-              });
+      Institution userInstitution =
+          institutionService
+              .getByUser(user)
+              .orElseThrow(() -> new BadRequestException("User Institution cannot be found"));
+      sendWelcomeEmail(user, googleUser, userInstitution);
+    } catch (BadRequestException ex) {
+      log.log(
+          Level.SEVERE,
+          "Exception while resending sending welcome email: " + ex.getLocalizedMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (WorkbenchException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

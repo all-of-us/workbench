@@ -9,7 +9,8 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
-  void sendWelcomeEmail(final String contactEmail, final String password, final String username)
+  void sendWelcomeEmail_deprecated(
+      final String contactEmail, final String password, final String username)
       throws MessagingException;
 
   void sendWelcomeEmail(

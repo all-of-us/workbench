@@ -54,7 +54,8 @@ public class MailServiceImpl implements MailService {
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
-  private static final String WELCOME_RESOURCE_OLD = "emails/welcomeemail/content_existing.html";
+  private static final String WELCOME_RESOURCE_DEPRECATED =
+      "emails/welcomeemail/content_deprecated.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
@@ -103,12 +104,12 @@ public class MailServiceImpl implements MailService {
   // This will be called for all the environments were Controlled Tier is not enabled
   // We can delete this method once CT is enabled on all enivornment for some time
   @Override
-  public void sendWelcomeEmail(
+  public void sendWelcomeEmail_deprecated(
       final String contactEmail, final String password, final String username)
       throws MessagingException {
     final String htmlMessage =
         buildHtml(
-            WELCOME_RESOURCE_OLD,
+            WELCOME_RESOURCE_DEPRECATED,
             welcomeMessageSubstitutionMap(password, username, "", false, false));
 
     sendWithRetries(

@@ -244,7 +244,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     super.setUp();
 
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
-    config.access.tiersVisibleToUsers = Arrays.asList("registered");
+    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -892,14 +892,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any());
+        .sendWelcomeEmail_deprecated(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService, times(2)).sendWelcomeEmail_deprecated(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -907,14 +907,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void resendWelcomeEmail_OK() throws MessagingException {
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
+    doNothing().when(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService, times(2)).sendWelcomeEmail_deprecated(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -922,7 +922,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void sendUserInstructions_none() throws MessagingException {
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
     verifyNoMoreInteractions(mockMailService);
@@ -941,7 +941,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
     verify(mockMailService)
         .sendInstitutionUserInstructions(
             CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
@@ -962,7 +962,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
     verifyNoMoreInteractions(mockMailService);
