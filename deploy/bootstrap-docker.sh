@@ -6,18 +6,8 @@ if [[ -z "${WORKBENCH_VERSION}" ]]; then
   exit 1
 fi
 
-# Coerce some of the volume permissions to be available to our docker user
-# "circleci" (group "circleci"). Use group for this creds file as the calling
-# script will want to maintain ownership to delete it afterwards.
-sudo chgrp circleci /creds/sa-key.json
-sudo chmod g+r /creds/sa-key.json
-sudo chown -R circleci ~/.gradle
-sudo mkdir -p ~/.cache/yarn
-sudo chown -R circleci ~/.cache
-
 if [[ ! -d ~/workbench/.git ]]; then
-  sudo git clone https://github.com/all-of-us/workbench ~/workbench
-  sudo chown -R circleci ~/workbench
+  git clone https://github.com/all-of-us/workbench ~/workbench
 fi
 cd ~/workbench
 

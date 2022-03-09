@@ -1,9 +1,9 @@
 version: "3"
 services:
   deploy:
-    image: allofustest/workbench:buildimage-0.0.23
+    build:
+      context: .
     entrypoint: /bootstrap-docker.sh
-    user: circleci
     environment:
       # Required: a GitHub release git tag, e.g. v1-0-rc1
       - WORKBENCH_VERSION

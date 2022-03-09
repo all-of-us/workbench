@@ -743,7 +743,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     WorkspaceOperation operation = workspacesController.createWorkspaceAsync(workspace).getBody();
     assertThat(operation.getId()).isNotNull();
-    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.PENDING);
+    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.QUEUED);
     assertThat(operation.getWorkspace()).isNull();
   }
 
@@ -787,7 +787,7 @@ public class WorkspacesControllerTest {
             .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getId(), request)
             .getBody();
     assertThat(operation.getId()).isNotNull();
-    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.PENDING);
+    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.QUEUED);
     assertThat(operation.getWorkspace()).isNull();
   }
 
@@ -823,15 +823,15 @@ public class WorkspacesControllerTest {
         workspaceOperationDao.save(
             new DbWorkspaceOperation()
                 .setCreatorId(currentUser.getUserId())
-                .setStatus(DbWorkspaceOperationStatus.PENDING));
+                .setStatus(DbWorkspaceOperationStatus.SUCCESS));
     assertThat(dbOperation.getId()).isNotNull();
-    assertThat(dbOperation.getStatus()).isEqualTo(DbWorkspaceOperationStatus.PENDING);
+    assertThat(dbOperation.getStatus()).isEqualTo(DbWorkspaceOperationStatus.SUCCESS);
     assertThat(dbOperation.getWorkspaceId()).isNull();
 
     WorkspaceOperation operation =
         workspacesController.getWorkspaceOperation(dbOperation.getId()).getBody();
     assertThat(operation.getId()).isEqualTo(dbOperation.getId());
-    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.PENDING);
+    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation.getWorkspace()).isNull();
   }
 
@@ -904,7 +904,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     WorkspaceOperation operation = workspacesController.createWorkspaceAsync(workspace).getBody();
     assertThat(operation.getId()).isNotNull();
-    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.PENDING);
+    assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.QUEUED);
     assertThat(operation.getWorkspace()).isNull();
 
     WorkspaceOperation operation2 =
