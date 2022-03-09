@@ -1,6 +1,7 @@
 import {
   AdminUserListResponse,
   EmptyResponse,
+  Profile,
   UserAdminApi,
 } from 'generated/fetch';
 
@@ -27,5 +28,9 @@ export class UserAdminApiStub extends UserAdminApi {
         },
       ],
     });
+  }
+
+  public getUserByUsername(): Promise<Profile> {
+    return Promise.resolve(this.profile);
   }
 }
