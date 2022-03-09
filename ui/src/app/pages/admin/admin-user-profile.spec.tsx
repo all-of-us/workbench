@@ -10,8 +10,10 @@ import {
   EgressEventsAdminApi,
   InstitutionalRole,
   InstitutionApi,
+  InstitutionTierConfig,
   Profile,
   UserAdminApi,
+  UserTierEligibility,
 } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -653,5 +655,142 @@ describe('AdminUserProfile', () => {
         findNodesContainingText(moduleRow, adminPageTitle).exists()
       ).toBeTruthy();
     });
+  });
+
+  test.each([
+    [
+      'RT only',
+      [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: true,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: false,
+        },
+      ],
+      'Registered Tier',
+      true,
+      false,
+    ],
+    [
+      'CT only',
+      [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: false,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+        },
+      ],
+      'Controlled Tier',
+      false,
+      true,
+    ],
+    [
+      'RT and CT',
+      [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: true,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+        },
+      ],
+      'Registered Tier and Controlled Tier',
+      true,
+      true,
+    ],
+  ])(
+    'should indicate when eRA Commons is required for %s',
+    async (
+      _,
+      tierEligibilities: UserTierEligibility[],
+      footerText: string,
+      rtBadgeExpected: boolean,
+      ctBadgeExpected: boolean
+    ) => {
+      updateTargetProfile({
+        tierEligibilities,
+      });
+
+      const wrapper = component();
+      expect(wrapper).toBeTruthy();
+      await waitOneTickAndUpdate(wrapper);
+
+      const moduleTable = wrapper.find('[data-test-id="access-module-table"]');
+      expect(
+        findNodesContainingText(
+          moduleTable,
+          `requires eRA Commons for ${footerText} access`
+        ).exists()
+      ).toBeTruthy();
+
+      const tableRows = moduleTable.find('.p-datatable-row');
+      expect(tableRows.length).toEqual(accessModulesForTable.length);
+
+      // a previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
+
+      const eraRow = tableRows.at(
+        accessModulesForTable.indexOf(AccessModule.ERACOMMONS)
+      );
+      const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
+
+      expect(
+        findNodesContainingText(eraBadges, 'registered-tier-badge.svg').exists()
+      ).toBe(rtBadgeExpected);
+      expect(
+        findNodesContainingText(eraBadges, 'controlled-tier-badge.svg').exists()
+      ).toBe(ctBadgeExpected);
+    }
+  );
+
+  it('should indicate when eRA Commons is required for RT and CT', async () => {
+    updateTargetProfile({
+      tierEligibilities: [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: true,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+        },
+      ],
+    });
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    const moduleTable = wrapper.find('[data-test-id="access-module-table"]');
+    expect(
+      findNodesContainingText(
+        moduleTable,
+        'requires eRA Commons for Registered Tier and Controlled Tier access'
+      ).exists()
+    ).toBeTruthy();
+
+    const tableRows = moduleTable.find('.p-datatable-row');
+    expect(tableRows.length).toEqual(accessModulesForTable.length);
+
+    // a previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
+
+    const eraRow = tableRows.at(
+      accessModulesForTable.indexOf(AccessModule.ERACOMMONS)
+    );
+    const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
+
+    expect(
+      findNodesContainingText(eraBadges, 'registered-tier-badge.svg').exists()
+    ).toBeTruthy();
+    expect(
+      findNodesContainingText(eraBadges, 'controlled-tier-badge.svg').exists()
+    ).toBeTruthy();
   });
 });
