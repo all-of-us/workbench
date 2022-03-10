@@ -54,6 +54,8 @@ public class MailServiceImpl implements MailService {
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
+  private static final String WELCOME_RESOURCE_DEPRECATED =
+      "emails/welcomeemail/content_deprecated.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
@@ -69,6 +71,19 @@ public class MailServiceImpl implements MailService {
       "emails/egress_remediation_email/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_EMAIL =
       "emails/workspace_admin_locking_email/content.html";
+
+  private static final String OPEN_LI_TAG = "<li>";
+  private static final String CLOSE_LI_TAG = "</li>";
+
+  // RT Steps
+  private static final String TWO_STEP_VERIFICATION = "Turn on Google 2-Step Verification";
+  private static final String CT_INSTITUTION_CHECK = "Check that %s allows Controlled Tier access";
+  private static final String ERA_COMMON = "Connect your eRA Commons account";
+  private static final String RT_TRAINING = "Complete All of Us Registered Tier Training";
+  private static final String LOGIN_GOV = "Verify your identity with Login.gov";
+
+  // CT Steps
+  private static final String CT_TRAINING = "Complete All of Us Controlled Tier Training";
 
   private enum Status {
     REJECTED,
@@ -86,13 +101,39 @@ public class MailServiceImpl implements MailService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
+  // This will be called for all the environments were Controlled Tier is not enabled
+  // We can delete this method once CT is enabled on all enivornment for some time
   @Override
-  public void sendWelcomeEmail(
+  public void sendWelcomeEmail_deprecated(
       final String contactEmail, final String password, final String username)
       throws MessagingException {
-
     final String htmlMessage =
-        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, username));
+        buildHtml(
+            WELCOME_RESOURCE_DEPRECATED,
+            welcomeMessageSubstitutionMap(password, username, "", false, false));
+
+    sendWithRetries(
+        Collections.singletonList(contactEmail),
+        Collections.emptyList(),
+        "Your new All of Us Researcher Workbench Account",
+        String.format("Welcome for %s", username),
+        htmlMessage);
+  }
+
+  @Override
+  public void sendWelcomeEmail(
+      final String contactEmail,
+      final String password,
+      final String username,
+      final String institutionName,
+      final Boolean showEraStepInRt,
+      final Boolean showEraStepInCt)
+      throws MessagingException {
+    final String htmlMessage =
+        buildHtml(
+            WELCOME_RESOURCE,
+            welcomeMessageSubstitutionMap(
+                password, username, institutionName, showEraStepInRt, showEraStepInCt));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -303,7 +344,11 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
-      final String password, final String username) {
+      final String password,
+      final String username,
+      final String institutionName,
+      final Boolean showEraStepInRT,
+      final Boolean showEraStepInCT) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, username)
@@ -315,7 +360,34 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
         .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
+        .put(EmailSubstitutionField.RT_STEPS, getRTSteps(showEraStepInRT))
+        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(showEraStepInCT, institutionName))
         .build();
+  }
+
+  private String getRTSteps(Boolean showEraStepInRT) {
+    StringBuffer rtSteps = new StringBuffer();
+    encloseInLiTag(rtSteps, TWO_STEP_VERIFICATION);
+    encloseInLiTag(rtSteps, LOGIN_GOV);
+    if (showEraStepInRT) {
+      encloseInLiTag(rtSteps, ERA_COMMON);
+    }
+    encloseInLiTag(rtSteps, RT_TRAINING);
+    return rtSteps.toString();
+  }
+
+  private String getCTSteps(Boolean showEraStepInCT, String institutionName) {
+    StringBuffer ctSteps = new StringBuffer();
+    encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institutionName));
+    if (showEraStepInCT) {
+      encloseInLiTag(ctSteps, ERA_COMMON);
+    }
+    encloseInLiTag(ctSteps, CT_TRAINING);
+    return ctSteps.toString();
+  }
+
+  private StringBuffer encloseInLiTag(StringBuffer steps, String step) {
+    return steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(

@@ -11,6 +11,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -252,18 +254,23 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
-
-    final MailService mail = mailServiceProvider.get();
-
+    String institutionShortName =
+        profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();
     try {
-      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), gSuiteUsername);
-    } catch (MessagingException e) {
-      throw new WorkbenchException(e);
+      Institution userInstitution =
+          institutionService
+              .getInstitution(institutionShortName)
+              .orElseThrow(() -> new BadRequestException("User Institution cannot be found"));
+      sendWelcomeEmail(user, googleUser, userInstitution);
+    } catch (BadRequestException ex) {
+      log.log(
+          Level.SEVERE,
+          "Exception while resending sending welcome email: " + ex.getLocalizedMessage());
+      throw ex;
     }
-
+    final MailService mail = mailServiceProvider.get();
     institutionService
-        .getInstitutionUserInstructions(
-            profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
+        .getInstitutionUserInstructions(institutionShortName)
         .ifPresent(
             instructions -> {
               try {
@@ -278,6 +285,47 @@ public class ProfileController implements ProfileApiDelegate {
     final Profile createdProfile = profileService.getProfile(user);
     profileAuditor.fireCreateAction(createdProfile);
     return ResponseEntity.ok(createdProfile);
+  }
+
+  private void sendWelcomeEmail(DbUser user, User googleUser, Institution userInstitution) {
+
+    final MailService mail = mailServiceProvider.get();
+
+    try {
+      // If CT Is enabled on the environment, send the new welcome emails else send the existing
+      // welcome email
+      if (workbenchConfigProvider
+          .get()
+          .access
+          .tiersVisibleToUsers
+          .contains(AccessTierService.CONTROLLED_TIER_SHORT_NAME)) {
+
+        boolean showEraStepInRT =
+            eraRequiredForTier(userInstitution, AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+        boolean showEraStepInCT =
+            !showEraStepInRT
+                && eraRequiredForTier(
+                    userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
+
+        mail.sendWelcomeEmail(
+            user.getContactEmail(),
+            googleUser.getPassword(),
+            user.getUsername(),
+            userInstitution.getDisplayName(),
+            showEraStepInRT,
+            showEraStepInCT);
+      } else {
+        mail.sendWelcomeEmail_deprecated(
+            user.getContactEmail(), googleUser.getPassword(), user.getUsername());
+      }
+    } catch (MessagingException e) {
+      throw new WorkbenchException(e);
+    }
+  }
+
+  private boolean eraRequiredForTier(Institution institution, String tierShortName) {
+    return institutionService.eRaRequiredForTier(institution, tierShortName);
   }
 
   @Override
@@ -400,10 +448,17 @@ public class ProfileController implements ProfileApiDelegate {
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
     User googleUser = directoryService.resetUserPassword(username);
     try {
-      mailServiceProvider
-          .get()
-          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), user.getUsername());
-    } catch (MessagingException e) {
+      Institution userInstitution =
+          institutionService
+              .getByUser(user)
+              .orElseThrow(() -> new BadRequestException("User Institution cannot be found"));
+      sendWelcomeEmail(user, googleUser, userInstitution);
+    } catch (BadRequestException ex) {
+      log.log(
+          Level.SEVERE,
+          "Exception while resending sending welcome email: " + ex.getLocalizedMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (WorkbenchException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

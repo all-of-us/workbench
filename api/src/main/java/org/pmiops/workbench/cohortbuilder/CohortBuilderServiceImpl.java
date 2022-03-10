@@ -529,7 +529,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return Domain.SURVEY.equals(Domain.fromValue(domain));
   }
 
-  private String modifyTermMatch(String term) {
+  protected String modifyTermMatch(String term) {
     term = removeStopWords(term);
     if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
       // doesn't start with special char so find exact match

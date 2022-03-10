@@ -1,16 +1,9 @@
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {
-  AgeSelectionRadioButton,
-  AnalysisTool,
-  ConceptSetSelectValue,
-  DatasetValueSelect,
-  Language,
-  LinkText
-} from 'app/text-labels';
+import { AgeSelectionRadioButton, AnalysisTool, ConceptSets, DataSets, Language, LinkText } from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { makeRandomName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import RuntimePanel, { AutoPauseIdleTime, ComputeType } from 'app/sidebar/runtime-panel';
@@ -31,13 +24,13 @@ describe('Genomics Extraction Test', () => {
   });
 
   const maxWaitTime = 50 * 60 * 1000;
-  const workspaceName = makeWorkspaceName();
+  const workspaceName = 'e2eGenomicExtractionToVcfTest';
   const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
-    await createWorkspace(page, {
+    await findOrCreateWorkspace(page, {
       workspaceName,
-      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      cdrVersion: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
     });
 
@@ -77,13 +70,13 @@ describe('Genomics Extraction Test', () => {
     // Step 1: select user created cohort.
     await datasetPage.selectCohorts([cohortName]);
     // Step 2: select "All whole genome sequence variant data".
-    await datasetPage.selectConceptSets([ConceptSetSelectValue.WholeGenomeSequenceVariantData]);
+    await datasetPage.selectConceptSets([ConceptSets.WholeGenomeSequenceVariantData]);
     // Step 3: make sure "VCF Files(s)" is selected.
-    await datasetPage.selectValues([DatasetValueSelect.VCFFile]);
+    await datasetPage.selectValues([DataSets.VCFFile]);
 
     // Save dataset.
     const createModal = await datasetPage.clickCreateButton();
-    const datasetName = await createModal.createDataset();
+    const datasetName = await createModal.create();
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // CREATING NOTEBOOK RUNTIME.

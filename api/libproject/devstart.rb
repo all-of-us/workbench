@@ -80,9 +80,11 @@ def start_local_db_service()
   bm = Benchmark.measure {
     common.run_inline %W{docker-compose up -d db}
 
+    root_pass = Workbench.read_vars_file("db/vars.env")["MYSQL_ROOT_PASSWORD"]
+
     common.status "waiting up to #{deadlineSec}s for mysql service to start..."
     start = Time.now
-    until (common.run %W{docker-compose exec -T db mysqladmin ping --silent}).success?
+    until (common.run "docker-compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
       if Time.now - start >= deadlineSec
         raise("mysql docker service did not become available after #{deadlineSec}s")
       end
@@ -1098,77 +1100,6 @@ Common.register_command({
   :fn => ->(*args) { build_cb_criteria_full_text_synonym("build-cb-criteria-full-text-synonym", *args) }
 })
 
-def circle_build_cdr_indices(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.opts.branch = "main"
-  op.add_option(
-    "--branch [--branch]",
-    ->(opts, v) { opts.branch = v},
-    "Branch. Optional - Default is main."
-  )
-  op.add_option(
-    "--project [--project]",
-    ->(opts, v) { opts.project = v},
-    "Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--wgv-project [wgv-project]",
-    ->(opts, v) { opts.wgv_project = v},
-    "Whole genome variant project."
-  )
-  op.add_option(
-    "--wgv-dataset [wgv-dataset]",
-    ->(opts, v) { opts.wgv_dataset = v},
-    "Whole genome variant dataset."
-  )
-  op.add_option(
-    "--wgv-table [wgv-table]",
-    ->(opts, v) { opts.wgv_table = v},
-    "Whole genome variant table."
-  )
-  op.add_option(
-    "--cdr-version [cdr-version]",
-    ->(opts, v) { opts.cdr_version = v},
-    "CDR version. Required."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
-  )
-  op.add_option(
-      "--array-table [array-table]",
-      ->(opts, v) { opts.array_table = v},
-      "Array table."
-    )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version }
-  op.parse.validate
-
-  env = ENVIRONMENTS[op.opts.project]
-  cdr_source = env.fetch(:source_cdr_project)
-  if op.opts.data_browser
-    cdr_source = "aou-res-curation-prod"
-  end
-  common = Common.new
-  content_type = "Content-Type: application/json"
-  accept = "Accept: application/json"
-  circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"array_source_table\": \"#{op.opts.array_table}\", \"data_browser\": #{op.opts.data_browser} }}"
-  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
-end
-
-Common.register_command({
-  :invocation => "circle-build-cdr-indices",
-  :description => "Build the CDR indices using CircleCi",
-  :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
-})
-
 def stage_redcap_files(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1317,336 +1248,6 @@ Common.register_command({
   :invocation => "validate-cdr",
   :description => "Validates synthetic data and CDR",
   :fn => ->(*args) { validate_cdr("validate-cdr", *args) }
-})
-
-def validate_prerequisites_exist(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Optional - Default is false"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
-  end
-end
-
-Common.register_command({
-  :invocation => "validate-prerequisites-exist",
-  :description => "Validating that all prerequisites exist",
-  :fn => ->(*args) { validate_prerequisites_exist("validate-prerequisites-exist", *args) }
-})
-
-def build_cdr_indices(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--cdr-version [cdr-version]",
-    ->(opts, v) { opts.cdr_version = v},
-    "CDR version. Required."
-  )
-  op.add_option(
-    "--wgv-project [wgv-project]",
-    ->(opts, v) { opts.wgv_project = v},
-    "Whole genome variant project."
-  )
-  op.add_option(
-    "--wgv-dataset [wgv-dataset]",
-    ->(opts, v) { opts.wgv_dataset = v},
-    "Whole genome variant dataset."
-  )
-  op.add_option(
-    "--wgv-table [wgv-table]",
-    ->(opts, v) { opts.wgv_table = v},
-    "Whole genome variant table."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Optional - Default is false"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cdr-indices.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-cdr-indices",
-  :description => "Kicks off build for CDR indices",
-  :fn => ->(*args) { build_cdr_indices("build-cdr-indices", *args) }
-})
-
-def make_bq_denormalized_review(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-bq-denormalized-review",
-  :description => "Generates big query denormalized tables for review. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_review("make-bq-denormalized-review", *args) }
-})
-
-def make_bq_denormalized_search_events(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Default is false"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-bq-denormalized-search-events",
-  :description => "Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_search_events("make-bq-denormalized-search-events", *args) }
-})
-
-def make_bq_denormalized_search_person(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--wgv-project [wgv-project]",
-    ->(opts, v) { opts.wgv_project = v},
-    "Whole genome variant project."
-  )
-  op.add_option(
-    "--wgv-dataset [wgv-dataset]",
-    ->(opts, v) { opts.wgv_dataset = v},
-    "Whole genome variant dataset."
-  )
-  op.add_option(
-    "--wgv-table [wgv-table]",
-    ->(opts, v) { opts.wgv_table = v},
-    "Whole genome variant table."
-  )
-  op.add_option(
-      "--array-table [array-table]",
-      ->(opts, v) { opts.array_table = v},
-      "Array table."
-    )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.array_table}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-bq-denormalized-search-person",
-  :description => "Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_search_person("make-bq-denormalized-search-person", *args) }
-})
-
-def make_bq_denormalized_dataset(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-bq-denormalized-dataset",
-  :description => "Generates big query denormalized dataset tables. Used by Data Set Builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_dataset("make-bq-denormalized-dataset", *args) }
-})
-
-def make_bq_dataset_linking(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-bq-dataset-linking",
-  :description => "Generates big query dataset linking tables. Used by Data Set Builder to show users values information.
-Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_dataset_linking("make-bq-dataset-linking", *args) }
-})
-
-def generate_cb_criteria_tables(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Default is false"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
-  end
-end
-
-Common.register_command({
-  :invocation => "generate-cb-criteria-tables",
-  :description => "Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { generate_cb_criteria_tables("generate_cb_criteria_tables", *args) }
-})
-
-def import_cdr_indices_to_cloudsql(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--project [project]",
-    ->(opts, v) { opts.project = v},
-    "Project. Required."
-  )
-  op.add_option(
-    "--cdr-version [cdr-version]",
-    ->(opts, v) { opts.cdr_version = v},
-    "CDR version. Required."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
-  op.parse.validate
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate()
-
-  with_cloud_proxy_and_db(gcc) do
-    common = Common.new
-    Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/import-cdr-indices-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.data_browser}}
-    end
-  end
-end
-
-Common.register_command({
-  :invocation => "import-cdr-indices-to-cloudsql",
-  :description => "Imports CB related tables to mysql/cloudsql to be used by workbench.",
-  :fn => ->(*args) { import_cdr_indices_to_cloudsql("import-cdr-indices-to-cloudsql", *args) }
 })
 
 def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
@@ -2769,14 +2370,20 @@ def update_cdr_config_options(cmd_name, args)
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
+  # RW-7931 consider removing this option after Controlled Tier is fully rolled out
+  op.opts.allow_empty_tiers = false
+  op.add_option(
+      "--allow_empty_tiers",
+      ->(opts, _) { opts.allow_empty_tiers = "true"},
+      "Allow access tiers to be empty (no CDR versions).")
   return op
 end
 
-def update_cdr_config_for_project(cdr_config_file, dry_run)
+def update_cdr_config_for_project(cdr_config_file, dry_run, allow_empty_tiers)
   common = Common.new
   common.run_inline %W{
     ./gradlew updateCdrConfig
-   -PappArgs=['#{cdr_config_file}',#{dry_run}]}
+   -PappArgs=['#{cdr_config_file}',#{dry_run},#{allow_empty_tiers}]}
 end
 
 def update_cdr_config(cmd_name, *args)
@@ -2787,7 +2394,7 @@ def update_cdr_config(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run, op.opts.allow_empty_tiers)
   end
 end
 
@@ -2802,7 +2409,10 @@ def update_cdr_config_local(cmd_name, *args)
   op = update_cdr_config_options(cmd_name, args)
   op.parse.validate
   cdr_config_file = 'config/cdr_config_local.json'
-  app_args = ["-PappArgs=['" + cdr_config_file + "',false]"]
+  dry_run = false
+  # RW-7931 consider switching to false or removal of this option after CT rollout is complete
+  allow_empty_tiers = true
+  app_args = ["-PappArgs=['#{cdr_config_file}',#{dry_run},#{allow_empty_tiers}]"]
   common = Common.new
   common.run_inline %W{./gradlew updateCdrConfig} + app_args
 end
@@ -2912,7 +2522,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     run_with_redirects(
       "docker run -i -t --rm --network host --entrypoint '' " +
       "-v $(pwd)/libproject/with-mysql-login.sh:/with-mysql-login.sh " +
-      "mysql:5.7.27 /bin/bash -c " +
+      "mariadb:10.2 /bin/bash -c " +
       "'export MYSQL_HOME=$(./with-mysql-login.sh root #{password}); /bin/bash'", password)
   end
 end
@@ -3160,6 +2770,11 @@ def deploy(cmd_name, args)
     ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
+  op.opts.allow_empty_tiers = false
+    op.add_option(
+        "--allow_empty_tiers",
+        ->(opts, _) { opts.allow_empty_tiers = "true"},
+        "Allow access tiers to be empty (no CDR versions).")
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
 
   gcc = GcloudContextV2.new(op)
@@ -3172,7 +2787,7 @@ def deploy(cmd_name, args)
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run, op.opts.allow_empty_tiers)
 
     # Keep the cloud proxy context open for the service account credentials.
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []

@@ -10,14 +10,14 @@ ID_PREFIX=$3
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
 echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
-CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
+CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9]
+CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9]
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
 
 echo "WHOLE GENOME VARIANT DATA"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -43,8 +43,7 @@ SELECT
     , 0
     , 0"
 
-#wait for process to end before copying
+## wait for process to end before copying
 wait
-## copy temp tables back to main tables, and delete temp?
-cpToMain "$TBL_CBC" &
-wait
+## copy tmp tables back to main tables and delete tmp
+cpToMainAndDeleteTmp "$TBL_CBC"

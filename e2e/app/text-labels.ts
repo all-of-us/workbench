@@ -164,14 +164,25 @@ export enum SideBarLink {
   GenomicExtractionsHistory
 }
 
-export const InstitutionSelectValue = {
+export const Institution = {
   Vanderbilt: 'Vanderbilt University Medical Center',
   Broad: 'Broad Institute',
   Verily: 'Verily LLC',
   NationalInstituteHealth: 'National Institute of Health',
   Wondros: 'Wondros',
   AdminTesting: 'Admin Testing',
-  DummyMaster: 'Dummy Master'
+  DummyMaster: 'Dummy Master',
+  Google: 'Google'
+};
+
+export const InstitutionRole = {
+  EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
+  UndergraduateStudent: 'Undergraduate (Bachelor level) student',
+  Industry: 'Industry',
+  ResearchAssistant: 'Research Assistant (pre-doctoral)',
+  ResearchAssociate: 'Research associate (post-doctoral; early/mid career)',
+  SeniorResearcher: 'Senior Researcher (PI/Team Lead, senior scientist)',
+  Teacher: 'Teacher/Instructor/Professor'
 };
 
 export enum HeaderName {
@@ -181,11 +192,11 @@ export enum HeaderName {
   UserEmailInstruction = 'User Email Instruction'
 }
 
-export const CohortsSelectValue = {
+export const Cohorts = {
   AllParticipants: 'All Participants'
 };
 
-export const ConceptSetSelectValue = {
+export const ConceptSets = {
   AllSurveys: 'All Surveys',
   Demographics: 'Demographics',
   FitbitActivitySummary: 'Fitbit Activity Summary',
@@ -195,7 +206,7 @@ export const ConceptSetSelectValue = {
   WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
 };
 
-export const DatasetValueSelect = {
+export const DataSets = {
   VCFFile: 'VCF Files',
   PersonID: 'person_id',
   GenderConceptId: 'gender_concept_id'

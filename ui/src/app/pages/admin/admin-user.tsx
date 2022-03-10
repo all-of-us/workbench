@@ -31,7 +31,7 @@ import {
   commonStyles,
   ContactEmailTextInput,
   ErrorsTooltip,
-  getInitalCreditsUsage,
+  getInitialCreditsUsage,
   getPublicInstitutionDetails,
   InitialCreditsDropdown,
   InstitutionalRoleDropdown,
@@ -518,7 +518,7 @@ export const AdminUser = withRouter(
                   />
                   <InitialCreditsUsage
                     isAboveLimit={this.usageIsAboveLimit()}
-                    usage={getInitalCreditsUsage(this.state.updatedProfile)}
+                    usage={getInitialCreditsUsage(this.state.updatedProfile)}
                   />
                 </FlexColumn>
                 <FlexColumn style={{ width: '33%' }}>

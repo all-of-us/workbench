@@ -8,6 +8,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import { notTooLong, required } from 'app/utils/validators';
 
 const styles = {
   smallHeaderStyles: {
@@ -22,13 +23,6 @@ interface AdminBannerState {
   bannerHeadline: string;
   readMoreLink: string;
 }
-const required = { presence: { allowEmpty: false } };
-const notTooLong = (maxLength) => ({
-  length: {
-    maximum: maxLength,
-    tooLong: 'must be %{count} characters or less',
-  },
-});
 const validators = {
   bannerDescription: { ...required, ...notTooLong(4000) },
   bannerHeadline: { ...required, ...notTooLong(200) },

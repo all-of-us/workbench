@@ -892,6 +892,43 @@ paths:
           description: The workspace that was created.
           schema:
             "$ref": "#/definitions/Workspace"
+  "/v1/workspaces/createAsync":
+    post:
+      tags:
+      - workspaces
+      consumes:
+      - application/json
+      description: Creates a workspace asynchronously
+      operationId: createWorkspaceAsync
+      parameters:
+      - in: body
+        name: workspace
+        description: workspace definition
+        schema:
+          "$ref": "#/definitions/Workspace"
+      responses:
+        200:
+          description: The workspace has been scheduled for creation.
+          schema:
+            "$ref": "#/definitions/WorkspaceOperation"
+  "/v1/workspaces/operations/{id}":
+    parameters:
+    - in: path
+      name: id
+      type: integer
+      format: int64
+      description: The workspace operation ID
+      required: true
+    get:
+      tags:
+      - workspaces
+      description: Returns a workspace operation, only accessible to the creator of the operation.
+      operationId: getWorkspaceOperation
+      responses:
+        200:
+          description: The asynchronous workspace operation.
+          schema:
+            "$ref": "#/definitions/WorkspaceOperation"
   "/v1/workspaces/published":
     get:
       tags:
@@ -1082,6 +1119,28 @@ paths:
           description: Successful duplicate response
           schema:
             "$ref": "#/definitions/CloneWorkspaceResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicateAsync":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - workspaces
+      consumes:
+      - application/json
+      description: |
+        Asynchronously duplicate an existing workspace. Semantics otherwise match cloneWorkspace.
+      operationId: duplicateWorkspaceAsync
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/CloneWorkspaceRequest"
+      responses:
+        200:
+          description: Successful duplicate response
+          schema:
+            "$ref": "#/definitions/WorkspaceOperation"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2796,6 +2855,48 @@ paths:
       responses:
         200:
           description: 'Egress event processed successfully'
+  "/v1/cloudTask/createWorkspace":
+    post:
+      tags:
+      - workspaces
+      - cloudTask
+      description: >
+        Asynchronously creates a workspace. Note: unlike other cloud tasks,
+        this task requires passing along the user's auth credential header.
+      operationId: processCreateWorkspaceTask
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Workspace creation task to process.
+        schema:
+          "$ref": "#/definitions/CreateWorkspaceTaskRequest"
+      responses:
+        200:
+          description: 'Workspace created'
+  "/v1/cloudTask/duplicateWorkspace":
+    post:
+      tags:
+        - workspaces
+        - cloudTask
+      description: >
+        Asynchronously duplicates a workspace. Note: unlike other cloud tasks,
+        this task requires passing along the user's auth credential header.
+      operationId: processDuplicateWorkspaceTask
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: Workspace duplication task to process.
+          schema:
+            "$ref": "#/definitions/DuplicateWorkspaceTaskRequest"
+      responses:
+        200:
+          description: 'Workspace created'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -4344,6 +4445,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AccessModuleConfig"
+      accessTiersVisibleToUsers:
+        type: array
+        description: The shortnames of the access tiers which are visible to users in this environment.
+        items:
+          type: string
   RuntimeImage:
     type: object
     properties:
@@ -4718,6 +4824,22 @@ definitions:
       workspace:
         "$ref": "#/definitions/Workspace"
         description: The newly created workspace duplicate.
+  WorkspaceOperation:
+    type: object
+    required:
+      - id
+      - status
+    properties:
+      id:
+        description: The identifier for this operation
+        type: integer
+        format: int64
+      status:
+        description: The status of the async operation
+        "$ref": "#/definitions/WorkspaceOperationStatus"
+      workspace:
+        description: The newly created workspace
+        "$ref": "#/definitions/Workspace"
   UpdateWorkspaceRequest:
     type: object
     required:
@@ -4740,6 +4862,15 @@ definitions:
     enum:
     - ACTIVE
     - DELETED
+  WorkspaceOperationStatus:
+    type: string
+    description: 'Note: PENDING is deprecated and has been replaced by QUEUED and PROCESSING'
+    enum:
+    - PENDING
+    - QUEUED
+    - PROCESSING
+    - ERROR
+    - SUCCESS
   ResearchPurpose:
     type: object
     required:
@@ -8590,6 +8721,45 @@ definitions:
         description: 'Egress event ID to be processed'
         type: integer
         format: int64
+
+  CreateWorkspaceTaskRequest:
+    type: object
+    required:
+      - operationId
+      - workspace
+    properties:
+      operationId:
+        description: 'Workspace operation ID'
+        type: integer
+        format: int64
+      workspace:
+        description: 'Requested workspace to create'
+        "$ref": "#/definitions/Workspace"
+
+  DuplicateWorkspaceTaskRequest:
+    type: object
+    required:
+      - operationId
+      - fromWorkspaceNamespace
+      - fromWorkspaceFirecloudName
+      - workspace
+    properties:
+      operationId:
+        description: 'Workspace operation ID'
+        type: integer
+        format: int64
+      fromWorkspaceNamespace:
+        description: 'Namespace of the From-Workspace'
+        type: string
+      fromWorkspaceFirecloudName:
+        description: 'Firecloud Name of the From-Workspace'
+        type: string
+      shouldDuplicateRoles:
+        description: 'Should the duplicated workspace also duplicate the roles of the source'
+        type: boolean
+      workspace:
+        description: 'Requested workspace to duplicate'
+        "$ref": "#/definitions/Workspace"
 
   WorkspaceAuditLogQueryResponse:
     type: object

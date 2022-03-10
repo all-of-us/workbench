@@ -1,7 +1,5 @@
 import { Page } from 'puppeteer';
-import DataResourceCard from 'app/component/data-resource-card';
-import Textarea from 'app/element/textarea';
-import Textbox from 'app/element/textbox';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { waitWhileLoading } from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
@@ -24,43 +22,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {ResourceCard} resourceType
    */
   async deleteResource(resourceName: string, resourceType: ResourceCard): Promise<string[]> {
-    const resourceCard = new DataResourceCard(this.page);
-    const card = await resourceCard.findCard(resourceName, resourceType, 60 * 1000);
-    if (!card) {
-      throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
-    }
-
-    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
-
-    const modal = new Modal(this.page);
-    await modal.waitForLoad();
-    const modalTextContent = await modal.getTextContent();
-
-    let link;
-    switch (resourceType) {
-      case ResourceCard.Cohort:
-        link = LinkText.DeleteCohort;
-        break;
-      case ResourceCard.ConceptSet:
-        link = LinkText.DeleteConceptSet;
-        break;
-      case ResourceCard.Dataset:
-        link = LinkText.DeleteDataset;
-        break;
-      case ResourceCard.Notebook:
-        link = LinkText.DeleteNotebook;
-        break;
-      case ResourceCard.CohortReview:
-        link = MenuOption.Delete;
-        break;
-      default:
-        throw new Error(`Case ${resourceType} handling is not defined.`);
-    }
-
-    await modal.clickButton(link, { waitForClose: true });
-    await waitWhileLoading(this.page);
-    logger.info(`Deleted ${resourceType} "${resourceName}"`);
-    return modalTextContent;
+    return new DataResourceCard(this.page).delete(resourceName, resourceType);
   }
 
   /**
@@ -69,64 +31,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {string} newResourceName
    */
   async renameResource(resourceName: string, newResourceName: string, resourceType: ResourceCard): Promise<string[]> {
-    // Find the Data resource card that match the resource name.
-    const resourceCard = new DataResourceCard(this.page);
-    const card = await resourceCard.findCard(resourceName, resourceType);
-    if (!card) {
-      throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
-    }
-
-    let option: MenuOption;
-    switch (resourceType) {
-      case ResourceCard.Dataset:
-        option = MenuOption.RenameDataset;
-        break;
-      default:
-        option = MenuOption.Rename;
-        break;
-    }
-    await card.selectSnowmanMenu(option, { waitForNav: false });
-
-    const modal = new Modal(this.page);
-    await modal.waitForLoad();
-
-    const modalTextContents = await modal.getTextContent();
-
-    // Type new name.
-    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameTextbox.type(newResourceName);
-
-    // Type description. Notebook rename modal does not have Description textarea.
-    if (resourceType !== ResourceCard.Notebook) {
-      const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
-      await descriptionTextarea.type(`Puppeteer automation test. Rename ${resourceName}.`);
-    }
-
-    let buttonLink;
-    switch (resourceType) {
-      case ResourceCard.Cohort:
-        buttonLink = LinkText.RenameCohort;
-        break;
-      case ResourceCard.ConceptSet:
-        buttonLink = LinkText.RenameConceptSet;
-        break;
-      case ResourceCard.Dataset:
-        buttonLink = LinkText.RenameDataset;
-        break;
-      case ResourceCard.Notebook:
-        buttonLink = LinkText.RenameNotebook;
-        break;
-      case ResourceCard.CohortReview:
-        buttonLink = LinkText.RenameCohortReview;
-        break;
-      default:
-        throw new Error(`Case ${resourceType} handling is not defined.`);
-    }
-
-    await modal.clickButton(buttonLink, { waitForClose: true });
-    await waitWhileLoading(this.page);
-    logger.info(`Renamed ${resourceType} "${resourceName}" to "${newResourceName}"`);
-    return modalTextContents;
+    return new DataResourceCard(this.page).rename(resourceName, newResourceName, resourceType);
   }
 
   /**
@@ -202,5 +107,17 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
     const snowmanMenu = new SnowmanMenu(this.page);
     return snowmanMenu;
+  }
+
+  //verify that only edit option is enabled on the workspace-action menu
+  async verifyLockedWorkspaceActionOptions(): Promise<void> {
+    const snowmanMenu = await this.getWorkspaceActionMenu();
+    const links = await snowmanMenu.getAllOptionTexts();
+    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
+
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
   }
 }

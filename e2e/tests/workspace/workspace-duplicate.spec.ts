@@ -2,7 +2,7 @@ import { findOrCreateWorkspace, findOrCreateWorkspaceCard, signInWithAccessToken
 import { MenuOption } from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, { NavLink } from 'app/component/navigation';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import { config } from 'resources/workbench-config';
@@ -52,14 +52,12 @@ describe('Duplicate workspace', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-    await workspacesPage.waitForLoad();
-    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
+    await new WorkspaceCard(page).delete({ name: duplicateWorkspaceName });
   });
 
   test('Cannot duplicate workspace with older CDR version without consent to restrictions', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
-    await workspaceCard.asElementHandle().hover();
+    await (await workspaceCard.asElement()).hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -101,9 +99,6 @@ describe('Duplicate workspace', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-
-    // Verify Delete action was successful.
-    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
+    await new WorkspaceCard(page).delete({ name: duplicateWorkspaceName });
   });
 });

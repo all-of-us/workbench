@@ -199,6 +199,9 @@
   <include file="changelog/db.changelog-187-user-code-of-conduct-agreement-backfill-v2.xml"/>
   <include file="changelog/db.changelog-188-controlled-tier-training-expirable.xml"/>
   <include file="changelog/db.changelog-189-cdr-bucket-paths.xml"/>
+  <include file="changelog/db.changelog-190-billing-migration-bug-backfill.xml"/>
+  <include file="changelog/db.changelog-191-workspace-operation.xml"/>
+  <include file="changelog/db.changelog-192-workspace-operation-add-queued-processing.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

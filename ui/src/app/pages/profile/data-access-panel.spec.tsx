@@ -2,7 +2,6 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 
-import { environment } from 'environments/environment';
 import {
   DataAccessPanel,
   DataAccessPanelProps,
@@ -11,6 +10,7 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
+import { updateVisibleTiers } from 'testing/test-utils';
 
 const findRTGranted = (wrapper) =>
   wrapper.find('[data-test-id="registered-tier-access-granted"]');
@@ -48,10 +48,10 @@ describe('Data Access Panel', () => {
 
   beforeEach(() => {
     cdrVersionStore.set(cdrVersionTiersResponse);
-    environment.accessTiersVisibleToUsers = [
+    updateVisibleTiers([
       AccessTierShortNames.Registered,
       AccessTierShortNames.Controlled,
-    ];
+    ]);
   });
 
   it('Should show success status for registered tier when the user has access', async () => {
@@ -77,14 +77,14 @@ describe('Data Access Panel', () => {
   });
 
   it('Should only show the registered tier in environments without a controlled tier (user has access)', async () => {
-    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+    updateVisibleTiers([AccessTierShortNames.Registered]);
 
     const wrapper = component({ userAccessTiers: ['registered'] });
     expectAccessStatusRtOnly(wrapper, true);
   });
 
   it('Should only show the registered tier in environments without a controlled tier (user does not have access)', async () => {
-    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+    updateVisibleTiers([AccessTierShortNames.Registered]);
 
     const wrapper = component({ userAccessTiers: [] });
     expectAccessStatusRtOnly(wrapper, false);

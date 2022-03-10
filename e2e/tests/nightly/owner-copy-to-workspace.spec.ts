@@ -1,4 +1,4 @@
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
@@ -69,7 +69,7 @@ describe('Workspace owner can copy notebook', () => {
 
     // Find and open source workspace Data page.
     const workspaceCard = await findWorkspaceCard(page, sourceWorkspaceName);
-    await workspaceCard.clickWorkspaceName();
+    await workspaceCard.clickName();
 
     // Create notebook in source workspace.
     const sourceNotebookName = makeRandomName('pytest');
@@ -118,12 +118,12 @@ describe('Workspace owner can copy notebook', () => {
 
     // Perform actions in copied notebook.
     // Open destination Workspace
-    await findWorkspaceCard(page, destWorkspace).then((card) => card.clickWorkspaceName());
+    await findWorkspaceCard(page, destWorkspace).then((card) => card.clickName());
 
     // Verify copy-to notebook exists in destination Workspace
     await openTab(page, Tabs.Analysis, analysisPage);
     const dataResourceCard = new DataResourceCard(page);
-    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
+    const notebookCard = await dataResourceCard.findCard({ name: copiedNotebookName, cardType: ResourceCard.Notebook });
     expect(notebookCard).toBeTruthy();
 
     // Delete notebook

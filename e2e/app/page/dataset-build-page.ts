@@ -16,7 +16,7 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceAboutPage from './workspace-about-page';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { getPropValue } from 'utils/element-utils';
-import { CohortsSelectValue, ConceptSetSelectValue, LinkText, Tabs } from 'app/text-labels';
+import { Cohorts, ConceptSets, LinkText, Tabs } from 'app/text-labels';
 import { openTab } from 'utils/test-utils';
 
 const pageTitle = '(Edit )?Dataset( Page)?';
@@ -35,10 +35,10 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, pageTitle);
 
-    const cohortSelectCheckbox = this.getCohortCheckBox(CohortsSelectValue.AllParticipants);
+    const cohortSelectCheckbox = this.getCohortCheckBox(Cohorts.AllParticipants);
     await cohortSelectCheckbox.waitUntilEnabled();
 
-    const conceptSetCheckBox = this.getConceptSetCheckBox(ConceptSetSelectValue.Demographics);
+    const conceptSetCheckBox = this.getConceptSetCheckBox(ConceptSets.Demographics);
     await conceptSetCheckBox.waitUntilEnabled();
 
     await waitWhileLoading(this.page);

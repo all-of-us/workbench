@@ -396,8 +396,8 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
                       <b>NIH-funded Research.</b>
                     </div>
                     <div style={styles.textNormal}>
-                      My research is funded by the National Institute of Health,
-                      (NIH). NIH funded research is eligible for discounted
+                      My research is funded by the National Institute of Health
+                      (NIH). NIH-funded research is eligible for discounted
                       cloud rates through the NIH STRIDES initiative.
                     </div>
                   </FlexColumn>
@@ -478,7 +478,7 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
                     dataTestId='user-institution-text'
                   />
                   <BillingConfirmItem
-                    title='NiH-funded'
+                    title='NIH-funded'
                     value={nihFunded ? 'Yes' : 'No'}
                     dataTestId='nih-funded-text'
                   />

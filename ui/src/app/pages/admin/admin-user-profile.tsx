@@ -4,6 +4,8 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import validate from 'validate.js';
+import { faLink } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessBypassRequest,
@@ -20,16 +22,26 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
+import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
 import { getAccessModuleConfig } from 'app/utils/access-utils';
 import {
+  AuthorityGuardedAction,
+  hasAuthorityForAction,
+} from 'app/utils/authorities';
+import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
-import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
+import {
+  MatchParams,
+  profileStore,
+  serverConfigStore,
+  useStore,
+} from 'app/utils/stores';
 
 import {
   adminGetProfile,
@@ -40,7 +52,7 @@ import {
   displayModuleStatus,
   ErrorsTooltip,
   getEraNote,
-  getInitalCreditsUsage,
+  getInitialCreditsUsage,
   getPublicInstitutionDetails,
   InitialCreditsDropdown,
   InstitutionalRoleDropdown,
@@ -91,7 +103,7 @@ const styles = reactStyles({
   },
   uneditableFields: {
     height: '221px',
-    width: '601px',
+    width: '650px',
     borderRadius: '9px',
     backgroundColor: colorWithWhiteness(colors.light, 0.23),
     paddingTop: '1em',
@@ -104,10 +116,14 @@ const styles = reactStyles({
 });
 
 const UneditableField = (props: {
+  dataTestId: string;
   label: string;
   value: string | JSX.Element;
 }) => (
-  <FlexColumn>
+  <FlexColumn
+    data-test-id={props.dataTestId}
+    style={{ paddingTop: '1em', width: '300px' }}
+  >
     <div style={styles.label}>{props.label}</div>
     <div style={styles.value}>{props.value}</div>
   </FlexColumn>
@@ -124,22 +140,38 @@ const UneditableFields = (props: { profile: Profile }) => {
     ) : (
       accessTierShortNames.map(displayNameForTier).join(', ')
     );
+
   return (
-    <FlexRow style={styles.uneditableFields}>
-      <FlexColumn>
+    <FlexColumn style={styles.uneditableFields}>
+      <FlexRow>
         <div style={styles.subHeader}>Researcher information</div>
-        <UneditableField label='Name' value={`${givenName} ${familyName}`} />
-        <UneditableField
-          label='Initial Credits Used'
-          value={getInitalCreditsUsage(props.profile)}
-        />
-      </FlexColumn>
-      <FlexColumn style={{ paddingLeft: '80px' }}>
         <div style={styles.uneditableFieldsSpacer} />
-        <UneditableField label='User name' value={username} />
-        <UneditableField label='Data Access Tiers' value={accessTiers} />
-      </FlexColumn>
-    </FlexRow>
+      </FlexRow>
+      <FlexRow>
+        <UneditableField
+          dataTestId='name'
+          label='Name'
+          value={`${givenName} ${familyName}`}
+        />
+        <UneditableField
+          dataTestId='user-name'
+          label='User name'
+          value={username}
+        />
+      </FlexRow>
+      <FlexRow>
+        <UneditableField
+          dataTestId='initial-credits-used'
+          label='Initial credits used'
+          value={getInitialCreditsUsage(props.profile)}
+        />
+        <UneditableField
+          dataTestId='data-access-tiers'
+          label='Data access tiers'
+          value={accessTiers}
+        />
+      </FlexRow>
+    </FlexColumn>
   );
 };
 
@@ -178,6 +210,15 @@ const EditableFields = ({
       i.shortName ===
       updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
   );
+  const { profile } = useStore(profileStore);
+
+  // Show the link to  redirect to institution detail page,
+  // if the LOGGED IN USER has Institution admin authority and
+  // institution name is populated
+  const showGoToInstitutionLink: Boolean =
+    hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
+    !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
+
   return (
     <FlexRow style={styles.editableFields}>
       <FlexColumn>
@@ -201,9 +242,23 @@ const EditableFields = ({
             highlightOnChange
             onChange={(event) => onChangeInstitution(event.value)}
           />
+          {showGoToInstitutionLink && (
+            <a
+              style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
+              href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
+              target='_blank'
+            >
+              <TooltipTrigger
+                content={`Click here to go to the
+                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
+              >
+                <FontAwesomeIcon icon={faLink} />
+              </TooltipTrigger>
+            </a>
+          )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
-          <div style={{ paddingLeft: '1em' }}>
+          <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
             {getEmailValidationErrorMessage(institution)}
           </div>
         )}
@@ -258,9 +313,10 @@ interface CommonToggleProps {
   checked: boolean;
   dataTestId: string;
   onToggle: () => void;
+  disabled?: boolean;
 }
 const CommonToggle = (props: CommonToggleProps) => {
-  const { name, checked, dataTestId, onToggle } = props;
+  const { name, checked, dataTestId, disabled, onToggle } = props;
   return (
     <Toggle
       name={name}
@@ -270,6 +326,7 @@ const CommonToggle = (props: CommonToggleProps) => {
       style={{ paddingBottom: 0, flexGrow: 0 }}
       height={24}
       width={50}
+      disabled={disabled}
     />
   );
 };
@@ -381,7 +438,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
         )
       }
     >
-      <Column field='moduleName' header='Access Module' />
+      <Column field='moduleName' header='Access module' />
       <Column field='moduleStatus' header='Status' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />
@@ -391,12 +448,19 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   );
 };
 
+const isLoggedInUser = (userProfile: Profile): boolean => {
+  const { profile } = profileStore.get();
+  return userProfile?.username === profile?.username;
+};
+
 const DisabledToggle = (props: {
   currentlyDisabled: boolean;
   previouslyDisabled: boolean;
+  profile: Profile;
   toggleDisabled: () => void;
 }) => {
-  const { currentlyDisabled, previouslyDisabled, toggleDisabled } = props;
+  const { currentlyDisabled, previouslyDisabled, profile, toggleDisabled } =
+    props;
   const highlightStyle =
     currentlyDisabled !== previouslyDisabled
       ? { background: colors.highlight }
@@ -410,6 +474,7 @@ const DisabledToggle = (props: {
           checked={!currentlyDisabled}
           dataTestId='user-disabled-toggle'
           onToggle={() => toggleDisabled()}
+          disabled={isLoggedInUser(profile)}
         />
       </div>
     </div>
@@ -645,13 +710,21 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             <FlexColumn>
               <FlexRow>
                 <div style={styles.tableHeader}>Access status</div>
-                <DisabledToggle
-                  currentlyDisabled={updatedProfile.disabled}
-                  previouslyDisabled={oldProfile.disabled}
-                  toggleDisabled={() =>
-                    updateProfile({ disabled: !updatedProfile.disabled })
-                  }
-                />
+                <TooltipTrigger
+                  disabled={!isLoggedInUser(updatedProfile)}
+                  content={'Cannot change your own Access Status'}
+                >
+                  <div>
+                    <DisabledToggle
+                      currentlyDisabled={updatedProfile.disabled}
+                      previouslyDisabled={oldProfile.disabled}
+                      toggleDisabled={() =>
+                        updateProfile({ disabled: !updatedProfile.disabled })
+                      }
+                      profile={updatedProfile}
+                    />
+                  </div>
+                </TooltipTrigger>
               </FlexRow>
               <AccessModuleTable
                 oldProfile={oldProfile}
@@ -666,6 +739,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           <FlexRow style={{ paddingTop: '1em' }}>
             <ErrorsTooltip errors={errors}>
               <Button
+                data-test-id='update-profile'
                 type='primary'
                 disabled={
                   !!errors ||

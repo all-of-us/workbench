@@ -152,7 +152,7 @@ describe('Create Cohorts Test', () => {
 
     // In Show All tab, new cohort card is found.
     const cohortCard = await dataPage.findCohortCard(cohortName);
-    expect(await cohortCard.getResourceName()).toEqual(cohortName);
+    expect(await cohortCard.getName()).toEqual(cohortName);
 
     // Delete cohort in Workspace Data page.
     await dataPage.deleteResource(cohortName, ResourceCard.Cohort);

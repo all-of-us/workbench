@@ -101,3 +101,11 @@ export const simulateComponentChange = async (
   });
   return await waitOneTickAndUpdate(wrapper);
 };
+
+export const simulateTextInputChange = async (
+  wrapper: ReactWrapper,
+  value: string
+) => {
+  wrapper.simulate('change', { target: { value } });
+  return await waitOneTickAndUpdate(wrapper);
+};

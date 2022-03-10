@@ -76,6 +76,12 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
     case ElementType.Tab:
       selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
       break;
+    case ElementType.Switch:
+      selector = `${textExpr}[.//input[@type="checkbox" and @role="switch"]]`;
+      break;
+    case ElementType.StaticText:
+      selector = textExpr;
+      break;
     default:
       console.error(`Implement unhandled type: ${type}`);
       throw new Error(`Implement unhandled type: ${type}`);

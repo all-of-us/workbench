@@ -1,19 +1,18 @@
-import { signInWithAccessToken } from 'utils/test-utils';
+import { createDatasetNotebook, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
-import WorkspaceAdminPage from 'app/page/admin-workspace-page';
-import { ConceptSetSelectValue, CloudStorageHeader, Language } from 'app/text-labels';
+import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
+import { CloudStorageHeader } from 'app/text-labels';
 import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
-import { Page } from 'puppeteer';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
+  const reasonText = 'locking this workspace';
   let workspaceNamespace = '';
 
   beforeEach(async () => {
@@ -50,10 +49,10 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeFalsy();
 
     //click on the LOCK WORKSPACE button
-    const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton();
+    const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton(workspaceStatus.Lock);
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
 
-    await lockWorkspaceModal.createLockWorkspaceReason();
+    await lockWorkspaceModal.createLockWorkspaceReason(reasonText);
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
     await lockWorkspaceModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
@@ -64,7 +63,7 @@ describe('Workspace Admin', () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
 
     //verify that the Notebook Preview button is disabled
@@ -93,8 +92,8 @@ describe('Workspace Admin', () => {
 
   test('Verify that admin is able to delete runtime', async () => {
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
-    await workspaceCard.clickWorkspaceName(true);
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName });
+    await workspaceCard.clickName();
     const dataPage = await new WorkspaceDataPage(page).waitForLoad();
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
@@ -127,27 +126,4 @@ describe('Workspace Admin', () => {
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
   });
-
-  async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    const datasetBuildPage = await dataPage.clickAddDatasetButton();
-
-    // Step 1 Select Cohort: Choose "All Participants"
-    await datasetBuildPage.selectCohorts(['All Participants']);
-
-    // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
-    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
-
-    const createModal = await datasetBuildPage.clickCreateButton();
-    await createModal.createDataset();
-
-    const exportModal = await datasetBuildPage.clickAnalyzeButton();
-
-    await exportModal.enterNotebookName(pyNotebookName);
-    await exportModal.pickLanguage(Language.Python);
-    await exportModal.clickExportButton();
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    return await notebookPreviewPage.waitForLoad();
-  }
 });

@@ -112,13 +112,16 @@
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-staging-ct",
       "bigqueryDataset": "test_R2019q4r3",
-      "wgsBigqueryDataset": "1kg_wgs",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true
+      "hasCopeSurveyData": true,
+      "storageBasePath": "v1",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
     }
   ]
 }

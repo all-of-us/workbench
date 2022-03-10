@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
 import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -262,10 +261,10 @@ export const requiredModules: AccessModule[] = [...rtModules, duccModule];
 
 export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
 
-const isCompleted = (status: AccessModuleStatus) =>
-  status && !!status.completionEpochMillis;
-const isBypassed = (status: AccessModuleStatus) =>
-  status && !!status.bypassEpochMillis;
+const isCompleted = (status: AccessModuleStatus): boolean =>
+  !!status?.completionEpochMillis;
+const isBypassed = (status: AccessModuleStatus): boolean =>
+  !!status?.bypassEpochMillis;
 const isCompliant = (status: AccessModuleStatus) =>
   isCompleted(status) || isBypassed(status);
 
@@ -944,7 +943,7 @@ const ControlledTierCard = (props: {
         </FlexRow>
         {isEligible ? (
           <div data-test-id='eligible-text' style={styles.dataDetails}>
-            You are eligible to access {ctDisplayName} data
+            You are eligible to access {ctDisplayName} data.
           </div>
         ) : (
           <div>
@@ -1024,7 +1023,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass },
+      config: { unsafeAllowSelfBypass, accessTiersVisibleToUsers },
     } = useStore(serverConfigStore);
 
     useEffect(() => {
@@ -1078,7 +1077,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
-    const showCtCard = environment.accessTiersVisibleToUsers.includes(
+    const showCtCard = accessTiersVisibleToUsers.includes(
       AccessTierShortNames.Controlled
     );
 

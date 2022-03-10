@@ -307,11 +307,7 @@ WHERE x.concept_id = y.concept_id
 AND x.type = 'ICD10CM'
 AND x.is_standard = 0"
 
-#wait for process to end before copying
+## wait for process to end before copying
 wait
-## copy temp tables back to main tables, and delete temp?
-cpToMain "$TBL_CBC" &
-cpToMain "$TBL_PAS" &
-cpToMain "$TBL_PCA" &
-wait
-
+## copy tmp tables back to main tables and delete tmp
+cpToMainAndDeleteTmp "$TBL_CBC" "$TBL_PAS" "$TBL_PCA"

@@ -1818,7 +1818,7 @@ export const DatasetPage = fp.flow(
             <div style={{ display: 'flex', paddingTop: '1rem' }}>
               <div
                 style={{
-                  width: '33%',
+                  width: '31%',
                   height: '80%',
                   minWidth: styles.selectBoxHeader.minWidth,
                 }}
@@ -1874,197 +1874,208 @@ export const DatasetPage = fp.flow(
                   </div>
                 </div>
               </div>
-              <div style={{ marginLeft: '1.5rem', width: '70%' }}>
+              <div
+                style={{
+                  width: '34.5%',
+                  height: '80%',
+                  marginLeft: '0.75rem',
+                  minWidth: styles.selectBoxHeader.minWidth,
+                }}
+              >
                 <div
                   style={{
-                    display: 'flex',
-                    backgroundColor: colors.white,
+                    backgroundColor: 'white',
                     border: `1px solid ${colors.light}`,
                   }}
                 >
+                  <BoxHeader
+                    step='2'
+                    header='Select Concept Sets'
+                    subHeader='Rows'
+                    style={{ paddingRight: '1rem' }}
+                  >
+                    <PlusLink
+                      dataTestId='concept-sets-link'
+                      path={conceptSetsPath}
+                      disable={!this.canWrite}
+                    />
+                  </BoxHeader>
                   <div
                     style={{
-                      width: '60%',
-                      borderRight: `1px solid ${colors.light}`,
+                      height: '9rem',
+                      overflowY: 'auto',
+                      pointerEvents:
+                        this.state.domainValueSetIsLoading.size > 0
+                          ? 'none'
+                          : 'auto',
                     }}
+                    data-test-id='prePackage-concept-set'
                   >
-                    <BoxHeader
-                      step='2'
-                      header='Select Concept Sets'
-                      subHeader='Rows'
-                      style={{ paddingRight: '1rem' }}
-                    >
-                      <PlusLink
-                        dataTestId='concept-sets-link'
-                        path={conceptSetsPath}
-                        disable={!this.canWrite}
-                      />
-                    </BoxHeader>
-                    <div
-                      style={{
-                        height: '9rem',
-                        overflowY: 'auto',
-                        pointerEvents:
-                          this.state.domainValueSetIsLoading.size > 0
-                            ? 'none'
-                            : 'auto',
-                      }}
-                      data-test-id='prePackage-concept-set'
-                    >
-                      <Subheader>Prepackaged Concept Sets</Subheader>
-                      {this.getPrePackagedList().map(
-                        (prepackaged: PrepackagedConceptSet) => {
-                          const p = PrepackagedConceptSet[prepackaged];
-                          return (
-                            <ImmutableListItem
-                              name={p}
-                              data-test-id='prePackage-concept-set-item'
-                              key={prepackaged}
-                              checked={selectedPrepackagedConceptSets.has(p)}
-                              onChange={() =>
-                                this.selectPrePackagedConceptSet(
-                                  p,
-                                  !selectedPrepackagedConceptSets.has(p)
-                                )
-                              }
-                            />
-                          );
-                        }
-                      )}
-                      <Subheader>Workspace Concept Sets</Subheader>
-                      {!loadingResources &&
-                        this.state.conceptSetList.map((conceptSet) => (
+                    <Subheader>Prepackaged Concept Sets</Subheader>
+                    {this.getPrePackagedList().map(
+                      (prepackaged: PrepackagedConceptSet) => {
+                        const p = PrepackagedConceptSet[prepackaged];
+                        return (
                           <ImmutableListItem
-                            key={conceptSet.id}
-                            name={conceptSet.name}
-                            data-test-id='concept-set-list-item'
-                            checked={selectedConceptSetIds.includes(
-                              conceptSet.id
-                            )}
+                            name={p}
+                            data-test-id='prePackage-concept-set-item'
+                            key={prepackaged}
+                            checked={selectedPrepackagedConceptSets.has(p)}
                             onChange={() =>
-                              this.selectConceptSet(
-                                conceptSet,
-                                !selectedConceptSetIds.includes(conceptSet.id)
+                              this.selectPrePackagedConceptSet(
+                                p,
+                                !selectedPrepackagedConceptSets.has(p)
                               )
                             }
-                            showSourceConceptIcon={crossDomainConceptSetList.has(
-                              conceptSet.id
-                            )}
                           />
-                        ))}
-                      {loadingResources && (
-                        <Spinner
-                          style={{
-                            position: 'relative',
-                            top: '2rem',
-                            left: '10rem',
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ width: '55%' }}>
-                    <BoxHeader
-                      step='3'
-                      header='Select Values'
-                      subHeader='Columns'
-                    >
-                      <div style={styles.selectAllContainer}>
-                        <CheckBox
-                          style={{ height: 17, width: 17 }}
-                          manageOwnState={false}
-                          disabled={selectedDomains.size === 0}
-                          data-test-id='select-all'
-                          onChange={() => this.selectAllValues()}
-                          checked={this.allValuesSelected}
-                        />
-                        <div
-                          style={{
-                            marginLeft: '0.25rem',
-                            fontSize: '13px',
-                            lineHeight: '17px',
-                          }}
-                        >
-                          {this.allValuesSelected
-                            ? 'Deselect All'
-                            : 'Select All'}
-                        </div>
-                      </div>
-                    </BoxHeader>
-                    <div
-                      style={{
-                        height: selectedDomains.size > 0 ? '7.625rem' : '9rem',
-                        overflowY: 'auto',
-                      }}
-                    >
-                      {domainValueSetIsLoading.size > 0 && (
-                        <Spinner
-                          style={{
-                            position: 'relative',
-                            top: '2rem',
-                            left: 'calc(50% - 36px)',
-                          }}
-                        />
-                      )}
-                      {Array.from(selectedDomains)
-                        .sort(COMPARE_DOMAINS_FOR_DISPLAY)
-                        .map(
-                          (domain) =>
-                            domainValueSetLookup.has(domain) && (
-                              <div key={domain}>
-                                <Subheader style={{ fontWeight: 'bold' }}>
-                                  {formatDomain(domain)}
-                                </Subheader>
-                                {domainValueSetLookup
-                                  .get(domain)
-                                  .values.map((domainValue) => (
-                                    <ValueListItem
-                                      data-test-id='value-list-items'
-                                      key={domainValue.value}
-                                      domain={domain}
-                                      domainValue={domainValue}
-                                      onChange={() =>
-                                        this.selectDomainValue(
-                                          domain,
-                                          domainValue
-                                        )
-                                      }
-                                      checked={fp.some(
-                                        {
-                                          domain: domain,
-                                          value: domainValue.value,
-                                        },
-                                        selectedDomainValuePairs
-                                      )}
-                                    />
-                                  ))}
-                              </div>
+                        );
+                      }
+                    )}
+                    <Subheader>Workspace Concept Sets</Subheader>
+                    {!loadingResources &&
+                      this.state.conceptSetList.map((conceptSet) => (
+                        <ImmutableListItem
+                          key={conceptSet.id}
+                          name={conceptSet.name}
+                          data-test-id='concept-set-list-item'
+                          checked={selectedConceptSetIds.includes(
+                            conceptSet.id
+                          )}
+                          onChange={() =>
+                            this.selectConceptSet(
+                              conceptSet,
+                              !selectedConceptSetIds.includes(conceptSet.id)
                             )
-                        )}
-                    </div>
-                    {selectedDomains.size > 0 && (
-                      <FlexRow
+                          }
+                          showSourceConceptIcon={crossDomainConceptSetList.has(
+                            conceptSet.id
+                          )}
+                        />
+                      ))}
+                    {loadingResources && (
+                      <Spinner
                         style={{
-                          width: '100%',
-                          height: '1.375rem',
-                          backgroundColor: colorWithWhiteness(colors.dark, 0.9),
-                          color: colors.primary,
-                          paddingLeft: '0.4rem',
-                          fontSize: '13px',
-                          lineHeight: '16px',
-                          alignItems: 'center',
+                          position: 'relative',
+                          top: '2rem',
+                          left: '10rem',
                         }}
-                      >
-                        <StyledExternalLink
-                          href={supportUrls.dataDictionary}
-                          target='_blank'
-                        >
-                          Learn more
-                        </StyledExternalLink>
-                        &nbsp;in the data dictionary
-                      </FlexRow>
+                      />
                     )}
                   </div>
+                </div>
+              </div>
+              <div
+                style={{
+                  width: '31.5%',
+                  height: '80%',
+                  marginLeft: '0.75rem',
+                  minWidth: styles.selectBoxHeader.minWidth,
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: 'white',
+                    border: `1px solid ${colors.light}`,
+                  }}
+                >
+                  <BoxHeader
+                    step='3'
+                    header='Select Values'
+                    subHeader='Columns'
+                  >
+                    <div style={styles.selectAllContainer}>
+                      <CheckBox
+                        style={{ height: 17, width: 17 }}
+                        manageOwnState={false}
+                        disabled={selectedDomains.size === 0}
+                        data-test-id='select-all'
+                        onChange={() => this.selectAllValues()}
+                        checked={this.allValuesSelected}
+                      />
+                      <div
+                        style={{
+                          marginLeft: '0.25rem',
+                          fontSize: '13px',
+                          lineHeight: '17px',
+                        }}
+                      >
+                        {this.allValuesSelected ? 'Deselect All' : 'Select All'}
+                      </div>
+                    </div>
+                  </BoxHeader>
+                  <div
+                    style={{
+                      height: selectedDomains.size > 0 ? '7.625rem' : '9rem',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {domainValueSetIsLoading.size > 0 && (
+                      <Spinner
+                        style={{
+                          position: 'relative',
+                          top: '2rem',
+                          left: 'calc(50% - 36px)',
+                        }}
+                      />
+                    )}
+                    {Array.from(selectedDomains)
+                      .sort(COMPARE_DOMAINS_FOR_DISPLAY)
+                      .map(
+                        (domain) =>
+                          domainValueSetLookup.has(domain) && (
+                            <div key={domain}>
+                              <Subheader style={{ fontWeight: 'bold' }}>
+                                {formatDomain(domain)}
+                              </Subheader>
+                              {domainValueSetLookup
+                                .get(domain)
+                                .values.map((domainValue) => (
+                                  <ValueListItem
+                                    data-test-id='value-list-items'
+                                    key={domainValue.value}
+                                    domain={domain}
+                                    domainValue={domainValue}
+                                    onChange={() =>
+                                      this.selectDomainValue(
+                                        domain,
+                                        domainValue
+                                      )
+                                    }
+                                    checked={fp.some(
+                                      {
+                                        domain: domain,
+                                        value: domainValue.value,
+                                      },
+                                      selectedDomainValuePairs
+                                    )}
+                                  />
+                                ))}
+                            </div>
+                          )
+                      )}
+                  </div>
+                  {selectedDomains.size > 0 && (
+                    <FlexRow
+                      style={{
+                        width: '100%',
+                        height: '1.375rem',
+                        backgroundColor: colorWithWhiteness(colors.dark, 0.9),
+                        color: colors.primary,
+                        paddingLeft: '0.4rem',
+                        fontSize: '13px',
+                        lineHeight: '16px',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <StyledExternalLink
+                        href={supportUrls.dataDictionary}
+                        target='_blank'
+                      >
+                        Learn more
+                      </StyledExternalLink>
+                      &nbsp;in the data dictionary
+                    </FlexRow>
+                  )}
                 </div>
               </div>
             </div>

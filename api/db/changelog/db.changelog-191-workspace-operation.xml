@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-191-workspace-operation">
+    <createTable tableName="workspace_operation">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="creator_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="ENUM('PENDING','ERROR','SUCCESS')">
+        <constraints nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint"/>
+      <column name="creation_time" type="timestamp"/>
+      <column name="last_modified_time" type="timestamp"/>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+                             baseTableName="workspace_operation"
+                             constraintName="fk_creator_id_workspace_operation"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user" onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+                             baseTableName="workspace_operation"
+                             constraintName="fk_workspace_id_workspace_operation"
+                             referencedColumnNames="workspace_id"
+                             referencedTableName="workspace" onDelete="CASCADE"/>
+  </changeSet>
+</databaseChangeLog>

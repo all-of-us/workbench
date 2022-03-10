@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import { waitForDocumentTitle } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
@@ -14,7 +14,8 @@ export default class UserAuditPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle)]);
+    await waitForDocumentTitle(this.page, PageTitle);
+    await waitWhileLoading(this.page);
     return true;
   }
 

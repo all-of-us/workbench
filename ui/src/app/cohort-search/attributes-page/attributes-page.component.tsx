@@ -424,10 +424,10 @@ export const AttributesPage = fp.flow(
                 operator: null,
                 operands: [],
                 conceptId: +value,
-                [attr.conceptName]: parseInt(attr.estCount, 10),
+                [attr.conceptName]: parseFloat(attr.estCount),
               });
             } else {
-              form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
+              form.num[0][attr.conceptName] = parseFloat(attr.estCount);
             }
           });
         }
@@ -466,10 +466,10 @@ export const AttributesPage = fp.flow(
                   operator: this.isSurvey ? 'ANY' : null,
                   operands: [],
                   conceptId: conceptId,
-                  [attr.conceptName]: parseInt(attr.estCount, 10),
+                  [attr.conceptName]: parseFloat(attr.estCount),
                 });
               } else {
-                form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
+                form.num[0][attr.conceptName] = parseFloat(attr.estCount);
               }
             } else {
               // CAT attributes are displayed as checkboxes in the attributes form
@@ -564,7 +564,7 @@ export const AttributesPage = fp.flow(
           operatorSelected = form.num.length !== 0;
         const formErrors = form.num.reduce((acc, attr) => {
           const { MIN, MAX, operator } = attr;
-          const operands = attr.operands.map((op) => parseInt(op, 10));
+          const operands = attr.operands.map((op) => parseFloat(op));
           switch (operator) {
             case null:
               operatorSelected = false;
@@ -755,7 +755,7 @@ export const AttributesPage = fp.flow(
             name +=
               optionUtil[attr.operator].display +
               attr.operands
-                .map((op) => parseInt(op, 10).toLocaleString())
+                .map((op) => parseFloat(op).toLocaleString())
                 .join('-');
           }
         });
@@ -954,7 +954,7 @@ export const AttributesPage = fp.flow(
                             padding: '0 0.25rem',
                             ...(this.hasUnits ? { width: '70%' } : {}),
                           }}
-                          value={attr.operands[0] || ''}
+                          value={attr.operands[0]}
                           min={attr.MIN}
                           max={attr.MAX}
                           onChange={(v) => this.inputChange(v, a, 0)}
@@ -974,7 +974,7 @@ export const AttributesPage = fp.flow(
                               padding: '0 0.25rem',
                               ...(this.hasUnits ? { width: '70%' } : {}),
                             }}
-                            value={attr.operands[1] || ''}
+                            value={attr.operands[1]}
                             min={attr.MIN}
                             max={attr.MAX}
                             onChange={(v) => this.inputChange(v, a, 1)}

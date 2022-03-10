@@ -38,18 +38,10 @@ import { displayDateWithoutHours } from 'app/utils/dates';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
+import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { DataAccessPanel } from './data-access-panel';
-
-// validators for validate.js
-const required = { presence: { allowEmpty: false } };
-const notTooLong = (maxLength) => ({
-  length: {
-    maximum: maxLength,
-    tooLong: 'must be %{count} characters or less',
-  },
-});
 
 const validators = {
   givenName: { ...required, ...notTooLong(80) },

@@ -15,8 +15,10 @@ import {
   WorkspaceResponse,
 } from 'generated/fetch';
 
+import { AlertWarning } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
 import { SmallHeader } from 'app/components/headers';
+import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { renderResourceCard } from 'app/components/render-resource-card';
 import {
@@ -26,7 +28,7 @@ import {
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, withCdrVersions } from 'app/utils';
+import { cond, reactStyles, withCdrVersions } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { getDisplayName, isNotebook } from 'app/utils/resources';
@@ -93,13 +95,19 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
   const [tableData, setTableData] = useState<TableData[]>();
+  const [apiLoadError, setApiLoadError] = useState<string>(null);
 
-  const loadResources = () => {
+  const loadResources = async () => {
     setLoading(true);
-    return userMetricsApi()
+    await userMetricsApi()
       .getUserRecentResources()
       .then(setResources)
-      .then(() => setLoading(false));
+      .catch(() => {
+        setApiLoadError(
+          'An error occurred while loading recent resources. Please refresh the page to reload.'
+        );
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -185,43 +193,60 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     }
   }, [resources, wsMap]);
 
-  return resources && wsMap && !loading ? (
-    <React.Fragment>
-      <SmallHeader>Recently Accessed Items</SmallHeader>
-      <div data-test-id='recent-resources-table'>
-        <DataTable
-          value={tableData}
-          scrollable={true}
-          paginator={true}
-          paginatorTemplate='CurrentPageReport'
-          currentPageReportTemplate='Showing {totalRecords} most recent items'
-        >
-          <Column field='menu' style={styles.menu} />
-          <Column
-            field='resourceType'
-            header='Item type'
-            style={styles.typeColumn}
-          />
-          <Column field='resourceName' header='Name' style={styles.column} />
-          <Column
-            field='workspaceName'
-            header='Workspace name'
-            style={styles.column}
-          />
-          <Column
-            field='formattedLastModified'
-            header='Last changed'
-            style={styles.column}
-          />
-          <Column
-            field='cdrVersionName'
-            header='Dataset'
-            style={styles.column}
-          />
-        </DataTable>
-      </div>
-    </React.Fragment>
-  ) : (
-    <SpinnerOverlay />
+  return cond(
+    [
+      apiLoadError && !loading,
+      () => (
+        <AlertWarning style={{ fontSize: 14 }}>
+          <ClrIcon className='is-solid' shape='exclamation-triangle' />
+          {apiLoadError}
+        </AlertWarning>
+      ),
+    ],
+    [
+      resources && wsMap && !loading,
+      () => (
+        <React.Fragment>
+          <SmallHeader>Recently Accessed Items</SmallHeader>
+          <div data-test-id='recent-resources-table'>
+            <DataTable
+              value={tableData}
+              scrollable={true}
+              paginator={true}
+              paginatorTemplate='CurrentPageReport'
+              currentPageReportTemplate='Showing {totalRecords} most recent items'
+            >
+              <Column field='menu' style={styles.menu} />
+              <Column
+                field='resourceType'
+                header='Item type'
+                style={styles.typeColumn}
+              />
+              <Column
+                field='resourceName'
+                header='Name'
+                style={styles.column}
+              />
+              <Column
+                field='workspaceName'
+                header='Workspace name'
+                style={styles.column}
+              />
+              <Column
+                field='formattedLastModified'
+                header='Last changed'
+                style={styles.column}
+              />
+              <Column
+                field='cdrVersionName'
+                header='Dataset'
+                style={styles.column}
+              />
+            </DataTable>
+          </div>
+        </React.Fragment>
+      ),
+    ],
+    [loading, () => <SpinnerOverlay />]
   );
 });

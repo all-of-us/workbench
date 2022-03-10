@@ -13,7 +13,7 @@ import AuthenticatedPage from './authenticated-page';
 import { logger } from 'libs/logger';
 import WorkspaceAboutPage from './workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'app/component/card/workspace-card';
 import { openTab } from 'utils/test-utils';
 
 const faker = require('faker/locale/en_US');
@@ -71,7 +71,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
     const link = Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
-    await link.clickAndWait();
+    await link.clickAndWait({ timeout: 3 * 60 * 1000 });
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
     return workspaceEdit;
@@ -182,7 +182,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
   }
 
   async openAboutPage(workspaceCard: WorkspaceCard): Promise<WorkspaceAboutPage> {
-    await workspaceCard.clickWorkspaceName(false);
+    await workspaceCard.clickName();
     const aboutPage = new WorkspaceAboutPage(this.page);
     // Older workspace requires Review Research Purpose
     const reviewPurposeModal = new WorkspaceReviewResearchPurposeModal(this.page);

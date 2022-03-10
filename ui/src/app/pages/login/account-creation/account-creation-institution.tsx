@@ -39,6 +39,7 @@ import {
   getEmailValidationErrorMessage,
   getRoleOptions,
 } from 'app/utils/institutions';
+import { notTooLong } from 'app/utils/validators';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -315,6 +316,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         this.state.profile.verifiedInstitutionalAffiliation
           .institutionalRoleEnum === InstitutionalRole.OTHER
           ? {
+              ...notTooLong(80),
               presence: {
                 allowEmpty: false,
                 message: '^Institutional role text cannot be blank',

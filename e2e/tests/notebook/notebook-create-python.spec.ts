@@ -3,7 +3,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
 import { waitForFn } from 'utils/waits-utils';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -88,8 +88,8 @@ describe('Python Kernel Notebook Test', () => {
 
     // Find notebook card.
     const resourceCard = new DataResourceCard(page);
-    const notebookCard = await resourceCard.findCard(pyNotebookName, ResourceCard.Notebook);
-    await notebookCard.clickResourceName();
+    const notebookCard = await resourceCard.findCard({ name: pyNotebookName, cardType: ResourceCard.Notebook });
+    await notebookCard.clickName();
 
     // Open notebook in Edit mode
     const notebookPreviewPage = new NotebookPreviewPage(page);

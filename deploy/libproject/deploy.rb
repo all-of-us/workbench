@@ -270,11 +270,14 @@ def deploy(cmd_name, args)
 
   # TODO: Add more granular logging, e.g. call deploy natively and pass an
   # optional log writer. Also rescue and log if deployment fails.
+
+  # TODO(RW-7931): rm --allow_empty_tiers
   api_deploy_flags = %W{
       --project #{op.opts.project}
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
+      --allow_empty_tiers
       #{op.opts.promote ? "--promote" : "--no-promote"}
   } + (op.opts.dry_run ? %W{--dry-run} : [])
 

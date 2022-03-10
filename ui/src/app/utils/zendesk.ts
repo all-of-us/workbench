@@ -8,7 +8,9 @@ interface ZendeskUrls {
   egressFaq: string;
   dataDictionary: string;
   faq: string;
+  genomicExtraction: string;
   gettingStarted: string;
+  gpus: string;
   helpCenter: string;
   tableOfContents: string;
   researchPurpose: string;
@@ -59,7 +61,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
       dataDictionary: article('360033200232'),
       egressFaq: article('4407354684052'),
       faq: category('360002157532'),
+      genomicExtraction: article('4558187754772'),
       gettingStarted: category('360002157352'),
+      gpus: article('4421259211668'),
       tableOfContents: category('360002625291'),
       researchPurpose: article('360042673211'),
       workspaceBucket: article('360040043072'),
@@ -71,6 +75,8 @@ export const supportUrls: ZendeskUrls = ((env) => {
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
       faq: category('360005877792'),
+      genomicExtraction: article('4403537387412'),
+      gpus: article('4428626363668'),
       gettingStarted: category('360005884571'),
       tableOfContents: category('360005884591'),
       researchPurpose: article('360058861612'),
@@ -83,7 +89,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
       faq: category('360003453651'),
+      genomicExtraction: article('404'),
       gettingStarted: category('360003430652'),
+      gpus: article('4421259211668'),
       tableOfContents: category('360003430672'),
       researchPurpose: article('360044334652'),
       workspaceBucket: article('360044796611'),

@@ -8,7 +8,7 @@
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "stable-AoU-RW",
-    "timeoutInSeconds": 60,
+    "timeoutInSeconds": 180,
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.11",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
@@ -44,11 +44,13 @@
     "extractionPetServiceAccount": "pet-116281557770103257351@aouwgscohortextraction-stable.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-stable",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 3,
+    "extractionMethodConfigurationVersion": 4,
+    "extractionMethodLogicalVersion": 2,
     "extractionCohortsDataset": "fc-aou-cdr-stable-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-stable-ct.wgs_extraction_temp_tables",
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-357-gc79075c-SNAPSHOT-local.jar",
+    "extractionFilterSetName": "example",
+    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-464-g86f1116-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
   "cdr": {
@@ -97,14 +99,15 @@
       "expiryDays": 365,
       "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
       "lookbackPeriod": 330
-    }
+    },
+    "tiersVisibleToUsers": ["registered"]
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableGpu": false,
+    "enableGpu": true,
     "enablePersistentDisk": false,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,

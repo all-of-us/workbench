@@ -3,8 +3,8 @@ import { Tabs } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import BaseElement from './base-element';
-import { waitWhileLoading } from 'utils/waits-utils';
-import { getStyleValue } from 'utils/element-utils';
+import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
+import { getPropValue, getStyleValue } from 'utils/element-utils';
 import AuthenticatedPage from 'app/page/authenticated-page';
 
 export default class Tab extends BaseElement {
@@ -19,16 +19,18 @@ export default class Tab extends BaseElement {
   }
 
   async isSelected(): Promise<boolean> {
-    const isSelected = await this.getProperty<boolean>('aria-selected');
-    if (isSelected !== null) {
-      return isSelected;
-    }
-    // subtabs do not have property aria-selected
     const element = await this.asElementHandle();
-    return !!(await getStyleValue<string>(this.page, element, 'border-bottom'));
+    const selected = await getPropValue<string>(element, 'ariaSelected');
+    return selected !== undefined
+      ? selected === 'true'
+      : (await getStyleValue<string>(this.page, element, 'border-bottom')) !== null;
   }
 
   async waitFor(page: AuthenticatedPage): Promise<void> {
     await page.waitForLoad();
+  }
+
+  async waitUntilSelected(): Promise<void> {
+    await waitForFn(async () => await this.isSelected());
   }
 }

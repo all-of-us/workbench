@@ -1,6 +1,6 @@
 import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/card/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Language, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { Page } from 'puppeteer';
@@ -63,23 +63,11 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return cohortBuildPage;
   }
 
-  /**
-   * Export Dataset to notebook thru the Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName Dataset name.
-   * @param {string} notebookName Notebook name.
-   */
-  async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
-    const resourceCard = new DataResourceCard(this.page);
-    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu(MenuOption.ExportToNotebook, { waitForNav: false });
-    console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
-  }
-
   async findCohortCard(cohortName?: string, timeout?: number): Promise<DataResourceCard> {
     await openTab(this.page, Tabs.Cohorts);
     if (cohortName) {
       // find Concept Set that match specified name.
-      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, timeout);
+      return new DataResourceCard(this.page).findCard({ name: cohortName, cardType: ResourceCard.Cohort, timeout });
     }
     // if Cohort name isn't specified, find any existing Cohort.
     return new DataResourceCard(this.page).findAnyCard(ResourceCard.Cohort);
@@ -177,7 +165,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
       return new DataResourceCard(this.page).findAnyCard(ResourceCard.ConceptSet);
     }
     // find Concept Set that match specified name.
-    return new DataResourceCard(this.page).findCard(conceptSetsName, ResourceCard.ConceptSet);
+    return new DataResourceCard(this.page).findCard({ name: conceptSetsName, cardType: ResourceCard.ConceptSet });
   }
 
   async findOrCreateCohort(): Promise<DataResourceCard> {

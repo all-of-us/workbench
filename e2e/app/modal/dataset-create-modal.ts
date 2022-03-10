@@ -29,14 +29,12 @@ export default class DatasetCreateModal extends Modal {
   /**
    * Handle Create dialog
    */
-  async createDataset(): Promise<string> {
-    const newDatasetName = makeRandomName();
-
+  async create(newDatasetName = makeRandomName()): Promise<string> {
     const nameTextbox = this.getNameTextbox();
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
-    await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
+    await this.clickButton(LinkText.Save, { waitForClose: true });
     await waitWhileLoading(this.page);
 
     logger.info(`Created Dataset "${newDatasetName}"`);

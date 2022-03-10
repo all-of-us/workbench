@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="calbach" id="changelog-190-billing-migration-bug-backfill">
+    <!--
+     Fix incorrect billing migration status enum value, initialized for all projects going forward:
+     https://github.com/all-of-us/workbench/pull/6162.
+
+     The change was released in Jan 2022, and the incorrectly specified MIGRATED (2) status was not used
+     for a long time prior; so overwrite any such status we see for workspaces created after this time.
+     -->
+    <sql>
+      UPDATE workspace
+        SET billing_migration_status = 1
+        WHERE billing_migration_status = 2 AND creation_time > "2022-01-01 00:00:00";
+    </sql>
+  </changeSet>
+</databaseChangeLog>

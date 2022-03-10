@@ -66,6 +66,13 @@ export default class UserAdminPage extends AuthenticatedPage {
     return new UserProfileInfo(newPage).waitForLoad();
   }
 
+  async clickUserName(rowIndex = 1, colIndex = 1): Promise<void> {
+    const dataTable = this.getUserAdminTable();
+    const bodyTable = dataTable.getFrozenBody();
+    const cell = await bodyTable.getCellLink(rowIndex, colIndex);
+    await cell.click();
+  }
+
   // get the username email
   async getUserNameEmail(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();

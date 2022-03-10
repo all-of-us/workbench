@@ -26,7 +26,7 @@ export default class CohortSaveAsModal extends Modal {
   }
 
   async clickSaveButton(): Promise<void> {
-    await this.clickButton(LinkText.Save, { waitForNav: true, waitForClose: true, timeout: 2 * 60 * 1000 });
+    await this.clickButton(LinkText.Save, { waitForClose: true, timeout: 2 * 60 * 1000 });
     await waitWhileLoading(this.page);
   }
 }
