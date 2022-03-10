@@ -109,3 +109,13 @@ export const simulateTextInputChange = async (
   wrapper.simulate('change', { target: { value } });
   return await waitOneTickAndUpdate(wrapper);
 };
+
+export const expectButtonState = (wrapper: ReactWrapper, enabled: boolean) => {
+  const buttonStyle: React.CSSProperties = wrapper.prop('style');
+  expect(buttonStyle.cursor).toEqual(enabled ? 'pointer' : 'not-allowed');
+};
+
+export const expectButtonEnabled = (buttonWrapper: ReactWrapper) =>
+  expectButtonState(buttonWrapper, true);
+export const expectButtonDisabled = (buttonWrapper: ReactWrapper) =>
+  expectButtonState(buttonWrapper, false);

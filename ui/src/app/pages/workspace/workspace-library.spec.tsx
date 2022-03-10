@@ -14,7 +14,11 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonDisabled,
+  expectButtonEnabled,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStubs } from 'testing/stubs/workspaces';
@@ -158,12 +162,12 @@ describe('WorkspaceLibrary', () => {
       .map((c) => c.text());
     expect(cardNameList.length).toEqual(1);
 
-    const styleCursor = wrapper
-      .find('[data-test-id="workspace-card"]')
-      .first()
-      .find('[role="button"]')
-      .map((c) => c.prop('style').cursor);
-    expect(styleCursor).toEqual(['not-allowed']);
+    expectButtonDisabled(
+      wrapper
+        .find('[data-test-id="workspace-card"]')
+        .first()
+        .find('[role="button"]')
+    );
   });
 
   it('controlled tier workspace is clickable for ct user', async () => {
@@ -191,11 +195,11 @@ describe('WorkspaceLibrary', () => {
     wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    const styleCursor = wrapper
-      .find('[data-test-id="workspace-card"]')
-      .first()
-      .find('[role="button"]')
-      .map((c) => c.prop('style').cursor);
-    expect(styleCursor).toEqual(['pointer']);
+    expectButtonEnabled(
+      wrapper
+        .find('[data-test-id="workspace-card"]')
+        .first()
+        .find('[role="button"]')
+    );
   });
 });
