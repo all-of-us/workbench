@@ -97,10 +97,18 @@ git secrets --scan /path/to/file (/other/path/to/file *)
 git secrets --scan -r /path/to/directory
 ```
 
+## envsubst
+
+`envsubst` is part of the `gettext` package.
+If you are on a mac, run:
+```Shell
+  brew install gettext
+```
+
 ## Initial Smoke Test
 Before doing any development, you must run the following from `/api`:
 ```Shell
-./gradlew compileGeneratedJava appengineRun
+./gradlew compileGeneratedJava compileJava
 ```
 This will generate compiled Java and MapStruct files that are necessary
 for the app to compile. On Macs, this command will never progress beyond 96%.
