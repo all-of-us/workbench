@@ -108,7 +108,7 @@
       "cdrVersionId": 7,
       "isDefault": true,
       "name": "Synthetic Dataset in the Controlled Tier",
-      "bigqueryProject": "fc-aou-cdr-synth-stable",
+      "bigqueryProject": "fc-aou-cdr-stable-ct",
       "bigqueryDataset": "test_R2019q4r3",
       "wgsBigqueryDataset": "1kg_wgs_2022q1",
       "creationTime": "2019-09-30 00:00:00Z",
