@@ -15,7 +15,21 @@ import { isBlank } from 'utils/str-utils';
 import fp from 'lodash/fp';
 
 /**
- * Tests works for Verified Institution "Admin testing" and user "admin_test@fake-research-aou.org"
+ * Expected state of test user:
+ *
+ * username = admin_test
+ * contact email = testing@vumc.org
+ * name = Admin Testing
+ * credits used = 0
+ * institution = Admin testing
+ * PROFILE and PUBLICATION access modules are Current
+ * PROFILE and PUBLICATION access modules expire on May 12, 2031
+ * all other modules are bypassed
+ *
+ * Admin testing institution requires ERA for both tiers
+ *
+ * These institutions also exist: Broad, Google, Verily, Vanderbilt
+ *
  */
 describe('User Profile Admin', () => {
   enum TableColumns {
@@ -150,6 +164,7 @@ describe('User Profile Admin', () => {
     expect(moduleNames.sort()).toEqual(accessModules.sort());
 
     // Verify Tier Badges displayed correctly
+    // note: assumes ERA required for both tiers
     for (const accessModule of accessModules) {
       const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.REQUIRED_FOR_TIER);
       expect(await hasTierBadge(cell, Tiers.CT)).toBe(true);
@@ -362,6 +377,7 @@ describe('User Profile Admin', () => {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
     }
 
+    // cleanup: end this test with the user in the bypassed state
     if (newStatus === 'Incomplete') {
       await bypassSwitch.toggleOn();
       await saveButton.click();
@@ -409,6 +425,7 @@ describe('User Profile Admin', () => {
       expect(await userProfileAdminPage.getDataAccessTiers()).toEqual('Registered Tier');
     }
 
+    // cleanup: end this test with the user in the bypassed state
     if (newStatus === 'Incomplete') {
       await bypassSwitch.toggleOn();
       await saveButton.click();
