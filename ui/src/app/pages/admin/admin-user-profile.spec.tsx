@@ -85,10 +85,8 @@ describe('AdminUserProfile', () => {
     usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
   ) => {
     return mount(
-      <MemoryRouter
-        initialEntries={[`/admin/users-tmp/${usernameWithoutGsuite}`]}
-      >
-        <Route path='/admin/users-tmp/:usernameWithoutGsuiteDomain'>
+      <MemoryRouter initialEntries={[`/admin/users/${usernameWithoutGsuite}`]}>
+        <Route path='/admin/users/:usernameWithoutGsuiteDomain'>
           <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
         </Route>
       </MemoryRouter>
