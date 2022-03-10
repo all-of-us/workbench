@@ -8,7 +8,16 @@ import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import { ElementHandle, Page } from 'puppeteer';
 import WorkspaceCard from 'app/component/card/workspace-card';
-import { Cohorts, ConceptSets, Language, PageUrl, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import {
+  AccessTierDisplayNames,
+  Cohorts,
+  ConceptSets,
+  Language,
+  PageUrl,
+  ResourceCard,
+  Tabs,
+  WorkspaceAccessLevel
+} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { isBlank, makeWorkspaceName } from './str-utils';
@@ -16,7 +25,6 @@ import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 import Tab from 'app/element/tab';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import DataResourceCard from 'app/component/card/data-resource-card';

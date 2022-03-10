@@ -1,10 +1,9 @@
 import RuntimePanel, { ComputeType, RuntimePreset, StartStopIconState } from 'app/sidebar/runtime-panel';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { AccessTierDisplayNames, LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);

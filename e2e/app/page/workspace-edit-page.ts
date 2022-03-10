@@ -7,7 +7,7 @@ import { ElementType } from 'app/xpath-options';
 import { ElementHandle, Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import { buildXPath } from 'app/xpath-builders';
-import { LinkText } from 'app/text-labels';
+import { AccessTierDisplayNames, LinkText } from 'app/text-labels';
 import NewWorkspaceModal from 'app/modal/new-workspace-modal';
 import WorkspaceBase, { UseFreeCredits } from './workspace-base';
 import { config } from 'resources/workbench-config';
@@ -270,11 +270,6 @@ export const FIELD = {
 export enum AccessTierShortNames {
   Registered = 'registered',
   Controlled = 'controlled'
-}
-
-export enum AccessTierDisplayNames {
-  Registered = 'Registered Tier',
-  Controlled = 'Controlled Tier'
 }
 
 export default class WorkspaceEditPage extends WorkspaceBase {

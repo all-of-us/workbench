@@ -1,7 +1,15 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { AgeSelectionRadioButton, AnalysisTool, ConceptSets, DataSets, Language, LinkText } from 'app/text-labels';
+import {
+  AccessTierDisplayNames,
+  AgeSelectionRadioButton,
+  AnalysisTool,
+  ConceptSets,
+  DataSets,
+  Language,
+  LinkText
+} from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
@@ -12,7 +20,6 @@ import GenomicExtractionsSidebar from 'app/sidebar/genomic-extractions-sidebar';
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
-import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // 60 minutes. Test could take a long time.
 // Since refresh token expires in 60 min. test can fail if running takes longer than 60 min.
