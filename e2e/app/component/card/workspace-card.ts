@@ -103,7 +103,7 @@ export default class WorkspaceCard extends BaseCard {
     return wholeText.replace('Last Changed: ', '').trim();
   }
 
-  async controlledTiersIconExists(): Promise<boolean> {
+  async controlledTierIconExists(): Promise<boolean> {
     const xpath = `${this.getXpath()}//*[local-name()="svg" and child::*[text()="Controlled Tier"]]`;
     try {
       await this.page.waitForXPath(xpath, { visible: true, timeout: 1000 });
