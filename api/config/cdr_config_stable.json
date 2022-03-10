@@ -103,6 +103,24 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 7,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier",
+      "bigqueryProject": "fc-aou-cdr-synth-stable",
+      "bigqueryDataset": "test_R2019q4r3",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 5,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_22",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "controlled",
+      "storageBasePath": "v5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
     }
   ]
 }
