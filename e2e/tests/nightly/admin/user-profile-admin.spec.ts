@@ -16,7 +16,7 @@ import fp from 'lodash/fp';
 
 /**
  * Expected state of test user:
- * 
+ *
  * username = admin_test
  * contact email = testing@vumc.org
  * name = Admin Testing
@@ -25,9 +25,9 @@ import fp from 'lodash/fp';
  * PROFILE and PUBLICATION access modules are Current
  * PROFILE and PUBLICATION access modules expire on May 12, 2031
  * all other modules are bypassed
- * 
+ *
  * Admin testing institution requires ERA for both tiers
- * 
+ *
  * These institutions also exist: Broad, Google, Verily, Vanderbilt
  *
  */
