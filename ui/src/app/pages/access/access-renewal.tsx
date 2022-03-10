@@ -468,32 +468,27 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               />
               <RadioButton
                 id={noReportId}
-                disabled={
-                  !isModuleExpiring(
-                    getAccessModuleStatusByNameOrEmpty(
-                      modules,
-                      AccessModule.PUBLICATIONCONFIRMATION
-                    )
+                disabled={bypassedOrCompleteAndNotExpiring(
+                  getAccessModuleStatusByNameOrEmpty(
+                    modules,
+                    AccessModule.PUBLICATIONCONFIRMATION
                   )
-                }
+                )}
                 style={{ justifySelf: 'end' }}
                 checked={publications === true}
                 onChange={() => setPublications(true)}
               />
               <label htmlFor={noReportId}>
-                {' '}
-                At this time, I have nothing to report{' '}
+                At this time, I have nothing to report
               </label>
               <RadioButton
                 id={reportId}
-                disabled={
-                  !isModuleExpiring(
-                    getAccessModuleStatusByNameOrEmpty(
-                      modules,
-                      AccessModule.PUBLICATIONCONFIRMATION
-                    )
+                disabled={bypassedOrCompleteAndNotExpiring(
+                  getAccessModuleStatusByNameOrEmpty(
+                    modules,
+                    AccessModule.PUBLICATIONCONFIRMATION
                   )
-                }
+                )}
                 style={{ justifySelf: 'end' }}
                 checked={publications === false}
                 onChange={() => setPublications(false)}
