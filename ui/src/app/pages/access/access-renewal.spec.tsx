@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AccessModule,
@@ -21,6 +21,8 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonDisabled,
+  expectButtonEnabled,
   findNodesByExactText,
   findNodesContainingText,
   waitOneTickAndUpdate,
@@ -62,7 +64,7 @@ describe('Access Renewal Page', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   }
 
-  function removeOneModule(toBeRemoved) {
+  function removeOneModule(toBeRemoved: AccessModule) {
     const oldProfile = profileStore.get().profile;
     const newModules = oldProfile.accessModules.modules.filter(
       (m) => m.moduleName !== toBeRemoved
@@ -75,7 +77,10 @@ describe('Access Renewal Page', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   }
 
-  function updateOneModuleExpirationTime(updateModuleName, time) {
+  function updateOneModuleExpirationTime(
+    updateModuleName: AccessModule,
+    time: number
+  ) {
     const oldProfile = profileStore.get().profile;
     const newModules = [
       ...oldProfile.accessModules.modules.filter(
@@ -136,22 +141,22 @@ describe('Access Renewal Page', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   }
 
-  const expectExpired = (wrapper) =>
+  const expectExpired = (wrapper: ReactWrapper) =>
     expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(
       1
     );
-  const expectNotExpired = (wrapper) =>
+  const expectNotExpired = (wrapper: ReactWrapper) =>
     expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(
       0
     );
-  const expectComplete = (wrapper) =>
+  const expectComplete = (wrapper: ReactWrapper) =>
     expect(
       findNodesByExactText(
         wrapper,
         'Thank you for completing all the necessary steps'
       ).length
     ).toBe(1);
-  const expectIncomplete = (wrapper) =>
+  const expectIncomplete = (wrapper: ReactWrapper) =>
     expect(
       findNodesByExactText(
         wrapper,
@@ -510,6 +515,32 @@ describe('Access Renewal Page', () => {
       expect(spy).toHaveBeenCalledTimes(expected);
     }
   );
+
+  // RW-7961
+  it('should allow completion of profile and publication confirmations when incomplete', async () => {
+    removeOneModule(AccessModule.PROFILECONFIRMATION);
+    removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
+
+    const wrapper = component();
+
+    // all are Incomplete
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectNotExpired(wrapper);
+    expectIncomplete(wrapper);
+
+    expectButtonEnabled(findNodesByExactText(wrapper, 'Review').parent());
+
+    // not yet - need to click a radio button
+    expectButtonDisabled(findNodesByExactText(wrapper, 'Confirm').parent());
+
+    wrapper.find('[data-test-id="report-submitted"]').first().simulate('click');
+
+    expectButtonEnabled(findNodesByExactText(wrapper, 'Confirm').parent());
+  });
 });
 
 describe('isExpiring', () => {

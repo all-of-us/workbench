@@ -467,6 +467,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
               />
               <RadioButton
+                data-test-id='nothing-to-report'
                 id={noReportId}
                 disabled={bypassedOrCompleteAndNotExpiring(
                   getAccessModuleStatusByNameOrEmpty(
@@ -482,6 +483,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 At this time, I have nothing to report
               </label>
               <RadioButton
+                data-test-id='report-submitted'
                 id={reportId}
                 disabled={bypassedOrCompleteAndNotExpiring(
                   getAccessModuleStatusByNameOrEmpty(
