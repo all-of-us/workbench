@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
-import { LinkText, PageUrl, Tabs } from 'app/text-labels';
-import WorkspaceEditPage, { AccessTierDisplayNames, FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
+import { AccessTierDisplayNames, LinkText, PageUrl, Tabs } from 'app/text-labels';
+import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';

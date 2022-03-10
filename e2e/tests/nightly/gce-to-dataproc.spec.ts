@@ -3,8 +3,7 @@ import { config } from 'resources/workbench-config';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import { ResourceCard } from 'app/text-labels';
-import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
+import { AccessTierDisplayNames, ResourceCard } from 'app/text-labels';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);

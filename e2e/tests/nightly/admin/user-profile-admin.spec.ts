@@ -1,17 +1,17 @@
-import UserAdminPage from 'app/page/admin-user-list-page';
-import { asyncFilter, parseForNumericalStrings, signInWithAccessToken } from 'utils/test-utils';
+import { ElementHandle, Page } from 'puppeteer';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
 import UserProfileAdminPage from 'app/page/admin/user-profile-admin-page';
-import { ElementHandle, Page } from 'puppeteer';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import { Institution, InstitutionRole } from 'app/text-labels';
-import { getPropValue, getStyleValue } from 'utils/element-utils';
+import UserAdminPage from 'app/page/admin-user-list-page';
+import { AccessTierDisplayNames, Institution, InstitutionRole } from 'app/text-labels';
 import Cell, { CellContent } from 'app/component/cell';
 import UserAuditPage from 'app/page/admin-user-audit-page';
+import { getPropValue, getStyleValue } from 'utils/element-utils';
 import { isBlank } from 'utils/str-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { asyncFilter, parseForNumericalStrings, signInWithAccessToken } from 'utils/test-utils';
 import fp from 'lodash/fp';
 
 /**
@@ -31,7 +31,7 @@ import fp from 'lodash/fp';
  * These institutions also exist: Broad, Google, Verily, Vanderbilt
  *
  */
-describe('User Profile Admin', () => {
+describe('User Profile Admin page', () => {
   enum TableColumns {
     ACCESS_MODULE = 'Access module',
     STATUS = 'Status',
@@ -71,11 +71,6 @@ describe('User Profile Admin', () => {
     AccessModules.UPDATE_PROFILE,
     AccessModules.PUBLICATION
   ];
-
-  enum Tiers {
-    RT = 'Registered Tier',
-    CT = 'Controlled Tier'
-  }
 
   const CHANGED_BACKGROUND_COLOR = 'rgb(248, 201, 84)';
   const BACKGROUND_COLOR = 'rgb(255, 255, 255)';
@@ -167,10 +162,10 @@ describe('User Profile Admin', () => {
     // note: assumes ERA required for both tiers
     for (const accessModule of accessModules) {
       const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.REQUIRED_FOR_TIER);
-      expect(await hasTierBadge(cell, Tiers.CT)).toBe(true);
+      expect(await hasTierBadge(cell, AccessTierDisplayNames.Controlled)).toBe(true);
       accessModule === AccessModules.CT_TRAINING
-        ? expect(await hasTierBadge(cell, Tiers.RT)).toBe(false)
-        : expect(await hasTierBadge(cell, Tiers.RT)).toBe(true);
+        ? expect(await hasTierBadge(cell, AccessTierDisplayNames.Registered)).toBe(false)
+        : expect(await hasTierBadge(cell, AccessTierDisplayNames.Registered)).toBe(true);
     }
 
     // Verify Status displayed correctly
@@ -520,7 +515,7 @@ describe('User Profile Admin', () => {
     await newPage.close();
   }
 
-  async function hasTierBadge(cell: Cell, tier: Tiers): Promise<boolean> {
+  async function hasTierBadge(cell: Cell, tier: AccessTierDisplayNames): Promise<boolean> {
     const elements: ElementHandle[] = await cell.getContent(CellContent.SVG);
     const svg: ElementHandle[] = await asyncFilter(
       elements,

@@ -1,5 +1,6 @@
 import { config } from 'resources/workbench-config';
 import { IPageUrl } from 'types';
+
 const { LOGIN_URL_DOMAIN_NAME, WORKSPACES_URL_PATH, ADMIN_URL_PATH, PROFILE_URL_PATH } = config;
 
 export const PageUrl: IPageUrl = {
@@ -233,4 +234,9 @@ export enum Tabs {
   CohortReviews = 'Cohort Reviews',
   ConceptSets = 'Concept Sets',
   ShowAll = 'Show All'
+}
+
+export enum AccessTierDisplayNames {
+  Registered = 'Registered Tier',
+  Controlled = 'Controlled Tier'
 }
