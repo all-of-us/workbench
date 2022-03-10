@@ -217,7 +217,7 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path='/admin/users/:usernameWithoutGsuiteDomain'
+        path='/admin/users-deprecated/:usernameWithoutGsuiteDomain'
         guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}
       >
         <UserAdminPage
@@ -226,7 +226,7 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path='/admin/users-tmp/:usernameWithoutGsuiteDomain'
+        path='/admin/users/:usernameWithoutGsuiteDomain'
         guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}
       >
         <UserAdminProfilePage
