@@ -501,6 +501,19 @@ describe('AdminUserProfile', () => {
     expect(saveButton.props().disabled).toBeFalsy();
   });
 
+  function expectModuleTitlesInOrder(
+    accessModules: AccessModule[],
+    tableRows: ReactWrapper
+  ) {
+    accessModules.forEach((moduleName, index) => {
+      const moduleRow = tableRows.at(index);
+      const { adminPageTitle } = getAccessModuleConfig(moduleName);
+      expect(
+        findNodesContainingText(moduleRow, adminPageTitle).exists()
+      ).toBeTruthy();
+    });
+  }
+
   it('should render the titles of all expected access modules', async () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
@@ -513,14 +526,7 @@ describe('AdminUserProfile', () => {
     expect(tableRows.length).toEqual(accessModulesForTable.length);
 
     // confirm that the accessModulesForTable are listed in order with expected title text
-
-    accessModulesForTable.forEach((moduleName, index) => {
-      const moduleRow = tableRows.at(index);
-      const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      expect(
-        findNodesContainingText(moduleRow, adminPageTitle).exists()
-      ).toBeTruthy();
-    });
+    expectModuleTitlesInOrder(accessModulesForTable, tableRows);
   });
 
   test.each([
@@ -646,14 +652,7 @@ describe('AdminUserProfile', () => {
     expect(tableRows.length).toEqual(expectedModules.length);
 
     // confirm that the expectedModules are listed in order with expected title text
-
-    expectedModules.forEach((moduleName, index) => {
-      const moduleRow = tableRows.at(index);
-      const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      expect(
-        findNodesContainingText(moduleRow, adminPageTitle).exists()
-      ).toBeTruthy();
-    });
+    expectModuleTitlesInOrder(expectedModules, tableRows);
   });
 
   test.each([
