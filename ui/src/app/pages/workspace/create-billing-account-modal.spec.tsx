@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 
 import { profileStore } from 'app/utils/stores';
 
+import { BROAD } from 'testing/stubs/institution-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { CreateBillingAccountModal } from './create-billing-account-modal';
@@ -83,7 +84,7 @@ describe('CreateBillingAccountModal', () => {
     ).toEqual('tester@fake-research-aou.org');
     expect(
       wrapper.find('[data-test-id="user-institution"]').first().prop('value')
-    ).toEqual('The Broad Institute');
+    ).toEqual(BROAD.displayName);
 
     // Type invalid phone number then valid phone number
     wrapper
@@ -129,7 +130,7 @@ describe('CreateBillingAccountModal', () => {
     expect(
       wrapper.find('[data-test-id="user-institution-text"]').first().props()
         .children
-    ).toEqual('The Broad Institute');
+    ).toEqual(BROAD.displayName);
     expect(
       wrapper.find('[data-test-id="nih-funded-text"]').first().props().children
     ).toEqual('No');
