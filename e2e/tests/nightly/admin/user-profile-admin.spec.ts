@@ -74,7 +74,7 @@ describe('User Profile Admin', () => {
 
   enum Tiers {
     RT = 'Registered Tier',
-    CT = 'Controlled tier'
+    CT = 'Controlled Tier'
   }
 
   const CHANGED_BACKGROUND_COLOR = 'rgb(248, 201, 84)';
