@@ -2957,9 +2957,12 @@ Common.register_command({
 })
 
 def export_workspace_operations(cmd_name, *args)
-  common = Common.new
-
-   op = WbOptionsParser.new(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, p) { opts.project = p },
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
    op.opts.project = TEST_PROJECT
    op.parse.validate
 
@@ -2968,6 +2971,7 @@ def export_workspace_operations(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   gcc.validate()
 
+  common = Common.new
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{./gradlew exportWorkspaceOperations}
   end
