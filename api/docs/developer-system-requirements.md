@@ -33,6 +33,8 @@ For local development, also install:
   * [Node.js](https://nodejs.org/en/) >= 10.  Currently known to work up to 16.13.
   * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   * [Docker Compose](https://docs.docker.com/compose/install/)
+  * `envsubst` which is part of [gettext](https://www.gnu.org/software/gettext/)
+    * Mac: `brew install gettext`
 
 ### Initialization
 Next, follow the steps in [Developer System Initialization](developer-system-initialization.md).
