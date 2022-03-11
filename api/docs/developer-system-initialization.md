@@ -102,5 +102,7 @@ Before doing any development, you must run the following from `/api`:
 ```Shell
 ./gradlew compileJava
 ```
-This will generate compiled Java and MapStruct files that are necessary
-for the app to compile. 
+Before compiling, this will also generate Java files from MapStruct and OpenAPI (Swagger) 
+definitions which the app requires to compile. Depending on your personal development environment,
+you may need to frequently run `./gradlew clean compileJava` to pick up MapStruct/OpenAPI changes, 
+particularly when changing branches.
