@@ -120,7 +120,7 @@
     {
       "cdrVersionId": 8,
       "name": "All of Us Controlled Tier Dataset v5",
-      "isDefault": true,
+      "archived": true,
       "bigqueryProject": "fc-aou-cdr-prod-ct",
       "bigqueryDataset": "C2021Q3R6",
       "creationTime": "2021-08-10 00:00:00Z",

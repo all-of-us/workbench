@@ -100,13 +100,13 @@
       "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
       "lookbackPeriod": 330
     },
-    "tiersVisibleToUsers": ["registered", "controlled"]
+    "tiersVisibleToUsers": ["registered"]
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableGenomicExtraction": true,
+    "enableGenomicExtraction": false,
     "enableGpu": true,
     "enablePersistentDisk": false,
     "enablePrivateDataprocWorker": false,
