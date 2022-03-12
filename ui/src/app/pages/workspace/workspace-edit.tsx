@@ -236,7 +236,7 @@ const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 
 // Poll parameters for checking the result of an async Workspace Create or Duplicate operation
-const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 3 * 60 * 1000;
+const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 6 * 60 * 1000;
 const WORKSPACE_OPERATION_POLL_INTERVAL_MS = 5 * 1000;
 
 const OPERATION_PENDING_STATES = [
