@@ -2,7 +2,6 @@ import { ElementHandle, Page } from 'puppeteer';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
-import UserProfileInfo from 'app/page/admin-user-profile-info';
 import UserProfileAdminPage from 'app/page/admin/user-profile-admin-page';
 import UserAdminPage from 'app/page/admin-user-list-page';
 import { AccessTierDisplayNames, Institution, InstitutionRole } from 'app/text-labels';
@@ -494,12 +493,7 @@ describe('User Profile Admin page', () => {
     const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
     const newPage = await newTarget.page();
 
-    await new UserProfileInfo(newPage).waitForLoad();
-
-    // Go to url users-tmp page
-    const tmpUrl = replaceWithTmpUrl(newPage.url());
-    await newPage.goto(tmpUrl, { waitUntil: ['load', 'networkidle0'] });
-
+    await new UserProfileAdminPage(newPage).waitForLoad();
     return newPage;
   }
 
@@ -522,9 +516,5 @@ describe('User Profile Admin page', () => {
       async (svg: ElementHandle) => tier === (await getPropValue<string>(svg, 'textContent'))
     );
     return svg.length > 0;
-  }
-
-  function replaceWithTmpUrl(url: string): string {
-    return url.replace('users', 'users-tmp');
   }
 });

@@ -7,7 +7,6 @@ import AdminTable from 'app/component/admin-table';
 import Textbox from 'app/element/textbox';
 import BypassPopup from 'app/component/bypass-modules';
 import UserAuditPage from './admin-user-audit-page';
-import UserProfileInfo from './admin-user-profile-info';
 
 const PageTitle = 'User Admin Table';
 
@@ -53,17 +52,6 @@ export default class UserAdminPage extends AuthenticatedPage {
     await cell.click();
     const bypassPopup = new BypassPopup(this.page);
     return bypassPopup;
-  }
-
-  // click on the name link in the frozen column to navigate to the user info page
-  async clickNameLink(rowIndex = 1, colIndex = 1): Promise<UserProfileInfo> {
-    const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getFrozenBody();
-    const cell = await bodyTable.getCellLink(rowIndex, colIndex);
-    await cell.click();
-    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
-    const newPage = await newTarget.page();
-    return new UserProfileInfo(newPage).waitForLoad();
   }
 
   async clickUserName(rowIndex = 1, colIndex = 1): Promise<void> {
