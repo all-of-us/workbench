@@ -96,4 +96,8 @@ export default class Select extends BaseElement {
         throw new Error(err);
       });
   }
+
+  async expectEnabled(enabled: boolean): Promise<void> {
+    expect(await this.isDisabled()).toBe(!enabled);
+  }
 }

@@ -103,6 +103,7 @@ export enum LinkText {
   ExtractAndContinue = 'Extract & Continue',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
+  GetStarted = 'Get Started',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',

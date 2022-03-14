@@ -17,6 +17,7 @@ export default class ShareModal extends Modal {
 
   async isLoaded(): Promise<boolean> {
     await waitForText(this.page, modalText, { container: this });
+    await waitWhileLoading(this.page);
     return true;
   }
 
@@ -31,21 +32,9 @@ export default class ShareModal extends Modal {
     };
     const addIcon = findCollaboratorAddIcon(userName);
 
-    const dropDownXpath = this.getXpath() + '//*[@data-test-id="drop-down"][.//clr-icon[@shape="plus-circle"]]';
-    const existsDropDown = async (timeout: number): Promise<boolean> => {
-      return this.page
-        .waitForXPath(dropDownXpath, { visible: true, timeout })
-        .then(() => {
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
-    };
-
     const waitForDropDownClose = async (): Promise<void> => {
       await waitWhileLoading(this.page);
-      await this.page.waitForXPath(dropDownXpath, { hidden: true });
+      await this.page.waitForXPath(this.getEmailsDropdownXpath(), { hidden: true, visible: false });
     };
 
     const pickUserRole = async (name: string): Promise<void> => {
@@ -64,20 +53,20 @@ export default class ShareModal extends Modal {
         const input = await this.waitForSearchBox().asElementHandle();
         const waitForResponsePromise = this.page.waitForResponse(
           (response) => {
-            return response.url().includes('/userSearch/registered/') && response.request().method() === 'GET';
+            return response.url().includes('v1/userSearch/') && response.request().method() === 'GET';
           },
           { timeout: 60000 }
         );
         await input.type(chars, { delay: 0 });
         // Wait for GET /userSearch request to finish. Sometimes it takes several seconds.
         await waitForResponsePromise;
-        const foundDropdown = await existsDropDown(timeout);
-        const foundAddIcon = await addIcon.exists(timeout);
-        if (foundDropdown && foundAddIcon) {
-          await addIcon.click();
-          // Test playback runs fast. Wait until dropdown disappears so it is not interfering with next click.
-          await waitForDropDownClose();
-          return true;
+        if (await this.existsUsersDropdown(timeout)) {
+          if (await addIcon.exists(1000)) {
+            await addIcon.click();
+            // Test playback runs fast. Wait until dropdown disappears so it is not interfering with next click.
+            await waitForDropDownClose();
+            return true;
+          }
         }
       }
       return false;
@@ -138,18 +127,39 @@ export default class ShareModal extends Modal {
     return this.page.waitForXPath(`//*[starts-with(@id,"react-select") and text()="${levelText}"]`, { visible: true });
   }
 
-  async existsUser(email: string): Promise<boolean> {
-    const notFoundXpath =
-      this.getXpath() + '//*[@data-test-id="drop-down"][not(.//*[text()="No results based on your search"])]';
-    await this.waitForSearchBox().type(email, { delay: 20 });
+  async userExists(email: string): Promise<boolean> {
+    const timeout = 10000;
+    const noSearchResultsXpath =
+      this.getXpath() + '//*[@data-test-id="drop-down"]//*[text()="No results based on your search"]';
+    const emailWithoutDomain = email.split('@')[0];
+    await this.waitForSearchBox().type(emailWithoutDomain);
     await waitWhileLoading(this.page);
+    await Promise.race([
+      this.page.waitForXPath(noSearchResultsXpath, { visible: true, timeout }),
+      this.existsUsersDropdown(timeout)
+    ]);
     return await this.page
-      .waitForXPath(notFoundXpath, { visible: true, timeout: 5000 })
+      .waitForXPath(noSearchResultsXpath, { visible: true, timeout: 100 })
+      .then(() => {
+        return false;
+      })
+      .catch(() => {
+        return true;
+      });
+  }
+
+  private async existsUsersDropdown(timeout = 2000): Promise<boolean> {
+    return this.page
+      .waitForXPath(this.getEmailsDropdownXpath(), { visible: true, timeout })
       .then(() => {
         return true;
       })
       .catch(() => {
         return false;
       });
+  }
+
+  private getEmailsDropdownXpath(): string {
+    return `${this.getXpath()}//*[@data-test-id="drop-down"][.//clr-icon[@shape="plus-circle"]]`;
   }
 }
