@@ -29,12 +29,56 @@
       "namespace": "aou-rw-141ad4f5",
       "id": "howtoworkwithallofussurveydatatier5",
       "category": "TUTORIAL_WORKSPACES"
-    }, {
+    },
+    {
       "name": "How to Work With Wearable Device Data (tier 5)",
       "namespace": "aou-rw-7b4a3b1d",
       "id": "howtoworkwithwearabledevicedatatier5",
       "category": "TUTORIAL_WORKSPACES"
-    }, {
+    },
+    {
+      "name": "How to run WDLs using Cromwell in Researcher Workbench",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to use dsub in the Researcher Workbench",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to use Nextflow in the Researcher Workbench",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us Genomic Data (Hail - Plink)",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us Survey Data_ct_v5",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Get Started with Controlled Tier Data",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Reproduce the All of Us SARS-CoV-2 Antibody Study",
+      "namespace": "",
+      "id": "",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "Phenotype - Breast Cancer (tier 5)",
       "namespace": "aou-rw-c6574691",
       "id": "phenotypebreastcancertier5",
