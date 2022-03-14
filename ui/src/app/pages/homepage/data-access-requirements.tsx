@@ -1028,6 +1028,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     useEffect(() => {
       const onMount = async () => {
+        console.log('calling syncModulesExternal');
         await syncModulesExternal(
           incompleteModules(getEligibleModules(allModules, profile), profile)
         );
