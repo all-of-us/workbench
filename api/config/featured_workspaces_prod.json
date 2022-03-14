@@ -109,6 +109,24 @@
       "category": "PHENOTYPE_LIBRARY"
     },
     {
+      "name": "Type 2 Diabetes",
+      "namespace": "",
+      "id": "",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Breast Cancer",
+      "namespace": "",
+      "id": "",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Ischemic Heart Disease",
+      "namespace": "",
+      "id": "",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
       "name": "Demo - Medication Sequencing",
       "namespace": "aou-rw-e8aeecf1",
       "id": "demomedicationsequencing",
