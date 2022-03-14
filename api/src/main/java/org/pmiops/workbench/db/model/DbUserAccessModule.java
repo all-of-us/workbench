@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.base.Objects;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Entity
 @Table(name = "user_access_module")
@@ -18,6 +20,7 @@ public class DbUserAccessModule {
   private DbAccessModule accessModule;
   private Timestamp completionTime;
   private Timestamp bypassTime;
+  private long optimisticLockingVersion;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,5 +74,54 @@ public class DbUserAccessModule {
   public DbUserAccessModule setBypassTime(Timestamp bypassTime) {
     this.bypassTime = bypassTime;
     return this;
+  }
+
+  @Version
+  @Column(name = "version")
+  public long getOptimisticLockingVersion() {
+    return optimisticLockingVersion;
+  }
+
+  public DbUserAccessModule setOptimisticLockingVersion(long optimisticLockingVersion) {
+    this.optimisticLockingVersion = optimisticLockingVersion;
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbUserAccessModule that = (DbUserAccessModule) o;
+    return Objects.equal(user, that.user)
+        && Objects.equal(accessModule, that.accessModule)
+        && Objects.equal(completionTime, that.completionTime)
+        && Objects.equal(bypassTime, that.bypassTime);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(user, accessModule, completionTime, bypassTime);
+  }
+
+  @Override
+  public String toString() {
+    return "DbUserAccessModule{"
+        + "userAccessModuleId="
+        + userAccessModuleId
+        + ", userId="
+        + user.getUserId()
+        + ", accessModuleId="
+        + accessModule.getAccessModuleId()
+        + ", completionTime="
+        + completionTime
+        + ", bypassTime="
+        + bypassTime
+        + ", optimisticLockingVersion="
+        + optimisticLockingVersion
+        + '}';
   }
 }
