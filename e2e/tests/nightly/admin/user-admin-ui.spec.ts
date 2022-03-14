@@ -43,7 +43,7 @@ describe('User Admin', () => {
     await userProfileAdmin.waitForLoad();
   });
 
-  test('Verify that the user-audit page UI renders correctly', async () => {
+  test('Can navigate to the UserAuditPage from the UserAdminPage', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 

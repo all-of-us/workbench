@@ -305,7 +305,7 @@ describe('User Profile Admin page', () => {
     expect(newVerifiedInstitution).toEqual(oldInstitution);
   });
 
-  test('Can go to User Audit page', async () => {
+  test('Can navigate to the UserAuditPage from the UserProfileAdminPage', async () => {
     const userProfileAdminPage = new UserProfileAdminPage(adminTab);
     await userProfileAdminPage.waitForLoad();
 
