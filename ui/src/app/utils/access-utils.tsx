@@ -509,7 +509,7 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
 
   return Promise.all(
     filteredModuleNames.map(async (moduleName) => {
-      console.log(`syncModulesExternal: ${moduleName}`)
+      console.log(`syncModulesExternal: ${moduleName}`);
       const { externalSyncAction } = getAccessModuleConfig(moduleName);
       if (externalSyncAction) {
         await externalSyncAction();
