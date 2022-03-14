@@ -91,7 +91,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     userAccessModuleToUpdate.setBypassTime(newBypassTime);
     logger.info("Saving access module update: " + userAccessModuleToUpdate.toString());
-    userAccessModuleDao.save(userAccessModuleToUpdate);
+    userAccessModuleDao.saveWithRetries(userAccessModuleToUpdate);
     userServiceAuditor.fireAdministrativeBypassTime(
         user.getUserId(),
         auditAccessModuleFromStorage(accessModule.getName()),
@@ -107,7 +107,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbUserAccessModule userAccessModuleToUpdate =
         retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     logger.info("Saving access module update: " + userAccessModuleToUpdate.toString());
-    userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
+    userAccessModuleDao.saveWithRetries(userAccessModuleToUpdate.setCompletionTime(timestamp));
   }
 
   @Override
