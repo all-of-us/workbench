@@ -3,7 +3,6 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
-import UserProfileAdminPage from 'app/page/admin/user-profile-admin-page';
 
 describe('User Admin', () => {
   const userEmail = 'admin_test';
@@ -39,12 +38,12 @@ describe('User Admin', () => {
     const nameColIndex = await adminTable.getNameColindex();
 
     //click on the name link to navigate to the admin-user-profile page
-    const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
+    const userProfileAdmin = await userAdminPage.clickNameLink(1, nameColIndex);
     //navigate to admin-user-profile page
-    await userProfileInfo.waitForLoad();
+    await userProfileAdmin.waitForLoad();
   });
 
-  test('Verify that the user-audit page UI renders correctly', async () => {
+  fit('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -70,8 +69,7 @@ describe('User Admin', () => {
     const userNameAuditPage = await userAuditPage.getUsernameValue();
     expect(userNameAuditPage).toEqual(userNameValue);
 
-    await userAuditPage.clickUserAdminLink();
-    const userProfileInfo = new UserProfileAdminPage(page);
-    await userProfileInfo.waitForLoad();
+    const userProfileAdmin = await userAuditPage.clickUserAdminLink();
+    await userProfileAdmin.waitForLoad();
   });
 });
