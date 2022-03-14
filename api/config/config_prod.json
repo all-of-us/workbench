@@ -106,7 +106,7 @@
     "unsafeAllowDeleteUser": false,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableGenomicExtraction": true,
+    "enableGenomicExtraction": false,
     "enableGpu": true,
     "enablePersistentDisk": false,
     "enablePrivateDataprocWorker": false,
