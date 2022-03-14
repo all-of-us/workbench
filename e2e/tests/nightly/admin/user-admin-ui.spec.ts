@@ -69,7 +69,6 @@ describe('User Admin', () => {
     const userNameAuditPage = await userAuditPage.getUsernameValue();
     expect(userNameAuditPage).toEqual(userNameValue);
 
-    const userProfileAdmin = await userAuditPage.clickUserAdminLink();
-    await userProfileAdmin.waitForLoad();
+    await userAuditPage.clickUserAdminLink();
   });
 });

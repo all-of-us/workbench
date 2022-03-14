@@ -42,6 +42,6 @@ export default class UserAuditPage extends AuthenticatedPage {
   async clickUserAdminLink(): Promise<UserProfileAdminPage> {
     const link = new Link(this.page, '//a[text()="User"]');
     await link.click();
-    return new UserProfileAdminPage(this.page);
+    return new UserProfileAdminPage(this.page).waitForLoad();
   }
 }
