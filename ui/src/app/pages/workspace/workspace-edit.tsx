@@ -2313,6 +2313,12 @@ export const WorkspaceEdit = fp.flow(
                   {loading && (
                     <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
                   )}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <b>
+                      Note: this workspace will take approximately one minute to
+                      create.
+                    </b>
+                  </div>
                   <div>Your responses to these questions:</div>
                   <div style={{ margin: '0.25rem 0 0.25rem 1rem' }}>
                     <span style={{ fontWeight: 600 }}>
