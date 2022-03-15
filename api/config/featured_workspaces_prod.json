@@ -29,12 +29,50 @@
       "namespace": "aou-rw-141ad4f5",
       "id": "howtoworkwithallofussurveydatatier5",
       "category": "TUTORIAL_WORKSPACES"
-    }, {
+    },
+    {
       "name": "How to Work With Wearable Device Data (tier 5)",
       "namespace": "aou-rw-7b4a3b1d",
       "id": "howtoworkwithwearabledevicedatatier5",
       "category": "TUTORIAL_WORKSPACES"
-    }, {
+    },
+    {
+      "name": "How to run WDLs using Cromwell in Researcher Workbench",
+      "namespace": "aou-rw-ec29d5cc",
+      "id": "howtorunwdlsusingcromwellintheresearcherworkbench",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to use dsub in the Researcher Workbench",
+      "namespace": "aou-rw-64c07d34",
+      "id": "howtousedsubintheresearcherworkbench",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to use Nextflow in the Researcher Workbench",
+      "namespace": "aou-rw-753ae8a4",
+      "id": "howtousenextflowintheresearcherworkbench",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us Genomic Data (Hail - Plink)",
+      "namespace": "aou-rw-87f97daa",
+      "id": "howtoworkwithallofusgenomicdatahailplink",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us COPE Survey Data",
+      "namespace": "aou-rw-a54183e5",
+      "id": "howtoworkwithallofussurveydata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Get Started with Controlled Tier Data",
+      "namespace": "aou-rw-0e75c5a2",
+      "id": "howtogetstartedwithcontrolledtierdata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "Phenotype - Breast Cancer (tier 5)",
       "namespace": "aou-rw-c6574691",
       "id": "phenotypebreastcancertier5",
@@ -62,6 +100,24 @@
       "name": "Phenotype - Type 2 Diabetes (tier 5)",
       "namespace": "aou-rw-8ec0c8fe",
       "id": "phenotypetype2diabetestier5",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Type 2 Diabetes",
+      "namespace": "aou-rw-a7c214e2",
+      "id": "phenotypetype2diabetestier5",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Breast Cancer",
+      "namespace": "aou-rw-4d183553",
+      "id": "phenotypebreastcancertier5",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Ischemic Heart Disease",
+      "namespace": "aou-rw-8d192a8e",
+      "id": "phenotypeischemicheartdiseasetier5",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
