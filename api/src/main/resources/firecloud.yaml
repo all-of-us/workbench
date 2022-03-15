@@ -1018,7 +1018,7 @@ paths:
       summary: Passes through to Sam API and accepts Terra Terms of Service
       operationId: acceptTermsOfService
       requestBody:
-        description: url
+        description: Must equal the (double-quoted) url of the Terra Terms of Service
         content:
           'application/json':
             schema:
@@ -1030,7 +1030,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RawlsMe'
+                $ref: '#/components/schemas/Me'
         404:
           description: User Not Found.
           content: { }
@@ -1899,13 +1899,6 @@ components:
         tosAccepted:
           type: boolean
           description: User has accepted the latest Terms of Service?
-    RawlsMe:
-      type: object
-      properties:
-        userInfo:
-          $ref: '#/components/schemas/UserInfo'
-        enabled:
-          $ref: '#/components/schemas/Enabled'
     CreateRawlsV2BillingProjectFullRequest:
       required:
         - billingAccount
