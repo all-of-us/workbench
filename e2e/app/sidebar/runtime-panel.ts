@@ -245,6 +245,7 @@ export default class RuntimePanel extends BaseSidebar {
     const isRunning = await this.isRunning();
     if (isRunning) {
       logger.info('Runtime is already running. Create new runtime is not needed.');
+      await this.close();
       return;
     }
 
