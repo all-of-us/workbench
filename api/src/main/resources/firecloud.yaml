@@ -1011,6 +1011,45 @@ paths:
           description: Internal server error
           content: {}
       x-codegen-request-body-name: profile
+  /register/user/v1/termsofservice:
+    post:
+      tags:
+        - Terms of Service
+      summary: Passes through to Sam API and accepts Terra Terms of Service
+      operationId: acceptTermsOfService
+      requestBody:
+        description: url
+        content:
+          'application/json':
+            schema:
+              type: string
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RawlsMe'
+        404:
+          description: User Not Found.
+          content: { }
+  /register/user/v1/termsofservice/status:
+    get:
+      tags:
+        - Terms of Service
+      summary: Check whether user has accepted the current version of the Terms of Service
+      operationId: getTermsOfServiceStatus
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        404:
+          description: User Not Found.
+          content: { }
   /api/groups:
     get:
       tags:
@@ -1854,6 +1893,16 @@ components:
         allUsersGroup:
           type: boolean
           description: User is a member of the "All Users" group?
+    ExtendedEnabled:
+      allOf:
+        - $ref: '#/components/schemas/Enabled'
+    RawlsMe:
+      type: object
+      properties:
+        userInfo:
+          $ref: '#/components/schemas/UserInfo'
+        enabled:
+          $ref: '#/components/schemas/ExtendedEnabled'
     CreateRawlsV2BillingProjectFullRequest:
       required:
         - billingAccount
