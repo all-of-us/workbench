@@ -62,14 +62,14 @@ export enum PhysicalMeasurementsCriteria {
 
 export enum Visits {
   AmbulanceVisit = 'Ambulance Visit',
-  AmbulatoryClinicCenter = 'Ambulatory Clinic/Center',
+  AmbulatoryClinicCenter = 'Ambulatory Clinic / Center',
   AmbulatoryRehabilitationVisit = 'Ambulatory Rehabilitation Visit',
   EmergencyRoomVisit = 'Emergency Room Visit',
   EmergencyRoomAndInpatientVisit = 'Emergency Room and Inpatient Visit',
   HomeVisit = 'Home Visit',
   InpatientVisit = 'Inpatient Visit',
   LaboratoryVisit = 'Laboratory Visit',
-  NonhospitalInstitutionVisit = 'Non-hospital institution Visit',
+  NonHospitalInstitutionVisit = 'Non-hospital institution Visit',
   OfficeVisit = 'Office Visit',
   OutpatientVisit = 'Outpatient Visit',
   PharmacyVisit = 'Pharmacy visit'
