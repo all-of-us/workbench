@@ -1893,16 +1893,19 @@ components:
         allUsersGroup:
           type: boolean
           description: User is a member of the "All Users" group?
-    ExtendedEnabled:
-      allOf:
-        - $ref: '#/components/schemas/Enabled'
+        adminEnabled:
+          type: boolean
+          description: User is a member of the admin group?
+        tosAccepted:
+          type: boolean
+          description: User has accepted the latest Terms of Service?
     RawlsMe:
       type: object
       properties:
         userInfo:
           $ref: '#/components/schemas/UserInfo'
         enabled:
-          $ref: '#/components/schemas/ExtendedEnabled'
+          $ref: '#/components/schemas/Enabled'
     CreateRawlsV2BillingProjectFullRequest:
       required:
         - billingAccount
