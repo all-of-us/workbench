@@ -225,9 +225,7 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public TermsOfServiceApi termsOfServiceApi(FirecloudApiClientFactory factory) {
-    TermsOfServiceApi termsOfServiceApi = new TermsOfServiceApi();
-    termsOfServiceApi.setApiClient(factory.newApiClient());
-    return termsOfServiceApi;
+  public TermsOfServiceApi termsOfServiceApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    return new TermsOfServiceApi(apiClient);
   }
 }
