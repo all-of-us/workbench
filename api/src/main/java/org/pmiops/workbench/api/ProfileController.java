@@ -66,8 +66,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ProfileController implements ProfileApiDelegate {
-  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
-
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
   private final AddressMapper addressMapper;
@@ -155,7 +153,15 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
 
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      return saveUserWithConflictHandling(dbUser);
+      dbUser = saveUserWithConflictHandling(dbUser);
+    }
+
+    // by approving the latest AOU Terms of Service, the user has also approved the Terra TOS
+    try {
+      profileService.validateTermsOfService(dbUser);
+      fireCloudService.acceptTermsOfService();
+    } catch (BadRequestException e) {
+      // TODO 7834
     }
 
     return dbUser;
@@ -192,7 +198,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyCaptcha(request.getCaptchaVerificationToken());
     }
 
-    validateTermsOfService(request.getTermsOfServiceVersion());
+    profileService.validateTermsOfService(request.getTermsOfServiceVersion());
 
     profileService.validateAffiliation(request.getProfile());
 
@@ -372,15 +378,6 @@ public class ProfileController implements ProfileApiDelegate {
       }
     } catch (org.pmiops.workbench.captcha.ApiException e) {
       throw new ServerErrorException("Exception while verifying Captcha");
-    }
-  }
-
-  private void validateTermsOfService(Integer tosVersion) {
-    if (tosVersion == null) {
-      throw new BadRequestException("Terms of Service version is NULL");
-    }
-    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
-      throw new BadRequestException("Terms of Service version is not up to date");
     }
   }
 

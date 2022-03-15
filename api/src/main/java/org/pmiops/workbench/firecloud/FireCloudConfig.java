@@ -21,6 +21,7 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -220,5 +221,13 @@ public class FireCloudConfig {
     StatusApi statusApi = new StatusApi();
     statusApi.setApiClient(factory.newApiClient());
     return statusApi;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public TermsOfServiceApi termsOfServiceApi(FirecloudApiClientFactory factory) {
+    TermsOfServiceApi termsOfServiceApi = new TermsOfServiceApi();
+    termsOfServiceApi.setApiClient(factory.newApiClient());
+    return termsOfServiceApi;
   }
 }
