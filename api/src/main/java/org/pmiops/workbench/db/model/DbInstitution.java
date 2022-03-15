@@ -18,8 +18,10 @@ public class DbInstitution {
   private String displayName;
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
+  private String requestAccessLink;
 
-  public DbInstitution() {}
+  public DbInstitution() {
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,6 +75,16 @@ public class DbInstitution {
     return this;
   }
 
+  @Column(name = "request_access_link")
+  public String getRequestAccessLink() {
+    return requestAccessLink;
+  }
+
+  public DbInstitution setRequestAccessLink(String requestAccessLink) {
+    this.requestAccessLink = requestAccessLink;
+    return this;
+  }
+
   // omit ID field from equality so equivalent objects match regardless
   // of whether they are actually present in the DB
 
@@ -89,12 +101,13 @@ public class DbInstitution {
     return Objects.equal(shortName, that.shortName)
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
-        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText);
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
+        && Objects.equal(requestAccessLink, that.requestAccessLink);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(
-        shortName, displayName, organizationTypeEnum, organizationTypeOtherText);
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, requestAccessLink);
   }
 }

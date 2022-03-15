@@ -860,6 +860,34 @@ export const AdminInstitutionEdit = fp.flow(
                     inputStyle={{ width: '16rem', marginTop: '0.8rem' }}
                   />
                 )}
+                <TextInputWithLabel
+                    value={institution.requestAccessLink}
+                    inputId='requestAccessLink'
+                    inputName='requestAccessLink'
+                    placeholder='Request Access URL'
+                    containerStyle={{marginTop:'1.5rem'}}
+                    labelStyle={styles.label}
+                    inputStyle={{ width: '16rem', marginTop: '0.3rem' }}
+                    labelText='Custom URL for “Request Access” Links'
+                    onChange={(v) =>
+                        this.setState(fp.set(['institution', 'requestAccessLink'], v))
+                    }
+                    onBlur={(v) =>
+                        this.setState(
+                            fp.set(['institution', 'requestAccessLink'], v.trim())
+                        )
+                    }
+                />
+
+                <p
+                    style={{
+                      color: colors.primary,
+                      fontSize: '12px',
+                      lineHeight: '18px',
+                    }}
+                >
+                  If provided, users who select this institution but are not allowed according to the data access tier requirements below will be guided to the custom URL rather than the standard ones (registration, CT).
+                </p>
               </FlexColumn>
               <FlexColumn style={{ width: '50%', marginRight: '1rem' }}>
                 <label style={{ ...styles.label, marginTop: '0rem' }}>

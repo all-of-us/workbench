@@ -158,7 +158,8 @@
   <include file="changelog/db.changelog-146-access-tier-table-and-cdr-version.xml"/>
   <include file="changelog/db.changelog-147-remove-cluster-create-retries.xml"/>
   <include file="changelog/db.changelog-148-remove-cluster-config.xml"/>
-  <include file="changelog/db.changelog-149-demographic-survey-add-disability-prefer-no-answer.xml"/>
+  <include
+    file="changelog/db.changelog-149-demographic-survey-add-disability-prefer-no-answer.xml"/>
   <include file="changelog/db.changelog-150-add-access-tier-to-billing-buffer.xml"/>
   <include file="changelog/db.changelog-151-workspace-addDefaultValue-data_access_level.xml"/>
   <include file="changelog/db.changelog-152-cdr-version-wgs-field.xml"/>
@@ -180,7 +181,8 @@
   <include file="changelog/db.changelog-168-rename-access-module-user-table.xml"/>
   <include file="changelog/db.changelog-169-add-institution-tier-requirement-tables.xml"/>
   <include file="changelog/db.changelog-170-add-access-tier-id-into-institution-tables.xml"/>
-  <include file="changelog/db.changelog-171-user-access-module-user-drop-null-constraint-and-add-bypassable.xml"/>
+  <include
+    file="changelog/db.changelog-171-user-access-module-user-drop-null-constraint-and-add-bypassable.xml"/>
   <include file="changelog/db.changelog-172-backfill-user-access-module.xml"/>
   <include file="changelog/db.changelog-173-extraction-submission-add-size.xml"/>
   <include file="changelog/db.changelog-174-backfill-institution-tier-requirements.xml"/>
@@ -202,6 +204,7 @@
   <include file="changelog/db.changelog-190-billing-migration-bug-backfill.xml"/>
   <include file="changelog/db.changelog-191-workspace-operation.xml"/>
   <include file="changelog/db.changelog-192-workspace-operation-add-queued-processing.xml"/>
+  <include file="changelog/db.changelog-193-institution-add-request-access-link.xml"/>
   <include file="changelog/db.changelog-194-add-terra-agreement-time.xml"/>
   <!--
    Note: to update the DB locally, do the following:
