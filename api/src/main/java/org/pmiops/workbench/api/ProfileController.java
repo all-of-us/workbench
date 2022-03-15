@@ -152,16 +152,16 @@ public class ProfileController implements ProfileApiDelegate {
       // If the user is already registered, their profile will get updated.
       fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
 
+      // by approving the latest AOU Terms of Service, the user has also approved the Terra TOS
+      try {
+        profileService.validateTermsOfService(dbUser);
+        fireCloudService.acceptTermsOfService();
+      } catch (BadRequestException e) {
+        // TODO 7834
+      }
+
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       dbUser = saveUserWithConflictHandling(dbUser);
-    }
-
-    // by approving the latest AOU Terms of Service, the user has also approved the Terra TOS
-    try {
-      profileService.validateTermsOfService(dbUser);
-      fireCloudService.acceptTermsOfService();
-    } catch (BadRequestException e) {
-      // TODO 7834
     }
 
     return dbUser;
