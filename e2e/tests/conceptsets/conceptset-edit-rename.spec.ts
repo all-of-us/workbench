@@ -59,12 +59,12 @@ describe('Editing and rename Concept Set', () => {
     criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain
-    procedureName = 'Screening procedure';
+    procedureName = 'Screening mammography';
     await criteriaSearch.searchCriteria(procedureName);
 
     // Select first row. Its name cell should match the search words.
     const row = await criteriaSearch.resultsTableSelectRow();
-    expect(row.name).toBe(procedureName);
+    expect(row.name).toContain(procedureName);
 
     await conceptSearchPage.reviewAndSaveConceptSet();
 
