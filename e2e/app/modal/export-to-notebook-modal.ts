@@ -53,8 +53,7 @@ export default class ExportToNotebookModal extends Modal {
 
   async showCodePreview(): Promise<string[]> {
     await this.clickButton(LinkText.SeeCodePreview);
-
-    const previewFrame = await this.page.waitForSelector('#export-preview-frame');
+    const previewFrame = await this.page.waitForSelector('#popup-root iframe#export-preview-frame', { visible: true });
     return getFormattedPreviewCode(await previewFrame.contentFrame());
   }
 
