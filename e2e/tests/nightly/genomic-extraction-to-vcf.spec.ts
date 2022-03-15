@@ -155,7 +155,7 @@ describe('Genomics Extraction Test', () => {
 
     // Verify row count is 1.
     const rowCount = await historyTable.getRowCount();
-    expect(rowCount).toBeGreaterThanOrEqual(1);
+    expect(rowCount).toEqual(1);
 
     // Verify dataset name (Column #1 is 'Dataset Name').
     const tableCellValue = await historyTable.getCellValue(1, 1);

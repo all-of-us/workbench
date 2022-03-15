@@ -503,8 +503,8 @@ describe('User Profile Admin page', () => {
     await userProfileAdminPage.getEmailErrorMessageLink().then((link) => link.click());
     const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
     const newPage = await newTarget.page();
-    // SUBMIT A REQUEST button exists
-    await newPage.waitForXPath('//*[./*[text()="Need an Agreement?"]]/a[text()="SUBMIT A REQUEST"]', { visible: true });
+    // SUBMIT REQUEST button exists
+    await newPage.waitForXPath('//a[text()="SUBMIT REQUEST"]', { visible: true });
     const pageTitle = await newPage.title();
     expect(pageTitle).toEqual('Institutional Agreements – All of Us Research Hub');
     await newPage.close();
