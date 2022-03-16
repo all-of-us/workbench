@@ -161,7 +161,7 @@ public class ProfileController implements ProfileApiDelegate {
       }
 
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      dbUser = saveUserWithConflictHandling(dbUser);
+      return saveUserWithConflictHandling(dbUser);
     }
 
     return dbUser;
