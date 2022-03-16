@@ -11,9 +11,11 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { profileStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -65,6 +67,12 @@ describe('WorkspaceLibrary', () => {
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
     PUBLISHED_WORKSPACE = publishedWorkspaceStubs[2];
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableResearchReviewPrompt: false,
+      },
+    });
   });
 
   it('renders', () => {
@@ -161,7 +169,7 @@ describe('WorkspaceLibrary', () => {
     const styleCursor = wrapper
       .find('[data-test-id="workspace-card"]')
       .first()
-      .find('[role="button"]')
+      .find('a')
       .map((c) => c.prop('style').cursor);
     expect(styleCursor).toEqual(['not-allowed']);
   });
@@ -194,8 +202,8 @@ describe('WorkspaceLibrary', () => {
     const styleCursor = wrapper
       .find('[data-test-id="workspace-card"]')
       .first()
-      .find('[role="button"]')
-      .map((c) => c.prop('style').cursor);
-    expect(styleCursor).toEqual(['pointer']);
+      .find('a')
+      .map((c) => c.prop('style').color);
+    expect(styleCursor).not.toEqual(colors.disabled);
   });
 });
