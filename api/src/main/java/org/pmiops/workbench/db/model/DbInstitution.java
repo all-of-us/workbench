@@ -20,8 +20,7 @@ public class DbInstitution {
   private String organizationTypeOtherText;
   private String requestAccessLink;
 
-  public DbInstitution() {
-  }
+  public DbInstitution() {}
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
