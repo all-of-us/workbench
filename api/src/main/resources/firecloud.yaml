@@ -1895,7 +1895,7 @@ components:
           description: User is a member of the "All Users" group?
         adminEnabled:
           type: boolean
-          description: User is a member of the admin group?
+          description: User is enabled in the system?
         tosAccepted:
           type: boolean
           description: User has accepted the latest Terms of Service?
