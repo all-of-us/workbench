@@ -2,7 +2,8 @@ import BaseSidebar from './base-sidebar';
 import { SideBarLink } from 'app/text-labels';
 import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
-import DataTable from '../component/data-table';
+import DataTable from 'app/component/data-table';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 export default class GenomicExtractionsSidebar extends BaseSidebar {
   constructor(page: Page) {
@@ -50,10 +51,13 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
     try {
       const table = this.getHistoryTable();
       await table.waitUntilVisible();
-      await this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
-        visible: true,
-        timeout
-      });
+      await Promise.all([
+        this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
+          visible: true,
+          timeout
+        }),
+        waitWhileLoading(this.page, { includeRuntimeSpinner: true, timeout })
+      ]);
       return true;
     } catch (err) {
       return false;

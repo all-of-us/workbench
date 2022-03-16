@@ -365,9 +365,12 @@ export async function waitWhileSpinnerDisplayed(
   opts: { includeRuntimeSpinner?: boolean; timeout?: number } = {}
 ): Promise<void> {
   const { timeout = 2 * 60 * 1000, includeRuntimeSpinner = false } = opts;
-  const spinnerCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
-    includeRuntimeSpinner ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
-  }`;
+  const spinnerCss =
+    '[style*="running spin"], .spinner:empty, ' +
+    `[style*="running rotation"]${
+      includeRuntimeSpinner ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
+    }, ` +
+    `[style*="animation-name: spin"]${includeRuntimeSpinner ? '' : ':not([data-test-id*="extraction-status"])'}`;
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;

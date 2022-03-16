@@ -13,7 +13,7 @@ describe('Updating runtime compute type', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eDataprocToGceTest';
+  const workspaceName = makeRandomName('e2eDataprocToGceTest');
 
   test('Switch from dataproc to GCE', async () => {
     await findOrCreateWorkspace(page, {
