@@ -1112,7 +1112,7 @@ const DuccCard = (props: {
     <FlexRow style={{ ...styles.card, height: '125px' }}>
       <FlexColumn>
         <div style={styles.cardStep}>Step {stepNumber}</div>
-        <div style={styles.cardHeader}>Sign the code of conduct</div>
+        <div style={styles.cardHeader}>Sign The Code of Conduct</div>
       </FlexColumn>
       <ModulesForCard
         profile={profile}
