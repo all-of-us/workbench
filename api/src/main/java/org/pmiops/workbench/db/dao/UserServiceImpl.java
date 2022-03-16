@@ -28,6 +28,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -368,7 +369,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DbDemographicSurvey dbDemographicSurvey,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
@@ -391,6 +391,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbDemographicSurvey.setUser(dbUser);
     }
 
+    Timestamp now = clockNow();
     try {
       dbUser = userDao.save(dbUser);
       dbVerifiedAffiliation.setUser(dbUser);
@@ -414,7 +415,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (!accessModuleService.isSignedDuccVersionCurrent(duccSignedVersion)) {
       throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    final Timestamp timestamp = clockNow();
     return updateUserWithRetries(
         (user) -> {
           accessModuleService.updateCompletionTime(
@@ -461,24 +462,30 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public void validateTermsOfService(DbUser dbUser) {
     final int tosVersion =
-        userTermsOfServiceDao
-            .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-            .map(DbUserTermsOfService::getTosVersion)
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "No Terms of Service acceptance recorded for this user"));
+        userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
     validateTermsOfService(tosVersion);
   }
 
   @Override
   @Transactional
-  public void submitTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {
-    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
-    userTermsOfService.setTosVersion(tosVersion);
-    userTermsOfService.setUserId(dbUser.getUserId());
-    userTermsOfServiceDao.save(userTermsOfService);
+  public void submitAouTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {
+    long userId = dbUser.getUserId();
+    userTermsOfServiceDao.save(
+        userTermsOfServiceDao
+            .findFirstByUserIdOrderByTosVersionDesc(userId)
+            .orElse(new DbUserTermsOfService().setUserId(userId))
+            .setTosVersion(tosVersion)
+            .setAouAgreementTime(clockNow()));
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
+  }
+
+  @Override
+  public void acceptTerraTermsOfService(DbUser dbUser) {
+    fireCloudService.acceptTermsOfService();
+    userTermsOfServiceDao.save(
+        userTermsOfServiceDao
+            .findByUserIdOrThrow(dbUser.getUserId())
+            .setTerraAgreementTime(clockNow()));
   }
 
   @Override
@@ -577,7 +584,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
 
     try {
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      Timestamp now = clockNow();
       Map<BadgeName, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
 
@@ -663,7 +670,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * <p>This method saves the updated user object to the database and returns it.
    */
   private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus, Agent agent) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    Timestamp now = clockNow();
 
     return updateUserWithRetries(
         user -> {
@@ -752,7 +759,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
               .orElse(true);
 
       if (needsDbCompletionUpdate) {
-        Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+        Timestamp timestamp = clockNow();
         accessModuleService.updateCompletionTime(
             targetUser, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
       }
@@ -839,7 +846,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          Timestamp timestamp = clockNow();
           user.setRasLinkLoginGovUsername(loginGovUserName);
           accessModuleService.updateCompletionTime(user, AccessModuleName.RAS_LOGIN_GOV, timestamp);
           // TODO(RW-6480): Determine if need to set link expiration time.
@@ -855,7 +862,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          Timestamp timestamp = clockNow();
           user.setEraCommonsLinkedNihUsername(eRACommonsUsername);
           accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, timestamp);
           return user;
@@ -867,7 +874,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   @Override
   public DbUser confirmProfile(DbUser dbUser) {
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    Timestamp timestamp = clockNow();
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
 
@@ -878,7 +885,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser confirmPublications() {
     final DbUser dbUser = userProvider.get();
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    Timestamp timestamp = clockNow();
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
 
@@ -892,6 +899,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
+  }
+
+  @NotNull
+  private Timestamp clockNow() {
+    return new Timestamp(clock.instant().toEpochMilli());
   }
 
   /**

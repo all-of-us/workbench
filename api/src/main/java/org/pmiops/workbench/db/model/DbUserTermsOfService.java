@@ -19,7 +19,11 @@ public class DbUserTermsOfService {
   private long userTermsOfServiceId;
   private long userId;
   private int tosVersion;
-  private Timestamp agreementTime;
+
+  // set automatically on DB row creation
+  private Timestamp aouAgreementTime;
+  // NOT set automatically because we create the Terra user after recording the AoU TOS agreement
+  private Timestamp terraAgreementTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +32,9 @@ public class DbUserTermsOfService {
     return userTermsOfServiceId;
   }
 
-  public void setUserTermsOfServiceId(long userTermsOfServiceId) {
+  public DbUserTermsOfService setUserTermsOfServiceId(long userTermsOfServiceId) {
     this.userTermsOfServiceId = userTermsOfServiceId;
+    return this;
   }
 
   @Column(name = "user_id", nullable = false)
@@ -37,8 +42,9 @@ public class DbUserTermsOfService {
     return userId;
   }
 
-  public void setUserId(long userId) {
+  public DbUserTermsOfService setUserId(long userId) {
     this.userId = userId;
+    return this;
   }
 
   @Column(name = "tos_version", nullable = false)
@@ -46,8 +52,9 @@ public class DbUserTermsOfService {
     return tosVersion;
   }
 
-  public void setTosVersion(int tosVersion) {
+  public DbUserTermsOfService setTosVersion(int tosVersion) {
     this.tosVersion = tosVersion;
+    return this;
   }
 
   // This column is non-nullable in our CloudSQL schema (see Liquibase changelog #123),
@@ -56,12 +63,23 @@ public class DbUserTermsOfService {
   // via the Hibernate CreationTimestamp annotation.
   @Column(name = "agreement_time")
   @CreatedDate
-  public Timestamp getAgreementTime() {
-    return agreementTime;
+  public Timestamp getAouAgreementTime() {
+    return aouAgreementTime;
   }
 
-  public void setAgreementTime(Timestamp agreementTime) {
-    this.agreementTime = agreementTime;
+  public DbUserTermsOfService setAouAgreementTime(Timestamp aouAgreementTime) {
+    this.aouAgreementTime = aouAgreementTime;
+    return this;
+  }
+
+  @Column(name = "terra_agreement_time")
+  public Timestamp getTerraAgreementTime() {
+    return terraAgreementTime;
+  }
+
+  public DbUserTermsOfService setTerraAgreementTime(Timestamp terraAgreementTime) {
+    this.terraAgreementTime = terraAgreementTime;
+    return this;
   }
 
   @Override
@@ -69,14 +87,14 @@ public class DbUserTermsOfService {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     DbUserTermsOfService that = (DbUserTermsOfService) o;
-    return userTermsOfServiceId == that.userTermsOfServiceId
-        && userId == that.userId
+    return userId == that.userId
         && tosVersion == that.tosVersion
-        && Objects.equals(agreementTime, that.agreementTime);
+        && Objects.equals(aouAgreementTime, that.aouAgreementTime)
+        && Objects.equals(terraAgreementTime, that.terraAgreementTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(userTermsOfServiceId, userId, tosVersion, agreementTime);
+    return Objects.hash(userId, tosVersion, aouAgreementTime, terraAgreementTime);
   }
 }

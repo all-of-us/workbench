@@ -411,7 +411,7 @@ public class UserServiceTest {
 
   @Test
   public void testSubmitTermsOfService() {
-    userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
+    userService.submitAouTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }

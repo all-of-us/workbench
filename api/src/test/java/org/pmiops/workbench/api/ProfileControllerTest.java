@@ -414,7 +414,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(tosRows.size()).isEqualTo(1);
     assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
-    assertThat(tosRows.get(0).getAgreementTime()).isNotNull();
+    assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     Profile profile = profileService.getProfile(dbUser);
     assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
   }

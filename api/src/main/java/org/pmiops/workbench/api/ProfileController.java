@@ -155,7 +155,7 @@ public class ProfileController implements ProfileApiDelegate {
       // by approving the latest AOU Terms of Service, the user has also approved the Terra TOS
       try {
         userService.validateTermsOfService(dbUser);
-        fireCloudService.acceptTermsOfService();
+        userService.acceptTerraTermsOfService(dbUser);
       } catch (BadRequestException e) {
         // TODO 7834
       }
@@ -259,7 +259,9 @@ public class ProfileController implements ProfileApiDelegate {
       throw e;
     }
 
-    userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
+    // we can't call submitTerraTermsOfService() yet because the Terra account doesn't exist yet.
+    // see initializeUserIfNeeded()
+    userService.submitAouTermsOfService(user, request.getTermsOfServiceVersion());
     String institutionShortName =
         profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();
     try {

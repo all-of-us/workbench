@@ -56,8 +56,11 @@ public interface UserService {
 
   void validateTermsOfService(DbUser dbUser);
 
-  // Registers that a user has agreed to a given version of the Terms of Service.
-  void submitTermsOfService(DbUser dbUser, Integer tosVersion);
+  // Registers that a user has agreed to a given version of the AoU Terms of Service.
+  void submitAouTermsOfService(DbUser dbUser, Integer tosVersion);
+
+  // Registers that a user has agreed to the current version of the Terra Terms of Service.
+  void acceptTerraTermsOfService(DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 

@@ -168,7 +168,7 @@ public class ProfileServiceTest {
   public void testReturnsLastAcknowledgedTermsOfService() {
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(1);
-    userTermsOfService.setAgreementTime(new Timestamp(1));
+    userTermsOfService.setAouAgreementTime(new Timestamp(1));
     when(mockUserTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(1))
         .thenReturn(Optional.of(userTermsOfService));
 
