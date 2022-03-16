@@ -244,7 +244,14 @@ export default class RuntimePanel extends BaseSidebar {
 
     const isRunning = await this.isRunning();
     if (isRunning) {
-      logger.info('Runtime is already running. Create new runtime is not needed.');
+      logger.info('Runtime is already running. Create runtime is not needed');
+      await this.close();
+      return;
+    }
+
+    const isStopped = await this.isStopped();
+    if (isStopped) {
+      await this.resumeRuntime();
       return;
     }
 
@@ -384,6 +391,18 @@ export default class RuntimePanel extends BaseSidebar {
 
   async isRunning(): Promise<boolean> {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
+    return this.page
+      .waitForXPath(xpath, { visible: true, timeout: 1000 })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  async isStopped(): Promise<boolean> {
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Stopped);
     return this.page
       .waitForXPath(xpath, { visible: true, timeout: 1000 })
       .then(() => {

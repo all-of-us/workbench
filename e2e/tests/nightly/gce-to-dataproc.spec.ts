@@ -13,7 +13,7 @@ describe('Updating runtime compute type', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eGceToDataprocTest';
+  const workspaceName = makeRandomName('e2eGceToDataprocTest');
   const notebookName = makeRandomName('py');
 
   test('Switch from GCE to dataproc', async () => {
