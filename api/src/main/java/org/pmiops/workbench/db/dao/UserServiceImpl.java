@@ -584,7 +584,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
 
     try {
-      Timestamp now = clockNow();
       Map<BadgeName, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
 
@@ -630,7 +629,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
               // First-time badge or renewal: our system recognizes the user as having
               // completed training right now, though the badge has been issued some
               // time in the past.
-              return Optional.of(now);
+              return Optional.of(clockNow());
             }
 
             // No change
@@ -759,9 +758,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
               .orElse(true);
 
       if (needsDbCompletionUpdate) {
-        Timestamp timestamp = clockNow();
         accessModuleService.updateCompletionTime(
-            targetUser, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
+            targetUser, AccessModuleName.TWO_FACTOR_AUTH, clockNow());
       }
     } else {
       accessModuleService.updateCompletionTime(targetUser, AccessModuleName.TWO_FACTOR_AUTH, null);
@@ -846,9 +844,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          Timestamp timestamp = clockNow();
           user.setRasLinkLoginGovUsername(loginGovUserName);
-          accessModuleService.updateCompletionTime(user, AccessModuleName.RAS_LOGIN_GOV, timestamp);
+          accessModuleService.updateCompletionTime(
+              user, AccessModuleName.RAS_LOGIN_GOV, clockNow());
           // TODO(RW-6480): Determine if need to set link expiration time.
           return user;
         },
@@ -862,9 +860,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          Timestamp timestamp = clockNow();
           user.setEraCommonsLinkedNihUsername(eRACommonsUsername);
-          accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, timestamp);
+          accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, clockNow());
           return user;
         },
         dbUser,
@@ -874,9 +871,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   @Override
   public DbUser confirmProfile(DbUser dbUser) {
-    Timestamp timestamp = clockNow();
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
+        dbUser, AccessModuleName.PROFILE_CONFIRMATION, clockNow());
 
     return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
@@ -885,9 +881,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser confirmPublications() {
     final DbUser dbUser = userProvider.get();
-    Timestamp timestamp = clockNow();
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, clockNow());
 
     return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
