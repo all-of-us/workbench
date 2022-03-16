@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
 
-  @VisibleForTesting public static final int PROJECT_BILLING_ID_SIZE = 8;
+  public static final int PROJECT_BILLING_ID_SIZE = 8;
   public static final String TERMS_OF_SERVICE_BODY = "app.terra.bio/#terms-of-service";
 
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
