@@ -6,23 +6,18 @@ import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 
-// 30 minutes. Test involves starting of notebook that could take a long time to create.
-jest.setTimeout(30 * 60 * 1000);
-
-describe('Export Notebook Test', () => {
+describe('Export Dataset to Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
-  const workspaceName = 'e2eDatasetExportToNotebookTest';
+  const workspaceName = 'e2eDatasetExportToRNotebookTest';
 
   /**
    * Test:
    * - Export dataset to a notebook. Run the notebook code and verify run results.
-   * (Cohort and Dataset are saved and reused)
    */
-  test.each(KernelLanguages)('Export to %s Jupyter notebook', async (kernelLanguage) => {
+  test('Export to R kernel notebook in Build Dataset page', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
     await findOrCreateDataset(page, { openEditPage: true });
 
@@ -32,8 +27,15 @@ describe('Export Notebook Test', () => {
 
     const notebookName = makeRandomName();
     await exportModal.enterNotebookName(notebookName);
-    await exportModal.pickLanguage(kernelLanguage.LANGUAGE);
-    await exportModal.showCodePreview();
+    await exportModal.pickLanguage(Language.R);
+
+    let previewCodeLines = await exportModal.showCodePreview();
+    expect(previewCodeLines.length).toBeGreaterThanOrEqual(1);
+    // Verify few randomly selected code snippet
+    expect(previewCodeLines.some((line) => line.includes('library(tidyverse)'))).toBe(true);
+    expect(previewCodeLines.some((line) => line.includes('library(bigrquery)'))).toBe(true);
+    expect(previewCodeLines.some((line) => line.includes('Sys.getenv("GOOGLE_PROJECT")'))).toBe(true);
+
     await exportModal.clickExportButton();
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
@@ -42,17 +44,10 @@ describe('Export Notebook Test', () => {
     const currentPageUrl = page.url();
     expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
 
-    const code = await notebookPreviewPage.getFormattedCode();
-    switch (kernelLanguage.LANGUAGE) {
-      case Language.Python:
-        expect(code.some((item) => item.includes('import pandas'))).toBe(true);
-        expect(code.some((item) => item.includes('import os'))).toBe(true);
-        break;
-      case Language.R:
-        expect(code.some((item) => item.includes('library(tidyverse)'))).toBe(true);
-        expect(code.some((item) => item.includes('library(bigrquery)'))).toBe(true);
-        break;
-    }
+    previewCodeLines = await notebookPreviewPage.getFormattedCode();
+    // Verify few randomly selected code snippet
+    expect(previewCodeLines.some((line) => line.includes('Sys.getenv("OWNER_EMAIL")'))).toBe(true);
+    expect(previewCodeLines.some((line) => line.includes('Sys.getenv("WORKSPACE_CDR")'))).toBe(true);
 
     // Open notebook in Edit mode.
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
@@ -62,10 +57,10 @@ describe('Export Notebook Test', () => {
     await notebookPage.waitForKernelIdle(2 * 60 * 1000, 5000);
     await notebookPage.save();
 
-    // In both Python / R, the last cell contains a preview of the dataframe.
+    // Last notebook cell contains a preview of the dataframe.
     const lastCell = await notebookPage.findLastCell();
-    // Verify run output: Cell output format should be html table.
-    await lastCell.findRenderedHtmlElementHandle();
+    // Verify run output: Cell output format should be html table. Log error if failed.
+    await lastCell.findRenderedHtmlElementHandle(2000).catch(() => lastCell.getOutputError());
 
     // Verify workspace name is in notebook page.
     const workspaceLink = await notebookPage.getWorkspaceLink().asElementHandle();
