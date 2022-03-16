@@ -152,13 +152,13 @@ const validatorFuncs = {
   },
   NUM_OF_OCCURRENCES: (value) => {
     if (value === '') {
-      return 'Has Occurrences is required';
+      return 'Number of occurrence dates is required';
     }
     if (value < 1 || value > 99) {
-      return 'Has Occurrences must be between 1 - 99';
+      return 'Number of occurrence dates must be between 1 - 99';
     }
     if (!Number.isInteger(parseFloat(value))) {
-      return 'Has Occurrences must be a whole number';
+      return 'Number of occurrence dates must be a whole number';
     }
     return null;
   },
@@ -243,7 +243,7 @@ export const ModifierPage = fp.flow(
       if (domain !== Domain.SURVEY) {
         formState.push({
           name: ModifierType.NUMOFOCCURRENCES,
-          label: 'Has Occurrences',
+          label: 'Number of occurrence dates',
           type: 'number',
           operator: undefined,
           values: [undefined, undefined],
