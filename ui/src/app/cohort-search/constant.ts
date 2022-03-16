@@ -110,7 +110,7 @@ export const MODIFIERS_MAP = {
     },
   },
   [ModifierType.NUMOFOCCURRENCES]: {
-    name: 'Has Occurrences',
+    name: 'Number Of Occurrence Dates',
     operators: {
       [Operator.GREATERTHANOREQUALTO]: 'N or More',
     },
