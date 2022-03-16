@@ -471,6 +471,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         userTermsOfServiceDao
             .findFirstByUserIdOrderByTosVersionDesc(userId)
             .orElse(new DbUserTermsOfService().setUserId(userId))
+            // set or update the aou tos version and agreement time
             .setTosVersion(tosVersion)
             .setAouAgreementTime(clockNow()));
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
