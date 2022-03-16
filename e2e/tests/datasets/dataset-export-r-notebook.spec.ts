@@ -5,6 +5,7 @@ import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DatasetBuildPage from 'app/page/dataset-build-page';
+import { logger } from 'libs/logger';
 
 describe('Export Dataset to Notebook Test', () => {
   beforeEach(async () => {
@@ -34,8 +35,8 @@ describe('Export Dataset to Notebook Test', () => {
     // Verify few randomly selected code snippet
     expect(previewCodeLines.some((line) => line.includes('library(tidyverse)'))).toBe(true);
     expect(previewCodeLines.some((line) => line.includes('library(bigrquery)'))).toBe(true);
-    expect(previewCodeLines.some((line) => line.includes('Sys.getenv("GOOGLE_PROJECT")'))).toBe(true);
 
+    logger.info({ previewCodeLines });
     await exportModal.clickExportButton();
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
@@ -48,6 +49,7 @@ describe('Export Dataset to Notebook Test', () => {
     // Verify few randomly selected code snippet
     expect(previewCodeLines.some((line) => line.includes('Sys.getenv("OWNER_EMAIL")'))).toBe(true);
     expect(previewCodeLines.some((line) => line.includes('Sys.getenv("WORKSPACE_CDR")'))).toBe(true);
+    expect(previewCodeLines.some((line) => line.includes('Sys.getenv("GOOGLE_PROJECT")'))).toBe(true);
 
     // Open notebook in Edit mode.
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
