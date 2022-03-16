@@ -35,8 +35,8 @@ describe('Export Dataset to Notebook Test', () => {
     // Verify few randomly selected code snippet
     expect(previewCodeLines.some((line) => line.includes('library(tidyverse)'))).toBe(true);
     expect(previewCodeLines.some((line) => line.includes('library(bigrquery)'))).toBe(true);
-
     logger.info({ previewCodeLines });
+
     await exportModal.clickExportButton();
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
