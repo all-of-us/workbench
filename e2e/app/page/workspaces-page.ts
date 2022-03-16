@@ -96,13 +96,21 @@ export default class WorkspacesPage extends AuthenticatedPage {
       reviewRequest = false
     } = opts;
 
-    const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
+    const createPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
+
+    const cdrVersionSelect = createPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION_NAME);
 
     // select Data access tier
-    await editPage.selectAccessTier(dataAccessTier);
+    await createPage.selectAccessTier(dataAccessTier);
+
+    if (dataAccessTier === AccessTierDisplayNames.Controlled) {
+      // observe that the CDR Version default has changed automatically
+      expect(await cdrVersionSelect.getSelectedValue()).not.toBe(config.DEFAULT_CDR_VERSION_NAME);
+    }
 
     // select the chosen CDR Version
-    await editPage.selectCdrVersion(cdrVersionName);
+    await createPage.selectCdrVersion(cdrVersionName);
 
     // if the CDR Version is not the default, consent to the necessary restrictions
     // cannot create a workspace with an old CDR Version without consenting to the restrictions.
@@ -113,9 +121,9 @@ export default class WorkspacesPage extends AuthenticatedPage {
     }
 
     // click CREATE WORKSPACE button
-    const createButton = editPage.getCreateWorkspaceButton();
+    const createButton = createPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
-    const modalContent = await editPage.clickCreateFinishButton(createButton);
+    const modalContent = await createPage.clickCreateFinishButton(createButton);
 
     await new WorkspaceDataPage(this.page).waitForLoad();
     logger.info(
