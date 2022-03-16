@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.db.dao.UserService.CURRENT_TERMS_OF_SERVICE_VERSION;
+import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -420,13 +420,13 @@ public class UserServiceTest {
         .isEqualTo(0);
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    userService.submitAouTermsOfService(user, CURRENT_TERMS_OF_SERVICE_VERSION);
+    userService.submitAouTermsOfService(user, LATEST_AOU_TOS_VERSION);
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
 
     Optional<DbUserTermsOfService> tosMaybe =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
     assertThat(tosMaybe).isPresent();
-    assertThat(tosMaybe.get().getTosVersion()).isEqualTo(CURRENT_TERMS_OF_SERVICE_VERSION);
+    assertThat(tosMaybe.get().getTosVersion()).isEqualTo(LATEST_AOU_TOS_VERSION);
     assertThat(tosMaybe.get().getAouAgreementTime()).isNotNull();
     assertThat(tosMaybe.get().getTerraAgreementTime()).isNull();
   }
@@ -439,7 +439,7 @@ public class UserServiceTest {
 
     // need to do this first
     DbUser user = userDao.findUserByUsername(USERNAME);
-    userService.submitAouTermsOfService(user, CURRENT_TERMS_OF_SERVICE_VERSION);
+    userService.submitAouTermsOfService(user, LATEST_AOU_TOS_VERSION);
 
     userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
     verify(mockFireCloudService).acceptTermsOfService();
@@ -552,7 +552,7 @@ public class UserServiceTest {
   @Test
   public void test_validateTermsOfService() {
     // does not throw
-    userService.validateTermsOfService(CURRENT_TERMS_OF_SERVICE_VERSION);
+    userService.validateTermsOfService(LATEST_AOU_TOS_VERSION);
   }
 
   @Test
@@ -565,7 +565,7 @@ public class UserServiceTest {
   public void test_validateTermsOfService_wrong_version() {
     assertThrows(
         BadRequestException.class,
-        () -> userService.validateTermsOfService(CURRENT_TERMS_OF_SERVICE_VERSION - 1));
+        () -> userService.validateTermsOfService(LATEST_AOU_TOS_VERSION - 1));
   }
 
   @Test
@@ -574,7 +574,7 @@ public class UserServiceTest {
     userTermsOfServiceDao.save(
         new DbUserTermsOfService()
             .setUserId(user.getUserId())
-            .setTosVersion(CURRENT_TERMS_OF_SERVICE_VERSION));
+            .setTosVersion(LATEST_AOU_TOS_VERSION));
 
     // does not throw
     userService.validateTermsOfService(user);
@@ -599,7 +599,7 @@ public class UserServiceTest {
     userTermsOfServiceDao.save(
         new DbUserTermsOfService()
             .setUserId(user.getUserId())
-            .setTosVersion(CURRENT_TERMS_OF_SERVICE_VERSION - 1));
+            .setTosVersion(LATEST_AOU_TOS_VERSION - 1));
     assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
   }
 

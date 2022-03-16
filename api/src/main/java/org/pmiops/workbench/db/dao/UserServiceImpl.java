@@ -451,7 +451,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (tosVersion == null) {
       throw new BadRequestException("Terms of Service version is NULL");
     }
-    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+    if (tosVersion != LATEST_AOU_TOS_VERSION) {
       throw new BadRequestException("Terms of Service version is not up to date");
     }
   }

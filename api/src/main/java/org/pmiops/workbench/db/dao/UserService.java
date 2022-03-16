@@ -17,7 +17,7 @@ import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
-  int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+  int LATEST_AOU_TOS_VERSION = 1;
 
   /**
    * Updates a user record with a modifier function.
@@ -62,7 +62,7 @@ public interface UserService {
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(DbUser dbUser, Integer tosVersion);
 
-  // Registers that a user has agreed to the current version of the Terra Terms of Service.
+  // Registers that a user has agreed to the latest version of the Terra Terms of Service.
   void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);

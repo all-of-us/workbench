@@ -152,7 +152,7 @@ public class ProfileController implements ProfileApiDelegate {
       // If the user is already registered, their profile will get updated.
       fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
 
-      // by approving the latest AOU Terms of Service, the user has also approved the Terra TOS
+      // by approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
       try {
         userService.validateTermsOfService(dbUser);
         userService.acceptTerraTermsOfService(dbUser);
