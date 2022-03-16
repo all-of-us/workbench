@@ -52,6 +52,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+  
   private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
   private final AccessModuleService accessModuleService;
