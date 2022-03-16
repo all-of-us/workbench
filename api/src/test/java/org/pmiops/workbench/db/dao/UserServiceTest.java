@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.db.dao.UserService.CURRENT_TERMS_OF_SERVICE_VERSION;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -82,21 +85,21 @@ public class UserServiceTest {
   private static DbAccessTier registeredTier;
   private static List<DbAccessModule> accessModules;
 
-  @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+  @MockBean private FireCloudService mockFireCloudService;
   @MockBean private InstitutionService mockInstitutionService;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
 
-  @Autowired private UserService userService;
-  @Autowired private UserDao userDao;
-  @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
-  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private FakeClock fakeClock;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private UserDao userDao;
+  @Autowired private UserService userService;
+  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
 
-  // we need the full service for some tests and mocks for others
+  // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
 
   @Import({
@@ -410,10 +413,38 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSubmitTermsOfService() {
-    userService.submitAouTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
-    verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
+  public void testSubmitAouTermsOfService() {
+    // confirm empty to start
+    assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
+        .isEqualTo(0);
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userService.submitAouTermsOfService(user, CURRENT_TERMS_OF_SERVICE_VERSION);
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
+
+    Optional<DbUserTermsOfService> tosMaybe = userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    assertThat(tosMaybe).isPresent();
+    assertThat(tosMaybe.get().getTosVersion()).isEqualTo(CURRENT_TERMS_OF_SERVICE_VERSION);
+    assertThat(tosMaybe.get().getAouAgreementTime()).isNotNull();
+    assertThat(tosMaybe.get().getTerraAgreementTime()).isNull();
+  }
+
+  @Test
+  public void testAcceptTerraTermsOfService() {
+    // confirm empty to start
+    assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
+        .isEqualTo(0);
+
+    // need to do this first
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userService.submitAouTermsOfService(user, CURRENT_TERMS_OF_SERVICE_VERSION);
+
+    userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
+    verify(mockFireCloudService).acceptTermsOfService();
+
+    Optional<DbUserTermsOfService> tosMaybe = userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    assertThat(tosMaybe).isPresent();
+    assertThat(tosMaybe.get().getTerraAgreementTime()).isNotNull();
   }
 
   @Test

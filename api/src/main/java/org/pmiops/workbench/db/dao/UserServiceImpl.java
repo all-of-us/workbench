@@ -28,7 +28,6 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -85,8 +84,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
-
-  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
       ImmutableMap.<AccessModuleName, BadgeName>builder()
@@ -896,11 +893,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
   }
 
-  @NotNull
-  private Timestamp clockNow() {
-    return new Timestamp(clock.instant().toEpochMilli());
-  }
-
   /**
    * Return the user's registered tier access expiration time, for the purpose of sending an access
    * renewal reminder or expiration email.
@@ -958,5 +950,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
+  }
+
+  private Timestamp clockNow() {
+    return new Timestamp(clock.instant().toEpochMilli());
   }
 }

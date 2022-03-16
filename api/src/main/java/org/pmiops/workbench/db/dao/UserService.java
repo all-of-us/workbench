@@ -16,6 +16,8 @@ import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
+  int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+
   /**
    * Updates a user record with a modifier function.
    *
