@@ -1,8 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -422,7 +422,8 @@ public class UserServiceTest {
     userService.submitAouTermsOfService(user, CURRENT_TERMS_OF_SERVICE_VERSION);
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
 
-    Optional<DbUserTermsOfService> tosMaybe = userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    Optional<DbUserTermsOfService> tosMaybe =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
     assertThat(tosMaybe).isPresent();
     assertThat(tosMaybe.get().getTosVersion()).isEqualTo(CURRENT_TERMS_OF_SERVICE_VERSION);
     assertThat(tosMaybe.get().getAouAgreementTime()).isNotNull();
@@ -442,7 +443,8 @@ public class UserServiceTest {
     userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
     verify(mockFireCloudService).acceptTermsOfService();
 
-    Optional<DbUserTermsOfService> tosMaybe = userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    Optional<DbUserTermsOfService> tosMaybe =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
     assertThat(tosMaybe).isPresent();
     assertThat(tosMaybe.get().getTerraAgreementTime()).isNotNull();
   }
