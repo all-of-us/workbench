@@ -243,7 +243,7 @@ export const ModifierPage = fp.flow(
       if (domain !== Domain.SURVEY) {
         formState.push({
           name: ModifierType.NUMOFOCCURRENCES,
-          label: 'Number of occurrence dates',
+          label: 'Number Of Occurrence Dates',
           type: 'number',
           operator: undefined,
           values: [undefined, undefined],
