@@ -158,7 +158,7 @@ const validatorFuncs = {
       return 'Number Of Occurrence Dates must be between 1 - 99';
     }
     if (!Number.isInteger(parseFloat(value))) {
-      return 'Number of occurrence dates must be a whole number';
+      return 'Number Of Occurrence Dates must be a whole number';
     }
     return null;
   },
