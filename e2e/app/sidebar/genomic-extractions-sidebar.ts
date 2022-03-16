@@ -56,7 +56,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
           visible: true,
           timeout
         }),
-        waitWhileLoading(this.page, { includeRuntimeSpinner: true, timeout })
+        waitWhileLoading(this.page, { includeRuntimeSpinner: true, takeScreenshotOnFailure: false, timeout })
       ]);
       return true;
     } catch (err) {
