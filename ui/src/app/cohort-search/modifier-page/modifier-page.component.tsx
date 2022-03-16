@@ -152,7 +152,7 @@ const validatorFuncs = {
   },
   NUM_OF_OCCURRENCES: (value) => {
     if (value === '') {
-      return 'Number of occurrence dates is required';
+      return 'Number Of Occurrence Dates is required';
     }
     if (value < 1 || value > 99) {
       return 'Number of occurrence dates must be between 1 - 99';
