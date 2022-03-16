@@ -54,8 +54,6 @@ import org.springframework.stereotype.Service;
 public class ProfileService {
   private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
-  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
-
   private final AccessModuleService accessModuleService;
   private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
@@ -539,26 +537,5 @@ public class ProfileService {
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
     return getProfile(dbUser);
-  }
-
-  public void validateTermsOfService(Integer tosVersion) {
-    if (tosVersion == null) {
-      throw new BadRequestException("Terms of Service version is NULL");
-    }
-    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
-      throw new BadRequestException("Terms of Service version is not up to date");
-    }
-  }
-
-  public void validateTermsOfService(DbUser dbUser) {
-    final int tosVersion =
-        userTermsOfServiceDao
-            .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-            .map(DbUserTermsOfService::getTosVersion)
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "No Terms of Service acceptance recorded for this user"));
-    validateTermsOfService(tosVersion);
   }
 }

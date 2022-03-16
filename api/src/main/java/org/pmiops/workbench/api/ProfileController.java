@@ -154,7 +154,7 @@ public class ProfileController implements ProfileApiDelegate {
 
       // by approving the latest AOU Terms of Service, the user has also approved the Terra TOS
       try {
-        profileService.validateTermsOfService(dbUser);
+        userService.validateTermsOfService(dbUser);
         fireCloudService.acceptTermsOfService();
       } catch (BadRequestException e) {
         // TODO 7834
@@ -198,7 +198,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyCaptcha(request.getCaptchaVerificationToken());
     }
 
-    profileService.validateTermsOfService(request.getTermsOfServiceVersion());
+    userService.validateTermsOfService(request.getTermsOfServiceVersion());
 
     profileService.validateAffiliation(request.getProfile());
 

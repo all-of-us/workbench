@@ -85,6 +85,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
 
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+
   private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
       ImmutableMap.<AccessModuleName, BadgeName>builder()
           .put(AccessModuleName.RT_COMPLIANCE_TRAINING, BadgeName.REGISTERED_TIER_TRAINING)
@@ -444,6 +446,29 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     ducc.setCompletionTime(timestamp);
     ducc.setUserNameOutOfDate(false);
     return dbUser;
+  }
+
+  @Override
+  public void validateTermsOfService(Integer tosVersion) {
+    if (tosVersion == null) {
+      throw new BadRequestException("Terms of Service version is NULL");
+    }
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
+    }
+  }
+
+  @Override
+  public void validateTermsOfService(DbUser dbUser) {
+    final int tosVersion =
+        userTermsOfServiceDao
+            .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
+            .map(DbUserTermsOfService::getTosVersion)
+            .orElseThrow(
+                () ->
+                    new BadRequestException(
+                        "No Terms of Service acceptance recorded for this user"));
+    validateTermsOfService(tosVersion);
   }
 
   @Override
