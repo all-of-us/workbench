@@ -861,9 +861,9 @@ export const AdminInstitutionEdit = fp.flow(
                   />
                 )}
                 <TextInputWithLabel
-                  value={institution.requestAccessLink}
-                  inputId='requestAccessLink'
-                  inputName='requestAccessLink'
+                  value={institution.requestAccessUrl}
+                  inputId='requestAccessUrl'
+                  inputName='requestAccessUrl'
                   placeholder='Request Access URL'
                   containerStyle={{ marginTop: '1.5rem' }}
                   labelStyle={styles.label}
@@ -871,12 +871,12 @@ export const AdminInstitutionEdit = fp.flow(
                   labelText='Custom URL for “Request Access” Links'
                   onChange={(v) =>
                     this.setState(
-                      fp.set(['institution', 'requestAccessLink'], v)
+                      fp.set(['institution', 'requestAccessUrl'], v)
                     )
                   }
                   onBlur={(v) =>
                     this.setState(
-                      fp.set(['institution', 'requestAccessLink'], v.trim())
+                      fp.set(['institution', 'requestAccessUrl'], v.trim())
                     )
                   }
                 />
@@ -884,8 +884,8 @@ export const AdminInstitutionEdit = fp.flow(
                 <p
                   style={{
                     color: colors.primary,
-                    fontSize: '12px',
-                    lineHeight: '18px',
+                    fontSize: 12,
+                    lineHeight: 18,
                     width: '16rem',
                   }}
                 >

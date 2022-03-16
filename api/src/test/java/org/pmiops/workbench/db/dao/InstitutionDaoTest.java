@@ -37,8 +37,18 @@ public class InstitutionDaoTest {
     final DbInstitution toSave =
         new DbInstitution()
             .setShortName("VUMC")
+            .setDisplayName("Vanderbilt University Medical Center");
+    final DbInstitution saved = institutionDao.save(toSave);
+    assertThat(saved).isEqualTo(toSave);
+  }
+
+  @Test
+  public void test_save_optional() {
+    final DbInstitution toSave =
+        new DbInstitution()
+            .setShortName("VUMC")
             .setDisplayName("Vanderbilt University Medical Center")
-            .setRequestAccessLink("https://www.vumc.org/");
+            .setRequestAccessUrl("https://www.vumc.org/");
     final DbInstitution saved = institutionDao.save(toSave);
     assertThat(saved).isEqualTo(toSave);
   }

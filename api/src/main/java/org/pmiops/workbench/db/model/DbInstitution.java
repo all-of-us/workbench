@@ -18,7 +18,7 @@ public class DbInstitution {
   private String displayName;
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
-  private String requestAccessLink;
+  private String requestAccessUrl;
 
   public DbInstitution() {}
 
@@ -74,13 +74,13 @@ public class DbInstitution {
     return this;
   }
 
-  @Column(name = "request_access_link")
-  public String getRequestAccessLink() {
-    return requestAccessLink;
+  @Column(name = "request_access_url")
+  public String getRequestAccessUrl() {
+    return requestAccessUrl;
   }
 
-  public DbInstitution setRequestAccessLink(String requestAccessLink) {
-    this.requestAccessLink = requestAccessLink;
+  public DbInstitution setRequestAccessUrl(String requestAccessUrl) {
+    this.requestAccessUrl = requestAccessUrl;
     return this;
   }
 
@@ -101,12 +101,12 @@ public class DbInstitution {
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
         && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
-        && Objects.equal(requestAccessLink, that.requestAccessLink);
+        && Objects.equal(requestAccessUrl, that.requestAccessUrl);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(
-        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, requestAccessLink);
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, requestAccessUrl);
   }
 }

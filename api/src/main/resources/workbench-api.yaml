@@ -6830,9 +6830,9 @@ definitions:
         type: string
         description: 'The detailed Organization Type of this institution, as text,
           if its enumerated type is OTHER'
-      requestAccessLink:
+      requestAccessUrl:
         type: string
-        description: 'Institution-specific request access link for users to use during registration.'
+        description: 'Request access url for users to use during registration.'
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string

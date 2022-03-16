@@ -121,8 +121,8 @@ export const AdminInstitution = fp.flow(withNavigation)(
       return capStringWithEllipsis(institution.userInstructions, 300);
     }
 
-    renderRequestAccessLink(institution: Institution) {
-      return capStringWithEllipsis(institution.requestAccessLink, 300);
+    renderrequestAccessUrl(institution: Institution) {
+      return capStringWithEllipsis(institution.requestAccessUrl, 300);
     }
 
     render() {
@@ -194,9 +194,9 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 headerStyle={{ ...styles.header, width: '5rem' }}
               />
               <Column
-                field='requestAccessLink'
+                field='requestAccessUrl'
                 header='Custom Request Access URL'
-                body={this.renderRequestAccessLink}
+                body={this.renderrequestAccessUrl}
                 bodyStyle={styles.text}
                 headerStyle={{ ...styles.header, width: '5rem' }}
               />
