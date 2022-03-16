@@ -861,32 +861,49 @@ export const AdminInstitutionEdit = fp.flow(
                   />
                 )}
                 <TextInputWithLabel
-                    value={institution.requestAccessLink}
-                    inputId='requestAccessLink'
-                    inputName='requestAccessLink'
-                    placeholder='Request Access URL'
-                    containerStyle={{marginTop:'1.5rem'}}
-                    labelStyle={styles.label}
-                    inputStyle={{ width: '16rem', marginTop: '0.3rem' }}
-                    labelText='Custom URL for “Request Access” Links'
-                    onChange={(v) =>
-                        this.setState(fp.set(['institution', 'requestAccessLink'], v))
-                    }
-                    onBlur={(v) =>
-                        this.setState(
-                            fp.set(['institution', 'requestAccessLink'], v.trim())
-                        )
-                    }
+                  value={institution.requestAccessLink}
+                  inputId='requestAccessLink'
+                  inputName='requestAccessLink'
+                  placeholder='Request Access URL'
+                  containerStyle={{ marginTop: '1.5rem' }}
+                  labelStyle={styles.label}
+                  inputStyle={{ width: '16rem', marginTop: '0.3rem' }}
+                  labelText='Custom URL for “Request Access” Links'
+                  onChange={(v) =>
+                    this.setState(
+                      fp.set(['institution', 'requestAccessLink'], v)
+                    )
+                  }
+                  onBlur={(v) =>
+                    this.setState(
+                      fp.set(['institution', 'requestAccessLink'], v.trim())
+                    )
+                  }
                 />
 
                 <p
-                    style={{
-                      color: colors.primary,
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                    }}
+                  style={{
+                    color: colors.primary,
+                    fontSize: '12px',
+                    lineHeight: '18px',
+                    width: '16rem',
+                  }}
                 >
-                  If provided, users who select this institution but are not allowed according to the data access tier requirements below will be guided to the custom URL rather than the standard ones (registration, CT).
+                  If provided, users who select this institution but are not
+                  allowed according to the data access tier requirements below
+                  will be guided to the custom URL rather than the standard ones
+                  (
+                  <a
+                    href='https://www.researchallofus.org/institutional-agreements'
+                    target='_blank'
+                  >
+                    registration
+                  </a>
+                  , &nbsp;
+                  <a href='mailto:support@researchallofus.org' target='_blank'>
+                    CT
+                  </a>
+                  ).
                 </p>
               </FlexColumn>
               <FlexColumn style={{ width: '50%', marginRight: '1rem' }}>
