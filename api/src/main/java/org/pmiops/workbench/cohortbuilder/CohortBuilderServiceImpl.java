@@ -363,54 +363,29 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public Long findDomainCountByStandard(String domain, String term, Boolean standard) {
     Long count = cbCriteriaDao.findDomainCountOnCodeAndStandard(term, domain, standard);
-
-    System.out.println(
-        "****************findDomainCountOnCodeAndStandard term:"
-            + term
-            + ", domain:"
-            + domain
-            + " std:"
-            + standard
-            + " -> long-count="
-            + count);
-    if (count ==0){
-      System.out.print(
-          "****************---> calling findDomainCountAndStandard modified-term:"
-              + modifyTermMatch(term)
-              + ", domain:"
-              + domain
-              + " std:"
-              + standard);
-      count = cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard);
-      System.out.println(" -> long-count="+count);
-    }
-    return count;
-//    return count == 0
-//        ? cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard)
-//        : count;
+    return count == 0
+        ? cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard)
+        : count;
   }
 
   @Override
   public List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
-    // term may be code?
-    // Iterate through list of domains and call findDomainCountOnCodeAndStandard ?
-    System.out.print(
-        "****************---> calling findDomainCounts modified-term:"
-            + modifyTermMatch(term)
-            + ", domainList:"
-            + domains
-            + " std:"
-            + standard);
-    List<CardCount> cardCounts = cbCriteriaDao
-        .findDomainCounts(
-            modifyTermMatch(term),
-            standard,
-            domains.stream().map(d -> d.toString()).collect(Collectors.toList()))
-        .stream()
-        .filter(cardCount -> cardCount.getCount() > 0)
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
-    System.out.println(" -> card-counts="+cardCounts);
+    List<String> strDomains =
+        domains.stream().map(d1 -> d1.toString()).collect(Collectors.toList());
+    List<CardCount> cardCounts =
+        cbCriteriaDao.findDomainCountsByCode(term, standard, strDomains).stream()
+            .filter(cardCount -> cardCount.getCount() > 0)
+            .map(cohortBuilderMapper::dbModelToClient)
+            .collect(Collectors.toList());
+    // filter strDomains to remove domains that have a cardCount
+    strDomains.removeAll(
+        cardCounts.stream().map(c -> c.getDomain().toString()).collect(Collectors.toList()));
+    // modify search term and call
+    cardCounts.addAll(
+        cbCriteriaDao.findDomainCounts(modifyTermMatch(term), standard, strDomains).stream()
+            .filter(cardCount -> cardCount.getCount() > 0)
+            .map(cohortBuilderMapper::dbModelToClient)
+            .collect(Collectors.toList()));
     return cardCounts;
   }
 

@@ -254,9 +254,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         cohortBuilderService.findDomainCounts(
             term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
     cardCounts.addAll(cohortBuilderService.findSurveyCounts(term));
-    System.out.println("******************new method******************");
-    System.out.println(cardCounts);
-    System.out.println("******************new method******************");
     return ResponseEntity.ok(new CardCountResponse().items(cardCounts));
   }
 
