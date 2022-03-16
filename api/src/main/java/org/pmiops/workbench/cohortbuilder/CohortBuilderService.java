@@ -7,12 +7,14 @@ import java.util.Set;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
+import org.pmiops.workbench.model.CardCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.EthnicityInfo;
 import org.pmiops.workbench.model.GenderOrSexType;
@@ -72,6 +74,10 @@ public interface CohortBuilderService {
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
   Long findDomainCountByStandard(String domain, String term, Boolean standard);
+
+  List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains);
+
+  List<CardCount> findSurveyCounts(String term);
 
   List<DomainCard> findDomainCards();
 

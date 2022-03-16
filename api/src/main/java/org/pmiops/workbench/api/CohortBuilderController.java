@@ -1,8 +1,10 @@
 package org.pmiops.workbench.api;
 
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import com.google.apphosting.api.DeadlineExceededException;
 import com.google.gson.Gson;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -11,6 +13,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
+import org.pmiops.workbench.model.CardCount;
+import org.pmiops.workbench.model.CardCountResponse;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
@@ -223,8 +227,37 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateDomain(domain);
     validateTerm(term);
     Long count = cohortBuilderService.findDomainCountByStandard(domain, term, standard);
+    if (!standard) {
+      findConceptCounts(workspaceNamespace, workspaceId, term);
+    }
     return ResponseEntity.ok(
         new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
+  }
+
+  @Override
+  public ResponseEntity<CardCountResponse> findConceptCounts(
+      String workspaceNamespace, String workspaceId, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(term);
+    List<CardCount> cardCounts =
+        cohortBuilderService.findDomainCounts(
+            term,
+            true,
+            ImmutableList.of(
+                Domain.CONDITION,
+                Domain.DRUG,
+                Domain.MEASUREMENT,
+                Domain.OBSERVATION,
+                Domain.PROCEDURE));
+    cardCounts.addAll(
+        cohortBuilderService.findDomainCounts(
+            term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
+    cardCounts.addAll(cohortBuilderService.findSurveyCounts(term));
+    System.out.println("******************new method******************");
+    System.out.println(cardCounts);
+    System.out.println("******************new method******************");
+    return ResponseEntity.ok(new CardCountResponse().items(cardCounts));
   }
 
   @Override

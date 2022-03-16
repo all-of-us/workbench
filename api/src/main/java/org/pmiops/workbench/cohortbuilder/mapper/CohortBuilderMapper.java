@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
+import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
@@ -11,6 +12,7 @@ import org.pmiops.workbench.cdr.model.DbDomainCard;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.AgeTypeCount;
+import org.pmiops.workbench.model.CardCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaMenu;
@@ -47,4 +49,7 @@ public interface CohortBuilderMapper {
   SurveyModule dbModelToClient(DbSurveyModule source);
 
   CriteriaMenu dbModelToClient(DbCriteriaMenu source);
+
+  @Mapping(target = "domain", source = "source.domainId", qualifiedByName = "domainIdToDomain")
+  CardCount dbModelToClient(DbCardCount source);
 }

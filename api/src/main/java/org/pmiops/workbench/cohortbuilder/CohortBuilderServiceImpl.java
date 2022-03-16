@@ -39,6 +39,7 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
+import org.pmiops.workbench.model.CardCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -362,9 +363,63 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public Long findDomainCountByStandard(String domain, String term, Boolean standard) {
     Long count = cbCriteriaDao.findDomainCountOnCodeAndStandard(term, domain, standard);
-    return count == 0
-        ? cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard)
-        : count;
+
+    System.out.println(
+        "****************findDomainCountOnCodeAndStandard term:"
+            + term
+            + ", domain:"
+            + domain
+            + " std:"
+            + standard
+            + " -> long-count="
+            + count);
+    if (count ==0){
+      System.out.print(
+          "****************---> calling findDomainCountAndStandard modified-term:"
+              + modifyTermMatch(term)
+              + ", domain:"
+              + domain
+              + " std:"
+              + standard);
+      count = cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard);
+      System.out.println(" -> long-count="+count);
+    }
+    return count;
+//    return count == 0
+//        ? cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard)
+//        : count;
+  }
+
+  @Override
+  public List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
+    // term may be code?
+    // Iterate through list of domains and call findDomainCountOnCodeAndStandard ?
+    System.out.print(
+        "****************---> calling findDomainCounts modified-term:"
+            + modifyTermMatch(term)
+            + ", domainList:"
+            + domains
+            + " std:"
+            + standard);
+    List<CardCount> cardCounts = cbCriteriaDao
+        .findDomainCounts(
+            modifyTermMatch(term),
+            standard,
+            domains.stream().map(d -> d.toString()).collect(Collectors.toList()))
+        .stream()
+        .filter(cardCount -> cardCount.getCount() > 0)
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+    System.out.println(" -> card-counts="+cardCounts);
+    return cardCounts;
+  }
+
+  @Override
+  public List<CardCount> findSurveyCounts(String term) {
+    return cbCriteriaDao.findSurveyCounts(modifyTermMatch(term)).stream()
+        .filter(cardCount -> cardCount.getCount() > 0)
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
