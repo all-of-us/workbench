@@ -363,6 +363,17 @@ export const ConceptHomepage = fp.flow(
       });
       await Promise.all(promises);
       this.setState({ conceptDomainCards, conceptSurveysList });
+      // // test new api-call
+      cohortBuilderApi()
+        .findConceptCounts(namespace, id, currentInputString)
+        .then((cardList) => {
+          console.log('CardCount[]');
+          console.log(cardList.items);
+          console.log('ConceptDomainCard[]');
+          console.log(conceptDomainCards);
+          console.log('SurveyModule[]');
+          console.log(conceptSurveysList);
+        });
     }
 
     getDomainCounts(domain: string, standard: boolean) {
