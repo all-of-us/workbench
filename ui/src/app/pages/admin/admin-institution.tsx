@@ -121,6 +121,10 @@ export const AdminInstitution = fp.flow(withNavigation)(
       return capStringWithEllipsis(institution.userInstructions, 300);
     }
 
+    renderRequestAccessLink(institution: Institution) {
+      return capStringWithEllipsis(institution.requestAccessLink, 300);
+    }
+
     render() {
       const { institutions, institutionLoadError, loadingInstitutions } =
         this.state;
@@ -186,6 +190,13 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 field='userInstructions'
                 header='User Email Instruction'
                 body={this.renderInstitutionInstructions}
+                bodyStyle={styles.text}
+                headerStyle={{ ...styles.header, width: '5rem' }}
+              />
+              <Column
+                field='requestAccessLink'
+                header='Custom Request Access URL'
+                body={this.renderRequestAccessLink}
                 bodyStyle={styles.text}
                 headerStyle={{ ...styles.header, width: '5rem' }}
               />
