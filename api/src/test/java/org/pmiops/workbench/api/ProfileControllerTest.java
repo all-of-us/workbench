@@ -962,6 +962,77 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void resendWelcomeEmail_messagingException() throws MessagingException {
+    createAccountAndDbUserWithAffiliation();
+    dbUser.setFirstSignInTime(null);
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doThrow(new MessagingException("exception"))
+        .when(mockMailService)
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+
+    ResponseEntity<Void> response =
+        profileController.resendWelcomeEmail(
+            new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    // called twice, once during account creation, once on resend
+    verify(mockMailService, times(2))
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
+  }
+
+  @Test
+  public void resendWelcomeEmail_OK() throws MessagingException {
+    createAccountAndDbUserWithAffiliation();
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doNothing()
+        .when(mockMailService)
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+
+    ResponseEntity<Void> response =
+        profileController.resendWelcomeEmail(
+            new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    // called twice, once during account creation, once on resend
+    verify(mockMailService, times(2))
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
+  }
+
+  @Test
+  public void sendUserInstructions_none_deprecated() throws MessagingException {
+    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+    // default Institution in this test class has no instructions
+    createAccountAndDbUserWithAffiliation();
+    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+
+    // don't send the user instructions email if there are no instructions
+    verifyNoMoreInteractions(mockMailService);
+  }
+
+  @Test
+  public void sendUserInstructions_withInstructions_deprecated() throws MessagingException {
+    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    final InstitutionUserInstructions instructions =
+        new InstitutionUserInstructions()
+            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
+            .instructions(
+                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\" />");
+    institutionService.setInstitutionUserInstructions(instructions);
+
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
+    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService)
+        .sendInstitutionUserInstructions(
+            CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
+  }
+
+  @Test
+>>>>>>> 60eddbf1e... Update test we do not need to set config
   public void sendUserInstructions_none() throws MessagingException {
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
