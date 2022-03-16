@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.db.dao.UserService.CURRENT_TERMS_OF_SERVICE_VERSION;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -167,16 +168,17 @@ public class ProfileServiceTest {
   @Test
   public void testReturnsLastAcknowledgedTermsOfService() {
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
-    userTermsOfService.setTosVersion(1);
-    userTermsOfService.setAouAgreementTime(new Timestamp(1));
+    userTermsOfService.setTosVersion(CURRENT_TERMS_OF_SERVICE_VERSION);
+    userTermsOfService.setAouAgreementTime(new Timestamp(100));
     when(mockUserTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(1))
         .thenReturn(Optional.of(userTermsOfService));
 
     DbUser user = new DbUser();
     user.setUserId(1);
     Profile profile = profileService.getProfile(user);
-    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
-    assertThat(profile.getLatestTermsOfServiceTime()).isEqualTo(1);
+    assertThat(profile.getLatestTermsOfServiceVersion())
+        .isEqualTo(CURRENT_TERMS_OF_SERVICE_VERSION);
+    assertThat(profile.getLatestTermsOfServiceTime()).isEqualTo(100);
   }
 
   @Test
