@@ -256,18 +256,17 @@ public class ProfileController implements ProfileApiDelegate {
     userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
     String institutionShortName =
         profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();
-    try {
-      Institution userInstitution =
-          institutionService
-              .getInstitution(institutionShortName)
-              .orElseThrow(() -> new BadRequestException("User Institution cannot be found"));
-      sendWelcomeEmail(user, googleUser, userInstitution);
-    } catch (BadRequestException ex) {
-      log.log(
-          Level.SEVERE,
-          "Exception while resending sending welcome email: " + ex.getLocalizedMessage());
-      throw ex;
-    }
+    Institution userInstitution =
+        institutionService
+            .getInstitution(institutionShortName)
+            .orElseThrow(
+                () -> {
+                  log.log(
+                      Level.SEVERE,
+                      "Exception while resending sending welcome email: User Institution cannot be found");
+                  return new BadRequestException("User Institution cannot be found");
+                });
+    sendWelcomeEmail(user, googleUser, userInstitution);
     final MailService mail = mailServiceProvider.get();
     institutionService
         .getInstitutionUserInstructions(institutionShortName)
