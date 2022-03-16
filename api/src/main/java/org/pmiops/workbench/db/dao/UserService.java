@@ -4,6 +4,7 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -56,13 +57,13 @@ public interface UserService {
 
   void validateTermsOfService(Integer tosVersion);
 
-  void validateTermsOfService(DbUser dbUser);
+  void validateTermsOfService(@Nonnull DbUser dbUser);
 
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(DbUser dbUser, Integer tosVersion);
 
   // Registers that a user has agreed to the current version of the Terra Terms of Service.
-  void acceptTerraTermsOfService(DbUser dbUser);
+  void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 

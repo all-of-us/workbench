@@ -457,7 +457,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void validateTermsOfService(DbUser dbUser) {
+  public void validateTermsOfService(@Nonnull DbUser dbUser) {
     final int tosVersion =
         userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
     validateTermsOfService(tosVersion);
@@ -477,7 +477,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void acceptTerraTermsOfService(DbUser dbUser) {
+  public void acceptTerraTermsOfService(@Nonnull DbUser dbUser) {
     fireCloudService.acceptTermsOfService();
     userTermsOfServiceDao.save(
         userTermsOfServiceDao

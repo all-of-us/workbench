@@ -45,6 +45,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -546,6 +547,60 @@ public class UserServiceTest {
     userService.confirmPublications();
     assertThat(getModuleCompletionTime(AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
+
+  @Test
+  public void test_validateTermsOfService() {
+    // does not throw
+    userService.validateTermsOfService(CURRENT_TERMS_OF_SERVICE_VERSION);
+  }
+
+  @Test
+  public void test_validateTermsOfService_null_version() {
+    final Integer badVersion = null;
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(badVersion));
+  }
+
+  @Test
+  public void test_validateTermsOfService_wrong_version() {
+    assertThrows(
+        BadRequestException.class,
+        () -> userService.validateTermsOfService(CURRENT_TERMS_OF_SERVICE_VERSION - 1));
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(
+        new DbUserTermsOfService()
+            .setUserId(user.getUserId())
+            .setTosVersion(CURRENT_TERMS_OF_SERVICE_VERSION));
+
+    // does not throw
+    userService.validateTermsOfService(user);
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_no_tos_entry() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_missing_version() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_wrong_version() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(
+        new DbUserTermsOfService()
+            .setUserId(user.getUserId())
+            .setTosVersion(CURRENT_TERMS_OF_SERVICE_VERSION - 1));
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
   }
 
   private void assertModuleCompletionEqual(
