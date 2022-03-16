@@ -63,6 +63,8 @@ describe('Share Controlled Tier Workspace', () => {
 
   test('Can share CT workspace only with user with CT access', async () => {
     await signInWithAccessToken(page);
+
+    // Create a workspace in the Controlled Tier
     await createWorkspace(page, {
       workspaceName,
       dataAccessTier: AccessTierDisplayNames.Controlled,
@@ -93,6 +95,7 @@ describe('Share Controlled Tier Workspace', () => {
     await shareModal.shareWithUser(hasCTAccessUser, WorkspaceAccessLevel.Writer);
   });
 
+  // Depends on previous test
   test('Writer can open and duplicate CT workspace', async () => {
     await signInWithAccessToken(page, hasCTAccessUser);
 
