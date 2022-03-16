@@ -36,7 +36,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -65,7 +65,6 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -213,7 +212,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final List<ListRuntimeResponse> workbenchListRuntimeResponses =
-        leonardoNotebooksClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
+        leonardoNotebooksClient
+            .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
             .stream()
             .map(leonardoMapper::toApiListRuntimeResponse)
             .collect(Collectors.toList());
@@ -343,7 +343,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
     final List<DbUser> owners =
-        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
+        workspaceService
+            .getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
             .stream()
             .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
             .map(UserRole::getEmail)
@@ -411,18 +412,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     // Enable all users in RT or higher tiers to see all published workspaces regardless of tier
+    // Note: keep in sync with WorkspaceAuthService.updateWorkspaceAcls.
     final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
-    final FirecloudManagedGroupWithMembers authDomainGroup =
-        fireCloudService.getGroup(dbAccessTier.getAuthDomainName());
+    final String registeredTierGroupEmail = dbAccessTier.getAuthDomainGroupEmail();
 
-    final FirecloudWorkspaceACLUpdate currentUpdate =
-        WorkspaceAuthService.updateFirecloudAclsOnUser(
-            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
+    final FirecloudWorkspaceACLUpdate aclUpdate =
+        FirecloudTransforms.buildAclUpdate(registeredTierGroupEmail, accessLevel);
 
     fireCloudService.updateWorkspaceACL(
         dbWorkspace.getWorkspaceNamespace(),
         dbWorkspace.getFirecloudName(),
-        Collections.singletonList(currentUpdate));
+        Collections.singletonList(aclUpdate));
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace);

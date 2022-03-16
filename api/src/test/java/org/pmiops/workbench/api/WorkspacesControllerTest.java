@@ -111,6 +111,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -535,16 +536,11 @@ public class WorkspacesControllerTest {
     return cohort;
   }
 
-  public ArrayList<FirecloudWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
+  private List<FirecloudWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
       List<UserRole> collaborators) {
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    for (UserRole userRole : collaborators) {
-      FirecloudWorkspaceACLUpdate aclUpdate =
-          new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
-      aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
-      updateACLRequestList.add(aclUpdate);
-    }
-    return updateACLRequestList;
+    return collaborators.stream()
+        .map(c -> FirecloudTransforms.buildAclUpdate(c.getEmail(), c.getRole()))
+        .collect(Collectors.toList());
   }
 
   @Test
@@ -2269,7 +2265,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
 
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(collaborators);
 
     verify(fireCloudService)
@@ -2365,7 +2361,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
     verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
@@ -2513,6 +2509,63 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testShareWorkspacePublishedWorkspace() {
+    DbCdrVersion ctCdrVersion =
+        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 5L);
+
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
+        .thenReturn(
+            createWorkspaceACL(
+                new JSONObject()
+                    .put(
+                        // Specifically, the REGISTERED tier is used for publishing.
+                        accessTier.getAuthDomainGroupEmail(),
+                        new JSONObject()
+                            .put("accessLevel", "READER")
+                            .put("canCompute", false)
+                            .put("canShare", false))
+                    .put(
+                        currentUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        writerUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "WRITER")
+                            .put("canCompute", true)
+                            .put("canShare", true))));
+
+    Workspace workspace =
+        createWorkspace().cdrVersionId(Long.toString(ctCdrVersion.getCdrVersionId()));
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            // Removing writer.
+            .addItemsItem(
+                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+    verify(fireCloudService)
+        .updateWorkspaceACL(
+            any(),
+            any(),
+            eq(
+                ImmutableList.of(
+                    FirecloudTransforms.buildAclUpdate(
+                        currentUser.getUsername(), WorkspaceAccessLevel.OWNER),
+                    FirecloudTransforms.buildAclUpdate(
+                        writerUser.getUsername(), WorkspaceAccessLevel.NO_ACCESS))));
+  }
+
+  @Test
   public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     stubFcGetWorkspaceACL();
@@ -2605,7 +2658,7 @@ public class WorkspacesControllerTest {
 
     // add the reader with NO_ACCESS to mock
     shareWorkspaceRequest.addItemsItem(reader);
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService)
         .updateWorkspaceACL(

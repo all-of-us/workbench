@@ -369,7 +369,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       String firecloudName,
       List<FirecloudWorkspaceACLUpdate> aclUpdates) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
-    // TODO: set authorization domain here
     return retryHandler.run(
         (context) ->
             workspacesApi.updateWorkspaceACL(aclUpdates, workspaceNamespace, firecloudName, false));
