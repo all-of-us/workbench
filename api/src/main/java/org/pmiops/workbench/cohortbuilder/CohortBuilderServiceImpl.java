@@ -33,6 +33,7 @@ import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
+import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -369,28 +370,43 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
-    List<String> strDomains =
-        domains.stream().map(d1 -> d1.toString()).collect(Collectors.toList());
+  public List<CardCount> findDomainCounts(String term) {
     List<CardCount> cardCounts =
-        cbCriteriaDao.findDomainCountsByCode(term, standard, strDomains).stream()
-            .filter(cardCount -> cardCount.getCount() > 0)
-            .map(cohortBuilderMapper::dbModelToClient)
-            .collect(Collectors.toList());
-    // filter strDomains to remove domains that have a cardCount
-    strDomains.removeAll(
-        cardCounts.stream().map(c -> c.getDomain().toString()).collect(Collectors.toList()));
-    // modify search term and call
+        findDomainCounts(
+            term,
+            true,
+            ImmutableList.of(
+                Domain.CONDITION,
+                Domain.DRUG,
+                Domain.MEASUREMENT,
+                Domain.OBSERVATION,
+                Domain.PROCEDURE));
     cardCounts.addAll(
-        cbCriteriaDao.findDomainCounts(modifyTermMatch(term), standard, strDomains).stream()
-            .filter(cardCount -> cardCount.getCount() > 0)
-            .map(cohortBuilderMapper::dbModelToClient)
-            .collect(Collectors.toList()));
+        findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
+    cardCounts.addAll(findSurveyCounts(term));
     return cardCounts;
   }
 
-  @Override
-  public List<CardCount> findSurveyCounts(String term) {
+  private List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
+    List<String> strDomains =
+        domains.stream().map(d1 -> d1.toString()).collect(Collectors.toList());
+    List<DbCardCount> cardCounts =
+        cbCriteriaDao.findDomainCountsByCode(term, standard, strDomains).stream()
+            .filter(cardCount -> cardCount.getCount() > 0)
+            .collect(Collectors.toList());
+    // filter strDomains to remove domains that have a cardCount by domain
+    strDomains.removeAll(
+        cardCounts.stream().map(c -> c.getDomainId()).collect(Collectors.toList()));
+    // modify search term and call
+    cardCounts.addAll(cbCriteriaDao.findDomainCounts(modifyTermMatch(term), standard, strDomains));
+
+    return cardCounts.stream()
+        .filter(cardCount -> cardCount.getCount() > 0)
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  private List<CardCount> findSurveyCounts(String term) {
     return cbCriteriaDao.findSurveyCounts(modifyTermMatch(term)).stream()
         .filter(cardCount -> cardCount.getCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)

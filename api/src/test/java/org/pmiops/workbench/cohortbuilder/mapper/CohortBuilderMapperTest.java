@@ -2,14 +2,20 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
+import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.AgeTypeCount;
+import org.pmiops.workbench.model.CardCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -134,6 +140,39 @@ public class CohortBuilderMapperTest {
     assertThat(
             cohortBuilderMapper.dbModelToClient(new DbSurveyVersionImpl(100L, "May 2020", 2344L)))
         .isEqualTo(expectedSurveyVersion);
+  }
+
+  @ParameterizedTest(name = "dbModelToClientCardCount -> {0}")
+  @MethodSource("domainCountParameters")
+  public void dbModelToClientCardCount(String domain) {
+    CardCount expected = new CardCount().domain(Domain.valueOf(domain)).name(domain).count(10L);
+    assertThat(
+            cohortBuilderMapper.dbModelToClient(
+                new DbCardCount() {
+                  public String getDomainId() {
+                    return domain;
+                  }
+
+                  public String getName() {
+                    return domain;
+                  }
+
+                  public Long getCount() {
+                    return 10L;
+                  }
+                }))
+        .isEqualTo(expected);
+  }
+
+  private static Stream<Arguments> domainCountParameters() {
+    return Stream.of(
+        Arguments.of("CONDITION", 10),
+        Arguments.of("DRUG", 10),
+        Arguments.of("MEASUREMENT", 10),
+        Arguments.of("OBSERVATION", 10),
+        Arguments.of("PROCEDURE", 10),
+        Arguments.of("PHYSICAL_MEASUREMENT_CSS", 10),
+        Arguments.of("SURVEY", 10));
   }
 
   static class DbAgeTypeCountImpl implements DbAgeTypeCount {
