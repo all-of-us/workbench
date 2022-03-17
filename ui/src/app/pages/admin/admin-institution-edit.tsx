@@ -773,7 +773,9 @@ export const AdminInstitutionEdit = fp.flow(
           controlledTierEmailAddresses: AccessTierShortNames.Controlled,
           registeredTierEmailDomains: AccessTierShortNames.Registered,
           controlledTierEmailDomains: AccessTierShortNames.Controlled,
-          requestAccessUrl: canonicalizeUrl(requestAccessUrl),
+          requestAccessUrl: requestAccessUrl
+            ? canonicalizeUrl(requestAccessUrl)
+            : '',
         },
         {
           displayName: {
