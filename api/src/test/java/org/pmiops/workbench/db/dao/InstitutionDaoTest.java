@@ -43,7 +43,7 @@ public class InstitutionDaoTest {
   }
 
   @Test
-  public void test_save_optional() {
+  public void test_save_optional_requestAccessUrl() {
     final DbInstitution toSave =
         new DbInstitution()
             .setShortName("VUMC")

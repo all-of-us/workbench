@@ -798,7 +798,7 @@ export const AdminInstitutionEdit = fp.flow(
 
             length: {
               maximum: 2000,
-              message: '^Request access URL must be 2000 characters or fewer',
+              tooLong: '^Request access URL must be 2000 characters or fewer',
             },
           },
         }
