@@ -137,4 +137,6 @@ public interface FireCloudService {
   String createBillingProjectName();
 
   boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName);
+
+  void acceptTermsOfService();
 }

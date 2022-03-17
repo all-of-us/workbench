@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.PROJECT_BILLING_ID_SIZE;
+import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.TERMS_OF_SERVICE_BODY;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
@@ -23,12 +24,12 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
-import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -59,20 +60,19 @@ public class FireCloudServiceImplTest {
 
   private static WorkbenchConfig workbenchConfig;
 
-  @MockBean private BillingApi billingApi;
-
   @MockBean
   @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
   private BillingV2Api billingV2Api;
+
+  @MockBean
+  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API)
+  private GroupsApi groupsApi;
 
   @MockBean private FirecloudApiClientFactory firecloudApiClientFactory;
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
-
-  @MockBean
-  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API)
-  private GroupsApi groupsApi;
+  @MockBean private TermsOfServiceApi termsOfServiceApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -134,7 +134,7 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testGetMe_throwsNotFound() throws ApiException {
+  public void testGetMe_throwsNotFound() {
     assertThrows(
         NotFoundException.class,
         () -> {
@@ -144,7 +144,7 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testGetMe_throwsForbidden() throws ApiException {
+  public void testGetMe_throwsForbidden() {
     assertThrows(
         ForbiddenException.class,
         () -> {
@@ -154,7 +154,7 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testGetMe_throwsUnauthorized() throws ApiException {
+  public void testGetMe_throwsUnauthorized() {
     assertThrows(
         UnauthorizedException.class,
         () -> {
@@ -211,7 +211,7 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testNihStatusException() throws Exception {
+  public void testNihStatusException() {
     assertThrows(
         ServerErrorException.class,
         () -> {
@@ -259,5 +259,11 @@ public class FireCloudServiceImplTest {
 
     assertThat(projectName.startsWith(prefix + "-")).isTrue();
     assertThat(projectName.length()).isEqualTo(prefix.length() + 1 + PROJECT_BILLING_ID_SIZE);
+  }
+
+  @Test
+  public void acceptTermsOfService() throws ApiException {
+    service.acceptTermsOfService();
+    verify(termsOfServiceApi).acceptTermsOfService(TERMS_OF_SERVICE_BODY);
   }
 }

@@ -4,6 +4,7 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -16,6 +17,8 @@ import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
+  int LATEST_AOU_TOS_VERSION = 1;
+
   /**
    * Updates a user record with a modifier function.
    *
@@ -52,8 +55,15 @@ public interface UserService {
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
   DbUser submitDUCC(DbUser user, Integer duccSignedVersion, String initials);
 
-  // Registers that a user has agreed to a given version of the Terms of Service.
-  void submitTermsOfService(DbUser dbUser, Integer tosVersion);
+  void validateTermsOfService(Integer tosVersion);
+
+  void validateTermsOfService(@Nonnull DbUser dbUser);
+
+  // Registers that a user has agreed to a given version of the AoU Terms of Service.
+  void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);
+
+  // Registers that a user has agreed to the latest version of the Terra Terms of Service.
+  void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
