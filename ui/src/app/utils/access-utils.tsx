@@ -15,10 +15,7 @@ import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
-import {
-  hasExpired,
-  isExpiringNotBypassed,
-} from 'app/pages/access/access-renewal';
+import { hasExpired, isExpiring } from 'app/pages/access/access-renewal';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -431,21 +428,15 @@ export const computeRenewalDisplayDates = (
     status || {};
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
+  const userExpiredModule = !!expirationEpochMillis;
   const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function getCompleteOrExpireModuleStatus(): AccessRenewalStatus {
-    return cond(
-      [!expirationEpochMillis, () => AccessRenewalStatus.NEVER_EXPIRES],
-      [hasExpired(expirationEpochMillis), () => AccessRenewalStatus.EXPIRED],
-      [
-        isExpiringNotBypassed({ expirationEpochMillis }),
-        () => AccessRenewalStatus.EXPIRING_SOON,
-      ],
-      [!!expirationEpochMillis, () => AccessRenewalStatus.CURRENT]
-    );
-  }
+  const daysRemainingDisplay = () => {
+    const daysRemaining = getWholeDaysFromNow(expirationEpochMillis);
+    return `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`;
+  };
 
   return cond(
     // User has bypassed module
@@ -457,7 +448,7 @@ export const computeRenewalDisplayDates = (
         moduleStatus: AccessRenewalStatus.BYPASSED,
       }),
     ],
-    // User never completed training
+    // Module is incomplete
     [
       !userCompletedModule && !userBypassedModule,
       () => ({
@@ -466,21 +457,39 @@ export const computeRenewalDisplayDates = (
         moduleStatus: AccessRenewalStatus.INCOMPLETE,
       }),
     ],
-    // User completed training; covers expired, within-lookback, and after-lookback cases.
+    // After this point, we know the module is complete and not bypassed.  The remaining checks determine whether the
+    // completion is expired, never expires, expires soon (within-lookback) or expires later (after lookback).
     [
-      userCompletedModule && !userBypassedModule,
-      () => {
-        const daysRemaining = getWholeDaysFromNow(expirationEpochMillis);
-        const daysRemainingDisplay =
-          daysRemaining >= 0
-            ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`
-            : '(expired)';
-        return {
-          lastConfirmedDate,
-          nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus: getCompleteOrExpireModuleStatus(),
-        };
-      },
+      !userExpiredModule,
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `Never Expires`,
+        moduleStatus: AccessRenewalStatus.NEVER_EXPIRES,
+      }),
+    ],
+    [
+      hasExpired(expirationEpochMillis),
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} (expired)`,
+        moduleStatus: AccessRenewalStatus.EXPIRED,
+      }),
+    ],
+    [
+      isExpiring(expirationEpochMillis),
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
+        moduleStatus: AccessRenewalStatus.EXPIRING_SOON,
+      }),
+    ],
+    [
+      userCompletedModule,
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
+        moduleStatus: AccessRenewalStatus.CURRENT,
+      }),
     ]
   );
 };
