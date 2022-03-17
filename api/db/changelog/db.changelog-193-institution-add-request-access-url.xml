@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="evrii" id="db.changelog-193-institution-add-request-access-url.xml">
+  <changeSet author="evrii" id="changelog-193-institution-add-request-access-url.xml">
     <addColumn tableName="institution">
       <column name="request_access_url" type="varchar(2000)"/>
     </addColumn>

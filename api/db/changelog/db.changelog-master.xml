@@ -200,7 +200,7 @@
   <include file="changelog/db.changelog-190-billing-migration-bug-backfill.xml"/>
   <include file="changelog/db.changelog-191-workspace-operation.xml"/>
   <include file="changelog/db.changelog-192-workspace-operation-add-queued-processing.xml"/>
-  <include file="changelog/db.changelog-193-institution-add-request-access-link.xml"/>
+  <include file="changelog/db.changelog-193-institution-add-request-access-url.xml"/>
   <include file="changelog/db.changelog-194-add-terra-agreement-time.xml"/>
   <!--
    Note: to update the DB locally, do the following:
