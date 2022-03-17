@@ -465,7 +465,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   @Transactional
-  public void submitAouTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {
+  public void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion) {
     long userId = dbUser.getUserId();
     userTermsOfServiceDao.save(
         userTermsOfServiceDao
