@@ -21,6 +21,7 @@ import { capStringWithEllipsis, reactStyles } from 'app/utils';
 import { orderedAccessTierShortNames } from 'app/utils/access-tiers';
 import { getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
+import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 const styles = reactStyles({
@@ -121,6 +122,16 @@ export const AdminInstitution = fp.flow(withNavigation)(
       return capStringWithEllipsis(institution.userInstructions, 300);
     }
 
+    renderRequestAccessUrl(institution: Institution) {
+      return institution.requestAccessUrl ? (
+        <a href={canonicalizeUrl(institution.requestAccessUrl)} target='_blank'>
+          {capStringWithEllipsis(institution.requestAccessUrl, 300)}
+        </a>
+      ) : (
+        ''
+      );
+    }
+
     render() {
       const { institutions, institutionLoadError, loadingInstitutions } =
         this.state;
@@ -186,6 +197,13 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 field='userInstructions'
                 header='User Email Instruction'
                 body={this.renderInstitutionInstructions}
+                bodyStyle={styles.text}
+                headerStyle={{ ...styles.header, width: '5rem' }}
+              />
+              <Column
+                field='requestAccessUrl'
+                header='Custom Request Access URL'
+                body={this.renderRequestAccessUrl}
                 bodyStyle={styles.text}
                 headerStyle={{ ...styles.header, width: '5rem' }}
               />

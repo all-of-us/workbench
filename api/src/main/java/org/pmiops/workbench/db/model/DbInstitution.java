@@ -18,6 +18,7 @@ public class DbInstitution {
   private String displayName;
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
+  private String requestAccessUrl;
 
   public DbInstitution() {}
 
@@ -73,6 +74,16 @@ public class DbInstitution {
     return this;
   }
 
+  @Column(name = "request_access_url")
+  public String getRequestAccessUrl() {
+    return requestAccessUrl;
+  }
+
+  public DbInstitution setRequestAccessUrl(String requestAccessUrl) {
+    this.requestAccessUrl = requestAccessUrl;
+    return this;
+  }
+
   // omit ID field from equality so equivalent objects match regardless
   // of whether they are actually present in the DB
 
@@ -89,12 +100,13 @@ public class DbInstitution {
     return Objects.equal(shortName, that.shortName)
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
-        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText);
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
+        && Objects.equal(requestAccessUrl, that.requestAccessUrl);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(
-        shortName, displayName, organizationTypeEnum, organizationTypeOtherText);
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, requestAccessUrl);
   }
 }

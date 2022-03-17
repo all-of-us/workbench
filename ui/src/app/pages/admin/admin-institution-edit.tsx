@@ -54,6 +54,7 @@ import {
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
+import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 const styles = reactStyles({
@@ -418,6 +419,7 @@ export const AdminInstitutionEdit = fp.flow(
           shortName: '',
           displayName: '',
           organizationTypeEnum: null,
+          requestAccessUrl: '',
         },
         institutionBeforeEdits: null,
         showOtherInstitutionTextBox: false,
@@ -709,8 +711,12 @@ export const AdminInstitutionEdit = fp.flow(
 
     render() {
       const { institution, showOtherInstitutionTextBox, title } = this.state;
-      const { displayName, organizationTypeEnum, organizationTypeOtherText } =
-        institution;
+      const {
+        displayName,
+        organizationTypeEnum,
+        organizationTypeOtherText,
+        requestAccessUrl,
+      } = institution;
 
       validate.validators.customEmailAddresses = (
         accessTierShortName: string
@@ -767,6 +773,9 @@ export const AdminInstitutionEdit = fp.flow(
           controlledTierEmailAddresses: AccessTierShortNames.Controlled,
           registeredTierEmailDomains: AccessTierShortNames.Registered,
           controlledTierEmailDomains: AccessTierShortNames.Controlled,
+          requestAccessUrl: requestAccessUrl
+            ? canonicalizeUrl(requestAccessUrl)
+            : '',
         },
         {
           displayName: {
@@ -782,6 +791,16 @@ export const AdminInstitutionEdit = fp.flow(
           controlledTierEmailAddresses: { customEmailAddresses: {} },
           registeredTierEmailDomains: { customEmailDomains: {} },
           controlledTierEmailDomains: { customEmailDomains: {} },
+          requestAccessUrl: {
+            url: {
+              message: `^Request access URL is not a valid URL`,
+            },
+
+            length: {
+              maximum: 2000,
+              tooLong: '^Request access URL must be 2000 characters or fewer',
+            },
+          },
         }
       );
 
@@ -860,6 +879,39 @@ export const AdminInstitutionEdit = fp.flow(
                     inputStyle={{ width: '16rem', marginTop: '0.8rem' }}
                   />
                 )}
+                <TextInputWithLabel
+                  value={institution.requestAccessUrl}
+                  inputId='requestAccessUrl'
+                  inputName='requestAccessUrl'
+                  placeholder='Request Access URL'
+                  containerStyle={{ marginTop: '1.5rem' }}
+                  labelStyle={styles.label}
+                  inputStyle={{ width: '16rem', marginTop: '0.3rem' }}
+                  labelText='Custom URL for “Request Access” Links'
+                  onChange={(v) =>
+                    this.setState(
+                      fp.set(['institution', 'requestAccessUrl'], v)
+                    )
+                  }
+                  onBlur={(v) =>
+                    this.setState(
+                      fp.set(['institution', 'requestAccessUrl'], v.trim())
+                    )
+                  }
+                />
+
+                <p
+                  style={{
+                    color: colors.primary,
+                    fontSize: 12,
+                    width: '16rem',
+                  }}
+                >
+                  If provided, users who select this institution but are not
+                  allowed according to the data access tier requirements below
+                  will be guided to the custom URL rather than the standard ones
+                  (initial registration, request for Controlled Tier access).
+                </p>
               </FlexColumn>
               <FlexColumn style={{ width: '50%', marginRight: '1rem' }}>
                 <label style={{ ...styles.label, marginTop: '0rem' }}>
@@ -949,6 +1001,7 @@ export const AdminInstitutionEdit = fp.flow(
                             errors.registeredTierEmailDomains,
                             errors.controlledTierEmailAddresses,
                             errors.controlledTierEmailDomains,
+                            ...errors.requestAccessUrl,
                           ].map((e) => e && <li key={e}>{e}</li>)}
                           {errors.organizationTypeOtherText && (
                             <li>

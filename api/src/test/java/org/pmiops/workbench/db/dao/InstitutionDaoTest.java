@@ -43,6 +43,17 @@ public class InstitutionDaoTest {
   }
 
   @Test
+  public void test_save_optional_requestAccessUrl() {
+    final DbInstitution toSave =
+        new DbInstitution()
+            .setShortName("VUMC")
+            .setDisplayName("Vanderbilt University Medical Center")
+            .setRequestAccessUrl("https://www.vumc.org/");
+    final DbInstitution saved = institutionDao.save(toSave);
+    assertThat(saved).isEqualTo(toSave);
+  }
+
+  @Test
   public void test_delete() {
     institutionDao.deleteById(testInst.getInstitutionId());
     DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).orElse(null);

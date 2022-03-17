@@ -101,8 +101,7 @@
   <include file="changelog/db.changelog-91-review-last-modified.xml"/>
   <include file="changelog/db.changelog-92-dataset-add-prepackaged-conceptsets.xml"/>
   <include file="changelog/db.changelog-93-annotation-version.xml"/>
-  <include
-    file="changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml"/>
+  <include file="changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml"/>
   <include file="changelog/db.changelog-95-free-credits.xml"/>
   <include file="changelog/db.changelog-96-drop-free-tier-billing.xml"/>
   <include file="changelog/db.changelog-97-cdr-archival-status.xml"/>
@@ -152,8 +151,7 @@
   <include file="changelog/db.changelog-141-populate-prePackagedConcept-table.xml"/>
   <include file="changelog/db.changelog-142-cdr-version-hasCopeSurvey-field.xml"/>
   <include file="changelog/db.changelog-143-alter-concept-set-concept-id.xml"/>
-  <include
-    file="changelog/db.changelog-144-remove-concept-set-concept-id-primarykeyconstraint.xml"/>
+  <include file="changelog/db.changelog-144-remove-concept-set-concept-id-primarykeyconstraint.xml"/>
   <include file="changelog/db.changelog-145-remove-participant-count.xml"/>
   <include file="changelog/db.changelog-146-access-tier-table-and-cdr-version.xml"/>
   <include file="changelog/db.changelog-147-remove-cluster-create-retries.xml"/>
@@ -202,6 +200,7 @@
   <include file="changelog/db.changelog-190-billing-migration-bug-backfill.xml"/>
   <include file="changelog/db.changelog-191-workspace-operation.xml"/>
   <include file="changelog/db.changelog-192-workspace-operation-add-queued-processing.xml"/>
+  <include file="changelog/db.changelog-193-institution-add-request-access-url.xml"/>
   <include file="changelog/db.changelog-194-add-terra-agreement-time.xml"/>
   <!--
    Note: to update the DB locally, do the following:
