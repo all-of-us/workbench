@@ -212,8 +212,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final List<ListRuntimeResponse> workbenchListRuntimeResponses =
-        leonardoNotebooksClient
-            .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
+        leonardoNotebooksClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
             .stream()
             .map(leonardoMapper::toApiListRuntimeResponse)
             .collect(Collectors.toList());
@@ -343,8 +342,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
     final List<DbUser> owners =
-        workspaceService
-            .getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
             .stream()
             .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
             .map(UserRole::getEmail)

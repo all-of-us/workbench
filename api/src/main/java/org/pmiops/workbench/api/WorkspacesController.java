@@ -684,8 +684,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
     List<String> workflowUsers = new ArrayList<>();
-    // Revoke lifescience permission before asking Firecloud to remove users. Because after unshare
-    // in Firecloud, we no longer can get user petSA from SAM using their credential.
+    // Revoke lifescience permission before asking Firecloud to remove users; after unsharing
+    // in Firecloud, we can no longer get the user's petSA from SAM using their credentials.
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
       workflowUsers =
           aclsByEmail.entrySet().stream()

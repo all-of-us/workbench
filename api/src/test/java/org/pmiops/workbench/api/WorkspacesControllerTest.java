@@ -287,7 +287,7 @@ public class WorkspacesControllerTest {
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
 
-  private DbAccessTier accessTier;
+  private DbAccessTier registeredTier;
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
   private String archivedCdrVersionId;
@@ -378,18 +378,18 @@ public class WorkspacesControllerTest {
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-    accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
-    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(accessTier);
+    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(accessTier);
+    cdrVersion.setAccessTier(registeredTier);
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
@@ -565,7 +565,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
-            workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
+            workspace.getNamespace(), workspace.getName(), registeredTier.getAuthDomainName());
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getName(),
@@ -579,7 +579,8 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
-    assertThat(retrievedWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+    assertThat(retrievedWorkspace.getAccessTierShortName())
+        .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(retrievedWorkspace.getId()).isEqualTo("name");
     assertThat(retrievedWorkspace.getName()).isEqualTo("name");
@@ -610,7 +611,8 @@ public class WorkspacesControllerTest {
         .updateBillingAccount(
             workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(fireCloudService)
-        .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
+        .createAllOfUsBillingProject(
+            workspace.getNamespace(), registeredTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(anyString());
@@ -709,7 +711,7 @@ public class WorkspacesControllerTest {
 
     final Workspace createdWorkspace =
         workspacesController.createWorkspace(requestedWorkspace).getBody();
-    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(registeredTier.getShortName());
   }
 
   @Test
@@ -1313,7 +1315,7 @@ public class WorkspacesControllerTest {
 
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+            clonedWorkspace.getNamespace(), registeredTier.getServicePerimeter());
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(any());
   }
 
@@ -1792,7 +1794,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(accessTier);
+    cdrVersion2.setAccessTier(registeredTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     DbConceptSetConceptId dbConceptSetConceptId1 =
@@ -1877,7 +1879,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(accessTier);
+    cdrVersion2.setAccessTier(registeredTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     final String expectedConceptSetName = "cs1";
@@ -2087,7 +2089,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(accessTier);
+    cdrVersion2.setAccessTier(registeredTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
     String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
 
@@ -2521,7 +2523,7 @@ public class WorkspacesControllerTest {
                 new JSONObject()
                     .put(
                         // Specifically, the REGISTERED tier is used for publishing.
-                        accessTier.getAuthDomainGroupEmail(),
+                        registeredTier.getAuthDomainGroupEmail(),
                         new JSONObject()
                             .put("accessLevel", "READER")
                             .put("canCompute", false)
@@ -2559,6 +2561,7 @@ public class WorkspacesControllerTest {
             any(),
             eq(
                 ImmutableList.of(
+                    // Specifically, the Registered Tier group should not be removed by this update.
                     FirecloudTransforms.buildAclUpdate(
                         currentUser.getUsername(), WorkspaceAccessLevel.OWNER),
                     FirecloudTransforms.buildAclUpdate(
