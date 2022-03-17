@@ -210,11 +210,10 @@ fi
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.concept_count = c.concept_count
-from (select count(distinct se.concept_id) as concept_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Condition'
-      and c.is_standard = 1) c
+from (select count(distinct concept_id) as concept_count
+      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+      where full_text like '%condition_rank1%'
+      and is_standard = 1) c
 where d.domain = 0
 and d.is_standard = 1"
 
@@ -222,11 +221,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
-from (select count(distinct se.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Condition'
-      and c.is_standard = 1) c
+from (select count(distinct person_id) as participant_count
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+      where domain = 'Condition'
+      and is_standard = 1) c
 where d.domain = 0
 and d.is_standard = 1"
 
@@ -234,15 +232,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.concept_count = c.concept_count
-from (select count(distinct se.concept_id) as concept_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      where concept_id in (select distinct ca.descendant_id
-                           from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\` ca
-                           where ca.ancestor_id in (select concept_id
-                                                    from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
-                                                    where domain_id = 'DRUG')
-                          )
-      and se.domain = 'Drug') c
+from (select count(distinct concept_id) as concept_count
+        from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+       where full_text like '%drug_rank1%'
+         and is_standard = 1) c
 where d.domain = 3
 and d.is_standard = 1"
 
@@ -250,15 +243,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
-from (select count(distinct se.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      where concept_id in (select distinct ca.descendant_id
-                           from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\` ca
-                           where ca.ancestor_id in (select concept_id
-                                                    from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
-                                                    where domain_id = 'DRUG')
-                          )
-      and se.domain = 'Drug') c
+from (select count(distinct person_id) as participant_count
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+       where domain = 'Drug'
+         and is_standard = 1) c
 where d.domain = 3
 and d.is_standard = 1"
 
@@ -266,11 +254,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.concept_count = c.concept_count
-from (select count(distinct se.concept_id) as concept_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Measurement'
-      and c.domain_id not in ('PHYSICAL_MEASUREMENT_CSS', 'PHYSICAL_MEASUREMENT')) c
+from (select count(distinct concept_id) as concept_count
+        from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+       where full_text like '%measurement_rank1%'
+         and is_standard = 1) c
 where d.domain = 4
 and d.is_standard = 1"
 
@@ -278,11 +265,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
-from (select count(distinct se.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Measurement'
-      and c.domain_id not in ('PHYSICAL_MEASUREMENT_CSS', 'PHYSICAL_MEASUREMENT')) c
+from (select count(distinct person_id) as participant_count
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+       where domain = 'Measurement'
+         and is_standard = 1) c
 where d.domain = 4
 and d.is_standard = 1"
 
@@ -290,11 +276,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.concept_count = c.concept_count
-from (select count(distinct se.concept_id) as concept_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Observation'
-      and c.domain_id not in ('PHYSICAL_MEASUREMENT', 'PHYSICAL_MEASUREMENT_CSS', 'SURVEY')) c
+from (select count(distinct concept_id) as concept_count
+        from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+       where full_text like '%observation_rank1%'
+         and is_standard = 1) c
 where d.domain = 5
 and d.is_standard = 1"
 
@@ -302,11 +287,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
-from (select count(distinct se.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Observation'
-      and c.domain_id not in ('PHYSICAL_MEASUREMENT', 'PHYSICAL_MEASUREMENT_CSS', 'SURVEY')) c
+from (select count(distinct person_id) as participant_count
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+       where domain = 'Observation'
+         and is_standard = 1) c
 where d.domain = 5
 and d.is_standard = 1"
 
@@ -314,11 +298,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.concept_count = c.concept_count
-from (select count(distinct se.concept_id) as concept_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Procedure'
-      and c.is_standard = 1) c
+from (select count(distinct concept_id) as concept_count
+        from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+       where full_text like '%procedure_rank1%'
+         and is_standard = 1) c
 where d.domain = 6
 and d.is_standard = 1"
 
@@ -326,11 +309,10 @@ and d.is_standard = 1"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
-from (select count(distinct se.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on se.concept_id = c.concept_id
-      where se.domain = 'Procedure'
-      and se.is_standard = 1) c
+from (select count(distinct person_id) as participant_count
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+      where domain = 'Procedure'
+        and is_standard = 1) c
 where d.domain = 6
 and d.is_standard = 1"
 
