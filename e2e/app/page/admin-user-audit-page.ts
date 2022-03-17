@@ -5,6 +5,7 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
 import Link from 'app/element/link';
+import UserProfileAdminPage from './admin/user-profile-admin-page';
 
 const PageTitle = 'User Audit | All of Us Researcher Workbench';
 
@@ -38,8 +39,9 @@ export default class UserAuditPage extends AuthenticatedPage {
     return usernameValue;
   }
 
-  async clickUserAdminLink(): Promise<void> {
+  async clickUserAdminLink(): Promise<UserProfileAdminPage> {
     const link = new Link(this.page, '//a[text()="User"]');
     await link.click();
+    return new UserProfileAdminPage(this.page).waitForLoad();
   }
 }

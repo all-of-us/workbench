@@ -236,7 +236,7 @@ const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 
 // Poll parameters for checking the result of an async Workspace Create or Duplicate operation
-const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 3 * 60 * 1000;
+const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 6 * 60 * 1000;
 const WORKSPACE_OPERATION_POLL_INTERVAL_MS = 5 * 1000;
 
 const OPERATION_PENDING_STATES = [
@@ -2313,6 +2313,12 @@ export const WorkspaceEdit = fp.flow(
                   {loading && (
                     <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
                   )}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <b>
+                      Note: this workspace will take approximately one minute to
+                      create.
+                    </b>
+                  </div>
                   <div>Your responses to these questions:</div>
                   <div style={{ margin: '0.25rem 0 0.25rem 1rem' }}>
                     <span style={{ fontWeight: 600 }}>

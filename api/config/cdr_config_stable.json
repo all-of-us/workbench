@@ -13,7 +13,7 @@
       "accessTierId": 2,
       "shortName": "controlled",
       "displayName": "Controlled Tier",
-      "servicePerimeter": "terra_prod_aou_stable_2",
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable_2",
       "authDomainName": "all-of-us-controlled-stable",
       "authDomainGroupEmail": "all-of-us-controlled-stable@firecloud.org",
       "datasetsBucket": "gs://fc-aou-stable-datasets-controlled/",
@@ -85,7 +85,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_22",
+      "cdrDbName": "synth_r_2019q4_32",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -99,10 +99,28 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_22",
+      "cdrDbName": "synth_r_2019q4_32",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 7,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier",
+      "bigqueryProject": "fc-aou-cdr-stable-ct",
+      "bigqueryDataset": "test_R2019q4r3",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 5,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_33",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "controlled",
+      "storageBasePath": "v5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
     }
   ]
 }

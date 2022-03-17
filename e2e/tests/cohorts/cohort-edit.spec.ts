@@ -35,7 +35,7 @@ describe('Editing Cohort Test', () => {
       Visits.HomeVisit,
       Visits.InpatientVisit,
       Visits.LaboratoryVisit,
-      Visits.NonhospitalInstitutionVisit,
+      Visits.NonHospitalInstitutionVisit,
       Visits.OfficeVisit,
       Visits.OutpatientVisit,
       Visits.PharmacyVisit

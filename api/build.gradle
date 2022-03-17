@@ -18,7 +18,7 @@ buildscript {
         SPRINGFOX_VERSION = '2.6.1'
         SPRING_BOOT_VERSION = '2.3.12.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
-        SWAGGER_3_CODEGEN_VERSION = '3.0.21'
+        SWAGGER_3_CODEGEN_VERSION = '3.0.33'
     }
 
     project.ext['hibernate.version'] = '5.4.31.Final'
@@ -476,7 +476,7 @@ dependencies {
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     __tools__Compile 'commons-cli:commons-cli:1.5.0'
-    __tools__Compile 'com.opencsv:opencsv:4.6'
+    __tools__Compile 'com.opencsv:opencsv:5.6'
 
     testCompile 'org.mockito:mockito-core:2.18.3'
     testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
@@ -797,6 +797,16 @@ task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
 task setAccessModuleTimestamps(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     main = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
+    systemProperties = commandLineSpringProperties
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
+// See project.rb command: export-workspace-operations
+task exportWorkspaceOperations(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    main = "org.pmiops.workbench.tools.ExportWorkspaceOperations"
     systemProperties = commandLineSpringProperties
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)

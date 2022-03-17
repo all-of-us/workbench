@@ -175,8 +175,8 @@ describe('Build cohort page actions', () => {
     // Include Group 1 has 1 criteria.
     expect((await group1.findGroupCriteriaList()).length).toBe(1);
 
-    // Add second criteria Genome Variant to Group 1.
-    await group1.includeWholeGenomeVariant();
+    // Add second criteria Age selector to Group 1.
+    await group1.includeAge(20, 40);
 
     // New Total Count and Group 1 Total Count are different after adding second criteria.
     expect((await cohortBuildPage.getTotalCount()) === totalCount).toBe(false);
@@ -186,9 +186,9 @@ describe('Build cohort page actions', () => {
     expect((await group1.findGroupCriteriaList()).length).toBe(2);
     totalCount = await cohortBuildPage.getTotalCount(); // New Total Count by 2 criteria.
 
-    // Rename Criteria: rename "Whole Genome Sequence" to "NDA Sets".
-    const newCriteriaName = 'DNA Sets';
-    await group1.editCriteriaName('Whole Genome Sequence', newCriteriaName);
+    // Rename Criteria
+    const newCriteriaName = 'twenty forty';
+    await group1.editCriteriaName('Contains Age Code', newCriteriaName);
     // New criteria name is visible in page.
     await page.waitForXPath(group1.getCriteriaXpath(newCriteriaName), { visible: true });
 

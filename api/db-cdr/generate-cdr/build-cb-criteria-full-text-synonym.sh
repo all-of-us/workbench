@@ -12,7 +12,6 @@ echo "FULL_TEXT and SYNONYMS - adding data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
-    , x.synonyms = y.full_text
 FROM
     (
         SELECT
@@ -67,7 +66,6 @@ echo "FULL_TEXT and SYNONYMS - adding update for survey answers"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
-    , x.synonyms = y.full_text
 FROM
     (
         SELECT
@@ -152,3 +150,15 @@ FROM
         GROUP BY domain_id, is_standard, type, subtype, concept_id, name
     ) y
 WHERE x.id = y.id"
+
+# Update full_text column to contain only rank1 synonyms for polyhierarchical trees
+# Polyhierarchical trees - (Drug, Measurement, Procedure and Condition)
+echo "FULL_TEXT - updating full_text to null for non rank1"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = null
+WHERE domain_id in ('DRUG', 'MEASUREMENT', 'PROCEDURE', 'CONDITION')
+AND type in ('LOINC', 'SNOMED', 'ATC', 'RXNORM')
+AND is_standard = 1
+AND concept_id is not null
+AND full_text not like '%rank1%'"

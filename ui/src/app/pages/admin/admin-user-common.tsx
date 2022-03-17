@@ -285,7 +285,7 @@ export const TierBadgesMaybe = (props: {
 
   // fake a sub-table to keep RTs aligned with RTs
   return (
-    <FlexRow style={{ justifyContent: 'center' }}>
+    <FlexRow data-test-id='tier-badges' style={{ justifyContent: 'center' }}>
       <div style={{ width: '30px' }}>
         {rtRequired && <RegisteredTierBadge />}
       </div>

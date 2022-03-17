@@ -362,12 +362,17 @@ export async function waitForText(
  */
 export async function waitWhileSpinnerDisplayed(
   page: Page,
-  opts: { includeRuntimeSpinner?: boolean; timeout?: number } = {}
+  opts: { includeRuntimeSpinner?: boolean; timeout?: number; takeScreenshotOnFailure?: boolean } = {}
 ): Promise<void> {
-  const { timeout = 2 * 60 * 1000, includeRuntimeSpinner = false } = opts;
-  const spinnerCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
-    includeRuntimeSpinner ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
-  }`;
+  const { timeout = 2 * 60 * 1000, includeRuntimeSpinner = false, takeScreenshotOnFailure = true } = opts;
+  const spinnerCss =
+    '[style*="running spin"], .spinner:empty, ' +
+    `[style*="running rotation"]${
+      includeRuntimeSpinner ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
+    }, ` +
+    `[style*="animation-name: spin"]${
+      includeRuntimeSpinner ? '' : ':not([aria-hidden="true"]):not([data-test-id*="extraction-status"])'
+    }`;
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
@@ -394,9 +399,11 @@ export async function waitWhileSpinnerDisplayed(
     }
     const spentTime = Date.now() - startTime;
     if (spentTime > maxTime) {
-      logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinnerCss}"`);
-      logger.error(error.stack);
-      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
+      if (takeScreenshotOnFailure) {
+        logger.error(`ERROR: Loading spinner has not stopped. Spinner css is: ${spinnerCss}`);
+        logger.error(error.stack);
+        await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
+      }
       throw new Error(error.message);
     }
 
@@ -412,10 +419,9 @@ export async function waitWhileSpinnerDisplayed(
  */
 export async function waitWhileLoading(
   page: Page,
-  opts: { includeRuntimeSpinner?: boolean; timeout?: number } = {}
+  opts: { includeRuntimeSpinner?: boolean; timeout?: number; takeScreenshotOnFailure?: boolean } = {}
 ): Promise<void> {
-  const { timeout = 2 * 60 * 1000 } = opts;
-  const isValidPage = await assertValidPage(page, timeout);
+  const isValidPage = await assertValidPage(page, 2 * 60 * 1000);
   if (!isValidPage) {
     return;
   }

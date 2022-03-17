@@ -1,7 +1,15 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { AgeSelectionRadioButton, AnalysisTool, ConceptSets, DataSets, Language, LinkText } from 'app/text-labels';
+import {
+  AccessTierDisplayNames,
+  AgeSelectionRadioButton,
+  AnalysisTool,
+  ConceptSets,
+  DataSets,
+  Language,
+  LinkText
+} from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
@@ -12,7 +20,7 @@ import GenomicExtractionsSidebar from 'app/sidebar/genomic-extractions-sidebar';
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
-import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
+import { range } from 'lodash';
 
 // 60 minutes. Test could take a long time.
 // Since refresh token expires in 60 min. test can fail if running takes longer than 60 min.
@@ -24,7 +32,7 @@ describe('Genomics Extraction Test', () => {
   });
 
   const maxWaitTime = 50 * 60 * 1000;
-  const workspaceName = 'e2eGenomicExtractionToVcfTest';
+  const workspaceName = makeRandomName('e2eGenomicExtractionToVcfTest');
   const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
@@ -148,11 +156,12 @@ describe('Genomics Extraction Test', () => {
 
     // Verify row count is 1.
     const rowCount = await historyTable.getRowCount();
-    expect(rowCount).toEqual(1);
+    expect(rowCount).toBeGreaterThanOrEqual(1);
 
-    // Verify dataset name (Column #1 is 'Dataset Name').
-    const tableCellValue = await historyTable.getCellValue(1, 1);
-    expect(tableCellValue).toEqual(datasetName);
+    // Verify dataset name found in table (Column #1 is 'Dataset Name').
+    const rowValues = await Promise.all(range(0, rowCount).map((row) => historyTable.getCellValue(row + 1, 1)));
+    const rowIndex = rowValues.findIndex((v) => v === datasetName);
+    expect(rowIndex).not.toBe(-1);
 
     await genomicExtractionsHistorySidebar.close();
 

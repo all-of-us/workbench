@@ -2955,3 +2955,32 @@ Common.register_command({
     :description => "Set access module timestamps for e2e test users.",
     :fn => ->(*args) {set_access_module_timestamps(SET_ACCESS_MODULE_TIMESTAMPS_CMD, *args)}
 })
+
+def export_workspace_operations(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, p) { opts.project = p },
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+   op.opts.project = TEST_PROJECT
+   op.parse.validate
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  common = Common.new
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{./gradlew exportWorkspaceOperations}
+  end
+end
+
+EXPORT_WORKSPACE_OPERATIONS_CMD = "export-workspace-operations"
+
+Common.register_command({
+    :invocation => EXPORT_WORKSPACE_OPERATIONS_CMD,
+    :description => "Export the workspace_operations table.",
+    :fn => ->(*args) {export_workspace_operations(EXPORT_WORKSPACE_OPERATIONS_CMD, *args)}
+})

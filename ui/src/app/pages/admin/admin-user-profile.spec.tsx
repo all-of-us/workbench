@@ -4,12 +4,15 @@ import { mount, ReactWrapper } from 'enzyme';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
+  AccessModule,
+  AccessModuleStatus,
   Authority,
   EgressEventsAdminApi,
   InstitutionalRole,
   InstitutionApi,
   Profile,
   UserAdminApi,
+  UserTierEligibility,
 } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -17,10 +20,16 @@ import {
   AccessTierDisplayNames,
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
+import {
+  AccessRenewalStatus,
+  getAccessModuleConfig,
+} from 'app/utils/access-utils';
+import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  findNodesContainingText,
   simulateComponentChange,
   simulateTextInputChange,
   waitOneTickAndUpdate,
@@ -37,7 +46,7 @@ import {
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
-import { AdminUserProfile } from './admin-user-profile';
+import { accessModulesForTable, AdminUserProfile } from './admin-user-profile';
 
 const load = jest.fn();
 const reload = jest.fn();
@@ -85,10 +94,8 @@ describe('AdminUserProfile', () => {
     usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
   ) => {
     return mount(
-      <MemoryRouter
-        initialEntries={[`/admin/users-tmp/${usernameWithoutGsuite}`]}
-      >
-        <Route path='/admin/users-tmp/:usernameWithoutGsuiteDomain'>
+      <MemoryRouter initialEntries={[`/admin/users/${usernameWithoutGsuite}`]}>
+        <Route path='/admin/users/:usernameWithoutGsuiteDomain'>
           <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
         </Route>
       </MemoryRouter>
@@ -491,4 +498,247 @@ describe('AdminUserProfile', () => {
     expect(saveButton.exists()).toBeTruthy();
     expect(saveButton.props().disabled).toBeFalsy();
   });
+
+  function expectModuleTitlesInOrder(
+    accessModules: AccessModule[],
+    tableRows: ReactWrapper
+  ) {
+    accessModules.forEach((moduleName, index) => {
+      const moduleRow = tableRows.at(index);
+      const { adminPageTitle } = getAccessModuleConfig(moduleName);
+      expect(
+        findNodesContainingText(moduleRow, adminPageTitle).exists()
+      ).toBeTruthy();
+    });
+  }
+
+  it('should render the titles of all expected access modules', async () => {
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    const table = wrapper.find('[data-test-id="access-module-table"]');
+    expect(table.exists()).toBeTruthy();
+
+    const tableRows = table.find('.p-datatable-row');
+    expect(tableRows.length).toEqual(accessModulesForTable.length);
+
+    // confirm that the accessModulesForTable are listed in order with expected title text
+    expectModuleTitlesInOrder(accessModulesForTable, tableRows);
+  });
+
+  test.each([
+    [
+      AccessRenewalStatus.EXPIRED,
+      AccessModule.COMPLIANCETRAINING,
+      {
+        moduleName: AccessModule.COMPLIANCETRAINING,
+        completionEpochMillis: nowPlusDays(-1000),
+        expirationEpochMillis: nowPlusDays(-1),
+      },
+    ],
+    [
+      AccessRenewalStatus.NEVER_EXPIRES,
+      AccessModule.TWOFACTORAUTH,
+      {
+        moduleName: AccessModule.TWOFACTORAUTH,
+        completionEpochMillis: nowPlusDays(-1000),
+      },
+    ],
+    [
+      AccessRenewalStatus.INCOMPLETE,
+      AccessModule.RASLINKLOGINGOV,
+      {
+        moduleName: AccessModule.RASLINKLOGINGOV,
+      },
+    ],
+    [
+      AccessRenewalStatus.CURRENT,
+      AccessModule.CTCOMPLIANCETRAINING,
+      {
+        moduleName: AccessModule.CTCOMPLIANCETRAINING,
+        completionEpochMillis: nowPlusDays(-1000),
+        expirationEpochMillis: nowPlusDays(400),
+      },
+    ],
+    [
+      AccessRenewalStatus.BYPASSED,
+      AccessModule.ERACOMMONS,
+      {
+        moduleName: AccessModule.ERACOMMONS,
+        bypassEpochMillis: 1,
+      },
+    ],
+    [
+      AccessRenewalStatus.EXPIRING_SOON,
+      AccessModule.PROFILECONFIRMATION,
+      {
+        moduleName: AccessModule.PROFILECONFIRMATION,
+        completionEpochMillis: nowPlusDays(-1000),
+        expirationEpochMillis: nowPlusDays(5),
+      },
+    ],
+  ])(
+    "should render a(n) '%s' completion status for access module %s",
+    async (
+      expectedStatus: AccessRenewalStatus,
+      moduleName: AccessModule,
+      moduleStatus: AccessModuleStatus
+    ) => {
+      const statusesExceptThisOne =
+        TARGET_USER_PROFILE.accessModules.modules.filter(
+          (s) => s.moduleName !== moduleName
+        );
+      updateTargetProfile({
+        accessModules: {
+          ...TARGET_USER_PROFILE.accessModules,
+          modules: [...statusesExceptThisOne, moduleStatus],
+        },
+      });
+      const wrapper = component();
+      expect(wrapper).toBeTruthy();
+      await waitOneTickAndUpdate(wrapper);
+
+      const tableRows = wrapper
+        .find('[data-test-id="access-module-table"]')
+        .find('.p-datatable-row');
+      expect(tableRows.length).toEqual(accessModulesForTable.length);
+
+      // the previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
+
+      const { adminPageTitle } = getAccessModuleConfig(moduleName);
+      const moduleRow = tableRows.at(accessModulesForTable.indexOf(moduleName));
+      // sanity check - this is actually the right row for this module
+      expect(
+        findNodesContainingText(moduleRow, adminPageTitle).exists()
+      ).toBeTruthy();
+
+      expect(
+        findNodesContainingText(moduleRow, expectedStatus).exists()
+      ).toBeTruthy();
+    }
+  );
+
+  it('should skip access modules when they are disabled in the environment', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableRasLoginGovLinking: false,
+        enforceRasLoginGovLinking: false,
+        enableEraCommons: false,
+        enableComplianceTraining: false,
+      },
+    });
+
+    const excludedModules = [
+      AccessModule.RASLINKLOGINGOV,
+      AccessModule.ERACOMMONS,
+      AccessModule.COMPLIANCETRAINING,
+      AccessModule.CTCOMPLIANCETRAINING,
+    ];
+    const expectedModules = accessModulesForTable.filter(
+      (moduleName) => !excludedModules.includes(moduleName)
+    );
+
+    const wrapper = component();
+    expect(wrapper).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    const tableRows = wrapper
+      .find('[data-test-id="access-module-table"]')
+      .find('.p-datatable-row');
+    expect(tableRows.length).toEqual(expectedModules.length);
+
+    // confirm that the expectedModules are listed in order with expected title text
+    expectModuleTitlesInOrder(expectedModules, tableRows);
+  });
+
+  test.each([
+    [
+      'Registered Tier',
+      [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: true,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: false,
+        },
+      ],
+      true,
+      false,
+    ],
+    [
+      'Controlled Tier',
+      [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: false,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+        },
+      ],
+      false,
+      true,
+    ],
+    [
+      'Registered Tier and Controlled Tier',
+      [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: true,
+        },
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+        },
+      ],
+      true,
+      true,
+    ],
+  ])(
+    'should indicate when eRA Commons is required for %s',
+    async (
+      tiers: string,
+      tierEligibilities: UserTierEligibility[],
+      rtBadgeExpected: boolean,
+      ctBadgeExpected: boolean
+    ) => {
+      updateTargetProfile({
+        tierEligibilities,
+      });
+
+      const wrapper = component();
+      expect(wrapper).toBeTruthy();
+      await waitOneTickAndUpdate(wrapper);
+
+      const moduleTable = wrapper.find('[data-test-id="access-module-table"]');
+      expect(
+        findNodesContainingText(
+          moduleTable,
+          `requires eRA Commons for ${tiers} access`
+        ).exists()
+      ).toBeTruthy();
+
+      const tableRows = moduleTable.find('.p-datatable-row');
+      expect(tableRows.length).toEqual(accessModulesForTable.length);
+
+      // a previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
+
+      const eraRow = tableRows.at(
+        accessModulesForTable.indexOf(AccessModule.ERACOMMONS)
+      );
+      const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
+
+      expect(
+        findNodesContainingText(eraBadges, 'registered-tier-badge.svg').exists()
+      ).toBe(rtBadgeExpected);
+      expect(
+        findNodesContainingText(eraBadges, 'controlled-tier-badge.svg').exists()
+      ).toBe(ctBadgeExpected);
+    }
+  );
 });

@@ -498,8 +498,17 @@ export const eligibleForTier = (
 };
 
 export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
+  // RT and CT compliance training have the same external sync action.
+  // Calling both can cause conflicts, so we need to remove one.
+  // We choose to remove CT arbitrarily.
+  const filteredModuleNames = moduleNames.includes(
+    AccessModule.COMPLIANCETRAINING
+  )
+    ? moduleNames.filter((m) => m !== AccessModule.CTCOMPLIANCETRAINING)
+    : moduleNames;
+
   return Promise.all(
-    moduleNames.map(async (moduleName) => {
+    filteredModuleNames.map(async (moduleName) => {
       const { externalSyncAction } = getAccessModuleConfig(moduleName);
       if (externalSyncAction) {
         await externalSyncAction();
