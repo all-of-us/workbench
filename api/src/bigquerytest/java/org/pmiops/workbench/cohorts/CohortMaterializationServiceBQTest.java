@@ -61,6 +61,7 @@ import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
@@ -71,6 +72,7 @@ import org.springframework.context.annotation.Import;
   TestJpaConfig.class,
   TestBigQueryCdrSchemaConfig.class,
   CohortBuilderServiceImpl.class,
+  CommonMappers.class,
   CohortBuilderMapperImpl.class,
   AnnotationQueryBuilder.class,
   CdrBigQuerySchemaConfigService.class,

@@ -11,6 +11,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
+import org.pmiops.workbench.model.CardCountResponse;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
@@ -225,6 +226,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     Long count = cohortBuilderService.findDomainCountByStandard(domain, term, standard);
     return ResponseEntity.ok(
         new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
+  }
+
+  @Override
+  public ResponseEntity<CardCountResponse> findConceptCounts(
+      String workspaceNamespace, String workspaceId, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(term);
+
+    return ResponseEntity.ok(
+        new CardCountResponse().items(cohortBuilderService.findDomainCounts(term)));
   }
 
   @Override

@@ -53,6 +53,7 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.CdrJpaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -79,6 +80,7 @@ import org.springframework.transaction.annotation.Transactional;
   CohortQueryBuilder.class,
   CdrBigQuerySchemaConfigService.class,
   CohortBuilderServiceImpl.class,
+  CommonMappers.class,
   CohortBuilderMapperImpl.class,
   BigQueryService.class,
   SearchGroupItemQueryBuilder.class,

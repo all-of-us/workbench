@@ -61,6 +61,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -92,7 +93,7 @@ public class CohortBuilderControllerTest {
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, CohortBuilderMapperImpl.class})
+  @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
   @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
 

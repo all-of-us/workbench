@@ -2,6 +2,7 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.util.Collection;
 import java.util.List;
+import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.springframework.data.domain.Page;
@@ -265,6 +266,55 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("term") String term,
       @Param("domain") String domain,
       @Param("standard") Boolean standard);
+
+  @Query(
+      value =
+          "select domain_id as domainId, domain_id as name, count(*) as count "
+              + "from cb_criteria "
+              + "where match(full_text) against(:term in boolean mode) "
+              + "and is_standard = :standard "
+              + "and domain_id in (:domains) "
+              + "group by domain_id "
+              + "order by count desc",
+      nativeQuery = true)
+  List<DbCardCount> findDomainCounts(
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      @Param("domains") List<String> domains);
+
+  @Query(
+      value =
+          "select domain_id as domainId, domain_id as name, count(*) as count "
+              + "from cb_criteria "
+              + "where code like upper(concat(:term,'%')) "
+              + "and is_standard = :standard "
+              + "and domain_id in (:domains) "
+              + "group by domain_id "
+              + "order by count desc",
+      nativeQuery = true)
+  List<DbCardCount> findDomainCountsByCode(
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      @Param("domains") List<String> domains);
+
+  @Query(
+      value =
+          "select 'SURVEY' as domainId, name, count "
+              + "from cb_criteria c "
+              + "join( "
+              + "select substring_index(path,'.',1) as survey_version_concept_id, count(*) as count "
+              + "from cb_criteria "
+              + "where domain_id = 'SURVEY' "
+              + "and subtype = 'QUESTION' "
+              + "and concept_id in ( select concept_id "
+              + "from cb_criteria "
+              + "where domain_id = 'SURVEY' "
+              + "and match(full_text) against(:term in boolean mode)) "
+              + "group by survey_version_concept_id"
+              + ") a on c.id = a.survey_version_concept_id "
+              + "order by count desc",
+      nativeQuery = true)
+  List<DbCardCount> findSurveyCounts(@Param("term") String term);
 
   @Query(
       value =

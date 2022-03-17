@@ -68,6 +68,7 @@ import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -88,6 +89,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Import({
     BigQueryTestService.class,
     CohortQueryBuilder.class,
+    CommonMappers.class,
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class,
