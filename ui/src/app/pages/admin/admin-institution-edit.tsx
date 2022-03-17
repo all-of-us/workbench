@@ -1001,7 +1001,7 @@ export const AdminInstitutionEdit = fp.flow(
                             errors.registeredTierEmailDomains,
                             errors.controlledTierEmailAddresses,
                             errors.controlledTierEmailDomains,
-                            errors.requestAccessUrl,
+                            ...errors.requestAccessUrl,
                           ].map((e) => e && <li key={e}>{e}</li>)}
                           {errors.organizationTypeOtherText && (
                             <li>
