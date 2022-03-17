@@ -27,6 +27,7 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
@@ -52,7 +53,8 @@ import org.springframework.stereotype.Service;
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
 
-  @VisibleForTesting public static final int PROJECT_BILLING_ID_SIZE = 8;
+  public static final int PROJECT_BILLING_ID_SIZE = 8;
+  public static final String TERMS_OF_SERVICE_BODY = "app.terra.bio/#terms-of-service";
 
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
@@ -65,6 +67,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<StatusApi> statusApiProvider;
+  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
+
   private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
       requestScopedGroupCacheProvider;
 
@@ -123,6 +127,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
+      Provider<TermsOfServiceApi> termsOfServiceApiProvider,
       @Qualifier(FireCloudConfig.END_USER_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
@@ -142,6 +147,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
+    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
@@ -544,5 +550,11 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private boolean notebookTransferComplete(String fileTransferTime) {
     return !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
+  }
+
+  @Override
+  public void acceptTermsOfService() {
+    TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
+    retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
   }
 }

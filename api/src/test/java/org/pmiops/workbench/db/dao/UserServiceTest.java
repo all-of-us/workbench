@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -42,6 +45,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -82,21 +86,21 @@ public class UserServiceTest {
   private static DbAccessTier registeredTier;
   private static List<DbAccessModule> accessModules;
 
-  @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+  @MockBean private FireCloudService mockFireCloudService;
   @MockBean private InstitutionService mockInstitutionService;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
 
-  @Autowired private UserService userService;
-  @Autowired private UserDao userDao;
-  @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
-  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private FakeClock fakeClock;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private UserDao userDao;
+  @Autowired private UserService userService;
+  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
 
-  // we need the full service for some tests and mocks for others
+  // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
 
   @Import({
@@ -410,10 +414,40 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSubmitTermsOfService() {
-    userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
-    verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
+  public void testSubmitAouTermsOfService() {
+    // confirm empty to start
+    assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
+        .isEqualTo(0);
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userService.submitAouTermsOfService(user, LATEST_AOU_TOS_VERSION);
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
+
+    Optional<DbUserTermsOfService> tosMaybe =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    assertThat(tosMaybe).isPresent();
+    assertThat(tosMaybe.get().getTosVersion()).isEqualTo(LATEST_AOU_TOS_VERSION);
+    assertThat(tosMaybe.get().getAouAgreementTime()).isNotNull();
+    assertThat(tosMaybe.get().getTerraAgreementTime()).isNull();
+  }
+
+  @Test
+  public void testAcceptTerraTermsOfService() {
+    // confirm empty to start
+    assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
+        .isEqualTo(0);
+
+    // need to do this first
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userService.submitAouTermsOfService(user, LATEST_AOU_TOS_VERSION);
+
+    userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
+    verify(mockFireCloudService).acceptTermsOfService();
+
+    Optional<DbUserTermsOfService> tosMaybe =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    assertThat(tosMaybe).isPresent();
+    assertThat(tosMaybe.get().getTerraAgreementTime()).isNotNull();
   }
 
   @Test
@@ -513,6 +547,60 @@ public class UserServiceTest {
     userService.confirmPublications();
     assertThat(getModuleCompletionTime(AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
+
+  @Test
+  public void test_validateTermsOfService() {
+    // does not throw
+    userService.validateTermsOfService(LATEST_AOU_TOS_VERSION);
+  }
+
+  @Test
+  public void test_validateTermsOfService_null_version() {
+    final Integer badVersion = null;
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(badVersion));
+  }
+
+  @Test
+  public void test_validateTermsOfService_wrong_version() {
+    assertThrows(
+        BadRequestException.class,
+        () -> userService.validateTermsOfService(LATEST_AOU_TOS_VERSION - 1));
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(
+        new DbUserTermsOfService()
+            .setUserId(user.getUserId())
+            .setTosVersion(LATEST_AOU_TOS_VERSION));
+
+    // does not throw
+    userService.validateTermsOfService(user);
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_no_tos_entry() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_missing_version() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_wrong_version() {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(
+        new DbUserTermsOfService()
+            .setUserId(user.getUserId())
+            .setTosVersion(LATEST_AOU_TOS_VERSION - 1));
+    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
   }
 
   private void assertModuleCompletionEqual(
