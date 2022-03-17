@@ -111,6 +111,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -286,7 +287,7 @@ public class WorkspacesControllerTest {
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
 
-  private DbAccessTier accessTier;
+  private DbAccessTier registeredTier;
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
   private String archivedCdrVersionId;
@@ -377,18 +378,18 @@ public class WorkspacesControllerTest {
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-    accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
-    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(accessTier);
+    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(accessTier);
+    cdrVersion.setAccessTier(registeredTier);
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
@@ -535,16 +536,11 @@ public class WorkspacesControllerTest {
     return cohort;
   }
 
-  public ArrayList<FirecloudWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
+  private List<FirecloudWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
       List<UserRole> collaborators) {
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    for (UserRole userRole : collaborators) {
-      FirecloudWorkspaceACLUpdate aclUpdate =
-          new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
-      aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
-      updateACLRequestList.add(aclUpdate);
-    }
-    return updateACLRequestList;
+    return collaborators.stream()
+        .map(c -> FirecloudTransforms.buildAclUpdate(c.getEmail(), c.getRole()))
+        .collect(Collectors.toList());
   }
 
   @Test
@@ -569,7 +565,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
-            workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
+            workspace.getNamespace(), workspace.getName(), registeredTier.getAuthDomainName());
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getName(),
@@ -583,7 +579,8 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
-    assertThat(retrievedWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+    assertThat(retrievedWorkspace.getAccessTierShortName())
+        .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(retrievedWorkspace.getId()).isEqualTo("name");
     assertThat(retrievedWorkspace.getName()).isEqualTo("name");
@@ -614,7 +611,8 @@ public class WorkspacesControllerTest {
         .updateBillingAccount(
             workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(fireCloudService)
-        .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
+        .createAllOfUsBillingProject(
+            workspace.getNamespace(), registeredTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(anyString());
@@ -713,7 +711,7 @@ public class WorkspacesControllerTest {
 
     final Workspace createdWorkspace =
         workspacesController.createWorkspace(requestedWorkspace).getBody();
-    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(registeredTier.getShortName());
   }
 
   @Test
@@ -1317,7 +1315,7 @@ public class WorkspacesControllerTest {
 
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+            clonedWorkspace.getNamespace(), registeredTier.getServicePerimeter());
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(any());
   }
 
@@ -1796,7 +1794,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(accessTier);
+    cdrVersion2.setAccessTier(registeredTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     DbConceptSetConceptId dbConceptSetConceptId1 =
@@ -1881,7 +1879,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(accessTier);
+    cdrVersion2.setAccessTier(registeredTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     final String expectedConceptSetName = "cs1";
@@ -2091,7 +2089,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
-    cdrVersion2.setAccessTier(accessTier);
+    cdrVersion2.setAccessTier(registeredTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
     String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
 
@@ -2269,7 +2267,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
 
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(collaborators);
 
     verify(fireCloudService)
@@ -2365,7 +2363,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
     verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
@@ -2513,6 +2511,64 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testShareWorkspacePublishedWorkspace() {
+    DbCdrVersion ctCdrVersion =
+        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 5L);
+
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
+        .thenReturn(
+            createWorkspaceACL(
+                new JSONObject()
+                    .put(
+                        // Specifically, the REGISTERED tier is used for publishing.
+                        registeredTier.getAuthDomainGroupEmail(),
+                        new JSONObject()
+                            .put("accessLevel", "READER")
+                            .put("canCompute", false)
+                            .put("canShare", false))
+                    .put(
+                        currentUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        writerUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "WRITER")
+                            .put("canCompute", true)
+                            .put("canShare", true))));
+
+    Workspace workspace =
+        createWorkspace().cdrVersionId(Long.toString(ctCdrVersion.getCdrVersionId()));
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            // Removing writer.
+            .addItemsItem(
+                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+    verify(fireCloudService)
+        .updateWorkspaceACL(
+            any(),
+            any(),
+            eq(
+                ImmutableList.of(
+                    // Specifically, the Registered Tier group should not be removed by this update.
+                    FirecloudTransforms.buildAclUpdate(
+                        currentUser.getUsername(), WorkspaceAccessLevel.OWNER),
+                    FirecloudTransforms.buildAclUpdate(
+                        writerUser.getUsername(), WorkspaceAccessLevel.NO_ACCESS))));
+  }
+
+  @Test
   public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     stubFcGetWorkspaceACL();
@@ -2605,7 +2661,7 @@ public class WorkspacesControllerTest {
 
     // add the reader with NO_ACCESS to mock
     shareWorkspaceRequest.addItemsItem(reader);
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService)
         .updateWorkspaceACL(

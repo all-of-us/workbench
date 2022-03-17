@@ -34,6 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -81,6 +82,7 @@ public class NotebooksControllerTest {
 
   @TestConfiguration
   @Import({
+    AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksController.class,
