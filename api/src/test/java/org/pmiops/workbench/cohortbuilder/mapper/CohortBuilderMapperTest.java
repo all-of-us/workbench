@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -28,7 +29,7 @@ public class CohortBuilderMapperTest {
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, CohortBuilderMapperImpl.class})
+  @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
   static class Configuration {}
 
   @Test
