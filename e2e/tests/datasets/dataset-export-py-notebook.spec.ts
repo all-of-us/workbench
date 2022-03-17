@@ -4,17 +4,12 @@ import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateDataset, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 
-// 10 minutes.
-jest.setTimeout(10 * 60 * 1000);
-
-describe('Dataset card snowman menu', () => {
-  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
-
+describe('Export Dataset to Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eDatasetSnowmanMenuExportToNotebookTest';
+  const workspaceName = 'e2eDatasetSnowmanMenuExportToPyNotebookTest';
 
   /**
    * Test:
@@ -22,12 +17,11 @@ describe('Dataset card snowman menu', () => {
    * - Export dataset to notebook via snowman menu.
    * - Notebook runtime is not started.
    */
-  test.each(KernelLanguages)('Export to %s Jupyter notebook', async (kernelLanguage) => {
+  test('Export to Python kernel Jupyter notebook via dataset card snowman menu', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
-
     const datasetName = await findOrCreateDataset(page, { openEditPage: false });
 
-    // Find Dataset card.
+    // Find Dataset card. Select menu option "Export to Notebook"
     const datasetCard = await new DataResourceCard(page).findCard({
       name: datasetName,
       cardType: ResourceCard.Dataset
@@ -41,7 +35,7 @@ describe('Dataset card snowman menu', () => {
     expect(await exportModal.waitForButton(LinkText.Export).isCursorNotAllowed()).toBe(true);
 
     const notebookName = makeRandomName('pyNotebook');
-    const notebookPreviewPage = await exportModal.fillInModal(notebookName, kernelLanguage.LANGUAGE);
+    const notebookPreviewPage = await exportModal.fillInModal(notebookName, Language.Python);
 
     // Verify notebook created successfully. Not going to start notebook runtime.
     const currentPageUrl = page.url();
