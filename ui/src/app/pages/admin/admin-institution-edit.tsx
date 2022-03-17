@@ -120,14 +120,6 @@ const isAddressInvalid = (emailAddress: string): boolean => {
 const isDomainInvalid = (emailDomain: string): boolean =>
   isAddressInvalid(`test@${emailDomain}`);
 
-const isRequestAccessUrlInvalid = (requestAccessUrl: string): boolean => {
-  const errors = validate(
-    { website: canonicalizeUrl(requestAccessUrl) },
-    { website: { url: true } }
-  );
-  return errors?.website && errors.website.length > 0;
-};
-
 const getInvalidEmailAddresses = (
   emailAddresses: Array<string>
 ): Array<string> => emailAddresses.filter(isAddressInvalid);
@@ -770,17 +762,6 @@ export const AdminInstitutionEdit = fp.flow(
         }
       };
 
-      validate.validators.requestAccessUrl = (url: string) => {
-        if (url && url.length > 2000) {
-          return 'should not be more than 2000 characters';
-        }
-        const invalid = url ? isRequestAccessUrlInvalid(url) : false;
-
-        if (invalid) {
-          return 'is an invalid URL';
-        }
-      };
-
       const errors = validate(
         {
           displayName,
@@ -792,7 +773,7 @@ export const AdminInstitutionEdit = fp.flow(
           controlledTierEmailAddresses: AccessTierShortNames.Controlled,
           registeredTierEmailDomains: AccessTierShortNames.Registered,
           controlledTierEmailDomains: AccessTierShortNames.Controlled,
-          requestAccessUrl,
+          requestAccessUrl: canonicalizeUrl(requestAccessUrl),
         },
         {
           displayName: {
@@ -808,7 +789,16 @@ export const AdminInstitutionEdit = fp.flow(
           controlledTierEmailAddresses: { customEmailAddresses: {} },
           registeredTierEmailDomains: { customEmailDomains: {} },
           controlledTierEmailDomains: { customEmailDomains: {} },
-          requestAccessUrl: { requestAccessUrl: {} },
+          requestAccessUrl: {
+            url: {
+              message: `^Request access URL is not a valid URL`,
+            },
+
+            length: {
+              maximum: 2000,
+              message: '^Request access URL must be 2000 characters or fewer',
+            },
+          },
         }
       );
 
@@ -918,7 +908,7 @@ export const AdminInstitutionEdit = fp.flow(
                   If provided, users who select this institution but are not
                   allowed according to the data access tier requirements below
                   will be guided to the custom URL rather than the standard ones
-                  (initial registration, request for CT access).
+                  (initial registration, request for Controlled Tier access).
                 </p>
               </FlexColumn>
               <FlexColumn style={{ width: '50%', marginRight: '1rem' }}>
