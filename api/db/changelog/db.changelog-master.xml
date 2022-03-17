@@ -202,7 +202,7 @@
   <include file="changelog/db.changelog-190-billing-migration-bug-backfill.xml"/>
   <include file="changelog/db.changelog-191-workspace-operation.xml"/>
   <include file="changelog/db.changelog-192-workspace-operation-add-queued-processing.xml"/>
-  <include file="changelog/db.changelog-xxx-add-terra-agreement-time.xml"/>
+  <include file="changelog/db.changelog-194-add-terra-agreement-time.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
