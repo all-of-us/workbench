@@ -4,6 +4,7 @@ import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
 import DataTable from 'app/component/data-table';
 import { waitWhileLoading } from 'utils/waits-utils';
+import { elementExists } from 'utils/element-utils';
 
 export default class GenomicExtractionsSidebar extends BaseSidebar {
   constructor(page: Page) {
@@ -33,14 +34,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   // Extraction spinner status.
   async isInProgress(timeout?: number): Promise<boolean> {
     const extractionStatusSpinner = '//*[@data-test-id="extraction-status-icon-container"]/*[@data-icon="sync-alt"]';
-    return this.page
-      .waitForXPath(extractionStatusSpinner, { visible: true, timeout })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+    return elementExists(this.page, extractionStatusSpinner, { timeout });
   }
 
   /**
@@ -48,21 +42,17 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
    */
   async waitForCompletionAndClose(timeout?: number): Promise<boolean> {
     await this.open();
-    try {
-      const table = this.getHistoryTable();
-      await table.waitUntilVisible();
-      await Promise.all([
-        this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
-          visible: true,
-          timeout
-        }),
-        waitWhileLoading(this.page, { includeRuntimeSpinner: true, takeScreenshotOnFailure: false, timeout })
-      ]);
-      return true;
-    } catch (err) {
-      return false;
-    } finally {
-      await this.close();
-    }
+    const table = this.getHistoryTable();
+    await table.waitUntilVisible();
+    return Promise.all([
+      this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
+        visible: true,
+        timeout
+      }),
+      waitWhileLoading(this.page, { includeRuntimeSpinner: true, takeScreenshotOnFailure: false, timeout })
+    ])
+      .then(() => true)
+      .catch(() => false)
+      .finally(() => this.close());
   }
 }

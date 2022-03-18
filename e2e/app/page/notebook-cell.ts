@@ -47,12 +47,8 @@ export default class NotebookCell extends NotebookFrame {
     const selector = this.cellSelector(cellIndx);
     return iframe
       .waitForSelector(`${selector}.selected`, { visible: true })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**

@@ -196,18 +196,16 @@ export default class NotebookPage extends NotebookFrame {
     };
 
     let maxRetries = 3;
-    const clickAndCheck = async (iframe: Frame) => {
+    const clickAndCheck = async (iframe: Frame): Promise<void> => {
       await clickFileMenuIcon(iframe);
       const succeeded = await iframe
         .waitForXPath(Xpath.open, { visible: true, timeout: 2000 })
         .then((menuitem) => {
           menuitem.hover();
           menuitem.click();
-          return true;
         })
-        .catch(() => {
-          return false;
-        });
+        .then(() => true)
+        .catch(() => false);
       if (succeeded) {
         return;
       }
@@ -238,11 +236,10 @@ export default class NotebookPage extends NotebookFrame {
         .waitForXPath(Xpath.downloadMenuDropdown, { visible: true, timeout: 2000 })
         .then((menuitem) => {
           menuitem.hover();
-          return true;
         })
-        .catch(() => {
-          return false;
-        });
+        .then(() => true)
+        .catch(() => false);
+
       if (succeeded) {
         return;
       }

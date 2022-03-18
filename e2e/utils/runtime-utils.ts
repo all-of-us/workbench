@@ -1,5 +1,6 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
+import { elementExists } from './element-utils';
 
 const Selector = {
   runtimeInitializerCreateButton: '//*[@role="dialog"]//*[text()="Create Environment" and @role="button"]'
@@ -19,12 +20,8 @@ export async function initializeRuntimeIfModalPresented(page: Page): Promise<voi
 }
 
 async function isSecuritySuspended(page: Page): Promise<boolean> {
-  try {
-    await page.waitForXPath('//*[@data-test-id="security-suspended-msg"]', { visible: true });
-  } catch (e) {
-    return false;
-  }
-  return true;
+  const xpath = '//*[@data-test-id="security-suspended-msg"]';
+  return elementExists(page, xpath);
 }
 
 export async function waitForSecuritySuspendedStatus(

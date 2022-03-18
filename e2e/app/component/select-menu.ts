@@ -2,7 +2,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import Container from 'app/container';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType, XPathOptions } from 'app/xpath-options';
-import { getPropValue } from 'utils/element-utils';
+import { elementExists, getPropValue } from 'utils/element-utils';
 import BaseMenu from './base-menu';
 
 const defaultMenuXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]';
@@ -105,11 +105,6 @@ export default class SelectMenu extends BaseMenu {
   }
 
   protected async isOpen(): Promise<boolean> {
-    try {
-      await this.page.waitForXPath(this.visibleXpath, { visible: true, timeout: 2000 });
-      return true;
-    } catch (err) {
-      return false;
-    }
+    return elementExists(this.page, this.visibleXpath, { timeout: 2000 });
   }
 }

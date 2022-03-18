@@ -67,3 +67,11 @@ export async function matchText(page: Page, cssSelector: string, subString: stri
   }
   return found;
 }
+
+export async function elementExists(page: Page, xpath: string, opt: { timeout?: number } = {}): Promise<boolean> {
+  const { timeout = 100 } = opt;
+  return page
+    .waitForXPath(xpath, { visible: true, timeout })
+    .then(() => false)
+    .catch(() => true);
+}

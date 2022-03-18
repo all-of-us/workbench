@@ -7,6 +7,7 @@ import Button from 'app/element/button';
 import { ElementType } from 'app/xpath-options';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { logger } from 'libs/logger';
+import { elementExists } from 'utils/element-utils';
 
 const modalText = 'share this workspace';
 
@@ -60,7 +61,7 @@ export default class ShareModal extends Modal {
         await input.type(chars, { delay: 0 });
         // Wait for GET /userSearch request to finish. Sometimes it takes several seconds.
         await waitForResponsePromise;
-        if (await this.existsUsersDropdown(timeout)) {
+        if (await this.emailsDropdownExists(timeout)) {
           if (await addIcon.exists(1000)) {
             await addIcon.click();
             // Test playback runs fast. Wait until dropdown disappears so it is not interfering with next click.
@@ -136,27 +137,13 @@ export default class ShareModal extends Modal {
     await waitWhileLoading(this.page);
     await Promise.race([
       this.page.waitForXPath(noSearchResultsXpath, { visible: true, timeout }),
-      this.existsUsersDropdown(timeout)
+      this.emailsDropdownExists(timeout)
     ]);
-    return await this.page
-      .waitForXPath(noSearchResultsXpath, { visible: true, timeout: 100 })
-      .then(() => {
-        return false;
-      })
-      .catch(() => {
-        return true;
-      });
+    return elementExists(this.page, noSearchResultsXpath);
   }
 
-  private async existsUsersDropdown(timeout = 2000): Promise<boolean> {
-    return this.page
-      .waitForXPath(this.getEmailsDropdownXpath(), { visible: true, timeout })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+  private async emailsDropdownExists(timeout = 2000): Promise<boolean> {
+    return elementExists(this.page, this.getEmailsDropdownXpath(), { timeout });
   }
 
   private getEmailsDropdownXpath(): string {

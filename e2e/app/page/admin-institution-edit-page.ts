@@ -167,10 +167,9 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   }
 
   // enable the CT toggle
-  async clickCtEnabledtoggle(): Promise<boolean> {
+  async clickCtEnabledtoggle(): Promise<void> {
     const ctEnabled = this.getCtEnabledtoggle();
     await ctEnabled.toggle(true);
-    return true;
   }
 
   getCtEmailDropdown(): SelectMenu {
