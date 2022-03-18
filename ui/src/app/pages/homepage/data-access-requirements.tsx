@@ -275,7 +275,7 @@ export const requiredModules: AccessModule[] = [...rtModules, duccModule];
 
 export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
 
-enum PageMode {
+export enum DARPageMode {
   INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
   ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
 }
@@ -761,8 +761,8 @@ const ControlledTierEraModule = (props: {
 };
 
 // the header outside the Fadebox
-const OuterHeader = (props: { pageMode: PageMode }) =>
-  props.pageMode === PageMode.INITIAL_REGISTRATION && (
+const OuterHeader = (props: { pageMode: DARPageMode }) =>
+  props.pageMode === DARPageMode.INITIAL_REGISTRATION && (
     <FlexColumn style={styles.registrationOuterHeader}>
       <Header style={styles.regHeaderRW}>Researcher Workbench</Header>
       <Header style={styles.regHeaderDAR}>Data Access Requirements</Header>
@@ -770,8 +770,8 @@ const OuterHeader = (props: { pageMode: PageMode }) =>
   );
 
 // the header inside the Fadebox
-const InnerHeader = (props: { pageMode: PageMode }) =>
-  props.pageMode === PageMode.INITIAL_REGISTRATION ? (
+const InnerHeader = (props: { pageMode: DARPageMode }) =>
+  props.pageMode === DARPageMode.INITIAL_REGISTRATION ? (
     <div
       data-test-id='initial-registration-header'
       style={styles.pleaseComplete}
@@ -897,7 +897,7 @@ const RegisteredTierCard = (props: {
   activeModule: AccessModule;
   clickableModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
-  pageMode: PageMode;
+  pageMode: DARPageMode;
 }) => {
   const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
     props;
@@ -907,8 +907,8 @@ const RegisteredTierCard = (props: {
   const accessCondition = () =>
     switchCase(
       pageMode,
-      [PageMode.INITIAL_REGISTRATION, () => 'Once registered'],
-      [PageMode.ANNUAL_RENEWAL, () => 'Once renewed']
+      [DARPageMode.INITIAL_REGISTRATION, () => 'Once registered'],
+      [DARPageMode.ANNUAL_RENEWAL, () => 'Once renewed']
     );
 
   return (
@@ -1126,15 +1126,17 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     }, [code]);
 
     // handle the different page modes of Data Access Requirements
-    const [pageMode, setPageMode] = useState(PageMode.INITIAL_REGISTRATION);
+    const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
     const pageModeParam = query.get('pageMode');
     useEffect(() => {
       if (
         environment.mergedAccessRenewal &&
         pageModeParam &&
-        Object.values(PageMode).includes(pageModeParam as unknown as PageMode)
+        Object.values(DARPageMode).includes(
+          pageModeParam as unknown as DARPageMode
+        )
       ) {
-        setPageMode(pageModeParam as unknown as PageMode);
+        setPageMode(pageModeParam as unknown as DARPageMode);
       }
     }, [environment.mergedAccessRenewal, pageModeParam]);
 
