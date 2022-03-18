@@ -118,15 +118,28 @@ VALUES
 echo "Inserting survey_module"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
-(concept_id,name,description,question_count,participant_count,order_number)
+(concept_id,description,question_count,participant_count,order_number)
 VALUES
-(1585855,'Lifestyle','Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
-(1585710,'Overall Health','Survey provides information about how participants report levels of individual health.',0,0,2),
-(1586134,'The Basics','Survey includes participant demographic information.',0,0,1),
-(43529712,'Personal Medical History','This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
-(43528895,'Health Care Access & Utilization','Survey includes information about a participants access to and use of health care.',0,0,5),
-(43528698,'Family History','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
-(1333342,'COVID-19 Participant Experience (COPE) Survey','COVID-19 Participant Experience (COPE) Survey.',0,0,7)"
+(1585855,'Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
+(1585710,'Survey provides information about how participants report levels of individual health.',0,0,2),
+(1586134,'Survey includes participant demographic information.',0,0,1),
+(43529712,'This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
+(43528895,'Survey includes information about a participants access to and use of health care.',0,0,5),
+(43528698,'Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
+(1333342,'COVID-19 Participant Experience (COPE) Survey.',0,0,7)"
+
+echo "Updating survey names on survey_module"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\` sm
+SET sm.name = c.concept_name
+FROM (
+  SELECT concept_name, concept_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+  WHERE domain_id = 'Observation'
+  AND vocabulary_id = 'PPI'
+  AND concept_class_id = 'Module'
+) c
+WHERE sm.concept_id = c.concept_id"
 
 # Populate cb_person table
 echo "Inserting cb_person"
