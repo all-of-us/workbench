@@ -326,42 +326,32 @@ export const ConceptHomepage = fp.flow(
         domainsLoading: conceptDomainCards.map((domain) => domain.domain),
         surveysLoading: conceptSurveysList.map((survey) => survey.name),
       });
-      const promises = [];
-      conceptDomainCards.forEach((conceptDomain) => {
-        promises.push(
-          this.getDomainCounts(
-            conceptDomain.domain.toString(),
-            conceptDomain.standard
-          ).then((domainCount) => {
-            conceptDomain.conceptCount = domainCount.conceptCount;
-            this.setState({
-              domainsLoading: this.state.domainsLoading.filter(
-                (domain) => domain !== conceptDomain.domain
-              ),
-            });
-          })
-        );
-      });
-      conceptSurveysList.forEach((conceptSurvey) => {
-        promises.push(
-          cohortBuilderApi()
-            .findSurveyCount(
-              namespace,
-              id,
-              conceptSurvey.name,
-              currentInputString
-            )
-            .then((surveyCount) => {
-              conceptSurvey.questionCount = surveyCount.conceptCount;
-              this.setState({
-                surveysLoading: this.state.surveysLoading.filter(
-                  (survey) => survey !== conceptSurvey.name
-                ),
-              });
-            })
-        );
-      });
-      await Promise.all(promises);
+      cohortBuilderApi()
+        .findConceptCounts(namespace, id, currentInputString)
+        .then((cardList) => {
+          conceptDomainCards.forEach((conceptDomainCard) => {
+            const cardCount = cardList.items.find(
+              (card) => card.domain === conceptDomainCard.domain
+            );
+            if (cardCount) {
+              conceptDomainCard.conceptCount = cardCount.count;
+            } else {
+              conceptDomainCard.conceptCount = 0;
+            }
+          });
+          this.setState({ domainsLoading: [] });
+          conceptSurveysList.forEach((conceptSurvey) => {
+            const cardCount = cardList.items.find(
+              (card) => card.name === conceptSurvey.name
+            );
+            if (cardCount) {
+              conceptSurvey.questionCount = cardCount.count;
+            } else {
+              conceptSurvey.questionCount = 0;
+            }
+          });
+          this.setState({ surveysLoading: [] });
+        });
       this.setState({ conceptDomainCards, conceptSurveysList });
     }
 
