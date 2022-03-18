@@ -419,7 +419,6 @@ export const AdminInstitutionEdit = fp.flow(
           shortName: '',
           displayName: '',
           organizationTypeEnum: null,
-          requestAccessUrl: '',
         },
         institutionBeforeEdits: null,
         showOtherInstitutionTextBox: false,
@@ -775,7 +774,7 @@ export const AdminInstitutionEdit = fp.flow(
           controlledTierEmailDomains: AccessTierShortNames.Controlled,
           requestAccessUrl: requestAccessUrl
             ? canonicalizeUrl(requestAccessUrl)
-            : '',
+            : null,
         },
         {
           displayName: {
@@ -880,7 +879,7 @@ export const AdminInstitutionEdit = fp.flow(
                   />
                 )}
                 <TextInputWithLabel
-                  value={institution.requestAccessUrl}
+                  value={requestAccessUrl ?? ''}
                   inputId='requestAccessUrl'
                   inputName='requestAccessUrl'
                   placeholder='Request Access URL'
@@ -1001,13 +1000,15 @@ export const AdminInstitutionEdit = fp.flow(
                             errors.registeredTierEmailDomains,
                             errors.controlledTierEmailAddresses,
                             errors.controlledTierEmailDomains,
-                            ...errors.requestAccessUrl,
                           ].map((e) => e && <li key={e}>{e}</li>)}
                           {errors.organizationTypeOtherText && (
                             <li>
                               Organization Type 'Other' requires additional
                               information
                             </li>
+                          )}
+                          {errors.requestAccessUrl?.map(
+                            (e) => e && <li key={e}>{e}</li>
                           )}
                         </BulletAlignedUnorderedList>
                       </div>
