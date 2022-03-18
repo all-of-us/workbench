@@ -118,15 +118,15 @@ VALUES
 echo "Inserting survey_module"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
-(concept_id,description,question_count,participant_count,order_number)
+(concept_id,name,description,question_count,participant_count,order_number)
 VALUES
-(1585855,'Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
-(1585710,'Survey provides information about how participants report levels of individual health.',0,0,2),
-(1586134,'Survey includes participant demographic information.',0,0,1),
-(43529712,'This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
-(43528895,'Survey includes information about a participants access to and use of health care.',0,0,5),
-(43528698,'Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
-(1333342,'COVID-19 Participant Experience (COPE) Survey.',0,0,7)"
+(1585855,'','Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
+(1585710,'','Survey provides information about how participants report levels of individual health.',0,0,2),
+(1586134,'','Survey includes participant demographic information.',0,0,1),
+(43529712,'','This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
+(43528895,'','Survey includes information about a participants access to and use of health care.',0,0,5),
+(43528698,'','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
+(1333342,'','COVID-19 Participant Experience (COPE) Survey.',0,0,7)"
 
 echo "Updating survey names on survey_module"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
