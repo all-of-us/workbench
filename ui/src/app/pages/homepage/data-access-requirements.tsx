@@ -299,54 +299,81 @@ const getStatusText = (status: AccessModuleStatus) => {
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };
 
-const handleTerraShibbolethCallback = (
+const useTerraShibbolethCallbackHandler = (
   token: string,
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
 ) => {
-  const handler = withErrorModal({
-    title: 'Error saving NIH Authentication status.',
-    message:
-      'An error occurred trying to save your NIH Authentication status. Please try again.',
-    onDismiss: () => {
-      spinnerProps.hideSpinner();
-    },
-  })(async () => {
-    spinnerProps.showSpinner();
-    await profileApi().updateNihToken({ jwt: token });
-    spinnerProps.hideSpinner();
-    reloadProfile();
-  });
+  useEffect(() => {
+    if (token) {
+      const handler = withErrorModal({
+        title: 'Error saving NIH Authentication status.',
+        message:
+          'An error occurred trying to save your NIH Authentication status. Please try again.',
+        onDismiss: () => {
+          spinnerProps.hideSpinner();
+        },
+      })(async () => {
+        spinnerProps.showSpinner();
+        await profileApi().updateNihToken({ jwt: token });
+        spinnerProps.hideSpinner();
+        reloadProfile();
+      });
 
-  return handler();
+      // run async handler but don't wait on resolution
+      handler();
+    }
+  }, [token]);
 };
 
-const handleRasCallback = (
+const useRasCallbackHandler = (
   code: string,
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
 ) => {
-  const handler = withErrorModal({
-    title: 'Error saving RAS Login.Gov linkage status.',
-    message:
-      'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
-    onDismiss: () => {
-      spinnerProps.hideSpinner();
-    },
-  })(async () => {
-    spinnerProps.showSpinner();
-    await profileApi().linkRasAccount({
-      authCode: code,
-      redirectUrl: buildRasRedirectUrl(),
-    });
-    spinnerProps.hideSpinner();
-    reloadProfile();
+  useEffect(() => {
+    if (code) {
+      const handler = withErrorModal({
+        title: 'Error saving RAS Login.Gov linkage status.',
+        message:
+          'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
+        onDismiss: () => {
+          spinnerProps.hideSpinner();
+        },
+      })(async () => {
+        spinnerProps.showSpinner();
+        await profileApi().linkRasAccount({
+          authCode: code,
+          redirectUrl: buildRasRedirectUrl(),
+        });
+        spinnerProps.hideSpinner();
+        reloadProfile();
 
-    // Cleanup parameter from URL after linking.
-    window.history.replaceState({}, '', '/');
-  });
+        // Cleanup parameter from URL after linking.
+        window.history.replaceState({}, '', '/');
+      });
 
-  return handler();
+      // run async handler but don't wait on resolution
+      handler();
+    }
+  }, [code]);
+};
+
+const usePageModeParam = (
+  pageModeParam: string,
+  setPageMode: (DARPageMode) => void
+) => {
+  useEffect(() => {
+    if (
+      environment.mergedAccessRenewal &&
+      pageModeParam &&
+      Object.values(DARPageMode).includes(
+        pageModeParam as unknown as DARPageMode
+      )
+    ) {
+      setPageMode(pageModeParam as unknown as DARPageMode);
+    }
+  }, [environment.mergedAccessRenewal, pageModeParam]);
 };
 
 const selfBypass = async (
@@ -1109,36 +1136,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const query = useQuery();
 
+    // invoke our custom hooks for the different queryparams
+
     // handle the route /nih-callback?token=<token>
-    const token = query.get('token');
-    useEffect(() => {
-      if (token) {
-        handleTerraShibbolethCallback(token, spinnerProps, reload);
-      }
-    }, [token]);
-
+    useTerraShibbolethCallbackHandler(query.get('token'), spinnerProps, reload);
     // handle the route /ras-callback?code=<code>
-    const code = query.get('code');
-    useEffect(() => {
-      if (code) {
-        handleRasCallback(code, spinnerProps, reload);
-      }
-    }, [code]);
-
-    // handle the different page modes of Data Access Requirements
+    useRasCallbackHandler(query.get('code'), spinnerProps, reload);
     const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
-    const pageModeParam = query.get('pageMode');
-    useEffect(() => {
-      if (
-        environment.mergedAccessRenewal &&
-        pageModeParam &&
-        Object.values(DARPageMode).includes(
-          pageModeParam as unknown as DARPageMode
-        )
-      ) {
-        setPageMode(pageModeParam as unknown as DARPageMode);
-      }
-    }, [environment.mergedAccessRenewal, pageModeParam]);
+    usePageModeParam(query.get('pageMode'), setPageMode);
 
     // At any given time, at most two modules will be clickable:
     //  1. The active module, which we visually direct the user to with a CTA
