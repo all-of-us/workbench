@@ -772,13 +772,19 @@ const OuterHeader = (props: { pageMode: PageMode }) =>
 // the header inside the Fadebox
 const InnerHeader = (props: { pageMode: PageMode }) =>
   props.pageMode === PageMode.INITIAL_REGISTRATION ? (
-    <div style={styles.pleaseComplete}>
+    <div
+      data-test-id='initial-registration-header'
+      style={styles.pleaseComplete}
+    >
       Please complete the necessary steps to gain access to the <AoU />{' '}
       datasets.
     </div>
   ) : (
     <FlexColumn>
-      <div style={styles.renewalHeaderYearly}>
+      <div
+        data-test-id='annual-renewal-header'
+        style={styles.renewalHeaderYearly}
+      >
         Yearly Researcher Workbench access renewal
       </div>
       <div style={styles.renewalHeaderRequirements}>

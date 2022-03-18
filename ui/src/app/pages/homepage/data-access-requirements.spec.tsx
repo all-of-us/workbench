@@ -9,6 +9,7 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import {
   profileApi,
   registerApiClient,
@@ -41,10 +42,15 @@ const load = jest.fn();
 const reload = jest.fn();
 const updateCache = jest.fn();
 
+const DEFAULT_PAGE_MODE = 'INITIAL_REGISTRATION';
+
 describe('DataAccessRequirements', () => {
-  const component = () => {
+  const component = (pageMode?: string) => {
+    const path = pageMode
+      ? `${DEFAULT_PAGE_MODE}?pageMode=${pageMode}`
+      : DEFAULT_PAGE_MODE;
     return mount(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[path]}>
         <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}} />
       </MemoryRouter>
     );
@@ -94,6 +100,12 @@ describe('DataAccessRequirements', () => {
 
   const findContactUs = (wrapper) =>
     wrapper.find('[data-test-id="contact-us"]');
+
+  const findInitialRegistrationHeader = (wrapper) =>
+    wrapper.find('[data-test-id="initial-registration-header"]');
+
+  const findAnnualRenewalHeader = (wrapper) =>
+    wrapper.find('[data-test-id="annual-renewal-header"]');
 
   beforeEach(async () => {
     registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -1338,7 +1350,7 @@ describe('DataAccessRequirements', () => {
     ).toBeTruthy();
   });
 
-  it('Should allow CT and DUCC as simultaneously clickable', async () => {
+  it('Should allow CT and DUCC to be simultaneously clickable', async () => {
     let wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -1399,5 +1411,20 @@ describe('DataAccessRequirements', () => {
     expect(
       findNextCtaForModule(wrapper, AccessModule.DATAUSERCODEOFCONDUCT).exists()
     ).toBeFalsy();
+  });
+
+  it('Should render in INITIAL_REGISTRATION mode by default', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(findInitialRegistrationHeader(wrapper).exists()).toBeTruthy();
+    expect(findAnnualRenewalHeader(wrapper).exists()).toBeFalsy();
+  });
+
+  it('Should render in ANNUAL_RENEWAL mode when specified by query param', async () => {
+    environment.mergedAccessRenewal = true;
+    const wrapper = component('ANNUAL_RENEWAL');
+    await waitOneTickAndUpdate(wrapper);
+    expect(findInitialRegistrationHeader(wrapper).exists()).toBeFalsy();
+    expect(findAnnualRenewalHeader(wrapper).exists()).toBeTruthy();
   });
 });
