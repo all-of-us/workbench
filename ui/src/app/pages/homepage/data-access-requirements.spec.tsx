@@ -16,6 +16,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -44,13 +45,11 @@ const load = jest.fn();
 const reload = jest.fn();
 const updateCache = jest.fn();
 
-const DEFAULT_PAGE_MODE = 'INITIAL_REGISTRATION';
-
 describe('DataAccessRequirements', () => {
   const component = (pageMode?: string) => {
     const path = pageMode
-      ? `${DEFAULT_PAGE_MODE}?pageMode=${pageMode}`
-      : DEFAULT_PAGE_MODE;
+      ? `${DATA_ACCESS_REQUIREMENTS_PATH}?pageMode=${pageMode}`
+      : DATA_ACCESS_REQUIREMENTS_PATH;
     return mount(
       <MemoryRouter initialEntries={[path]}>
         <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}} />
