@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
 import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -276,7 +277,6 @@ enum PageMode {
   INITIAL_REGISTRATION,
   ANNUAL_RENEWAL,
 }
-const WIP_PAGE_MODE = PageMode.INITIAL_REGISTRATION;
 
 const isCompleted = (status: AccessModuleStatus): boolean =>
   !!status?.completionEpochMillis;
@@ -1090,21 +1090,36 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       onMount();
     }, []);
 
-    // handle the route /nih-callback?token=<token>
-    // handle the route /ras-callback?code=<code>
     const query = useQuery();
+
+    // handle the route /nih-callback?token=<token>
     const token = query.get('token');
-    const code = query.get('code');
     useEffect(() => {
       if (token) {
         handleTerraShibbolethCallback(token, spinnerProps, reload);
       }
     }, [token]);
+
+    // handle the route /ras-callback?code=<code>
+    const code = query.get('code');
     useEffect(() => {
       if (code) {
         handleRasCallback(code, spinnerProps, reload);
       }
     }, [code]);
+
+    // handle the different page modes of Data Access Requirements
+    const [pageMode, setPageMode] = useState(PageMode.INITIAL_REGISTRATION);
+    const pageModeParam = query.get('pageMode');
+    useEffect(() => {
+      if (
+        environment.mergedAccessRenewal &&
+        pageModeParam &&
+        Object.values(PageMode).includes(pageModeParam as unknown as PageMode)
+      ) {
+        setPageMode(pageModeParam as unknown as PageMode);
+      }
+    }, [pageModeParam]);
 
     // At any given time, at most two modules will be clickable:
     //  1. The active module, which we visually direct the user to with a CTA
@@ -1167,13 +1182,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     return (
       <FlexColumn style={styles.pageWrapper}>
-        <OuterHeader pageMode={WIP_PAGE_MODE} />
+        <OuterHeader pageMode={pageMode} />
         {profile && !nextRequired && <Completed />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>
-          <InnerHeader pageMode={WIP_PAGE_MODE} />
+          <InnerHeader pageMode={pageMode} />
           <React.Fragment>{cards}</React.Fragment>
         </FadeBox>
       </FlexColumn>
