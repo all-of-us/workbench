@@ -9,3 +9,12 @@ export function canonicalizeUrl(url: string): string {
   // and https:// may yield a bad certificate if not configured.
   return `http://${url}`;
 }
+
+export function isValidUrl(potentialUrl: string): boolean {
+  try {
+    new URL(potentialUrl);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
