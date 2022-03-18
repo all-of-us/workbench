@@ -274,8 +274,8 @@ export const requiredModules: AccessModule[] = [...rtModules, duccModule];
 export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
 
 enum PageMode {
-  INITIAL_REGISTRATION,
-  ANNUAL_RENEWAL,
+  INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
+  ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
 }
 
 const isCompleted = (status: AccessModuleStatus): boolean =>
@@ -889,10 +889,19 @@ const RegisteredTierCard = (props: {
   activeModule: AccessModule;
   clickableModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
+  pageMode: PageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps } = props;
+  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+    props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
+
+  const accessCondition = () =>
+    switchCase(
+      pageMode,
+      [PageMode.INITIAL_REGISTRATION, () => 'Once registered'],
+      [PageMode.ANNUAL_RENEWAL, () => 'Once renewed']
+    );
 
   return (
     <FlexRow style={styles.card}>
@@ -904,7 +913,7 @@ const RegisteredTierCard = (props: {
           <div style={styles.dataHeader}>{rtDisplayName} data</div>
         </FlexRow>
         <div style={styles.dataDetails}>
-          Once registered, you’ll have access to:
+          {accessCondition()}, you’ll have access to:
         </div>
         <DataDetail icon='individual' text='Individual (not aggregated) data' />
         <DataDetail icon='identifying' text='Identifying information removed' />
@@ -1155,6 +1164,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         activeModule={activeModule}
         clickableModules={clickableModules}
         spinnerProps={spinnerProps}
+        pageMode={pageMode}
       />
     );
     const ctCard = showCtCard ? (
