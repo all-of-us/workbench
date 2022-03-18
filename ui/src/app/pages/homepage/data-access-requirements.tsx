@@ -762,7 +762,7 @@ const ControlledTierEraModule = (props: {
 const OuterHeader = (props: { pageMode: PageMode }) =>
   props.pageMode === PageMode.INITIAL_REGISTRATION && (
     <FlexColumn style={styles.registrationOuterHeader}>
-      <Header style={styles.regHeaderDAR}>Researcher Workbench</Header>
+      <Header style={styles.regHeaderRW}>Researcher Workbench</Header>
       <Header style={styles.regHeaderDAR}>Data Access Requirements</Header>
     </FlexColumn>
   );
@@ -1119,7 +1119,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       ) {
         setPageMode(pageModeParam as unknown as PageMode);
       }
-    }, [pageModeParam]);
+    }, [environment.mergedAccessRenewal, pageModeParam]);
 
     // At any given time, at most two modules will be clickable:
     //  1. The active module, which we visually direct the user to with a CTA
