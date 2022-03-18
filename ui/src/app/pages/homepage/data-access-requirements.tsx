@@ -81,10 +81,12 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: 20,
     fontWeight: 600,
+    marginBottom: '1em',
   },
   renewalHeaderRequirements: {
     color: colors.primary,
     fontSize: 14,
+    marginBottom: '1em',
   },
   completed: {
     height: '87px',
