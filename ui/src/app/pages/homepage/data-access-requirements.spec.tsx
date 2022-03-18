@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AccessModule,
@@ -14,6 +14,7 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
@@ -31,6 +32,7 @@ import { updateVisibleTiers } from 'testing/test-utils';
 
 import {
   allModules,
+  DARPageMode,
   DataAccessRequirements,
   getActiveModule,
   getEligibleModules,
@@ -106,6 +108,25 @@ describe('DataAccessRequirements', () => {
 
   const findAnnualRenewalHeader = (wrapper) =>
     wrapper.find('[data-test-id="annual-renewal-header"]');
+
+  const expectPageMode = (wrapper: ReactWrapper, pageMode: DARPageMode) =>
+    switchCase(
+      pageMode,
+      [
+        DARPageMode.INITIAL_REGISTRATION,
+        () => {
+          expect(findInitialRegistrationHeader(wrapper).exists()).toBeTruthy();
+          expect(findAnnualRenewalHeader(wrapper).exists()).toBeFalsy();
+        },
+      ],
+      [
+        DARPageMode.ANNUAL_RENEWAL,
+        () => {
+          expect(findInitialRegistrationHeader(wrapper).exists()).toBeFalsy();
+          expect(findAnnualRenewalHeader(wrapper).exists()).toBeTruthy();
+        },
+      ]
+    );
 
   beforeEach(async () => {
     registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -1413,18 +1434,38 @@ describe('DataAccessRequirements', () => {
     ).toBeFalsy();
   });
 
-  it('Should render in INITIAL_REGISTRATION mode by default', async () => {
+  it('Should render in INITIAL_REGISTRATION mode by default (mergedAccessRenewal is true)', async () => {
+    environment.mergedAccessRenewal = true;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(findInitialRegistrationHeader(wrapper).exists()).toBeTruthy();
-    expect(findAnnualRenewalHeader(wrapper).exists()).toBeFalsy();
+    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
+  });
+
+  it('Should render in INITIAL_REGISTRATION mode by default (mergedAccessRenewal is false)', async () => {
+    environment.mergedAccessRenewal = false;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
   });
 
   it('Should render in ANNUAL_RENEWAL mode when specified by query param', async () => {
     environment.mergedAccessRenewal = true;
-    const wrapper = component('ANNUAL_RENEWAL');
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
     await waitOneTickAndUpdate(wrapper);
-    expect(findInitialRegistrationHeader(wrapper).exists()).toBeFalsy();
-    expect(findAnnualRenewalHeader(wrapper).exists()).toBeTruthy();
+    expectPageMode(wrapper, DARPageMode.ANNUAL_RENEWAL);
+  });
+
+  it('Should not render in ANNUAL_RENEWAL mode if mergedAccessRenewal is false', async () => {
+    environment.mergedAccessRenewal = false;
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+    await waitOneTickAndUpdate(wrapper);
+    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
+  });
+
+  it('Should render in INITIAL_REGISTRATION mode if the queryParam is invalid', async () => {
+    environment.mergedAccessRenewal = true;
+    const wrapper = component('some-garbage');
+    await waitOneTickAndUpdate(wrapper);
+    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
   });
 });
