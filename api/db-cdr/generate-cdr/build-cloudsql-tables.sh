@@ -118,7 +118,7 @@ VALUES
 echo "Inserting survey_module"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
-(concept_id,description,question_count,participant_count,order_number)
+(concept_id,name,description,question_count,participant_count,order_number)
 VALUES
 (1585855,'','Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
 (1585710,'','Survey provides information about how participants report levels of individual health.',0,0,2),
