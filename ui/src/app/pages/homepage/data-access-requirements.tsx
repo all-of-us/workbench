@@ -18,10 +18,11 @@ import {
   Repeat,
 } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
-import { SupportButton } from 'app/components/support';
+import { SupportButton, SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { cond, reactStyles, switchCase } from 'app/utils';
@@ -58,9 +59,31 @@ import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
 const styles = reactStyles({
-  headerFlexColumn: {
+  registrationOuterHeader: {
     marginLeft: '3%',
     width: '50%',
+  },
+  regHeaderRW: {
+    textTransform: 'uppercase',
+    margin: '1em 0 0 0',
+  },
+  regHeaderDAR: {
+    height: '30px',
+    width: '302px',
+    fontFamily: 'Montserrat',
+    fontSize: '22px',
+    fontWeight: 500,
+    letterSpacing: 0,
+    margin: '0.5em 0 0 0',
+  },
+  renewalHeaderYearly: {
+    color: colors.primary,
+    fontSize: 20,
+    fontWeight: 600,
+  },
+  renewalHeaderRequirements: {
+    color: colors.primary,
+    fontSize: 14,
   },
   completed: {
     height: '87px',
@@ -93,19 +116,6 @@ const styles = reactStyles({
     fontSize: '18px',
     fontWeight: 600,
   },
-  headerRW: {
-    textTransform: 'uppercase',
-    margin: '1em 0 0 0',
-  },
-  headerDAR: {
-    height: '30px',
-    width: '302px',
-    fontFamily: 'Montserrat',
-    fontSize: '22px',
-    fontWeight: 500,
-    letterSpacing: 0,
-    margin: '0.5em 0 0 0',
-  },
   pageWrapper: {
     marginLeft: '-1rem',
     marginRight: '-0.6rem',
@@ -118,8 +128,9 @@ const styles = reactStyles({
     padding: '0 0.1rem',
   },
   pleaseComplete: {
-    fontSize: '14px',
     color: colors.primary,
+    fontSize: 16,
+    fontWeight: 600,
   },
   card: {
     height: '375px',
@@ -260,6 +271,12 @@ const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 export const requiredModules: AccessModule[] = [...rtModules, duccModule];
 
 export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
+
+enum PageMode {
+  INITIAL_REGISTRATION,
+  ANNUAL_RENEWAL,
+}
+const WIP_PAGE_MODE = PageMode.INITIAL_REGISTRATION;
 
 const isCompleted = (status: AccessModuleStatus): boolean =>
   !!status?.completionEpochMillis;
@@ -741,11 +758,46 @@ const ControlledTierEraModule = (props: {
   ) : null;
 };
 
-const DARHeader = () => (
-  <FlexColumn style={styles.headerFlexColumn}>
-    <Header style={styles.headerRW}>Researcher Workbench</Header>
-    <Header style={styles.headerDAR}>Data Access Requirements</Header>
-  </FlexColumn>
+// the header outside the Fadebox
+const OuterHeader = (props: { pageMode: PageMode }) =>
+  props.pageMode === PageMode.INITIAL_REGISTRATION && (
+    <FlexColumn style={styles.registrationOuterHeader}>
+      <Header style={styles.regHeaderDAR}>Researcher Workbench</Header>
+      <Header style={styles.regHeaderDAR}>Data Access Requirements</Header>
+    </FlexColumn>
+  );
+
+// the header inside the Fadebox
+const InnerHeader = (props: { pageMode: PageMode }) =>
+  props.pageMode === PageMode.INITIAL_REGISTRATION ? (
+    <div style={styles.pleaseComplete}>
+      Please complete the necessary steps to gain access to the <AoU />{' '}
+      datasets.
+    </div>
+  ) : (
+    <FlexColumn>
+      <div style={styles.renewalHeaderYearly}>
+        Yearly Researcher Workbench access renewal
+      </div>
+      <div style={styles.renewalHeaderRequirements}>
+        <RenewalRequirementsText /> For any questions, please contact{' '}
+        <SupportMailto />.
+      </div>
+      <div style={styles.pleaseComplete}>
+        Please complete the following steps.
+      </div>
+    </FlexColumn>
+  );
+
+const SelfBypass = (props: { onClick: () => void }) => (
+  <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+    <div style={styles.selfBypassText}>
+      [Test environment] Self-service bypass is enabled
+    </div>
+    <Button style={{ marginLeft: '0.5rem' }} onClick={() => props.onClick()}>
+      Bypass all
+    </Button>
+  </FlexRow>
 );
 
 const Completed = () => (
@@ -1115,26 +1167,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     return (
       <FlexColumn style={styles.pageWrapper}>
-        <DARHeader />
+        <OuterHeader pageMode={WIP_PAGE_MODE} />
         {profile && !nextRequired && <Completed />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
-          <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
-            <div style={styles.selfBypassText}>
-              [Test environment] Self-service bypass is enabled
-            </div>
-            <Button
-              style={{ marginLeft: '0.5rem' }}
-              onClick={async () => await selfBypass(spinnerProps, reload)}
-            >
-              Bypass all
-            </Button>
-          </FlexRow>
+          <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>
-          <div style={styles.pleaseComplete}>
-            Please complete the necessary steps to gain access to the <AoU />{' '}
-            datasets.
-          </div>
+          <InnerHeader pageMode={WIP_PAGE_MODE} />
           <React.Fragment>{cards}</React.Fragment>
         </FadeBox>
       </FlexColumn>
