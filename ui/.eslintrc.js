@@ -15,7 +15,7 @@ module.exports = {
   extends: ['prettier'],
   parserOptions: {
     ecmaFeatures: {
-      jsx: true,
+      jsx: true
     },
     ecmaVersion: 6,
     project: ['./tsconfig.json'],
@@ -75,6 +75,7 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'warn',
     '@typescript-eslint/prefer-optional-chain': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
+    '@typescript-eslint/promise-function-async': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
     // '@typescript-eslint/prefer-function-type': 'warn',
 
