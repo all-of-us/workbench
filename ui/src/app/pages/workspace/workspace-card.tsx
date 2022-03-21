@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourceType, Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { Button, Clickable, SnowmanButton } from 'app/components/buttons';
+import { Button, SnowmanButton } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -63,6 +63,8 @@ const styles = reactStyles({
     marginBottom: '0.5rem',
     fontSize: 18,
     wordBreak: 'break-all',
+    pointerEvents: 'none',
+    cursor: 'not-allowed',
   },
   permissionBox: {
     color: colors.white,
@@ -153,24 +155,46 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       ]);
     }
 
-    onClick() {
-      const { workspace } = this.props;
-      if (
+    requiresReviewPrompt() {
+      return (
         serverConfigStore.get().config.enableResearchReviewPrompt &&
-        workspace.researchPurpose.needsReviewPrompt
-      ) {
+        this.props.workspace.researchPurpose.needsReviewPrompt
+      );
+    }
+
+    trackWorkspaceNavigation() {
+      const {
+        workspace: { name, published },
+      } = this.props;
+      published
+        ? AnalyticsTracker.Workspaces.NavigateToFeatured(name)
+        : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+    }
+
+    onClick() {
+      const {
+        workspace: { id, namespace },
+      } = this.props;
+      if (this.requiresReviewPrompt()) {
         this.setState({ showResearchPurposeReviewModal: true });
       } else {
-        workspace.published
-          ? AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name)
-          : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-        this.props.navigate([
-          'workspaces',
-          workspace.namespace,
-          workspace.id,
-          'data',
-        ]);
+        this.trackWorkspaceNavigation();
+        this.props.navigate(['workspaces', namespace, id, 'data']);
       }
+    }
+
+    onNameRtClick() {
+      // Restrict open new tab option/right click options, if workspace requires review
+      if (this.requiresReviewPrompt()) {
+        return;
+      }
+
+      const {
+        workspace: { id, namespace },
+      } = this.props;
+
+      this.trackWorkspaceNavigation();
+      return `/workspaces/${namespace}/${id}/data`;
     }
 
     render() {
@@ -251,13 +275,14 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               >
                 <FlexColumn style={{ marginBottom: 'auto' }}>
                   <FlexRow style={{ alignItems: 'flex-start' }}>
-                    <Clickable
-                      style={{
-                        cursor: tierAccessDisabled ? 'not-allowed' : 'pointer',
-                        ...styles,
-                      }}
+                    <a
+                      style={
+                        tierAccessDisabled
+                          ? styles.workspaceNameDisabled
+                          : styles.workspaceName
+                      }
                       onClick={() => this.onClick()}
-                      disabled={tierAccessDisabled}
+                      href={this.onNameRtClick()}
                     >
                       <TooltipTrigger
                         content={
@@ -282,8 +307,22 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           {workspace.name}
                         </div>
                       </TooltipTrigger>
-                    </Clickable>
+                    </a>
                   </FlexRow>
+                  {this.requiresReviewPrompt() && (
+                    <div style={{ color: colors.warning }}>
+                      <ClrIcon
+                        shape={'warning-standard'}
+                        class={'is-solid'}
+                        size={20}
+                        style={{
+                          color: colors.warning,
+                          flex: '0 0 auto',
+                        }}
+                      />
+                      Needs Review
+                    </div>
+                  )}
                   {workspace.researchPurpose.reviewRequested === true &&
                     workspace.researchPurpose.approved === false && (
                       <div style={{ color: colors.danger }}>
