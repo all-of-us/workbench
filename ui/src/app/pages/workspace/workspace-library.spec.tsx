@@ -11,14 +11,20 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { profileStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 
+<<<<<<< HEAD
 import {
   expectButtonDisabled,
   expectButtonEnabled,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
+=======
+import defaultServerConfig from 'testing/default-server-config';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+>>>>>>> Fix UI test
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStubs } from 'testing/stubs/workspaces';
@@ -69,6 +75,12 @@ describe('WorkspaceLibrary', () => {
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
     PUBLISHED_WORKSPACE = publishedWorkspaceStubs[2];
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableResearchReviewPrompt: false,
+      },
+    });
   });
 
   it('renders', () => {
@@ -162,12 +174,21 @@ describe('WorkspaceLibrary', () => {
       .map((c) => c.text());
     expect(cardNameList.length).toEqual(1);
 
+<<<<<<< HEAD
     expectButtonDisabled(
       wrapper
         .find('[data-test-id="workspace-card"]')
         .first()
         .find('[role="button"]')
     );
+=======
+    const styleCursor = wrapper
+      .find('[data-test-id="workspace-card"]')
+      .first()
+      .find('a')
+      .map((c) => c.prop('style').cursor);
+    expect(styleCursor).toEqual(['not-allowed']);
+>>>>>>> Fix UI test
   });
 
   it('controlled tier workspace is clickable for ct user', async () => {
@@ -195,11 +216,20 @@ describe('WorkspaceLibrary', () => {
     wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
+<<<<<<< HEAD
     expectButtonEnabled(
       wrapper
         .find('[data-test-id="workspace-card"]')
         .first()
         .find('[role="button"]')
     );
+=======
+    const styleCursor = wrapper
+      .find('[data-test-id="workspace-card"]')
+      .first()
+      .find('a')
+      .map((c) => c.prop('style').color);
+    expect(styleCursor).not.toEqual(colors.disabled);
+>>>>>>> Fix UI test
   });
 });
