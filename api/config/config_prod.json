@@ -144,7 +144,7 @@
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": true,
-    "notifyFromEmail": "egress@pmi-ops.org",
+    "notifyFromEmail": "security-alerts@researchallofus.org",
     "escalations": [{
       "afterIncidentCount": 1,
       "suspendCompute": {
