@@ -3578,6 +3578,26 @@ paths:
           description: A count of matching concepts per survey
           schema:
             "$ref": "#/definitions/SurveyCount"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/ehrDomainCounts":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns a count of term matches per domain for EHR domains'
+      operationId: findEhrDomainCounts
+      parameters:
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+      responses:
+        200:
+          description: information about counts for EHR domains
+          schema:
+            "$ref": "#/definitions/CardCountResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/conceptCounts":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3585,7 +3605,7 @@ paths:
     get:
       tags:
         - cohortBuilder
-      description: 'Returns a count of term matches per domain for all EHR domains, Physical Measurement css, and per survey name for all survey names'
+      description: 'Returns a count of term matches per domain for EHR domains, Physical Measurement css, and per survey name for all survey names'
       operationId: findConceptCounts
       parameters:
         - in: query
@@ -3595,7 +3615,7 @@ paths:
           description: the term to search for
       responses:
         200:
-          description: information about the surveys
+          description: information about counts for EHR domains, physical Measurement CSS, and Surveys for all survey names
           schema:
             "$ref": "#/definitions/CardCountResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{standard}/search/term":
