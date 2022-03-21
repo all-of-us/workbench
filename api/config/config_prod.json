@@ -145,6 +145,7 @@
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": true,
     "notifyFromEmail": "security-alerts@researchallofus.org",
+    "notifyCcEmails": ["security-alerts@researchallofus.org"],
     "escalations": [{
       "afterIncidentCount": 1,
       "suspendCompute": {

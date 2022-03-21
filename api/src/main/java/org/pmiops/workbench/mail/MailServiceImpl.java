@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -307,10 +309,12 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
                 .build());
 
+    EgressAlertRemediationPolicy egressPolicy =
+        workbenchConfigProvider.get().egressAlertRemediationPolicy;
     sendWithRetriesFrom(
-        workbenchConfigProvider.get().egressAlertRemediationPolicy.notifyFromEmail,
+        egressPolicy.notifyFromEmail,
         ImmutableList.of(dbUser.getContactEmail()),
-        ImmutableList.of(),
+        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
