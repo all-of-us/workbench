@@ -16,6 +16,7 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {
   expectButtonDisabled,
   expectButtonEnabled,
@@ -25,6 +26,10 @@ import {
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 >>>>>>> Fix UI test
+=======
+import defaultServerConfig from 'testing/default-server-config';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+>>>>>>> d000f3948ab75f6d4e4f5b385b139580c8be22fd
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStubs } from 'testing/stubs/workspaces';
@@ -175,6 +180,7 @@ describe('WorkspaceLibrary', () => {
     expect(cardNameList.length).toEqual(1);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     expectButtonDisabled(
       wrapper
         .find('[data-test-id="workspace-card"]')
@@ -182,13 +188,18 @@ describe('WorkspaceLibrary', () => {
         .find('[role="button"]')
     );
 =======
+=======
+>>>>>>> d000f3948ab75f6d4e4f5b385b139580c8be22fd
     const styleCursor = wrapper
       .find('[data-test-id="workspace-card"]')
       .first()
       .find('a')
       .map((c) => c.prop('style').cursor);
     expect(styleCursor).toEqual(['not-allowed']);
+<<<<<<< HEAD
 >>>>>>> Fix UI test
+=======
+>>>>>>> d000f3948ab75f6d4e4f5b385b139580c8be22fd
   });
 
   it('controlled tier workspace is clickable for ct user', async () => {
@@ -217,6 +228,7 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     expectButtonEnabled(
       wrapper
         .find('[data-test-id="workspace-card"]')
@@ -224,12 +236,17 @@ describe('WorkspaceLibrary', () => {
         .find('[role="button"]')
     );
 =======
+=======
+>>>>>>> d000f3948ab75f6d4e4f5b385b139580c8be22fd
     const styleCursor = wrapper
       .find('[data-test-id="workspace-card"]')
       .first()
       .find('a')
       .map((c) => c.prop('style').color);
     expect(styleCursor).not.toEqual(colors.disabled);
+<<<<<<< HEAD
 >>>>>>> Fix UI test
+=======
+>>>>>>> d000f3948ab75f6d4e4f5b385b139580c8be22fd
   });
 });
