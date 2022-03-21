@@ -370,6 +370,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<CardCount> findEhrDomainCounts(String term) {
+    return findDomainCounts(
+        term,
+        true,
+        ImmutableList.of(
+            Domain.CONDITION,
+            Domain.DRUG,
+            Domain.MEASUREMENT,
+            Domain.OBSERVATION,
+            Domain.PROCEDURE,
+            Domain.DEVICE,
+            Domain.VISIT));
+  }
+
+  @Override
   public List<CardCount> findDomainCounts(String term) {
     List<CardCount> cardCounts =
         findDomainCounts(
