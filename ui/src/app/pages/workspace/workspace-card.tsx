@@ -183,7 +183,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       }
     }
 
-    onNameRtClick() {
+    getRightClickTarget() {
       // Restrict open new tab option/right click options, if workspace requires review
       if (this.requiresReviewPrompt()) {
         return;
@@ -282,7 +282,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           : styles.workspaceName
                       }
                       onClick={() => this.onClick()}
-                      href={this.onNameRtClick()}
+                      href={this.getRightClickTarget()}
                     >
                       <TooltipTrigger
                         content={
