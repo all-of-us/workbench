@@ -15,7 +15,6 @@ import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
-import { hasExpired, isExpiring } from 'app/pages/access/access-renewal';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -415,6 +414,17 @@ const withInvalidDateHandling = (date) => {
     return displayDateWithoutHours(date);
   }
 };
+
+// The module has already expired
+const hasExpired = (expiration: number): boolean =>
+  !!expiration && getWholeDaysFromNow(expiration) < 0;
+
+// The module can either be expired or is expiring
+export const isExpiring = (expiration: number): boolean =>
+  expiration
+    ? getWholeDaysFromNow(expiration) <=
+      serverConfigStore.get().config.accessRenewalLookback
+    : false;
 
 interface RenewalDisplayDates {
   lastConfirmedDate: string;

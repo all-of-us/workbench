@@ -28,11 +28,11 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByNameOrEmpty,
+  isExpiring,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
-import { getWholeDaysFromNow } from 'app/utils/dates';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
@@ -142,30 +142,13 @@ export const RenewalRequirementsText = () => (
 );
 
 // Helper Functions
-// The module has already expired
-export const hasExpired = (expiration: number): boolean =>
-  !!expiration && getWholeDaysFromNow(expiration) < 0;
-
-// The module can either be expired or is expiring
-export const isExpiring = (expiration: number): boolean =>
-  expiration
-    ? getWholeDaysFromNow(expiration) <=
-      serverConfigStore.get().config.accessRenewalLookback
-    : false;
-
-const isModuleExpiring = (status: AccessModuleStatus): boolean =>
-  isExpiring(status?.expirationEpochMillis);
-
-export const isExpiringNotBypassed = (moduleStatus: AccessModuleStatus) => {
-  return isModuleExpiring(moduleStatus) && !moduleStatus.bypassEpochMillis;
-};
 
 const isExpiringAndNotBypassed = (
   moduleName: AccessModule,
   modules: AccessModuleStatus[]
 ) => {
-  const status = modules?.find((m) => m.moduleName === moduleName);
-  return isExpiringNotBypassed(status);
+  const status = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
+  return isExpiring(status?.expirationEpochMillis) && !status.bypassEpochMillis;
 };
 
 const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
