@@ -861,7 +861,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           user.setEraCommonsLinkedNihUsername(eRACommonsUsername);
-          accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, clockNow());
+          accessModuleService.updateCompletionTime(
+              user, DbAccessModuleName.ERA_COMMONS, clockNow());
           return user;
         },
         dbUser,
