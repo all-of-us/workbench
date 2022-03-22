@@ -3,7 +3,7 @@ package org.pmiops.workbench.access;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -17,7 +17,8 @@ public interface AccessModuleService {
   void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed);
 
   /** Update module status to complete for a user. */
-  void updateCompletionTime(DbUser dbUser, AccessModuleName accessModuleName, Timestamp timestamp);
+  void updateCompletionTime(
+      DbUser dbUser, DbAccessModuleName accessModuleName, Timestamp timestamp);
 
   /** Retrieves all {@link AccessModuleStatus} for a user. */
   List<AccessModuleStatus> getAccessModuleStatus(DbUser user);
@@ -28,17 +29,17 @@ public interface AccessModuleService {
    * @return
    */
   Optional<AccessModuleStatus> getAccessModuleStatus(
-      DbUser user, AccessModuleName accessModuleName);
+      DbUser user, DbAccessModuleName accessModuleName);
 
   /**
    * Returns true if the access module is compliant.
    *
    * <p>The module can be bypassed OR (completed but not expired).
    */
-  boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName);
+  boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName);
 
   /** Returns true if the access module is bypassable and bypassed */
-  boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName);
+  boolean isModuleBypassed(DbUser dbUser, DbAccessModuleName accessModuleName);
 
   boolean isSignedDuccVersionCurrent(Integer signedVersion);
 

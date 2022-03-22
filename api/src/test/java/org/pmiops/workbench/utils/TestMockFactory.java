@@ -23,7 +23,7 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -68,35 +68,35 @@ public class TestMockFactory {
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
       ImmutableList.of(
           new DbAccessModule()
-              .setName(AccessModuleName.TWO_FACTOR_AUTH)
+              .setName(DbAccessModuleName.TWO_FACTOR_AUTH)
               .setExpirable(false)
               .setBypassable(true),
           new DbAccessModule()
-              .setName(AccessModuleName.ERA_COMMONS)
+              .setName(DbAccessModuleName.ERA_COMMONS)
               .setExpirable(false)
               .setBypassable(true),
           new DbAccessModule()
-              .setName(AccessModuleName.RAS_LOGIN_GOV)
+              .setName(DbAccessModuleName.RAS_LOGIN_GOV)
               .setExpirable(false)
               .setBypassable(true),
           new DbAccessModule()
-              .setName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
+              .setName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)
               .setExpirable(true)
               .setBypassable(true),
           new DbAccessModule()
-              .setName(AccessModuleName.RT_COMPLIANCE_TRAINING)
+              .setName(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
               .setExpirable(true)
               .setBypassable(true),
           new DbAccessModule()
-              .setName(AccessModuleName.CT_COMPLIANCE_TRAINING)
+              .setName(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
               .setExpirable(false)
               .setBypassable(true),
           new DbAccessModule()
-              .setName(AccessModuleName.PROFILE_CONFIRMATION)
+              .setName(DbAccessModuleName.PROFILE_CONFIRMATION)
               .setExpirable(true)
               .setBypassable(false),
           new DbAccessModule()
-              .setName(AccessModuleName.PUBLICATION_CONFIRMATION)
+              .setName(DbAccessModuleName.PUBLICATION_CONFIRMATION)
               .setExpirable(true)
               .setBypassable(false));
 

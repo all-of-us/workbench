@@ -21,7 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
@@ -100,7 +100,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateCompletionTime(
-      DbUser dbUser, AccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
+      DbUser dbUser, DbAccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModuleToUpdate =
@@ -119,7 +119,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public Optional<AccessModuleStatus> getAccessModuleStatus(
-      DbUser user, AccessModuleName accessModuleName) {
+      DbUser user, DbAccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
@@ -150,7 +150,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
+  public boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     // if the module is not required, the user is always compliant
@@ -162,7 +162,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     boolean isCompleted = userAccessModule.getCompletionTime() != null;
 
     // we have an additional check before considering DUCC "complete"
-    if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
+    if (isCompleted && accessModuleName == DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
       isCompleted = hasUserSignedACurrentDucc(dbUser);
     }
 
@@ -176,7 +176,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName) {
+  public boolean isModuleBypassed(DbUser dbUser, DbAccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     return dbAccessModule.getBypassable()
@@ -218,7 +218,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   private static DbAccessModule getDbAccessModuleOrThrow(
-      List<DbAccessModule> dbAccessModules, AccessModuleName accessModuleName) {
+      List<DbAccessModule> dbAccessModules, DbAccessModuleName accessModuleName) {
     return dbAccessModules.stream()
         .filter(a -> a.getName() == accessModuleName)
         .findFirst()

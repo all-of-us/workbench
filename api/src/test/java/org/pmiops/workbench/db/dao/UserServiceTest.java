@@ -40,7 +40,7 @@ import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
@@ -181,14 +181,14 @@ public class UserServiceTest {
     // The user should be updated in the database with a non-empty completion.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Completion timestamp should not change when the method is called again.
     tick();
     userService.syncComplianceTrainingStatusV2();
 
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
   }
 
   @Test
@@ -206,14 +206,14 @@ public class UserServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Deprecate the old training.
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
     userService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
 
     // The user does a new training.
     retBadge.lastissued(issued + 5).valid(true);
@@ -221,7 +221,7 @@ public class UserServiceTest {
     // Completion and expiry timestamp should be updated.
     userService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Time passes, user renews training
     retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
@@ -230,7 +230,7 @@ public class UserServiceTest {
     // Completion should be updated to the current time.
     userService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
   @Test
@@ -252,9 +252,9 @@ public class UserServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
     assertModuleCompletionEqual(
-        AccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
     fakeClock.increment(5000);
@@ -262,9 +262,9 @@ public class UserServiceTest {
     // Renewing training updates completion.
     userService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
     assertModuleCompletionEqual(
-        AccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
   private void tick() {
@@ -277,7 +277,7 @@ public class UserServiceTest {
 
     DbUser user = userDao.findUserByUsername(USERNAME);
     accessModuleService.updateCompletionTime(
-        user, AccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
+        user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
     Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
@@ -286,7 +286,7 @@ public class UserServiceTest {
 
     userService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
   }
 
   @Test
@@ -319,7 +319,8 @@ public class UserServiceTest {
     userService.syncEraCommonsStatus();
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(AccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
 
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
@@ -328,7 +329,8 @@ public class UserServiceTest {
     tick();
     userService.syncEraCommonsStatus();
 
-    assertModuleCompletionEqual(AccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
   }
 
   @Test
@@ -339,12 +341,12 @@ public class UserServiceTest {
     testUser = userDao.save(testUser);
 
     accessModuleService.updateCompletionTime(
-        testUser, AccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
+        testUser, DbAccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
 
     userService.syncEraCommonsStatus();
 
     DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(AccessModuleName.ERA_COMMONS, retrievedUser, null);
+    assertModuleCompletionEqual(DbAccessModuleName.ERA_COMMONS, retrievedUser, null);
   }
 
   @Test
@@ -383,7 +385,7 @@ public class UserServiceTest {
     userService.updateRasLinkLoginGovStatus(loginGovName);
     assertThat(providedDbUser.getRasLinkLoginGovUsername()).isEqualTo(loginGovName);
     assertModuleCompletionEqual(
-        AccessModuleName.RAS_LOGIN_GOV, providedDbUser, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RAS_LOGIN_GOV, providedDbUser, Timestamp.from(START_INSTANT));
   }
 
   @Test
@@ -397,20 +399,20 @@ public class UserServiceTest {
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByUsername(USERNAME);
     Timestamp twoFactorAuthCompletionTime =
-        getModuleCompletionTime(AccessModuleName.TWO_FACTOR_AUTH, user);
+        getModuleCompletionTime(DbAccessModuleName.TWO_FACTOR_AUTH, user);
     assertThat(twoFactorAuthCompletionTime).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
     tick();
     userService.syncTwoFactorAuthStatus();
     assertModuleCompletionEqual(
-        AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, twoFactorAuthCompletionTime);
+        DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser, twoFactorAuthCompletionTime);
 
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
+    assertModuleCompletionEqual(DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
   }
 
   @Test
@@ -475,7 +477,7 @@ public class UserServiceTest {
     userService.syncDuccVersionStatus(user, Agent.asSystem());
 
     verify(accessModuleService)
-        .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+        .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
   @Test
@@ -485,7 +487,7 @@ public class UserServiceTest {
     userService.syncDuccVersionStatus(user, Agent.asSystem());
 
     verify(accessModuleService)
-        .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+        .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
   @Test
@@ -513,39 +515,39 @@ public class UserServiceTest {
 
   @Test
   public void test_confirmProfile() {
-    assertModuleIncomplete(AccessModuleName.PROFILE_CONFIRMATION, providedDbUser);
+    assertModuleIncomplete(DbAccessModuleName.PROFILE_CONFIRMATION, providedDbUser);
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
     userService.confirmProfile(providedDbUser);
     assertModuleCompletionEqual(
-        AccessModuleName.PROFILE_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.PROFILE_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
     tick();
 
     userService.confirmProfile(providedDbUser);
-    assertThat(getModuleCompletionTime(AccessModuleName.PROFILE_CONFIRMATION, providedDbUser))
+    assertThat(getModuleCompletionTime(DbAccessModuleName.PROFILE_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 
   @Test
   public void test_confirmPublications() {
-    assertModuleIncomplete(AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser);
+    assertModuleIncomplete(DbAccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser);
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
     userService.confirmPublications();
     assertModuleCompletionEqual(
-        AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
     tick();
 
     userService.confirmPublications();
-    assertThat(getModuleCompletionTime(AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser))
+    assertThat(getModuleCompletionTime(DbAccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 
@@ -604,18 +606,18 @@ public class UserServiceTest {
   }
 
   private void assertModuleCompletionEqual(
-      AccessModuleName moduleName, DbUser user, Timestamp timestamp) {
+      DbAccessModuleName moduleName, DbUser user, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);
   }
 
-  private Timestamp getModuleCompletionTime(AccessModuleName moduleName, DbUser user) {
+  private Timestamp getModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
     return userAccessModuleDao
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
         .get()
         .getCompletionTime();
   }
 
-  private void assertModuleIncomplete(AccessModuleName moduleName, DbUser user) {
+  private void assertModuleIncomplete(DbAccessModuleName moduleName, DbUser user) {
     // assert that the module is either not present or explicitly null
     userAccessModuleDao
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
