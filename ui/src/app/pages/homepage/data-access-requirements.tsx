@@ -69,10 +69,10 @@ const styles = reactStyles({
     margin: '1em 0 0 0',
   },
   initialRegistrationHeaderDAR: {
-    height: '30px',
-    width: '302px',
+    height: 30,
+    width: 302,
     fontFamily: 'Montserrat',
-    fontSize: '22px',
+    fontSize: 22,
     fontWeight: 500,
     letterSpacing: 0,
     margin: '0.5em 0 0 0',
