@@ -467,16 +467,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public boolean validateTerraTermsOfService(@Nonnull DbUser dbUser) {
-    boolean userHasAcceptedTerraTOS = false;
+    boolean termsOfServiceAccepted = false;
     try {
-      userHasAcceptedTerraTOS = fireCloudService.getUserTermsOfServiceStatus();
+      termsOfServiceAccepted = fireCloudService.getUserTermsOfServiceStatus();
     } catch (ApiException e) {
       log.log(
           Level.SEVERE,
-          String.format("Error while accepting Terra TOS for user %s", dbUser.getUsername()));
+          String.format(
+              "Error while getting Terra Terms of Service status for user %s",
+              dbUser.getUsername()));
       throw new ServerErrorException(e);
     }
-    return userHasAcceptedTerraTOS;
+    return termsOfServiceAccepted;
   }
 
   @Override

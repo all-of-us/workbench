@@ -173,9 +173,9 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.ok(profile);
   }
 
-  private void validateTerraTOSStatus(DbUser user) {
-    boolean tosHasBeenAccepted = userService.validateTerraTermsOfService(user);
-    if (!tosHasBeenAccepted) {
+  private void validateTerraTermsOfServiceStatus(DbUser user) {
+    boolean termsOfServiceAccepted = userService.validateTerraTermsOfService(user);
+    if (!termsOfServiceAccepted) {
       throw new UnauthorizedException("User has not accepted Terra TOS");
     }
   }
@@ -190,7 +190,7 @@ public class ProfileController implements ProfileApiDelegate {
     // not accepting the terms of use.
 
     DbUser dbUser = initializeUserIfNeeded();
-    validateTerraTOSStatus(dbUser);
+    validateTerraTermsOfServiceStatus(dbUser);
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
   }
