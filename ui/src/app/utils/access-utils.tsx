@@ -34,7 +34,6 @@ import {
 } from './dates';
 import { cond, switchCase } from './index';
 
-const TOS_ERROR_MESSAGE = 'User has not accepted Terra TOS';
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
   CURRENT = 'Current',
@@ -364,7 +363,9 @@ export const useIsUserDisabled = () => {
 
 export const useNeedsToAcceptTOS = () => {
   const { authLoaded, isSignedIn } = useStore(authStore);
-  const [tos, setTos] = useState<boolean | undefined>(undefined);
+  const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] = useState<
+    boolean | undefined
+  >(false);
   useEffect(() => {
     if (!authLoaded) {
       return;
@@ -372,21 +373,18 @@ export const useNeedsToAcceptTOS = () => {
 
     let mounted = true;
     if (!isSignedIn) {
-      setTos(false);
+      setUserRequiredToAcceptTOS(false);
     } else {
       (async () => {
         try {
           await profileStore.get().load();
           if (mounted) {
-            setTos(false);
+            setUserRequiredToAcceptTOS(false);
           }
         } catch (e) {
           const errorResponse = await convertAPIError(e);
-          if (
-            errorResponse.statusCode === 401 &&
-            errorResponse.message === TOS_ERROR_MESSAGE
-          ) {
-            setTos(true);
+          if (errorResponse.statusCode === 401) {
+            setUserRequiredToAcceptTOS(true);
           }
         }
       })();
@@ -395,13 +393,13 @@ export const useNeedsToAcceptTOS = () => {
       mounted = false;
     };
   }, [authLoaded, isSignedIn]);
-  return tos;
+  return userRequiredToAcceptTOS;
 };
 
-export const acceptTermsOfService = () => {
+export const acceptTermsOfService = (tosVersion) => {
   (async () => {
     try {
-      await profileApi().acceptTerraTos();
+      await profileApi().acceptTermsOfService(tosVersion);
       window.location.reload();
     } catch (ex) {
       console.log('Error while accepting TOS');

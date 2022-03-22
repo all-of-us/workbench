@@ -269,10 +269,10 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         return (
           <AccountCreationTos
             filePath='/aou-tos.html'
-            onComplete={() => {
+            onComplete={(tosVersion) => {
               AnalyticsTracker.Registration.TOS();
               this.setState({
-                termsOfServiceVersion: 1,
+                termsOfServiceVersion: tosVersion,
                 currentStep: this.getNextStep(currentStep),
                 isPreviousStep: false,
               });

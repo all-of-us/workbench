@@ -236,15 +236,21 @@ paths:
         204:
           description: Request Received.
 
-  "/v1/accpetTerraTOS":
+  "/v1/acceptTermsOfService":
     post:
       tags:
         - profile
-      description: User need to accept Terra Terms of Service
-      operationId: acceptTerraTos
+      description: User accepts AOU and Terra Terms of Service
+      operationId: acceptTermsOfService
+      parameters:
+      - in: query
+        name: termsOfServiceVersion
+        type: integer
+        format: int32
+        description: 'Version of the TOS that the user has acknowledged'
       responses:
         204:
-          description: User has accepted Terra Terms of service.
+          description: User has accepted AOU and Terra Terms of service.
 
   "/v1/confirmProfile":
     post:

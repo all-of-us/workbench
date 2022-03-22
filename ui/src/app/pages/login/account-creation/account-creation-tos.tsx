@@ -8,6 +8,7 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
+const LATEST_TOS_VERSION = 1;
 const baseCheckboxLabelStyle = {
   color: colors.primary,
   fontFamily: 'Montserrat',
@@ -37,7 +38,7 @@ const styles = reactStyles({
 
 export interface AccountCreationTosProps {
   // Callback which will be called by this component when the user clicks "Next".
-  onComplete: () => void;
+  onComplete: (tosVersion) => void;
   // Path to the Terms of Service file to be displayed.
   filePath: string;
   // Coming from Institution page
@@ -51,6 +52,7 @@ interface AccountCreationTosState {
   hasAckedTermsOfService: boolean;
 }
 
+// TODO: Rename this to TermsOfService
 export class AccountCreationTos extends React.Component<
   AccountCreationTosProps,
   AccountCreationTosState
@@ -171,7 +173,7 @@ export class AccountCreationTos extends React.Component<
                 !hasAckedPrivacyStatement ||
                 !hasAckedTermsOfService
               }
-              onClick={() => this.props.onComplete()}
+              onClick={() => this.props.onComplete(LATEST_TOS_VERSION)}
             >
               Next
             </Button>

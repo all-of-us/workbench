@@ -200,6 +200,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
   () => {
     const config = useServerConfig();
     const { authLoaded, authError } = useAuthentication();
+    const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
     const isUserDisabledInDb = useIsUserDisabled();
     const overriddenUrl = useOverriddenApiUrl();
 
@@ -306,9 +307,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
             )}
           </React.Fragment>
         )}
-        {useNeedsToAcceptTOS() && (
+        {doesUserNeedToAcceptTOS && (
           <AccountCreationTos
-            onComplete={() => acceptTermsOfService()}
+            onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
             filePath={'/aou-tos.html'}
             afterPrev={false}
             style={{ height: '35rem' }}

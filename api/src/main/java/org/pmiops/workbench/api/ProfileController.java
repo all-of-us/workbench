@@ -196,8 +196,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> acceptTerraTos() {
+  public ResponseEntity<Void> acceptTermsOfService(Integer termsOfServiceVersion) {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
+    userService.submitAouTermsOfService(loggedInUser, termsOfServiceVersion);
     userService.acceptTerraTermsOfService(loggedInUser);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
