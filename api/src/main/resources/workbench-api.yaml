@@ -6913,6 +6913,9 @@ definitions:
         "$ref": "#/definitions/InstitutionMembershipRequirement"
         description: 'Type of Registered tier requirement the institution has signed, email domains
          or restricted to a defined set of specific researchers'
+      requestAccessUrl:
+        type: string
+        description: Request access url for users to use during registration.
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
