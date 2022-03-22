@@ -1,4 +1,6 @@
 import {
+  CardCount,
+  CardCountResponse,
   CohortBuilderApi,
   Criteria,
   CriteriaAttributeListResponse,
@@ -93,6 +95,30 @@ export class DomainCountStubVariables {
     },
   ];
 }
+
+export class CardCountStubVariables {
+  static STUB_CARD_COUNTS: CardCount[] = [
+    {
+      domain: Domain.CONDITION,
+      name: 'Condition',
+      count: 2,
+    },
+    {
+      domain: Domain.MEASUREMENT,
+      name: 'Measurement',
+      count: 1,
+    },
+    {
+      domain: Domain.DRUG,
+      name: 'Drug',
+      count: 2,
+    },
+  ];
+}
+
+export const cardCountResponseStub: CardCountResponse = {
+  items: CardCountStubVariables.STUB_CARD_COUNTS,
+};
 
 export const cohortStub = {
   name: 'Test Cohort',
@@ -447,6 +473,12 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   findDomainCount(): Promise<DomainCount> {
     return new Promise<DomainCount>((resolve) => resolve(domainCountStub));
+  }
+
+  findConceptCounts(): Promise<CardCountResponse> {
+    return new Promise<CardCountResponse>((resolve) =>
+      resolve(cardCountResponseStub)
+    );
   }
 
   findDomainCountByStandardSource(): Promise<DomainCount> {
