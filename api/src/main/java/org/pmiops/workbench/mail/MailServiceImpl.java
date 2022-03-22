@@ -311,7 +311,7 @@ public class MailServiceImpl implements MailService {
 
     EgressAlertRemediationPolicy egressPolicy =
         workbenchConfigProvider.get().egressAlertRemediationPolicy;
-    sendWithRetriesFrom(
+    sendWithRetries(
         egressPolicy.notifyFromEmail,
         ImmutableList.of(dbUser.getContactEmail()),
         Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
@@ -528,7 +528,7 @@ public class MailServiceImpl implements MailService {
       String description,
       String htmlMessage)
       throws MessagingException {
-    sendWithRetriesFrom(
+    sendWithRetries(
         workbenchConfigProvider.get().mandrill.fromEmail,
         toRecipientEmails,
         ccRecipientEmails,
@@ -537,7 +537,7 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
-  private void sendWithRetriesFrom(
+  private void sendWithRetries(
       String from,
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,
