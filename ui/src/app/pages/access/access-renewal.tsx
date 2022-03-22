@@ -145,23 +145,12 @@ export const RenewalRequirementsText = () => (
 
 // is the module "renewal complete" ?
 // meaning (bypassed || (complete and not expiring))
-const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
+const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
   const isComplete = !!status?.completionEpochMillis;
   const wasBypassed = !!status?.bypassEpochMillis;
   return (
     wasBypassed ||
     (isComplete && !isExpiringOrExpired(status?.expirationEpochMillis))
-  );
-};
-
-// show the training refresh button if applicable:
-// not (bypassed || (complete and not expiring))
-const showTrainingRefreshButton = (
-  moduleName: AccessModule,
-  modules: AccessModuleStatus[]
-) => {
-  return !bypassedOrCompleteAndNotExpiring(
-    getAccessModuleStatusByNameOrEmpty(modules, moduleName)
   );
 };
 
@@ -203,7 +192,7 @@ const ActionButton = ({
   style,
 }: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus?.bypassEpochMillis;
-  return bypassedOrCompleteAndNotExpiring(moduleStatus) ? (
+  return isRenewalCompleteForModule(moduleStatus) ? (
     <CompletedOrBypassedButton
       completedText={completedButtonText}
       wasBypassed={wasBypassed}
@@ -292,7 +281,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
       accessRenewalModules.includes(moduleStatus.moduleName)
     );
     const accessRenewalCompleted = expirableModules.every(
-      bypassedOrCompleteAndNotExpiring
+      isRenewalCompleteForModule
     );
 
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
@@ -463,7 +452,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               <RadioButton
                 data-test-id='nothing-to-report'
                 id={noReportId}
-                disabled={bypassedOrCompleteAndNotExpiring(
+                disabled={isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
                     AccessModule.PUBLICATIONCONFIRMATION
@@ -479,7 +468,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               <RadioButton
                 data-test-id='report-submitted'
                 id={reportId}
-                disabled={bypassedOrCompleteAndNotExpiring(
+                disabled={isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
                     AccessModule.PUBLICATIONCONFIRMATION
@@ -507,9 +496,11 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 courses to understand the privacy safeguards and the compliance
                 requirements for using the <AoU /> Dataset.
               </div>
-              {showTrainingRefreshButton(
-                AccessModule.COMPLIANCETRAINING,
-                modules
+              {!isRenewalCompleteForModule(
+                getAccessModuleStatusByNameOrEmpty(
+                  modules,
+                  AccessModule.COMPLIANCETRAINING
+                )
               ) && (
                 <div style={renewalStyle.complianceTrainingExpiring}>
                   When you have completed the training click the refresh button
@@ -529,9 +520,11 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                     redirectToRegisteredTraining();
                   }}
                 />
-                {showTrainingRefreshButton(
-                  AccessModule.COMPLIANCETRAINING,
-                  modules
+                {!isRenewalCompleteForModule(
+                  getAccessModuleStatusByNameOrEmpty(
+                    modules,
+                    AccessModule.COMPLIANCETRAINING
+                  )
                 ) && (
                   <Button
                     disabled={refreshButtonDisabled}
