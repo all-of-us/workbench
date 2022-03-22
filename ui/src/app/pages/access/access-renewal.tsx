@@ -132,6 +132,15 @@ const syncAndReloadTraining = fp.flow(
   await profileApi().syncComplianceTrainingStatus();
 });
 
+export const RenewalRequirementsText = () => (
+  <span>
+    Researchers are required to complete a number of steps as part of the annual
+    renewal to maintain access to <AoU /> data. Renewal of access will occur on
+    a rolling basis annually (i.e. for each user, access renewal will be due 365
+    days after the date of authorization to access <AoU /> data).
+  </span>
+);
+
 // Helper Functions
 // The module has already expired
 export const hasExpired = (expiration: number): boolean =>
@@ -364,11 +373,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 : { gridColumnStart: 2 }
             }
           >
-            Researchers are required to complete a number of steps as part of
-            the annual renewal to maintain access to <AoU /> data. Renewal of
-            access will occur on a rolling basis annually (i.e. for each user,
-            access renewal will be due 365 days after the date of authorization
-            to access <AoU /> data.
+            <RenewalRequirementsText />
           </div>
           {accessRenewalCompleted && (
             <div

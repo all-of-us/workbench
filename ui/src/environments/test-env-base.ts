@@ -26,4 +26,5 @@ export const testEnvironmentBase: EnvironmentBase = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableAsyncWorkspaceOperations: true,
+  mergedAccessRenewal: true,
 };
