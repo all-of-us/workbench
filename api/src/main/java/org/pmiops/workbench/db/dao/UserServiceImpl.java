@@ -47,6 +47,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -470,7 +471,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     try {
       userHasAcceptedTerraTOS = fireCloudService.getUserTermsOfServiceStatus();
     } catch (ApiException e) {
-      e.printStackTrace();
+      log.log(
+          Level.SEVERE,
+          String.format("Error while accepting Terra TOS for user %s", dbUser.getUsername()));
+      throw new ServerErrorException(e);
     }
     return userHasAcceptedTerraTOS;
   }

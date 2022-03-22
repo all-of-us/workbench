@@ -240,11 +240,11 @@ paths:
     post:
       tags:
         - profile
-      description: User need to accept terra Terms of Service
+      description: User need to accept Terra Terms of Service
       operationId: acceptTerraTos
       responses:
         204:
-          description: Profile Confirmed.
+          description: User has accepted Terra Terms of service.
 
   "/v1/confirmProfile":
     post:
