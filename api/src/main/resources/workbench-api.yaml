@@ -6915,7 +6915,7 @@ definitions:
          or restricted to a defined set of specific researchers'
       requestAccessUrl:
         type: string
-        description: Request access url for users to use during registration.
+        description: Optional url for institution's handling their own access requests
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
