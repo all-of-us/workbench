@@ -760,45 +760,53 @@ const ControlledTierEraModule = (props: {
   ) : null;
 };
 
-// the header outside the Fadebox
-const OuterHeader = (props: { pageMode: DARPageMode }) =>
-  props.pageMode === DARPageMode.INITIAL_REGISTRATION && (
-    <FlexColumn style={styles.initialRegistrationOuterHeader}>
-      <Header style={styles.initialRegistrationHeaderRW}>
-        Researcher Workbench
-      </Header>
-      <Header style={styles.initialRegistrationHeaderDAR}>
-        Data Access Requirements
-      </Header>
-    </FlexColumn>
-  );
+// the header(s) outside the Fadebox
 
-// the header inside the Fadebox
+const InitialOuterHeader = () => (
+  <FlexColumn style={styles.initialRegistrationOuterHeader}>
+    <Header style={styles.initialRegistrationHeaderRW}>
+      Researcher Workbench
+    </Header>
+    <Header style={styles.initialRegistrationHeaderDAR}>
+      Data Access Requirements
+    </Header>
+  </FlexColumn>
+);
+
+const OuterHeader = (props: { pageMode: DARPageMode }) =>
+  props.pageMode === DARPageMode.INITIAL_REGISTRATION && <InitialOuterHeader />;
+
+// the header(s) inside the Fadebox
+
+const InitialInnerHeader = () => (
+  <div data-test-id='initial-registration-header' style={styles.pleaseComplete}>
+    Please complete the necessary steps to gain access to the <AoU /> datasets.
+  </div>
+);
+
+const AnnualInnerHeader = () => (
+  <FlexColumn>
+    <div
+      data-test-id='annual-renewal-header'
+      style={styles.renewalHeaderYearly}
+    >
+      Yearly Researcher Workbench access renewal
+    </div>
+    <div style={styles.renewalHeaderRequirements}>
+      <RenewalRequirementsText /> For any questions, please contact{' '}
+      <SupportMailto />.
+    </div>
+    <div style={styles.pleaseComplete}>
+      Please complete the following steps.
+    </div>
+  </FlexColumn>
+);
+
 const InnerHeader = (props: { pageMode: DARPageMode }) =>
   props.pageMode === DARPageMode.INITIAL_REGISTRATION ? (
-    <div
-      data-test-id='initial-registration-header'
-      style={styles.pleaseComplete}
-    >
-      Please complete the necessary steps to gain access to the <AoU />{' '}
-      datasets.
-    </div>
+    <InitialInnerHeader />
   ) : (
-    <FlexColumn>
-      <div
-        data-test-id='annual-renewal-header'
-        style={styles.renewalHeaderYearly}
-      >
-        Yearly Researcher Workbench access renewal
-      </div>
-      <div style={styles.renewalHeaderRequirements}>
-        <RenewalRequirementsText /> For any questions, please contact{' '}
-        <SupportMailto />.
-      </div>
-      <div style={styles.pleaseComplete}>
-        Please complete the following steps.
-      </div>
-    </FlexColumn>
+    <AnnualInnerHeader />
   );
 
 const SelfBypass = (props: { onClick: () => void }) => (
