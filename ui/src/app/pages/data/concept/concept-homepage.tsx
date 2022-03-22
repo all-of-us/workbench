@@ -291,8 +291,9 @@ export const ConceptHomepage = fp.flow(
       await Promise.all([getDomainCards, getSurveyInfo]);
       if (cohortContext?.searchTerms) {
         await this.updateCardCounts();
+      } else {
+        this.setState({ loadingConceptCounts: false });
       }
-      this.setState({ loadingConceptCounts: false });
     }
 
     async updateCardCounts() {

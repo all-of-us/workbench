@@ -289,6 +289,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "where code like upper(concat(:term,'%')) "
               + "and is_standard = :standard "
               + "and domain_id in (:domains) "
+              + "and full_text like '%_rank1]' "
               + "group by domain_id "
               + "order by count desc",
       nativeQuery = true)
