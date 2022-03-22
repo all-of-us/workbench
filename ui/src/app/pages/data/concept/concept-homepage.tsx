@@ -105,8 +105,7 @@ const styles = reactStyles({
 const DomainCard: React.FunctionComponent<{
   conceptDomainCard: ConceptDomainCard;
   browseInDomain: Function;
-  updating: boolean;
-}> = ({ conceptDomainCard, browseInDomain, updating }) => {
+}> = ({ conceptDomainCard, browseInDomain }) => {
   const conceptCount = conceptDomainCard.conceptCount;
   const { name, participantCount } = conceptDomainCard;
   return (
@@ -122,16 +121,8 @@ const DomainCard: React.FunctionComponent<{
         {name}
       </Clickable>
       <div style={styles.conceptText}>
-        {updating ? (
-          <Spinner size={42} />
-        ) : (
-          <React.Fragment>
-            <span style={{ fontSize: 30 }}>
-              {conceptCount.toLocaleString()}
-            </span>{' '}
-            concepts in this domain.
-          </React.Fragment>
-        )}
+        <span style={{ fontSize: 30 }}>{conceptCount.toLocaleString()}</span>{' '}
+        concepts in this domain.
         <div>
           <b>{participantCount.toLocaleString()}</b> participants in domain.
         </div>
@@ -146,8 +137,7 @@ const DomainCard: React.FunctionComponent<{
 const SurveyCard: React.FunctionComponent<{
   survey: SurveyModule;
   browseSurvey: Function;
-  updating: boolean;
-}> = ({ survey, browseSurvey, updating }) => {
+}> = ({ survey, browseSurvey }) => {
   return (
     <DomainCardBase style={{ maxHeight: 'auto', width: 'calc(25% - 1rem)' }}>
       <Clickable
@@ -158,16 +148,10 @@ const SurveyCard: React.FunctionComponent<{
         {survey.name}
       </Clickable>
       <div style={styles.conceptText}>
-        {updating ? (
-          <Spinner size={42} />
-        ) : (
-          <React.Fragment>
-            <span style={{ fontSize: 30 }}>
-              {survey.questionCount.toLocaleString()}
-            </span>{' '}
-            survey questions with
-          </React.Fragment>
-        )}
+        <span style={{ fontSize: 30 }}>
+          {survey.questionCount.toLocaleString()}
+        </span>{' '}
+        survey questions with
         <div>
           <b>{survey.participantCount.toLocaleString()}</b> participants
         </div>
@@ -185,8 +169,7 @@ const SurveyCard: React.FunctionComponent<{
 const PhysicalMeasurementsCard: React.FunctionComponent<{
   physicalMeasurementCard: ConceptDomainCard;
   browsePhysicalMeasurements: Function;
-  updating: boolean;
-}> = ({ physicalMeasurementCard, browsePhysicalMeasurements, updating }) => {
+}> = ({ physicalMeasurementCard, browsePhysicalMeasurements }) => {
   const conceptCount = physicalMeasurementCard.conceptCount;
   const { description, name, participantCount } = physicalMeasurementCard;
   return (
@@ -199,16 +182,8 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{
         {name}
       </Clickable>
       <div style={styles.conceptText}>
-        {updating ? (
-          <Spinner size={42} />
-        ) : (
-          <React.Fragment>
-            <span style={{ fontSize: 30 }}>
-              {conceptCount.toLocaleString()}
-            </span>{' '}
-            physical measurements.
-          </React.Fragment>
-        )}
+        <span style={{ fontSize: 30 }}>{conceptCount.toLocaleString()}</span>{' '}
+        physical measurements.
         <div>
           <b>{participantCount.toLocaleString()}</b> participants in this domain
         </div>
@@ -520,7 +495,6 @@ export const ConceptHomepage = fp.flow(
                               }
                               key={i}
                               data-test-id='domain-box'
-                              updating={loadingConceptCounts}
                             />
                           ))
                       )}
@@ -547,7 +521,6 @@ export const ConceptHomepage = fp.flow(
                           browseSurvey={() =>
                             this.browseDomain(Domain.SURVEY, survey.name)
                           }
-                          updating={loadingConceptCounts}
                         />
                       ))
                   )}
@@ -570,7 +543,6 @@ export const ConceptHomepage = fp.flow(
                           browsePhysicalMeasurements={() =>
                             this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)
                           }
-                          updating={loadingConceptCounts}
                         />
                       )}
                     </div>
