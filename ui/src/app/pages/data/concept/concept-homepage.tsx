@@ -315,7 +315,7 @@ export const ConceptHomepage = fp.flow(
         });
       await Promise.all([getDomainCards, getSurveyInfo]);
       if (cohortContext?.searchTerms) {
-        this.updateCardCounts();
+        await this.updateCardCounts();
       }
       this.setState({ loadingConceptCounts: false });
     }
@@ -357,18 +357,6 @@ export const ConceptHomepage = fp.flow(
           console.error(e);
         });
       this.setState({ conceptDomainCards, conceptSurveysList });
-    }
-
-    getDomainCounts(domain: string, standard: boolean) {
-      const { id, namespace } = this.props.workspace;
-      const { currentInputString } = this.state;
-      return cohortBuilderApi().findDomainCountByStandardSource(
-        namespace,
-        id,
-        domain,
-        standard,
-        currentInputString
-      );
     }
 
     handleSearchKeyPress(e) {
