@@ -42,6 +42,7 @@ export interface AccountCreationTosProps {
   filePath: string;
   // Coming from Institution page
   afterPrev: boolean;
+  style?: React.CSSProperties;
 }
 
 interface AccountCreationTosState {
@@ -73,7 +74,7 @@ export class AccountCreationTos extends React.Component<
     return (
       <FlexColumn
         data-test-id='account-creation-tos'
-        style={{ flex: 1, padding: '1rem 3rem 0 3rem' }}
+        style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
       >
         <HtmlViewer
           ariaLabel='terms of service agreement'

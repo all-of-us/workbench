@@ -65,6 +65,7 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -295,7 +296,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
-    } catch (ApiException e) {
+      when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
+    } catch (ApiException | org.pmiops.workbench.firecloud.ApiException e) {
       e.printStackTrace();
     }
 
@@ -576,6 +578,16 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testMe_UserHasNotAcceptedTerraTOS()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
+    createAccountAndDbUserWithAffiliation();
+    final UnauthorizedException exception =
+        assertThrows(UnauthorizedException.class, () -> profileController.getMe());
+    assertThat(exception.getMessage()).contains("User has not accepted Terra TOS");
+  }
+
+  @Test
   public void testMe_userBeforeNotLoggedInSuccess() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
@@ -639,6 +651,13 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .institutionalRoleEnum(InstitutionalRole.ADMIN);
           createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
         });
+  }
+
+  @Test
+  public void test_AcceptTerraTos() {
+    createAccountAndDbUserWithAffiliation();
+    profileController.acceptTerraTos();
+    verify(mockFireCloudService).acceptTermsOfService();
   }
 
   @Test

@@ -173,17 +173,33 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.ok(profile);
   }
 
+  private void validateTerraTOSStatus(DbUser user) {
+    boolean tosHasBeenAccepted = userService.validateTerraTermsOfService(user);
+    if (!tosHasBeenAccepted) {
+      throw new UnauthorizedException("User has not accepted Terra TOS");
+    }
+  }
+
   @Override
   public ResponseEntity<Profile> getMe() {
-    // Record that the user signed in, and create the user's FireCloud user and free tier billing
+    // Record that the user signed in, confirms that user has accepted Terra TOS
+    // and create the user's FireCloud user and free tier billing
     // project if they haven't been created already.
     // This means they can start using the NIH billing account in FireCloud (without access to
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
     DbUser dbUser = initializeUserIfNeeded();
+    validateTerraTOSStatus(dbUser);
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
+  }
+
+  @Override
+  public ResponseEntity<Void> acceptTerraTos() {
+    DbUser loggedInUser = userAuthenticationProvider.get().getUser();
+    userService.acceptTerraTermsOfService(loggedInUser);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

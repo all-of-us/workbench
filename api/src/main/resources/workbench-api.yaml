@@ -235,6 +235,17 @@ paths:
       responses:
         204:
           description: Request Received.
+
+  "/v1/accpetTerraTOS":
+    post:
+      tags:
+        - profile
+      description: User need to accept terra Terms of Service
+      operationId: acceptTerraTos
+      responses:
+        204:
+          description: Profile Confirmed.
+
   "/v1/confirmProfile":
     post:
       tags:

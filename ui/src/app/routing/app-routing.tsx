@@ -12,6 +12,7 @@ import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
 import { NotificationModal } from 'app/components/modals';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { CookiePolicy } from 'app/pages/cookie-policy';
+import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
 import { SignIn } from 'app/pages/login/sign-in';
 import { NotFound } from 'app/pages/not-found';
 import { SessionExpired } from 'app/pages/session-expired';
@@ -29,7 +30,11 @@ import {
   configApi,
   getApiBaseUrl,
 } from 'app/services/swagger-fetch-clients';
-import { useIsUserDisabled } from 'app/utils/access-utils';
+import {
+  acceptTermsOfService,
+  useIsUserDisabled,
+  useNeedsToAcceptTOS,
+} from 'app/utils/access-utils';
 import { initializeAnalytics } from 'app/utils/analytics';
 import { useAuthentication } from 'app/utils/authentication';
 import {
@@ -300,6 +305,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
               </div>
             )}
           </React.Fragment>
+        )}
+        {useNeedsToAcceptTOS() && (
+          <AccountCreationTos
+            onComplete={() => acceptTermsOfService()}
+            filePath={'/aou-tos.html'}
+            afterPrev={false}
+            style={{ height: '30rem' }}
+          />
         )}
         {!firstPartyCookiesEnabled ||
           (!thirdPartyCookiesEnabled && (

@@ -59,10 +59,12 @@ public interface UserService {
 
   void validateTermsOfService(@Nonnull DbUser dbUser);
 
+  boolean validateTerraTermsOfService(@Nonnull DbUser dbUser);
+
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);
 
-  // Registers that a user has agreed to the latest version of the Terra Terms of Service.
+  // Registers that a user has accepted the latest version of the Terra Terms of Service.
   void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);

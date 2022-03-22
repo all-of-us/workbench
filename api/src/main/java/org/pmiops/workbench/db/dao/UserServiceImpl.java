@@ -47,6 +47,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
@@ -461,6 +462,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final int tosVersion =
         userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
     validateTermsOfService(tosVersion);
+  }
+
+  @Override
+  public boolean validateTerraTermsOfService(@Nonnull DbUser dbUser) {
+    boolean userHasAcceptedTerraTOS = false;
+    try {
+      userHasAcceptedTerraTOS = fireCloudService.getUserTermsOfServiceStatus();
+    } catch (ApiException e) {
+      e.printStackTrace();
+    }
+    return userHasAcceptedTerraTOS;
   }
 
   @Override
