@@ -42,6 +42,11 @@ describe('Updating runtime status', () => {
     let codeOutput = await notebookPage.runCodeFile(1, diskBeforeNotebookName);
     expect(codeOutput).toMatch(/success$/);
 
+    // TODO(IA-3258): Remove this sleep once the ticket is resolved.
+    // Due to IA-3258, files written within ~30s of runtime deletion are likely to
+    // be truncated. Wait 90s to allow a wide margin for this bug.
+    await page.waitForTimeout(90 * 1000);
+
     await notebookPage.save();
     dataPage = await notebookPage.goDataPage();
 
