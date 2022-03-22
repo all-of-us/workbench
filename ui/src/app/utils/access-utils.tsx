@@ -402,6 +402,7 @@ export const acceptTermsOfService = () => {
   (async () => {
     try {
       await profileApi().acceptTerraTos();
+      window.location.reload();
     } catch (ex) {
       console.log('Error while accepting TOS');
     }

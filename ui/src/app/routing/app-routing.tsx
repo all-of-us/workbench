@@ -311,7 +311,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
             onComplete={() => acceptTermsOfService()}
             filePath={'/aou-tos.html'}
             afterPrev={false}
-            style={{ height: '30rem' }}
+            style={{ height: '35rem' }}
           />
         )}
         {!firstPartyCookiesEnabled ||
