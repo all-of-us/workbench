@@ -1136,11 +1136,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       if (
         environment.mergedAccessRenewal &&
         pageModeParam &&
-        Object.values(DARPageMode).includes(
-          pageModeParam as unknown as DARPageMode
-        )
+        Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
       ) {
-        setPageMode(pageModeParam as unknown as DARPageMode);
+        setPageMode(DARPageMode[pageModeParam]);
       }
     }, [environment.mergedAccessRenewal, pageModeParam]);
 
