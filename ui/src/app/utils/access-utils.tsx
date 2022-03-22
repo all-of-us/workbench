@@ -485,7 +485,7 @@ export const computeRenewalDisplayDates = (
       }),
     ],
     [
-      isExpiring(expirationEpochMillis),
+      isExpiringOrExpired(expirationEpochMillis),
       () => ({
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
