@@ -654,9 +654,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_AcceptTerraTos() {
+  public void test_AcceptTermsOfService() {
     createAccountAndDbUserWithAffiliation();
-    profileController.acceptTerraTos();
+    profileController.acceptTermsOfService(1);
     verify(mockFireCloudService).acceptTermsOfService();
   }
 
