@@ -12,9 +12,7 @@ import {
   Domain,
   DomainCard,
   DomainCardResponse,
-  DomainCount,
   ParticipantDemographics,
-  SurveyCount,
   SurveyModule,
   SurveysResponse,
   SurveyVersionListResponse,
@@ -72,26 +70,6 @@ export class DomainStubVariables {
       participantCount: 200,
       sortOrder: 3,
       standard: true,
-    },
-  ];
-}
-
-export class DomainCountStubVariables {
-  static STUB_DOMAIN_COUNTS: DomainCount[] = [
-    {
-      domain: Domain.CONDITION,
-      name: 'Condition',
-      conceptCount: 2,
-    },
-    {
-      domain: Domain.MEASUREMENT,
-      name: 'Measurement',
-      conceptCount: 1,
-    },
-    {
-      domain: Domain.DRUG,
-      name: 'Drug',
-      conceptCount: 2,
     },
   ];
 }
@@ -471,22 +449,10 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     );
   }
 
-  findDomainCount(): Promise<DomainCount> {
-    return new Promise<DomainCount>((resolve) => resolve(domainCountStub));
-  }
-
   findConceptCounts(): Promise<CardCountResponse> {
     return new Promise<CardCountResponse>((resolve) =>
       resolve(cardCountResponseStub)
     );
-  }
-
-  findDomainCountByStandardSource(): Promise<DomainCount> {
-    return new Promise<DomainCount>((resolve) => resolve(domainCountStub));
-  }
-
-  findSurveyCount(): Promise<SurveyCount> {
-    return new Promise<SurveyCount>((resolve) => resolve(surveyCountStub));
   }
 
   findSurveyVersionByQuestionConceptId(): Promise<SurveyVersionListResponse> {
