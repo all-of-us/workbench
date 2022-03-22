@@ -105,8 +105,7 @@ const styles = reactStyles({
 const DomainCard: React.FunctionComponent<{
   conceptDomainCard: ConceptDomainCard;
   browseInDomain: Function;
-  updating: boolean;
-}> = ({ conceptDomainCard, browseInDomain, updating }) => {
+}> = ({ conceptDomainCard, browseInDomain }) => {
   const conceptCount = conceptDomainCard.conceptCount;
   const { name, participantCount } = conceptDomainCard;
   return (
@@ -122,16 +121,8 @@ const DomainCard: React.FunctionComponent<{
         {name}
       </Clickable>
       <div style={styles.conceptText}>
-        {updating ? (
-          <Spinner size={42} />
-        ) : (
-          <React.Fragment>
-            <span style={{ fontSize: 30 }}>
-              {conceptCount.toLocaleString()}
-            </span>{' '}
-            concepts in this domain.
-          </React.Fragment>
-        )}
+        <span style={{ fontSize: 30 }}>{conceptCount.toLocaleString()}</span>{' '}
+        concepts in this domain.
         <div>
           <b>{participantCount.toLocaleString()}</b> participants in domain.
         </div>
@@ -146,8 +137,7 @@ const DomainCard: React.FunctionComponent<{
 const SurveyCard: React.FunctionComponent<{
   survey: SurveyModule;
   browseSurvey: Function;
-  updating: boolean;
-}> = ({ survey, browseSurvey, updating }) => {
+}> = ({ survey, browseSurvey }) => {
   return (
     <DomainCardBase style={{ maxHeight: 'auto', width: 'calc(25% - 1rem)' }}>
       <Clickable
@@ -158,16 +148,10 @@ const SurveyCard: React.FunctionComponent<{
         {survey.name}
       </Clickable>
       <div style={styles.conceptText}>
-        {updating ? (
-          <Spinner size={42} />
-        ) : (
-          <React.Fragment>
-            <span style={{ fontSize: 30 }}>
-              {survey.questionCount.toLocaleString()}
-            </span>{' '}
-            survey questions with
-          </React.Fragment>
-        )}
+        <span style={{ fontSize: 30 }}>
+          {survey.questionCount.toLocaleString()}
+        </span>{' '}
+        survey questions with
         <div>
           <b>{survey.participantCount.toLocaleString()}</b> participants
         </div>
@@ -185,8 +169,7 @@ const SurveyCard: React.FunctionComponent<{
 const PhysicalMeasurementsCard: React.FunctionComponent<{
   physicalMeasurementCard: ConceptDomainCard;
   browsePhysicalMeasurements: Function;
-  updating: boolean;
-}> = ({ physicalMeasurementCard, browsePhysicalMeasurements, updating }) => {
+}> = ({ physicalMeasurementCard, browsePhysicalMeasurements }) => {
   const conceptCount = physicalMeasurementCard.conceptCount;
   const { description, name, participantCount } = physicalMeasurementCard;
   return (
@@ -199,16 +182,8 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{
         {name}
       </Clickable>
       <div style={styles.conceptText}>
-        {updating ? (
-          <Spinner size={42} />
-        ) : (
-          <React.Fragment>
-            <span style={{ fontSize: 30 }}>
-              {conceptCount.toLocaleString()}
-            </span>{' '}
-            physical measurements.
-          </React.Fragment>
-        )}
+        <span style={{ fontSize: 30 }}>{conceptCount.toLocaleString()}</span>{' '}
+        physical measurements.
         <div>
           <b>{participantCount.toLocaleString()}</b> participants in this domain
         </div>
@@ -241,18 +216,16 @@ interface State {
   currentSearchString: string;
   // True if the getDomainInfo call fails
   domainInfoError: boolean;
-  // List of domains loading updated counts for domain cards
-  domainsLoading: Array<Domain>;
-  // List of error messages to display if the search input is invalid
-  inputErrors: Array<string>;
-  // If concept metadata is still being gathered for any domain
-  loadingDomains: boolean;
-  // Show if a search error occurred
-  showSearchError: boolean;
   // True if the getSurveyInfo call fails
   surveyInfoError: boolean;
-  // List of surveys loading updated counts for survey cards
-  surveysLoading: Array<string>;
+  // List of error messages to display if the search input is invalid
+  inputErrors: Array<string>;
+  // Show if a search error occurred
+  showSearchError: boolean;
+  // If concept metadata is still being gathered for EHR domains, pm, and surveys
+  loadingConceptCounts: boolean;
+  // True of findConceptCounts fail
+  conceptCountInfoError: boolean;
 }
 
 export const ConceptHomepage = fp.flow(
@@ -274,12 +247,11 @@ export const ConceptHomepage = fp.flow(
           ? props.cohortContext.searchTerms
           : '',
         domainInfoError: false,
-        domainsLoading: [],
-        inputErrors: [],
-        loadingDomains: true,
         showSearchError: false,
         surveyInfoError: false,
-        surveysLoading: [],
+        inputErrors: [],
+        loadingConceptCounts: true,
+        conceptCountInfoError: false,
       };
     }
 
@@ -293,6 +265,11 @@ export const ConceptHomepage = fp.flow(
         cohortContext,
         workspace: { id, namespace },
       } = this.props;
+      this.setState({
+        domainInfoError: false,
+        surveyInfoError: false,
+        conceptCountInfoError: false,
+      });
       const getDomainCards = cohortBuilderApi()
         .findDomainCards(namespace, id)
         .then((conceptDomainCards) =>
@@ -313,9 +290,9 @@ export const ConceptHomepage = fp.flow(
         });
       await Promise.all([getDomainCards, getSurveyInfo]);
       if (cohortContext?.searchTerms) {
-        this.updateCardCounts();
+        await this.updateCardCounts();
       }
-      this.setState({ loadingDomains: false });
+      this.setState({ loadingConceptCounts: false });
     }
 
     async updateCardCounts() {
@@ -323,58 +300,38 @@ export const ConceptHomepage = fp.flow(
       const { conceptDomainCards, conceptSurveysList, currentInputString } =
         this.state;
       this.setState({
-        domainsLoading: conceptDomainCards.map((domain) => domain.domain),
-        surveysLoading: conceptSurveysList.map((survey) => survey.name),
+        loadingConceptCounts: true,
+        domainInfoError: false,
+        surveyInfoError: false,
+        conceptCountInfoError: false,
       });
-      const promises = [];
-      conceptDomainCards.forEach((conceptDomain) => {
-        promises.push(
-          this.getDomainCounts(
-            conceptDomain.domain.toString(),
-            conceptDomain.standard
-          ).then((domainCount) => {
-            conceptDomain.conceptCount = domainCount.conceptCount;
-            this.setState({
-              domainsLoading: this.state.domainsLoading.filter(
-                (domain) => domain !== conceptDomain.domain
-              ),
-            });
-          })
-        );
-      });
-      conceptSurveysList.forEach((conceptSurvey) => {
-        promises.push(
-          cohortBuilderApi()
-            .findSurveyCount(
-              namespace,
-              id,
-              conceptSurvey.name,
-              currentInputString
-            )
-            .then((surveyCount) => {
-              conceptSurvey.questionCount = surveyCount.conceptCount;
-              this.setState({
-                surveysLoading: this.state.surveysLoading.filter(
-                  (survey) => survey !== conceptSurvey.name
-                ),
-              });
-            })
-        );
-      });
-      await Promise.all(promises);
-      this.setState({ conceptDomainCards, conceptSurveysList });
-    }
 
-    getDomainCounts(domain: string, standard: boolean) {
-      const { id, namespace } = this.props.workspace;
-      const { currentInputString } = this.state;
-      return cohortBuilderApi().findDomainCountByStandardSource(
-        namespace,
-        id,
-        domain,
-        standard,
-        currentInputString
-      );
+      cohortBuilderApi()
+        .findConceptCounts(namespace, id, currentInputString)
+        .then((cardList) => {
+          conceptDomainCards.forEach((conceptDomainCard) => {
+            const cardCount = cardList.items.find(
+              (card) => card.domain === conceptDomainCard.domain
+            );
+            conceptDomainCard.conceptCount = cardCount ? cardCount.count : 0;
+          });
+          conceptSurveysList.forEach((conceptSurvey) => {
+            const cardCount = cardList.items.find(
+              (card) => card.name === conceptSurvey.name
+            );
+            if (cardCount) {
+              conceptSurvey.questionCount = cardCount.count;
+            } else {
+              conceptSurvey.questionCount = 0;
+            }
+          });
+          this.setState({ loadingConceptCounts: false });
+        })
+        .catch((e) => {
+          this.setState({ domainInfoError: true, surveyInfoError: true });
+          console.error(e);
+        });
+      this.setState({ conceptDomainCards, conceptSurveysList });
     }
 
     handleSearchKeyPress(e) {
@@ -402,9 +359,9 @@ export const ConceptHomepage = fp.flow(
         {
           currentInputString: '',
           currentSearchString: '',
-          loadingDomains: true,
           inputErrors: [],
           showSearchError: false,
+          loadingConceptCounts: true,
         },
         () => this.loadDomainsAndSurveys()
       );
@@ -447,12 +404,11 @@ export const ConceptHomepage = fp.flow(
         currentInputString,
         currentSearchString,
         domainInfoError,
-        domainsLoading,
         inputErrors,
-        loadingDomains,
         surveyInfoError,
         showSearchError,
-        surveysLoading,
+        loadingConceptCounts,
+        conceptCountInfoError,
       } = this.state;
       const domainCards = conceptDomainCards.filter(
         (domain) => domain.domain !== Domain.PHYSICALMEASUREMENTCSS
@@ -510,7 +466,7 @@ export const ConceptHomepage = fp.flow(
                 />
               </AlertDanger>
             )}
-            {loadingDomains ? (
+            {currentInputString === '' && loadingConceptCounts ? (
               <div style={{ position: 'relative', minHeight: '10rem' }}>
                 <SpinnerOverlay />
               </div>
@@ -518,13 +474,11 @@ export const ConceptHomepage = fp.flow(
               <div>
                 <div style={styles.sectionHeader}>Domains</div>
                 <div style={styles.cardList}>
-                  {domainInfoError ? (
+                  {conceptCountInfoError || domainInfoError ? (
                     this.errorMessage()
                   ) : (
                     <React.Fragment>
-                      {domainCards.some((domain) =>
-                        domainsLoading.includes(domain.domain)
-                      ) ? (
+                      {loadingConceptCounts ? (
                         <Spinner size={42} />
                       ) : domainCards.every(
                           (domain) => domain.conceptCount === 0
@@ -541,7 +495,6 @@ export const ConceptHomepage = fp.flow(
                               }
                               key={i}
                               data-test-id='domain-box'
-                              updating={domainsLoading.includes(domain.domain)}
                             />
                           ))
                       )}
@@ -550,11 +503,9 @@ export const ConceptHomepage = fp.flow(
                 </div>
                 <div style={styles.sectionHeader}>Survey Questions</div>
                 <div style={styles.cardList}>
-                  {surveyInfoError ? (
+                  {conceptCountInfoError || surveyInfoError ? (
                     this.errorMessage()
-                  ) : conceptSurveysList.some((survey) =>
-                      surveysLoading.includes(survey.name)
-                    ) ? (
+                  ) : loadingConceptCounts ? (
                     <Spinner size={42} />
                   ) : conceptSurveysList.every(
                       (survey) => survey.questionCount === 0
@@ -570,7 +521,6 @@ export const ConceptHomepage = fp.flow(
                           browseSurvey={() =>
                             this.browseDomain(Domain.SURVEY, survey.name)
                           }
-                          updating={surveysLoading.includes(survey.name)}
                         />
                       ))
                   )}
@@ -581,11 +531,9 @@ export const ConceptHomepage = fp.flow(
                       Program Physical Measurements
                     </div>
                     <div style={{ ...styles.cardList, marginBottom: '1rem' }}>
-                      {domainInfoError ? (
+                      {conceptCountInfoError || domainInfoError ? (
                         this.errorMessage()
-                      ) : domainsLoading.includes(
-                          Domain.PHYSICALMEASUREMENTCSS
-                        ) ? (
+                      ) : loadingConceptCounts ? (
                         <Spinner size={42} />
                       ) : physicalMeasurementsCard.conceptCount === 0 ? (
                         'No Program Physical Measurement Results. Please type in a new search term.'
@@ -595,9 +543,6 @@ export const ConceptHomepage = fp.flow(
                           browsePhysicalMeasurements={() =>
                             this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)
                           }
-                          updating={domainsLoading.includes(
-                            Domain.PHYSICALMEASUREMENTCSS
-                          )}
                         />
                       )}
                     </div>
