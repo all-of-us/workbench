@@ -272,6 +272,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select domain_id as domainId, domain_id as name, count(*) as count "
               + "from cb_criteria "
               + "where match(full_text) against(:term in boolean mode) "
+              + "and full_text like '%_rank1%' "
               + "and is_standard = :standard "
               + "and domain_id in (:domains) "
               + "group by domain_id "
@@ -289,7 +290,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "where code like upper(concat(:term,'%')) "
               + "and is_standard = :standard "
               + "and domain_id in (:domains) "
-              + "and full_text like '%_rank1]%' "
+              + "and full_text like '%_rank1%' "
               + "group by domain_id "
               + "order by count desc",
       nativeQuery = true)
