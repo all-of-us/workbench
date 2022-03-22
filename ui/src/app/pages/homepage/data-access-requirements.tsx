@@ -60,15 +60,15 @@ import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
 const styles = reactStyles({
-  registrationOuterHeader: {
+  initialRegistrationOuterHeader: {
     marginLeft: '3%',
     width: '50%',
   },
-  regHeaderRW: {
+  initialRegistrationHeaderRW: {
     textTransform: 'uppercase',
     margin: '1em 0 0 0',
   },
-  regHeaderDAR: {
+  initialRegistrationHeaderDAR: {
     height: '30px',
     width: '302px',
     fontFamily: 'Montserrat',
@@ -763,9 +763,13 @@ const ControlledTierEraModule = (props: {
 // the header outside the Fadebox
 const OuterHeader = (props: { pageMode: DARPageMode }) =>
   props.pageMode === DARPageMode.INITIAL_REGISTRATION && (
-    <FlexColumn style={styles.registrationOuterHeader}>
-      <Header style={styles.regHeaderRW}>Researcher Workbench</Header>
-      <Header style={styles.regHeaderDAR}>Data Access Requirements</Header>
+    <FlexColumn style={styles.initialRegistrationOuterHeader}>
+      <Header style={styles.initialRegistrationHeaderRW}>
+        Researcher Workbench
+      </Header>
+      <Header style={styles.initialRegistrationHeaderDAR}>
+        Data Access Requirements
+      </Header>
     </FlexColumn>
   );
 
