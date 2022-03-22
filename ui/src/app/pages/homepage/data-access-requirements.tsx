@@ -894,6 +894,28 @@ const renderIcon = (iconName: string) =>
     ['wearable', () => <Wearable style={styles.dataDetailsIcon} />]
   );
 
+const RtDataDetailHeader = (props: { pageMode: DARPageMode }) => {
+  return switchCase(
+    props.pageMode,
+    [
+      DARPageMode.INITIAL_REGISTRATION,
+      () => (
+        <div style={styles.dataDetails}>
+          Once registered, you’ll have access to:
+        </div>
+      ),
+    ],
+    [
+      DARPageMode.ANNUAL_RENEWAL,
+      () => (
+        <div style={styles.dataDetails}>
+          Once renewed, you’ll have access to:
+        </div>
+      ),
+    ]
+  );
+};
+
 const DataDetail = (props: { icon: string; text: string }) => {
   const { icon, text } = props;
   return (
@@ -916,13 +938,6 @@ const RegisteredTierCard = (props: {
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
 
-  const accessCondition = () =>
-    switchCase(
-      pageMode,
-      [DARPageMode.INITIAL_REGISTRATION, () => 'Once registered'],
-      [DARPageMode.ANNUAL_RENEWAL, () => 'Once renewed']
-    );
-
   return (
     <FlexRow style={styles.card}>
       <FlexColumn>
@@ -932,9 +947,7 @@ const RegisteredTierCard = (props: {
           <RegisteredTierBadge />
           <div style={styles.dataHeader}>{rtDisplayName} data</div>
         </FlexRow>
-        <div style={styles.dataDetails}>
-          {accessCondition()}, you’ll have access to:
-        </div>
+        <RtDataDetailHeader pageMode={pageMode} />
         <DataDetail icon='individual' text='Individual (not aggregated) data' />
         <DataDetail icon='identifying' text='Identifying information removed' />
         <DataDetail icon='electronic' text='Electronic health records' />
