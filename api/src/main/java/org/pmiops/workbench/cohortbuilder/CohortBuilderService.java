@@ -74,6 +74,8 @@ public interface CohortBuilderService {
 
   Long findDomainCountByStandard(String domain, String term, Boolean standard);
 
+  List<CardCount> findEhrDomainCounts(String term);
+
   List<CardCount> findDomainCounts(String term);
 
   List<DomainCard> findDomainCards();
