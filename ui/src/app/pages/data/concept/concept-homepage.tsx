@@ -338,11 +338,7 @@ export const ConceptHomepage = fp.flow(
             const cardCount = cardList.items.find(
               (card) => card.domain === conceptDomainCard.domain
             );
-            if (cardCount) {
-              conceptDomainCard.conceptCount = cardCount.count;
-            } else {
-              conceptDomainCard.conceptCount = 0;
-            }
+            conceptDomainCard.conceptCount = cardCount ? cardCount.count : 0;
           });
           conceptSurveysList.forEach((conceptSurvey) => {
             const cardCount = cardList.items.find(
