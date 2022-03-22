@@ -43,7 +43,11 @@ export async function checkInstitutionalEmail(
   }
 }
 
-const EmailAddressMismatchErrorMessage = ({ requestAccessUrl }) => {
+const EmailAddressMismatchErrorMessage = ({
+  requestAccessUrl,
+}: {
+  requestAccessUrl: string;
+}) => {
   let url = 'https://www.researchallofus.org/institutional-agreements';
 
   if (requestAccessUrl) {

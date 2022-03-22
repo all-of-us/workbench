@@ -918,7 +918,10 @@ const ControlledTierCard = (props: {
   const isSigned = !!controlledTierEligibility;
   const isEligible = isSigned && controlledTierEligibility.eligible;
   const {
-    verifiedInstitutionalAffiliation: { institutionDisplayName },
+    verifiedInstitutionalAffiliation: {
+      institutionDisplayName,
+      institutionRequestAccessUrl,
+    },
   } = profile;
   // Display era in CT if:
   // 1) Institution has signed the CT institution agreement,
@@ -952,7 +955,10 @@ const ControlledTierCard = (props: {
               is required.
             </div>
             <div style={styles.requestAccess}>
-              <SupportButton label='Request Access' />
+              <SupportButton
+                label='Request Access'
+                url={institutionRequestAccessUrl}
+              />
             </div>
           </div>
         )}
