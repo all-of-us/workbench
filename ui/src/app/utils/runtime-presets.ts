@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { Disk, Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import { DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES } from './machines';
 

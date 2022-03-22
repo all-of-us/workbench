@@ -65,6 +65,7 @@ import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   AnalysisDiff,
+  maybeWithExistingDisk,
   diffsToUpdateMessaging,
   DiskConfig,
   diskTypeLabels,
@@ -1717,7 +1718,11 @@ const RuntimePanel = fp.flow(
       useCustomRuntime(namespace, persistentDisk);
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
     if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
-      currentRuntime = applyPresetOverride(currentRuntime);
+      currentRuntime = applyPresetOverride(
+        // The attached disk information is lost for deleted runtimes. In any case,
+        // by default we want to offer that the user reattach their existing disk,
+        // if any and if the configuration allows it.
+        maybeWithExistingDisk(currentRuntime, persistentDisk));
     }
 
     const [status, setRuntimeStatus] = useRuntimeStatus(
