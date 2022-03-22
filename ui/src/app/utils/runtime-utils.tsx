@@ -626,7 +626,10 @@ export const maybeWithExistingDiskName = (
 };
 
 // Attach an existing disk to the given runtime, if the configuration allows it.
-export const maybeWithExistingDisk = (runtime: Runtime, existingDisk: Disk|null): Runtime => {
+export const maybeWithExistingDisk = (
+  runtime: Runtime,
+  existingDisk: Disk | null
+): Runtime => {
   if (!runtime || !existingDisk || runtime.dataprocConfig) {
     return runtime;
   }
@@ -639,9 +642,9 @@ export const maybeWithExistingDisk = (runtime: Runtime, existingDisk: Disk|null)
       persistentDisk: {
         name: existingDisk.name,
         size: existingDisk.size,
-        diskType: existingDisk.diskType
-      }
-    }
+        diskType: existingDisk.diskType,
+      },
+    },
   };
 };
 
