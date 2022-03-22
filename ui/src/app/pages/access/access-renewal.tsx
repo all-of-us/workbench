@@ -143,23 +143,25 @@ export const RenewalRequirementsText = () => (
 
 // Helper Functions
 
-const isExpiringAndNotBypassed = (
-  moduleName: AccessModule,
-  modules: AccessModuleStatus[]
-) => {
-  const status = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
-  return (
-    isExpiringOrExpired(status?.expirationEpochMillis) &&
-    !status.bypassEpochMillis
-  );
-};
-
+// is the module "renewal complete" ?
+// meaning (bypassed || (complete and not expiring))
 const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
   const isComplete = !!status?.completionEpochMillis;
   const wasBypassed = !!status?.bypassEpochMillis;
   return (
     wasBypassed ||
     (isComplete && !isExpiringOrExpired(status?.expirationEpochMillis))
+  );
+};
+
+// show the training refresh button if applicable:
+// not (bypassed || (complete and not expiring))
+const showTrainingRefreshButton = (
+  moduleName: AccessModule,
+  modules: AccessModuleStatus[]
+) => {
+  return !bypassedOrCompleteAndNotExpiring(
+    getAccessModuleStatusByNameOrEmpty(modules, moduleName)
   );
 };
 
@@ -505,7 +507,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 courses to understand the privacy safeguards and the compliance
                 requirements for using the <AoU /> Dataset.
               </div>
-              {isExpiringAndNotBypassed(
+              {showTrainingRefreshButton(
                 AccessModule.COMPLIANCETRAINING,
                 modules
               ) && (
@@ -527,7 +529,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                     redirectToRegisteredTraining();
                   }}
                 />
-                {isExpiringAndNotBypassed(
+                {showTrainingRefreshButton(
                   AccessModule.COMPLIANCETRAINING,
                   modules
                 ) && (
