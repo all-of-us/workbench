@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import({
+  AccessModuleNameMapperImpl.class,
+  CommonMappers.class,
   FakeClockConfiguration.class,
   UserAccessModuleMapperImpl.class,
-  AccessModuleNameMapperImpl.class,
-  CommonMappers.class
 })
 @SpringJUnitConfig
 public class UserAccessModuleMapperTest {
