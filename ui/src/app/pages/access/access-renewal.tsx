@@ -22,7 +22,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { styles } from 'app/pages/profile/profile-styles';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
-import { cond, switchCase, useId, withStyle } from 'app/utils';
+import { cond, switchCase, useId } from 'app/utils';
 import {
   accessRenewalModules,
   computeRenewalDisplayDates,
@@ -315,7 +315,6 @@ const RtTrainingRenewal = (props: {
   return (
     <React.Fragment>
       <div>
-        {' '}
         You are required to complete the refreshed ethics training courses to
         understand the privacy safeguards and the compliance requirements for
         using the <AoU /> Dataset.
@@ -423,44 +422,38 @@ interface CardProps {
   modules: AccessModuleStatus[];
   setLoading: (boolean) => void;
 }
-const RenewalCard = withStyle(renewalStyle.card)(
-  ({ step, moduleName, modules, setLoading }: CardProps) => {
-    const moduleStatus = getAccessModuleStatusByNameOrEmpty(
-      modules,
-      moduleName
-    );
-    const { AARTitleComponent } = getAccessModuleConfig(moduleName);
-    const { lastConfirmedDate, nextReviewDate } =
-      computeRenewalDisplayDates(moduleStatus);
-
-    return (
-      <FlexColumn>
-        <div style={renewalStyle.h3}>STEP {step}</div>
-        <div style={renewalStyle.h3}>
-          <AARTitleComponent />
-        </div>
-        <div
-          style={{
-            color: colors.primary,
-            margin: '0.5rem 0',
-            display: 'grid',
-            columnGap: '1rem',
-            gridTemplateColumns: 'auto 1fr',
-          }}
-        >
-          <div>Last Updated On:</div>
-          <div>Next Review:</div>
-          <div>{lastConfirmedDate}</div>
-          <div>{nextReviewDate}</div>
-        </div>
-        <ModuleBody
-          moduleStatus={moduleStatus}
-          setLoading={(v) => setLoading(v)}
-        />
-      </FlexColumn>
-    );
-  }
-);
+const RenewalCard = ({ step, moduleName, modules, setLoading }: CardProps) => {
+  const moduleStatus = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
+  const { AARTitleComponent } = getAccessModuleConfig(moduleName);
+  const { lastConfirmedDate, nextReviewDate } =
+    computeRenewalDisplayDates(moduleStatus);
+  return (
+    <FlexColumn style={renewalStyle.card}>
+      <div style={renewalStyle.h3}>STEP {step}</div>
+      <div style={renewalStyle.h3}>
+        <AARTitleComponent />
+      </div>
+      <div
+        style={{
+          color: colors.primary,
+          margin: '0.5rem 0',
+          display: 'grid',
+          columnGap: '1rem',
+          gridTemplateColumns: 'auto 1fr',
+        }}
+      >
+        <div>Last Updated On:</div>
+        <div>Next Review:</div>
+        <div>{lastConfirmedDate}</div>
+        <div>{nextReviewDate}</div>
+      </div>
+      <ModuleBody
+        moduleStatus={moduleStatus}
+        setLoading={(v) => setLoading(v)}
+      />
+    </FlexColumn>
+  );
+};
 
 // Page to render
 export const AccessRenewal = fp.flow(withProfileErrorModal)(
