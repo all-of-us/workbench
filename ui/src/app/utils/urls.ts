@@ -9,3 +9,23 @@ export function canonicalizeUrl(url: string): string {
   // and https:// may yield a bad certificate if not configured.
   return `http://${url}`;
 }
+
+function isValidUrl(potentialUrl: string): boolean {
+  try {
+    new URL(potentialUrl);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export function getCustomOrDefaultUrl(customUrl: string, defaultUrl: string) {
+  let url = defaultUrl;
+  if (customUrl) {
+    const adjustedUrl = canonicalizeUrl(customUrl);
+    if (isValidUrl(adjustedUrl)) {
+      url = adjustedUrl;
+    }
+  }
+  return url;
+}

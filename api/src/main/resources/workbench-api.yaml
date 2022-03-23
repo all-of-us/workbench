@@ -6898,7 +6898,7 @@ definitions:
           if its enumerated type is OTHER'
       requestAccessUrl:
         type: string
-        description: Request access url for users to use during registration.
+        description: Optional url for institution's handling their own access requests
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
@@ -6933,6 +6933,9 @@ definitions:
         "$ref": "#/definitions/InstitutionMembershipRequirement"
         description: 'Type of Registered tier requirement the institution has signed, email domains
          or restricted to a defined set of specific researchers'
+      requestAccessUrl:
+        type: string
+        description: Optional url for institution's handling their own access requests
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
@@ -7020,6 +7023,9 @@ definitions:
         description: 'The longer, more descriptive name of the Institution where the
           user has a Verified Affiliation, such as ''Vanderbilt University Medical
           Center'''
+      institutionRequestAccessUrl:
+        type: string
+        description: Optional url for institution's handling their own access requests
       institutionalRoleEnum:
         "$ref": "#/definitions/InstitutionalRole"
         description: 'The user''s Institutional Role at this Institution if it is

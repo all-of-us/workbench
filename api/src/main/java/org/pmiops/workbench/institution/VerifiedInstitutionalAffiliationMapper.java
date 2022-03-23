@@ -40,5 +40,6 @@ public interface VerifiedInstitutionalAffiliationMapper {
 
   @Mapping(target = "institutionShortName", source = "institution.shortName")
   @Mapping(target = "institutionDisplayName", source = "institution.displayName")
+  @Mapping(target = "institutionRequestAccessUrl", source = "institution.requestAccessUrl")
   VerifiedInstitutionalAffiliation dbToModel(DbVerifiedInstitutionalAffiliation dbObject);
 }
