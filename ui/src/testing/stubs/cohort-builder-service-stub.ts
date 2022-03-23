@@ -356,17 +356,6 @@ export const SurveyQuestionStubVariables = {
   },
 };
 
-const domainCountStub = {
-  domain: Domain.CONDITION,
-  name: Domain.CONDITION.toString(),
-  conceptCount: 1,
-};
-
-const surveyCountStub = {
-  name: 'The Basics',
-  conceptCount: 1,
-};
-
 export class CohortBuilderServiceStub extends CohortBuilderApi {
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
