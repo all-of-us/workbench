@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueMappingStrategy;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
@@ -34,7 +34,7 @@ public interface UserAccessModuleMapper {
   AccessModuleStatus dbToModule(DbUserAccessModule source, @Context Timestamp expirationTime);
 
   @Named("moduleNameToModel")
-  default AccessModule accessModuleDbToModel(AccessModuleName moduleName) {
+  default AccessModule accessModuleDbToModel(DbAccessModuleName moduleName) {
     return storageAccessModuleToClient(moduleName);
   }
 
