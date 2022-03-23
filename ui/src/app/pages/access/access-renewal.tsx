@@ -386,36 +386,35 @@ const ModuleBody = (props: {
   setLoading: (boolean) => void;
 }) => {
   const { moduleStatus, setLoading } = props;
-  return () =>
-    switchCase(
-      moduleStatus.moduleName,
-      [
-        AccessModule.PROFILECONFIRMATION,
-        () => <ProfileRenewal profileStatus={moduleStatus} />,
-      ],
-      [
-        AccessModule.PROFILECONFIRMATION,
-        () => (
-          <PublicationsRenewal
-            publicationStatus={moduleStatus}
-            setLoading={(v) => setLoading(v)}
-          />
-        ),
-      ],
-      [
-        AccessModule.COMPLIANCETRAINING,
-        () => (
-          <RtTrainingRenewal
-            rtTrainingStatus={moduleStatus}
-            setLoading={(v) => setLoading(v)}
-          />
-        ),
-      ],
-      [
-        AccessModule.DATAUSERCODEOFCONDUCT,
-        () => <DuccRenewal duccStatus={moduleStatus} />,
-      ]
-    );
+  return switchCase(
+    moduleStatus.moduleName,
+    [
+      AccessModule.PROFILECONFIRMATION,
+      () => <ProfileRenewal profileStatus={moduleStatus} />,
+    ],
+    [
+      AccessModule.PUBLICATIONCONFIRMATION,
+      () => (
+        <PublicationsRenewal
+          publicationStatus={moduleStatus}
+          setLoading={(v) => setLoading(v)}
+        />
+      ),
+    ],
+    [
+      AccessModule.COMPLIANCETRAINING,
+      () => (
+        <RtTrainingRenewal
+          rtTrainingStatus={moduleStatus}
+          setLoading={(v) => setLoading(v)}
+        />
+      ),
+    ],
+    [
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      () => <DuccRenewal duccStatus={moduleStatus} />,
+    ]
+  );
 };
 
 interface CardProps {
