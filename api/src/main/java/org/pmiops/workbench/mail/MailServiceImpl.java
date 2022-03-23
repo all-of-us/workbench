@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -307,10 +309,12 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
                 .build());
 
+    EgressAlertRemediationPolicy egressPolicy =
+        workbenchConfigProvider.get().egressAlertRemediationPolicy;
     sendWithRetries(
+        egressPolicy.notifyFromEmail,
         ImmutableList.of(dbUser.getContactEmail()),
-        ImmutableList.of(
-            workbenchConfigProvider.get().egressAlertRemediationPolicy.notifyFromEmail),
+        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
@@ -524,6 +528,23 @@ public class MailServiceImpl implements MailService {
       String description,
       String htmlMessage)
       throws MessagingException {
+    sendWithRetries(
+        workbenchConfigProvider.get().mandrill.fromEmail,
+        toRecipientEmails,
+        ccRecipientEmails,
+        subject,
+        description,
+        htmlMessage);
+  }
+
+  private void sendWithRetries(
+      String from,
+      List<String> toRecipientEmails,
+      List<String> ccRecipientEmails,
+      String subject,
+      String description,
+      String htmlMessage)
+      throws MessagingException {
     List<RecipientAddress> toAddresses =
         toRecipientEmails.stream()
             .map(a -> (validatedRecipient(a, RecipientType.TO)))
@@ -538,7 +559,7 @@ public class MailServiceImpl implements MailService {
             .html(htmlMessage)
             .subject(subject)
             .preserveRecipients(true)
-            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+            .fromEmail(from);
 
     String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
     int retries = workbenchConfigProvider.get().mandrill.sendRetries;

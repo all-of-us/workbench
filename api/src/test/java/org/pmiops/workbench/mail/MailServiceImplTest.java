@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -176,11 +177,12 @@ public class MailServiceImplTest {
 
     verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
-    List<RecipientAddress> receipts = (((MandrillMessage) got.getMessage()).getTo());
+
+    assertThat(((MandrillMessage) got.getMessage()).getFromEmail()).isEqualTo("egress@aou.com");
+    List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
     assertThat(receipts)
         .containsExactly(
-            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO),
-            new RecipientAddress().email("egress@aou.com").type(RecipientType.CC));
+            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("compute access has been temporarily suspended");
@@ -190,11 +192,19 @@ public class MailServiceImplTest {
   @Test
   public void testSendEgressRemediationEmail_disableUser() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
+    workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails =
+        ImmutableList.of("egress-cc@aou.com");
     DbUser user = createDbUser();
     service.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER);
 
     verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+
+    List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
+    assertThat(receipts)
+        .containsExactly(
+            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO),
+            new RecipientAddress().email("egress-cc@aou.com").type(RecipientType.CC));
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("account has been disabled");

@@ -73,6 +73,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "How to Run Python Notebooks in the Background",
+      "namespace": "aou-rw-7172272a",
+      "id": "howtorunnotebooksinthebackground",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "Phenotype - Breast Cancer (tier 5)",
       "namespace": "aou-rw-c6574691",
       "id": "phenotypebreastcancertier5",
@@ -157,15 +163,15 @@
       "category": "DEMO_PROJECTS"
     },
     {
-      "name": "How to Run Python Notebooks in the Background",
-      "namespace": "aou-rw-7172272a",
-      "id": "howtorunnotebooksinthebackground",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
       "name": "Demo - Hypertension Prevalence",
       "namespace": "aou-rw-1f867de7",
       "id": "duplicateofd16htnrevisionaftercodereview",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Siloed Analysis of All of Us and UK Biobank Genomic Data",
+      "namespace": "aou-rw-6ef5a3b8",
+      "id": "siloedanalysisofallofusandukbiobankgenomicdata",
       "category": "DEMO_PROJECTS"
     }
   ]
