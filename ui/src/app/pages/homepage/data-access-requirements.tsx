@@ -293,8 +293,7 @@ const getStatusText = (status: AccessModuleStatus) => {
     isCompliant(status),
     'Cannot provide status text for incomplete module'
   );
-  const { completionEpochMillis, bypassEpochMillis }: AccessModuleStatus =
-    status || {};
+  const { completionEpochMillis, bypassEpochMillis } = status;
   return isCompleted(status)
     ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;

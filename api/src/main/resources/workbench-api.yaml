@@ -5949,6 +5949,8 @@ definitions:
 
   AccessModuleStatus:
     type: object
+    required:
+      - moduleName
     properties:
       moduleName:
         "$ref": "#/definitions/AccessModule"

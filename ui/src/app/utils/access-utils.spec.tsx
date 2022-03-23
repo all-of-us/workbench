@@ -18,6 +18,8 @@ import {
   buildRasRedirectUrl,
   computeRenewalDisplayDates,
   getTwoFactorSetupUrl,
+  hasExpired,
+  isExpiringOrExpired,
   maybeDaysRemaining,
   NOTIFICATION_THRESHOLD_DAYS,
   RAS_CALLBACK_PATH,
@@ -421,5 +423,93 @@ describe('buildRasRedirectUrl', () => {
     expect(buildRasRedirectUrl()).toMatch(
       encodeURIComponent('http://localhost' + RAS_CALLBACK_PATH)
     );
+  });
+});
+
+describe('hasExpired', () => {
+  it('should return hasExpired=true for a date in the past', () => {
+    const testTime = nowPlusDays(-10);
+    expect(hasExpired(testTime)).toBeTruthy();
+  });
+
+  it('should return hasExpired=false for a date in the future', () => {
+    const testTime = nowPlusDays(10);
+    expect(hasExpired(testTime)).toBeFalsy();
+  });
+
+  it('should return hasExpired=false for a null date', () => {
+    const testTime = nowPlusDays(null);
+    expect(hasExpired(testTime)).toBeFalsy();
+  });
+
+  it('should return hasExpired=false for an undefined date', () => {
+    const testTime = nowPlusDays(undefined);
+    expect(hasExpired(testTime)).toBeFalsy();
+  });
+});
+
+describe('isExpiringOrExpired', () => {
+  const LOOKBACK_PERIOD = 99; // arbitrary for testing; actual prod value is 330
+  const EXPIRATION_DAYS = 123; // arbitrary for testing; actual prod value is 365
+
+  beforeEach(() => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        accessRenewalLookback: LOOKBACK_PERIOD,
+      },
+    });
+  });
+
+  it('should return isExpiringOrExpired=true if a module has expired', () => {
+    const completionDaysPast = 555; // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate =
+      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking an expiration in the past
+    expect(expirationDate).toBeLessThan(Date.now());
+
+    expect(isExpiringOrExpired(expirationDate)).toEqual(true);
+  });
+
+  it('should return isExpiringOrExpired=true if a module will expire in the future and within the lookback period', () => {
+    const completionDaysPast = 44; // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate =
+      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date within the lookback
+    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
+    expect(expirationDate).toBeLessThan(endOfLookback);
+
+    expect(isExpiringOrExpired(expirationDate)).toEqual(true);
+  });
+
+  it('should return isExpiringOrExpired=false if a module will expire in the future beyond the lookback period', () => {
+    const completionDaysPast = 3; // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate =
+      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date beyond the lookback
+    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
+    expect(expirationDate).toBeGreaterThan(endOfLookback);
+
+    expect(isExpiringOrExpired(expirationDate)).toEqual(false);
+  });
+
+  it('should return isExpiringOrExpired=false if a module has a null expiration', () => {
+    expect(isExpiringOrExpired(null)).toEqual(false);
+  });
+
+  it('should return isExpiringOrExpired=false if a module has an undefined expiration', () => {
+    expect(isExpiringOrExpired(undefined)).toEqual(false);
   });
 });
