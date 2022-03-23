@@ -18,7 +18,7 @@ import {
   Repeat,
 } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
-import { SupportButton } from 'app/components/support';
+import { SUPPORT_EMAIL } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -45,6 +45,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { getCustomOrDefaultUrl } from 'app/utils/urls';
 import { openZendeskWidget } from 'app/utils/zendesk';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
@@ -874,6 +875,11 @@ const RegisteredTierCard = (props: {
   );
 };
 
+const handleClickSupportButton = (url) => () => {
+  const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);
+  window.open(adjustedUrl);
+};
+
 const ControlledTierStep = (props: { enabled: boolean; text: String }) => {
   return (
     <FlexRow>
@@ -955,10 +961,11 @@ const ControlledTierCard = (props: {
               is required.
             </div>
             <div style={styles.requestAccess}>
-              <SupportButton
-                label='Request Access'
-                url={institutionRequestAccessUrl}
-              />
+              <Button
+                onClick={handleClickSupportButton(institutionRequestAccessUrl)}
+              >
+                Request Access
+              </Button>
             </div>
           </div>
         )}
