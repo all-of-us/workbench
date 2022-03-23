@@ -153,13 +153,14 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName) {
-    DbAccessModule dbAccessModule =
-        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     // if the module is not required, the user is always compliant
     if (!isModuleRequiredInEnvironment(
-        accessModuleNameMapper.storageAccessModuleToClient(dbAccessModule.getName()))) {
+        accessModuleNameMapper.storageAccessModuleToClient(accessModuleName))) {
       return true;
     }
+
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
     boolean isCompleted = userAccessModule.getCompletionTime() != null;
