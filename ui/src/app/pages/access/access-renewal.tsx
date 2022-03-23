@@ -419,13 +419,12 @@ const ModuleBody = (props: {
 
 interface CardProps {
   step: number;
-  modules: AccessModuleStatus[];
   moduleName: AccessModule;
-  style: React.CSSProperties;
-  setLoading?: (boolean) => void;
+  modules: AccessModuleStatus[];
+  setLoading: (boolean) => void;
 }
 const RenewalCard = withStyle(renewalStyle.card)(
-  ({ step, modules, moduleName, style, setLoading }: CardProps) => {
+  ({ step, moduleName, modules, setLoading }: CardProps) => {
     const moduleStatus = getAccessModuleStatusByNameOrEmpty(
       modules,
       moduleName
@@ -435,7 +434,7 @@ const RenewalCard = withStyle(renewalStyle.card)(
       computeRenewalDisplayDates(moduleStatus);
 
     return (
-      <FlexColumn style={style}>
+      <FlexColumn>
         <div style={renewalStyle.h3}>STEP {step}</div>
         <div style={renewalStyle.h3}>
           <AARTitleComponent />
@@ -585,27 +584,29 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
         >
           <RenewalCard
             step={1}
-            modules={modules}
             moduleName={AccessModule.PROFILECONFIRMATION}
+            modules={modules}
+            setLoading={(v: boolean) => setLoading(v)}
           />
           <RenewalCard
             step={2}
-            modules={modules}
             moduleName={AccessModule.PUBLICATIONCONFIRMATION}
+            modules={modules}
             setLoading={(v: boolean) => setLoading(v)}
           />
           {enableComplianceTraining && (
             <RenewalCard
               step={3}
-              modules={modules}
               moduleName={AccessModule.COMPLIANCETRAINING}
+              modules={modules}
               setLoading={(v: boolean) => setLoading(v)}
             />
           )}
           <RenewalCard
             step={enableComplianceTraining ? 4 : 3}
-            modules={modules}
             moduleName={AccessModule.DATAUSERCODEOFCONDUCT}
+            modules={modules}
+            setLoading={(v: boolean) => setLoading(v)}
           />
         </div>
         {loading && <SpinnerOverlay dark={true} opacity={0.6} />}
