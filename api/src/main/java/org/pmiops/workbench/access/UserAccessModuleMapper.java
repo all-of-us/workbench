@@ -8,7 +8,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueMappingStrategy;
-import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
