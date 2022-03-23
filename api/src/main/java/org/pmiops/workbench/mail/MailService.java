@@ -38,6 +38,10 @@ public interface MailService {
   void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
       throws MessagingException;
 
+  void alertUsersUnusedDiskWarningThreshold(
+      List<DbUser> users, DbUser diskCreator, DbWorkspace diskWorkspace, int thresholdDays)
+      throws MessagingException;
+
   void sendBillingSetupEmail(final DbUser user, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException;
 

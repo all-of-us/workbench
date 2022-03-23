@@ -25,6 +25,7 @@ public class NotebooksConfig {
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
   public static final String USER_DISKS_API = "userDisksApi";
+  public static final String SERVICE_DISKS_API = "svcDisksApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
@@ -109,6 +110,15 @@ public class NotebooksConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DisksApi disksApi(
       @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    DisksApi api = new DisksApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_DISKS_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public DisksApi serviceDisksApi(
+      @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     DisksApi api = new DisksApi();
     api.setApiClient(apiClient);
     return api;

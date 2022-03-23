@@ -1,5 +1,6 @@
 package org.pmiops.workbench.mail;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -262,6 +263,15 @@ public class MailServiceImpl implements MailService {
             "Registered Tier access expired for user %s (%s)",
             user.getUsername(), user.getContactEmail()),
         htmlMessage);
+  }
+
+  @Override
+  public void alertUsersUnusedDiskWarningThreshold(
+      List<DbUser> users, DbUser diskCreator, DbWorkspace diskWorkspace, int unusedDays)
+      throws MessagingException {
+    log.info(
+        Joiner.on(",")
+            .join(new Object[] {"notifying!", users, diskCreator, diskWorkspace, unusedDays}));
   }
 
   @Override
