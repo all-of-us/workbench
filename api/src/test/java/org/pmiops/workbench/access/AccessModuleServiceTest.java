@@ -52,10 +52,11 @@ public class AccessModuleServiceTest {
   private static List<DbAccessModule> accessModules;
 
   @Import({
-    FakeClockConfiguration.class,
+    AccessModuleNameMapperImpl.class,
     AccessModuleServiceImpl.class,
-    UserAccessModuleMapperImpl.class,
     CommonMappers.class,
+    FakeClockConfiguration.class,
+    UserAccessModuleMapperImpl.class,
   })
   @TestConfiguration
   static class Configuration {
@@ -101,7 +102,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             Optional.empty(),
             nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
   }
@@ -129,7 +130,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             nullableTimestampToOptionalInstant(existingBypasstime),
             nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
   }
@@ -147,7 +148,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             Optional.empty(),
             Optional.empty());
   }
@@ -175,7 +176,7 @@ public class AccessModuleServiceTest {
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(
             user.getUserId(),
-            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             nullableTimestampToOptionalInstant(existingBypasstime),
             Optional.empty());
   }

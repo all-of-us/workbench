@@ -16,7 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@Import({FakeClockConfiguration.class, UserAccessModuleMapperImpl.class, CommonMappers.class})
+@Import({
+  AccessModuleNameMapperImpl.class,
+  CommonMappers.class,
+  FakeClockConfiguration.class,
+  UserAccessModuleMapperImpl.class,
+})
 @SpringJUnitConfig
 public class UserAccessModuleMapperTest {
   @Autowired private UserAccessModuleMapper mapper;

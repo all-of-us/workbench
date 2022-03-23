@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
@@ -60,6 +61,7 @@ public class AuthDomainControllerTest {
   @Autowired private UserDao userDao;
 
   @Mock private AccessTierService accessTierService;
+  @Mock private AccessModuleNameMapper accessModuleNameMapper;
   @Mock private AccessModuleService accessModuleService;
   @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
@@ -104,6 +106,7 @@ public class AuthDomainControllerTest {
             adminActionHistoryDao,
             userTermsOfServiceDao,
             verifiedInstitutionalAffiliationDao,
+            accessModuleNameMapper,
             accessModuleService,
             fireCloudService,
             complianceService,
