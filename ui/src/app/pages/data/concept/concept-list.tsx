@@ -215,7 +215,7 @@ export const ConceptListPage = fp.flow(
             ? Domain.PHYSICALMEASUREMENT
             : (domain as Domain),
         name: domainToTitle(domain),
-        conceptCount: this.props.concept.length,
+        count: this.props.concept.length,
       };
       return domainCount;
     }
