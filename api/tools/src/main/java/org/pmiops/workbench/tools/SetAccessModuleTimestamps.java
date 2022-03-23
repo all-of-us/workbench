@@ -17,7 +17,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
 import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.CacheAccessModuleConfiguration;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -60,7 +60,7 @@ public class SetAccessModuleTimestamps {
   void updateCompletionTime(
       AccessModuleService accessModuleService,
       String username,
-      AccessModuleName moduleName,
+      DbAccessModuleName moduleName,
       @Nullable Timestamp timestamp) {
     accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
 
@@ -82,7 +82,7 @@ public class SetAccessModuleTimestamps {
       updateCompletionTime(
           accessModuleService,
           username,
-          AccessModuleName.PROFILE_CONFIRMATION,
+          DbAccessModuleName.PROFILE_CONFIRMATION,
           PROFILE_CONFIRMATION_TIMESTAMP);
     };
   }

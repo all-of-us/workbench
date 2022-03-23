@@ -35,7 +35,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -85,10 +85,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
 
-  private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
-      ImmutableMap.<AccessModuleName, BadgeName>builder()
-          .put(AccessModuleName.RT_COMPLIANCE_TRAINING, BadgeName.REGISTERED_TIER_TRAINING)
-          .put(AccessModuleName.CT_COMPLIANCE_TRAINING, BadgeName.CONTROLLED_TIER_TRAINING)
+  private static final Map<DbAccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
+      ImmutableMap.<DbAccessModuleName, BadgeName>builder()
+          .put(DbAccessModuleName.RT_COMPLIANCE_TRAINING, BadgeName.REGISTERED_TIER_TRAINING)
+          .put(DbAccessModuleName.CT_COMPLIANCE_TRAINING, BadgeName.CONTROLLED_TIER_TRAINING)
           .build();
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -260,12 +260,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldGrantUserTierAccess(
-      DbUser user, List<AccessModuleName> requiredModules, String tierShortName) {
+      DbUser user, List<DbAccessModuleName> requiredModules, String tierShortName) {
     boolean allStandardRequiredModulesCompliant =
         requiredModules.stream()
             .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
     boolean eraCompliant =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
+        accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
 
     boolean eRARequiredForTier = true;
     boolean institutionalEmailValidForTier = false;
@@ -394,8 +394,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbVerifiedAffiliation.setUser(dbUser);
       verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
       accessModuleService.updateCompletionTime(
-          dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
-      accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+          dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, now);
+      accessModuleService.updateCompletionTime(
+          dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(username);
       if (dbUser == null) {
@@ -416,7 +417,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         (user) -> {
           accessModuleService.updateCompletionTime(
-              user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
+              user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
           return updateDuccAgreement(user, duccSignedVersion, initials, timestamp);
         },
         dbUser,
@@ -596,7 +597,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
        *   <li>Else: existing completion time, i.e. no change
        * </ul>
        */
-      Function<AccessModuleName, Optional<Timestamp>> determineCompletionTime =
+      Function<DbAccessModuleName, Optional<Timestamp>> determineCompletionTime =
           (moduleName) -> {
             BadgeName badgeName = BADGE_BY_COMPLIANCE_MODULE.get(moduleName);
             Optional<BadgeDetailsV2> badge =
@@ -634,7 +635,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             return Optional.of(Timestamp.from(dbCompletionTime));
           };
 
-      Map<AccessModuleName, Optional<Timestamp>> completionTimes =
+      Map<DbAccessModuleName, Optional<Timestamp>> completionTimes =
           BADGE_BY_COMPLIANCE_MODULE.keySet().stream()
               .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
 
@@ -674,7 +675,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           if (nihStatus != null) {
             Timestamp eraCommonsCompletionTime =
                 accessModuleService
-                    .getAccessModuleStatus(user, AccessModuleName.ERA_COMMONS)
+                    .getAccessModuleStatus(user, DbAccessModuleName.ERA_COMMONS)
                     .map(AccessModuleStatus::getCompletionEpochMillis)
                     .map(Timestamp::new)
                     .orElse(null);
@@ -707,11 +708,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
             user.setEraCommonsLinkExpireTime(nihLinkExpireTime);
             accessModuleService.updateCompletionTime(
-                user, AccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
+                user, DbAccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
           } else {
             user.setEraCommonsLinkedNihUsername(null);
             user.setEraCommonsLinkExpireTime(null);
-            accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, null);
+            accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, null);
           }
           return user;
         },
@@ -751,16 +752,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (isEnrolledIn2FA) {
       final boolean needsDbCompletionUpdate =
           accessModuleService
-              .getAccessModuleStatus(targetUser, AccessModuleName.TWO_FACTOR_AUTH)
+              .getAccessModuleStatus(targetUser, DbAccessModuleName.TWO_FACTOR_AUTH)
               .map(status -> status.getCompletionEpochMillis() == null)
               .orElse(true);
 
       if (needsDbCompletionUpdate) {
         accessModuleService.updateCompletionTime(
-            targetUser, AccessModuleName.TWO_FACTOR_AUTH, clockNow());
+            targetUser, DbAccessModuleName.TWO_FACTOR_AUTH, clockNow());
       }
     } else {
-      accessModuleService.updateCompletionTime(targetUser, AccessModuleName.TWO_FACTOR_AUTH, null);
+      accessModuleService.updateCompletionTime(
+          targetUser, DbAccessModuleName.TWO_FACTOR_AUTH, null);
     }
 
     return updateUserAccessTiers(targetUser, agent);
@@ -775,7 +777,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     if (!accessModuleService.hasUserSignedACurrentDucc(targetUser)) {
       accessModuleService.updateCompletionTime(
-          targetUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+          targetUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     }
 
     return updateUserAccessTiers(targetUser, agent);
@@ -844,7 +846,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         user -> {
           user.setRasLinkLoginGovUsername(loginGovUserName);
           accessModuleService.updateCompletionTime(
-              user, AccessModuleName.RAS_LOGIN_GOV, clockNow());
+              user, DbAccessModuleName.RAS_LOGIN_GOV, clockNow());
           // TODO(RW-6480): Determine if need to set link expiration time.
           return user;
         },
@@ -859,7 +861,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           user.setEraCommonsLinkedNihUsername(eRACommonsUsername);
-          accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, clockNow());
+          accessModuleService.updateCompletionTime(
+              user, DbAccessModuleName.ERA_COMMONS, clockNow());
           return user;
         },
         dbUser,
@@ -870,7 +873,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser confirmProfile(DbUser dbUser) {
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PROFILE_CONFIRMATION, clockNow());
+        dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, clockNow());
 
     return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
@@ -880,7 +883,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser confirmPublications() {
     final DbUser dbUser = userProvider.get();
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, clockNow());
+        dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, clockNow());
 
     return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
