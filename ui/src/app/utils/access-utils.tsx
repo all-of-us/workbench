@@ -3,8 +3,8 @@ import { Redirect } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
-  AccessModule,
   AccessModuleConfig,
+  AccessModuleName,
   AccessModuleStatus,
   ErrorCode,
   Profile,
@@ -143,7 +143,7 @@ interface AccessModuleUIConfig extends AccessModuleConfig {
 // without a next step:
 // https://github.com/all-of-us/workbench/blob/main/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getAccessModuleConfig = (
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): AccessModuleUIConfig => {
   const {
     enableRasLoginGovLinking,
@@ -152,12 +152,12 @@ export const getAccessModuleConfig = (
     enableComplianceTraining,
     accessModules,
   } = serverConfigStore.get().config;
-  const apiConfig = accessModules.find((m) => m.name === moduleName);
+  const apiConfig = accessModules.find((m) => m.moduleNameTemp === moduleName);
   return switchCase(
     moduleName,
 
     [
-      AccessModule.TWOFACTORAUTH,
+      AccessModuleName.TWOFACTORAUTH,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -170,7 +170,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.RASLINKLOGINGOV,
+      AccessModuleName.RASLOGINGOV,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment:
@@ -201,7 +201,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.ERACOMMONS,
+      AccessModuleName.ERACOMMONS,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableEraCommons,
@@ -214,7 +214,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.COMPLIANCETRAINING,
+      AccessModuleName.RTCOMPLIANCETRAINING,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
@@ -237,7 +237,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModuleName.CTCOMPLIANCETRAINING,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
@@ -255,7 +255,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModuleName.DATAUSERCODEOFCONDUCT,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -266,7 +266,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -276,7 +276,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -290,10 +290,10 @@ export const getAccessModuleConfig = (
 
 // the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const accessRenewalModules = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModuleName.PROFILECONFIRMATION,
+  AccessModuleName.PUBLICATIONCONFIRMATION,
+  AccessModuleName.RTCOMPLIANCETRAINING,
+  AccessModuleName.DATAUSERCODEOFCONDUCT,
 ];
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
@@ -362,18 +362,18 @@ export const useIsUserDisabled = () => {
 
 export const getAccessModuleStatusByNameOrEmpty = (
   modules: AccessModuleStatus[],
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): AccessModuleStatus => {
   return (
-    modules.find((status) => status.moduleName === moduleName) || {
-      moduleName,
+    modules.find((status) => status.moduleNameTemp === moduleName) || {
+      moduleNameTemp: moduleName,
     }
   );
 };
 
 export const getAccessModuleStatusByName = (
   profile: Profile,
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): AccessModuleStatus => {
   return getAccessModuleStatusByNameOrEmpty(
     profile.accessModules.modules,
@@ -382,12 +382,12 @@ export const getAccessModuleStatusByName = (
 };
 
 export const bypassAll = async (
-  accessModules: AccessModule[],
+  accessModules: AccessModuleName[],
   isBypassed: boolean
 ) => {
-  for (const module of accessModules) {
+  for (const moduleName of accessModules) {
     await userAdminApi().unsafeSelfBypassAccessRequirement({
-      moduleName: module,
+      moduleNameTemp: moduleName,
       isBypassed: isBypassed,
     });
   }
@@ -514,14 +514,14 @@ export const eligibleForTier = (
   return rtEligiblity?.eligible;
 };
 
-export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
+export const syncModulesExternal = async (moduleNames: AccessModuleName[]) => {
   // RT and CT compliance training have the same external sync action.
   // Calling both can cause conflicts, so we need to remove one.
   // We choose to remove CT arbitrarily.
   const filteredModuleNames = moduleNames.includes(
-    AccessModule.COMPLIANCETRAINING
+    AccessModuleName.RTCOMPLIANCETRAINING
   )
-    ? moduleNames.filter((m) => m !== AccessModule.CTCOMPLIANCETRAINING)
+    ? moduleNames.filter((m) => m !== AccessModuleName.CTCOMPLIANCETRAINING)
     : moduleNames;
 
   return Promise.all(

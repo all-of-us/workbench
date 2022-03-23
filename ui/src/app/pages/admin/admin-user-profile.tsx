@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessBypassRequest,
-  AccessModule,
+  AccessModuleName,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -299,14 +299,14 @@ const EditableFields = ({
 // list the access modules in the desired order
 // exported for testing
 export const accessModulesForTable = [
-  AccessModule.TWOFACTORAUTH,
-  AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
-  AccessModule.RASLINKLOGINGOV,
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModuleName.TWOFACTORAUTH,
+  AccessModuleName.ERACOMMONS,
+  AccessModuleName.RTCOMPLIANCETRAINING,
+  AccessModuleName.CTCOMPLIANCETRAINING,
+  AccessModuleName.DATAUSERCODEOFCONDUCT,
+  AccessModuleName.RASLOGINGOV,
+  AccessModuleName.PROFILECONFIRMATION,
+  AccessModuleName.PUBLICATIONCONFIRMATION,
 ];
 
 interface CommonToggleProps {
@@ -340,7 +340,7 @@ interface AccessModuleTableProps {
 }
 
 interface ToggleProps extends AccessModuleTableProps {
-  moduleName: AccessModule;
+  moduleName: AccessModuleName;
 }
 
 const ToggleForModule = (props: ToggleProps) => {
@@ -354,7 +354,7 @@ const ToggleForModule = (props: ToggleProps) => {
 
   const previouslyBypassed = isBypassed(oldProfile, moduleName);
   const pendingBypassState = pendingBypassRequests.find(
-    (r) => r.moduleName === moduleName
+    (r) => r.moduleNameTemp === moduleName
   );
   const isModuleBypassed = pendingBypassState
     ? pendingBypassState.isBypassed
@@ -376,7 +376,10 @@ const ToggleForModule = (props: ToggleProps) => {
         checked={isModuleBypassed}
         dataTestId={`${moduleName}-toggle`}
         onToggle={() =>
-          bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
+          bypassUpdate({
+            moduleNameTemp: moduleName,
+            isBypassed: !isModuleBypassed,
+          })
         }
       />
     </FlexRow>
@@ -432,7 +435,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       style={{ paddingTop: '1em' }}
       value={tableData}
       footer={
-        getAccessModuleConfig(AccessModule.ERACOMMONS)
+        getAccessModuleConfig(AccessModuleName.ERACOMMONS)
           .isEnabledInEnvironment && (
           <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
             {getEraNote(updatedProfile)}
@@ -622,7 +625,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     accessBypassRequest: AccessBypassRequest
   ) => {
     const otherModuleRequests = bypassChangeRequests.filter(
-      (r) => r.moduleName !== accessBypassRequest.moduleName
+      (r) => r.moduleNameTemp !== accessBypassRequest.moduleNameTemp
     );
     setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };

@@ -9,7 +9,7 @@ import { Dropdown } from 'primereact/dropdown';
 
 import {
   AccessBypassRequest,
-  AccessModule,
+  AccessModuleName,
   AccountDisabledStatus,
   AccountPropertyUpdate,
   InstitutionalRole,
@@ -175,7 +175,7 @@ export const getUpdatedProfileValue = (
 
 const getModuleStatus = (
   profile: Profile,
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): AccessRenewalStatus =>
   computeRenewalDisplayDates(getAccessModuleStatusByName(profile, moduleName))
     .moduleStatus;
@@ -196,7 +196,7 @@ const moduleStatusStyle = (moduleStatus) =>
 
 const displayModuleStatusAndDate = (
   profile: Profile,
-  moduleName: AccessModule,
+  moduleName: AccessModuleName,
   child: string
 ): JSX.Element => {
   return (
@@ -208,19 +208,19 @@ const displayModuleStatusAndDate = (
 
 export const isBypassed = (
   profile: Profile,
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
 // For other modules display the expiry date if known, else display '-' (say in case of bypass)
-const getNullStringForExpirationDate = (moduleName: AccessModule): string =>
+const getNullStringForExpirationDate = (moduleName: AccessModuleName): string =>
   getAccessModuleConfig(moduleName).expirable ? '-' : 'Never';
 
 export const displayModuleStatus = (
   profile: Profile,
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): JSX.Element =>
   displayModuleStatusAndDate(
     profile,
@@ -230,7 +230,7 @@ export const displayModuleStatus = (
 
 export const displayModuleCompletionDate = (
   profile: Profile,
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): JSX.Element =>
   displayModuleStatusAndDate(
     profile,
@@ -243,7 +243,7 @@ export const displayModuleCompletionDate = (
 
 export const displayModuleExpirationDate = (
   profile: Profile,
-  moduleName: AccessModule
+  moduleName: AccessModuleName
 ): JSX.Element =>
   displayModuleStatusAndDate(
     profile,
@@ -262,24 +262,24 @@ const isEraRequiredForTier = (
     (tier) => tier.accessTierShortName === accessTierShortName
   );
   return (
-    getAccessModuleConfig(AccessModule.ERACOMMONS).isEnabledInEnvironment &&
+    getAccessModuleConfig(AccessModuleName.ERACOMMONS).isEnabledInEnvironment &&
     tierEligibility?.eraRequired
   );
 };
 
 export const TierBadgesMaybe = (props: {
   profile: Profile;
-  moduleName: AccessModule;
+  moduleName: AccessModuleName;
 }) => {
   const { profile, moduleName } = props;
 
   const rtRequired =
-    moduleName === AccessModule.ERACOMMONS
+    moduleName === AccessModuleName.ERACOMMONS
       ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
       : getAccessModuleConfig(moduleName)?.requiredForRTAccess;
 
   const ctRequired =
-    moduleName === AccessModule.ERACOMMONS
+    moduleName === AccessModuleName.ERACOMMONS
       ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
       : getAccessModuleConfig(moduleName)?.requiredForCTAccess;
 
@@ -323,7 +323,8 @@ export const getEraNote = (profile: Profile): string => {
 export const wouldUpdateBypassState = (
   oldProfile: Profile,
   request: AccessBypassRequest
-): boolean => isBypassed(oldProfile, request.moduleName) !== request.isBypassed;
+): boolean =>
+  isBypassed(oldProfile, request.moduleNameTemp) !== request.isBypassed;
 
 export const profileNeedsUpdate = (
   oldProfile: Profile,
@@ -655,7 +656,7 @@ export const AccessModuleExpirations = ({ profile }: ExpirationProps) => {
   const moduleNames = enableComplianceTraining
     ? accessRenewalModules
     : accessRenewalModules.filter(
-        (moduleName) => moduleName !== AccessModule.COMPLIANCETRAINING
+        (moduleName) => moduleName !== AccessModuleName.RTCOMPLIANCETRAINING
       );
 
   const accessStatus = hasRegisteredTierAccess(profile) ? (

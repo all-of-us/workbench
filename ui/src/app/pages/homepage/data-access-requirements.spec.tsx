@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { mount, ReactWrapper } from 'enzyme';
 
 import {
-  AccessModule,
+  AccessModuleName,
   InstitutionApi,
   Profile,
   ProfileApi,
@@ -57,16 +57,16 @@ describe('DataAccessRequirements', () => {
     );
   };
 
-  const findModule = (wrapper, module: AccessModule) =>
+  const findModule = (wrapper, module: AccessModuleName) =>
     wrapper.find(`[data-test-id="module-${module}"]`);
-  const findIneligibleModule = (wrapper, module: AccessModule) =>
+  const findIneligibleModule = (wrapper, module: AccessModuleName) =>
     wrapper.find(`[data-test-id="module-${module}-ineligible"]`);
-  const findCompleteModule = (wrapper, module: AccessModule) =>
+  const findCompleteModule = (wrapper, module: AccessModuleName) =>
     wrapper.find(`[data-test-id="module-${module}-complete"]`);
-  const findIncompleteModule = (wrapper, module: AccessModule) =>
+  const findIncompleteModule = (wrapper, module: AccessModuleName) =>
     wrapper.find(`[data-test-id="module-${module}-incomplete"]`);
 
-  const findNextCtaForModule = (wrapper, module: AccessModule) =>
+  const findNextCtaForModule = (wrapper, module: AccessModuleName) =>
     findModule(wrapper, module).find('[data-test-id="next-module-cta"]');
 
   const findCompletionBanner = (wrapper) =>
@@ -96,7 +96,7 @@ describe('DataAccessRequirements', () => {
     wrapper.find('[data-test-id="eligible-text"]');
   const findIneligibleText = (wrapper) =>
     wrapper.find('[data-test-id="ineligible-text"]');
-  const findClickableModuleText = (wrapper, module: AccessModule) =>
+  const findClickableModuleText = (wrapper, module: AccessModuleName) =>
     wrapper.find(`[data-test-id="module-${module}-clickable-text"]`);
 
   const findContactUs = (wrapper) =>
@@ -158,7 +158,7 @@ describe('DataAccessRequirements', () => {
       },
     });
     const enabledModules = getEligibleModules(allModules, profile);
-    expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
+    expect(enabledModules.includes(AccessModuleName.RASLOGINGOV)).toBeFalsy();
   });
 
   it(
@@ -174,7 +174,7 @@ describe('DataAccessRequirements', () => {
       });
       const enabledModules = getEligibleModules(allModules, profile);
       expect(
-        enabledModules.includes(AccessModule.RASLINKLOGINGOV)
+        enabledModules.includes(AccessModuleName.RASLOGINGOV)
       ).toBeTruthy();
     }
   );
@@ -184,7 +184,7 @@ describe('DataAccessRequirements', () => {
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
     const enabledModules = getEligibleModules(allModules, profile);
-    expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
+    expect(enabledModules.includes(AccessModuleName.ERACOMMONS)).toBeFalsy();
   });
 
   it('should not return the Compliance module from getEligibleModules when its feature flag is disabled', () => {
@@ -193,7 +193,7 @@ describe('DataAccessRequirements', () => {
     });
     const enabledModules = getEligibleModules(allModules, profile);
     expect(
-      enabledModules.includes(AccessModule.COMPLIANCETRAINING)
+      enabledModules.includes(AccessModuleName.RTCOMPLIANCETRAINING)
     ).toBeFalsy();
   });
 
@@ -205,7 +205,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[0]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH);
+    expect(activeModule).toEqual(AccessModuleName.TWOFACTORAUTH);
   });
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
@@ -213,7 +213,10 @@ describe('DataAccessRequirements', () => {
       ...profile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModuleName.TWOFACTORAUTH,
+            completionEpochMillis: 1,
+          },
         ],
       },
     };
@@ -225,7 +228,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
+    expect(activeModule).toEqual(AccessModuleName.RASLOGINGOV);
   });
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
@@ -233,7 +236,7 @@ describe('DataAccessRequirements', () => {
       ...profile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, bypassEpochMillis: 1 },
+          { moduleName: AccessModuleName.TWOFACTORAUTH, bypassEpochMillis: 1 },
         ],
       },
     };
@@ -245,7 +248,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
+    expect(activeModule).toEqual(AccessModuleName.RASLOGINGOV);
   });
 
   it(
@@ -265,7 +268,7 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: [
             {
-              moduleName: AccessModule.TWOFACTORAUTH,
+              moduleName: AccessModuleName.TWOFACTORAUTH,
               completionEpochMillis: 1,
             },
           ],
@@ -276,7 +279,7 @@ describe('DataAccessRequirements', () => {
       const activeModule = getActiveModule(enabledModules, testProfile);
 
       // update this if the order changes
-      expect(activeModule).toEqual(AccessModule.ERACOMMONS);
+      expect(activeModule).toEqual(AccessModuleName.ERACOMMONS);
 
       // 2FA (module 0) is complete, so enabled #1 is active
       expect(activeModule).toEqual(enabledModules[1]);
@@ -291,10 +294,13 @@ describe('DataAccessRequirements', () => {
       ...profile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
-          { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleName: AccessModuleName.TWOFACTORAUTH,
+            completionEpochMillis: 1,
+          },
+          { moduleName: AccessModuleName.ERACOMMONS, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModuleName.RASLOGINGOV,
             completionEpochMillis: 1,
           },
         ],
@@ -308,7 +314,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[3]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.COMPLIANCETRAINING);
+    expect(activeModule).toEqual(AccessModuleName.RTCOMPLIANCETRAINING);
   });
 
   it('should return undefined from getActiveModule when all modules have been completed', () => {
@@ -334,14 +340,17 @@ describe('DataAccessRequirements', () => {
       ...profile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
-          { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModuleName.TWOFACTORAUTH,
+            completionEpochMillis: 1,
+          },
+          { moduleName: AccessModuleName.ERACOMMONS, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModuleName.RTCOMPLIANCETRAINING,
             completionEpochMillis: 1,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModuleName.DATAUSERCODEOFCONDUCT,
             completionEpochMillis: 1,
           },
         ],
@@ -351,7 +360,7 @@ describe('DataAccessRequirements', () => {
     const enabledModules = getEligibleModules(requiredModules, profile);
 
     let activeModule = getActiveModule(enabledModules, testProfile);
-    expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
+    expect(activeModule).toEqual(AccessModuleName.RASLOGINGOV);
 
     // simulate handleRasCallback() by updating the profile
 
@@ -361,7 +370,7 @@ describe('DataAccessRequirements', () => {
         modules: [
           ...testProfile.accessModules.modules,
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleName: AccessModuleName.RASLOGINGOV,
             completionEpochMillis: 1,
           },
         ],
@@ -384,7 +393,9 @@ describe('DataAccessRequirements', () => {
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
     const wrapper = component();
-    expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeFalsy();
+    expect(
+      findModule(wrapper, AccessModuleName.ERACOMMONS).exists()
+    ).toBeFalsy();
   });
 
   it('should not render the Compliance module when its feature flag is disabled', () => {
@@ -393,7 +404,7 @@ describe('DataAccessRequirements', () => {
     });
     const wrapper = component();
     expect(
-      findModule(wrapper, AccessModule.COMPLIANCETRAINING).exists()
+      findModule(wrapper, AccessModuleName.RTCOMPLIANCETRAINING).exists()
     ).toBeFalsy();
   });
 
@@ -410,17 +421,17 @@ describe('DataAccessRequirements', () => {
     });
     const wrapper = component();
     expect(
-      findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeTruthy();
     expect(
-      findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIneligibleModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeTruthy();
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeFalsy();
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeFalsy();
   });
 
@@ -440,8 +451,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => ({
-            moduleName: module,
+          modules: requiredModules.map((moduleName) => ({
+            moduleNameTemp: moduleName,
             completionEpochMillis: 1,
           })),
         },
@@ -469,14 +480,14 @@ describe('DataAccessRequirements', () => {
     // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
 
     const allExceptRas = requiredModules.filter(
-      (m) => m !== AccessModule.RASLINKLOGINGOV
+      (m) => m !== AccessModuleName.RASLOGINGOV
     );
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: allExceptRas.map((module) => ({
-            moduleName: module,
+          modules: allExceptRas.map((moduleName) => ({
+            moduleNameTemp: moduleName,
             completionEpochMillis: 1,
           })),
         },
@@ -496,14 +507,14 @@ describe('DataAccessRequirements', () => {
 
     // RAS is not complete
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeTruthy();
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeFalsy();
     expect(
-      findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIneligibleModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeFalsy();
 
     expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
@@ -514,8 +525,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => ({
-            moduleName: module,
+          modules: requiredModules.map((moduleName) => ({
+            moduleNameTemp: moduleName,
             completionEpochMillis: 1,
           })),
         },
@@ -542,8 +553,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => {
-            return { moduleName: module, bypassEpochMillis: 1 };
+          modules: requiredModules.map((moduleName) => {
+            return { moduleNameTemp: moduleName, bypassEpochMillis: 1 };
           }),
         },
       },
@@ -564,9 +575,9 @@ describe('DataAccessRequirements', () => {
 
   it('should render a mix of complete and incomplete modules, as appropriate', () => {
     const requiredModulesSize = requiredModules.length;
-    const incompleteModules = [AccessModule.RASLINKLOGINGOV];
+    const incompleteModules = [AccessModuleName.RASLOGINGOV];
     const completeModules = requiredModules.filter(
-      (module) => module !== AccessModule.RASLINKLOGINGOV
+      (module) => module !== AccessModuleName.RASLOGINGOV
     );
     const completeModulesSize = requiredModulesSize - incompleteModules.length;
 
@@ -578,8 +589,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: completeModules.map((module) => {
-            return { moduleName: module, completionEpochMillis: 1 };
+          modules: completeModules.map((moduleName) => {
+            return { moduleNameTemp: moduleName, completionEpochMillis: 1 };
           }),
         },
       },
@@ -637,8 +648,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => {
-            return { moduleName: module, completionEpochMillis: 1 };
+          modules: requiredModules.map((moduleName) => {
+            return { moduleNameTemp: moduleName, completionEpochMillis: 1 };
           }),
         },
       },
@@ -662,8 +673,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => {
-            return { moduleName: module, completionEpochMillis: 1 };
+          modules: requiredModules.map((moduleName) => {
+            return { moduleNameTemp: moduleName, completionEpochMillis: 1 };
           }),
         },
         tierEligibilities: [
@@ -712,8 +723,8 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => ({
-            moduleName: module,
+          modules: requiredModules.map((moduleName) => ({
+            moduleNameTemp: moduleName,
             completionEpochMillis: 1,
           })),
         },
@@ -741,7 +752,9 @@ describe('DataAccessRequirements', () => {
   it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async () => {
     let wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
+    expect(
+      findModule(wrapper, AccessModuleName.ERACOMMONS).exists()
+    ).toBeTruthy();
 
     profileStore.set({
       profile: {
@@ -759,7 +772,9 @@ describe('DataAccessRequirements', () => {
     });
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeFalsy();
+    expect(
+      findModule(wrapper, AccessModuleName.ERACOMMONS).exists()
+    ).toBeFalsy();
 
     // Ignore eraRequired if the accessTier is Controlled
     profileStore.set({
@@ -782,7 +797,9 @@ describe('DataAccessRequirements', () => {
     });
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
+    expect(
+      findModule(wrapper, AccessModuleName.ERACOMMONS).exists()
+    ).toBeTruthy();
   });
 
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
@@ -1001,7 +1018,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(wrapper),
-          AccessModule.ERACOMMONS
+          AccessModuleName.ERACOMMONS
         ).exists()
       ).toBeTruthy();
     }
@@ -1039,7 +1056,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(wrapper),
-          AccessModule.ERACOMMONS
+          AccessModuleName.ERACOMMONS
         ).exists()
       ).toBeFalsy();
     }
@@ -1073,7 +1090,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(wrapper),
-          AccessModule.ERACOMMONS
+          AccessModuleName.ERACOMMONS
         ).exists()
       ).toBeFalsy();
     }
@@ -1107,7 +1124,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findIneligibleModule(
           findControlledTierCard(wrapper),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModuleName.CTCOMPLIANCETRAINING
         ).exists()
       ).toBeTruthy();
     }
@@ -1147,7 +1164,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findIneligibleModule(
           findControlledTierCard(wrapper),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModuleName.CTCOMPLIANCETRAINING
         ).exists()
       ).toBeTruthy();
     }
@@ -1189,7 +1206,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(wrapper),
-          AccessModule.ERACOMMONS
+          AccessModuleName.ERACOMMONS
         ).exists()
       ).toBeFalsy();
     }
@@ -1200,10 +1217,10 @@ describe('DataAccessRequirements', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeFalsy();
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeTruthy();
 
     expect(findContactUs(wrapper).exists()).toBeTruthy();
@@ -1216,7 +1233,7 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: [
             {
-              moduleName: AccessModule.RASLINKLOGINGOV,
+              moduleNameTemp: AccessModuleName.RASLOGINGOV,
               completionEpochMillis: 1,
             },
           ],
@@ -1231,10 +1248,10 @@ describe('DataAccessRequirements', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeTruthy();
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModuleName.RASLOGINGOV).exists()
     ).toBeFalsy();
 
     expect(findContactUs(wrapper).exists()).toBeFalsy();
@@ -1276,7 +1293,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(wrapper),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModuleName.CTCOMPLIANCETRAINING
         ).exists()
       ).toBeFalsy();
     }
@@ -1309,7 +1326,10 @@ describe('DataAccessRequirements', () => {
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
-      findIneligibleModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()
+      findIneligibleModule(
+        wrapper,
+        AccessModuleName.CTCOMPLIANCETRAINING
+      ).exists()
     ).toBeTruthy();
   });
 
@@ -1335,7 +1355,10 @@ describe('DataAccessRequirements', () => {
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
-      findIneligibleModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()
+      findIneligibleModule(
+        wrapper,
+        AccessModuleName.CTCOMPLIANCETRAINING
+      ).exists()
     ).toBeTruthy();
   });
 
@@ -1366,7 +1389,10 @@ describe('DataAccessRequirements', () => {
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
-      findIncompleteModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()
+      findIncompleteModule(
+        wrapper,
+        AccessModuleName.CTCOMPLIANCETRAINING
+      ).exists()
     ).toBeTruthy();
   });
 
@@ -1381,13 +1407,13 @@ describe('DataAccessRequirements', () => {
           modules: allModules.map((moduleName) => {
             if (
               [
-                AccessModule.CTCOMPLIANCETRAINING,
-                AccessModule.DATAUSERCODEOFCONDUCT,
+                AccessModuleName.CTCOMPLIANCETRAINING,
+                AccessModuleName.DATAUSERCODEOFCONDUCT,
               ].includes(moduleName)
             ) {
-              return { moduleName };
+              return { moduleNameTemp: moduleName };
             }
-            return { moduleName, completionEpochMillis: 1 };
+            return { moduleNameTemp: moduleName, completionEpochMillis: 1 };
           }),
         },
         tierEligibilities: [
@@ -1414,22 +1440,28 @@ describe('DataAccessRequirements', () => {
     expect(
       findClickableModuleText(
         wrapper,
-        AccessModule.CTCOMPLIANCETRAINING
+        AccessModuleName.CTCOMPLIANCETRAINING
       ).exists()
     ).toBeTruthy();
     expect(
       findClickableModuleText(
         wrapper,
-        AccessModule.DATAUSERCODEOFCONDUCT
+        AccessModuleName.DATAUSERCODEOFCONDUCT
       ).exists()
     ).toBeTruthy();
 
     // Only the first module is active.
     expect(
-      findNextCtaForModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()
+      findNextCtaForModule(
+        wrapper,
+        AccessModuleName.CTCOMPLIANCETRAINING
+      ).exists()
     ).toBeTruthy();
     expect(
-      findNextCtaForModule(wrapper, AccessModule.DATAUSERCODEOFCONDUCT).exists()
+      findNextCtaForModule(
+        wrapper,
+        AccessModuleName.DATAUSERCODEOFCONDUCT
+      ).exists()
     ).toBeFalsy();
   });
 

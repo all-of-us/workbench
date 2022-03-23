@@ -2,7 +2,7 @@ import * as React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
 import {
-  AccessModule,
+  AccessModuleName,
   AccessModuleStatus,
   ErrorCode,
   ProfileApi,
@@ -56,7 +56,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleNameTemp: AccessModuleName.RASLOGINGOV,
             expirationEpochMillis: undefined,
           },
         ],
@@ -72,7 +72,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
             expirationEpochMillis: undefined,
           },
         ],
@@ -88,7 +88,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
             expirationEpochMillis:
               nowPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1) +
               ONE_MINUTE_IN_MILLIS,
@@ -109,11 +109,11 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
             expirationEpochMillis: nowPlusDays(soonDays) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleNameTemp: AccessModuleName.DATAUSERCODEOFCONDUCT,
             expirationEpochMillis:
               nowPlusDays(aBitLater) + ONE_MINUTE_IN_MILLIS,
           },
@@ -131,11 +131,11 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
             expirationEpochMillis: nowPlusDays(30) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleNameTemp: AccessModuleName.DATAUSERCODEOFCONDUCT,
             expirationEpochMillis: nowPlusDays(31) + ONE_MINUTE_IN_MILLIS,
           },
         ],

@@ -1,6 +1,6 @@
 import {
-  AccessModule,
   AccessModuleConfig,
+  AccessModuleName,
   ConfigResponse,
 } from 'generated/fetch/api';
 
@@ -8,56 +8,56 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 const defaultAccessModuleConfig: AccessModuleConfig[] = [
   {
-    name: AccessModule.TWOFACTORAUTH,
+    moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
     bypassable: true,
     expirable: false,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.RASLINKLOGINGOV,
+    moduleNameTemp: AccessModuleName.RASLOGINGOV,
     bypassable: true,
     expirable: false,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.ERACOMMONS,
+    moduleNameTemp: AccessModuleName.ERACOMMONS,
     bypassable: true,
     expirable: false,
     requiredForRTAccess: false,
     requiredForCTAccess: false,
   },
   {
-    name: AccessModule.COMPLIANCETRAINING,
+    moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
     bypassable: true,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.CTCOMPLIANCETRAINING,
+    moduleNameTemp: AccessModuleName.CTCOMPLIANCETRAINING,
     bypassable: true,
     expirable: false,
     requiredForRTAccess: false,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.DATAUSERCODEOFCONDUCT,
+    moduleNameTemp: AccessModuleName.DATAUSERCODEOFCONDUCT,
     bypassable: true,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.PROFILECONFIRMATION,
+    moduleNameTemp: AccessModuleName.PROFILECONFIRMATION,
     bypassable: false,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.PUBLICATIONCONFIRMATION,
+    moduleNameTemp: AccessModuleName.PUBLICATIONCONFIRMATION,
     bypassable: false,
     expirable: true,
     requiredForRTAccess: true,

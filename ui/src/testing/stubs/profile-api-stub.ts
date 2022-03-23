@@ -1,5 +1,5 @@
 import {
-  AccessModule,
+  AccessModuleName,
   AdminTableUser,
   InstitutionalRole,
   Profile,
@@ -46,19 +46,19 @@ export class ProfileStubVariables {
     accessModules: {
       modules: [
         {
-          moduleName: AccessModule.COMPLIANCETRAINING,
+          moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+          moduleNameTemp: AccessModuleName.DATAUSERCODEOFCONDUCT,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.PROFILECONFIRMATION,
+          moduleNameTemp: AccessModuleName.PROFILECONFIRMATION,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+          moduleNameTemp: AccessModuleName.PUBLICATIONCONFIRMATION,
           expirationEpochMillis: undefined,
         },
       ],

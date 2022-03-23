@@ -4,7 +4,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
-  AccessModule,
+  AccessModuleName,
   AccessModuleStatus,
   Authority,
   EgressEventsAdminApi,
@@ -500,7 +500,7 @@ describe('AdminUserProfile', () => {
   });
 
   function expectModuleTitlesInOrder(
-    accessModules: AccessModule[],
+    accessModules: AccessModuleName[],
     tableRows: ReactWrapper
   ) {
     accessModules.forEach((moduleName, index) => {
@@ -530,50 +530,50 @@ describe('AdminUserProfile', () => {
   test.each([
     [
       AccessRenewalStatus.EXPIRED,
-      AccessModule.COMPLIANCETRAINING,
+      AccessModuleName.RTCOMPLIANCETRAINING,
       {
-        moduleName: AccessModule.COMPLIANCETRAINING,
+        moduleName: AccessModuleName.RTCOMPLIANCETRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(-1),
       },
     ],
     [
       AccessRenewalStatus.NEVER_EXPIRES,
-      AccessModule.TWOFACTORAUTH,
+      AccessModuleName.TWOFACTORAUTH,
       {
-        moduleName: AccessModule.TWOFACTORAUTH,
+        moduleName: AccessModuleName.TWOFACTORAUTH,
         completionEpochMillis: nowPlusDays(-1000),
       },
     ],
     [
       AccessRenewalStatus.INCOMPLETE,
-      AccessModule.RASLINKLOGINGOV,
+      AccessModuleName.RASLOGINGOV,
       {
-        moduleName: AccessModule.RASLINKLOGINGOV,
+        moduleName: AccessModuleName.RASLOGINGOV,
       },
     ],
     [
       AccessRenewalStatus.CURRENT,
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModuleName.CTCOMPLIANCETRAINING,
       {
-        moduleName: AccessModule.CTCOMPLIANCETRAINING,
+        moduleName: AccessModuleName.CTCOMPLIANCETRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(400),
       },
     ],
     [
       AccessRenewalStatus.BYPASSED,
-      AccessModule.ERACOMMONS,
+      AccessModuleName.ERACOMMONS,
       {
-        moduleName: AccessModule.ERACOMMONS,
+        moduleName: AccessModuleName.ERACOMMONS,
         bypassEpochMillis: 1,
       },
     ],
     [
       AccessRenewalStatus.EXPIRING_SOON,
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       {
-        moduleName: AccessModule.PROFILECONFIRMATION,
+        moduleName: AccessModuleName.PROFILECONFIRMATION,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(5),
       },
@@ -582,12 +582,12 @@ describe('AdminUserProfile', () => {
     "should render a(n) '%s' completion status for access module %s",
     async (
       expectedStatus: AccessRenewalStatus,
-      moduleName: AccessModule,
+      moduleName: AccessModuleName,
       moduleStatus: AccessModuleStatus
     ) => {
       const statusesExceptThisOne =
         TARGET_USER_PROFILE.accessModules.modules.filter(
-          (s) => s.moduleName !== moduleName
+          (s) => s.moduleNameTemp !== moduleName
         );
       updateTargetProfile({
         accessModules: {
@@ -631,10 +631,10 @@ describe('AdminUserProfile', () => {
     });
 
     const excludedModules = [
-      AccessModule.RASLINKLOGINGOV,
-      AccessModule.ERACOMMONS,
-      AccessModule.COMPLIANCETRAINING,
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModuleName.RASLOGINGOV,
+      AccessModuleName.ERACOMMONS,
+      AccessModuleName.RTCOMPLIANCETRAINING,
+      AccessModuleName.CTCOMPLIANCETRAINING,
     ];
     const expectedModules = accessModulesForTable.filter(
       (moduleName) => !excludedModules.includes(moduleName)
@@ -729,7 +729,7 @@ describe('AdminUserProfile', () => {
       // a previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
 
       const eraRow = tableRows.at(
-        accessModulesForTable.indexOf(AccessModule.ERACOMMONS)
+        accessModulesForTable.indexOf(AccessModuleName.ERACOMMONS)
       );
       const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
 
