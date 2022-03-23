@@ -68,6 +68,9 @@ export interface EnvironmentBase {
 
   // RW-7973 whether we should use async operations for Create and Duplicate Workspace
   enableAsyncWorkspaceOperations: boolean;
+
+  // RW-7764 merge access-renewal into data-access-requirements
+  mergedAccessRenewal: boolean;
 }
 
 export interface Environment extends EnvironmentBase {

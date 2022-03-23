@@ -19,7 +19,7 @@ public class DbAccessModule {
   private long accessModuleId;
   private boolean expirable;
   private boolean bypassable;
-  private AccessModuleName name;
+  private DbAccessModuleName name;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,11 +55,11 @@ public class DbAccessModule {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "name", nullable = false)
-  public AccessModuleName getName() {
+  public DbAccessModuleName getName() {
     return name;
   }
 
-  public DbAccessModule setName(AccessModuleName name) {
+  public DbAccessModule setName(DbAccessModuleName name) {
     this.name = name;
     return this;
   }
@@ -74,7 +74,7 @@ public class DbAccessModule {
     return REQUIRED_MODULES_FOR_CONTROLLED_TIER.contains(name);
   }
 
-  public enum AccessModuleName {
+  public enum DbAccessModuleName {
     ERA_COMMONS,
     TWO_FACTOR_AUTH,
     RAS_LOGIN_GOV,

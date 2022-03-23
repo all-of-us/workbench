@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
 import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -18,10 +19,11 @@ import {
   Repeat,
 } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
-import { SUPPORT_EMAIL } from 'app/components/support';
+import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { cond, reactStyles, switchCase } from 'app/utils';
@@ -59,9 +61,33 @@ import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
 const styles = reactStyles({
-  headerFlexColumn: {
+  initialRegistrationOuterHeader: {
     marginLeft: '3%',
     width: '50%',
+  },
+  initialRegistrationHeaderRW: {
+    textTransform: 'uppercase',
+    margin: '1em 0 0 0',
+  },
+  initialRegistrationHeaderDAR: {
+    height: 30,
+    width: 302,
+    fontFamily: 'Montserrat',
+    fontSize: 22,
+    fontWeight: 500,
+    letterSpacing: 0,
+    margin: '0.5em 0 0 0',
+  },
+  renewalHeaderYearly: {
+    color: colors.primary,
+    fontSize: 20,
+    fontWeight: 600,
+    marginBottom: '1em',
+  },
+  renewalHeaderRequirements: {
+    color: colors.primary,
+    fontSize: 14,
+    marginBottom: '1em',
   },
   completed: {
     height: '87px',
@@ -94,19 +120,6 @@ const styles = reactStyles({
     fontSize: '18px',
     fontWeight: 600,
   },
-  headerRW: {
-    textTransform: 'uppercase',
-    margin: '1em 0 0 0',
-  },
-  headerDAR: {
-    height: '30px',
-    width: '302px',
-    fontFamily: 'Montserrat',
-    fontSize: '22px',
-    fontWeight: 500,
-    letterSpacing: 0,
-    margin: '0.5em 0 0 0',
-  },
   pageWrapper: {
     marginLeft: '-1rem',
     marginRight: '-0.6rem',
@@ -119,8 +132,9 @@ const styles = reactStyles({
     padding: '0 0.1rem',
   },
   pleaseComplete: {
-    fontSize: '14px',
     color: colors.primary,
+    fontSize: 16,
+    fontWeight: 600,
   },
   card: {
     height: '375px',
@@ -261,6 +275,11 @@ const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 export const requiredModules: AccessModule[] = [...rtModules, duccModule];
 
 export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
+
+export enum DARPageMode {
+  INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
+  ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
+}
 
 const isCompleted = (status: AccessModuleStatus): boolean =>
   !!status?.completionEpochMillis;
@@ -742,11 +761,64 @@ const ControlledTierEraModule = (props: {
   ) : null;
 };
 
-const DARHeader = () => (
-  <FlexColumn style={styles.headerFlexColumn}>
-    <Header style={styles.headerRW}>Researcher Workbench</Header>
-    <Header style={styles.headerDAR}>Data Access Requirements</Header>
+// the header(s) outside the Fadebox
+
+const InitialOuterHeader = () => (
+  <FlexColumn style={styles.initialRegistrationOuterHeader}>
+    <Header style={styles.initialRegistrationHeaderRW}>
+      Researcher Workbench
+    </Header>
+    <Header style={styles.initialRegistrationHeaderDAR}>
+      Data Access Requirements
+    </Header>
   </FlexColumn>
+);
+
+const OuterHeader = (props: { pageMode: DARPageMode }) =>
+  props.pageMode === DARPageMode.INITIAL_REGISTRATION && <InitialOuterHeader />;
+
+// the header(s) inside the Fadebox
+
+const InitialInnerHeader = () => (
+  <div data-test-id='initial-registration-header' style={styles.pleaseComplete}>
+    Please complete the necessary steps to gain access to the <AoU /> datasets.
+  </div>
+);
+
+const AnnualInnerHeader = () => (
+  <FlexColumn>
+    <div
+      data-test-id='annual-renewal-header'
+      style={styles.renewalHeaderYearly}
+    >
+      Yearly Researcher Workbench access renewal
+    </div>
+    <div style={styles.renewalHeaderRequirements}>
+      <RenewalRequirementsText /> For any questions, please contact{' '}
+      <SupportMailto />.
+    </div>
+    <div style={styles.pleaseComplete}>
+      Please complete the following steps.
+    </div>
+  </FlexColumn>
+);
+
+const InnerHeader = (props: { pageMode: DARPageMode }) =>
+  props.pageMode === DARPageMode.INITIAL_REGISTRATION ? (
+    <InitialInnerHeader />
+  ) : (
+    <AnnualInnerHeader />
+  );
+
+const SelfBypass = (props: { onClick: () => void }) => (
+  <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+    <div style={styles.selfBypassText}>
+      [Test environment] Self-service bypass is enabled
+    </div>
+    <Button style={{ marginLeft: '0.5rem' }} onClick={() => props.onClick()}>
+      Bypass all
+    </Button>
+  </FlexRow>
 );
 
 const Completed = () => (
@@ -823,6 +895,28 @@ const renderIcon = (iconName: string) =>
     ['wearable', () => <Wearable style={styles.dataDetailsIcon} />]
   );
 
+const RtDataDetailHeader = (props: { pageMode: DARPageMode }) => {
+  return switchCase(
+    props.pageMode,
+    [
+      DARPageMode.INITIAL_REGISTRATION,
+      () => (
+        <div style={styles.dataDetails}>
+          Once registered, you’ll have access to:
+        </div>
+      ),
+    ],
+    [
+      DARPageMode.ANNUAL_RENEWAL,
+      () => (
+        <div style={styles.dataDetails}>
+          Once renewed, you’ll have access to:
+        </div>
+      ),
+    ]
+  );
+};
+
 const DataDetail = (props: { icon: string; text: string }) => {
   const { icon, text } = props;
   return (
@@ -838,8 +932,10 @@ const RegisteredTierCard = (props: {
   activeModule: AccessModule;
   clickableModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
+  pageMode: DARPageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps } = props;
+  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+    props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
 
@@ -852,9 +948,7 @@ const RegisteredTierCard = (props: {
           <RegisteredTierBadge />
           <div style={styles.dataHeader}>{rtDisplayName} data</div>
         </FlexRow>
-        <div style={styles.dataDetails}>
-          Once registered, you’ll have access to:
-        </div>
+        <RtDataDetailHeader pageMode={pageMode} />
         <DataDetail icon='individual' text='Individual (not aggregated) data' />
         <DataDetail icon='identifying' text='Identifying information removed' />
         <DataDetail icon='electronic' text='Electronic health records' />
@@ -1051,21 +1145,36 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       onMount();
     }, []);
 
-    // handle the route /nih-callback?token=<token>
-    // handle the route /ras-callback?code=<code>
     const query = useQuery();
+
+    // handle the route /nih-callback?token=<token>
     const token = query.get('token');
-    const code = query.get('code');
     useEffect(() => {
       if (token) {
         handleTerraShibbolethCallback(token, spinnerProps, reload);
       }
     }, [token]);
+
+    // handle the route /ras-callback?code=<code>
+    const code = query.get('code');
     useEffect(() => {
       if (code) {
         handleRasCallback(code, spinnerProps, reload);
       }
     }, [code]);
+
+    // handle the different page modes of Data Access Requirements
+    const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
+    const pageModeParam = query.get('pageMode');
+    useEffect(() => {
+      if (
+        environment.mergedAccessRenewal &&
+        pageModeParam &&
+        Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
+      ) {
+        setPageMode(DARPageMode[pageModeParam]);
+      }
+    }, [environment.mergedAccessRenewal, pageModeParam]);
 
     // At any given time, at most two modules will be clickable:
     //  1. The active module, which we visually direct the user to with a CTA
@@ -1101,6 +1210,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         activeModule={activeModule}
         clickableModules={clickableModules}
         spinnerProps={spinnerProps}
+        pageMode={pageMode}
       />
     );
     const ctCard = showCtCard ? (
@@ -1128,26 +1238,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     return (
       <FlexColumn style={styles.pageWrapper}>
-        <DARHeader />
+        <OuterHeader pageMode={pageMode} />
         {profile && !nextRequired && <Completed />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
-          <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
-            <div style={styles.selfBypassText}>
-              [Test environment] Self-service bypass is enabled
-            </div>
-            <Button
-              style={{ marginLeft: '0.5rem' }}
-              onClick={async () => await selfBypass(spinnerProps, reload)}
-            >
-              Bypass all
-            </Button>
-          </FlexRow>
+          <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>
-          <div style={styles.pleaseComplete}>
-            Please complete the necessary steps to gain access to the <AoU />{' '}
-            datasets.
-          </div>
+          <InnerHeader pageMode={pageMode} />
           <React.Fragment>{cards}</React.Fragment>
         </FadeBox>
       </FlexColumn>

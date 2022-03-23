@@ -15,7 +15,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -176,17 +176,17 @@ public class UserDaoTest {
     addUserToTier(user, registeredTier);
 
     final DbAccessModule twoFactorAuthModule =
-        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.TWO_FACTOR_AUTH).get();
     final DbAccessModule rtTrainingModule =
-        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
     final DbAccessModule ctTrainingModule =
-        accessModuleDao.findOneByName(AccessModuleName.CT_COMPLIANCE_TRAINING).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
     final DbAccessModule eRACommonsModule =
-        accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.ERA_COMMONS).get();
     final DbAccessModule duccModule =
-        accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     final DbAccessModule rasConfirmModule =
-        accessModuleDao.findOneByName(AccessModuleName.RAS_LOGIN_GOV).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
     Instant now = Instant.now();
     Timestamp twoFactorAuthBypassTime = Timestamp.from(now.minusSeconds(10));
     Timestamp twoFactorAuthCompleteTime = Timestamp.from(now.minusSeconds(20));
