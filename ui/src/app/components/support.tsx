@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { canonicalizeUrl, isValidUrl } from 'app/utils/urls';
+import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { Button, StyledExternalLink } from './buttons';
 
@@ -13,13 +13,8 @@ export const SupportMailto = ({ label = SUPPORT_EMAIL, style = {} }) => (
 );
 
 const handleClickSupportButton = (url) => () => {
-  if (url) {
-    const adjustedUrl = canonicalizeUrl(url);
-    if (isValidUrl(adjustedUrl)) {
-      url = adjustedUrl;
-    }
-  }
-  window.open(url ?? `mailto:${SUPPORT_EMAIL}`);
+  const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);
+  window.open(adjustedUrl);
 };
 export const SupportButton = ({
   label = SUPPORT_EMAIL,

@@ -15,7 +15,7 @@ import { AccountCreationOptions } from 'app/pages/login/account-creation/account
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { canonicalizeUrl, isValidUrl } from 'app/utils/urls';
+import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { isAbortError } from './errors';
 import { cond, isBlank, switchCase } from './index';
@@ -48,14 +48,8 @@ const EmailAddressMismatchErrorMessage = ({
 }: {
   requestAccessUrl: string;
 }) => {
-  let url = 'https://www.researchallofus.org/institutional-agreements';
-
-  if (requestAccessUrl) {
-    const adjustedUrl = canonicalizeUrl(requestAccessUrl);
-    if (isValidUrl(adjustedUrl)) {
-      url = adjustedUrl;
-    }
-  }
+  const defaultUrl = 'https://www.researchallofus.org/institutional-agreements';
+  const url = getCustomOrDefaultUrl(requestAccessUrl, defaultUrl);
 
   return (
     <div data-test-id='email-error-message' style={{ color: colors.danger }}>

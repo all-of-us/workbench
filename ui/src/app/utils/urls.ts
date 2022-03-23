@@ -10,11 +10,22 @@ export function canonicalizeUrl(url: string): string {
   return `http://${url}`;
 }
 
-export function isValidUrl(potentialUrl: string): boolean {
+function isValidUrl(potentialUrl: string): boolean {
   try {
     new URL(potentialUrl);
     return true;
   } catch (e) {
     return false;
   }
+}
+
+export function getCustomOrDefaultUrl(customUrl: string, defaultUrl: string) {
+  let url = defaultUrl;
+  if (customUrl) {
+    const adjustedUrl = canonicalizeUrl(customUrl);
+    if (isValidUrl(adjustedUrl)) {
+      url = adjustedUrl;
+    }
+  }
+  return url;
 }
