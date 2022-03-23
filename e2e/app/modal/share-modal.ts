@@ -7,7 +7,7 @@ import Button from 'app/element/button';
 import { ElementType } from 'app/xpath-options';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { logger } from 'libs/logger';
-import { elementExists } from 'utils/element-utils';
+import { exists } from 'utils/element-utils';
 
 const modalText = 'share this workspace';
 
@@ -139,11 +139,11 @@ export default class ShareModal extends Modal {
       this.page.waitForXPath(noSearchResultsXpath, { visible: true, timeout }),
       this.emailsDropdownExists(timeout)
     ]);
-    return elementExists(this.page, noSearchResultsXpath);
+    return !(await exists(this.page, noSearchResultsXpath));
   }
 
   private async emailsDropdownExists(timeout = 2000): Promise<boolean> {
-    return elementExists(this.page, this.getEmailsDropdownXpath(), { timeout });
+    return exists(this.page, this.getEmailsDropdownXpath(), { timeout });
   }
 
   private getEmailsDropdownXpath(): string {

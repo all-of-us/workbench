@@ -4,7 +4,7 @@ import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
 import DataTable from 'app/component/data-table';
 import { waitWhileLoading } from 'utils/waits-utils';
-import { elementExists } from 'utils/element-utils';
+import { exists } from 'utils/element-utils';
 
 export default class GenomicExtractionsSidebar extends BaseSidebar {
   constructor(page: Page) {
@@ -34,7 +34,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   // Extraction spinner status.
   async isInProgress(timeout?: number): Promise<boolean> {
     const extractionStatusSpinner = '//*[@data-test-id="extraction-status-icon-container"]/*[@data-icon="sync-alt"]';
-    return elementExists(this.page, extractionStatusSpinner, { timeout });
+    return exists(this.page, extractionStatusSpinner, { timeout });
   }
 
   /**

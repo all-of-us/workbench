@@ -2,7 +2,7 @@ import { Page } from 'puppeteer';
 import Container from 'app/container';
 import { MenuOption } from 'app/text-labels';
 import { waitWhileLoading } from 'utils/waits-utils';
-import { elementExists, getPropValue } from 'utils/element-utils';
+import { exists, getPropValue } from 'utils/element-utils';
 import Link from 'app/element/link';
 
 export default abstract class BaseMenu extends Container {
@@ -84,7 +84,7 @@ export default abstract class BaseMenu extends Container {
 
   protected async isOpen(xpath?: string): Promise<boolean> {
     xpath = xpath || this.getXpath();
-    return elementExists(this.page, xpath, { timeout: 2000 });
+    return exists(this.page, xpath, { timeout: 2000 });
   }
 
   // Find and hover over menuitem

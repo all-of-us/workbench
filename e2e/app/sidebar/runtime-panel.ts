@@ -10,7 +10,7 @@ import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
 import Checkbox from 'app/element/checkbox';
 import { waitWhileLoading } from 'utils/waits-utils';
-import { elementExists } from 'utils/element-utils';
+import { exists } from 'utils/element-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -364,7 +364,7 @@ export default class RuntimePanel extends BaseSidebar {
   // runtime status spinner.
   async existStatusIcon(timeout?: number): Promise<boolean> {
     const runtimeStatusSpinner = '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="sync-alt"]';
-    return elementExists(this.page, runtimeStatusSpinner, { timeout });
+    return exists(this.page, runtimeStatusSpinner, { timeout });
   }
 
   /**
@@ -382,12 +382,12 @@ export default class RuntimePanel extends BaseSidebar {
 
   async isRunning(): Promise<boolean> {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
-    return elementExists(this.page, xpath, { timeout: 1000 });
+    return exists(this.page, xpath);
   }
 
   async isStopped(): Promise<boolean> {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Stopped);
-    return elementExists(this.page, xpath, { timeout: 1000 });
+    return exists(this.page, xpath);
   }
 
   async clickDeleteEnvironmentButton(): Promise<void> {

@@ -2,7 +2,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { LinkText } from 'app/text-labels';
 import Button from 'app/element/button';
-import { elementExists } from 'utils/element-utils';
+import { exists } from 'utils/element-utils';
 
 /**
  * This is the super base class.
@@ -20,7 +20,7 @@ export default class Container {
   }
 
   async isVisible(timeout = 1000): Promise<boolean> {
-    return elementExists(this.page, this.getXpath(), { timeout });
+    return exists(this.page, this.getXpath(), { timeout });
   }
 
   async waitUntilVisible(timeout = 60000): Promise<void> {

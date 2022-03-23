@@ -1,6 +1,6 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
-import { elementExists, getPropValue } from 'utils/element-utils';
+import { exists, getPropValue } from 'utils/element-utils';
 import BaseCard from './base-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { logger } from 'libs/logger';
@@ -105,7 +105,7 @@ export default class WorkspaceCard extends BaseCard {
 
   async controlledTierIconExists(): Promise<boolean> {
     const xpath = `${this.getXpath()}//*[local-name()="svg" and child::*[text()="Controlled Tier"]]`;
-    return elementExists(this.page, xpath, { timeout: 1000 });
+    return exists(this.page, xpath);
   }
 
   /**

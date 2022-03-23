@@ -1,7 +1,7 @@
 import { buildXPath } from 'app/xpath-builders';
 import { ElementHandle, Page } from 'puppeteer';
 import { ElementType } from 'app/xpath-options';
-import { elementExists } from 'utils/element-utils';
+import { exists } from 'utils/element-utils';
 
 export enum NavLink {
   HOME = 'Home',
@@ -103,6 +103,6 @@ export default class Navigation {
   // Determine the open state by looking for a visible Home icon
   private static async sideNavIsOpen(page: Page): Promise<boolean> {
     const xpath = buildXPath({ name: 'Home', type: ElementType.Icon, iconShape: 'home' });
-    return elementExists(page, xpath, { timeout: 2000 });
+    return exists(page, xpath);
   }
 }

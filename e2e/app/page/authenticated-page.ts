@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
 import BasePage from 'app/page/base-page';
-import { elementExists, getPropValue } from 'utils/element-utils';
+import { exists, getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/sidebar/help-tips-sidebar';
 import { logger } from 'libs/logger';
 
@@ -14,7 +14,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
-    return elementExists(this.page, process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout });
+    return exists(this.page, process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout });
   }
 
   /**
