@@ -69,10 +69,7 @@ Fill out local test user credentials
 * Run one test in **headful mode** (with the browser interactions visible to
   you) <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 * Run all tests in parallel in **headless mode** on "test" environment <div class="text-blue">`yarn test`</div>
-* Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
-* Run tests against a local UI and API server (RW-6132 will eliminate this distinction):
-    * Ensure your API server is running, e.g. `api$ ./project.rb dev-up`
-    * `e2e$ yarn test-local-devup`
+* Run one test on your local server (UI and API or just UI) <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is
   useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
     * Navigate to `chrome://inspect` after launching the tests to debug test code
