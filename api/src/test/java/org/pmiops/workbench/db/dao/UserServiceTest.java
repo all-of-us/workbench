@@ -550,26 +550,29 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService() {
+  public void test_validateAllOfUsTermsOfService() {
     // does not throw
-    userService.validateTermsOfService(LATEST_AOU_TOS_VERSION);
+    userService.validateAllOfUsTermsOfService(LATEST_AOU_TOS_VERSION);
   }
 
   @Test
-  public void test_validateTermsOfService_null_version() {
+  public void test_validateAllOfUsTermsOfService_null_version() {
     final Integer badVersion = null;
-    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(badVersion));
+    assertThrows(
+        BadRequestException.class, () -> userService.validateAllOfUsTermsOfService(badVersion));
   }
 
   @Test
-  public void test_validateTermsOfService_wrong_version() {
+  public void test_validateAllOfUsTermsOfService_wrong_version() {
     assertThrows(
         BadRequestException.class,
-        () -> userService.validateTermsOfService(LATEST_AOU_TOS_VERSION - 1));
+        () -> userService.validateAllOfUsTermsOfService(LATEST_AOU_TOS_VERSION - 1));
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser() {
+  public void test_validateTermsOfService_dbUser()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
     DbUser user = userDao.findUserByUsername(USERNAME);
     userTermsOfServiceDao.save(
         new DbUserTermsOfService()
@@ -581,7 +584,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_no_tos_entry() {
+  public void test_validateAllOfUsTermsOfService_dbUser_no_tos_entry() {
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
   }

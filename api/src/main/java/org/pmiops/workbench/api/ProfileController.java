@@ -188,10 +188,10 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Boolean> getUserTerraTermsOfServiceStatus() {
+  public ResponseEntity<Void> validateUserTermsOfServiceStatus() {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
-    boolean termsOfServiceAccepted = userService.getUserTerraTermsOfServiceStatus(loggedInUser);
-    return ResponseEntity.ok(termsOfServiceAccepted);
+    userService.validateTermsOfService(loggedInUser);
+    return ResponseEntity.ok().build();
   }
 
   @Override
@@ -214,7 +214,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyCaptcha(request.getCaptchaVerificationToken());
     }
 
-    userService.validateTermsOfService(request.getTermsOfServiceVersion());
+    userService.validateAllOfUsTermsOfService(request.getTermsOfServiceVersion());
 
     profileService.validateAffiliation(request.getProfile());
 

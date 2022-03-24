@@ -372,11 +372,13 @@ export const useNeedsToAcceptTOS = () => {
     } else {
       (async () => {
         try {
-          const userAcceptedTerraTOS =
-            await profileApi().getUserTerraTermsOfServiceStatus();
-          setUserRequiredToAcceptTOS(!userAcceptedTerraTOS);
+          await profileApi().validateUserTermsOfServiceStatus();
+          setUserRequiredToAcceptTOS(false);
         } catch (e) {
-          console.log('Error while getting user terms of service');
+          const errorResponse = await convertAPIError(e);
+          if (errorResponse.statusCode === 400) {
+            setUserRequiredToAcceptTOS(true);
+          }
         }
       })();
     }

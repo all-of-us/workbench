@@ -55,7 +55,7 @@ public interface UserService {
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
   DbUser submitDUCC(DbUser user, Integer duccSignedVersion, String initials);
 
-  void validateTermsOfService(Integer tosVersion);
+  void validateAllOfUsTermsOfService(Integer tosVersion);
 
   void validateTermsOfService(@Nonnull DbUser dbUser);
 

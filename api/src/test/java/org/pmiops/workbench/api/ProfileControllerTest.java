@@ -170,6 +170,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_DUCC_VERSION = 27; // arbitrary for test
+  private static final String TERRA_TOS_NOT_ACCEPTED_ERROR_MESSAGE =
+      "Terra Terms of Service has not been Accepted or version is not up to date";
+  private static final String AOU_TOS_LATEST_VERSION_NOT_ACCEPTED =
+      "All of Us Terms of Service version is not up to date";
+  private static final String AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE =
+      "No Terms of Service acceptance recorded for user ID %s";
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
@@ -577,12 +583,46 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGetUserTerraTermsOfServiceStatus_UserHasNotAcceptedTerraTOS()
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS()
       throws org.pmiops.workbench.firecloud.ApiException {
     when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
     createAccountAndDbUserWithAffiliation();
 
-    assertThat(profileController.getUserTerraTermsOfServiceStatus().getBody()).isEqualTo(false);
+    final BadRequestException badRequestexception =
+        assertThrows(
+            BadRequestException.class, () -> profileController.validateUserTermsOfServiceStatus());
+    assertThat(badRequestexception.getMessage()).contains(TERRA_TOS_NOT_ACCEPTED_ERROR_MESSAGE);
+  }
+
+  @Test
+  public void testValidatesUserTermsOfServiceStatus_UserHasNotAcceptedLatestAoUTOSVersion() {
+    createAccountAndDbUserWithAffiliation();
+    DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
+    userTermsOfServiceDao.save(
+        userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId()).setTosVersion(-1));
+    final BadRequestException badRequestexception =
+        assertThrows(
+            BadRequestException.class, () -> profileController.validateUserTermsOfServiceStatus());
+    assertThat(badRequestexception.getMessage()).contains(AOU_TOS_LATEST_VERSION_NOT_ACCEPTED);
+  }
+
+  @Test
+  public void testValidatesUserTermsOfServiceStatus_UserHasNotAcceptedAoUTOS() {
+    createAccountAndDbUserWithAffiliation();
+    DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
+    DbUserTermsOfService userTos = userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId());
+    userTermsOfServiceDao.delete(userTos);
+    final BadRequestException badRequestexception =
+        assertThrows(
+            BadRequestException.class, () -> profileController.validateUserTermsOfServiceStatus());
+    assertThat(badRequestexception.getMessage())
+        .contains(String.format(AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE, user.getUserId()));
+  }
+
+  @Test
+  public void testValidatesUserTermsOfServiceStatus() {
+    createAccountAndDbUserWithAffiliation();
+    profileController.validateUserTermsOfServiceStatus();
   }
 
   @Test
