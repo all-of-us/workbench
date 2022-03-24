@@ -18,7 +18,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AccessModuleStatus;
@@ -84,9 +84,9 @@ public class CloudTaskUserControllerTest {
 
   @Test
   public void testSynchronizeAccess() {
-    when(mockAccessModuleService.getAccessModuleStatus(userA, AccessModuleName.TWO_FACTOR_AUTH))
+    when(mockAccessModuleService.getAccessModuleStatus(userA, DbAccessModuleName.TWO_FACTOR_AUTH))
         .thenReturn(Optional.of(new AccessModuleStatus().completionEpochMillis(123L)));
-    when(mockAccessModuleService.getAccessModuleStatus(userB, AccessModuleName.TWO_FACTOR_AUTH))
+    when(mockAccessModuleService.getAccessModuleStatus(userB, DbAccessModuleName.TWO_FACTOR_AUTH))
         .thenReturn(Optional.of(new AccessModuleStatus()));
 
     // kluge to prevent test NPEs on the return value of syncDuccVersionStatus()

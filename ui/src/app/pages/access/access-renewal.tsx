@@ -28,11 +28,11 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByNameOrEmpty,
+  isExpiringOrExpired,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
-import { getWholeDaysFromNow } from 'app/utils/dates';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
@@ -132,38 +132,25 @@ const syncAndReloadTraining = fp.flow(
   await profileApi().syncComplianceTrainingStatus();
 });
 
+export const RenewalRequirementsText = () => (
+  <span>
+    Researchers are required to complete a number of steps as part of the annual
+    renewal to maintain access to <AoU /> data. Renewal of access will occur on
+    a rolling basis annually (i.e. for each user, access renewal will be due 365
+    days after the date of authorization to access <AoU /> data).
+  </span>
+);
+
 // Helper Functions
-// The module has already expired
-export const hasExpired = (expiration: number): boolean =>
-  !!expiration && getWholeDaysFromNow(expiration) < 0;
 
-// The module can either be expired or is expiring
-export const isExpiring = (expiration: number): boolean =>
-  expiration
-    ? getWholeDaysFromNow(expiration) <=
-      serverConfigStore.get().config.accessRenewalLookback
-    : false;
-
-const isModuleExpiring = (status: AccessModuleStatus): boolean =>
-  isExpiring(status?.expirationEpochMillis);
-
-export const isExpiringNotBypassed = (moduleStatus: AccessModuleStatus) => {
-  return isModuleExpiring(moduleStatus) && !moduleStatus.bypassEpochMillis;
-};
-
-const isExpiringAndNotBypassed = (
-  moduleName: AccessModule,
-  modules: AccessModuleStatus[]
-) => {
-  const status = modules?.find((m) => m.moduleName === moduleName);
-  return isExpiringNotBypassed(status);
-};
-
-const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
+// is the module "renewal complete" ?
+// meaning (bypassed || (complete and not expiring))
+const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
   const isComplete = !!status?.completionEpochMillis;
   const wasBypassed = !!status?.bypassEpochMillis;
   return (
-    wasBypassed || (isComplete && !isExpiring(status?.expirationEpochMillis))
+    wasBypassed ||
+    (isComplete && !isExpiringOrExpired(status?.expirationEpochMillis))
   );
 };
 
@@ -205,7 +192,7 @@ const ActionButton = ({
   style,
 }: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus?.bypassEpochMillis;
-  return bypassedOrCompleteAndNotExpiring(moduleStatus) ? (
+  return isRenewalCompleteForModule(moduleStatus) ? (
     <CompletedOrBypassedButton
       completedText={completedButtonText}
       wasBypassed={wasBypassed}
@@ -294,13 +281,13 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
       accessRenewalModules.includes(moduleStatus.moduleName)
     );
     const accessRenewalCompleted = expirableModules.every(
-      bypassedOrCompleteAndNotExpiring
+      isRenewalCompleteForModule
     );
 
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
     useEffect(() => {
       const expiringModuleNames: AccessModule[] = expirableModules
-        .filter((status) => isExpiring(status.expirationEpochMillis))
+        .filter((status) => isExpiringOrExpired(status.expirationEpochMillis))
         .map((status) => status.moduleName);
 
       const onMount = async () => {
@@ -364,11 +351,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 : { gridColumnStart: 2 }
             }
           >
-            Researchers are required to complete a number of steps as part of
-            the annual renewal to maintain access to <AoU /> data. Renewal of
-            access will occur on a rolling basis annually (i.e. for each user,
-            access renewal will be due 365 days after the date of authorization
-            to access <AoU /> data.
+            <RenewalRequirementsText />
           </div>
           {accessRenewalCompleted && (
             <div
@@ -469,7 +452,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               <RadioButton
                 data-test-id='nothing-to-report'
                 id={noReportId}
-                disabled={bypassedOrCompleteAndNotExpiring(
+                disabled={isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
                     AccessModule.PUBLICATIONCONFIRMATION
@@ -485,7 +468,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               <RadioButton
                 data-test-id='report-submitted'
                 id={reportId}
-                disabled={bypassedOrCompleteAndNotExpiring(
+                disabled={isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
                     AccessModule.PUBLICATIONCONFIRMATION
@@ -513,9 +496,11 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 courses to understand the privacy safeguards and the compliance
                 requirements for using the <AoU /> Dataset.
               </div>
-              {isExpiringAndNotBypassed(
-                AccessModule.COMPLIANCETRAINING,
-                modules
+              {!isRenewalCompleteForModule(
+                getAccessModuleStatusByNameOrEmpty(
+                  modules,
+                  AccessModule.COMPLIANCETRAINING
+                )
               ) && (
                 <div style={renewalStyle.complianceTrainingExpiring}>
                   When you have completed the training click the refresh button
@@ -535,9 +520,11 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                     redirectToRegisteredTraining();
                   }}
                 />
-                {isExpiringAndNotBypassed(
-                  AccessModule.COMPLIANCETRAINING,
-                  modules
+                {!isRenewalCompleteForModule(
+                  getAccessModuleStatusByNameOrEmpty(
+                    modules,
+                    AccessModule.COMPLIANCETRAINING
+                  )
                 ) && (
                   <Button
                     disabled={refreshButtonDisabled}

@@ -1,9 +1,5 @@
 package org.pmiops.workbench.access;
 
-import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
-import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
-import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
@@ -21,7 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
@@ -40,28 +36,31 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final Provider<List<DbAccessModule>> dbAccessModulesProvider;
   private final Clock clock;
 
+  private final AccessModuleNameMapper accessModuleNameMapper;
+  private final Provider<WorkbenchConfig> configProvider;
   private final UserAccessModuleDao userAccessModuleDao;
+  private final UserAccessModuleMapper userAccessModuleMapper;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
-  private final Provider<WorkbenchConfig> configProvider;
-  private final UserAccessModuleMapper userAccessModuleMapper;
 
   @Autowired
   public AccessModuleServiceImpl(
-      Provider<List<DbAccessModule>> dbAccessModulesProvider,
+      AccessModuleNameMapper accessModuleNameMapper,
       Clock clock,
-      UserAccessModuleDao userAccessModuleDao,
-      UserDao userDao,
-      UserServiceAuditor userServiceAuditor,
+      Provider<List<DbAccessModule>> dbAccessModulesProvider,
       Provider<WorkbenchConfig> configProvider,
-      UserAccessModuleMapper userAccessModuleMapper) {
-    this.dbAccessModulesProvider = dbAccessModulesProvider;
+      UserAccessModuleDao userAccessModuleDao,
+      UserAccessModuleMapper userAccessModuleMapper,
+      UserDao userDao,
+      UserServiceAuditor userServiceAuditor) {
+    this.accessModuleNameMapper = accessModuleNameMapper;
     this.clock = clock;
+    this.configProvider = configProvider;
+    this.dbAccessModulesProvider = dbAccessModulesProvider;
     this.userAccessModuleDao = userAccessModuleDao;
+    this.userAccessModuleMapper = userAccessModuleMapper;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
-    this.configProvider = configProvider;
-    this.userAccessModuleMapper = userAccessModuleMapper;
   }
 
   @Override
@@ -73,10 +72,13 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
     DbAccessModule accessModule =
-        getDbAccessModuleFromApi(dbAccessModulesProvider.get(), accessModuleName);
+        getDbAccessModuleOrThrow(
+            dbAccessModulesProvider.get(),
+            accessModuleNameMapper.clientAccessModuleToStorage(accessModuleName));
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
+
     final DbUser user = userDao.findUserByUserId(userId);
     DbUserAccessModule userAccessModuleToUpdate =
         retrieveUserAccessModuleOrCreate(user, accessModule);
@@ -93,14 +95,14 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     userAccessModuleDao.save(userAccessModuleToUpdate);
     userServiceAuditor.fireAdministrativeBypassTime(
         user.getUserId(),
-        auditAccessModuleFromStorage(accessModule.getName()),
+        accessModuleNameMapper.bypassAuditPropertyFromStorage(accessModule.getName()),
         Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
         Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
   }
 
   @Override
   public void updateCompletionTime(
-      DbUser dbUser, AccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
+      DbUser dbUser, DbAccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModuleToUpdate =
@@ -119,7 +121,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public Optional<AccessModuleStatus> getAccessModuleStatus(
-      DbUser user, AccessModuleName accessModuleName) {
+      DbUser user, DbAccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
@@ -150,19 +152,21 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
-    DbAccessModule dbAccessModule =
-        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+  public boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName) {
     // if the module is not required, the user is always compliant
-    if (!isModuleRequiredInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+    if (!isModuleRequiredInEnvironment(
+        accessModuleNameMapper.storageAccessModuleToClient(accessModuleName))) {
       return true;
     }
+
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
     boolean isCompleted = userAccessModule.getCompletionTime() != null;
 
     // we have an additional check before considering DUCC "complete"
-    if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
+    if (isCompleted && accessModuleName == DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
       isCompleted = hasUserSignedACurrentDucc(dbUser);
     }
 
@@ -176,7 +180,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName) {
+  public boolean isModuleBypassed(DbUser dbUser, DbAccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     return dbAccessModule.getBypassable()
@@ -218,7 +222,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   private static DbAccessModule getDbAccessModuleOrThrow(
-      List<DbAccessModule> dbAccessModules, AccessModuleName accessModuleName) {
+      List<DbAccessModule> dbAccessModules, DbAccessModuleName accessModuleName) {
     return dbAccessModules.stream()
         .filter(a -> a.getName() == accessModuleName)
         .findFirst()
@@ -226,11 +230,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             () ->
                 new BadRequestException(
                     "There is no access module named: " + accessModuleName.toString()));
-  }
-
-  private static DbAccessModule getDbAccessModuleFromApi(
-      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
-    return getDbAccessModuleOrThrow(dbAccessModules, clientAccessModuleToStorage(apiAccessModule));
   }
 
   /**

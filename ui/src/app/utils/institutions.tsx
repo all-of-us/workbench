@@ -15,6 +15,7 @@ import { AccountCreationOptions } from 'app/pages/login/account-creation/account
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { isAbortError } from './errors';
 import { cond, isBlank, switchCase } from './index';
@@ -42,16 +43,20 @@ export async function checkInstitutionalEmail(
   }
 }
 
-const EmailAddressMismatchErrorMessage = () => {
+const EmailAddressMismatchErrorMessage = ({
+  requestAccessUrl,
+}: {
+  requestAccessUrl: string;
+}) => {
+  const defaultUrl = 'https://www.researchallofus.org/institutional-agreements';
+  const url = getCustomOrDefaultUrl(requestAccessUrl, defaultUrl);
+
   return (
     <div data-test-id='email-error-message' style={{ color: colors.danger }}>
       The institution has authorized access only to select members.
       <br />
       Please{' '}
-      <a
-        href='https://www.researchallofus.org/institutional-agreements'
-        target='_blank'
-      >
+      <a href={url} target='_blank'>
         click here
       </a>{' '}
       to request to be added to the institution
@@ -79,7 +84,11 @@ export const getEmailValidationErrorMessage = (
     InstitutionMembershipRequirement.ADDRESSES
   ) {
     // Institution requires an exact email address match and the email is not in allowed emails list
-    return <EmailAddressMismatchErrorMessage />;
+    return (
+      <EmailAddressMismatchErrorMessage
+        requestAccessUrl={institution.requestAccessUrl}
+      />
+    );
   } else {
     // Institution requires email domain matching and the domain is not in the allowed list
     return <EmailDomainMismatchErrorMessage />;

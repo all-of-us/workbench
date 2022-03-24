@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -38,8 +38,9 @@ public class UserAccessModuleDaoTest {
     user = userDao.save(user);
 
     TestMockFactory.createAccessModules(accessModuleDao);
-    twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
-    rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    twoFactorAuthModule = accessModuleDao.findOneByName(DbAccessModuleName.TWO_FACTOR_AUTH).get();
+    rtTrainingModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
   }
 
   @Test
