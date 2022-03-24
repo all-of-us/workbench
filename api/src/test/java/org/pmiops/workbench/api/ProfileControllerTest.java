@@ -931,6 +931,10 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_messagingException() throws MessagingException {
+    config.access.tiersVisibleToUsers =
+        Arrays.asList(
+            AccessTierService.REGISTERED_TIER_SHORT_NAME,
+            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
     createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(null);
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
@@ -950,6 +954,11 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_OK() throws MessagingException {
+    config.access.tiersVisibleToUsers =
+        Arrays.asList(
+            AccessTierService.REGISTERED_TIER_SHORT_NAME,
+            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
+
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doNothing()
