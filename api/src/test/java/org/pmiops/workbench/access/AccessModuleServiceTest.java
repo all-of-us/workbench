@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -215,6 +216,7 @@ public class AccessModuleServiceTest {
             .setCompletionTime(twoFactorCompletionTime);
     AccessModuleStatus expected2FAModuleStatus =
         new AccessModuleStatus()
+            .moduleName(AccessModule.TWO_FACTOR_AUTH)
             .moduleNameTemp(AccessModuleName.TWO_FACTOR_AUTH)
             .completionEpochMillis(twoFactorCompletionTime.getTime());
 
@@ -231,6 +233,7 @@ public class AccessModuleServiceTest {
             .setCompletionTime(rtTrainingCompletionTime);
     AccessModuleStatus expectedRtTrainingModuleStatus =
         new AccessModuleStatus()
+            .moduleName(AccessModule.COMPLIANCE_TRAINING)
             .moduleNameTemp(AccessModuleName.RT_COMPLIANCE_TRAINING)
             .completionEpochMillis(rtTrainingCompletionTime.getTime())
             .bypassEpochMillis(rtTrainingBypassTime.getTime());
@@ -249,6 +252,7 @@ public class AccessModuleServiceTest {
             .setCompletionTime(profileCompletionTime);
     AccessModuleStatus expectedProfileModuleStatus =
         new AccessModuleStatus()
+            .moduleName(AccessModule.PROFILE_CONFIRMATION)
             .moduleNameTemp(AccessModuleName.PROFILE_CONFIRMATION)
             .completionEpochMillis(profileCompletionTime.getTime())
             .expirationEpochMillis(expectedProfileExpirationTime.getTime());
@@ -266,6 +270,7 @@ public class AccessModuleServiceTest {
             .setCompletionTime(publicationCompletionTime);
     AccessModuleStatus expectedPublicationModuleStatus =
         new AccessModuleStatus()
+            .moduleName(AccessModule.PUBLICATION_CONFIRMATION)
             .moduleNameTemp(AccessModuleName.PUBLICATION_CONFIRMATION)
             .completionEpochMillis(publicationCompletionTime.getTime())
             .expirationEpochMillis(expectedPublicationExpirationTime.getTime());
@@ -274,7 +279,9 @@ public class AccessModuleServiceTest {
     DbUserAccessModule duccAccessModule =
         new DbUserAccessModule().setAccessModule(ducc).setUser(user);
     AccessModuleStatus expectedDuccModuleStatus =
-        new AccessModuleStatus().moduleNameTemp(AccessModuleName.DATA_USER_CODE_OF_CONDUCT);
+        new AccessModuleStatus()
+            .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+            .moduleNameTemp(AccessModuleName.DATA_USER_CODE_OF_CONDUCT);
 
     userAccessModuleDao.saveAll(
         ImmutableList.of(
@@ -317,6 +324,7 @@ public class AccessModuleServiceTest {
             .setCompletionTime(twoFactorCompletionTime);
     AccessModuleStatus expected2FAModuleStatus =
         new AccessModuleStatus()
+            .moduleName(AccessModule.TWO_FACTOR_AUTH)
             .moduleNameTemp(AccessModuleName.TWO_FACTOR_AUTH)
             .completionEpochMillis(twoFactorCompletionTime.getTime());
 

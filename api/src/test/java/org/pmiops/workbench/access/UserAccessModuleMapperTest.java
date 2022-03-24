@@ -9,6 +9,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -42,6 +43,7 @@ public class UserAccessModuleMapperTest {
     assertThat(mapper.dbToModule(dbUserAccessModule, expirationTime))
         .isEqualTo(
             new AccessModuleStatus()
+                .moduleName(AccessModule.ERA_COMMONS)
                 .moduleNameTemp(AccessModuleName.ERA_COMMONS)
                 .bypassEpochMillis(bypassTime.getTime())
                 .expirationEpochMillis(expirationTime.getTime())
@@ -62,6 +64,7 @@ public class UserAccessModuleMapperTest {
     assertThat(mapper.dbToModule(dbUserAccessModule, expirationTime))
         .isEqualTo(
             new AccessModuleStatus()
+                .moduleName(AccessModule.ERA_COMMONS)
                 .moduleNameTemp(AccessModuleName.ERA_COMMONS)
                 .completionEpochMillis(completionTime.getTime()));
   }
