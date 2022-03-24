@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This generates big query denormalized tables for search, review and datasets.
+# This generates the prep_survey table.
 
 set -e
 
@@ -150,14 +150,36 @@ function increment_answer_parent_id() {
   ANSWER_PARENT_ID=$(($1))
 }
 
+# run this query to initializing our .bigqueryrc configuration file
+# otherwise this will corrupt the output of the first call to find_info()
+simple_select
+
+if [[ "$FILE_NAME" = "socialdeterminantsofhea_staged.csv" ]]; then
+  #  Getting count for SDOH Survey
+  query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+  where concept_id = 40192389"
+  sdohCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+  if [[ "$sdohCount" = 0 ]]; then
+    # If no concept exists for sdoh survey then exit gracefully
+    exit 0
+  fi
+fi
+
+if [[ "$FILE_NAME" = "winterminutesurveyoncov_staged.csv" ]]; then
+  #  Getting count for Cope Minute Survey
+  query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+  where concept_id = 765936"
+  minuteCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+  if [[ "$minuteCount" = 0 ]]; then
+    # If no concept exists for minute survey then exit gracefully
+    exit 0
+  fi
+fi
+
 rm -rf "$TEMP_FILE_DIR"
 mkdir "$TEMP_FILE_DIR"
 
 gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
-
-# run this query to initializing our .bigqueryrc configuration file
-# otherwise this will corrupt the output of the first call to find_info()
-simple_select
 
 while IFS=$'|' read -r concept_code survey_name topic answers;
 do
