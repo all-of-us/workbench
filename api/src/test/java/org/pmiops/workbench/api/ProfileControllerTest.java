@@ -57,7 +57,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
@@ -539,15 +539,15 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
-    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, TIMESTAMP);
-    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
-    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
+        dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, TIMESTAMP);
+        dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, TIMESTAMP);
     accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PROFILE_CONFIRMATION, TIMESTAMP);
+        dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, TIMESTAMP);
 
     // arbitrary; at coding time the current version is 3
     final int versionA = 5;
@@ -1519,29 +1519,23 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME),
+            eq(BypassTimeTargetProperty.DATA_USER_CODE_OF_CONDUCT),
             any(),
             any());
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME),
+            eq(BypassTimeTargetProperty.RT_COMPLIANCE_TRAINING),
             any(),
             any());
 
     // ERA and 2FA once in request 2
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME),
-            any(),
-            any());
+            eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.ERA_COMMONS), any(), any());
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME),
-            any(),
-            any());
+            eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH), any(), any());
   }
 
   @Test
@@ -1620,7 +1614,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     dbUser.setRasLinkLoginGovUsername(loginGovUsername);
     dbUser = userDao.save(dbUser);
-    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
 
     when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl()))
         .thenReturn(dbUser);

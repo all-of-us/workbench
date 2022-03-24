@@ -13,7 +13,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
@@ -126,7 +126,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // bother checking them either.
         if (!user.getDisabled()) {
           Optional<AccessModuleStatus> status =
-              accessModuleService.getAccessModuleStatus(user, AccessModuleName.TWO_FACTOR_AUTH);
+              accessModuleService.getAccessModuleStatus(user, DbAccessModuleName.TWO_FACTOR_AUTH);
           if (status.isPresent() && status.get().getCompletionEpochMillis() != null) {
             user = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
           }

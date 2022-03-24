@@ -7,7 +7,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
@@ -16,7 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@Import({FakeClockConfiguration.class, UserAccessModuleMapperImpl.class, CommonMappers.class})
+@Import({
+  AccessModuleNameMapperImpl.class,
+  CommonMappers.class,
+  FakeClockConfiguration.class,
+  UserAccessModuleMapperImpl.class,
+})
 @SpringJUnitConfig
 public class UserAccessModuleMapperTest {
   @Autowired private UserAccessModuleMapper mapper;
@@ -31,7 +36,7 @@ public class UserAccessModuleMapperTest {
     DbUserAccessModule dbUserAccessModule =
         new DbUserAccessModule()
             .setBypassTime(bypassTime)
-            .setAccessModule(new DbAccessModule().setName(AccessModuleName.ERA_COMMONS))
+            .setAccessModule(new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS))
             .setCompletionTime(completionTime);
 
     assertThat(mapper.dbToModule(dbUserAccessModule, expirationTime))
@@ -51,7 +56,7 @@ public class UserAccessModuleMapperTest {
     DbUserAccessModule dbUserAccessModule =
         new DbUserAccessModule()
             .setBypassTime(bypassTime)
-            .setAccessModule(new DbAccessModule().setName(AccessModuleName.ERA_COMMONS))
+            .setAccessModule(new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS))
             .setCompletionTime(completionTime);
 
     assertThat(mapper.dbToModule(dbUserAccessModule, expirationTime))

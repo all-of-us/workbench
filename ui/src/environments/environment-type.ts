@@ -69,6 +69,9 @@ export interface EnvironmentBase {
   // RW-7973 whether we should use async operations for Create and Duplicate Workspace
   enableAsyncWorkspaceOperations: boolean;
 
+  // RW-7764 merge access-renewal into data-access-requirements
+  mergedAccessRenewal: boolean;
+
   // RW-7834: Enable redirecting logged in users who have not accepted latest AoU and Terra Terms of Service
   // to Terms Of Service page
   enableTOSRedirectForLoggedInUser: boolean;
