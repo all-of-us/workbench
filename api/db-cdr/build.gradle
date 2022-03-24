@@ -28,6 +28,7 @@ liquibase {
             url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
+            classpath "$rootDir"
         }
         data {
             if (project.hasProperty('contexts')) {
@@ -37,6 +38,7 @@ liquibase {
             url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
+            classpath "$rootDir"
         }
         add_bigdata_indexes {
             if (project.hasProperty('contexts')) {
@@ -46,6 +48,7 @@ liquibase {
             url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
+            classpath "$rootDir"
         }
         drop_bigdata_indexes {
             if (project.hasProperty('contexts')) {
@@ -55,6 +58,7 @@ liquibase {
             url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
+            classpath "$rootDir"
         }
         runList = project.ext.runList
     }
