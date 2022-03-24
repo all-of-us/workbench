@@ -22,4 +22,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableAsyncWorkspaceOperations: true,
+  enableTOSRedirectForLoggedInUser: false,
 };

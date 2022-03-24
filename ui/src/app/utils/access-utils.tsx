@@ -10,6 +10,7 @@ import {
   Profile,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
@@ -367,7 +368,11 @@ export const useNeedsToAcceptTOS = () => {
     boolean | undefined
   >(false);
   useEffect(() => {
-    if (!authLoaded || !isSignedIn) {
+    if (
+      !authLoaded ||
+      !isSignedIn ||
+      !environment.enableTOSRedirectForLoggedInUser
+    ) {
       setUserRequiredToAcceptTOS(false);
     } else {
       (async () => {
