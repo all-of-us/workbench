@@ -268,7 +268,7 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void validateTermsOfServiceStatus() throws ApiException {
+  public void getUserTermsOfServiceStatus() throws ApiException {
     service.getUserTermsOfServiceStatus();
     verify(termsOfServiceApi).getTermsOfServiceStatus();
   }

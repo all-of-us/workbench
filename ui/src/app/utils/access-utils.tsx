@@ -367,11 +367,7 @@ export const useNeedsToAcceptTOS = () => {
     boolean | undefined
   >(false);
   useEffect(() => {
-    if (!authLoaded) {
-      return;
-    }
-
-    if (!isSignedIn) {
+    if (!authLoaded || !isSignedIn) {
       setUserRequiredToAcceptTOS(false);
     } else {
       (async () => {

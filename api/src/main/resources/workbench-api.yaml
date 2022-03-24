@@ -240,11 +240,11 @@ paths:
     get:
       tags:
         - profile
-      description: Retrieves if the logged in user has accepted Terra service or not
+      description: Retrieves if the logged in user has accepted the current version of Terra service
       operationId: getUserTerraTermsOfServiceStatus
       responses:
         200:
-          description: Returns false if user is required to accept Terra Terms of Service, else true
+          description: Returns true if user has already accepted the current version of Terra Terms of Service
           schema:
             type: boolean
 
@@ -252,14 +252,14 @@ paths:
     post:
       tags:
         - profile
-      description: User accepts AOU and Terra Terms of Service
+      description: User accepts current version of Terra and specific version Of All of Us Terms of Service
       operationId: acceptTermsOfService
       parameters:
       - in: query
         name: termsOfServiceVersion
         type: integer
         format: int32
-        description: 'Version of the TOS that the user has acknowledged'
+        description: 'Version of the All of Us TOS that the user has acknowledged'
       responses:
         204:
           description: User has accepted AOU and Terra Terms of service.
