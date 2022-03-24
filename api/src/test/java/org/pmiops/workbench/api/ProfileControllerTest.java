@@ -587,42 +587,31 @@ public class ProfileControllerTest extends BaseControllerTest {
       throws org.pmiops.workbench.firecloud.ApiException {
     when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
     createAccountAndDbUserWithAffiliation();
-
-    final BadRequestException badRequestexception =
-        assertThrows(
-            BadRequestException.class, () -> profileController.validateUserTermsOfServiceStatus());
-    assertThat(badRequestexception.getMessage()).contains(TERRA_TOS_NOT_ACCEPTED_ERROR_MESSAGE);
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }
 
   @Test
-  public void testValidatesUserTermsOfServiceStatus_UserHasNotAcceptedLatestAoUTOSVersion() {
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedLatestAoUTOSVersion() {
     createAccountAndDbUserWithAffiliation();
     DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
     userTermsOfServiceDao.save(
         userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId()).setTosVersion(-1));
-    final BadRequestException badRequestexception =
-        assertThrows(
-            BadRequestException.class, () -> profileController.validateUserTermsOfServiceStatus());
-    assertThat(badRequestexception.getMessage()).contains(AOU_TOS_LATEST_VERSION_NOT_ACCEPTED);
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }
 
   @Test
-  public void testValidatesUserTermsOfServiceStatus_UserHasNotAcceptedAoUTOS() {
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedAoUTOS() {
     createAccountAndDbUserWithAffiliation();
     DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
     DbUserTermsOfService userTos = userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId());
     userTermsOfServiceDao.delete(userTos);
-    final BadRequestException badRequestexception =
-        assertThrows(
-            BadRequestException.class, () -> profileController.validateUserTermsOfServiceStatus());
-    assertThat(badRequestexception.getMessage())
-        .contains(String.format(AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE, user.getUserId()));
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }
 
   @Test
-  public void testValidatesUserTermsOfServiceStatus() {
+  public void testGetUserTermsOfServiceStatus() {
     createAccountAndDbUserWithAffiliation();
-    profileController.validateUserTermsOfServiceStatus();
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isTrue();
   }
 
   @Test

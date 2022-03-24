@@ -305,7 +305,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
                 onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
                 filePath={'/aou-tos.html'}
                 afterPrev={false}
-                style={{ height: '35rem' }}
+                style={{ height: '36rem' }}
               />
             )}
             {overriddenUrl && (

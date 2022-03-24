@@ -155,9 +155,10 @@ public class ProfileController implements ProfileApiDelegate {
       // by approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
       try {
         userService.validateTermsOfService(dbUser);
-        userService.acceptTerraTermsOfService(dbUser);
       } catch (BadRequestException e) {
-        // TODO 7834
+        // Assumption is that user has accepted the latest Aou terms of service agreement
+        // TODO if the assumption is incorrect do we redirect the user to Terms of service page
+        userService.acceptTerraTermsOfService(dbUser);
       }
 
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -188,10 +189,14 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> validateUserTermsOfServiceStatus() {
+  public ResponseEntity<Boolean> getUserTermsOfServiceStatus() {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
-    userService.validateTermsOfService(loggedInUser);
-    return ResponseEntity.ok().build();
+    try {
+      userService.validateTermsOfService(loggedInUser);
+    } catch (BadRequestException ex) {
+      return ResponseEntity.ok(false);
+    }
+    return ResponseEntity.ok(true);
   }
 
   @Override

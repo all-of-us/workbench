@@ -236,19 +236,17 @@ paths:
         204:
           description: Request Received.
 
-  "/v1/validateTermsOfServiceStatus":
+  "/v1/getUserTermsOfServiceStatus":
     get:
       tags:
         - profile
-      description: Validates if the logged in user has accepted the latest version of All of Us and Terra service
-      operationId: validateUserTermsOfServiceStatus
+      description: Returns if the logged in user has accepted the latest versions of the All of Us and Terra Terms of Service agreements
+      operationId: getUserTermsOfServiceStatus
       responses:
-        204:
-          description: Logged in User has accepted latest Version of All of Us and Terra TOS
-        400:
-          description: Bad request, user has not accepted laterst version of All of Us or Terra TOS
+        200:
+          description: Returns true if user has accepted latest versions of the All of Us and Terra Terms of Service agreements
           schema:
-            "$ref": "#/definitions/ErrorResponse"
+            type: boolean
 
   "/v1/acceptTermsOfService":
     post:

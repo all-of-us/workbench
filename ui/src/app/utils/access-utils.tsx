@@ -364,9 +364,8 @@ export const useIsUserDisabled = () => {
 
 export const useNeedsToAcceptTOS = () => {
   const { authLoaded, isSignedIn } = useStore(authStore);
-  const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] = useState<
-    boolean | undefined
-  >(false);
+  const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] =
+    useState<boolean>(false);
   useEffect(() => {
     if (
       !authLoaded ||
@@ -377,13 +376,11 @@ export const useNeedsToAcceptTOS = () => {
     } else {
       (async () => {
         try {
-          await profileApi().validateUserTermsOfServiceStatus();
-          setUserRequiredToAcceptTOS(false);
+          const userHasAcceptedLatestTOS =
+            await profileApi().getUserTermsOfServiceStatus();
+          setUserRequiredToAcceptTOS(!userHasAcceptedLatestTOS);
         } catch (e) {
-          const errorResponse = await convertAPIError(e);
-          if (errorResponse.statusCode === 400) {
-            setUserRequiredToAcceptTOS(true);
-          }
+          console.log('Error while getting user terms of service status');
         }
       })();
     }
