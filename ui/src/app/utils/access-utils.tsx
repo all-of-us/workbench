@@ -371,27 +371,20 @@ export const useNeedsToAcceptTOS = () => {
       return;
     }
 
-    let mounted = true;
     if (!isSignedIn) {
       setUserRequiredToAcceptTOS(false);
     } else {
       (async () => {
         try {
-          await profileStore.get().load();
-          if (mounted) {
-            setUserRequiredToAcceptTOS(false);
-          }
+          const userAcceptedTerraTOS =
+            await profileApi().getUserTerraTermsOfServiceStatus();
+          setUserRequiredToAcceptTOS(!userAcceptedTerraTOS);
         } catch (e) {
-          const errorResponse = await convertAPIError(e);
-          if (errorResponse.statusCode === 401) {
-            setUserRequiredToAcceptTOS(true);
-          }
+          console.log('Error while getting user terms of service');
         }
       })();
     }
-    return () => {
-      mounted = false;
-    };
+    return () => {};
   }, [authLoaded, isSignedIn]);
   return userRequiredToAcceptTOS;
 };

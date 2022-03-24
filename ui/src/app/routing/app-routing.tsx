@@ -293,10 +293,20 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
                     exact={false}
                     guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
                   >
-                    <SignedInPage intermediaryRoute={true} routeData={{}} />
+                    {!doesUserNeedToAcceptTOS && (
+                      <SignedInPage intermediaryRoute={true} routeData={{}} />
+                    )}
                   </AppRoute>
                 </Switch>
               </AppRouter>
+            )}
+            {doesUserNeedToAcceptTOS && (
+              <AccountCreationTos
+                onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
+                filePath={'/aou-tos.html'}
+                afterPrev={false}
+                style={{ height: '35rem' }}
+              />
             )}
             {overriddenUrl && (
               <div style={{ position: 'absolute', top: 0, left: '1rem' }}>
@@ -306,14 +316,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
               </div>
             )}
           </React.Fragment>
-        )}
-        {doesUserNeedToAcceptTOS && (
-          <AccountCreationTos
-            onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
-            filePath={'/aou-tos.html'}
-            afterPrev={false}
-            style={{ height: '35rem' }}
-          />
         )}
         {!firstPartyCookiesEnabled ||
           (!thirdPartyCookiesEnabled && (

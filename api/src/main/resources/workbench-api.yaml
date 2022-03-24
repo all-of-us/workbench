@@ -236,6 +236,18 @@ paths:
         204:
           description: Request Received.
 
+  "/v1/getTerraTermsOfServiceStatus":
+    get:
+      tags:
+        - profile
+      description: Retrieves if the logged in user has accepted Terra service or not
+      operationId: getUserTerraTermsOfServiceStatus
+      responses:
+        200:
+          description: Returns false if user is required to accept Terra Terms of Service, else true
+          schema:
+            type: boolean
+
   "/v1/acceptTermsOfService":
     post:
       tags:
