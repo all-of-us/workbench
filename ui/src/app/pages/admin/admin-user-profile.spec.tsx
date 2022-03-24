@@ -532,7 +532,7 @@ describe('AdminUserProfile', () => {
       AccessRenewalStatus.EXPIRED,
       AccessModuleName.RTCOMPLIANCETRAINING,
       {
-        moduleName: AccessModuleName.RTCOMPLIANCETRAINING,
+        moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(-1),
       },
@@ -541,7 +541,7 @@ describe('AdminUserProfile', () => {
       AccessRenewalStatus.NEVER_EXPIRES,
       AccessModuleName.TWOFACTORAUTH,
       {
-        moduleName: AccessModuleName.TWOFACTORAUTH,
+        moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
         completionEpochMillis: nowPlusDays(-1000),
       },
     ],
@@ -549,14 +549,14 @@ describe('AdminUserProfile', () => {
       AccessRenewalStatus.INCOMPLETE,
       AccessModuleName.RASLOGINGOV,
       {
-        moduleName: AccessModuleName.RASLOGINGOV,
+        moduleNameTemp: AccessModuleName.RASLOGINGOV,
       },
     ],
     [
       AccessRenewalStatus.CURRENT,
       AccessModuleName.CTCOMPLIANCETRAINING,
       {
-        moduleName: AccessModuleName.CTCOMPLIANCETRAINING,
+        moduleNameTemp: AccessModuleName.CTCOMPLIANCETRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(400),
       },
@@ -565,7 +565,7 @@ describe('AdminUserProfile', () => {
       AccessRenewalStatus.BYPASSED,
       AccessModuleName.ERACOMMONS,
       {
-        moduleName: AccessModuleName.ERACOMMONS,
+        moduleNameTemp: AccessModuleName.ERACOMMONS,
         bypassEpochMillis: 1,
       },
     ],
@@ -573,7 +573,7 @@ describe('AdminUserProfile', () => {
       AccessRenewalStatus.EXPIRING_SOON,
       AccessModuleName.PROFILECONFIRMATION,
       {
-        moduleName: AccessModuleName.PROFILECONFIRMATION,
+        moduleNameTemp: AccessModuleName.PROFILECONFIRMATION,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(5),
       },

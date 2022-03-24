@@ -214,7 +214,7 @@ describe('DataAccessRequirements', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModuleName.TWOFACTORAUTH,
+            moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
             completionEpochMillis: 1,
           },
         ],
@@ -236,7 +236,10 @@ describe('DataAccessRequirements', () => {
       ...profile,
       accessModules: {
         modules: [
-          { moduleName: AccessModuleName.TWOFACTORAUTH, bypassEpochMillis: 1 },
+          {
+            moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
+            bypassEpochMillis: 1,
+          },
         ],
       },
     };
@@ -268,7 +271,7 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: [
             {
-              moduleName: AccessModuleName.TWOFACTORAUTH,
+              moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
               completionEpochMillis: 1,
             },
           ],
@@ -295,12 +298,15 @@ describe('DataAccessRequirements', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModuleName.TWOFACTORAUTH,
+            moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
             completionEpochMillis: 1,
           },
-          { moduleName: AccessModuleName.ERACOMMONS, completionEpochMillis: 1 },
           {
-            moduleName: AccessModuleName.RASLOGINGOV,
+            moduleNameTemp: AccessModuleName.ERACOMMONS,
+            completionEpochMillis: 1,
+          },
+          {
+            moduleNameTemp: AccessModuleName.RASLOGINGOV,
             completionEpochMillis: 1,
           },
         ],
@@ -322,7 +328,7 @@ describe('DataAccessRequirements', () => {
       ...profile,
       accessModules: {
         modules: requiredModules.map((module) => ({
-          moduleName: module,
+          moduleNameTemp: module,
           completionEpochMillis: 1,
         })),
       },
@@ -341,16 +347,19 @@ describe('DataAccessRequirements', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModuleName.TWOFACTORAUTH,
-            completionEpochMillis: 1,
-          },
-          { moduleName: AccessModuleName.ERACOMMONS, completionEpochMillis: 1 },
-          {
-            moduleName: AccessModuleName.RTCOMPLIANCETRAINING,
+            moduleNameTemp: AccessModuleName.TWOFACTORAUTH,
             completionEpochMillis: 1,
           },
           {
-            moduleName: AccessModuleName.DATAUSERCODEOFCONDUCT,
+            moduleNameTemp: AccessModuleName.ERACOMMONS,
+            completionEpochMillis: 1,
+          },
+          {
+            moduleNameTemp: AccessModuleName.RTCOMPLIANCETRAINING,
+            completionEpochMillis: 1,
+          },
+          {
+            moduleNameTemp: AccessModuleName.DATAUSERCODEOFCONDUCT,
             completionEpochMillis: 1,
           },
         ],
@@ -370,7 +379,7 @@ describe('DataAccessRequirements', () => {
         modules: [
           ...testProfile.accessModules.modules,
           {
-            moduleName: AccessModuleName.RASLOGINGOV,
+            moduleNameTemp: AccessModuleName.RASLOGINGOV,
             completionEpochMillis: 1,
           },
         ],
