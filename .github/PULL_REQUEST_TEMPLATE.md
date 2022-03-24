@@ -25,7 +25,7 @@ Please also:
 - [ ] This PR includes appropriate unit tests
 - [ ] I have added explanatory comments where the logic is not obvious
 - [ ] I have run and tested this change locally, and my testing process is described here
-- [ ] If this includes a UI change, I have run the E2E tests on ths change against my local UI and/or API server with `yarn test-local` or [yarn test-local-devup](https://github.com/all-of-us/workbench/blob/master/e2e/README.md#examples)
+- [ ] If this includes a UI change, I have run the E2E tests on this change against my local UI and/or API server with `yarn test-local` or [yarn test-local-devup](https://github.com/all-of-us/workbench/blob/master/e2e/README.md#examples)
 - [ ] If this includes a UI change, I have taken screen recordings or screenshots of the new behavior and notified the PO and UX designer in [Slack](https://pmi-engteam.slack.com/archives/C02MWP2RN5P)
 - [ ] I have considered the impact on deployment safety (i.e. removing/altering APIs which are in use)
 - [ ] If this includes an API change, I have updated the appropriate Swagger definitions and notified/updated the appropriate API consumers
