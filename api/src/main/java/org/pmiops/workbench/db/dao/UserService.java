@@ -1,6 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import javax.annotation.Nonnull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -11,11 +15,6 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
-
-import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 public interface UserService {
   int LATEST_AOU_TOS_VERSION = 1;

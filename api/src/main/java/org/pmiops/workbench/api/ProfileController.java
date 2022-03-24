@@ -199,7 +199,7 @@ public class ProfileController implements ProfileApiDelegate {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
     userService.submitAouTermsOfService(loggedInUser, termsOfServiceVersion);
     userService.acceptTerraTermsOfService(loggedInUser);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.ok().build();
   }
 
   @Override
