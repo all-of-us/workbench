@@ -4511,7 +4511,7 @@ definitions:
       - requiredForCTAccess
     properties:
       name:
-        description: DEPRECATED. Use moduleNameTemp.
+        description: DEPRECATED. We're in the process of transitioning to a new structure.  Use moduleNameTemp for now.
         "$ref": "#/definitions/AccessModule"
       moduleNameTemp:
         "$ref": "#/definitions/AccessModuleName"
@@ -5103,11 +5103,11 @@ definitions:
     - moduleNameTemp
     - isBypassed
     properties:
+      moduleName:
+        description: DEPRECATED. We're in the process of transitioning to a new structure.  Use moduleNameTemp for now.
+        "$ref": "#/definitions/AccessModule"
       moduleNameTemp:
         "$ref": "#/definitions/AccessModuleName"
-      moduleName:
-        description: DEPRECATED. Use moduleNameTemp.
-        "$ref": "#/definitions/AccessModule"
       isBypassed:
         type: boolean
         default: false
@@ -6025,11 +6025,11 @@ definitions:
     required:
       - moduleNameTemp
     properties:
+      moduleName:
+        description: DEPRECATED. We're in the process of transitioning to a new structure.  Use moduleNameTemp for now.
+        "$ref": "#/definitions/AccessModule"
       moduleNameTemp:
         "$ref": "#/definitions/AccessModuleName"
-      moduleName:
-        description: DEPRECATED. Use moduleNameTemp.
-        "$ref": "#/definitions/AccessModule"
       completionEpochMillis:
         type: integer
         format: int64
