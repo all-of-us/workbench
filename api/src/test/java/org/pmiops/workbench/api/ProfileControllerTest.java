@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -935,39 +936,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mockMailService)
-        .sendWelcomeEmail_deprecated(any(), any(), any());
-
-    ResponseEntity<Void> response =
-        profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-    // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2)).sendWelcomeEmail_deprecated(any(), any(), any());
-    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
-  }
-
-  @Test
-  public void resendWelcomeEmail_OK() throws MessagingException {
-    createAccountAndDbUserWithAffiliation();
-    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing().when(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
-
-    ResponseEntity<Void> response =
-        profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2)).sendWelcomeEmail_deprecated(any(), any(), any());
-    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
-  }
-
-  @Test
-  public void resendWelcomeEmail_messagingException() throws MessagingException {
-    createAccountAndDbUserWithAffiliation();
-    dbUser.setFirstSignInTime(null);
-    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doThrow(new MessagingException("exception"))
-        .when(mockMailService)
         .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
 
     ResponseEntity<Void> response =
@@ -1032,7 +1000,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
->>>>>>> 60eddbf1e... Update test we do not need to set config
   public void sendUserInstructions_none() throws MessagingException {
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();

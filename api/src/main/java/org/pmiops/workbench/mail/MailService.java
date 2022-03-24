@@ -10,10 +10,6 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
-import javax.mail.MessagingException;
-import java.time.Instant;
-import java.util.List;
-
 public interface MailService {
   @Deprecated
   void sendWelcomeEmail_deprecated(
