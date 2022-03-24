@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
@@ -51,6 +52,13 @@ const renewalStyle = {
   h3: {
     fontSize: '0.675rem',
     fontWeight: 600,
+  },
+  dates: {
+    color: colors.primary,
+    margin: '0.5rem 0',
+    display: 'grid',
+    columnGap: '1rem',
+    gridTemplateColumns: 'auto 1fr',
   },
   completedButton: {
     height: '1.6rem',
@@ -218,31 +226,38 @@ const BackArrow = withCircleBackground(() => (
   <Arrow style={{ height: 21, width: 18 }} />
 ));
 
-const CardBody = (props: {
+export const RenewalCardBody = (props: {
   moduleStatus: AccessModuleStatus;
   setLoading: (boolean) => void;
+  hide?: boolean;
+  textStyle?: CSSProperties;
 }) => {
-  const { moduleStatus, setLoading } = props;
+  const { moduleStatus, setLoading, hide, textStyle } = props;
+
   const [, navigateByUrl] = useNavigation();
+  const noReportId = useId();
+  const reportId = useId();
   const [publications, setPublications] = useState<boolean>(null);
   const [trainingRefreshButtonDisabled, setTrainingRefreshButtonDisabled] =
     useState(true);
-  const noReportId = useId();
-  const reportId = useId();
 
-  return switchCase(
+  const { AARTitleComponent } = getAccessModuleConfig(moduleStatus.moduleName);
+  const { lastConfirmedDate, nextReviewDate } =
+    computeRenewalDisplayDates(moduleStatus);
+
+  const module = switchCase(
     moduleStatus.moduleName,
     [
       AccessModule.PROFILECONFIRMATION,
       () => (
         <React.Fragment>
-          <div style={{ marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: '0.5rem', ...textStyle }}>
             Please update your profile information if any of it has changed
             recently.
           </div>
-          <div>
+          <div style={textStyle}>
             Note that you are obliged by the Terms of Use of the Workbench to
-            provide keep your profile information up-to-date at all times.
+            keep your profile information up-to-date at all times.
           </div>
           <ActionButton
             actionButtonText='Review'
@@ -259,7 +274,7 @@ const CardBody = (props: {
       AccessModule.PUBLICATIONCONFIRMATION,
       () => (
         <React.Fragment>
-          <div>
+          <div style={textStyle}>
             The <AoU /> Publication and Presentation Policy requires that you
             report any upcoming publication or presentation resulting from the
             use of <AoU /> Research Program Data at least two weeks before the
@@ -274,7 +289,9 @@ const CardBody = (props: {
             </a>{' '}
             For any questions, please contact <SupportMailto />
           </div>
-          <div style={renewalStyle.publicationConfirmation}>
+          <div
+            style={{ ...renewalStyle.publicationConfirmation, ...textStyle }}
+          >
             <ActionButton
               actionButtonText='Confirm'
               completedButtonText='Confirmed'
@@ -315,13 +332,18 @@ const CardBody = (props: {
       AccessModule.COMPLIANCETRAINING,
       () => (
         <React.Fragment>
-          <div>
+          <div style={textStyle}>
             You are required to complete the refreshed ethics training courses
             to understand the privacy safeguards and the compliance requirements
             for using the <AoU /> Dataset.
           </div>
           {!isRenewalCompleteForModule(moduleStatus) && (
-            <div style={renewalStyle.complianceTrainingExpiring}>
+            <div
+              style={{
+                ...renewalStyle.complianceTrainingExpiring,
+                ...textStyle,
+              }}
+            >
               When you have completed the training click the refresh button or
               reload the page.
             </div>
@@ -361,7 +383,7 @@ const CardBody = (props: {
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => (
         <React.Fragment>
-          <div>
+          <div style={textStyle}>
             Please review and sign the data user code of conduct consenting to
             the <AoU /> data use policy.
           </div>
@@ -379,6 +401,23 @@ const CardBody = (props: {
       ),
     ]
   );
+
+  return (
+    <React.Fragment>
+      <div style={renewalStyle.h3}>
+        <AARTitleComponent />
+      </div>
+      {!hide && (
+        <div style={{ ...renewalStyle.dates, ...textStyle }}>
+          <div>Last Updated On:</div>
+          <div>Next Review:</div>
+          <div>{lastConfirmedDate}</div>
+          <div>{nextReviewDate}</div>
+        </div>
+      )}
+      {!hide && module}
+    </React.Fragment>
+  );
 };
 
 interface CardProps {
@@ -388,31 +427,13 @@ interface CardProps {
   setLoading: (boolean) => void;
 }
 const RenewalCard = ({ step, moduleName, modules, setLoading }: CardProps) => {
-  const moduleStatus = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
-  const { AARTitleComponent } = getAccessModuleConfig(moduleName);
-  const { lastConfirmedDate, nextReviewDate } =
-    computeRenewalDisplayDates(moduleStatus);
   return (
     <FlexColumn style={renewalStyle.card}>
       <div style={renewalStyle.h3}>STEP {step}</div>
-      <div style={renewalStyle.h3}>
-        <AARTitleComponent />
-      </div>
-      <div
-        style={{
-          color: colors.primary,
-          margin: '0.5rem 0',
-          display: 'grid',
-          columnGap: '1rem',
-          gridTemplateColumns: 'auto 1fr',
-        }}
-      >
-        <div>Last Updated On:</div>
-        <div>Next Review:</div>
-        <div>{lastConfirmedDate}</div>
-        <div>{nextReviewDate}</div>
-      </div>
-      <CardBody moduleStatus={moduleStatus} setLoading={(v) => setLoading(v)} />
+      <RenewalCardBody
+        moduleStatus={getAccessModuleStatusByNameOrEmpty(modules, moduleName)}
+        setLoading={(v) => setLoading(v)}
+      />
     </FlexColumn>
   );
 };
