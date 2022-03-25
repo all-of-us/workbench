@@ -5,7 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourceType, Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { Button, SnowmanButton } from 'app/components/buttons';
+import {
+  Button,
+  SnowmanButton,
+  StyledRouterLink,
+} from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -171,30 +175,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
     }
 
-    onClick() {
-      const {
-        workspace: { id, namespace },
-      } = this.props;
+    onClick(e) {
       if (this.requiresReviewPrompt()) {
         this.setState({ showResearchPurposeReviewModal: true });
-      } else {
-        this.trackWorkspaceNavigation();
-        this.props.navigate(['workspaces', namespace, id, 'data']);
+        e.preventDefault();
       }
-    }
-
-    getRightClickTarget() {
-      // Restrict open new tab option/right click options, if workspace requires review
-      if (this.requiresReviewPrompt()) {
-        return;
-      }
-
-      const {
-        workspace: { id, namespace },
-      } = this.props;
-
-      this.trackWorkspaceNavigation();
-      return `/workspaces/${namespace}/${id}/data`;
     }
 
     render() {
@@ -275,14 +260,15 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               >
                 <FlexColumn style={{ marginBottom: 'auto' }}>
                   <FlexRow style={{ alignItems: 'flex-start' }}>
-                    <a
+                    <StyledRouterLink
                       style={
                         tierAccessDisabled
                           ? styles.workspaceNameDisabled
                           : styles.workspaceName
                       }
-                      onClick={() => this.onClick()}
-                      href={this.getRightClickTarget()}
+                      onClick={(e) => this.onClick(e)}
+                      analyticsFn={() => this.trackWorkspaceNavigation()}
+                      path={`/workspaces/${namespace}/${id}/data`}
                     >
                       <TooltipTrigger
                         content={
@@ -307,7 +293,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           {workspace.name}
                         </div>
                       </TooltipTrigger>
-                    </a>
+                    </StyledRouterLink>
                   </FlexRow>
                   {this.requiresReviewPrompt() && (
                     <div style={{ color: colors.warning }}>
