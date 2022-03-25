@@ -9,6 +9,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({
+  AccessModuleNameMapperImpl.class,
   AccessModuleServiceImpl.class,
   ActionAuditServiceImpl.class,
   ActionAuditSpringConfiguration.class, // injects com.google.cloud.logging.Logging
