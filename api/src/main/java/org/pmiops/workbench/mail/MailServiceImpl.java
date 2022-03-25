@@ -359,8 +359,8 @@ public class MailServiceImpl implements MailService {
     sendWithRetries(
         egressPolicy.notifyFromEmail,
         ImmutableList.of(dbUser.getContactEmail()),
-        ImmutableList.of(),
         Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
+        ImmutableList.of(),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
