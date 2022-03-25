@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
 
 import { WorkspaceAccessLevel, WorkspacesApi } from 'generated/fetch';
@@ -17,11 +18,13 @@ describe('WorkspaceCard', () => {
 
   const component = (accessLevel: WorkspaceAccessLevel) => {
     return mount(
-      <WorkspaceCard
-        accessLevel={accessLevel}
-        reload={reload}
-        workspace={workspaceStubs[0]}
-      />,
+      <MemoryRouter>
+        <WorkspaceCard
+          accessLevel={accessLevel}
+          reload={reload}
+          workspace={workspaceStubs[0]}
+        />
+      </MemoryRouter>,
       { attachTo: document.getElementById('root') }
     );
   };
