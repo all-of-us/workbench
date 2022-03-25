@@ -15,7 +15,6 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -383,36 +382,7 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
   });
 
-  it('supports successful duplication in synchronous mode', async () => {
-    environment.enableAsyncWorkspaceOperations = false;
-    workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="review-request-btn-false"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const numBefore = workspacesApi.workspaces.length;
-    wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
-  });
-
   it('supports successful duplication in asynchronous mode', async () => {
-    environment.enableAsyncWorkspaceOperations = true;
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -439,44 +409,7 @@ describe('WorkspaceEdit', () => {
     expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
-  it('defaults to upgrading the CDR Version when synchronously duplicating a workspace with an older CDR Version', async () => {
-    environment.enableAsyncWorkspaceOperations = false;
-    // init the workspace to a non-default CDR version value
-    const altCdrWorkspace = {
-      ...workspace,
-      cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
-    };
-    currentWorkspaceStore.next(altCdrWorkspace);
-
-    // duplication will involve a CDR version upgrade by default
-    workspaceEditMode = WorkspaceEditMode.Duplicate;
-
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    const cdrSelection = wrapper
-      .find('[data-test-id="select-cdr-version"]')
-      .find('select')
-      .props().value;
-
-    // default CDR version, not the existing workspace's alt CDR version
-    expect(cdrSelection).toBe(
-      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-    );
-
-    const { ALT_WORKSPACE_CDR_VERSION, DEFAULT_WORKSPACE_CDR_VERSION } =
-      CdrVersionsStubVariables;
-    const expectedUpgradeMessage = `${ALT_WORKSPACE_CDR_VERSION} to ${DEFAULT_WORKSPACE_CDR_VERSION}.`;
-    const cdrUpgradeMessage = wrapper
-      .find('[data-test-id="cdr-version-upgrade"]')
-      .first()
-      .text();
-    expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
-    expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
-  });
-
   it('defaults to upgrading the CDR Version when asynchronously duplicating a workspace with an older CDR Version', async () => {
-    environment.enableAsyncWorkspaceOperations = true;
     // init the workspace to a non-default CDR version value
     const altCdrWorkspace = {
       ...workspace,
@@ -512,7 +445,6 @@ describe('WorkspaceEdit', () => {
   });
 
   it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async () => {
-    environment.enableAsyncWorkspaceOperations = true;
     // the standard test workspace already has the latest CDR Version but let's make it explicit with a new const
     const defaultCdrWorkspace = {
       ...workspace,
@@ -706,51 +638,8 @@ describe('WorkspaceEdit', () => {
     await expectNoTierChangesAllowed();
   });
 
-  // regression test for RW-5132 - sync version
-  it('prevents multiple (sync) Workspace creations via the same confirmation dialog', async () => {
-    environment.enableAsyncWorkspaceOperations = false;
-    workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="review-request-btn-false"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const numBefore = workspacesApi.workspaces.length;
-    wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
-  });
-
   // regression test for RW-5132 - async version
   it('prevents multiple (async) Workspace creations via the same confirmation dialog', async () => {
-    environment.enableAsyncWorkspaceOperations = true;
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
