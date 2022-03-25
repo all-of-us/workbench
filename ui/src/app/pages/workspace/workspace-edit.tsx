@@ -1438,7 +1438,6 @@ export const WorkspaceEdit = fp.flow(
       const {
         cdrVersionTiersResponse,
         profileState: { profile },
-        workspaceEditMode,
       } = this.props;
       const { freeTierDollarQuota, freeTierUsage } = profile;
       const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
@@ -2295,15 +2294,15 @@ export const WorkspaceEdit = fp.flow(
                   {loading && (
                     <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
                   )}
-                  {(workspaceEditMode === WorkspaceEditMode.Create ||
-                    workspaceEditMode === WorkspaceEditMode.Duplicate) && (
-                    <div style={{ marginBottom: '1rem' }}>
-                      <b>
-                        Note: this workspace will take approximately one minute
-                        to create.
-                      </b>
-                    </div>
-                  )}
+                  {this.isMode(WorkspaceEditMode.Create) ||
+                    (this.isMode(WorkspaceEditMode.Duplicate) && (
+                      <div style={{ marginBottom: '1rem' }}>
+                        <b>
+                          Note: this workspace will take approximately one
+                          minute to create.
+                        </b>
+                      </div>
+                    ))}
                   <div>Your responses to these questions:</div>
                   <div style={{ margin: '0.25rem 0 0.25rem 1rem' }}>
                     <span style={{ fontWeight: 600 }}>
