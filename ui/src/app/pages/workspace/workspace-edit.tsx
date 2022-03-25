@@ -19,7 +19,6 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -1112,20 +1111,6 @@ export const WorkspaceEdit = fp.flow(
       );
     }
 
-    // the API endpoint is synchronous in that it waits for the Terra call
-    // but we still need an `async` method to call it here
-    private async apiDuplicateWorkspace(): Promise<Workspace> {
-      const duplicateResponse = await workspacesApi().cloneWorkspace(
-        this.props.workspace.namespace,
-        this.props.workspace.id,
-        {
-          includeUserRoles: this.state.cloneUserRole,
-          workspace: this.state.workspace,
-        }
-      );
-      return duplicateResponse.workspace;
-    }
-
     async saveWorkspace() {
       try {
         this.setState({ loading: true });
@@ -1135,13 +1120,9 @@ export const WorkspaceEdit = fp.flow(
         }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = environment.enableAsyncWorkspaceOperations
-            ? await this.apiCreateWorkspaceAsync()
-            : await workspacesApi().createWorkspace(this.state.workspace);
+          workspace = await this.apiCreateWorkspaceAsync();
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          workspace = environment.enableAsyncWorkspaceOperations
-            ? await this.apiDuplicateWorkspaceAsync()
-            : await this.apiDuplicateWorkspace();
+          workspace = await this.apiDuplicateWorkspaceAsync();
         } else {
           workspace.researchPurpose.needsReviewPrompt = false;
           workspace = await workspacesApi().updateWorkspace(
