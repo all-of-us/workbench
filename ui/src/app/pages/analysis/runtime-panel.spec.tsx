@@ -700,6 +700,26 @@ describe('RuntimePanel', () => {
     }
   );
 
+  it('should reattach to an existing disk by default, for deleted VMs', async () => {
+    setCurrentDisk(existingDisk());
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Deleted,
+      configurationType: RuntimeConfigurationType.UserOverride,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+      },
+      dataprocConfig: null,
+    });
+
+    const wrapper = await component();
+
+    const getDetachableRadio = () =>
+      wrapper.find({ name: 'detachableDisk' }).first();
+    expect(getDetachableRadio().prop('checked')).toBeTruthy();
+  });
+
   it('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
 
