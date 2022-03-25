@@ -146,7 +146,7 @@ public class FreeTierBillingService {
   }
 
   // TODO: move to DbWorkspace?  RW-5107
-  private boolean isFreeTier(final DbWorkspace workspace) {
+  public boolean isFreeTier(final DbWorkspace workspace) {
     return workspace
         .getBillingAccountName()
         .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName());

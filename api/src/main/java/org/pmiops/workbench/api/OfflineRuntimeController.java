@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -60,6 +62,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final int IDLE_AFTER_HOURS = 3;
 
   private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
   private final MailService mailService;
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<DisksApi> disksApiProvider;
@@ -71,6 +74,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   @Autowired
   OfflineRuntimeController(
       FireCloudService firecloudService,
+      FreeTierBillingService freeTierBillingService,
       MailService mailService,
       @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(NotebooksConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
@@ -79,6 +83,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       UserDao userDao,
       Clock clock) {
     this.fireCloudService = firecloudService;
+    this.freeTierBillingService = freeTierBillingService;
     this.mailService = mailService;
     this.runtimesApiProvider = runtimesApiProvider;
     this.disksApiProvider = disksApiProvider;
@@ -213,6 +218,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final Instant now = clock.instant();
     Map<Integer, List<LeonardoListPersistentDiskResponse>> disksByDaysUnused =
         disks.stream()
+            .filter(disk -> LeonardoDiskStatus.READY.equals(disk.getStatus()))
             .collect(
                 Collectors.groupingBy(
                     disk -> {
@@ -291,7 +297,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         acl.getAcl().entrySet().stream()
             .filter(
                 entry ->
-                    WorkspaceAccessLevel.OWNER.equals(entry.getValue())
+                    WorkspaceAccessLevel.OWNER.toString().equals(entry.getValue().getAccessLevel())
                         || entry.getKey().equals(disk.getAuditInfo().getCreator()))
             .map(Entry::getKey)
             .collect(Collectors.toList());
@@ -312,20 +318,14 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       return false;
     }
 
-    Optional<DbUser> diskCreator =
-        dbUsers.stream()
-            .filter(u -> u.getUsername().equals(disk.getAuditInfo().getCreator()))
-            .findFirst();
-    if (!diskCreator.isPresent()) {
-      log.warning(
-          String.format(
-              "failed to find disk creator '%s' in the database, skipping notification",
-              disk.getAuditInfo().getCreator()));
-      return false;
+    Double initialCreditsRemaining = null;
+    if (freeTierBillingService.isFreeTier(workspace.get())) {
+      initialCreditsRemaining =
+          freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, diskCreator.get(), workspace.get(), daysUnused);
+        dbUsers, workspace.get(), disk, daysUnused, initialCreditsRemaining);
     return true;
   }
 }

@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
@@ -267,11 +269,18 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void alertUsersUnusedDiskWarningThreshold(
-      List<DbUser> users, DbUser diskCreator, DbWorkspace diskWorkspace, int unusedDays)
+      List<DbUser> users,
+      DbWorkspace diskWorkspace,
+      LeonardoListPersistentDiskResponse disk,
+      int daysUnused,
+      @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException {
     log.info(
         Joiner.on(",")
-            .join(new Object[] {"notifying!", users, diskCreator, diskWorkspace, unusedDays}));
+            .join(
+                new Object[] {
+                  "notifying!", users, diskWorkspace, daysUnused, workspaceInitialCreditsRemaining
+                }));
   }
 
   @Override
