@@ -203,7 +203,7 @@ public class OfflineRuntimeControllerTest {
                     users.stream()
                         .collect(
                             Collectors.toMap(
-                                u -> u.getUsername(),
+                                DbUser::getUsername,
                                 u ->
                                     new FirecloudWorkspaceAccessEntry()
                                         .accessLevel(WorkspaceAccessLevel.OWNER.toString())))));
