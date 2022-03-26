@@ -268,6 +268,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       }
                       onClick={(e) => this.onClick(e)}
                       analyticsFn={() => this.trackWorkspaceNavigation()}
+                      data-test-id={'workspace-card-link'}
+                      propagateDataTestId
                       path={`/workspaces/${namespace}/${id}/data`}
                     >
                       <TooltipTrigger
