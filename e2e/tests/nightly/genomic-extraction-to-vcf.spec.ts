@@ -22,16 +22,16 @@ import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
 import { range } from 'lodash';
 
-// 60 minutes. Test could take a long time.
-// Since refresh token expires in 60 min. test can fail if running takes longer than 60 min.
-jest.setTimeout(60 * 60 * 1000);
+// 70 minutes. Test could take a long time.
+// Since refresh token expires in 60 min. test may fail if running takes longer than 60 min.
+jest.setTimeout(70 * 60 * 1000);
 
 describe('Genomics Extraction Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const maxWaitTime = 50 * 60 * 1000;
+  const waitForCompletionMaxTime = 60 * 60 * 1000;
   const workspaceName = makeRandomName('e2eGenomicExtractionToVcfTest');
   const notebookName = makeRandomName('genomicDataToVcf');
 
@@ -167,7 +167,7 @@ describe('Genomics Extraction Test', () => {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // LONG WAIT: Wait for VCF files extraction and runtime creation to finish.
-    await waitForComplete(page, maxWaitTime);
+    await waitForComplete(page, waitForCompletionMaxTime);
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // RUN NOTEBOOK CODE.
@@ -217,6 +217,7 @@ describe('Genomics Extraction Test', () => {
     const genomicSidebar = new GenomicExtractionsSidebar(page);
     const startTime = Date.now();
     while (Date.now() - startTime <= maxTime) {
+      await page.waitForTimeout(1 * 60 * 1000); // sleep 1 min
       isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunningAndClose(pollInterval) : true;
       // At the time of writing this test, it takes 30 - 40 minutes to create VCF files.
       isExtractionReady = !isExtractionReady ? await genomicSidebar.waitForCompletionAndClose(pollInterval) : true;
@@ -224,9 +225,8 @@ describe('Genomics Extraction Test', () => {
         logger.info('Runtime is running and Genomic data extraction is done.');
         return true;
       }
-      await page.waitForTimeout(pollInterval);
-      const timeInSecs = Math.round((Date.now() - startTime) / 1000);
-      logger.info(`Waiting [ ${timeInSecs} ] seconds for runtime and genomic extraction to finish.`);
+      const timeSpentInMin = Math.round((Date.now() - startTime) / 1000) / 60;
+      logger.info(`Waited [ ${timeSpentInMin} ] seconds for runtime and genomic extraction to finish.`);
     }
     // Take screenshot for manual checking.
     await runtimeSidebar.open();
