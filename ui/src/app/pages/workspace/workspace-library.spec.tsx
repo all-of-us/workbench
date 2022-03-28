@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import {
   FeaturedWorkspacesConfigApi,
@@ -16,7 +15,10 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  mountWithRouter,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStubs } from 'testing/stubs/workspaces';
@@ -43,7 +45,7 @@ describe('WorkspaceLibrary', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceLibrary {...props} />);
+    return mountWithRouter(<WorkspaceLibrary {...props} />);
   };
 
   beforeEach(async () => {

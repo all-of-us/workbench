@@ -1,12 +1,14 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { WorkspaceAccessLevel, WorkspacesApi } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  mountWithRouter,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
@@ -16,7 +18,7 @@ describe('WorkspaceCard', () => {
   const reload = jest.fn();
 
   const component = (accessLevel: WorkspaceAccessLevel) => {
-    return mount(
+    return mountWithRouter(
       <WorkspaceCard
         accessLevel={accessLevel}
         reload={reload}
