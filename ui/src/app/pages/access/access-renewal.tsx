@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { AccessModule, AccessModuleStatus } from 'generated/fetch';
+import { AccessModuleName, AccessModuleStatus } from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -227,7 +227,7 @@ interface CardProps {
 const RenewalCard = withStyle(renewalStyle.card)(
   ({ step, moduleStatus, style, children }: CardProps) => {
     const { AARTitleComponent } = getAccessModuleConfig(
-      moduleStatus.moduleName
+      moduleStatus.moduleNameTemp
     );
     const { lastConfirmedDate, nextReviewDate } =
       computeRenewalDisplayDates(moduleStatus);
@@ -278,7 +278,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
     const [, navigateByUrl] = useNavigation();
 
     const expirableModules = modules.filter((moduleStatus) =>
-      accessRenewalModules.includes(moduleStatus.moduleName)
+      accessRenewalModules.includes(moduleStatus.moduleNameTemp)
     );
     const accessRenewalCompleted = expirableModules.every(
       isRenewalCompleteForModule
@@ -286,9 +286,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
 
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
     useEffect(() => {
-      const expiringModuleNames: AccessModule[] = expirableModules
+      const expiringModuleNames: AccessModuleName[] = expirableModules
         .filter((status) => isExpiringOrExpired(status.expirationEpochMillis))
-        .map((status) => status.moduleName);
+        .map((status) => status.moduleNameTemp);
 
       const onMount = async () => {
         setLoading(true);
@@ -387,7 +387,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
             step={1}
             moduleStatus={getAccessModuleStatusByNameOrEmpty(
               modules,
-              AccessModule.PROFILECONFIRMATION
+              AccessModuleName.PROFILECONFIRMATION
             )}
           >
             <div style={{ marginBottom: '0.5rem' }}>
@@ -403,7 +403,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               completedButtonText='Confirmed'
               moduleStatus={getAccessModuleStatusByNameOrEmpty(
                 modules,
-                AccessModule.PROFILECONFIRMATION
+                AccessModuleName.PROFILECONFIRMATION
               )}
               onClick={() =>
                 navigateByUrl('profile', { queryParams: { renewal: 1 } })
@@ -415,7 +415,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
             step={2}
             moduleStatus={getAccessModuleStatusByNameOrEmpty(
               modules,
-              AccessModule.PUBLICATIONCONFIRMATION
+              AccessModuleName.PUBLICATIONCONFIRMATION
             )}
           >
             <div>
@@ -439,7 +439,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 completedButtonText='Confirmed'
                 moduleStatus={getAccessModuleStatusByNameOrEmpty(
                   modules,
-                  AccessModule.PUBLICATIONCONFIRMATION
+                  AccessModuleName.PUBLICATIONCONFIRMATION
                 )}
                 onClick={async () => {
                   setLoading(true);
@@ -455,7 +455,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 disabled={isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
-                    AccessModule.PUBLICATIONCONFIRMATION
+                    AccessModuleName.PUBLICATIONCONFIRMATION
                   )
                 )}
                 style={{ justifySelf: 'end' }}
@@ -471,7 +471,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 disabled={isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
-                    AccessModule.PUBLICATIONCONFIRMATION
+                    AccessModuleName.PUBLICATIONCONFIRMATION
                   )
                 )}
                 style={{ justifySelf: 'end' }}
@@ -487,7 +487,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               step={3}
               moduleStatus={getAccessModuleStatusByNameOrEmpty(
                 modules,
-                AccessModule.COMPLIANCETRAINING
+                AccessModuleName.RTCOMPLIANCETRAINING
               )}
             >
               <div>
@@ -499,7 +499,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               {!isRenewalCompleteForModule(
                 getAccessModuleStatusByNameOrEmpty(
                   modules,
-                  AccessModule.COMPLIANCETRAINING
+                  AccessModuleName.RTCOMPLIANCETRAINING
                 )
               ) && (
                 <div style={renewalStyle.complianceTrainingExpiring}>
@@ -513,7 +513,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                   completedButtonText='Completed'
                   moduleStatus={getAccessModuleStatusByNameOrEmpty(
                     modules,
-                    AccessModule.COMPLIANCETRAINING
+                    AccessModuleName.RTCOMPLIANCETRAINING
                   )}
                   onClick={() => {
                     setRefreshButtonDisabled(false);
@@ -523,7 +523,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
                 {!isRenewalCompleteForModule(
                   getAccessModuleStatusByNameOrEmpty(
                     modules,
-                    AccessModule.COMPLIANCETRAINING
+                    AccessModuleName.RTCOMPLIANCETRAINING
                   )
                 ) && (
                   <Button
@@ -550,7 +550,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
             step={enableComplianceTraining ? 4 : 3}
             moduleStatus={getAccessModuleStatusByNameOrEmpty(
               modules,
-              AccessModule.DATAUSERCODEOFCONDUCT
+              AccessModuleName.DATAUSERCODEOFCONDUCT
             )}
           >
             <div>
@@ -562,7 +562,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
               completedButtonText='Completed'
               moduleStatus={getAccessModuleStatusByNameOrEmpty(
                 modules,
-                AccessModule.DATAUSERCODEOFCONDUCT
+                AccessModuleName.DATAUSERCODEOFCONDUCT
               )}
               onClick={() =>
                 navigateByUrl('data-code-of-conduct', {

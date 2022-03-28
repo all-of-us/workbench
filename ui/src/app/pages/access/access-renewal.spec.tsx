@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import { mount, ReactWrapper } from 'enzyme';
 
 import {
-  AccessModule,
+  AccessModuleName,
   AccessModuleStatus,
   InstitutionApi,
   Profile,
@@ -53,7 +53,7 @@ describe('Access Renewal Page', () => {
         modules: accessRenewalModules.map(
           (m) =>
             ({
-              moduleName: m,
+              moduleNameTemp: m,
               completionEpochMillis: expiredTime - 1,
               expirationEpochMillis: expiredTime,
             } as AccessModuleStatus)
@@ -64,10 +64,10 @@ describe('Access Renewal Page', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   }
 
-  function removeOneModule(toBeRemoved: AccessModule) {
+  function removeOneModule(toBeRemoved: AccessModuleName) {
     const oldProfile = profileStore.get().profile;
     const newModules = oldProfile.accessModules.modules.filter(
-      (m) => m.moduleName !== toBeRemoved
+      (m) => m.moduleNameTemp !== toBeRemoved
     );
     const newProfile = fp.set(
       ['accessModules', 'modules'],
@@ -78,17 +78,17 @@ describe('Access Renewal Page', () => {
   }
 
   function updateOneModuleExpirationTime(
-    updateModuleName: AccessModule,
+    updateModuleName: AccessModuleName,
     time: number
   ) {
     const oldProfile = profileStore.get().profile;
     const newModules = [
       ...oldProfile.accessModules.modules.filter(
-        (m) => m.moduleName !== updateModuleName
+        (m) => m.moduleNameTemp !== updateModuleName
       ),
       {
         ...oldProfile.accessModules.modules.find(
-          (m) => m.moduleName === updateModuleName
+          (m) => m.moduleNameTemp === updateModuleName
         ),
         completionEpochMillis: time - 1,
         expirationEpochMillis: time,
@@ -126,8 +126,10 @@ describe('Access Renewal Page', () => {
         ...moduleStatus,
         bypassEpochMillis:
           // profile and publication are not bypassable.
-          moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION ||
-          moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+          moduleStatus.moduleNameTemp ===
+            AccessModuleName.PROFILECONFIRMATION ||
+          moduleStatus.moduleNameTemp ===
+            AccessModuleName.PUBLICATIONCONFIRMATION
             ? null
             : bypassFn(),
       }),
@@ -198,19 +200,19 @@ describe('Access Renewal Page', () => {
     const wrapper = component();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModuleName.RTCOMPLIANCETRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModuleName.DATAUSERCODEOFCONDUCT,
       oneYearFromNow()
     );
 
@@ -265,7 +267,7 @@ describe('Access Renewal Page', () => {
     const wrapper = component();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     await waitOneTickAndUpdate(wrapper);
@@ -288,11 +290,11 @@ describe('Access Renewal Page', () => {
     const wrapper = component();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
     await waitOneTickAndUpdate(wrapper);
@@ -314,15 +316,15 @@ describe('Access Renewal Page', () => {
     const wrapper = component();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModuleName.RTCOMPLIANCETRAINING,
       oneYearFromNow()
     );
     await waitOneTickAndUpdate(wrapper);
@@ -343,7 +345,7 @@ describe('Access Renewal Page', () => {
     const newModules = [
       ...profileStore.get().profile.accessModules.modules,
       {
-        moduleName: AccessModule.TWOFACTORAUTH, // not expirable
+        moduleNameTemp: AccessModuleName.TWOFACTORAUTH, // not expirable
         completionEpochMillis: null,
         bypassEpochMillis: null,
         expirationEpochMillis: oneYearAgo(),
@@ -360,19 +362,19 @@ describe('Access Renewal Page', () => {
     const wrapper = component();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModuleName.RTCOMPLIANCETRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModuleName.DATAUSERCODEOFCONDUCT,
       oneYearFromNow()
     );
 
@@ -425,11 +427,11 @@ describe('Access Renewal Page', () => {
     setBypassTimes(() => Date.now());
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
 
@@ -461,20 +463,20 @@ describe('Access Renewal Page', () => {
     setCompletionTimes(() => Date.now());
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModuleName.PROFILECONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModuleName.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModuleName.DATAUSERCODEOFCONDUCT,
       oneYearFromNow()
     );
 
     // this module will not be returned in AccessModules because it is disabled
-    removeOneModule(AccessModule.COMPLIANCETRAINING);
+    removeOneModule(AccessModuleName.RTCOMPLIANCETRAINING);
 
     await waitOneTickAndUpdate(wrapper);
 
@@ -506,7 +508,7 @@ describe('Access Renewal Page', () => {
       const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
 
       updateOneModuleExpirationTime(
-        AccessModule.COMPLIANCETRAINING,
+        AccessModuleName.RTCOMPLIANCETRAINING,
         expirationTime
       );
 
@@ -518,8 +520,8 @@ describe('Access Renewal Page', () => {
 
   // RW-7961
   it('should allow completion of profile and publication confirmations when incomplete', async () => {
-    removeOneModule(AccessModule.PROFILECONFIRMATION);
-    removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
+    removeOneModule(AccessModuleName.PROFILECONFIRMATION);
+    removeOneModule(AccessModuleName.PUBLICATIONCONFIRMATION);
 
     const wrapper = component();
 

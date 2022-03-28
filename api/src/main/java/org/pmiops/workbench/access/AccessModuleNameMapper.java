@@ -7,17 +7,24 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface AccessModuleNameMapper {
+  @Deprecated // use the AccessModuleName mappers
   @ValueMapping(source = "COMPLIANCE_TRAINING", target = "RT_COMPLIANCE_TRAINING")
   @ValueMapping(source = "RAS_LINK_LOGIN_GOV", target = "RAS_LOGIN_GOV")
-  DbAccessModuleName clientAccessModuleToStorage(AccessModule source);
+  DbAccessModuleName deprecatedClientAccessModuleToStorage(AccessModule source);
 
+  @Deprecated // use the AccessModuleName mappers
   @ValueMapping(source = "RT_COMPLIANCE_TRAINING", target = "COMPLIANCE_TRAINING")
   @ValueMapping(source = "RAS_LOGIN_GOV", target = "RAS_LINK_LOGIN_GOV")
-  AccessModule storageAccessModuleToClient(DbAccessModuleName source);
+  AccessModule deprecatedStorageAccessModuleToClient(DbAccessModuleName source);
+
+  DbAccessModuleName clientAccessModuleToStorage(AccessModuleName source);
+
+  AccessModuleName storageAccessModuleToClient(DbAccessModuleName source);
 
   // these modules cannot be bypassed
   @ValueMapping(source = "PROFILE_CONFIRMATION", target = MappingConstants.NULL)

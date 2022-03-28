@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
 
-import { AccessModule, InstitutionalRole, Profile } from 'generated/fetch';
+import { AccessModuleName, InstitutionalRole, Profile } from 'generated/fetch';
 import { PublicInstitutionDetails } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
@@ -242,7 +242,7 @@ export const ProfileComponent = fp.flow(
       } = currentProfile;
 
       const profileExpiration = fp.flow(
-        fp.find({ moduleName: AccessModule.PROFILECONFIRMATION }),
+        fp.find({ moduleName: AccessModuleName.PROFILECONFIRMATION }),
         fp.get('expirationEpochMillis')
       )(profile.accessModules.modules);
       const hasExpired = profileExpiration && profileExpiration < Date.now();

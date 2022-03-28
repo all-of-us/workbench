@@ -28,7 +28,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -154,7 +154,7 @@ public class RasLinkService {
     DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
     Optional<AccessModuleStatus> eRAModuleStatus =
         accessModuleService.getAccessModuleStatus(user).stream()
-            .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
+            .filter(a -> a.getModuleNameTemp() == AccessModuleName.ERA_COMMONS)
             .findFirst();
     if (eRAModuleStatus.isPresent()
         && (eRAModuleStatus.get().getCompletionEpochMillis() != null

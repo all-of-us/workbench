@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -19,9 +20,27 @@ public class AccessModuleNameMapperTest {
   @Autowired private AccessModuleNameMapper mapper;
 
   @Test
+  public void testDeprecatedStorageToClientMapping() {
+    for (DbAccessModuleName name : DbAccessModuleName.values()) {
+      AccessModule clientName = mapper.deprecatedStorageAccessModuleToClient(name);
+      assertThat(clientName).isNotNull();
+      assertThat(mapper.deprecatedClientAccessModuleToStorage(clientName)).isEqualTo(name);
+    }
+  }
+
+  @Test
+  public void testDeprecatedClientToStorageMapping() {
+    for (AccessModule name : AccessModule.values()) {
+      DbAccessModuleName dbName = mapper.deprecatedClientAccessModuleToStorage(name);
+      assertThat(dbName).isNotNull();
+      assertThat(mapper.deprecatedStorageAccessModuleToClient(dbName)).isEqualTo(name);
+    }
+  }
+
+  @Test
   public void testStorageToClientMapping() {
     for (DbAccessModuleName name : DbAccessModuleName.values()) {
-      AccessModule clientName = mapper.storageAccessModuleToClient(name);
+      AccessModuleName clientName = mapper.storageAccessModuleToClient(name);
       assertThat(clientName).isNotNull();
       assertThat(mapper.clientAccessModuleToStorage(clientName)).isEqualTo(name);
     }
@@ -29,7 +48,7 @@ public class AccessModuleNameMapperTest {
 
   @Test
   public void testClientToStorageMapping() {
-    for (AccessModule name : AccessModule.values()) {
+    for (AccessModuleName name : AccessModuleName.values()) {
       DbAccessModuleName dbName = mapper.clientAccessModuleToStorage(name);
       assertThat(dbName).isNotNull();
       assertThat(mapper.storageAccessModuleToClient(dbName)).isEqualTo(name);

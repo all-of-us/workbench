@@ -4504,14 +4504,17 @@ definitions:
   AccessModuleConfig:
     type: object
     required:
-      - name
+      - moduleNameTemp
       - expirable
       - bypassable
       - requiredForRTAccess
       - requiredForCTAccess
     properties:
       name:
+        description: DEPRECATED. We're in the process of transitioning to a new structure.  Use moduleNameTemp for now.
         "$ref": "#/definitions/AccessModule"
+      moduleNameTemp:
+        "$ref": "#/definitions/AccessModuleName"
       expirable:
         type: boolean
       bypassable:
@@ -5072,6 +5075,7 @@ definitions:
         type: boolean
         default: false
   AccessModule:
+    description: DEPRECATED.  use AccessModuleName.
     type: string
     enum:
     - DATA_USER_CODE_OF_CONDUCT
@@ -5082,14 +5086,28 @@ definitions:
     - RAS_LINK_LOGIN_GOV
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
+  AccessModuleName:
+    type: string
+    enum:
+      - DATA_USER_CODE_OF_CONDUCT
+      - RT_COMPLIANCE_TRAINING
+      - CT_COMPLIANCE_TRAINING
+      - ERA_COMMONS
+      - TWO_FACTOR_AUTH
+      - RAS_LOGIN_GOV
+      - PROFILE_CONFIRMATION
+      - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:
-    - moduleName
+    - moduleNameTemp
     - isBypassed
     properties:
       moduleName:
+        description: DEPRECATED. We're in the process of transitioning to a new structure.  Use moduleNameTemp for now.
         "$ref": "#/definitions/AccessModule"
+      moduleNameTemp:
+        "$ref": "#/definitions/AccessModuleName"
       isBypassed:
         type: boolean
         default: false
@@ -6005,10 +6023,13 @@ definitions:
   AccessModuleStatus:
     type: object
     required:
-      - moduleName
+      - moduleNameTemp
     properties:
       moduleName:
+        description: DEPRECATED. We're in the process of transitioning to a new structure.  Use moduleNameTemp for now.
         "$ref": "#/definitions/AccessModule"
+      moduleNameTemp:
+        "$ref": "#/definitions/AccessModuleName"
       completionEpochMillis:
         type: integer
         format: int64

@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class UserAccessModuleMapperTest {
         .isEqualTo(
             new AccessModuleStatus()
                 .moduleName(AccessModule.ERA_COMMONS)
+                .moduleNameTemp(AccessModuleName.ERA_COMMONS)
                 .bypassEpochMillis(bypassTime.getTime())
                 .expirationEpochMillis(expirationTime.getTime())
                 .completionEpochMillis(completionTime.getTime()));
@@ -63,6 +65,7 @@ public class UserAccessModuleMapperTest {
         .isEqualTo(
             new AccessModuleStatus()
                 .moduleName(AccessModule.ERA_COMMONS)
+                .moduleNameTemp(AccessModuleName.ERA_COMMONS)
                 .completionEpochMillis(completionTime.getTime()));
   }
 }

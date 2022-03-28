@@ -36,6 +36,7 @@ public interface WorkbenchConfigMapper {
             .collect(Collectors.toList()));
   }
 
+  @Mapping(target = "moduleNameTemp", source = "accessModule.name")
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
   // handled by mapRuntimeImages()

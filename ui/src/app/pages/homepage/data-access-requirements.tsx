@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
+import { AccessModuleName, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
@@ -262,19 +262,23 @@ const styles = reactStyles({
 
 // in display order
 const rtModules = [
-  AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKLOGINGOV,
-  AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModuleName.TWOFACTORAUTH,
+  AccessModuleName.RASLOGINGOV,
+  AccessModuleName.ERACOMMONS,
+  AccessModuleName.RTCOMPLIANCETRAINING,
 ];
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+const ctModule = AccessModuleName.CTCOMPLIANCETRAINING;
+const duccModule = AccessModuleName.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
-export const requiredModules: AccessModule[] = [...rtModules, duccModule];
+export const requiredModules: AccessModuleName[] = [...rtModules, duccModule];
 
-export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
+export const allModules: AccessModuleName[] = [
+  ...rtModules,
+  ctModule,
+  duccModule,
+];
 
 export enum DARPageMode {
   INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
@@ -352,7 +356,7 @@ const handleRasCallback = (
 const selfBypass = async (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function,
-  modules: AccessModule[] = allModules
+  modules: AccessModuleName[] = allModules
 ) => {
   spinnerProps.showSpinner();
   await bypassAll(modules, true);
@@ -362,12 +366,12 @@ const selfBypass = async (
 
 const isEraCommonsModuleRequiredByInstitution = (
   profile: Profile,
-  moduleNames: AccessModule
+  moduleNames: AccessModuleName
 ): boolean => {
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
-  if (moduleNames !== AccessModule.ERACOMMONS) {
+  if (moduleNames !== AccessModuleName.ERACOMMONS) {
     return true;
   }
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
@@ -381,8 +385,8 @@ const isEraCommonsModuleRequiredByInstitution = (
   )(profile.tierEligibilities);
 };
 
-const isEligibleModule = (module: AccessModule, profile: Profile) => {
-  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+const isEligibleModule = (module: AccessModuleName, profile: Profile) => {
+  if (module !== AccessModuleName.CTCOMPLIANCETRAINING) {
     // Currently a user can only be ineligible for CT modules.
     // Note: eRA Commons is an edge case which is handled elsewhere. It is
     // technically also possible for CT eRA commons to be ineligible.
@@ -396,23 +400,26 @@ const isEligibleModule = (module: AccessModule, profile: Profile) => {
 
 // exported for test
 export const getEligibleModules = (
-  modules: AccessModule[],
+  modules: AccessModuleName[],
   profile: Profile
-): AccessModule[] =>
+): AccessModuleName[] =>
   fp.flow(
-    fp.filter((module: AccessModule) => isEligibleModule(module, profile)),
+    fp.filter((module: AccessModuleName) => isEligibleModule(module, profile)),
     fp.map(getAccessModuleConfig),
     fp.filter((moduleConfig) => moduleConfig.isEnabledInEnvironment),
     fp.filter((moduleConfig) =>
-      isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.name)
+      isEraCommonsModuleRequiredByInstitution(
+        profile,
+        moduleConfig.moduleNameTemp
+      )
     ),
-    fp.map((moduleConfig) => moduleConfig.name)
+    fp.map((moduleConfig) => moduleConfig.moduleNameTemp)
   )(modules);
 
 const incompleteModules = (
-  modules: AccessModule[],
+  modules: AccessModuleName[],
   profile: Profile
-): AccessModule[] =>
+): AccessModuleName[] =>
   modules.filter(
     (moduleName) =>
       !isCompliant(getAccessModuleStatusByName(profile, moduleName))
@@ -420,9 +427,9 @@ const incompleteModules = (
 
 // exported for test
 export const getActiveModule = (
-  modules: AccessModule[],
+  modules: AccessModuleName[],
   profile: Profile
-): AccessModule => incompleteModules(modules, profile)[0];
+): AccessModuleName => incompleteModules(modules, profile)[0];
 
 const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
   const { showSpinner, refreshAction } = props;
@@ -451,7 +458,7 @@ const Next = () => (
 );
 
 const ModuleIcon = (props: {
-  moduleName: AccessModule;
+  moduleName: AccessModuleName;
   completedOrBypassed: boolean;
   eligible?: boolean;
 }) => {
@@ -494,7 +501,7 @@ const ModuleIcon = (props: {
 
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = () => {
-  const moduleName = AccessModule.RASLINKLOGINGOV;
+  const moduleName = AccessModuleName.RASLOGINGOV;
   const { DARTitleComponent } = getAccessModuleConfig(moduleName);
   return (
     <FlexRow data-test-id={`module-${moduleName}`}>
@@ -547,7 +554,7 @@ const LoginGovHelpText = (props: {
 
   // don't return help text if complete or bypassed
   const needsHelp = !isCompliant(
-    getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV)
+    getAccessModuleStatusByName(profile, AccessModuleName.RASLOGINGOV)
   );
 
   return (
@@ -589,7 +596,7 @@ const ModuleBox = (props: {
 
 interface ModuleProps {
   profile: Profile;
-  moduleName: AccessModule;
+  moduleName: AccessModuleName;
   active: boolean;
   clickable: boolean;
   spinnerProps: WithSpinnerOverlayProps;
@@ -613,13 +620,16 @@ const MaybeModule = ({
   // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
   const moduleAction: Function = switchCase(
     moduleName,
-    [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
-    [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
-    [AccessModule.ERACOMMONS, () => redirectToNiH],
-    [AccessModule.COMPLIANCETRAINING, () => redirectToRegisteredTraining],
-    [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModuleName.TWOFACTORAUTH,
+      () => () => setShowTwoFactorAuthModal(true),
+    ],
+    [AccessModuleName.RASLOGINGOV, () => redirectToRas],
+    [AccessModuleName.ERACOMMONS, () => redirectToNiH],
+    [AccessModuleName.RTCOMPLIANCETRAINING, () => redirectToRegisteredTraining],
+    [AccessModuleName.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
+    [
+      AccessModuleName.DATAUSERCODEOFCONDUCT,
       () => () => {
         AnalyticsTracker.Registration.EnterDUCC();
         navigate(['data-code-of-conduct']);
@@ -672,7 +682,7 @@ const MaybeModule = ({
               }
             >
               <DARTitleComponent />
-              {moduleName === AccessModule.RASLINKLOGINGOV && (
+              {moduleName === AccessModuleName.RASLOGINGOV && (
                 <LoginGovHelpText
                   profile={profile}
                   afterInitialClick={showRefresh}
@@ -705,7 +715,7 @@ const ControlledTierEraModule = (props: {
   const { profile, eligible, spinnerProps } = props;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
-  const moduleName = AccessModule.ERACOMMONS;
+  const moduleName = AccessModuleName.ERACOMMONS;
   const { DARTitleComponent, refreshAction, isEnabledInEnvironment } =
     getAccessModuleConfig(moduleName);
   const status = getAccessModuleStatusByName(profile, moduleName);
@@ -836,9 +846,9 @@ const Completed = () => (
 
 interface CardProps {
   profile: Profile;
-  modules: AccessModule[];
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  modules: AccessModuleName[];
+  activeModule: AccessModuleName;
+  clickableModules: AccessModuleName[];
   spinnerProps: WithSpinnerOverlayProps;
   children?: string | React.ReactNode;
 }
@@ -928,8 +938,8 @@ const DataDetail = (props: { icon: string; text: string }) => {
 
 const RegisteredTierCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  activeModule: AccessModuleName;
+  clickableModules: AccessModuleName[];
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
 }) => {
@@ -1002,8 +1012,8 @@ const ControlledTierStep = (props: { enabled: boolean; text: String }) => {
 
 const ControlledTierCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  activeModule: AccessModuleName;
+  clickableModules: AccessModuleName[];
   reload: Function;
   spinnerProps: WithSpinnerOverlayProps;
 }) => {
@@ -1101,8 +1111,8 @@ const ControlledTierCard = (props: {
 
 const DuccCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  activeModule: AccessModuleName;
+  clickableModules: AccessModuleName[];
   spinnerProps: WithSpinnerOverlayProps;
   stepNumber: number;
 }) => {
@@ -1182,7 +1192,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const [activeModule, setActiveModule] = useState(null);
     const [clickableModules, setClickableModules] = useState([]);
 
-    const getNextActive = (modules: AccessModule[]) =>
+    const getNextActive = (modules: AccessModuleName[]) =>
       getActiveModule(getEligibleModules(modules, profile), profile);
     const nextActive = getNextActive(allModules);
     const nextRequired = getNextActive(requiredModules);

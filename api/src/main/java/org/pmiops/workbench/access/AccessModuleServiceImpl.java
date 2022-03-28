@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessBypassRequest;
-import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,11 +66,11 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest) {
     updateBypassTime(
-        userId, accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
+        userId, accessBypassRequest.getModuleNameTemp(), accessBypassRequest.getIsBypassed());
   }
 
   @Override
-  public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
+  public void updateBypassTime(long userId, AccessModuleName accessModuleName, boolean isBypassed) {
     DbAccessModule accessModule =
         getDbAccessModuleOrThrow(
             dbAccessModulesProvider.get(),
@@ -132,7 +132,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       DbUserAccessModule dbUserAccessModule) {
     return Optional.of(dbUserAccessModule)
         .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
-        .filter(a -> isModuleStatusReturnedInProfile(a.getModuleName()));
+        .filter(a -> isModuleStatusReturnedInProfile(a.getModuleNameTemp()));
   }
 
   @VisibleForTesting
@@ -248,18 +248,18 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   // Profile.accessModules because we have two Feature Flags for RAS.
   // When the RAS roll-out is complete, we can collapse these two methods again.
 
-  private boolean isModuleRequiredInEnvironment(AccessModule module) {
+  private boolean isModuleRequiredInEnvironment(AccessModuleName moduleName) {
     final AccessConfig accessConfig = configProvider.get().access;
 
-    switch (module) {
+    switch (moduleName) {
       case ERA_COMMONS:
         return accessConfig.enableEraCommons;
         // RT Compliance training  and CT Compliance training modules are
         // controlled by the same feature flag COMPLIANCE_TRAINING
-      case COMPLIANCE_TRAINING:
+      case RT_COMPLIANCE_TRAINING:
       case CT_COMPLIANCE_TRAINING:
         return accessConfig.enableComplianceTraining;
-      case RAS_LINK_LOGIN_GOV:
+      case RAS_LOGIN_GOV:
         return accessConfig.enforceRasLoginGovLinking;
       default:
         return true;
@@ -270,16 +270,16 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   // whether the module is *required* in the environment because we have two Feature Flags for RAS.
   // When the RAS roll-out is complete, we can collapse these two methods again.
 
-  private boolean isModuleStatusReturnedInProfile(AccessModule module) {
+  private boolean isModuleStatusReturnedInProfile(AccessModuleName moduleName) {
     final AccessConfig accessConfig = configProvider.get().access;
 
     // temporary special case: always return RAS in Profile.accessModules when this FF = true
     // even when we do not require it for tier membership
-    if (accessConfig.enableRasLoginGovLinking && module == AccessModule.RAS_LINK_LOGIN_GOV) {
+    if (accessConfig.enableRasLoginGovLinking && moduleName == AccessModuleName.RAS_LOGIN_GOV) {
       return true;
     }
 
     // for every other case
-    return isModuleRequiredInEnvironment(module);
+    return isModuleRequiredInEnvironment(moduleName);
   }
 }

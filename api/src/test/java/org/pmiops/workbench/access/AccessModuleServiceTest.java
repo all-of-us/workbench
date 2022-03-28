@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleName;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -92,7 +93,7 @@ public class AccessModuleServiceTest {
   @Test
   public void testBypassSuccess_insertNewEntity() {
     assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModuleName.TWO_FACTOR_AUTH, true);
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
     assertThat(userAccessModule.get(0).getAccessModule().getName())
@@ -120,7 +121,7 @@ public class AccessModuleServiceTest {
             .setBypassTime(existingBypasstime);
     userAccessModuleDao.save(existingDbUserAccessModule);
     assertThat(userAccessModuleDao.getAllByUser(user).size()).isEqualTo(1);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModuleName.TWO_FACTOR_AUTH, true);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -138,7 +139,7 @@ public class AccessModuleServiceTest {
   @Test
   public void testUnBypassSuccess_insertNewEntity() {
     assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModuleName.TWO_FACTOR_AUTH, false);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -166,7 +167,7 @@ public class AccessModuleServiceTest {
             .setBypassTime(existingBypasstime);
     userAccessModuleDao.save(existingDbUserAccessModule);
     assertThat(userAccessModuleDao.getAllByUser(user).size()).isEqualTo(1);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModuleName.TWO_FACTOR_AUTH, false);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -187,7 +188,7 @@ public class AccessModuleServiceTest {
         ForbiddenException.class,
         () ->
             accessModuleService.updateBypassTime(
-                user.getUserId(), AccessModule.PROFILE_CONFIRMATION, true));
+                user.getUserId(), AccessModuleName.PROFILE_CONFIRMATION, true));
   }
 
   @Test
@@ -216,6 +217,7 @@ public class AccessModuleServiceTest {
     AccessModuleStatus expected2FAModuleStatus =
         new AccessModuleStatus()
             .moduleName(AccessModule.TWO_FACTOR_AUTH)
+            .moduleNameTemp(AccessModuleName.TWO_FACTOR_AUTH)
             .completionEpochMillis(twoFactorCompletionTime.getTime());
 
     // RT Training module: Completion time + expiryDays is 10 days ahead current time, but the
@@ -232,6 +234,7 @@ public class AccessModuleServiceTest {
     AccessModuleStatus expectedRtTrainingModuleStatus =
         new AccessModuleStatus()
             .moduleName(AccessModule.COMPLIANCE_TRAINING)
+            .moduleNameTemp(AccessModuleName.RT_COMPLIANCE_TRAINING)
             .completionEpochMillis(rtTrainingCompletionTime.getTime())
             .bypassEpochMillis(rtTrainingBypassTime.getTime());
 
@@ -250,6 +253,7 @@ public class AccessModuleServiceTest {
     AccessModuleStatus expectedProfileModuleStatus =
         new AccessModuleStatus()
             .moduleName(AccessModule.PROFILE_CONFIRMATION)
+            .moduleNameTemp(AccessModuleName.PROFILE_CONFIRMATION)
             .completionEpochMillis(profileCompletionTime.getTime())
             .expirationEpochMillis(expectedProfileExpirationTime.getTime());
 
@@ -267,6 +271,7 @@ public class AccessModuleServiceTest {
     AccessModuleStatus expectedPublicationModuleStatus =
         new AccessModuleStatus()
             .moduleName(AccessModule.PUBLICATION_CONFIRMATION)
+            .moduleNameTemp(AccessModuleName.PUBLICATION_CONFIRMATION)
             .completionEpochMillis(publicationCompletionTime.getTime())
             .expirationEpochMillis(expectedPublicationExpirationTime.getTime());
 
@@ -274,7 +279,9 @@ public class AccessModuleServiceTest {
     DbUserAccessModule duccAccessModule =
         new DbUserAccessModule().setAccessModule(ducc).setUser(user);
     AccessModuleStatus expectedDuccModuleStatus =
-        new AccessModuleStatus().moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT);
+        new AccessModuleStatus()
+            .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+            .moduleNameTemp(AccessModuleName.DATA_USER_CODE_OF_CONDUCT);
 
     userAccessModuleDao.saveAll(
         ImmutableList.of(
@@ -318,6 +325,7 @@ public class AccessModuleServiceTest {
     AccessModuleStatus expected2FAModuleStatus =
         new AccessModuleStatus()
             .moduleName(AccessModule.TWO_FACTOR_AUTH)
+            .moduleNameTemp(AccessModuleName.TWO_FACTOR_AUTH)
             .completionEpochMillis(twoFactorCompletionTime.getTime());
 
     Timestamp rtTrainingCompletionTime =

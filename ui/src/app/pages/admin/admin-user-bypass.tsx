@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { AccessModule, AdminTableUser } from 'generated/fetch';
+import { AccessModuleName, AdminTableUser } from 'generated/fetch';
 
 import { Button, IconButton } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
@@ -30,23 +30,23 @@ interface State {
   // a spinner should be shown.
   isSaving: boolean;
   // The current set of bypassed access modules in the widget.
-  selectedModules: AccessModule[];
+  selectedModules: AccessModuleName[];
 }
 
-const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
+const getBypassedModules = (user: AdminTableUser): Array<AccessModuleName> => {
   return [
     ...(user.complianceTrainingBypassTime
-      ? [AccessModule.COMPLIANCETRAINING]
+      ? [AccessModuleName.RTCOMPLIANCETRAINING]
       : []),
     ...(user.ctComplianceTrainingBypassTime
-      ? [AccessModule.CTCOMPLIANCETRAINING]
+      ? [AccessModuleName.CTCOMPLIANCETRAINING]
       : []),
     ...(user.dataUseAgreementBypassTime
-      ? [AccessModule.DATAUSERCODEOFCONDUCT]
+      ? [AccessModuleName.DATAUSERCODEOFCONDUCT]
       : []),
-    ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
-    ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
-    ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
+    ...(user.eraCommonsBypassTime ? [AccessModuleName.ERACOMMONS] : []),
+    ...(user.twoFactorAuthBypassTime ? [AccessModuleName.TWOFACTORAUTH] : []),
+    ...(user.rasLinkLoginGovBypassTime ? [AccessModuleName.RASLOGINGOV] : []),
   ];
 };
 
@@ -84,10 +84,10 @@ export class AdminUserBypass extends React.Component<Props, State> {
     const changedModules = fp.xor(getBypassedModules(user), selectedModules);
     this.setState({ isSaving: true });
     try {
-      for (const module of changedModules) {
+      for (const moduleName of changedModules) {
         await userAdminApi().bypassAccessRequirement(user.userId, {
-          isBypassed: selectedModules.includes(module),
-          moduleName: module,
+          isBypassed: selectedModules.includes(moduleName),
+          moduleNameTemp: moduleName,
         });
       }
       this.setState({ isSaving: false });
@@ -149,13 +149,13 @@ export class AdminUserBypass extends React.Component<Props, State> {
               <Toggle
                 name='RT Compliance Training'
                 checked={selectedModules.includes(
-                  AccessModule.COMPLIANCETRAINING
+                  AccessModuleName.RTCOMPLIANCETRAINING
                 )}
                 data-test-id='rt-compliance-training-toggle'
                 onToggle={() => {
                   this.setState({
                     selectedModules: fp.xor(selectedModules, [
-                      AccessModule.COMPLIANCETRAINING,
+                      AccessModuleName.RTCOMPLIANCETRAINING,
                     ]),
                   });
                 }}
@@ -165,13 +165,13 @@ export class AdminUserBypass extends React.Component<Props, State> {
               <Toggle
                 name='CT Compliance Training'
                 checked={selectedModules.includes(
-                  AccessModule.CTCOMPLIANCETRAINING
+                  AccessModuleName.CTCOMPLIANCETRAINING
                 )}
                 data-test-id='ct-compliance-training-toggle'
                 onToggle={() => {
                   this.setState({
                     selectedModules: fp.xor(selectedModules, [
-                      AccessModule.CTCOMPLIANCETRAINING,
+                      AccessModuleName.CTCOMPLIANCETRAINING,
                     ]),
                   });
                 }}
@@ -180,12 +180,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
             {enableEraCommons && (
               <Toggle
                 name='eRA Commons Linking'
-                checked={selectedModules.includes(AccessModule.ERACOMMONS)}
+                checked={selectedModules.includes(AccessModuleName.ERACOMMONS)}
                 data-test-id='era-commons-toggle'
                 onToggle={() => {
                   this.setState({
                     selectedModules: fp.xor(selectedModules, [
-                      AccessModule.ERACOMMONS,
+                      AccessModuleName.ERACOMMONS,
                     ]),
                   });
                 }}
@@ -193,12 +193,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
             )}
             <Toggle
               name='Two Factor Auth'
-              checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
+              checked={selectedModules.includes(AccessModuleName.TWOFACTORAUTH)}
               data-test-id='two-factor-auth-toggle'
               onToggle={() => {
                 this.setState({
                   selectedModules: fp.xor(selectedModules, [
-                    AccessModule.TWOFACTORAUTH,
+                    AccessModuleName.TWOFACTORAUTH,
                   ]),
                 });
               }}
@@ -206,13 +206,13 @@ export class AdminUserBypass extends React.Component<Props, State> {
             <Toggle
               name='Data User Code of Conduct'
               checked={selectedModules.includes(
-                AccessModule.DATAUSERCODEOFCONDUCT
+                AccessModuleName.DATAUSERCODEOFCONDUCT
               )}
               data-test-id='ducc-toggle'
               onToggle={() => {
                 this.setState({
                   selectedModules: fp.xor(selectedModules, [
-                    AccessModule.DATAUSERCODEOFCONDUCT,
+                    AccessModuleName.DATAUSERCODEOFCONDUCT,
                   ]),
                 });
               }}
@@ -220,12 +220,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
             {(enableRasLoginGovLinking || enforceRasLoginGovLinking) && (
               <Toggle
                 name='RAS Login.gov Link'
-                checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
+                checked={selectedModules.includes(AccessModuleName.RASLOGINGOV)}
                 data-test-id='ras-link-login-gov-toggle'
                 onToggle={() => {
                   this.setState({
                     selectedModules: fp.xor(selectedModules, [
-                      AccessModule.RASLINKLOGINGOV,
+                      AccessModuleName.RASLOGINGOV,
                     ]),
                   });
                 }}
