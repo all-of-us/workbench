@@ -918,6 +918,7 @@ const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
               setLoading={() => {}}
               textStyle={{ fontSize: '0.6rem' }}
               hide={!showModule}
+              showTimeEstimate={true}
             />
           </FlexColumn>
         );

@@ -9,6 +9,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   Arrow,
+  Clock,
   ClrIcon,
   ExclamationTriangle,
   withCircleBackground,
@@ -231,8 +232,15 @@ export const RenewalCardBody = (props: {
   setLoading: (boolean) => void;
   hide?: boolean;
   textStyle?: CSSProperties;
+  showTimeEstimate?: boolean;
 }) => {
-  const { moduleStatus, setLoading, hide, textStyle } = props;
+  const {
+    moduleStatus,
+    setLoading,
+    hide,
+    textStyle,
+    showTimeEstimate = false,
+  } = props;
 
   const [, navigateByUrl] = useNavigation();
   const noReportId = useId();
@@ -241,9 +249,20 @@ export const RenewalCardBody = (props: {
   const [trainingRefreshButtonDisabled, setTrainingRefreshButtonDisabled] =
     useState(true);
 
-  const { AARTitleComponent } = getAccessModuleConfig(moduleStatus.moduleName);
+  const { AARTitleComponent, renewalTimeEstimate } = getAccessModuleConfig(
+    moduleStatus.moduleName
+  );
   const { lastConfirmedDate, nextReviewDate } =
     computeRenewalDisplayDates(moduleStatus);
+  const TimeEstimate = () =>
+    showTimeEstimate ? (
+      <div>
+        <span style={{ padding: 10 }}>
+          <Clock style={{ color: colors.disabled }} />
+        </span>
+        {renewalTimeEstimate} min
+      </div>
+    ) : null;
 
   const module = switchCase(
     moduleStatus.moduleName,
@@ -259,6 +278,7 @@ export const RenewalCardBody = (props: {
             Note that you are obliged by the Terms of Use of the Workbench to
             keep your profile information up-to-date at all times.
           </div>
+          <TimeEstimate />
           <ActionButton
             actionButtonText='Review'
             completedButtonText='Confirmed'
@@ -289,6 +309,7 @@ export const RenewalCardBody = (props: {
             </a>{' '}
             For any questions, please contact <SupportMailto />
           </div>
+          <TimeEstimate />
           <div
             style={{ ...renewalStyle.publicationConfirmation, ...textStyle }}
           >
@@ -348,6 +369,7 @@ export const RenewalCardBody = (props: {
               reload the page.
             </div>
           )}
+          <TimeEstimate />
           <FlexRow style={{ marginTop: 'auto' }}>
             <ActionButton
               actionButtonText='Complete Training'
@@ -387,6 +409,7 @@ export const RenewalCardBody = (props: {
             Please review and sign the data user code of conduct consenting to
             the <AoU /> data use policy.
           </div>
+          <TimeEstimate />
           <ActionButton
             actionButtonText='View & Sign'
             completedButtonText='Completed'
