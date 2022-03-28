@@ -363,6 +363,7 @@ export const useIsUserDisabled = () => {
 
 export const useNeedsToAcceptTOS = () => {
   const { authLoaded, isSignedIn } = useStore(authStore);
+  const profile = profileStore.get().profile;
   const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] =
     useState<boolean>(false);
   useEffect(() => {
@@ -372,7 +373,9 @@ export const useNeedsToAcceptTOS = () => {
       !environment.enableTOSRedirectForLoggedInUser
     ) {
       setUserRequiredToAcceptTOS(false);
-    } else {
+    } else if (profile) {
+      // wait for profile to load, to  ensure user initialization happens
+      // before checking term of service status
       (async () => {
         try {
           const userHasAcceptedLatestTOS =
@@ -384,7 +387,7 @@ export const useNeedsToAcceptTOS = () => {
       })();
     }
     return () => {};
-  }, [authLoaded, isSignedIn]);
+  }, [authLoaded, isSignedIn, profile]);
   return userRequiredToAcceptTOS;
 };
 

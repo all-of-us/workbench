@@ -447,6 +447,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return dbUser;
   }
 
+  /**
+   * This method is used by create Account flow, it throws exception if user has not accepted AoU
+   * Terms of Service at all or has accepted the incorrect version
+   *
+   * @param tosVersion
+   */
   @Override
   public void validateAllOfUsTermsOfService(Integer tosVersion) {
     if (tosVersion == null) {
@@ -457,22 +463,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  public void validateTermsOfService(Integer tosVersion, Boolean userAcceptedTerraTermsOfService) {
-    validateAllOfUsTermsOfService(tosVersion);
-    if (!userAcceptedTerraTermsOfService) {
-      throw new BadRequestException(
-          "Terra Terms of Service has not been Accepted or version is not up to date");
-    }
-  }
-
+  // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
-  public void validateTermsOfService(@Nonnull DbUser dbUser) {
-    // Verify if the user has accepted the LATEST All of Us Terms of Service Version
-    // If User has accepted latest All of Us Tos, verify if user has accepted Latest Terra TOS
+  public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
     final int tosVersion =
         userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
+    return tosVersion == LATEST_AOU_TOS_VERSION;
+  }
+
+  // Returns true only if the user has accepted the latest version of both AoU and Terra terms of service
+  @Override
+  public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
     boolean userHasAcceptedLatestTerraTos = getUserTerraTermsOfServiceStatus(dbUser);
-    validateTermsOfService(tosVersion, userHasAcceptedLatestTerraTos);
+    return validateAllOfUsTermsOfServiceVersion(dbUser) && userHasAcceptedLatestTerraTos;
   }
 
   @Override

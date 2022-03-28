@@ -57,7 +57,9 @@ public interface UserService {
 
   void validateAllOfUsTermsOfService(Integer tosVersion);
 
-  void validateTermsOfService(@Nonnull DbUser dbUser);
+  boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser);
+
+  boolean validateTermsOfService(@Nonnull DbUser dbUser);
 
   boolean getUserTerraTermsOfServiceStatus(@Nonnull DbUser dbUser);
 

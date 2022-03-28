@@ -595,7 +595,7 @@ public class UserServiceTest {
   public void test_validateTermsOfService_dbUser_missing_version() {
     DbUser user = userDao.findUserByUsername(USERNAME);
     userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
-    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+    assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
   @Test
@@ -605,7 +605,7 @@ public class UserServiceTest {
         new DbUserTermsOfService()
             .setUserId(user.getUserId())
             .setTosVersion(LATEST_AOU_TOS_VERSION - 1));
-    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+    assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
   private void assertModuleCompletionEqual(

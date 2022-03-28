@@ -200,7 +200,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
   () => {
     const config = useServerConfig();
     const { authLoaded, authError } = useAuthentication();
-    const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
     const isUserDisabledInDb = useIsUserDisabled();
     const overriddenUrl = useOverriddenApiUrl();
 
@@ -225,6 +224,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
         }
       }
     };
+    const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
 
     useEffect(() => {
       if (config) {
