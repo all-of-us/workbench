@@ -1,7 +1,6 @@
 import * as React from 'react';
 import RSelect from 'react-select';
-import { mount, ReactWrapper } from 'enzyme';
-import { mockNavigate } from 'setupTests';
+import { ReactWrapper } from 'enzyme';
 
 import {
   ProfileApi,
@@ -12,7 +11,10 @@ import {
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  mountWithRouter,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
@@ -30,6 +32,7 @@ describe('WorkspaceList', () => {
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
+
   let workspacesApiStub: WorkspacesApiStub;
 
   const props = {
@@ -38,7 +41,7 @@ describe('WorkspaceList', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceList {...props} />, {
+    return mountWithRouter(<WorkspaceList {...props} />, {
       attachTo: document.getElementById('root'),
     });
   };
@@ -84,22 +87,6 @@ describe('WorkspaceList', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(getCardNames(wrapper)).toEqual(workspaceStubs.map((w) => w.name));
-  });
-
-  it('navigates when clicking on the workspace name', async () => {
-    const workspace = workspaceStubs[0];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .first()
-      .simulate('click');
-    expect(mockNavigate).toHaveBeenCalledWith([
-      'workspaces',
-      workspace.namespace,
-      workspace.id,
-      'data',
-    ]);
   });
 
   it('has the correct permissions classes', async () => {

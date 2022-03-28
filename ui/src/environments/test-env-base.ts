@@ -25,7 +25,6 @@ export const testEnvironmentBase: EnvironmentBase = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
-  enableAsyncWorkspaceOperations: true,
   mergedAccessRenewal: true,
   enableTOSRedirectForLoggedInUser: true,
 };
