@@ -226,7 +226,7 @@ describe('Genomics Extraction Test', () => {
         return true;
       }
       const timeSpentInMin = Math.round((Date.now() - startTime) / 1000) / 60;
-      logger.info(`Waited [ ${timeSpentInMin} ] seconds for runtime and genomic extraction to finish.`);
+      logger.info(`Waited [ ${timeSpentInMin} ] minutes for runtime and genomic extraction to finish.`);
     }
     // Take screenshot for manual checking.
     await runtimeSidebar.open();
