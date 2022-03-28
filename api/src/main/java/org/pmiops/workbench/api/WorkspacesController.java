@@ -598,7 +598,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, clonedRoles);
+      dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, clonedRoles);
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
@@ -725,7 +725,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
+    dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     List<UserRole> userRolesAfterShare =
