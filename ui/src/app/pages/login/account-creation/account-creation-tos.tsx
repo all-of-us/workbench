@@ -176,7 +176,8 @@ export class AccountCreationTos extends React.Component<
               disabled={
                 !hasReadEntireTos ||
                 !hasAckedPrivacyStatement ||
-                !hasAckedTermsOfService
+                !hasAckedTermsOfService ||
+                hasClickedNext
               }
               onClick={() => {
                 this.setState({ hasClickedNext: true });
