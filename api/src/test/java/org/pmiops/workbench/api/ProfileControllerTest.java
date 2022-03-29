@@ -601,10 +601,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
     DbUserTermsOfService userTos = userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId());
     userTermsOfServiceDao.delete(userTos);
-    final BadRequestException badRequestexception =
-        assertThrows(
-            BadRequestException.class, () -> profileController.getUserTermsOfServiceStatus());
-    assertThat(badRequestexception.getMessage()).contains(AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE);
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isEqualTo(false);
   }
 
   @Test
