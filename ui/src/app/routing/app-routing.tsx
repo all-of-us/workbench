@@ -12,6 +12,7 @@ import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
 import { NotificationModal } from 'app/components/modals';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { CookiePolicy } from 'app/pages/cookie-policy';
+import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
 import { SignIn } from 'app/pages/login/sign-in';
 import { NotFound } from 'app/pages/not-found';
 import { SessionExpired } from 'app/pages/session-expired';
@@ -29,7 +30,11 @@ import {
   configApi,
   getApiBaseUrl,
 } from 'app/services/swagger-fetch-clients';
-import { useIsUserDisabled } from 'app/utils/access-utils';
+import {
+  acceptTermsOfService,
+  useIsUserDisabled,
+  useNeedsToAcceptTOS,
+} from 'app/utils/access-utils';
 import { initializeAnalytics } from 'app/utils/analytics';
 import { useAuthentication } from 'app/utils/authentication';
 import {
@@ -219,6 +224,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
         }
       }
     };
+    const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
 
     useEffect(() => {
       if (config) {
@@ -287,10 +293,20 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
                     exact={false}
                     guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
                   >
-                    <SignedInPage intermediaryRoute={true} routeData={{}} />
+                    {!doesUserNeedToAcceptTOS && (
+                      <SignedInPage intermediaryRoute={true} routeData={{}} />
+                    )}
                   </AppRoute>
                 </Switch>
               </AppRouter>
+            )}
+            {doesUserNeedToAcceptTOS && (
+              <AccountCreationTos
+                onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
+                filePath={'/aou-tos.html'}
+                afterPrev={false}
+                style={{ height: '36rem' }}
+              />
             )}
             {overriddenUrl && (
               <div style={{ position: 'absolute', top: 0, left: '1rem' }}>

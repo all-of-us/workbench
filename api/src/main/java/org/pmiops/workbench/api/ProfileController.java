@@ -152,14 +152,12 @@ public class ProfileController implements ProfileApiDelegate {
       // If the user is already registered, their profile will get updated.
       fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
 
-      // by approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
-      try {
-        userService.validateTermsOfService(dbUser);
+      // By approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
+      // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos
+      // will take care of scenario by re-directing them to AoU terms of service page
+      if (userService.validateAllOfUsTermsOfServiceVersion(dbUser)) {
         userService.acceptTerraTermsOfService(dbUser);
-      } catch (BadRequestException e) {
-        // TODO 7834
       }
-
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       return saveUserWithConflictHandling(dbUser);
     }
@@ -175,7 +173,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> getMe() {
-    // Record that the user signed in, and create the user's FireCloud user and free tier billing
+    // Record that the user signed in
+    // and create the user's FireCloud user and free tier billing
     // project if they haven't been created already.
     // This means they can start using the NIH billing account in FireCloud (without access to
     // the CDR); we will probably need a job that deactivates accounts after some period of
@@ -184,6 +183,20 @@ public class ProfileController implements ProfileApiDelegate {
     DbUser dbUser = initializeUserIfNeeded();
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
+  }
+
+  @Override
+  public ResponseEntity<Boolean> getUserTermsOfServiceStatus() {
+    DbUser loggedInUser = userAuthenticationProvider.get().getUser();
+    return ResponseEntity.ok(userService.validateTermsOfService(loggedInUser));
+  }
+
+  @Override
+  public ResponseEntity<Void> acceptTermsOfService(Integer termsOfServiceVersion) {
+    DbUser loggedInUser = userAuthenticationProvider.get().getUser();
+    userService.submitAouTermsOfService(loggedInUser, termsOfServiceVersion);
+    userService.acceptTerraTermsOfService(loggedInUser);
+    return ResponseEntity.ok().build();
   }
 
   @Override
@@ -198,7 +211,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyCaptcha(request.getCaptchaVerificationToken());
     }
 
-    userService.validateTermsOfService(request.getTermsOfServiceVersion());
+    userService.validateAllOfUsTermsOfService(request.getTermsOfServiceVersion());
 
     profileService.validateAffiliation(request.getProfile());
 

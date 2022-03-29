@@ -8,6 +8,7 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
+const LATEST_TOS_VERSION = 1;
 const baseCheckboxLabelStyle = {
   color: colors.primary,
   fontFamily: 'Montserrat',
@@ -37,11 +38,12 @@ const styles = reactStyles({
 
 export interface AccountCreationTosProps {
   // Callback which will be called by this component when the user clicks "Next".
-  onComplete: () => void;
+  onComplete: (tosVersion) => void;
   // Path to the Terms of Service file to be displayed.
   filePath: string;
   // Coming from Institution page
   afterPrev: boolean;
+  style?: React.CSSProperties;
 }
 
 interface AccountCreationTosState {
@@ -50,6 +52,7 @@ interface AccountCreationTosState {
   hasAckedTermsOfService: boolean;
 }
 
+// TODO: Rename this to TermsOfService
 export class AccountCreationTos extends React.Component<
   AccountCreationTosProps,
   AccountCreationTosState
@@ -73,7 +76,7 @@ export class AccountCreationTos extends React.Component<
     return (
       <FlexColumn
         data-test-id='account-creation-tos'
-        style={{ flex: 1, padding: '1rem 3rem 0 3rem' }}
+        style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
       >
         <HtmlViewer
           ariaLabel='terms of service agreement'
@@ -170,7 +173,7 @@ export class AccountCreationTos extends React.Component<
                 !hasAckedPrivacyStatement ||
                 !hasAckedTermsOfService
               }
-              onClick={() => this.props.onComplete()}
+              onClick={() => this.props.onComplete(LATEST_TOS_VERSION)}
             >
               Next
             </Button>

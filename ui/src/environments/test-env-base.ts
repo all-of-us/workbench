@@ -26,4 +26,5 @@ export const testEnvironmentBase: EnvironmentBase = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   mergedAccessRenewal: true,
+  enableTOSRedirectForLoggedInUser: true,
 };

@@ -48,6 +48,8 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
@@ -445,21 +447,54 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return dbUser;
   }
 
+  /**
+   * This method is used by create Account flow, it throws exception if user has not accepted AoU
+   * Terms of Service at all or has accepted the incorrect version
+   *
+   * @param tosVersion
+   */
   @Override
-  public void validateTermsOfService(Integer tosVersion) {
+  public void validateAllOfUsTermsOfService(Integer tosVersion) {
     if (tosVersion == null) {
       throw new BadRequestException("Terms of Service version is NULL");
     }
     if (tosVersion != LATEST_AOU_TOS_VERSION) {
-      throw new BadRequestException("Terms of Service version is not up to date");
+      throw new BadRequestException("All of Us Terms of Service version is not up to date");
     }
   }
 
+  // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
-  public void validateTermsOfService(@Nonnull DbUser dbUser) {
-    final int tosVersion =
-        userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
-    validateTermsOfService(tosVersion);
+  public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
+    try {
+      final int tosVersion =
+          userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
+      return tosVersion == LATEST_AOU_TOS_VERSION;
+    } catch (BadRequestException ex) {
+      // In case user doesnt have any terms of service
+      return false;
+    }
+  }
+
+  // Returns true only if the user has accepted the latest version of both AoU and Terra terms of
+  // service
+  @Override
+  public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
+    return validateAllOfUsTermsOfServiceVersion(dbUser) && getUserTerraTermsOfServiceStatus(dbUser);
+  }
+
+  @Override
+  public boolean getUserTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
+    try {
+      return fireCloudService.getUserTermsOfServiceStatus();
+    } catch (ApiException e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Error while getting Terra Terms of Service status for user %s",
+              dbUser.getUsername()));
+      throw new ServerErrorException(e);
+    }
   }
 
   @Override

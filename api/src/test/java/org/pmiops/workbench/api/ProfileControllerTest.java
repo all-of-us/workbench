@@ -170,6 +170,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_DUCC_VERSION = 27; // arbitrary for test
+  private static final String AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE =
+      "No Terms of Service acceptance recorded for user ID";
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
@@ -295,7 +297,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
-    } catch (ApiException e) {
+      when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
+    } catch (ApiException | org.pmiops.workbench.firecloud.ApiException e) {
       e.printStackTrace();
     }
 
@@ -576,6 +579,38 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
+    createAccountAndDbUserWithAffiliation();
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
+  }
+
+  @Test
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedLatestAoUTOSVersion() {
+    createAccountAndDbUserWithAffiliation();
+    DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
+    userTermsOfServiceDao.save(
+        userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId()).setTosVersion(-1));
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
+  }
+
+  @Test
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedAoUTOS() {
+    createAccountAndDbUserWithAffiliation();
+    DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
+    DbUserTermsOfService userTos = userTermsOfServiceDao.findByUserIdOrThrow(user.getUserId());
+    userTermsOfServiceDao.delete(userTos);
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isEqualTo(false);
+  }
+
+  @Test
+  public void testGetUserTermsOfServiceStatus() {
+    createAccountAndDbUserWithAffiliation();
+    assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isTrue();
+  }
+
+  @Test
   public void testMe_userBeforeNotLoggedInSuccess() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
@@ -639,6 +674,13 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .institutionalRoleEnum(InstitutionalRole.ADMIN);
           createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
         });
+  }
+
+  @Test
+  public void test_AcceptTermsOfService() {
+    createAccountAndDbUserWithAffiliation();
+    profileController.acceptTermsOfService(1);
+    verify(mockFireCloudService).acceptTermsOfService();
   }
 
   @Test
