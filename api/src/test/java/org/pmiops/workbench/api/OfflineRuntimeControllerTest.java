@@ -291,7 +291,7 @@ public class OfflineRuntimeControllerTest {
             idleDisk(Duration.ofDays(0L)),
             idleDisk(Duration.ofDays(1L)),
             idleDisk(Duration.ofDays(13L)),
-            idleDisk(Duration.ofDays(61L)),
+            idleDisk(Duration.ofDays(31L)),
             idleDisk(Duration.ofDays(119L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -322,9 +322,9 @@ public class OfflineRuntimeControllerTest {
     stubWorkspaceOwners(workspace, ImmutableList.of(user1));
     stubDisks(
         ImmutableList.of(
+            idleDisk(Duration.ofDays(30L)),
             idleDisk(Duration.ofDays(60L)),
-            idleDisk(Duration.ofDays(120L)),
-            idleDisk(Duration.ofDays(180L))));
+            idleDisk(Duration.ofDays(90L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockMailService, times(3))
@@ -335,7 +335,7 @@ public class OfflineRuntimeControllerTest {
   @Test
   public void testCheckPersistentDisksMultipleOwners() throws Exception {
     stubWorkspaceOwners(workspace, ImmutableList.of(user1, user2));
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(60L))));
+    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(30L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockMailService, times(1))
@@ -349,14 +349,14 @@ public class OfflineRuntimeControllerTest {
 
     LeonardoListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
     mysteryDisk.getAuditInfo().setCreator("404@aou.org");
-    stubDisks(ImmutableList.of(mysteryDisk, idleDisk(Duration.ofDays(60L))));
+    stubDisks(ImmutableList.of(mysteryDisk, idleDisk(Duration.ofDays(30L))));
 
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     // Skips the unknown user, but still sends the rest.
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), eq(60), any());
+            eq(ImmutableList.of(user1)), eq(workspace), any(), eq(30), any());
   }
 
   @Test

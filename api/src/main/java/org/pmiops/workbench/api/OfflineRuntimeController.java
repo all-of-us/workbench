@@ -54,7 +54,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // On the n'th day of inactivity on a PD, a notification is sent.
   private static final Set<Integer> INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS = ImmutableSet.of(14);
   // Every n'th day of inactivity on a PD (not including 0), a notification is sent.
-  private static final int INACTIVE_DISK_NOTIFY_PERIOD_DAYS = 60;
+  private static final int INACTIVE_DISK_NOTIFY_PERIOD_DAYS = 30;
 
   // This is temporary while we wait for Leonardo autopause to rollout. Once
   // available, we should instead take a runtime status of STOPPED to trigger
