@@ -246,13 +246,15 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select domain_id as domainId, domain_id as name, count(*) as count "
+          "select upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as domainId, "
+              + " upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as name, "
+              + " count(*) as count "
               + "from cb_criteria "
               + "where match(full_text) against(:term in boolean mode) "
               + "and full_text like '%_rank1%' "
               + "and is_standard = :standard "
               + "and domain_id in (:domains) "
-              + "group by domain_id "
+              + "group by 1 "
               + "order by count desc",
       nativeQuery = true)
   List<DbCardCount> findDomainCounts(
@@ -262,13 +264,15 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select domain_id as domainId, domain_id as name, count(*) as count "
+          "select upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as domainId, "
+              + " upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as name, "
+              + " count(*) as count "
               + "from cb_criteria "
-              + "where code like upper(concat(:term,'%')) "
+              + "where domain_id in (:domains) "
               + "and is_standard = :standard "
-              + "and domain_id in (:domains) "
+              + "and code like upper(concat(:term,'%')) "
               + "and full_text like '%_rank1%' "
-              + "group by domain_id "
+              + "group by 1 "
               + "order by count desc",
       nativeQuery = true)
   List<DbCardCount> findDomainCountsByCode(
