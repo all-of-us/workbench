@@ -556,4 +556,12 @@ public class FireCloudServiceImpl implements FireCloudService {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
     retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
   }
+
+  @Override
+  public boolean getUserTermsOfServiceStatus() throws ApiException {
+    TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
+    boolean userHasAcceptedTOS =
+        retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
+    return userHasAcceptedTOS;
+  }
 }

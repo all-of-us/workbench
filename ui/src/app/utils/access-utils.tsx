@@ -10,6 +10,7 @@ import {
   Profile,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
@@ -358,6 +359,47 @@ export const useIsUserDisabled = () => {
     };
   }, [authLoaded, isSignedIn]);
   return disabled;
+};
+
+export const useNeedsToAcceptTOS = () => {
+  const { authLoaded, isSignedIn } = useStore(authStore);
+  const profile = profileStore.get().profile;
+  const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] =
+    useState<boolean>(false);
+  useEffect(() => {
+    if (
+      !authLoaded ||
+      !isSignedIn ||
+      !environment.enableTOSRedirectForLoggedInUser
+    ) {
+      setUserRequiredToAcceptTOS(false);
+    } else if (profile) {
+      // wait for profile to load, to  ensure user initialization happens
+      // before checking term of service status
+      (async () => {
+        try {
+          const userHasAcceptedLatestTOS =
+            await profileApi().getUserTermsOfServiceStatus();
+          setUserRequiredToAcceptTOS(!userHasAcceptedLatestTOS);
+        } catch (e) {
+          console.log('Error while getting user terms of service status');
+        }
+      })();
+    }
+    return () => {};
+  }, [authLoaded, isSignedIn, profile]);
+  return userRequiredToAcceptTOS;
+};
+
+export const acceptTermsOfService = (tosVersion) => {
+  (async () => {
+    try {
+      await profileApi().acceptTermsOfService(tosVersion);
+      window.location.reload();
+    } catch (ex) {
+      console.log('Error while accepting TOS');
+    }
+  })();
 };
 
 export const getAccessModuleStatusByNameOrEmpty = (

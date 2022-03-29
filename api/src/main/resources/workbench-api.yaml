@@ -235,6 +235,35 @@ paths:
       responses:
         204:
           description: Request Received.
+
+  "/v1/getUserTermsOfServiceStatus":
+    get:
+      tags:
+        - profile
+      description: Returns if the logged in user has accepted the latest versions of the All of Us and Terra Terms of Service agreements
+      operationId: getUserTermsOfServiceStatus
+      responses:
+        200:
+          description: Returns true if user has accepted latest versions of the All of Us and Terra Terms of Service agreements
+          schema:
+            type: boolean
+
+  "/v1/acceptTermsOfService":
+    post:
+      tags:
+        - profile
+      description: User accepts current version of Terra and specific version Of All of Us Terms of Service
+      operationId: acceptTermsOfService
+      parameters:
+      - in: query
+        name: termsOfServiceVersion
+        type: integer
+        format: int32
+        description: 'Version of the All of Us TOS that the user has acknowledged'
+      responses:
+        204:
+          description: User has accepted AOU and Terra Terms of service.
+
   "/v1/confirmProfile":
     post:
       tags:

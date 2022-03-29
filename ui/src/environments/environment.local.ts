@@ -23,4 +23,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   mergedAccessRenewal: true,
+  enableTOSRedirectForLoggedInUser: true,
 };

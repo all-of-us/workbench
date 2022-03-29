@@ -139,4 +139,6 @@ public interface FireCloudService {
   boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName);
 
   void acceptTermsOfService();
+
+  boolean getUserTermsOfServiceStatus() throws ApiException;
 }
