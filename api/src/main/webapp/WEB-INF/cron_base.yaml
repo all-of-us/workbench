@@ -4,6 +4,13 @@ cron:
   schedule: every 3 hours
   timezone: UTC
   target: api
+- description: >
+    Daily persistent disk checks / notifications. Note: rerunning may result in duplicate email
+    notifications. This endpoint's logic depends on it running once daily.
+  url: /v1/cron/checkPersistentDisks
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
 - description: 'Daily audit of gcp resources that users have access to'
   url: /v1/cron/bulkAuditProjectAccess
   schedule: every 24 hours
