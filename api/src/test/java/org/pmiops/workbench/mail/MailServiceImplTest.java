@@ -228,7 +228,7 @@ public class MailServiceImplTest {
   }
 
   @Test
-  public void testAlertusersUnusedDiskWarning() throws Exception {
+  public void testAlertUsersUnusedDiskWarning() throws Exception {
     DbUser user = createDbUser();
     mailService.alertUsersUnusedDiskWarningThreshold(
         ImmutableList.of(user),

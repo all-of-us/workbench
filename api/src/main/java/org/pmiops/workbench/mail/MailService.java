@@ -41,8 +41,10 @@ public interface MailService {
       throws MessagingException;
 
   /**
-   * Notifies the specified users via BCC that there is an unused persistent disk. If the workspace
-   * is on initial credits, workspaceInitialCreditsRemaining should be provided.
+   * Notifies the specified users via BCC that there is an unused persistent disk. CC could also be
+   * considered here, but may require a policy discussion, as we'd be introducing the sharing of
+   * contact emails across users with this change. the workspace is on initial credits,
+   * workspaceInitialCreditsRemaining should be provided.
    */
   void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
