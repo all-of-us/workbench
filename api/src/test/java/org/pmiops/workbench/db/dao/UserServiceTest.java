@@ -572,39 +572,67 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser()
-      throws org.pmiops.workbench.firecloud.ApiException {
-    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
-    DbUser user = userDao.findUserByUsername(USERNAME);
-    userTermsOfServiceDao.save(
-        new DbUserTermsOfService()
-            .setUserId(user.getUserId())
-            .setTosVersion(LATEST_AOU_TOS_VERSION));
-
-    // does not throw
-    userService.validateTermsOfService(user);
+  public void test_validateAllOfUsTermsOfServiceVersion() {
+    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION);
+    assertThat(userService.validateAllOfUsTermsOfServiceVersion(user)).isTrue();
   }
 
   @Test
-  public void test_validateAllOfUsTermsOfService_dbUser_no_tos_entry() {
-    DbUser user = userDao.findUserByUsername(USERNAME);
+  public void test_validateAllOfUsTermsOfServiceVersion_incorrectVersion() {
+    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION - 1);
+    assertThat(userService.validateAllOfUsTermsOfServiceVersion(user)).isFalse();
+  }
+
+  @Test
+  public void test_validateAllOfUsTermsOfServiceVersion_userHasNotAcceptedTOS() {
+    DbUser dbUser = userDao.findUserByUsername(USERNAME);
+    assertThat(userService.validateAllOfUsTermsOfServiceVersion(dbUser)).isFalse();
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_hasNotAcceptedTerraTOS()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
+    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION);
+
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_missing_version() {
+  public void test_validateTermsOfService_dbUser()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
+    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION);
+    assertThat(userService.validateTermsOfService(user)).isTrue();
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_missing_version()
+      throws org.pmiops.workbench.firecloud.ApiException {
     DbUser user = userDao.findUserByUsername(USERNAME);
     userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_wrong_version() {
+  public void test_validateTermsOfService_dbUser_wrong_aou_version_acceptedTerra()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
+    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION - 1);
+    assertThat(userService.validateTermsOfService(user)).isFalse();
+  }
+
+  @Test
+  public void test_validateTermsOfService_dbUser_wrong_aou_version_hasNot_acceptedTerra()
+      throws org.pmiops.workbench.firecloud.ApiException {
+    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
+    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION - 1);
+    assertThat(userService.validateTermsOfService(user)).isFalse();
+  }
+
+  @Test
+  public void test_validateAllOfUsTermsOfService_dbUser_no_tos_entry() {
     DbUser user = userDao.findUserByUsername(USERNAME);
-    userTermsOfServiceDao.save(
-        new DbUserTermsOfService()
-            .setUserId(user.getUserId())
-            .setTosVersion(LATEST_AOU_TOS_VERSION - 1));
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
@@ -629,5 +657,14 @@ public class UserServiceTest {
 
   private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
     return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
+  }
+
+  private DbUser createUserWithAoUTOSVersion(int tosVersion) {
+    DbUser dbUser = userDao.findUserByUsername(USERNAME);
+    userTermsOfServiceDao.save(
+        new DbUserTermsOfService()
+            .setUserId(dbUser.getUserId())
+            .setTosVersion(tosVersion));
+    return dbUser;
   }
 }
