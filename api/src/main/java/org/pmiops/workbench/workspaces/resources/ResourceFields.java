@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces.resources;
 
+import javax.annotation.Nullable;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ConceptSet;
@@ -16,53 +17,59 @@ class ResourceFields {
   private FileDetail notebook;
   private ConceptSet conceptSet;
   private DataSet dataSet;
-  private long lastModifiedEpochMillis;
+  private Long lastModifiedEpochMillis;
 
   public Cohort getCohort() {
     return cohort;
   }
 
-  public void setCohort(Cohort cohort) {
+  public ResourceFields setCohort(Cohort cohort) {
     this.cohort = cohort;
+    return this;
   }
 
   public CohortReview getCohortReview() {
     return cohortReview;
   }
 
-  public void setCohortReview(CohortReview cohortReview) {
+  public ResourceFields setCohortReview(CohortReview cohortReview) {
     this.cohortReview = cohortReview;
+    return this;
   }
 
   public FileDetail getNotebook() {
     return notebook;
   }
 
-  public void setNotebook(FileDetail notebook) {
+  public ResourceFields setNotebook(FileDetail notebook) {
     this.notebook = notebook;
+    return this;
   }
 
   public ConceptSet getConceptSet() {
     return conceptSet;
   }
 
-  public void setConceptSet(ConceptSet conceptSet) {
+  public ResourceFields setConceptSet(ConceptSet conceptSet) {
     this.conceptSet = conceptSet;
+    return this;
   }
 
   public DataSet getDataSet() {
     return dataSet;
   }
 
-  public void setDataSet(DataSet dataSet) {
+  public ResourceFields setDataSet(DataSet dataSet) {
     this.dataSet = dataSet;
+    return this;
   }
 
   public long getLastModifiedEpochMillis() {
     return lastModifiedEpochMillis;
   }
 
-  public void setLastModifiedEpochMillis(long lastModifiedEpochMillis) {
+  public ResourceFields setLastModifiedEpochMillis(@Nullable Long lastModifiedEpochMillis) {
     this.lastModifiedEpochMillis = lastModifiedEpochMillis;
+    return this;
   }
 }

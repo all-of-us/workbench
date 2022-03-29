@@ -80,8 +80,9 @@ public class DbDataset {
     return dataSetId;
   }
 
-  public void setDataSetId(long dataSetId) {
+  public DbDataset setDataSetId(long dataSetId) {
     this.dataSetId = dataSetId;
+    return this;
   }
 
   @Version
@@ -90,8 +91,9 @@ public class DbDataset {
     return version;
   }
 
-  public void setVersion(int version) {
+  public DbDataset setVersion(int version) {
     this.version = version;
+    return this;
   }
 
   @Column(name = "workspace_id")
@@ -99,8 +101,9 @@ public class DbDataset {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbDataset setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   @Column(name = "name")
@@ -108,8 +111,9 @@ public class DbDataset {
     return name;
   }
 
-  public void setName(String name) {
+  public DbDataset setName(String name) {
     this.name = name;
+    return this;
   }
 
   @Column(name = "description")
@@ -117,8 +121,9 @@ public class DbDataset {
     return description;
   }
 
-  public void setDescription(String description) {
+  public DbDataset setDescription(String description) {
     this.description = description;
+    return this;
   }
 
   @Column(name = "creator_id")
@@ -126,8 +131,9 @@ public class DbDataset {
     return creatorId;
   }
 
-  public void setCreatorId(long creatorId) {
+  public DbDataset setCreatorId(long creatorId) {
     this.creatorId = creatorId;
+    return this;
   }
 
   @Column(name = "creation_time")
@@ -135,8 +141,9 @@ public class DbDataset {
     return creationTime;
   }
 
-  public void setCreationTime(Timestamp creationTime) {
+  public DbDataset setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "last_modified_time")
@@ -144,8 +151,9 @@ public class DbDataset {
     return lastModifiedTime;
   }
 
-  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+  public DbDataset setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+    return this;
   }
 
   @Column(name = "invalid")
@@ -153,8 +161,9 @@ public class DbDataset {
     return invalid;
   }
 
-  public void setInvalid(Boolean invalid) {
+  public DbDataset setInvalid(Boolean invalid) {
     this.invalid = invalid == null ? false : invalid;
+    return this;
   }
 
   @Column(name = "includes_all_participants")
@@ -162,8 +171,9 @@ public class DbDataset {
     return includesAllParticipants;
   }
 
-  public void setIncludesAllParticipants(Boolean includesAllParticipants) {
+  public DbDataset setIncludesAllParticipants(Boolean includesAllParticipants) {
     this.includesAllParticipants = includesAllParticipants;
+    return this;
   }
 
   @ElementCollection
@@ -173,8 +183,9 @@ public class DbDataset {
     return conceptSetIds;
   }
 
-  public void setConceptSetIds(List<Long> conceptSetIds) {
+  public DbDataset setConceptSetIds(List<Long> conceptSetIds) {
     this.conceptSetIds = conceptSetIds;
+    return this;
   }
 
   @ElementCollection
@@ -184,8 +195,9 @@ public class DbDataset {
     return cohortIds;
   }
 
-  public void setCohortIds(List<Long> cohortIds) {
+  public DbDataset setCohortIds(List<Long> cohortIds) {
     this.cohortIds = cohortIds;
+    return this;
   }
 
   @ElementCollection
@@ -195,8 +207,9 @@ public class DbDataset {
     return values;
   }
 
-  public void setValues(List<DbDatasetValue> values) {
+  public DbDataset setValues(List<DbDatasetValue> values) {
     this.values = values;
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
@@ -208,8 +221,9 @@ public class DbDataset {
     return prePackagedConceptSet;
   }
 
-  public void setPrePackagedConceptSet(List<Short> prePackagedConceptSet) {
+  public DbDataset setPrePackagedConceptSet(List<Short> prePackagedConceptSet) {
     this.prePackagedConceptSet = prePackagedConceptSet;
+    return this;
   }
 
   @Transient
@@ -219,11 +233,12 @@ public class DbDataset {
         .collect(Collectors.toList());
   }
 
-  public void setPrePackagedConceptSetEnum(List<PrePackagedConceptSetEnum> domain) {
+  public DbDataset setPrePackagedConceptSetEnum(List<PrePackagedConceptSetEnum> domain) {
     this.prePackagedConceptSet =
         domain.stream()
             .map(DbStorageEnums::prePackagedConceptSetsToStorage)
             .collect(Collectors.toList());
+    return this;
   }
 
   @Override
