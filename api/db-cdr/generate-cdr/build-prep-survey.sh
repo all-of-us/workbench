@@ -97,7 +97,7 @@ function find_info() {
   'ANSWER' as subtype,
   concept_id,
   concept_code as code,
-  CASE WHEN STRPOS(concept_name, ':') > 1 THEN SUBSTR(concept_name, (STRPOS(concept_name, ':') + 2), (LENGTH(concept_name) - STRPOS(concept_name, ':'))) ELSE concept_name END as name,
+  CASE WHEN CONTAINS_SUBSTR(concept_name, 'PMI') THEN SUBSTR(concept_name, (STRPOS(concept_name, 'PMI') + 4)) ELSE concept_name END as name,
   value_source_concept_id as value,
   0 as is_group,
   1 as is_selectable,
@@ -108,10 +108,11 @@ function find_info() {
   select ROW_NUMBER() OVER (ORDER BY ($order_by)) + (SELECT 2) AS id,
   concept_code,
   observation_source_concept_id as concept_id,
-  concept_name,
+  CASE WHEN cs.concept_synonym_name is null THEN c.concept_name ELSE REPLACE(cs.concept_synonym_name, '|', ',') END AS concept_name,
   value_source_concept_id
   from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
   join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on c.concept_id = o.value_source_concept_id
+  left join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs on (c.concept_id = cs.concept_id and lower(cs.concept_synonym_name) not like '%this condition?')
   where lower(observation_source_value) = lower('$concept_code')
   and value_source_concept_id != 0
   and value_source_concept_id is not null
@@ -124,7 +125,7 @@ function find_info() {
   )
   group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id
   order by ($order_by))
-  order by id) order by id"
+  order by id"
   echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
 }
 
