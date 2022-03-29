@@ -466,17 +466,21 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
   public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
-    final int tosVersion =
-        userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
-    return tosVersion == LATEST_AOU_TOS_VERSION;
+    try {
+      final int tosVersion =
+          userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
+      return tosVersion == LATEST_AOU_TOS_VERSION;
+    } catch (BadRequestException ex) {
+      // In case user doesnt have any terms of service
+      return false;
+    }
   }
 
   // Returns true only if the user has accepted the latest version of both AoU and Terra terms of
   // service
   @Override
   public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
-    boolean userHasAcceptedLatestTerraTos = getUserTerraTermsOfServiceStatus(dbUser);
-    return validateAllOfUsTermsOfServiceVersion(dbUser) && userHasAcceptedLatestTerraTos;
+    return validateAllOfUsTermsOfServiceVersion(dbUser) && getUserTerraTermsOfServiceStatus(dbUser);
   }
 
   @Override

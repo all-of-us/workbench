@@ -588,7 +588,7 @@ public class UserServiceTest {
   @Test
   public void test_validateAllOfUsTermsOfService_dbUser_no_tos_entry() {
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertThrows(BadRequestException.class, () -> userService.validateTermsOfService(user));
+    assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
   @Test
