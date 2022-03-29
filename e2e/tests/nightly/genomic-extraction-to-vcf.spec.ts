@@ -217,7 +217,6 @@ describe('Genomics Extraction Test', () => {
     const genomicSidebar = new GenomicExtractionsSidebar(page);
     const startTime = Date.now();
     while (Date.now() - startTime <= maxTime) {
-      await page.waitForTimeout(1 * 60 * 1000); // sleep 1 min
       isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunningAndClose(pollInterval) : true;
       // At the time of writing this test, it takes 30 - 40 minutes to create VCF files.
       isExtractionReady = !isExtractionReady ? await genomicSidebar.waitForCompletionAndClose(pollInterval) : true;
@@ -225,6 +224,7 @@ describe('Genomics Extraction Test', () => {
         logger.info('Runtime is running and Genomic data extraction is done.');
         return true;
       }
+      await page.waitForTimeout(pollInterval);
       const timeSpentInMin = Math.round((Date.now() - startTime) / 1000) / 60;
       logger.info(`Waited [ ${timeSpentInMin} ] minutes for runtime and genomic extraction to finish.`);
     }
