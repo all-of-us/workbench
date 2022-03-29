@@ -1,20 +1,41 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
+import javax.mail.MessagingException;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,23 +51,46 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineRuntimeController.class.getName());
 
+  // On the n'th day of inactivity on a PD, a notification is sent.
+  private static final Set<Integer> INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS = ImmutableSet.of(14);
+  // Every n'th day of inactivity on a PD (not including 0), a notification is sent.
+  private static final int INACTIVE_DISK_NOTIFY_PERIOD_DAYS = 30;
+
   // This is temporary while we wait for Leonardo autopause to rollout. Once
   // available, we should instead take a runtime status of STOPPED to trigger
   // idle deletion.
   private static final int IDLE_AFTER_HOURS = 3;
 
+  private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
+  private final MailService mailService;
   private final Provider<RuntimesApi> runtimesApiProvider;
+  private final Provider<DisksApi> disksApiProvider;
   private final Provider<WorkbenchConfig> configProvider;
+  private final WorkspaceDao workspaceDao;
+  private final UserDao userDao;
   private final Clock clock;
 
   @Autowired
   OfflineRuntimeController(
+      FireCloudService firecloudService,
+      FreeTierBillingService freeTierBillingService,
+      MailService mailService,
       @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
+      @Qualifier(NotebooksConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
       Provider<WorkbenchConfig> configProvider,
+      WorkspaceDao workspaceDao,
+      UserDao userDao,
       Clock clock) {
+    this.fireCloudService = firecloudService;
+    this.freeTierBillingService = freeTierBillingService;
+    this.mailService = mailService;
+    this.runtimesApiProvider = runtimesApiProvider;
+    this.disksApiProvider = disksApiProvider;
+    this.workspaceDao = workspaceDao;
+    this.userDao = userDao;
     this.clock = clock;
     this.configProvider = configProvider;
-    this.runtimesApiProvider = runtimesApiProvider;
   }
 
   /**
@@ -158,5 +202,130 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       return String.format("%dd", d.toDays());
     }
     return String.format("%dd %dh", d.toDays(), d.toHours() % 24);
+  }
+
+  @Override
+  public ResponseEntity<Void> checkPersistentDisks() {
+    // Fetch disks as the service, which gets all disks for all workspaces.
+    final List<LeonardoListPersistentDiskResponse> disks;
+    try {
+      disks = disksApiProvider.get().listDisks(null /* labels */, false /* includeDeleted */);
+    } catch (ApiException e) {
+      throw new ServerErrorException("listDisks failed", e);
+    }
+
+    // Bucket disks by days since last access.
+    final Instant now = clock.instant();
+    Map<Integer, List<LeonardoListPersistentDiskResponse>> disksByDaysUnused =
+        disks.stream()
+            .filter(disk -> LeonardoDiskStatus.READY.equals(disk.getStatus()))
+            .collect(
+                Collectors.groupingBy(
+                    disk -> {
+                      Instant lastAccessed = Instant.parse(disk.getAuditInfo().getDateAccessed());
+                      return (int) Duration.between(lastAccessed, now).toDays();
+                    }));
+
+    // Dispatch notifications if any disks are the right number of days old.
+    int notifySuccess = 0;
+    int notifySkip = 0;
+    int notifyFail = 0;
+    Exception lastException = null;
+    for (int daysUnused : disksByDaysUnused.keySet()) {
+      if (daysUnused <= 0) {
+        // Our periodic notifications should not trigger on day 0.
+        continue;
+      }
+
+      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
+          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
+        continue;
+      }
+
+      for (LeonardoListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
+        try {
+          if (notifyForUnusedDisk(disk, daysUnused)) {
+            notifySuccess++;
+          } else {
+            notifySkip++;
+          }
+        } catch (MessagingException e) {
+          log.log(
+              Level.WARNING,
+              String.format(
+                  "failed to send notification for disk '%s/%s'",
+                  disk.getGoogleProject(), disk.getName()),
+              e);
+          lastException = e;
+          notifyFail++;
+        }
+      }
+    }
+
+    log.info(
+        String.format(
+            "sent %d notifications successfully (%d skipped, %d failed)",
+            notifySuccess, notifySkip, notifyFail));
+    if (lastException != null) {
+      throw new ServerErrorException(
+          String.format(
+              "%d/%d disk notifications failed to send, see logs for details",
+              notifyFail, notifySuccess + notifyFail + notifySkip),
+          lastException);
+    }
+
+    return ResponseEntity.noContent().build();
+  }
+
+  // Returns true if an email is sent.
+  private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
+      throws MessagingException {
+    Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(disk.getGoogleProject());
+    if (!workspace.isPresent()) {
+      log.warning(
+          String.format(
+              "skipping disk '%s' associated with unknown Google project '%s'",
+              disk.getName(), disk.getGoogleProject()));
+      return false;
+    }
+
+    // Lookup the owners and disk creators.
+    FirecloudWorkspaceACL acl =
+        fireCloudService.getWorkspaceAclAsService(
+            workspace.get().getWorkspaceNamespace(), workspace.get().getFirecloudName());
+    List<String> notifyUsernames =
+        acl.getAcl().entrySet().stream()
+            .filter(
+                entry ->
+                    WorkspaceAccessLevel.OWNER.toString().equals(entry.getValue().getAccessLevel())
+                        || entry.getKey().equals(disk.getAuditInfo().getCreator()))
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
+
+    // Lookup these users in the database, so we can get their contact email, etc.
+    List<DbUser> dbUsers = userDao.findUserByUsernameIn(notifyUsernames);
+    if (dbUsers.size() != notifyUsernames.size()) {
+      log.warning(
+          "failed to lookup one or more users in the database: "
+              + Sets.difference(
+                      dbUsers.stream().map(DbUser::getUsername).collect(Collectors.toSet()),
+                      new HashSet<>(notifyUsernames))
+                  .stream()
+                  .collect(Collectors.joining(",")));
+    }
+    if (dbUsers.isEmpty()) {
+      log.warning("found no users to notify");
+      return false;
+    }
+
+    Double initialCreditsRemaining = null;
+    if (freeTierBillingService.isFreeTier(workspace.get())) {
+      initialCreditsRemaining =
+          freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
+    }
+
+    mailService.alertUsersUnusedDiskWarningThreshold(
+        dbUsers, workspace.get(), disk, daysUnused, initialCreditsRemaining);
+    return true;
   }
 }
