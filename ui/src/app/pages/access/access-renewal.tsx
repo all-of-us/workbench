@@ -264,12 +264,22 @@ export const RenewalCardBody = (props: {
       </div>
     ) : null;
 
+  const Dates = () => (
+    <div style={{ ...renewalStyle.dates, ...textStyle }}>
+      <div>Last Updated On:</div>
+      <div>Next Review:</div>
+      <div>{lastConfirmedDate}</div>
+      <div>{nextReviewDate}</div>
+    </div>
+  );
+
   const module = switchCase(
     moduleStatus.moduleName,
     [
       AccessModule.PROFILECONFIRMATION,
       () => (
         <React.Fragment>
+          <Dates />
           <div style={{ marginBottom: '0.5rem', ...textStyle }}>
             Please update your profile information if any of it has changed
             recently.
@@ -294,6 +304,7 @@ export const RenewalCardBody = (props: {
       AccessModule.PUBLICATIONCONFIRMATION,
       () => (
         <React.Fragment>
+          <Dates />
           <div style={textStyle}>
             The <AoU /> Publication and Presentation Policy requires that you
             report any upcoming publication or presentation resulting from the
@@ -353,6 +364,7 @@ export const RenewalCardBody = (props: {
       AccessModule.COMPLIANCETRAINING,
       () => (
         <React.Fragment>
+          <Dates />
           <div style={textStyle}>
             You are required to complete the refreshed ethics training courses
             to understand the privacy safeguards and the compliance requirements
@@ -405,6 +417,7 @@ export const RenewalCardBody = (props: {
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => (
         <React.Fragment>
+          <Dates />
           <div style={textStyle}>
             Please review and sign the data user code of conduct consenting to
             the <AoU /> data use policy.
@@ -430,14 +443,6 @@ export const RenewalCardBody = (props: {
       <div style={renewalStyle.h3}>
         <AARTitleComponent />
       </div>
-      {!hide && (
-        <div style={{ ...renewalStyle.dates, ...textStyle }}>
-          <div>Last Updated On:</div>
-          <div>Next Review:</div>
-          <div>{lastConfirmedDate}</div>
-          <div>{nextReviewDate}</div>
-        </div>
-      )}
       {!hide && module}
     </React.Fragment>
   );
