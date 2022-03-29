@@ -662,9 +662,7 @@ public class UserServiceTest {
   private DbUser createUserWithAoUTOSVersion(int tosVersion) {
     DbUser dbUser = userDao.findUserByUsername(USERNAME);
     userTermsOfServiceDao.save(
-        new DbUserTermsOfService()
-            .setUserId(dbUser.getUserId())
-            .setTosVersion(tosVersion));
+        new DbUserTermsOfService().setUserId(dbUser.getUserId()).setTosVersion(tosVersion));
     return dbUser;
   }
 }
