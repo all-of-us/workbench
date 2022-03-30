@@ -605,6 +605,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
+    List<String> failedWorkflowRunnerGrants = new ArrayList<>();
     if (accessTier.getEnableUserWorkflows()) {
       iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
       List<String> usersGainPermission =
@@ -612,13 +613,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
-      iamService.grantWorkflowRunnerRoleForUsers(
-          dbWorkspace.getGoogleProject(), usersGainPermission);
+      failedWorkflowRunnerGrants =
+          iamService.grantWorkflowRunnerRoleForUsers(
+              dbWorkspace.getGoogleProject(), usersGainPermission);
     }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
-    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
+    final CloneWorkspaceResponse response = new CloneWorkspaceResponse().workspace(savedWorkspace);
+    if (!failedWorkflowRunnerGrants.isEmpty()) {
+      response.setFailedWorkflowGrants(failedWorkflowRunnerGrants);
+    }
+    return ResponseEntity.ok(response);
   }
 
   /** Gets a FireCloud Billing project. */
@@ -721,7 +727,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
       // grant newly workspace OWNER and WRITER Lifescience Runner permission
-      iamService.grantWorkflowRunnerRoleForUsers(dbWorkspace.getGoogleProject(), workflowUsers);
+      List<String> failedGrants =
+          iamService.grantWorkflowRunnerRoleForUsers(dbWorkspace.getGoogleProject(), workflowUsers);
+      if (!failedGrants.isEmpty()) {
+        resp.setFailedWorkflowGrants(failedGrants);
+      }
     }
     workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
