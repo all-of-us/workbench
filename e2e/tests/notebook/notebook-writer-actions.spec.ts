@@ -18,7 +18,7 @@ import expect from 'expect';
 jest.setTimeout(30 * 60 * 1000);
 
 // TODO (RW-7312): Re-enable once issue is fixed.
-xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
+describe('Workspace WRITER Jupyter notebook action tests', () => {
   // All tests use same workspace and notebook.
   const workspaceName = makeWorkspaceName();
   const notebookName = makeRandomName('py3');
