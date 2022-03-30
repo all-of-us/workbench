@@ -12,8 +12,6 @@ import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.List;
 import javax.mail.MessagingException;
-import java.util.List;
-import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -99,7 +97,7 @@ public class MailServiceImplTest {
   }
 
   @Test
-  public void testSendWelcomeEmail_throwsApiException_deprecated() throws MessagingException, ApiException {
+  public void testSendWelcomeEmail_throwsApiException_deprecated() throws ApiException {
     doThrow(ApiException.class).when(mockMandrillApi).send(any());
     assertThrows(
         MessagingException.class,
@@ -108,7 +106,7 @@ public class MailServiceImplTest {
   }
 
   @Test
-  public void testSendWelcomeEmail_invalidEmail_deprecated() throws MessagingException {
+  public void testSendWelcomeEmail_invalidEmail_deprecated() {
     assertThrows(
         ServerErrorException.class,
         () ->
@@ -123,24 +121,26 @@ public class MailServiceImplTest {
 
   @Test
   public void testSendWelcomeEmail_throwsMessagingException() throws ApiException {
-    when(msgStatus.getRejectReason()).thenReturn("this was rejected");
+    MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
+    msgStatuses.add(new MandrillMessageStatus().rejectReason("this was rejected"));
+    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
     assertThrows(
         MessagingException.class,
         () ->
-            service.sendWelcomeEmail(
+            mailService.sendWelcomeEmail(
                 CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
-    verify(mandrillApi, times(1)).send(any());
+    verify(mockMandrillApi, times(1)).send(any());
   }
 
   @Test
   public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
-    doThrow(ApiException.class).when(mandrillApi).send(any());
+    doThrow(ApiException.class).when(mockMandrillApi).send(any());
     assertThrows(
         MessagingException.class,
         () ->
-            service.sendWelcomeEmail(
+            mailService.sendWelcomeEmail(
                 CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
-    verify(mandrillApi, times(3)).send(any());
+    verify(mockMandrillApi, times(3)).send(any());
   }
 
   @Test
@@ -148,7 +148,7 @@ public class MailServiceImplTest {
     assertThrows(
         ServerErrorException.class,
         () ->
-            service.sendWelcomeEmail(
+            mailService.sendWelcomeEmail(
                 "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
   }
 
@@ -157,7 +157,7 @@ public class MailServiceImplTest {
     assertThrows(
         ServerErrorException.class,
         () ->
-            service.sendWelcomeEmail(
+            mailService.sendWelcomeEmail(
                 "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, false));
   }
 
@@ -166,28 +166,29 @@ public class MailServiceImplTest {
     assertThrows(
         ServerErrorException.class,
         () ->
-            service.sendWelcomeEmail(
+            mailService.sendWelcomeEmail(
                 "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, false, false));
   }
 
   @Test
   public void testSendWelcomeEmailRTAndCT() throws MessagingException, ApiException {
-    service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true);
-    verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+    mailService.sendWelcomeEmail(
+        CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true);
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailOnlyRT() throws MessagingException, ApiException {
-    service.sendWelcomeEmail(
+    mailService.sendWelcomeEmail(
         CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, false);
-    verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailNoRtAndCt() throws MessagingException, ApiException {
-    service.sendWelcomeEmail(
+    mailService.sendWelcomeEmail(
         CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, false, false);
-    verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
