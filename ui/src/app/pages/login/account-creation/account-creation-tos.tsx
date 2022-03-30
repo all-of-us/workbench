@@ -4,6 +4,7 @@ import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { HtmlViewer } from 'app/components/html-viewer';
 import { CheckBox } from 'app/components/inputs';
+import { SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -50,6 +51,7 @@ interface AccountCreationTosState {
   hasReadEntireTos: boolean;
   hasAckedPrivacyStatement: boolean;
   hasAckedTermsOfService: boolean;
+  hasClickedNext: boolean;
 }
 
 // TODO: Rename this to TermsOfService
@@ -63,6 +65,7 @@ export class AccountCreationTos extends React.Component<
       hasReadEntireTos: props.afterPrev,
       hasAckedPrivacyStatement: props.afterPrev,
       hasAckedTermsOfService: props.afterPrev,
+      hasClickedNext: false,
     };
   }
 
@@ -71,6 +74,7 @@ export class AccountCreationTos extends React.Component<
       hasReadEntireTos,
       hasAckedTermsOfService,
       hasAckedPrivacyStatement,
+      hasClickedNext,
     } = this.state;
 
     return (
@@ -84,6 +88,7 @@ export class AccountCreationTos extends React.Component<
           onLastPage={() => this.setState({ hasReadEntireTos: true })}
           filePath={this.props.filePath}
         />
+        {hasClickedNext && <SpinnerOverlay />}
         <FlexRow
           style={{
             display: 'inline-flex',
@@ -171,9 +176,13 @@ export class AccountCreationTos extends React.Component<
               disabled={
                 !hasReadEntireTos ||
                 !hasAckedPrivacyStatement ||
-                !hasAckedTermsOfService
+                !hasAckedTermsOfService ||
+                hasClickedNext
               }
-              onClick={() => this.props.onComplete(LATEST_TOS_VERSION)}
+              onClick={() => {
+                this.setState({ hasClickedNext: true });
+                this.props.onComplete(LATEST_TOS_VERSION);
+              }}
             >
               Next
             </Button>
