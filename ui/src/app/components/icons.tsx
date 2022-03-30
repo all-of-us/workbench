@@ -4,6 +4,7 @@ import {
   faCaretRight,
   faCheck,
   faCheckCircle,
+  faClock,
   faExclamationTriangle,
   faLongArrowAltRight,
   faMinusCircle,
@@ -177,6 +178,7 @@ export const ArrowRight = (props) => (
 export const CaretRight = (props) => <Icon shape={faCaretRight} {...props} />;
 export const Check = (props) => <Icon shape={faCheck} {...props} />;
 export const CheckCircle = (props) => <Icon shape={faCheckCircle} {...props} />;
+export const Clock = (props) => <Icon shape={faClock} {...props} />;
 export const ExclamationTriangle = (props) => (
   <Icon shape={faExclamationTriangle} color={colors.danger} {...props} />
 );
