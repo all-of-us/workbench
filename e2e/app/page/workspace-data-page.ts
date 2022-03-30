@@ -191,7 +191,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return conceptSetsCard;
   }
 
-  async clone(cloneName?: string): Promise<string> {
+  async cloneWorkspace(cloneName?: string): Promise<string> {
     await this.selectWorkspaceAction(MenuOption.Duplicate);
 
     // Fill out Workspace Name.
@@ -210,7 +210,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return cloneName;
   }
 
-  // extract the workspace-namesapce from the url to be used to load workspace in the workspace-admin page
+  // extract the workspace-namespace from the url to be used to load workspace in the workspace-admin page
   async extractWorkspaceNamespace(): Promise<string> {
     const href = await this.page.evaluate(() => location.href);
     const pathArray = href.split('/');
