@@ -83,7 +83,7 @@ it('should disable next button when next button is pressed', async () => {
 
   getNextButton(wrapper).simulate('click');
 
-  // After clicking Next, the button should not be disabled
+  // After clicking Next, the button should be disabled
   expect(getNextButton(wrapper).prop('disabled')).toBeTruthy();
 });
 
