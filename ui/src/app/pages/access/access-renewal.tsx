@@ -40,6 +40,9 @@ import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 const { useState, useEffect } = React;
 
+const REDCAP_PUBLICATIONS_SURVEY =
+  'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N';
+
 const renewalStyle = {
   h1: {
     fontSize: '0.83rem',
@@ -314,7 +317,7 @@ export const RenewalCardBody = (props: {
             <a
               target='_blank'
               style={{ textDecoration: 'underline' }}
-              href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}
+              href={REDCAP_PUBLICATIONS_SURVEY}
             >
               please report it now.
             </a>{' '}
