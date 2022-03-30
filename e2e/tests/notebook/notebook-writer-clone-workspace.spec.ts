@@ -100,6 +100,5 @@ describe('WRITER clone workspace and notebook tests', () => {
     // Delete notebook and workspace clone.
     await notebookPreviewPage.goAnalysisPage();
     await dataPage.deleteResource(notebookName, ResourceCard.Notebook);
-    await dataPage.deleteWorkspace();
   });
 });
