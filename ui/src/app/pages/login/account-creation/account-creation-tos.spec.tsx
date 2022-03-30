@@ -78,8 +78,12 @@ it('should disable next button when next button is pressed', async () => {
   getPrivacyCheckbox(wrapper).simulate('change', { target: { checked: true } });
   getTosCheckbox(wrapper).simulate('change', { target: { checked: true } });
 
+  // Next Button should be Enabled after checking Privacy and TOS checkbox
+  expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();
+
   getNextButton(wrapper).simulate('click');
 
+  // After clicking Next, the button should not be disabled
   expect(getNextButton(wrapper).prop('disabled')).toBeTruthy();
 });
 
