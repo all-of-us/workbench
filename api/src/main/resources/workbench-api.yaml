@@ -4787,6 +4787,11 @@ definitions:
         type: array
         items:
           type: string
+      failedWorkflowRevocations:
+        description: A list of user emails for whom we were unable to revoke workflow runner roles, if any
+        type: array
+        items:
+          type: string
   CopyRequest:
     type: object
     required:

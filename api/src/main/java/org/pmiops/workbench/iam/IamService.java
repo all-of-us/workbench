@@ -17,7 +17,7 @@ public interface IamService {
    * <p>The users' Terra PET service accounts will get: lifesciences.workflowsRunner and
    * serviceAccountUser (on the petSA itself).
    *
-   * @return the list of users whose pet SAs we failed to retrieve, if any
+   * @return the list of users whose workflow runner roles we failed to grant, if any
    */
   List<String> grantWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails);
 
@@ -26,7 +26,7 @@ public interface IamService {
    *
    * <p>For now just revoke lifesciences.workflowsRunner permission but keep petSA ActAS permission.
    *
-   * @return the list of users whose pet SAs we failed to retrieve, if any
+   * @return the list of users whose workflow runner roles we failed to revoke, if any
    */
   List<String> revokeWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails);
 }

@@ -689,6 +689,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
+    WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
+
     List<String> workflowUsers = new ArrayList<>();
     // Revoke lifescience permission before asking Firecloud to remove users; after unsharing
     // in Firecloud, we can no longer get the user's petSA from SAM using their credentials.
@@ -710,15 +712,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                               || WorkspaceAccessLevel.WRITER.equals(u.getRole()))
                           && !finalWorkflowUsers.contains(u.getEmail())
                           && !u.getEmail().equals(userProvider.get().getUsername()))
-              .map(u -> u.getEmail())
+              .map(UserRole::getEmail)
               .collect(Collectors.toList());
-      iamService.revokeWorkflowRunnerRoleForUsers(
-          dbWorkspace.getGoogleProject(), userLostPermission);
+      List<String> failedRevocations =
+          iamService.revokeWorkflowRunnerRoleForUsers(
+              dbWorkspace.getGoogleProject(), userLostPermission);
+      if (!failedRevocations.isEmpty()) {
+        resp.setFailedWorkflowRevocations(failedRevocations);
+      }
     }
 
     // This automatically enforces the "canShare" permission.
     dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
-    WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     List<UserRole> userRolesAfterShare =
