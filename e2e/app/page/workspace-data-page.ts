@@ -191,7 +191,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return conceptSetsCard;
   }
 
-  async clone(cloneName?: string): Promise<string> {
+  async cloneWorkspace(cloneName?: string): Promise<string> {
     await this.selectWorkspaceAction(MenuOption.Duplicate);
 
     // Fill out Workspace Name.

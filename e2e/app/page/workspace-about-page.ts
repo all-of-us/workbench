@@ -7,7 +7,7 @@ import ShareModal from 'app/modal/share-modal';
 import BaseElement from 'app/element/base-element';
 import WorkspaceEditPage from './workspace-edit-page';
 import Tab from 'app/element/tab';
-import { Tabs } from 'app/text-labels';
+import { Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 
 export const PageTitle = 'View Workspace Details';
 
@@ -43,6 +43,12 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
       }
     }
     return users;
+  }
+
+  async collaboratorExists(email: string, workspaceAccessLevel: WorkspaceAccessLevel): Promise<boolean> {
+    const collaborators = await this.findUsersInCollaboratorList();
+    const writerArr = collaborators.get(workspaceAccessLevel);
+    return writerArr ? writerArr.some((item) => item === email) : false;
   }
 
   async openShareModal(): Promise<ShareModal> {

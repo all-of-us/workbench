@@ -20,24 +20,29 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Workspace WRITER notebook tests', () => {
+  const notebookName = makeRandomName('notebookWriterActionsTest-Py3');
   const workspaceName = 'e2eNotebookWriterActionsTest';
-  const notebookName = makeRandomName('py3');
-  const writerWorkspaceName = 'e2eWriterWorkspace1';
+  const writerWorkspaceName = 'e2eNotebookTestWriterWorkspace1';
 
   test('WRITER create workspace', async () => {
     await signInWithAccessToken(page, config.WRITER_USER);
     await findOrCreateWorkspace(page, { workspaceName: writerWorkspaceName });
   });
 
-  test('Create Python notebook and share workspace to WRITER', async () => {
+  test('Create notebook and share workspace to WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });
 
     // Share workspace to a WRITER before creating new notebook.
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);
-    await aboutPage.shareWorkspaceWithUser(config.WRITER_USER, WorkspaceAccessLevel.Writer);
-    await waitWhileLoading(page);
+
+    // If workspace has not shared to the WRITER, share it now.
+    const isShared = await aboutPage.collaboratorExists(config.WRITER_USER, WorkspaceAccessLevel.Writer);
+    if (!isShared) {
+      await aboutPage.shareWorkspaceWithUser(config.WRITER_USER, WorkspaceAccessLevel.Writer);
+      await waitWhileLoading(page);
+    }
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
@@ -128,13 +133,12 @@ describe('Workspace WRITER notebook tests', () => {
 
     expect(await copyModal.isLoaded()).toBe(true);
     modalText = await copyModal.getTextContent();
-    expect(
-      modalText.some((text) => text.includes('Notebook with the same name already exists in the targeted workspace.'))
-    ).toBe(true);
-
+    const regex = new RegExp(/Notebook with the same name already exists in the targeted workspace/i);
+    expect(modalText.some((text) => regex.exec(text) !== null)).toBe(true);
     // Close Copy modal
     await copyModal.clickButton(LinkText.Close, { waitForClose: true });
 
+    // Delete notebook. Don't delete workspace because it's reused in test runs.
     await newAnalysisPage.deleteResource(notebookCopyName, ResourceCard.Notebook);
   });
 

@@ -14,24 +14,29 @@ import expect from 'expect';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('WRITER clone workspace and notebook tests', () => {
+  const notebookName = makeRandomName('notebookWriterTest-Py3');
   const workspaceName = 'e2eNotebookWriterCloneWorkspaceTest';
-  const notebookName = makeRandomName('py3');
-  const writerWorkspaceName = 'e2eWriterWorkspace2';
+  const writerWorkspaceName = 'e2eNotebookTestWriterWorkspace2';
 
   test('WRITER create workspace', async () => {
     await signInWithAccessToken(page, config.WRITER_USER);
     await findOrCreateWorkspace(page, { workspaceName: writerWorkspaceName });
   });
 
-  test('Create workspace and notebook, share workspace to WRITER', async () => {
+  test('Create notebook and share workspace to WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });
 
     // Share workspace to a WRITER before creating new notebook.
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);
-    await aboutPage.shareWorkspaceWithUser(config.WRITER_USER, WorkspaceAccessLevel.Writer);
-    await waitWhileLoading(page);
+
+    // If workspace has not shared to the WRITER, share it now.
+    const isShared = await aboutPage.collaboratorExists(config.WRITER_USER, WorkspaceAccessLevel.Writer);
+    if (!isShared) {
+      await aboutPage.shareWorkspaceWithUser(config.WRITER_USER, WorkspaceAccessLevel.Writer);
+      await waitWhileLoading(page);
+    }
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
@@ -39,7 +44,7 @@ describe('WRITER clone workspace and notebook tests', () => {
 
     // Run Python code.
     expect(
-      await notebookPage.runCodeCell(3, {
+      await notebookPage.runCodeCell(1, {
         codeFile: 'resources/python-code/git-ignore-check.py',
         markdownWorkaround: true
       })
@@ -58,7 +63,8 @@ describe('WRITER clone workspace and notebook tests', () => {
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
-    await dataPage.clone(); // Cloning workspace
+
+    await dataPage.cloneWorkspace();
 
     // Currently displayed workspace is the workspace clone.
     const workspaceCloneAnalysisPage = new WorkspaceAnalysisPage(page);
@@ -72,7 +78,7 @@ describe('WRITER clone workspace and notebook tests', () => {
       name: notebookName,
       cardType: ResourceCard.Notebook,
       timeout: 60 * 1000
-    });
+    }); // Need a longer wait time in case workspaces and notebook are new and created a short time ago.
 
     // Click notebook name.
     await notebookCard.clickName();
@@ -91,6 +97,7 @@ describe('WRITER clone workspace and notebook tests', () => {
       })
     ).toBe(true);
 
+    // Delete notebook and workspace clone.
     await notebookPreviewPage.goAnalysisPage();
     await dataPage.deleteResource(notebookName, ResourceCard.Notebook);
     await dataPage.deleteWorkspace();
