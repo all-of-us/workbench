@@ -32,12 +32,12 @@ import {
 import { updateVisibleTiers } from 'testing/test-utils';
 
 import {
-  allModules,
+  allInitialModules,
   DARPageMode,
   DataAccessRequirements,
   getActiveModule,
   getEligibleModules,
-  requiredModules,
+  initialRequiredModules,
 } from './data-access-requirements';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
@@ -143,8 +143,8 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
-    const enabledModules = getEligibleModules(allModules, profile);
-    requiredModules.forEach((module) =>
+    const enabledModules = getEligibleModules(allInitialModules, profile);
+    initialRequiredModules.forEach((module) =>
       expect(enabledModules.includes(module)).toBeTruthy()
     );
   });
@@ -157,7 +157,7 @@ describe('DataAccessRequirements', () => {
         enforceRasLoginGovLinking: false,
       },
     });
-    const enabledModules = getEligibleModules(allModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, profile);
     expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
   });
 
@@ -172,7 +172,7 @@ describe('DataAccessRequirements', () => {
           enforceRasLoginGovLinking: true,
         },
       });
-      const enabledModules = getEligibleModules(allModules, profile);
+      const enabledModules = getEligibleModules(allInitialModules, profile);
       expect(
         enabledModules.includes(AccessModule.RASLINKLOGINGOV)
       ).toBeTruthy();
@@ -183,7 +183,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
-    const enabledModules = getEligibleModules(allModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, profile);
     expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
   });
 
@@ -191,17 +191,17 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableComplianceTraining: false },
     });
-    const enabledModules = getEligibleModules(allModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, profile);
     expect(
       enabledModules.includes(AccessModule.COMPLIANCETRAINING)
     ).toBeFalsy();
   });
 
   it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-    const enabledModules = getEligibleModules(requiredModules, profile);
+    const enabledModules = getEligibleModules(initialRequiredModules, profile);
     const activeModule = getActiveModule(enabledModules, profile);
 
-    expect(activeModule).toEqual(requiredModules[0]);
+    expect(activeModule).toEqual(initialRequiredModules[0]);
     expect(activeModule).toEqual(enabledModules[0]);
 
     // update this if the order changes
@@ -218,10 +218,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(requiredModules, profile);
+    const enabledModules = getEligibleModules(initialRequiredModules, profile);
     const activeModule = getActiveModule(enabledModules, testProfile);
 
-    expect(activeModule).toEqual(requiredModules[1]);
+    expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
@@ -238,10 +238,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(requiredModules, profile);
+    const enabledModules = getEligibleModules(initialRequiredModules, profile);
     const activeModule = getActiveModule(enabledModules, testProfile);
 
-    expect(activeModule).toEqual(requiredModules[1]);
+    expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
@@ -272,7 +272,10 @@ describe('DataAccessRequirements', () => {
         },
       };
 
-      const enabledModules = getEligibleModules(requiredModules, profile);
+      const enabledModules = getEligibleModules(
+        initialRequiredModules,
+        profile
+      );
       const activeModule = getActiveModule(enabledModules, testProfile);
 
       // update this if the order changes
@@ -282,7 +285,7 @@ describe('DataAccessRequirements', () => {
       expect(activeModule).toEqual(enabledModules[1]);
 
       // but we skip requiredModules[1] because it's RAS and is not enabled
-      expect(activeModule).toEqual(requiredModules[2]);
+      expect(activeModule).toEqual(initialRequiredModules[2]);
     }
   );
 
@@ -301,10 +304,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(requiredModules, profile);
+    const enabledModules = getEligibleModules(initialRequiredModules, profile);
     const activeModule = getActiveModule(enabledModules, testProfile);
 
-    expect(activeModule).toEqual(requiredModules[3]);
+    expect(activeModule).toEqual(initialRequiredModules[3]);
     expect(activeModule).toEqual(enabledModules[3]);
 
     // update this if the order changes
@@ -315,14 +318,14 @@ describe('DataAccessRequirements', () => {
     const testProfile = {
       ...profile,
       accessModules: {
-        modules: requiredModules.map((module) => ({
+        modules: initialRequiredModules.map((module) => ({
           moduleName: module,
           completionEpochMillis: 1,
         })),
       },
     };
 
-    const enabledModules = getEligibleModules(requiredModules, profile);
+    const enabledModules = getEligibleModules(initialRequiredModules, profile);
     const activeModule = getActiveModule(enabledModules, testProfile);
 
     expect(activeModule).toBeUndefined();
@@ -348,7 +351,7 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(requiredModules, profile);
+    const enabledModules = getEligibleModules(initialRequiredModules, profile);
 
     let activeModule = getActiveModule(enabledModules, testProfile);
     expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
@@ -374,7 +377,7 @@ describe('DataAccessRequirements', () => {
 
   it('should render all required modules by default (all FFs enabled)', () => {
     const wrapper = component();
-    allModules.forEach((module) =>
+    allInitialModules.forEach((module) =>
       expect(findModule(wrapper, module).exists()).toBeTruthy()
     );
   });
@@ -426,7 +429,7 @@ describe('DataAccessRequirements', () => {
 
   it('should render all required modules as incomplete when the profile accessModules are empty', () => {
     const wrapper = component();
-    requiredModules.forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findIncompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findCompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -440,7 +443,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => ({
+          modules: initialRequiredModules.map((module) => ({
             moduleName: module,
             completionEpochMillis: 1,
           })),
@@ -452,7 +455,7 @@ describe('DataAccessRequirements', () => {
     });
 
     const wrapper = component();
-    requiredModules.forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -468,7 +471,7 @@ describe('DataAccessRequirements', () => {
 
     // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
 
-    const allExceptRas = requiredModules.filter(
+    const allExceptRas = initialRequiredModules.filter(
       (m) => m !== AccessModule.RASLINKLOGINGOV
     );
     profileStore.set({
@@ -514,7 +517,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => ({
+          modules: initialRequiredModules.map((module) => ({
             moduleName: module,
             completionEpochMillis: 1,
           })),
@@ -527,7 +530,7 @@ describe('DataAccessRequirements', () => {
 
     await waitForFakeTimersAndUpdate(wrapper);
 
-    requiredModules.forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -542,7 +545,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => {
+          modules: initialRequiredModules.map((module) => {
             return { moduleName: module, bypassEpochMillis: 1 };
           }),
         },
@@ -553,7 +556,7 @@ describe('DataAccessRequirements', () => {
     });
 
     const wrapper = component();
-    requiredModules.forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -563,9 +566,9 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should render a mix of complete and incomplete modules, as appropriate', () => {
-    const requiredModulesSize = requiredModules.length;
+    const requiredModulesSize = initialRequiredModules.length;
     const incompleteModules = [AccessModule.RASLINKLOGINGOV];
-    const completeModules = requiredModules.filter(
+    const completeModules = initialRequiredModules.filter(
       (module) => module !== AccessModule.RASLINKLOGINGOV
     );
     const completeModulesSize = requiredModulesSize - incompleteModules.length;
@@ -637,7 +640,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => {
+          modules: initialRequiredModules.map((module) => {
             return { moduleName: module, completionEpochMillis: 1 };
           }),
         },
@@ -662,7 +665,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => {
+          modules: initialRequiredModules.map((module) => {
             return { moduleName: module, completionEpochMillis: 1 };
           }),
         },
@@ -712,7 +715,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: requiredModules.map((module) => ({
+          modules: initialRequiredModules.map((module) => ({
             moduleName: module,
             completionEpochMillis: 1,
           })),
@@ -1378,7 +1381,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: allModules.map((moduleName) => {
+          modules: allInitialModules.map((moduleName) => {
             if (
               [
                 AccessModule.CTCOMPLIANCETRAINING,
