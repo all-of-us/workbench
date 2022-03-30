@@ -1772,6 +1772,19 @@ paths:
       responses:
         204:
           description: Runtimes were checked and handled successfully.
+  "/v1/cron/checkPersistentDisks":
+    get:
+      security: []
+      tags:
+      - offlineRuntime
+      - cron
+      description: 'Endpoint meant to be called offline to check for old / detached persistent disks.
+        Notifies workspace owners at configurable intervals about old disks. Only executable via App Engine cronjob.
+        Note: rerunning this out of band may result in the sending of duplicate emails.'
+      operationId: checkPersistentDisks
+      responses:
+        204:
+          description: Disks were checked and handled successfully.
   "/v1/cron/bulkAuditProjectAccess":
     get:
       security: []
