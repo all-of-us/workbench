@@ -456,7 +456,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public void validateAllOfUsTermsOfService(Integer tosVersion) {
     if (tosVersion == null) {
-      throw new BadRequestException("Terms of Service version is NULL");
+      throw new BadRequestException("All of Us Terms of Service version is NULL");
     }
     if (tosVersion != LATEST_AOU_TOS_VERSION) {
       throw new BadRequestException("All of Us Terms of Service version is not up to date");
@@ -466,14 +466,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
   public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
-    try {
-      final int tosVersion =
-          userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
-      return tosVersion == LATEST_AOU_TOS_VERSION;
-    } catch (BadRequestException ex) {
-      // In case user doesnt have any terms of service
-      return false;
-    }
+    return userTermsOfServiceDao
+        .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
+        .map(u -> u.getTosVersion() == LATEST_AOU_TOS_VERSION)
+        .orElse(false);
   }
 
   // Returns true only if the user has accepted the latest version of both AoU and Terra terms of
