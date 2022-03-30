@@ -67,13 +67,6 @@ describe('Python Kernel Notebook Test', () => {
       })
     ).toMatch(/success$/);
 
-    expect(
-      await notebook.runCodeCell(3, {
-        codeFile: 'resources/python-code/git-ignore-check.py',
-        markdownWorkaround: true
-      })
-    ).toMatch(/success$/);
-
     await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
