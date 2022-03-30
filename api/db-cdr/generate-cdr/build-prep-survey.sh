@@ -125,7 +125,7 @@ function find_info() {
   )
   group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id
   order by ($order_by))
-  order by id"
+  order by id) order by id"
   echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
 }
 
