@@ -4,6 +4,7 @@ import static org.pmiops.workbench.iam.SamConfig.SAM_END_USER_GOOGLE_API;
 
 import com.google.api.services.iam.v1.model.Binding;
 import com.google.api.services.iam.v1.model.Policy;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ public class IamServiceImpl implements IamService {
     grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
   }
 
-  /** Gets a Terra pet service account from SAM. SAM will create one if user does not have it. */
+  /** Gets a Terra pet service account from SAM. SAM will create one if one does not yet exist. */
   private String getOrCreatePetServiceAccount(String googleProject, GoogleApi googleApi) {
     return samRetryHandler.run(
         (context) -> {
@@ -59,22 +60,16 @@ public class IamServiceImpl implements IamService {
   }
 
   /**
-   * Gets a Terra pet service account from SAM. SAM will create one if user does not have it.
+   * Gets a Terra pet service account from SAM. SAM will create one if one does not yet exist.
    *
-   * <p>Differs from the above version in that it uses impersonation. Because this is expected to
-   * fail in certain cases (e.g. the user is not ToS-compliant) it returns Empty instead of throwing
+   * <p>Differs from the above version in that it uses impersonation.
    */
-  private Optional<String> maybeGetOrCreatePetServiceAccountUsingImpersonation(
-      String googleProject, String userEmail) {
+  private String getOrCreatePetServiceAccountUsingImpersonation(
+      String googleProject, String userEmail) throws IOException {
     GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
-    try {
-      googleApiAsImpersonatedUser.setApiClient(
-          samApiClientFactory.newImpersonatedApiClient(userEmail));
-      return Optional.ofNullable(
-          getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser));
-    } catch (Exception e) {
-      return Optional.empty();
-    }
+    googleApiAsImpersonatedUser.setApiClient(
+        samApiClientFactory.newImpersonatedApiClient(userEmail));
+    return getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
   }
 
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
@@ -95,12 +90,12 @@ public class IamServiceImpl implements IamService {
     List<String> petServiceAccountFailures = new ArrayList<>();
 
     for (String userEmail : userEmails) {
-      Optional<String> petServiceAccountNameMaybe =
-          maybeGetOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
-      if (petServiceAccountNameMaybe.isPresent()) {
-        petServiceAccountsToGrantPermission.add(petServiceAccountNameMaybe.get());
-        grantServiceAccountUserRole(googleProject, petServiceAccountNameMaybe.get());
-      } else {
+      try {
+        String petServiceAccountName =
+            getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
+        petServiceAccountsToGrantPermission.add(petServiceAccountName);
+        grantServiceAccountUserRole(googleProject, petServiceAccountName);
+      } catch (Exception e) {
         petServiceAccountFailures.add(userEmail);
       }
     }
@@ -115,11 +110,11 @@ public class IamServiceImpl implements IamService {
     List<String> petServiceAccountFailures = new ArrayList<>();
 
     for (String userEmail : userEmails) {
-      Optional<String> petServiceAccountNameMaybe =
-          maybeGetOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
-      if (petServiceAccountNameMaybe.isPresent()) {
-        petServiceAccountsToRevokePermission.add(petServiceAccountNameMaybe.get());
-      } else {
+      try {
+        String petServiceAccountName =
+            getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
+        petServiceAccountsToRevokePermission.add(petServiceAccountName);
+      } catch (Exception e) {
         petServiceAccountFailures.add(userEmail);
       }
     }
