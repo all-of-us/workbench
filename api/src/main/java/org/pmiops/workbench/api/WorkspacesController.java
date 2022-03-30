@@ -602,10 +602,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+    final CloneWorkspaceResponse response = new CloneWorkspaceResponse().workspace(savedWorkspace);
 
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
-    List<String> failedWorkflowRunnerGrants = new ArrayList<>();
     if (accessTier.getEnableUserWorkflows()) {
       iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
       List<String> usersGainPermission =
@@ -613,17 +614,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
-      failedWorkflowRunnerGrants =
+      List<String> failedGrants =
           iamService.grantWorkflowRunnerRoleForUsers(
               dbWorkspace.getGoogleProject(), usersGainPermission);
+      if (!failedGrants.isEmpty()) {
+        response.setFailedWorkflowGrants(failedGrants);
+      }
     }
-    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
-    final CloneWorkspaceResponse response = new CloneWorkspaceResponse().workspace(savedWorkspace);
-    if (!failedWorkflowRunnerGrants.isEmpty()) {
-      response.setFailedWorkflowGrants(failedWorkflowRunnerGrants);
-    }
     return ResponseEntity.ok(response);
   }
 
