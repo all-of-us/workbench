@@ -46,9 +46,9 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   async collaboratorExists(email: string, workspaceAccessLevel: WorkspaceAccessLevel): Promise<boolean> {
-    const collaborators = await this.findUsersInCollaboratorList();
-    const writerArr = collaborators.get(workspaceAccessLevel);
-    return writerArr ? writerArr.some((item) => item === email) : false;
+    const allCollaborators = await this.findUsersInCollaboratorList();
+    const collaborators = allCollaborators.get(workspaceAccessLevel);
+    return collaborators ? collaborators.some((item) => item === email) : false;
   }
 
   async openShareModal(): Promise<ShareModal> {
