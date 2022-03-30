@@ -4,14 +4,12 @@ import static org.pmiops.workbench.iam.SamConfig.SAM_END_USER_GOOGLE_API;
 
 import com.google.api.services.iam.v1.model.Binding;
 import com.google.api.services.iam.v1.model.Policy;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudIamClient;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.sam.api.GoogleApi;
@@ -60,6 +58,25 @@ public class IamServiceImpl implements IamService {
         });
   }
 
+  /**
+   * Gets a Terra pet service account from SAM. SAM will create one if user does not have it.
+   *
+   * <p>Differs from the above version in that it uses impersonation. Because this is expected to
+   * fail in certain cases (e.g. the user is not ToS-compliant) it returns Empty instead of throwing
+   */
+  private Optional<String> maybeGetOrCreatePetServiceAccountUsingImpersonation(
+      String googleProject, String userEmail) {
+    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
+    try {
+      googleApiAsImpersonatedUser.setApiClient(
+          samApiClientFactory.newImpersonatedApiClient(userEmail));
+      return Optional.ofNullable(
+          getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser));
+    } catch (Exception e) {
+      return Optional.empty();
+    }
+  }
+
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
     Policy policy = cloudIamClient.getServiceAccountIamPolicy(googleProject, petServiceAccount);
     List<Binding> bindingList = Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
@@ -72,40 +89,42 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void grantWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails) {
-    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
-    try {
-      List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
-      for (String userEmail : userEmails) {
-        googleApiAsImpersonatedUser.setApiClient(
-            samApiClientFactory.newImpersonatedApiClient(userEmail));
-        String petServiceAccountName =
-            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-        petServiceAccountsToGrantPermission.add(petServiceAccountName);
-        grantServiceAccountUserRole(googleProject, petServiceAccountName);
+  public List<String> grantWorkflowRunnerRoleForUsers(
+      String googleProject, List<String> userEmails) {
+    List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
+    List<String> petServiceAccountFailures = new ArrayList<>();
+
+    for (String userEmail : userEmails) {
+      Optional<String> petServiceAccountNameMaybe =
+          maybeGetOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
+      if (petServiceAccountNameMaybe.isPresent()) {
+        petServiceAccountsToGrantPermission.add(petServiceAccountNameMaybe.get());
+        grantServiceAccountUserRole(googleProject, petServiceAccountNameMaybe.get());
+      } else {
+        petServiceAccountFailures.add(userEmail);
       }
-      grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
     }
+    grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
+    return petServiceAccountFailures;
   }
 
   @Override
-  public void revokeWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails) {
-    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
-    try {
-      List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
-      for (String userEmail : userEmails) {
-        googleApiAsImpersonatedUser.setApiClient(
-            samApiClientFactory.newImpersonatedApiClient(userEmail));
-        String petServiceAccountName =
-            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-        petServiceAccountsToRevokePermission.add(petServiceAccountName);
+  public List<String> revokeWorkflowRunnerRoleForUsers(
+      String googleProject, List<String> userEmails) {
+    List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
+    List<String> petServiceAccountFailures = new ArrayList<>();
+
+    for (String userEmail : userEmails) {
+      Optional<String> petServiceAccountNameMaybe =
+          maybeGetOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
+      if (petServiceAccountNameMaybe.isPresent()) {
+        petServiceAccountsToRevokePermission.add(petServiceAccountNameMaybe.get());
+      } else {
+        petServiceAccountFailures.add(userEmail);
       }
-      revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
     }
+    revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
+    return petServiceAccountFailures;
   }
 
   /** Grants life science runner role to list of service accounts. */
