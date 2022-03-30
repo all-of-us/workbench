@@ -64,7 +64,7 @@ class ResourceFields {
     return this;
   }
 
-  public long getLastModifiedEpochMillis() {
+  public Long getLastModifiedEpochMillis() {
     return lastModifiedEpochMillis;
   }
 
