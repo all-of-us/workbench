@@ -305,63 +305,70 @@ export const RenewalCardBody = (props: {
     ],
     [
       AccessModule.PUBLICATIONCONFIRMATION,
-      () => (
-        <React.Fragment>
-          <Dates />
-          <div style={textStyle}>
-            The <AoU /> Publication and Presentation Policy requires that you
-            report any upcoming publication or presentation resulting from the
-            use of <AoU /> Research Program Data at least two weeks before the
-            date of publication. If you are lead on or part of a publication or
-            presentation that hasn’t been reported to the program,{' '}
-            <a
-              target='_blank'
-              style={{ textDecoration: 'underline' }}
-              href={REDCAP_PUBLICATIONS_SURVEY}
-            >
-              please report it now.
-            </a>{' '}
-            For any questions, please contact <SupportMailto />
-          </div>
-          <TimeEstimate />
-          <div
-            style={{ ...renewalStyle.publicationConfirmation, ...textStyle }}
-          >
-            <ActionButton
-              actionButtonText='Confirm'
-              completedButtonText='Confirmed'
-              moduleStatus={moduleStatus}
-              onClick={async () => {
-                setLoading(true);
-                await confirmPublications();
-                setLoading(false);
-              }}
-              disabled={publications === null}
-              style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
-            />
-            <RadioButton
-              data-test-id='nothing-to-report'
-              id={noReportId}
-              disabled={isRenewalCompleteForModule(moduleStatus)}
-              style={{ justifySelf: 'end' }}
-              checked={publications === true}
-              onChange={() => setPublications(true)}
-            />
-            <label htmlFor={noReportId}>
-              At this time, I have nothing to report
-            </label>
-            <RadioButton
-              data-test-id='report-submitted'
-              id={reportId}
-              disabled={isRenewalCompleteForModule(moduleStatus)}
-              style={{ justifySelf: 'end' }}
-              checked={publications === false}
-              onChange={() => setPublications(false)}
-            />
-            <label htmlFor={reportId}>Report submitted</label>
-          </div>
-        </React.Fragment>
-      ),
+      () => {
+        const buttonsStyle = {
+          ...renewalStyle.publicationConfirmation,
+          ...textStyle,
+          color: isRenewalCompleteForModule(moduleStatus)
+            ? colors.disabled
+            : colors.primary,
+        };
+        return (
+          <React.Fragment>
+            <Dates />
+            <div style={textStyle}>
+              The <AoU /> Publication and Presentation Policy requires that you
+              report any upcoming publication or presentation resulting from the
+              use of <AoU /> Research Program Data at least two weeks before the
+              date of publication. If you are lead on or part of a publication
+              or presentation that hasn’t been reported to the program,{' '}
+              <a
+                target='_blank'
+                style={{ textDecoration: 'underline' }}
+                href={REDCAP_PUBLICATIONS_SURVEY}
+              >
+                please report it now.
+              </a>{' '}
+              For any questions, please contact <SupportMailto />
+            </div>
+            <TimeEstimate />
+            <div style={buttonsStyle}>
+              <ActionButton
+                actionButtonText='Confirm'
+                completedButtonText='Confirmed'
+                moduleStatus={moduleStatus}
+                onClick={async () => {
+                  setLoading(true);
+                  await confirmPublications();
+                  setLoading(false);
+                }}
+                disabled={publications === null}
+                style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
+              />
+              <RadioButton
+                data-test-id='nothing-to-report'
+                id={noReportId}
+                disabled={isRenewalCompleteForModule(moduleStatus)}
+                style={{ justifySelf: 'end' }}
+                checked={publications === true}
+                onChange={() => setPublications(true)}
+              />
+              <label htmlFor={noReportId}>
+                At this time, I have nothing to report
+              </label>
+              <RadioButton
+                data-test-id='report-submitted'
+                id={reportId}
+                disabled={isRenewalCompleteForModule(moduleStatus)}
+                style={{ justifySelf: 'end' }}
+                checked={publications === false}
+                onChange={() => setPublications(false)}
+              />
+              <label htmlFor={reportId}>Report submitted</label>
+            </div>
+          </React.Fragment>
+        );
+      },
     ],
     [
       AccessModule.COMPLIANCETRAINING,
