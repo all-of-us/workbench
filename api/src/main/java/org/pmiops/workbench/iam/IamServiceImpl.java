@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.google.CloudIamClient;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.sam.api.GoogleApi;
@@ -23,24 +27,27 @@ public class IamServiceImpl implements IamService {
   private static final String SERVICE_ACCOUNT_USER_ROLE = "roles/iam.serviceAccountUser";
   private static final String LIFESCIENCE_RUNNER_ROLE = "roles/lifesciences.workflowsRunner";
 
-  private final SamApiClientFactory samApiClientFactory;
   private final CloudIamClient cloudIamClient;
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final Provider<GoogleApi> endUserGoogleApiProvider;
+  private final FirecloudApiClientFactory firecloudApiClientFactory;
+  private final SamApiClientFactory samApiClientFactory;
   private final SamRetryHandler samRetryHandler;
+  private final Provider<GoogleApi> endUserGoogleApiProvider;
 
   @Autowired
   public IamServiceImpl(
-      SamApiClientFactory samApiClientFactory,
       CloudIamClient cloudIamClient,
       CloudResourceManagerService cloudResourceManagerService,
-      @Qualifier(SAM_END_USER_GOOGLE_API) Provider<GoogleApi> endUserGoogleApiProvider,
-      SamRetryHandler samRetryHandler) {
-    this.samApiClientFactory = samApiClientFactory;
+      FirecloudApiClientFactory firecloudApiClientFactory,
+      SamApiClientFactory samApiClientFactory,
+      SamRetryHandler samRetryHandler,
+      @Qualifier(SAM_END_USER_GOOGLE_API) Provider<GoogleApi> endUserGoogleApiProvider) {
     this.cloudIamClient = cloudIamClient;
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.endUserGoogleApiProvider = endUserGoogleApiProvider;
+    this.firecloudApiClientFactory = firecloudApiClientFactory;
+    this.samApiClientFactory = samApiClientFactory;
     this.samRetryHandler = samRetryHandler;
+    this.endUserGoogleApiProvider = endUserGoogleApiProvider;
   }
 
   /** Gets a Terra pet service account from SAM. SAM will create one if one does not yet exist. */
@@ -57,13 +64,27 @@ public class IamServiceImpl implements IamService {
   }
 
   /**
-   * Gets a Terra pet service account from SAM as the given user using impersonation. SAM will
-   * create one if one does not yet exist.
+   * Gets a Terra pet service account from SAM as the given user using impersonation, if possible.
+   *
+   * <p>If the user has not yet accepted the latest Terms of Service, impersonation will not be
+   * possible, and ww will return Empty instead.
    */
-  private String getOrCreatePetServiceAccountUsingImpersonation(
-      String googleProject, String userEmail) throws IOException {
-    return getOrCreatePetServiceAccount(
-        googleProject, new GoogleApi(samApiClientFactory.newImpersonatedApiClient(userEmail)));
+  private Optional<String> getOrCreatePetServiceAccountUsingImpersonation(
+      String googleProject, String userEmail) throws IOException, ApiException {
+
+    boolean userAcceptedLatestTos =
+        Boolean.TRUE.equals(
+            new TermsOfServiceApi(firecloudApiClientFactory.newImpersonatedApiClient(userEmail))
+                .getTermsOfServiceStatus());
+
+    if (userAcceptedLatestTos) {
+      return Optional.of(
+          getOrCreatePetServiceAccount(
+              googleProject,
+              new GoogleApi(samApiClientFactory.newImpersonatedApiClient(userEmail))));
+    } else {
+      return Optional.empty();
+    }
   }
 
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
@@ -90,16 +111,21 @@ public class IamServiceImpl implements IamService {
     List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
     List<String> petServiceAccountFailures = new ArrayList<>();
 
-    for (String userEmail : userEmails) {
-      try {
-        String petServiceAccountName =
+    try {
+      for (String userEmail : userEmails) {
+        Optional<String> petSaMaybe =
             getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
-        petServiceAccountsToGrantPermission.add(petServiceAccountName);
-        grantServiceAccountUserRole(googleProject, petServiceAccountName);
-      } catch (Exception e) {
-        petServiceAccountFailures.add(userEmail);
+        if (petSaMaybe.isPresent()) {
+          petServiceAccountsToGrantPermission.add(petSaMaybe.get());
+          grantServiceAccountUserRole(googleProject, petSaMaybe.get());
+        } else {
+          petServiceAccountFailures.add(userEmail);
+        }
       }
+    } catch (IOException | ApiException e) {
+      throw new ServerErrorException(e);
     }
+
     grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
     return petServiceAccountFailures;
   }
@@ -110,15 +136,20 @@ public class IamServiceImpl implements IamService {
     List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
     List<String> petServiceAccountFailures = new ArrayList<>();
 
-    for (String userEmail : userEmails) {
-      try {
-        String petServiceAccountName =
+    try {
+      for (String userEmail : userEmails) {
+        Optional<String> petSaMaybe =
             getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
-        petServiceAccountsToRevokePermission.add(petServiceAccountName);
-      } catch (Exception e) {
-        petServiceAccountFailures.add(userEmail);
+        if (petSaMaybe.isPresent()) {
+          petServiceAccountsToRevokePermission.add(petSaMaybe.get());
+        } else {
+          petServiceAccountFailures.add(userEmail);
+        }
       }
+    } catch (IOException | ApiException e) {
+      throw new ServerErrorException(e);
     }
+
     revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
     return petServiceAccountFailures;
   }
