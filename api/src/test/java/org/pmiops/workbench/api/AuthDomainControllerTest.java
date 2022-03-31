@@ -103,7 +103,6 @@ public class AuthDomainControllerTest {
             new FakeLongRandom(12345),
             mockUserServiceAuditAdapter,
             userDao,
-            adminActionHistoryDao,
             userTermsOfServiceDao,
             verifiedInstitutionalAffiliationDao,
             accessModuleNameMapper,
