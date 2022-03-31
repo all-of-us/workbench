@@ -67,7 +67,7 @@ public class IamServiceImpl implements IamService {
    * Gets a Terra pet service account from SAM as the given user using impersonation, if possible.
    *
    * <p>If the user has not yet accepted the latest Terms of Service, impersonation will not be
-   * possible, and ww will return Empty instead.
+   * possible, and we will return Empty instead.
    */
   private Optional<String> getOrCreatePetServiceAccountUsingImpersonation(
       String googleProject, String userEmail) throws IOException, ApiException {
@@ -108,10 +108,10 @@ public class IamServiceImpl implements IamService {
   @Override
   public List<String> grantWorkflowRunnerRoleForUsers(
       String googleProject, List<String> userEmails) {
-    List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
     List<String> petServiceAccountFailures = new ArrayList<>();
 
     try {
+      List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
       for (String userEmail : userEmails) {
         Optional<String> petSaMaybe =
             getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
@@ -122,21 +122,21 @@ public class IamServiceImpl implements IamService {
           petServiceAccountFailures.add(userEmail);
         }
       }
+      grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
     } catch (IOException | ApiException e) {
       throw new ServerErrorException(e);
     }
 
-    grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
     return petServiceAccountFailures;
   }
 
   @Override
   public List<String> revokeWorkflowRunnerRoleForUsers(
       String googleProject, List<String> userEmails) {
-    List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
     List<String> petServiceAccountFailures = new ArrayList<>();
 
     try {
+      List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
       for (String userEmail : userEmails) {
         Optional<String> petSaMaybe =
             getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
@@ -146,11 +146,11 @@ public class IamServiceImpl implements IamService {
           petServiceAccountFailures.add(userEmail);
         }
       }
+      revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
     } catch (IOException | ApiException e) {
       throw new ServerErrorException(e);
     }
 
-    revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
     return petServiceAccountFailures;
   }
 
