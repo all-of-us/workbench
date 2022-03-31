@@ -328,26 +328,6 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findDomainCountAndStandard() {
-    assertThat(cbCriteriaDao.findDomainCountAndStandard("term", Domain.CONDITION.toString(), false))
-        .isEqualTo(1);
-    assertThat(cbCriteriaDao.findDomainCountAndStandard("term", Domain.CONDITION.toString(), true))
-        .isEqualTo(0);
-  }
-
-  @Test
-  public void findDomainCountOnCodeAndStandard() {
-    assertThat(
-            cbCriteriaDao.findDomainCountOnCodeAndStandard(
-                "120", Domain.CONDITION.toString(), false))
-        .isEqualTo(1);
-    assertThat(
-            cbCriteriaDao.findDomainCountOnCodeAndStandard(
-                "120", Domain.CONDITION.toString(), true))
-        .isEqualTo(1);
-  }
-
-  @Test
   public void findSurveyVersionByQuestionConceptId() {
     jdbcTemplate.execute(
         "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");

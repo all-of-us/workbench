@@ -3550,36 +3550,6 @@ paths:
           description: information on the domains
           schema:
             "$ref": "#/definitions/DomainCardResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaincard/{domain}/{standard}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-        - cohortBuilder
-      description: 'Returns a count of term matches per domain per standard flag'
-      operationId: findDomainCountByStandardSource
-      parameters:
-        - in: path
-          name: domain
-          type: string
-          required: true
-          description: the specific type of domain
-        - in: path
-          name: standard
-          type: boolean
-          required: true
-          description: is domain standard or Source
-        - in: query
-          name: term
-          type: string
-          required: true
-          description: the term to search for
-      responses:
-        200:
-          description: A count of matching concepts in this domain
-          schema:
-            "$ref": "#/definitions/DomainCount"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3595,31 +3565,6 @@ paths:
           description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule/{name}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-      - cohortBuilder
-      description: 'Returns a count of term matches per survey name'
-      operationId: findSurveyCount
-      parameters:
-      - in: path
-        name: name
-        type: string
-        required: true
-        description: the name of the survey
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
-      responses:
-        200:
-          description: A count of matching concepts per survey
-          schema:
-            "$ref": "#/definitions/SurveyCount"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/ehrDomainCounts":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -7528,36 +7473,6 @@ definitions:
         type: string
       languageConceptId:
         description: language concept id
-        type: integer
-        format: int64
-  DomainCount:
-    type: object
-    required:
-    - domain
-    - name
-    - conceptCount
-    properties:
-      domain:
-        description: the domain ID
-        "$ref": "#/definitions/Domain"
-      name:
-        description: display name of the domain
-        type: string
-      conceptCount:
-        description: number of concepts matching the search query in this domain
-        type: integer
-        format: int64
-  SurveyCount:
-    type: object
-    required:
-    - name
-    - conceptCount
-    properties:
-      name:
-        description: display name of the survey
-        type: string
-      conceptCount:
-        description: number of concepts matching the search query in this survey
         type: integer
         format: int64
   CreateReviewRequest:

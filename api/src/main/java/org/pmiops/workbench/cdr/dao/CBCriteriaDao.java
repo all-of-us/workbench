@@ -246,29 +246,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(*) "
-              + "from DbCriteria "
-              + "where standard =:standard "
-              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
-  Long findDomainCountAndStandard(
-      @Param("term") String term,
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard);
-
-  @Query(
-      value =
-          "select count(*) "
-              + "from DbCriteria "
-              + "where code like upper(concat(:term,'%')) "
-              + "and standard = :standard "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0")
-  Long findDomainCountOnCodeAndStandard(
-      @Param("term") String term,
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard);
-
-  @Query(
-      value =
           "select upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as domainId, "
               + " upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as name, "
               + " count(*) as count "
@@ -321,23 +298,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "order by count desc",
       nativeQuery = true)
   List<DbCardCount> findSurveyCounts(@Param("term") String term);
-
-  @Query(
-      value =
-          "select count from cb_criteria c "
-              + "join(select substring_index(path,'.',1) as survey_version_concept_id, count(*) as count "
-              + "       from cb_criteria "
-              + "      where domain_id = 'SURVEY' "
-              + "        and subtype = 'QUESTION' "
-              + "        and concept_id in ( select concept_id "
-              + "                              from cb_criteria "
-              + "                             where domain_id = 'SURVEY' "
-              + "                               and match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
-              + "   group by survey_version_concept_id) a "
-              + "on c.id = a.survey_version_concept_id "
-              + "where name = :surveyName",
-      nativeQuery = true)
-  Long findSurveyCount(@Param("surveyName") String surveyName, @Param("term") String term);
 
   @Query(
       value =

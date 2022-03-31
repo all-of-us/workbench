@@ -22,12 +22,10 @@ import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCardResponse;
-import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.EthnicityInfoListResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SurveyCount;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -217,18 +215,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DomainCount> findDomainCountByStandardSource(
-      String workspaceNamespace, String workspaceId, String domain, Boolean standard, String term) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateDomain(domain);
-    validateTerm(term);
-    Long count = cohortBuilderService.findDomainCountByStandard(domain, term, standard);
-    return ResponseEntity.ok(
-        new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
-  }
-
-  @Override
   public ResponseEntity<CardCountResponse> findEhrDomainCounts(
       String workspaceNamespace, String workspaceId, String term) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -292,16 +278,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics());
-  }
-
-  @Override
-  public ResponseEntity<SurveyCount> findSurveyCount(
-      String workspaceNamespace, String workspaceId, String name, String term) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Long surveyCount = cohortBuilderService.findSurveyCount(name, term);
-    return ResponseEntity.ok(
-        new SurveyCount().conceptCount(surveyCount == null ? 0 : surveyCount).name(name));
   }
 
   @Override
