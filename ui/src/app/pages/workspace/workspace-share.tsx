@@ -135,6 +135,13 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
   },
+
+  workflowRolesText: {
+    color: colors.primary,
+    margin: '1em 0 1em 0',
+    fontSize: 14,
+    fontWeight: 500,
+  },
 });
 
 export const UserRoleOptions = [
@@ -142,6 +149,69 @@ export const UserRoleOptions = [
   { value: WorkspaceAccessLevel.WRITER, label: 'Writer' },
   { value: WorkspaceAccessLevel.OWNER, label: 'Owner' },
 ];
+
+interface ConflictProps {
+  reloadAction: () => void;
+  cancelAction: () => void;
+}
+const ConflictModal = (props: ConflictProps) => (
+  <Modal>
+    <ModalTitle>Conflicting update:</ModalTitle>
+    <ModalBody>
+      Another client has modified this workspace since the beginning of this
+      sharing session. Please reload to avoid overwriting those changes.
+    </ModalBody>
+    <ModalFooter>
+      <Button onClick={() => props.reloadAction()}>Reload Workspace</Button>
+      <Button onClick={() => props.cancelAction()}>Cancel Sharing</Button>
+    </ModalFooter>
+  </Modal>
+);
+
+interface WorkflowRolesProps {
+  usernames: string[];
+  cancelAction: () => void;
+}
+const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
+  <Modal>
+    <ModalTitle>Workflow sharing successful but incomplete</ModalTitle>
+    <ModalBody>
+      <div style={styles.workflowRolesText}>
+        The Researcher Workbench has successfully shared the workspace with the
+        specified collaborators, but with limited functionality for some.
+      </div>
+      <div style={styles.workflowRolesText}>
+        For compliance reasons, we were unable to grant the following
+        researchers appropriate access to run workflows in this workspace:
+        <ul>
+          {props.usernames.sort().map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div style={styles.workflowRolesText}>
+        For these researchers to gain access to run workflows, the following
+        must occur, in order:
+        <ol>
+          <li>
+            The researchers must log in to the <AoU /> Research Workbench
+          </li>
+          <li>This workspace must be shared with the researchers as Readers</li>
+          <li>
+            This workspace must then be shared with the researchers as Writers
+            or Owners
+          </li>
+        </ol>
+      </div>
+      <div style={styles.workflowRolesText}>
+        We apologize for the inconvenience.
+      </div>
+    </ModalBody>
+    <ModalFooter>
+      <Button onClick={() => props.cancelAction()}>Return to Workspace</Button>
+    </ModalFooter>
+  </Modal>
+);
 
 export interface State {
   autocompleteLoading: boolean;
@@ -156,6 +226,7 @@ export interface State {
   userRolesToChange: UserRole[];
   searchTerm: string;
   dropDown: boolean;
+  workflowRolesErrors: string[];
 }
 
 export interface Props {
@@ -187,6 +258,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         userRolesToChange: [],
         searchTerm: '',
         dropDown: false,
+        workflowRolesErrors: [],
       };
       this.searchTermChangedEvent = fp.debounce(300, this.userSearch);
     }
@@ -233,7 +305,11 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       if (this.state.saving) {
         return;
       }
-      this.setState({ saving: true, workspaceShareError: false });
+      this.setState({
+        saving: true,
+        workspaceShareError: false,
+        workflowRolesErrors: [],
+      });
       workspacesApi()
         .shareWorkspacePatch(
           this.props.workspace.namespace,
@@ -252,7 +328,15 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
             userRoles: resp.items,
             userRolesToChange: [],
           });
-          this.props.onClose();
+
+          // TODO: should we do anything for failed workflow role revocations?
+          if (resp.failedWorkflowGrants?.length > 0) {
+            this.setState({
+              workflowRolesErrors: resp.failedWorkflowGrants,
+            });
+          } else {
+            this.props.onClose();
+          }
         })
         .catch((error) => {
           if (error.status === 400) {
@@ -703,20 +787,16 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
             </div>
           )}
           {this.state.workspaceUpdateConflictError && (
-            <Modal>
-              <ModalTitle>Conflicting update:</ModalTitle>
-              <ModalBody>
-                Another client has modified this workspace since the beginning
-                of this sharing session. Please reload to avoid overwriting
-                those changes.
-              </ModalBody>
-              <ModalFooter>
-                <Button onClick={() => this.loadUserRoles()}>
-                  Reload Workspace
-                </Button>
-                <Button onClick={() => this.onCancel()}>Cancel Sharing</Button>
-              </ModalFooter>
-            </Modal>
+            <ConflictModal
+              reloadAction={() => this.loadUserRoles()}
+              cancelAction={() => this.onCancel()}
+            />
+          )}
+          {this.state.workflowRolesErrors?.length > 0 && (
+            <WorkflowRolesErrorModal
+              usernames={this.state.workflowRolesErrors}
+              cancelAction={() => this.onCancel()}
+            />
           )}
         </React.Fragment>
       );
