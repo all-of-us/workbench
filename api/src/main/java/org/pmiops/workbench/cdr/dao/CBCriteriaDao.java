@@ -246,36 +246,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-<<<<<<< HEAD
-          "select count(*) "
-              + "from DbCriteria "
-              + "where standard =:standard "
-              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
-  Long findDomainCountAndStandard(
-      @Param("term") String term,
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard);
-
-  @Query(
-      value =
-          "select count(*) "
-              + "from DbCriteria "
-              + "where code like upper(concat(:term,'%')) "
-              + "and standard = :standard "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0")
-  Long findDomainCountOnCodeAndStandard(
-      @Param("term") String term,
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard);
-
-  @Query(
-      value =
           "select upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as domainId, "
               + " upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as name, "
               + " count(*) as count "
-=======
-          "select domain_id as domainId, domain_id as name, count(*) as count "
->>>>>>> bce2992df (Removed unused api calls and methods and classes that support it.)
               + "from cb_criteria "
               + "where match(full_text) against(:term in boolean mode) "
               + "and full_text like '%_rank1%' "
