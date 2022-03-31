@@ -14,10 +14,8 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
-import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -114,29 +112,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
     workspaceAdminService.setAdminUnlockedState(workspaceNamespace);
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  /** Record approval or rejection of research purpose. */
-  @Override
-  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
-  public ResponseEntity<EmptyResponse> reviewWorkspace(
-      String ns, String id, ResearchPurposeReviewRequest review) {
-
-    workspaceAdminService.setResearchPurposeApproved(ns, id, review.getApproved());
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  // Note we do not paginate the workspaces list, since we expect few workspaces
-  // to require review.
-  //
-  // We can add pagination in the DAO by returning Slice<DbWorkspace> if we want the method to
-  // return pagination information (e.g. are there more workspaces to get), and Page<DbWorkspace> if
-  // we want the method to return both pagination information and a total count.
-  @Override
-  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
-  public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
-    return ResponseEntity.ok(
-        new WorkspaceListResponse().items(workspaceAdminService.getWorkspacesForReview()));
   }
 
   @Override

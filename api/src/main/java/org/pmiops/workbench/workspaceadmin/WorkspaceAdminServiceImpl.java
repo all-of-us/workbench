@@ -55,7 +55,6 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
@@ -212,7 +211,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final List<ListRuntimeResponse> workbenchListRuntimeResponses =
-        leonardoNotebooksClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
+        leonardoNotebooksClient
+            .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
             .stream()
             .map(leonardoMapper::toApiListRuntimeResponse)
             .collect(Collectors.toList());
@@ -342,7 +342,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
     final List<DbUser> owners =
-        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
+        workspaceService
+            .getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
             .stream()
             .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
             .map(UserRole::getEmail)
@@ -363,42 +364,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     workspaceDao.save(dbWorkspace.setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Override
-  public void setResearchPurposeApproved(
-      String workspaceNamespace, String firecloudName, boolean approved) {
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-    if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
-      throw new BadRequestException(
-          String.format(
-              "No review requested for workspace %s/%s.", workspaceNamespace, firecloudName));
-    }
-
-    Boolean existingApproval = workspace.getApproved();
-    if (existingApproval != null) {
-      throw new BadRequestException(
-          String.format(
-              "DbWorkspace %s/%s already %s.",
-              workspaceNamespace, firecloudName, existingApproval ? "approved" : "rejected"));
-    }
-    workspace.setApproved(approved);
-    workspaceDao.saveWithLastModified(workspace);
-
-    // RW-7087 replace with a new workspaceAuditor action (fireReviewAction?)
-    // because this uses the deprecated DbAdminActionHistory
-    userService.logAdminWorkspaceAction(
-        workspace.getWorkspaceId(),
-        "research purpose approval",
-        workspace.getApproved(),
-        existingApproval);
-  }
-
-  @Override
-  public List<Workspace> getWorkspacesForReview() {
-    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested().stream()
-        .map(workspaceMapper::toApiWorkspace)
-        .collect(Collectors.toList());
   }
 
   @Override

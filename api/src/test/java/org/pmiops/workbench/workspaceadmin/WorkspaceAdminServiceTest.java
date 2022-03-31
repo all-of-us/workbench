@@ -1,7 +1,6 @@
 package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -47,7 +46,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -436,46 +434,6 @@ public class WorkspaceAdminServiceTest {
   public void testSetAdminUnlockedStateCallsAuditor() {
     workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
     verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Test
-  public void testApproveWorkspace() {
-    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n").setReviewRequested(true));
-    workspaceAdminService.setResearchPurposeApproved(
-        w.getWorkspaceNamespace(), w.getFirecloudName(), true);
-
-    assertThat(mustGetDbWorkspace(w).getApproved()).isTrue();
-  }
-
-  @Test
-  public void testRejectAfterApproveThrows() {
-    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n").setReviewRequested(true));
-    workspaceAdminService.setResearchPurposeApproved(
-        w.getWorkspaceNamespace(), w.getFirecloudName(), true);
-
-    assertThrows(
-        BadRequestException.class,
-        () ->
-            workspaceAdminService.setResearchPurposeApproved(
-                w.getWorkspaceNamespace(), w.getFirecloudName(), false));
-  }
-
-  @Test
-  public void testListForApproval() {
-    List<Workspace> forApproval = workspaceAdminService.getWorkspacesForReview();
-    assertThat(forApproval).isEmpty();
-
-    // requested approval, but not approved
-    DbWorkspace pendingWorkspace =
-        workspaceDao.save(stubWorkspace("ws1", "1").setReviewRequested(true));
-    // already approved
-    workspaceDao.save(stubWorkspace("ws2", "2").setReviewRequested(true).setApproved(true));
-    // no approval requested
-    workspaceDao.save(stubWorkspace("ws3", "3"));
-
-    forApproval = workspaceAdminService.getWorkspacesForReview();
-    assertThat(forApproval.size()).isEqualTo(1);
-    assertThat(forApproval.get(0).getId()).isEqualTo(pendingWorkspace.getFirecloudName());
   }
 
   @Test

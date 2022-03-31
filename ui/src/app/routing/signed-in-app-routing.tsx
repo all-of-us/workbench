@@ -16,7 +16,6 @@ import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
 import { AdminInstitution } from 'app/pages/admin/admin-institution';
 import { AdminInstitutionEdit } from 'app/pages/admin/admin-institution-edit';
 import { AdminNotebookView } from 'app/pages/admin/admin-notebook-view';
-import { AdminReviewWorkspace } from 'app/pages/admin/admin-review-workspace';
 import { AdminUser } from 'app/pages/admin/admin-user';
 import { AdminUserAccess } from 'app/pages/admin/admin-user-access';
 import { AdminUserProfile } from 'app/pages/admin/admin-user-profile';
@@ -55,10 +54,6 @@ const AdminNotebookViewPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminNotebookView);
-const AdminReviewWorkspacePage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(AdminReviewWorkspace);
 const AdminEgressAuditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -190,15 +185,6 @@ export const SignedInRoutes = () => {
       >
         <InstitutionEditAdminPage
           routeData={{ title: 'Institution Admin', minimizeChrome: true }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path='/admin/review-workspace'
-        guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}
-      >
-        <AdminReviewWorkspacePage
-          routeData={{ title: 'Review Workspaces', minimizeChrome: true }}
         />
       </AppRoute>
       <AppRoute exact path='/admin/user'>
