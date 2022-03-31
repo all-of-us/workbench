@@ -43,33 +43,27 @@ public class IamServiceImpl implements IamService {
     this.samRetryHandler = samRetryHandler;
   }
 
-  @Override
-  public void grantWorkflowRunnerRoleToCurrentUser(String googleProject) {
-    String petServiceAccountName =
-        getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
-    grantServiceAccountUserRole(googleProject, petServiceAccountName);
-    grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
-  }
-
   /** Gets a Terra pet service account from SAM. SAM will create one if one does not yet exist. */
   private String getOrCreatePetServiceAccount(String googleProject, GoogleApi googleApi) {
-    return samRetryHandler.run(
-        (context) -> {
-          return googleApi.getPetServiceAccount(googleProject);
-        });
+    return samRetryHandler.run((context) -> googleApi.getPetServiceAccount(googleProject));
   }
 
   /**
-   * Gets a Terra pet service account from SAM. SAM will create one if one does not yet exist.
-   *
-   * <p>Differs from the above version in that it uses impersonation.
+   * Gets a Terra pet service account from SAM as the current user. SAM will create one if one does
+   * not yet exist.
+   */
+  private String getOrCreatePetServiceAccountAsCurrentUser(String googleProject) {
+    return getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
+  }
+
+  /**
+   * Gets a Terra pet service account from SAM as the given user using impersonation. SAM will
+   * create one if one does not yet exist.
    */
   private String getOrCreatePetServiceAccountUsingImpersonation(
       String googleProject, String userEmail) throws IOException {
-    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
-    googleApiAsImpersonatedUser.setApiClient(
-        samApiClientFactory.newImpersonatedApiClient(userEmail));
-    return getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
+    return getOrCreatePetServiceAccount(
+        googleProject, new GoogleApi(samApiClientFactory.newImpersonatedApiClient(userEmail)));
   }
 
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
@@ -81,6 +75,13 @@ public class IamServiceImpl implements IamService {
             .setMembers(Collections.singletonList("serviceAccount:" + petServiceAccount)));
     cloudIamClient.setServiceAccountIamPolicy(
         googleProject, petServiceAccount, policy.setBindings(bindingList));
+  }
+
+  @Override
+  public void grantWorkflowRunnerRoleToCurrentUser(String googleProject) {
+    String petServiceAccountName = getOrCreatePetServiceAccountAsCurrentUser(googleProject);
+    grantServiceAccountUserRole(googleProject, petServiceAccountName);
+    grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
   }
 
   @Override
