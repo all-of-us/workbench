@@ -3,11 +3,11 @@ import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
 
 import {
+  CardCount,
   ConceptSet,
   CreateConceptSetRequest,
   Criteria,
   Domain,
-  DomainCount,
   UpdateConceptSetRequest,
 } from 'generated/fetch';
 
@@ -51,7 +51,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
   class extends React.Component<
     {
       workspace: WorkspaceData;
-      activeDomainTab: DomainCount;
+      activeDomainTab: CardCount;
       selectedConcepts: Criteria[];
       onSave: Function;
       onClose: Function;
