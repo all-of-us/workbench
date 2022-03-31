@@ -2,10 +2,10 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
+  CardCount,
   ConceptSet,
   Criteria,
   Domain,
-  DomainCount,
   UpdateConceptSetRequest,
 } from 'generated/fetch';
 
@@ -209,13 +209,13 @@ export const ConceptListPage = fp.flow(
 
     getDomainCount() {
       const { domain, type } = this.props.cohortContext;
-      const domainCount: DomainCount = {
+      const domainCount: CardCount = {
         domain:
           domain === 'Measurement' && type === 'PPI'
             ? Domain.PHYSICALMEASUREMENT
             : (domain as Domain),
         name: domainToTitle(domain),
-        conceptCount: this.props.concept.length,
+        count: this.props.concept.length,
       };
       return domainCount;
     }
