@@ -31,7 +31,6 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -160,7 +159,6 @@ public class DiskControllerTest {
 
   @Captor private ArgumentCaptor<LeonardoUpdateDiskRequest> updateDiskRequestCaptor;
 
-  @MockBean AdminActionHistoryDao mockAdminActionHistoryDao;
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean ComplianceService mockComplianceService;
   @MockBean DirectoryService mockDirectoryService;

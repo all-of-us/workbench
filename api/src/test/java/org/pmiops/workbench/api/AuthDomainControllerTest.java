@@ -22,7 +22,6 @@ import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
@@ -63,7 +62,6 @@ public class AuthDomainControllerTest {
   @Mock private AccessTierService accessTierService;
   @Mock private AccessModuleNameMapper accessModuleNameMapper;
   @Mock private AccessModuleService accessModuleService;
-  @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
