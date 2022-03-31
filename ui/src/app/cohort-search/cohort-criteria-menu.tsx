@@ -22,12 +22,11 @@ const styles = reactStyles({
     display: 'inline-flex',
     fontSize: '10px',
     height: '0.625rem',
-    justifyContent: 'center',
     lineHeight: 'normal',
-    margin: '0 0.25rem',
     minWidth: '0.675rem',
     padding: '0 4px',
-    verticalAlign: 'middle',
+    float: 'right',
+    marginTop: '0.55rem',
   },
   menuButton: {
     background: colors.white,
@@ -106,7 +105,7 @@ const styles = reactStyles({
     cursor: 'pointer',
     fontSize: '12px',
     margin: 0,
-    padding: '0 1.25rem',
+    padding: '0 0.5rem 0 1.25rem',
     position: 'relative',
     width: '100%',
   },
@@ -148,6 +147,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     const [hoverId, setHoverId] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerms, setSearchTerms] = useState('');
+    const [subHoverId, setSubHoverId] = useState(null);
     const [subMenuOpen, setSubMenuOpen] = useState(false);
 
     const getDomainCounts = () => {
@@ -212,62 +212,92 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                       domainCounts.find((dc) => dc.domain === menuItem.domain)
                   )
                   .map((menuItem, m) => (
-                    <React.Fragment key={m}>
-                      <div
-                        style={{
-                          ...styles.dropdownItem,
-                          ...(hoverId === `${index}-${m}`
-                            ? { background: colors.light }
-                            : {}),
-                        }}
-                        onMouseEnter={() => {
-                          setHoverId(`${index}-${m}`);
-                          if (menuItem.group) {
-                            setSubMenuOpen(true);
-                          }
-                        }}
-                        onMouseLeave={() => {
-                          setHoverId(null);
-                          if (menuItem.group) {
-                            setSubMenuOpen(false);
-                          }
-                        }}
-                        onClick={() => {
+                    <div
+                      key={m}
+                      style={{
+                        ...styles.dropdownItem,
+                        ...(hoverId === `${index}-${m}`
+                          ? {
+                              background: colorWithWhiteness(colors.light, 0.5),
+                            }
+                          : {}),
+                      }}
+                      onMouseEnter={() => {
+                        setHoverId(`${index}-${m}`);
+                        if (menuItem.group) {
+                          setSubMenuOpen(true);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        setHoverId(null);
+                        if (menuItem.group) {
+                          setSubMenuOpen(false);
+                        }
+                      }}
+                      onClick={() => {
+                        if (!menuItem.group) {
                           launchSearch(menuItem, searchTerms);
                           setMenuOpen(false);
                           setDomainCounts(null);
                           setSearchTerms('');
-                        }}
-                      >
-                        <span style={{ verticalAlign: 'middle' }}>
-                          {menuItem.name}
+                        }
+                      }}
+                    >
+                      <span style={{ verticalAlign: 'middle' }}>
+                        {menuItem.name}
+                      </span>
+                      {domainCounts !== null && (
+                        <span style={styles.count}>
+                          {domainCounts
+                            .find((dc) => dc.domain === menuItem.domain)
+                            .count.toLocaleString()}
                         </span>
-                        {domainCounts !== null && (
-                          <span style={styles.count}>
-                            {domainCounts
-                              .find((dc) => dc.domain === menuItem.domain)
-                              .count.toLocaleString()}
-                          </span>
-                        )}
-                        {menuItem.group && (
-                          <React.Fragment>
-                            <i
-                              style={styles.subMenuIcon}
-                              className='pi pi-sort-down'
-                            />
-                            {subMenuOpen && (
-                              <div style={styles.subMenu}>
-                                {menuItem.children?.map((subMenuItem, s) => (
-                                  <div key={s} style={styles.subMenuItem}>
-                                    {subMenuItem.name}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </React.Fragment>
-                        )}
-                      </div>
-                    </React.Fragment>
+                      )}
+                      {menuItem.group && (
+                        <React.Fragment>
+                          <i
+                            style={styles.subMenuIcon}
+                            className='pi pi-sort-down'
+                          />
+                          {subMenuOpen && (
+                            <div style={styles.subMenu}>
+                              {menuItem.children?.map((subMenuItem, s) => (
+                                <div
+                                  key={s}
+                                  style={{
+                                    ...styles.subMenuItem,
+                                    ...(subHoverId === `${index}-${m}-${s}`
+                                      ? {
+                                          background: colorWithWhiteness(
+                                            colors.light,
+                                            0.5
+                                          ),
+                                        }
+                                      : {}),
+                                  }}
+                                  onMouseEnter={() =>
+                                    setSubHoverId(`${index}-${m}-${s}`)
+                                  }
+                                  onMouseLeave={() => {
+                                    setSubHoverId(null);
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    launchSearch(subMenuItem, searchTerms);
+                                    setMenuOpen(false);
+                                    setSubMenuOpen(false);
+                                    setDomainCounts(null);
+                                    setSearchTerms('');
+                                  }}
+                                >
+                                  {subMenuItem.name}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </React.Fragment>
+                      )}
+                    </div>
                   ))}
               </div>
             ))}
