@@ -246,8 +246,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as domainId, "
-              + " upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as name, "
+          "select upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as domainId, "
+              + " upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as name, "
               + " count(*) as count "
               + "from cb_criteria "
               + "where match(full_text) against(:term in boolean mode) "
@@ -264,8 +264,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as domainId, "
-              + " upper(substring_index(substring_index(full_text, '[', -1), '_', 1)) as name, "
+          "select upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as domainId, "
+              + " upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as name, "
               + " count(*) as count "
               + "from cb_criteria "
               + "where domain_id in (:domains) "
