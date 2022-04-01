@@ -2,6 +2,7 @@ import * as React from 'react';
 
 const { useEffect, useRef, useState } = React;
 
+import { AlertDanger } from 'app/components/alert';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
@@ -27,6 +28,15 @@ const styles = reactStyles({
     padding: '0 4px',
     float: 'right',
     marginTop: '0.55rem',
+  },
+  error: {
+    width: '99%',
+    marginTop: '2.75rem',
+    padding: '0.25rem',
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    borderRadius: '5px',
   },
   menuButton: {
     background: colors.white,
@@ -143,8 +153,10 @@ const styles = reactStyles({
 export const CohortCriteriaMenu = withCurrentWorkspace()(
   ({ launchSearch, menuOptions, workspace }) => {
     const [domainCounts, setDomainCounts] = useState(null);
+    const [domainCountsError, setDomainCountsError] = useState(false);
     const [domainCountsLoading, setDomainCountsLoading] = useState(false);
     const [hoverId, setHoverId] = useState(null);
+    const [inputError, setInputError] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerms, setSearchTerms] = useState('');
     const [subHoverId, setSubHoverId] = useState(null);
@@ -153,13 +165,38 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
 
     const getDomainCounts = () => {
       const { id, namespace } = workspace;
-      setDomainCountsLoading(true);
       cohortBuilderApi()
         .findEhrDomainCounts(namespace, id, searchTerms)
         .then((response) => {
           setDomainCounts(response.items);
           setDomainCountsLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setDomainCountsError(true);
         });
+    };
+
+    const onEnterPress = () => {
+      if (!searchTerms || searchTerms.length < 2) {
+        setInputError('Minimum search length is two characters.');
+      } else {
+        setDomainCountsError(false);
+        setDomainCountsLoading(true);
+        setInputError(null);
+        getDomainCounts();
+      }
+    };
+
+    const categoryHasResults = (index: number) => {
+      return (
+        domainCounts === null ||
+        domainCounts.some((domainCount) =>
+          menuOptions[index].some(
+            (menuOption) => domainCount.domain === menuOption.domain
+          )
+        )
+      );
     };
 
     const closeAndClearMenu = () => {
@@ -168,6 +205,8 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
       setHoverId(null);
       setSubHoverId(null);
       setDomainCounts(null);
+      setDomainCountsError(false);
+      setInputError(null);
       setSearchTerms('');
     };
 
@@ -217,7 +256,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   style={styles.searchInput}
                   value={searchTerms}
                   onChange={(val) => setSearchTerms(val)}
-                  onKeyDown={(e) => e.key === 'Enter' && getDomainCounts()}
+                  onKeyDown={(e) => e.key === 'Enter' && onEnterPress()}
                 />
                 <ClrIcon
                   shape='times'
@@ -226,112 +265,152 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   onClick={() => {
                     setDomainCounts(null);
                     setSearchTerms('');
+                    setInputError(null);
                   }}
                 />
               </div>
             </div>
-            {!domainCountsLoading &&
-              menuOptions.map((category, index) => (
-                <div key={index}>
-                  <div style={styles.dropdownHeader}>
-                    <span style={styles.dropdownHeaderText}>
-                      {category[0].category}
-                    </span>
+            {!domainCountsLoading && (
+              <React.Fragment>
+                {domainCountsError && (
+                  <div style={styles.error}>
+                    <ClrIcon
+                      style={{ margin: '0 0.5rem 0 0.25rem' }}
+                      className='is-solid'
+                      shape='exclamation-triangle'
+                      size='22'
+                    />
+                    Sorry, the request cannot be completed. Please try again or
+                    contact Support in the left hand navigation.
                   </div>
-                  {category
-                    .filter(
-                      (menuItem) =>
-                        domainCounts === null ||
-                        domainCounts.find((dc) => dc.domain === menuItem.domain)
-                    )
-                    .map((menuItem, m) => (
-                      <div
-                        key={m}
-                        style={{
-                          ...styles.dropdownItem,
-                          ...(hoverId === `${index}-${m}`
-                            ? {
-                                background: colorWithWhiteness(
-                                  colors.light,
-                                  0.5
-                                ),
-                              }
-                            : {}),
-                        }}
-                        onMouseEnter={() => {
-                          setHoverId(`${index}-${m}`);
-                          if (menuItem.group) {
-                            setSubMenuOpen(true);
-                          }
-                        }}
-                        onMouseLeave={() => {
-                          setHoverId(null);
-                          if (menuItem.group) {
-                            setSubMenuOpen(false);
-                          }
-                        }}
-                        onClick={() => {
-                          if (!menuItem.group) {
-                            launchSearch(menuItem, searchTerms);
-                            closeAndClearMenu();
-                          }
-                        }}
-                      >
-                        <span style={{ verticalAlign: 'middle' }}>
-                          {menuItem.name}
-                        </span>
-                        {domainCounts !== null && (
-                          <span style={styles.count}>
-                            {domainCounts
-                              .find((dc) => dc.domain === menuItem.domain)
-                              .count.toLocaleString()}
+                )}
+                {!!inputError && (
+                  <AlertDanger
+                    style={{ margin: '0 0.5rem 0.25rem', padding: '0.25rem' }}
+                  >
+                    <span>{inputError}</span>
+                  </AlertDanger>
+                )}
+                {domainCounts?.length === 0 ? (
+                  <div style={{ padding: '0.25rem 0.5rem' }}>
+                    No results found
+                  </div>
+                ) : (
+                  menuOptions.map((category, index) => (
+                    <div key={index}>
+                      {categoryHasResults(index) && (
+                        <div style={styles.dropdownHeader}>
+                          <span style={styles.dropdownHeaderText}>
+                            {category[0].category}
                           </span>
-                        )}
-                        {menuItem.group && (
-                          <React.Fragment>
-                            <i
-                              style={styles.subMenuIcon}
-                              className='pi pi-sort-down'
-                            />
-                            {subMenuOpen && (
-                              <div style={styles.subMenu}>
-                                {menuItem.children?.map((subMenuItem, s) => (
-                                  <div
-                                    key={s}
-                                    style={{
-                                      ...styles.subMenuItem,
-                                      ...(subHoverId === `${index}-${m}-${s}`
-                                        ? {
-                                            background: colorWithWhiteness(
-                                              colors.light,
-                                              0.5
-                                            ),
-                                          }
-                                        : {}),
-                                    }}
-                                    onMouseEnter={() =>
-                                      setSubHoverId(`${index}-${m}-${s}`)
-                                    }
-                                    onMouseLeave={() => {
-                                      setSubHoverId(null);
-                                    }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      launchSearch(subMenuItem, searchTerms);
-                                      closeAndClearMenu();
-                                    }}
-                                  >
-                                    {subMenuItem.name}
-                                  </div>
-                                ))}
-                              </div>
+                        </div>
+                      )}
+                      {category
+                        .filter(
+                          (menuItem) =>
+                            domainCounts === null ||
+                            domainCounts.find(
+                              (dc) => dc.domain === menuItem.domain
+                            )
+                        )
+                        .map((menuItem, m) => (
+                          <div
+                            key={m}
+                            style={{
+                              ...styles.dropdownItem,
+                              ...(hoverId === `${index}-${m}`
+                                ? {
+                                    background: colorWithWhiteness(
+                                      colors.light,
+                                      0.5
+                                    ),
+                                  }
+                                : {}),
+                            }}
+                            onMouseEnter={() => {
+                              setHoverId(`${index}-${m}`);
+                              if (menuItem.group) {
+                                setSubMenuOpen(true);
+                              }
+                            }}
+                            onMouseLeave={() => {
+                              setHoverId(null);
+                              if (menuItem.group) {
+                                setSubMenuOpen(false);
+                              }
+                            }}
+                            onClick={() => {
+                              if (!menuItem.group) {
+                                launchSearch(menuItem, searchTerms);
+                                closeAndClearMenu();
+                              }
+                            }}
+                          >
+                            <span style={{ verticalAlign: 'middle' }}>
+                              {menuItem.name}
+                            </span>
+                            {domainCounts !== null && (
+                              <span style={styles.count}>
+                                {domainCounts
+                                  .find((dc) => dc.domain === menuItem.domain)
+                                  .count.toLocaleString()}
+                              </span>
                             )}
-                          </React.Fragment>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              ))}
+                            {menuItem.group && (
+                              <React.Fragment>
+                                <i
+                                  style={styles.subMenuIcon}
+                                  className='pi pi-sort-down'
+                                />
+                                {subMenuOpen && (
+                                  <div style={styles.subMenu}>
+                                    {menuItem.children?.map(
+                                      (subMenuItem, s) => (
+                                        <div
+                                          key={s}
+                                          style={{
+                                            ...styles.subMenuItem,
+                                            ...(subHoverId ===
+                                            `${index}-${m}-${s}`
+                                              ? {
+                                                  background:
+                                                    colorWithWhiteness(
+                                                      colors.light,
+                                                      0.5
+                                                    ),
+                                                }
+                                              : {}),
+                                          }}
+                                          onMouseEnter={() =>
+                                            setSubHoverId(`${index}-${m}-${s}`)
+                                          }
+                                          onMouseLeave={() => {
+                                            setSubHoverId(null);
+                                          }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            launchSearch(
+                                              subMenuItem,
+                                              searchTerms
+                                            );
+                                            closeAndClearMenu();
+                                          }}
+                                        >
+                                          {subMenuItem.name}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                              </React.Fragment>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  ))
+                )}
+              </React.Fragment>
+            )}
           </div>
         )}
       </div>
