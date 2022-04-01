@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const { useState } = React;
+const { useEffect, useRef, useState } = React;
 
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
@@ -149,6 +149,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     const [searchTerms, setSearchTerms] = useState('');
     const [subHoverId, setSubHoverId] = useState(null);
     const [subMenuOpen, setSubMenuOpen] = useState(false);
+    const menuRef = useRef(null);
 
     const getDomainCounts = () => {
       const { id, namespace } = workspace;
@@ -161,16 +162,47 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
         });
     };
 
+    const closeAndClearMenu = () => {
+      setMenuOpen(false);
+      setSubMenuOpen(false);
+      setHoverId(null);
+      setSubHoverId(null);
+      setDomainCounts(null);
+      setSearchTerms('');
+    };
+
+    const onClickOutside = (event) => {
+      if (
+        menuRef?.current &&
+        !menuRef.current.contains(event.target) &&
+        menuOpen
+      ) {
+        closeAndClearMenu();
+      }
+    };
+
+    useEffect(() => {
+      // Close menu on outside click
+      document.addEventListener('click', onClickOutside);
+      return () => {
+        document.removeEventListener('click', onClickOutside);
+      };
+    });
+
     return (
       <div style={styles.cardBlock}>
         <button
           style={styles.menuButton}
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => {
+            if (!menuOpen) {
+              setMenuOpen(true);
+            }
+          }}
         >
           Add Criteria <ClrIcon shape='caret down' size={12} />
         </button>
         {menuOpen && (
-          <div style={styles.dropdownMenu}>
+          <div ref={menuRef} style={styles.dropdownMenu}>
             <div style={styles.searchContainer}>
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
@@ -198,109 +230,108 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                 />
               </div>
             </div>
-            {menuOptions.map((category, index) => (
-              <div key={index}>
-                <div style={styles.dropdownHeader}>
-                  <span style={styles.dropdownHeaderText}>
-                    {category[0].category}
-                  </span>
-                </div>
-                {category
-                  .filter(
-                    (menuItem) =>
-                      domainCounts === null ||
-                      domainCounts.find((dc) => dc.domain === menuItem.domain)
-                  )
-                  .map((menuItem, m) => (
-                    <div
-                      key={m}
-                      style={{
-                        ...styles.dropdownItem,
-                        ...(hoverId === `${index}-${m}`
-                          ? {
-                              background: colorWithWhiteness(colors.light, 0.5),
-                            }
-                          : {}),
-                      }}
-                      onMouseEnter={() => {
-                        setHoverId(`${index}-${m}`);
-                        if (menuItem.group) {
-                          setSubMenuOpen(true);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        setHoverId(null);
-                        if (menuItem.group) {
-                          setSubMenuOpen(false);
-                        }
-                      }}
-                      onClick={() => {
-                        if (!menuItem.group) {
-                          launchSearch(menuItem, searchTerms);
-                          setMenuOpen(false);
-                          setDomainCounts(null);
-                          setSearchTerms('');
-                        }
-                      }}
-                    >
-                      <span style={{ verticalAlign: 'middle' }}>
-                        {menuItem.name}
-                      </span>
-                      {domainCounts !== null && (
-                        <span style={styles.count}>
-                          {domainCounts
-                            .find((dc) => dc.domain === menuItem.domain)
-                            .count.toLocaleString()}
+            {!domainCountsLoading &&
+              menuOptions.map((category, index) => (
+                <div key={index}>
+                  <div style={styles.dropdownHeader}>
+                    <span style={styles.dropdownHeaderText}>
+                      {category[0].category}
+                    </span>
+                  </div>
+                  {category
+                    .filter(
+                      (menuItem) =>
+                        domainCounts === null ||
+                        domainCounts.find((dc) => dc.domain === menuItem.domain)
+                    )
+                    .map((menuItem, m) => (
+                      <div
+                        key={m}
+                        style={{
+                          ...styles.dropdownItem,
+                          ...(hoverId === `${index}-${m}`
+                            ? {
+                                background: colorWithWhiteness(
+                                  colors.light,
+                                  0.5
+                                ),
+                              }
+                            : {}),
+                        }}
+                        onMouseEnter={() => {
+                          setHoverId(`${index}-${m}`);
+                          if (menuItem.group) {
+                            setSubMenuOpen(true);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          setHoverId(null);
+                          if (menuItem.group) {
+                            setSubMenuOpen(false);
+                          }
+                        }}
+                        onClick={() => {
+                          if (!menuItem.group) {
+                            launchSearch(menuItem, searchTerms);
+                            closeAndClearMenu();
+                          }
+                        }}
+                      >
+                        <span style={{ verticalAlign: 'middle' }}>
+                          {menuItem.name}
                         </span>
-                      )}
-                      {menuItem.group && (
-                        <React.Fragment>
-                          <i
-                            style={styles.subMenuIcon}
-                            className='pi pi-sort-down'
-                          />
-                          {subMenuOpen && (
-                            <div style={styles.subMenu}>
-                              {menuItem.children?.map((subMenuItem, s) => (
-                                <div
-                                  key={s}
-                                  style={{
-                                    ...styles.subMenuItem,
-                                    ...(subHoverId === `${index}-${m}-${s}`
-                                      ? {
-                                          background: colorWithWhiteness(
-                                            colors.light,
-                                            0.5
-                                          ),
-                                        }
-                                      : {}),
-                                  }}
-                                  onMouseEnter={() =>
-                                    setSubHoverId(`${index}-${m}-${s}`)
-                                  }
-                                  onMouseLeave={() => {
-                                    setSubHoverId(null);
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    launchSearch(subMenuItem, searchTerms);
-                                    setMenuOpen(false);
-                                    setSubMenuOpen(false);
-                                    setDomainCounts(null);
-                                    setSearchTerms('');
-                                  }}
-                                >
-                                  {subMenuItem.name}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </React.Fragment>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            ))}
+                        {domainCounts !== null && (
+                          <span style={styles.count}>
+                            {domainCounts
+                              .find((dc) => dc.domain === menuItem.domain)
+                              .count.toLocaleString()}
+                          </span>
+                        )}
+                        {menuItem.group && (
+                          <React.Fragment>
+                            <i
+                              style={styles.subMenuIcon}
+                              className='pi pi-sort-down'
+                            />
+                            {subMenuOpen && (
+                              <div style={styles.subMenu}>
+                                {menuItem.children?.map((subMenuItem, s) => (
+                                  <div
+                                    key={s}
+                                    style={{
+                                      ...styles.subMenuItem,
+                                      ...(subHoverId === `${index}-${m}-${s}`
+                                        ? {
+                                            background: colorWithWhiteness(
+                                              colors.light,
+                                              0.5
+                                            ),
+                                          }
+                                        : {}),
+                                    }}
+                                    onMouseEnter={() =>
+                                      setSubHoverId(`${index}-${m}-${s}`)
+                                    }
+                                    onMouseLeave={() => {
+                                      setSubHoverId(null);
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      launchSearch(subMenuItem, searchTerms);
+                                      closeAndClearMenu();
+                                    }}
+                                  >
+                                    {subMenuItem.name}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </React.Fragment>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              ))}
           </div>
         )}
       </div>
