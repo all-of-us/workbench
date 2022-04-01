@@ -10,8 +10,9 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { cdrVersionStore } from 'app/utils/stores';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
@@ -26,6 +27,7 @@ describe('CohortPage', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({ config: defaultServerConfig });
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     history = createMemoryHistory();
