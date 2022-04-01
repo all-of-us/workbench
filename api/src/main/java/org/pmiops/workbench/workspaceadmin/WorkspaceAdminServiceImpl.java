@@ -55,7 +55,6 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
@@ -363,42 +362,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     workspaceDao.save(dbWorkspace.setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Override
-  public void setResearchPurposeApproved(
-      String workspaceNamespace, String firecloudName, boolean approved) {
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-    if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
-      throw new BadRequestException(
-          String.format(
-              "No review requested for workspace %s/%s.", workspaceNamespace, firecloudName));
-    }
-
-    Boolean existingApproval = workspace.getApproved();
-    if (existingApproval != null) {
-      throw new BadRequestException(
-          String.format(
-              "DbWorkspace %s/%s already %s.",
-              workspaceNamespace, firecloudName, existingApproval ? "approved" : "rejected"));
-    }
-    workspace.setApproved(approved);
-    workspaceDao.saveWithLastModified(workspace);
-
-    // RW-7087 replace with a new workspaceAuditor action (fireReviewAction?)
-    // because this uses the deprecated DbAdminActionHistory
-    userService.logAdminWorkspaceAction(
-        workspace.getWorkspaceId(),
-        "research purpose approval",
-        workspace.getApproved(),
-        existingApproval);
-  }
-
-  @Override
-  public List<Workspace> getWorkspacesForReview() {
-    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested().stream()
-        .map(workspaceMapper::toApiWorkspace)
-        .collect(Collectors.toList());
   }
 
   @Override

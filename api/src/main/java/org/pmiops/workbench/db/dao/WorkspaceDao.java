@@ -79,8 +79,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       @Param("fcName") String fcName,
       @Param("status") short status);
 
-  List<DbWorkspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
-
   List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
 
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
