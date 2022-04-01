@@ -200,6 +200,7 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public String credentialsKeyV2;
+    public int lookbackPeriod;
   }
 
   public static class ZendeskConfig {

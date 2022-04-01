@@ -150,7 +150,8 @@ const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
   const wasBypassed = !!status?.bypassEpochMillis;
   return (
     wasBypassed ||
-    (isComplete && !isExpiringOrExpired(status?.expirationEpochMillis))
+    (isComplete &&
+      !isExpiringOrExpired(status?.expirationEpochMillis, status.moduleName))
   );
 };
 
@@ -287,7 +288,9 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
     useEffect(() => {
       const expiringModuleNames: AccessModule[] = expirableModules
-        .filter((status) => isExpiringOrExpired(status.expirationEpochMillis))
+        .filter((status) =>
+          isExpiringOrExpired(status.expirationEpochMillis, status.moduleName)
+        )
         .map((status) => status.moduleName);
 
       const onMount = async () => {

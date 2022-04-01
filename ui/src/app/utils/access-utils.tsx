@@ -461,10 +461,19 @@ const withInvalidDateHandling = (date) => {
 export const hasExpired = (expiration: number): boolean =>
   !!expiration && getWholeDaysFromNow(expiration) < 0;
 
-export const isExpiringOrExpired = (expiration: number): boolean =>
-  !!expiration &&
-  getWholeDaysFromNow(expiration) <=
-    serverConfigStore.get().config.accessRenewalLookback;
+export const isExpiringOrExpired = (
+  expiration: number,
+  module: AccessModule
+): boolean => {
+  const moodleModules = [
+    AccessModule.COMPLIANCETRAINING,
+    AccessModule.CTCOMPLIANCETRAINING,
+  ];
+  const lookback = moodleModules.includes(module)
+    ? serverConfigStore.get().config.complianceTrainingRenewalLookback
+    : serverConfigStore.get().config.accessRenewalLookback;
+  return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
+};
 
 interface RenewalDisplayDates {
   lastConfirmedDate: string;
@@ -526,7 +535,7 @@ export const computeRenewalDisplayDates = (
       }),
     ],
     [
-      isExpiringOrExpired(expirationEpochMillis),
+      isExpiringOrExpired(expirationEpochMillis, status.moduleName),
       () => ({
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
