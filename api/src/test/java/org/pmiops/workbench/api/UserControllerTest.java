@@ -27,7 +27,6 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -79,7 +78,6 @@ public class UserControllerTest {
     CommonMappers.class,
   })
   @MockBean({
-    AdminActionHistoryDao.class,
     ComplianceService.class,
     DirectoryService.class,
     FireCloudService.class,
