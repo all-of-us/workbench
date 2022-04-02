@@ -108,7 +108,7 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableGpu": true,
-    "enablePersistentDisk": false,
+    "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": false,
     "ccSupportWhenAdminLocking": true,
     "enableDSCREntryInRecentModified": false,
