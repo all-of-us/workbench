@@ -67,7 +67,7 @@ const staging: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
-  ENABLED_PERSISTENT_DISK: false
+  ENABLED_PERSISTENT_DISK: true
 };
 
 // NOT WORKING: workbench stable environment
@@ -84,7 +84,7 @@ const stable: IEnvConfig = {
   EGRESS_TEST_USER: 'TODO - NOT AVAILABLE',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
-  ENABLED_PERSISTENT_DISK: false
+  ENABLED_PERSISTENT_DISK: true
 };
 
 // workbench perf environment
@@ -101,7 +101,7 @@ const perf: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
-  ENABLED_PERSISTENT_DISK: false
+  ENABLED_PERSISTENT_DISK: true
 };
 
 const environment = {
