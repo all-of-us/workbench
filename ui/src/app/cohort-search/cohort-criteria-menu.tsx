@@ -231,6 +231,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     return (
       <div style={styles.cardBlock}>
         <button
+          data-test-id='criteria-menu-button'
           style={styles.menuButton}
           onClick={() => {
             if (!menuOpen) {
@@ -241,7 +242,11 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
           Add Criteria <ClrIcon shape='caret down' size={12} />
         </button>
         {menuOpen && (
-          <div ref={menuRef} style={styles.dropdownMenu}>
+          <div
+            data-test-id='criteria-menu-dropdown'
+            ref={menuRef}
+            style={styles.dropdownMenu}
+          >
             <div style={styles.searchContainer}>
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
@@ -253,6 +258,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   <ClrIcon shape='search' size='18' />
                 )}
                 <TextInput
+                  data-test-id='criteria-menu-input'
                   style={styles.searchInput}
                   value={searchTerms}
                   onChange={(val) => setSearchTerms(val)}
@@ -286,6 +292,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                 )}
                 {!!inputError && (
                   <AlertDanger
+                    data-test-id='criteria-menu-input-alert'
                     style={{ margin: '0 0.5rem 0.25rem', padding: '0.25rem' }}
                   >
                     <span>{inputError}</span>
