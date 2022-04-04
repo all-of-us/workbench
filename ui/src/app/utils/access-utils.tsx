@@ -483,8 +483,12 @@ interface RenewalDisplayDates {
 export const computeRenewalDisplayDates = (
   status: AccessModuleStatus
 ): RenewalDisplayDates => {
-  const { completionEpochMillis, expirationEpochMillis, bypassEpochMillis } =
-    status || {};
+  const {
+    completionEpochMillis,
+    expirationEpochMillis,
+    bypassEpochMillis,
+    moduleName,
+  } = status || {};
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
   const userExpiredModule = !!expirationEpochMillis;
@@ -535,7 +539,7 @@ export const computeRenewalDisplayDates = (
       }),
     ],
     [
-      isExpiringOrExpired(expirationEpochMillis, status.moduleName),
+      isExpiringOrExpired(expirationEpochMillis, moduleName),
       () => ({
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,

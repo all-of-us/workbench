@@ -4059,7 +4059,7 @@ paths:
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-      - cohortBuilder
+        - cohortBuilder
       description: Returns data filter options per cdr version
       operationId: findDataFilters
       responses:
@@ -4450,6 +4450,9 @@ definitions:
       complianceTrainingHost:
         type: string
         description: The hostname for constructing the compliance training URL.
+      complianceTrainingRenewalLookback:
+        type: number
+        description: the point when we give users the option to update their compliance items.
       enableEraCommons:
         type: boolean
         default: false
