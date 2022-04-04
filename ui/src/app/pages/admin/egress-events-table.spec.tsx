@@ -89,4 +89,34 @@ describe('EgressEventsTable', () => {
       EgressEventStatus.VERIFIEDFALSEPOSITIVE
     );
   });
+
+  it('should allow multiple event status updates', async () => {
+    eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 5);
+
+    const wrapper = mountWithRouter(<EgressEventsTable />);
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    wrapper.find('.p-row-editor-init').at(2).simulate('click');
+    wrapper
+      .find('.p-dropdown-item')
+      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
+      .simulate('click');
+    wrapper.find('.p-row-editor-save-icon').simulate('click');
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    wrapper.find('.p-row-editor-init').at(3).simulate('click');
+    wrapper
+      .find('.p-dropdown-item')
+      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
+      .simulate('click');
+    wrapper.find('.p-row-editor-save-icon').simulate('click');
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(eventsStub.events[2].status).toBe(
+      EgressEventStatus.VERIFIEDFALSEPOSITIVE
+    );
+    expect(eventsStub.events[3].status).toBe(
+      EgressEventStatus.VERIFIEDFALSEPOSITIVE
+    );
+  });
 });
