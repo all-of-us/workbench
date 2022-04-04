@@ -9,14 +9,10 @@ export BQ_DATASET=$2  # dataset
 
 # check if OMOP 5.3.1
 echo "ds-linking - checking $BQ_PROJECT:$BQ_DATASET.visit_detail table exists"
-export TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
-if [[ "$TABLE_LIST" == *'visit_detail'* ]]; then
-    echo "Dataset is OMOP 5.3.1, dataset contains 'visit_detail' table"
-    export IS_OMOP_531=1
-  else
-    echo "Dataset is OMOP 5.2 compliant"
-    export IS_OMOP_531=0
-  end
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+if [[ "$TABLE_LIST" == *'visit_detail'* ]];
+then
+  echo "Dataset is OMOP 5.3.1, dataset contains 'visit_detail' table"
 fi
 # query to find max of id column after inserting rows for a table
 MAX_ID_QRY="bq query --quiet --nouse_legacy_sql --format=csv 'select max(id) from \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`' | awk '{if(NR>1)print}'"
@@ -42,7 +38,7 @@ VALUES
     ($MAX_ID + 11, 'STOP_REASON', 'c_occurrence.stop_reason', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
     ($MAX_ID + 12, 'VISIT_OCCURRENCE_ID', 'c_occurrence.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
     ($MAX_ID + 13, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON c_occurrence.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` visit ON v.visit_concept_id = visit.concept_id', 'Condition')"
-if [[ "$IS_OMOP_531" == 1 ]];
+if [[ "$TABLE_LIST" == *'visit_detail'*  ]];
 then
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
@@ -96,7 +92,7 @@ VALUES
     ($MAX_ID + 19, 'LOT_NUMBER', 'd_exposure.lot_number', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
     ($MAX_ID + 20, 'VISIT_OCCURRENCE_ID', 'd_exposure.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
     ($MAX_ID + 21, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'd_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON d_exposure.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_visit ON v.visit_concept_id = d_visit.concept_id', 'Drug')"
-if [[ "$IS_OMOP_531" == 1 ]];
+if [[ "$TABLE_LIST" == *'visit_detail'*  ]];
 then
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
@@ -147,7 +143,7 @@ VALUES
     ($MAX_ID + 18, 'RANGE_HIGH', 'measurement.range_high', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
     ($MAX_ID + 19, 'VISIT_OCCURRENCE_ID', 'measurement.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
     ($MAX_ID + 20, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'm_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIn \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON measurement.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_visit ON v.visit_concept_id = m_visit.concept_id', 'Measurement')"
-if [[ "$IS_OMOP_531" == 1 ]];
+if [[ "$TABLE_LIST" == *'visit_detail'*  ]];
 then
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
@@ -197,7 +193,7 @@ VALUES
     ($MAX_ID + 17, 'UNIT_CONCEPT_NAME', 'o_unit.concept_name as unit_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_unit ON observation.unit_concept_id = o_unit.concept_id', 'Observation'),
     ($MAX_ID + 18, 'VISIT_OCCURRENCE_ID', 'observation.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.observation\` observation', 'Observation'),
     ($MAX_ID + 19, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'o_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON observation.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_visit ON v.visit_concept_id = o_visit.concept_id', 'Observation')"
-if [[ "$IS_OMOP_531" == 1 ]];
+if [[ "$TABLE_LIST" == *'visit_detail'*  ]];
 then
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
