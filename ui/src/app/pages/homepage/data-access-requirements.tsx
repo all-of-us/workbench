@@ -1180,7 +1180,7 @@ const DuccCard = (props: {
     <FlexRow style={styles.card}>
       <FlexColumn>
         <div style={styles.cardStep}>Step {stepNumber}</div>
-        <div style={styles.cardHeader}>Sign The Code of Conduct</div>
+        <div style={styles.cardHeader}>Sign the Code of Conduct</div>
       </FlexColumn>
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
