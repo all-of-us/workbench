@@ -5,9 +5,9 @@ import {
   AccessModule,
   AccessModuleStatus,
   ErrorCode,
+  Profile,
   ProfileApi,
 } from 'generated/fetch';
-import { Profile } from 'generated/fetch';
 
 import {
   profileApi,
@@ -450,6 +450,7 @@ describe('hasExpired', () => {
 
 describe('isExpiringOrExpired', () => {
   const LOOKBACK_PERIOD = 99; // arbitrary for testing; actual prod value is 330
+  const TRAINING_LOOKBACK_PERIOD = 20; // arbitrary for testing; actual prod value is 30
   const EXPIRATION_DAYS = 123; // arbitrary for testing; actual prod value is 365
 
   beforeEach(() => {
@@ -457,6 +458,7 @@ describe('isExpiringOrExpired', () => {
       config: {
         ...defaultServerConfig,
         accessRenewalLookback: LOOKBACK_PERIOD,
+        complianceTrainingRenewalLookback: TRAINING_LOOKBACK_PERIOD,
       },
     });
   });
@@ -472,7 +474,9 @@ describe('isExpiringOrExpired', () => {
     // sanity-check: this test is checking an expiration in the past
     expect(expirationDate).toBeLessThan(Date.now());
 
-    expect(isExpiringOrExpired(expirationDate)).toEqual(true);
+    expect(
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+    ).toEqual(true);
   });
 
   it('should return isExpiringOrExpired=true if a module will expire in the future and within the lookback period', () => {
@@ -487,7 +491,9 @@ describe('isExpiringOrExpired', () => {
     const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
     expect(expirationDate).toBeLessThan(endOfLookback);
 
-    expect(isExpiringOrExpired(expirationDate)).toEqual(true);
+    expect(
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+    ).toEqual(true);
   });
 
   it('should return isExpiringOrExpired=false if a module will expire in the future beyond the lookback period', () => {
@@ -502,14 +508,52 @@ describe('isExpiringOrExpired', () => {
     const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
     expect(expirationDate).toBeGreaterThan(endOfLookback);
 
-    expect(isExpiringOrExpired(expirationDate)).toEqual(false);
+    expect(
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+    ).toEqual(false);
+  });
+
+  it('should return isExpiringOrExpired=true if a training module will expire in the future and within the lookback period', () => {
+    const completionDaysPast = 120; // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate =
+      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date within the lookback
+    const endOfLookback = nowPlusDays(TRAINING_LOOKBACK_PERIOD);
+    expect(expirationDate).toBeLessThan(endOfLookback);
+
+    expect(
+      isExpiringOrExpired(expirationDate, AccessModule.CTCOMPLIANCETRAINING)
+    ).toEqual(true);
+  });
+
+  it('should return isExpiringOrExpired=false if a training module will expire in the future beyond the lookback period', () => {
+    // Verifying that training modules are not considered to be expiring in the traditional lookback period.
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-LOOKBACK_PERIOD) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date beyond the lookback
+    const endOfLookback = nowPlusDays(TRAINING_LOOKBACK_PERIOD);
+    expect(expirationDate).toBeGreaterThan(endOfLookback);
+
+    expect(
+      isExpiringOrExpired(expirationDate, AccessModule.CTCOMPLIANCETRAINING)
+    ).toEqual(false);
   });
 
   it('should return isExpiringOrExpired=false if a module has a null expiration', () => {
-    expect(isExpiringOrExpired(null)).toEqual(false);
+    expect(
+      isExpiringOrExpired(null, AccessModule.PUBLICATIONCONFIRMATION)
+    ).toEqual(false);
   });
 
   it('should return isExpiringOrExpired=false if a module has an undefined expiration', () => {
-    expect(isExpiringOrExpired(undefined)).toEqual(false);
+    expect(
+      isExpiringOrExpired(undefined, AccessModule.PUBLICATIONCONFIRMATION)
+    ).toEqual(false);
   });
 });
