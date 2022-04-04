@@ -99,7 +99,7 @@ export default class UserProfileAdminPage extends BaseAdminPage {
 
   async getBypassSwitchCell(rowValue: string): Promise<Cell> {
     const accountAccessTable = this.getAccessStatusTable();
-    return await accountAccessTable.getCellByValue(rowValue, 'Bypass');
+    return await accountAccessTable.findCellByRowValue('Access module', rowValue, 'Bypass');
   }
 
   async getBypassSwitchForRow(rowValue: string): Promise<Switch> {

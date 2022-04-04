@@ -32,27 +32,56 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   }
 
   // Extraction spinner status.
-  async isInProgress(timeout?: number): Promise<boolean> {
-    const extractionStatusSpinner = '//*[@data-test-id="extraction-status-icon-container"]/*[@data-icon="sync-alt"]';
-    return exists(this.page, extractionStatusSpinner, { timeout });
+  async isInProgress(datasetName: string, timeout?: number): Promise<boolean> {
+    const statusSpinnerXpath = await this.getStatusSpinnerXpath(datasetName);
+    // Look for the spinner in the table. Return true when it's found. Otherwise return false.
+    return this.page
+      .waitForXPath(statusSpinnerXpath, {
+        timeout: timeout
+      })
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
    * Open sidebar, wait for finished status, close sidebar.
    */
-  async waitForCompletionAndClose(timeout?: number): Promise<boolean> {
+  async waitForJobDone(datasetName: string, timeout?: number): Promise<boolean> {
     await this.open();
-    const table = this.getHistoryTable();
-    await table.waitUntilVisible();
-    return Promise.all([
-      this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
+    const inProgress = await this.isInProgress(datasetName, timeout);
+    await this.close();
+    return !inProgress;
+  }
+
+  /**
+   * Look for job's success icon in Genomic Extraction History table in Extraction sidebar.
+   */
+  async isJobSuccess(datasetName: string): Promise<boolean> {
+    await this.open();
+    const statusSuccessXpath = await this.getStatusSuccessXpath(datasetName);
+    return await this.page
+      .waitForXPath(statusSuccessXpath, {
         visible: true,
-        timeout
-      }),
-      waitWhileLoading(this.page, { includeRuntimeSpinner: true, takeScreenshotOnFailure: false, timeout })
-    ])
+        timeout: 5000
+      })
       .then(() => true)
-      .catch(() => false)
-      .finally(() => this.close());
+      .catch(() => false);
+  }
+
+  private async getStatusSpinnerXpath(datasetName: string): Promise<string> {
+    const historyTable = this.getHistoryTable();
+    await historyTable.waitUntilVisible();
+    const statusCell = await historyTable.findCellByRowValue('DATASET NAME', datasetName, 'STATUS');
+    return (
+      statusCell.getXpath() +
+      '/*[.//*[@data-icon="sync-alt" and @role="img" and contains(@style,"animation-name: spin")]]'
+    );
+  }
+
+  private async getStatusSuccessXpath(datasetName: string): Promise<string> {
+    const historyTable = this.getHistoryTable();
+    await historyTable.waitUntilVisible();
+    const statusCell = await historyTable.findCellByRowValue('DATASET NAME', datasetName, 'STATUS');
+    return statusCell.getXpath() + '/*[.//*[@data-icon="check-circle" and @role="img"]]';
   }
 }

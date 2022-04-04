@@ -160,7 +160,11 @@ describe('User Profile Admin page', () => {
     // Verify Tier Badges displayed correctly
     // note: assumes ERA required for both tiers
     for (const accessModule of accessModules) {
-      const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.REQUIRED_FOR_TIER);
+      const cell = await accountAccessTable.findCellByRowValue(
+        TableColumns.ACCESS_MODULE,
+        accessModule,
+        TableColumns.REQUIRED_FOR_TIER
+      );
       expect(await hasTierBadge(cell, AccessTierDisplayNames.Controlled)).toBe(true);
       accessModule === AccessModules.CT_TRAINING
         ? expect(await hasTierBadge(cell, AccessTierDisplayNames.Registered)).toBe(false)
@@ -169,7 +173,11 @@ describe('User Profile Admin page', () => {
 
     // Verify Status displayed correctly
     for (const accessModule of accessModules) {
-      const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.STATUS);
+      const cell = await accountAccessTable.findCellByRowValue(
+        TableColumns.ACCESS_MODULE,
+        accessModule,
+        TableColumns.STATUS
+      );
       accessModule === AccessModules.UPDATE_PROFILE || accessModule === AccessModules.PUBLICATION
         ? expect(await cell.getText()).toBe('Current')
         : expect(await cell.getText()).toBe('Bypassed');
@@ -177,7 +185,11 @@ describe('User Profile Admin page', () => {
 
     // Verify values in "Expires on" column
     for (const accessModule of accessModules) {
-      const cell = await accountAccessTable.getCellByValue(accessModule, TableColumns.EXPIRES_ON);
+      const cell = await accountAccessTable.findCellByRowValue(
+        TableColumns.ACCESS_MODULE,
+        accessModule,
+        TableColumns.EXPIRES_ON
+      );
       switch (accessModule) {
         case AccessModules.GOOGLE_VERIFICATION:
         case AccessModules.ERA:
@@ -331,7 +343,8 @@ describe('User Profile Admin page', () => {
     const accessStatusTable = userProfileAdminPage.getAccessStatusTable();
 
     // Last completed on is a dash
-    const lastCompletedOnCell = await accessStatusTable.getCellByValue(
+    const lastCompletedOnCell = await accessStatusTable.findCellByRowValue(
+      TableColumns.ACCESS_MODULE,
       AccessModules.GOOGLE_VERIFICATION,
       TableColumns.LAST_COMPLETED_ON
     );
@@ -339,7 +352,11 @@ describe('User Profile Admin page', () => {
     expect(completedOn).toEqual('-');
 
     // Change Bypass for Google 2-step verification module
-    const statusCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, TableColumns.STATUS);
+    const statusCell = await accessStatusTable.findCellByRowValue(
+      TableColumns.ACCESS_MODULE,
+      AccessModules.GOOGLE_VERIFICATION,
+      TableColumns.STATUS
+    );
     const oldStatus = await statusCell.getText();
 
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.GOOGLE_VERIFICATION);
@@ -354,7 +371,11 @@ describe('User Profile Admin page', () => {
       await bypassSwitch.toggleOn();
     }
 
-    const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.GOOGLE_VERIFICATION, 'Bypass');
+    const bypassSwitchCell = await accessStatusTable.findCellByRowValue(
+      TableColumns.ACCESS_MODULE,
+      AccessModules.GOOGLE_VERIFICATION,
+      'Bypass'
+    );
     await verifyToggleSwitchNewBackgroundColor(adminTab, bypassSwitchCell);
 
     const saveButton = userProfileAdminPage.getSaveButton();
@@ -385,12 +406,20 @@ describe('User Profile Admin page', () => {
     await userProfileAdminPage.waitForLoad();
 
     const accessStatusTable = userProfileAdminPage.getAccessStatusTable();
-    const expiresOnCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.EXPIRES_ON);
+    const expiresOnCell = await accessStatusTable.findCellByRowValue(
+      TableColumns.ACCESS_MODULE,
+      AccessModules.CT_TRAINING,
+      TableColumns.EXPIRES_ON
+    );
     const expiresOn = await expiresOnCell.getText();
     expect(expiresOn).toEqual('-');
 
     // Change Bypass for Controlled Tier training module
-    const statusCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, TableColumns.STATUS);
+    const statusCell = await accessStatusTable.findCellByRowValue(
+      TableColumns.ACCESS_MODULE,
+      AccessModules.CT_TRAINING,
+      TableColumns.STATUS
+    );
     const oldStatus = await statusCell.getText();
 
     const bypassSwitch = await userProfileAdminPage.getBypassSwitchForRow(AccessModules.CT_TRAINING);
@@ -402,7 +431,11 @@ describe('User Profile Admin page', () => {
       await bypassSwitch.toggleOn();
     }
 
-    const bypassSwitchCell = await accessStatusTable.getCellByValue(AccessModules.CT_TRAINING, 'Bypass');
+    const bypassSwitchCell = await accessStatusTable.findCellByRowValue(
+      TableColumns.ACCESS_MODULE,
+      AccessModules.CT_TRAINING,
+      'Bypass'
+    );
     await verifyToggleSwitchNewBackgroundColor(adminTab, bypassSwitchCell);
 
     const saveButton = userProfileAdminPage.getSaveButton();
