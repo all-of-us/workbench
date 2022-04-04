@@ -465,11 +465,11 @@ export const isExpiringOrExpired = (
   expiration: number,
   module: AccessModule
 ): boolean => {
-  const moodleModules = [
+  const trainingModules = [
     AccessModule.COMPLIANCETRAINING,
     AccessModule.CTCOMPLIANCETRAINING,
   ];
-  const lookback = moodleModules.includes(module)
+  const lookback = trainingModules.includes(module)
     ? serverConfigStore.get().config.complianceTrainingRenewalLookback
     : serverConfigStore.get().config.accessRenewalLookback;
   return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
