@@ -15,7 +15,7 @@ then
   echo "Dataset is OMOP 5.3.1, dataset contains 'visit_detail' table"
 fi
 # query to find max of id column after inserting rows for a table
-MAX_ID_QRY="bq query --quiet --nouse_legacy_sql --format=csv 'select max(id) from \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`' | awk '{if(NR>1)print}'"
+MAX_ID_QRY="bq query --quiet --nouse_legacy_sql --format=csv 'select coalesce(max(id),0) from \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`' | awk '{if(NR>1)print}'"
 ################################################
 # INSERT DATA
 ################################################
