@@ -48,6 +48,10 @@
     "type": "STRING"
   },
   {
+    "name": "VISIT_DETAIL_ID",
+    "type": "INTEGER"
+  },
+  {
     "name": "CONDITION_SOURCE_VALUE",
     "type": "STRING"
   },

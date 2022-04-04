@@ -52,6 +52,10 @@
     "type": "STRING"
   },
   {
+    "name": "VISIT_DETAIL_ID",
+    "type": "INTEGER"
+  },
+  {
     "name": "PROCEDURE_SOURCE_VALUE",
     "type": "STRING"
   },
@@ -72,7 +76,7 @@
     "type": "STRING"
   },
   {
-    "name": "QUALIFIER_SOURCE_VALUE",
+    "name": "MODIFIER_SOURCE_VALUE",
     "type": "STRING"
   }
 ]

@@ -32,6 +32,10 @@
     "type": "STRING"
   },
   {
+    "name": "VISIT_DETAIL_ID",
+    "type": "INTEGER"
+  },
+  {
     "name": "OPERATOR_CONCEPT_ID",
     "type": "INTEGER"
   },
