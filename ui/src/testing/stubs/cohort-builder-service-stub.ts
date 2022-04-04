@@ -457,8 +457,6 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   findEhrDomainCounts(): Promise<CardCountResponse> {
-    return new Promise<CardCountResponse>((resolve) =>
-      resolve({ items: [] })
-    );
+    return new Promise<CardCountResponse>((resolve) => resolve({ items: [] }));
   }
 }

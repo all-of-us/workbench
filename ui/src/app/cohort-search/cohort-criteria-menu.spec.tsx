@@ -1,7 +1,10 @@
 import * as React from 'react';
 import { mount } from 'enzyme';
 
-import { cohortBuilderApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import {
+  cohortBuilderApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { CohortBuilderApi } from 'generated/fetch';
 
@@ -13,7 +16,9 @@ import { CohortCriteriaMenu } from './cohort-criteria-menu';
 
 describe('CohortCriteriaMenu', () => {
   const component = () => {
-    return mount(<CohortCriteriaMenu launchSearch={() => {}} menuOptions={[]} />);
+    return mount(
+      <CohortCriteriaMenu launchSearch={() => {}} menuOptions={[]} />
+    );
   };
 
   beforeEach(() => {
@@ -51,7 +56,10 @@ describe('CohortCriteriaMenu', () => {
       .find('[data-test-id="criteria-menu-button"]')
       .first()
       .simulate('click');
-    const domainCountsSpy = jest.spyOn(cohortBuilderApi(), 'findEhrDomainCounts');
+    const domainCountsSpy = jest.spyOn(
+      cohortBuilderApi(),
+      'findEhrDomainCounts'
+    );
     expect(domainCountsSpy).toHaveBeenCalledTimes(0);
 
     // Show the alert message when only a single char is entered
@@ -63,7 +71,7 @@ describe('CohortCriteriaMenu', () => {
     wrapper
       .find('[data-test-id="criteria-menu-input"]')
       .first()
-      .simulate('keydown', {key: 'Enter'});
+      .simulate('keydown', { key: 'Enter' });
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="criteria-menu-input"]').exists()
@@ -81,7 +89,7 @@ describe('CohortCriteriaMenu', () => {
     wrapper
       .find('[data-test-id="criteria-menu-input"]')
       .first()
-      .simulate('keydown', {key: 'Enter'});
+      .simulate('keydown', { key: 'Enter' });
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="criteria-menu-input-alert"]').exists()
