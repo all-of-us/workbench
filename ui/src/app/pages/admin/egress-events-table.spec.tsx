@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
+import { ReactWrapper } from 'enzyme';
 
 import { EgressEventsAdminApi, EgressEventStatus } from 'generated/fetch';
 
@@ -27,6 +28,19 @@ describe('EgressEventsTable', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
+
+  const editRowToFalsePositive = async (
+    wrapper: ReactWrapper,
+    rowIndex: number
+  ) => {
+    wrapper.find('.p-row-editor-init').at(rowIndex).simulate('click');
+    wrapper
+      .find('.p-dropdown-item')
+      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
+      .simulate('click');
+    wrapper.find('.p-row-editor-save-icon').simulate('click');
+    await waitForFakeTimersAndUpdate(wrapper);
+  };
 
   it('should render basic', async () => {
     const wrapper = mountWithRouter(<EgressEventsTable />);
@@ -77,14 +91,7 @@ describe('EgressEventsTable', () => {
     const wrapper = mountWithRouter(<EgressEventsTable />);
     await waitForFakeTimersAndUpdate(wrapper);
 
-    wrapper.find('.p-row-editor-init').at(2).simulate('click');
-    wrapper
-      .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
-      .simulate('click');
-    wrapper.find('.p-row-editor-save-icon').simulate('click');
-
-    await waitForFakeTimersAndUpdate(wrapper);
+    await editRowToFalsePositive(wrapper, 2);
     expect(eventsStub.events[2].status).toBe(
       EgressEventStatus.VERIFIEDFALSEPOSITIVE
     );
@@ -96,21 +103,8 @@ describe('EgressEventsTable', () => {
     const wrapper = mountWithRouter(<EgressEventsTable />);
     await waitForFakeTimersAndUpdate(wrapper);
 
-    wrapper.find('.p-row-editor-init').at(2).simulate('click');
-    wrapper
-      .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
-      .simulate('click');
-    wrapper.find('.p-row-editor-save-icon').simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    wrapper.find('.p-row-editor-init').at(3).simulate('click');
-    wrapper
-      .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
-      .simulate('click');
-    wrapper.find('.p-row-editor-save-icon').simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
+    await editRowToFalsePositive(wrapper, 2);
+    await editRowToFalsePositive(wrapper, 3);
 
     expect(eventsStub.events[2].status).toBe(
       EgressEventStatus.VERIFIEDFALSEPOSITIVE
