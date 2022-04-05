@@ -40,46 +40,6 @@ do
     then
       echo "Creating $table_name"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_condition_occurrence' && "$TABLE_LIST" == *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_condition_occurrence_52' && "$TABLE_LIST" =~ *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_drug_exposure' && "$TABLE_LIST" == *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_drug_exposure_52' && "$TABLE_LIST" =~ *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_measurement' && "$TABLE_LIST" == *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_measurement_52' && "$TABLE_LIST" =~ *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_observation' && "$TABLE_LIST" == *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_observation_52' && "$TABLE_LIST" =~ *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_procedure_occurrence' && "$TABLE_LIST" == *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_procedure_occurrence_52' && "$TABLE_LIST" =~ *'visit_detail'* ]]
-    then
-      echo "Creating $table_name"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
     elif [[ "$table_name" == 'ds_zip_code_socioeconomic' ]]
     then
       if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]
