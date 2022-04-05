@@ -8,10 +8,47 @@ export BQ_DATASET=$2        # dataset
 ###############################################
 # FULL_TEXT and SYNONYMS
 ###############################################
+echo "FULL_TEXT and SYNONYMS - adding full_text for Blood Pressure"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = 'Blood Pressure|', display_synonyms = 'Blood Pressure|'
+WHERE subtype = 'BP'
+AND parent_id != 0"
+
+echo "FULL_TEXT and SYNONYMS - adding full_text for Heart Rhythm Status"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = 'No irregularity detected|', display_synonyms = 'No irregularity detected|'
+WHERE subtype = 'HR-NOIRR'"
+
+echo "FULL_TEXT and SYNONYMS - adding full_text for Heart Rhythm Status"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = 'Irregularity detected|', display_synonyms = 'Irregularity detected|'
+WHERE subtype = 'HR-IRR'"
+
+echo "FULL_TEXT and SYNONYMS - adding full_text for BMI"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = 'BMI|', display_synonyms = 'BMI|'
+WHERE subtype = 'BMI'"
+
+echo "FULL_TEXT and SYNONYMS - adding pregnant"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = 'Pregnant at enrollment|', display_synonyms = 'Pregnant at enrollment|'
+WHERE subtype = 'PREG'"
+
+echo "FULL_TEXT and SYNONYMS - adding wheelchair"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET full_text = 'Wheelchair user at enrollment|', display_synonyms = 'Wheelchair user at enrollment|'
+WHERE subtype = 'WHEEL'"
+
 echo "FULL_TEXT and SYNONYMS - adding data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET   x.full_text = y.full_text
+SET   x.full_text = CONCAT(x.full_text, y.full_text)
 FROM
     (
         SELECT
@@ -38,7 +75,7 @@ WHERE x.id = y.id"
 echo "DISPLAY_SYNONYMS - adding data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET   x.display_synonyms = y.display_synonyms
+SET   x.display_synonyms = CONCAT(x.display_synonyms, y.display_synonyms)
 FROM
     (
         SELECT
@@ -65,7 +102,7 @@ WHERE x.id = y.id"
 echo "FULL_TEXT and SYNONYMS - adding update for survey answers"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET   x.full_text = y.full_text
+SET   x.full_text = CONCAT(x.full_text, y.full_text)
 FROM
     (
         SELECT
