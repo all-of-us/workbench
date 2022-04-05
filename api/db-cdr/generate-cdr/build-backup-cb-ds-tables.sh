@@ -54,8 +54,13 @@ ds_zip_code_socioeconomic
 
 for t in "${backup_tables[@]}"
 do
+    t_schema=$t".json"
+    if [[ ! "$TABLE_LIST" == *"visit_detail"* &&  "ds_condition_occurrence|ds_drug_exposure|ds_measurement|ds_observation|ds_procedure_occurrence" =~ $t ]]
+    then
+      t_schema=$t"_52.json"
+    fi
     bq --project_id="$OUTPUT_PROJECT" rm -f "$BACKUP_DATASET.$t"
-    bq --quiet --project_id="$OUTPUT_PROJECT" mk --schema="$schema_path/$t.json" "$BACKUP_DATASET.$t"
+    bq --quiet --project_id="$OUTPUT_PROJECT" mk --schema="$schema_path/$t_schema" "$BACKUP_DATASET.$t"
 done
 
 ###############
