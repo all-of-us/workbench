@@ -123,15 +123,21 @@ export default class NotebookPage extends NotebookFrame {
     return newPage;
   }
 
-  async downloadFileSameDirectory(treePage: Page, filename: string): Promise<Page> {
+  async downloadFileFromTree(treePage: Page, filename: string): Promise<Page> {
     // Check the box for the given filename and download.
-    await treePage.waitForXPath(
-      `//*[@id="notebook_list"]//a[@class="item_link"][span[text()="${filename}"]]/preceding-sibling::input`, {visible: true}).then(e => e.click());
+    const findAndClickCheckbox = () => treePage.waitForXPath(
+      `//*[@id="notebook_list"]//a[@class="item_link"][span[text()="${filename}"]]/preceding-sibling::input`,
+      {visible: true}
+    ).then(e => e.click());
+    await findAndClickCheckbox();
 
     const handleDialog = (d) => this.acceptDataUseDownloadDialog(treePage, d);
     treePage.on('dialog', handleDialog);
     await treePage.waitForXPath('//button[@aria-label="Download selected"]', {visible: true}).then(e => e.click());
     treePage.off('dialog', handleDialog);
+
+    // Uncheck afterwards, to restore the original state of the page.
+    await findAndClickCheckbox();
 
     return treePage;
   }

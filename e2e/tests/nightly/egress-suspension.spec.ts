@@ -32,7 +32,7 @@ describe('egress suspension', () => {
     for (let i = 0; i < 6; i++) {
       const f = `data${i}.txt`;
       console.log(`Downloading ${f} to generate egress`);
-      await notebookPage.downloadFileSameDirectory(treePage, f);
+      await notebookPage.downloadFileFromTree(treePage, f);
     }
 
     console.log('Awaiting security suspension in a new page');
