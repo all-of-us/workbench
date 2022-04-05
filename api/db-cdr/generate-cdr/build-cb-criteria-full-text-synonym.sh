@@ -48,7 +48,7 @@ WHERE subtype = 'WHEEL'"
 echo "FULL_TEXT and SYNONYMS - adding data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET   x.full_text = CONCAT(x.full_text, y.full_text)
+SET   x.full_text = ARRAY_TO_STRING([x.full_text, y.full_text], '')
 FROM
     (
         SELECT
@@ -75,7 +75,7 @@ WHERE x.id = y.id"
 echo "DISPLAY_SYNONYMS - adding data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET   x.display_synonyms = CONCAT(x.display_synonyms, y.display_synonyms)
+SET   x.display_synonyms = ARRAY_TO_STRING([x.display_synonyms, y.display_synonyms], '')
 FROM
     (
         SELECT
@@ -102,7 +102,7 @@ WHERE x.id = y.id"
 echo "FULL_TEXT and SYNONYMS - adding update for survey answers"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET   x.full_text = CONCAT(x.full_text, y.full_text)
+SET   x.full_text = ARRAY_TO_STRING([x.full_text, y.full_text], '')
 FROM
     (
         SELECT
