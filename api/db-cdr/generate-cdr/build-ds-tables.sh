@@ -28,7 +28,7 @@ then
   select a.PERSON_ID, CONDITION_CONCEPT_ID, c1.concept_name as STANDARD_CONCEPT_NAME, c1.concept_code as STANDARD_CONCEPT_CODE,
       c1.vocabulary_id as STANDARD_VOCABULARY, CONDITION_START_DATETIME, CONDITION_END_DATETIME, CONDITION_TYPE_CONCEPT_ID,
       c2.concept_name as CONDITION_TYPE_CONCEPT_NAME, STOP_REASON, a.VISIT_OCCURRENCE_ID, c3.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME,
-      vd.VISIT_DETAIL_ID, CONDITION_SOURCE_VALUE, CONDITION_SOURCE_CONCEPT_ID, c4.concept_name as SOURCE_CONCEPT_NAME, c4.concept_code as SOURCE_CONCEPT_CODE,
+      a.VISIT_DETAIL_ID, CONDITION_SOURCE_VALUE, CONDITION_SOURCE_CONCEPT_ID, c4.concept_name as SOURCE_CONCEPT_NAME, c4.concept_code as SOURCE_CONCEPT_CODE,
       c4.vocabulary_id as SOURCE_VOCABULARY, CONDITION_STATUS_SOURCE_VALUE, CONDITION_STATUS_CONCEPT_ID,
       c5.concept_name as CONDITION_STATUS_CONCEPT_NAME
   from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
@@ -37,8 +37,7 @@ then
   left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
   left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
   left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.CONDITION_SOURCE_CONCEPT_ID = c4.CONCEPT_ID
-  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.CONDITION_STATUS_CONCEPT_ID = c5.CONCEPT_ID
-  left join \`$BQ_PROJECT.$BQ_DATASET.visit_detail\` vd on a.VISIT_OCCURRENCE_ID = vd.VISIT_OCCURRENCE_ID"
+  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.CONDITION_STATUS_CONCEPT_ID = c5.CONCEPT_ID"
 else
   echo "ds_condition_occurrence - inserting data"
   bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -77,7 +76,7 @@ then
       c1.vocabulary_id as STANDARD_VOCABULARY, DRUG_EXPOSURE_START_DATETIME, DRUG_EXPOSURE_END_DATETIME, VERBATIM_END_DATE,
       DRUG_TYPE_CONCEPT_ID, c2.concept_name as DRUG_TYPE_CONCEPT_NAME, STOP_REASON, REFILLS, QUANTITY, DAYS_SUPPLY, SIG,
       ROUTE_CONCEPT_ID, c3.concept_name as ROUTE_CONCEPT_NAME, LOT_NUMBER, a.VISIT_OCCURRENCE_ID,
-      c4.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME, vd.VISIT_DETAIL_ID, DRUG_SOURCE_VALUE, DRUG_SOURCE_CONCEPT_ID,
+      c4.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME, a.VISIT_DETAIL_ID, DRUG_SOURCE_VALUE, DRUG_SOURCE_CONCEPT_ID,
       c5.concept_name as SOURCE_CONCEPT_NAME, c5.concept_code as SOURCE_CONCEPT_CODE, c5.vocabulary_id as SOURCE_VOCABULARY,
       ROUTE_SOURCE_VALUE, DOSE_UNIT_SOURCE_VALUE
   FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
@@ -86,8 +85,7 @@ then
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.ROUTE_CONCEPT_ID = c3.CONCEPT_ID
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.VISIT_CONCEPT_ID = c4.CONCEPT_ID
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DRUG_SOURCE_CONCEPT_ID = c5.CONCEPT_ID
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_detail\` vd on a.VISIT_OCCURRENCE_ID = vd.VISIT_OCCURRENCE_ID"
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DRUG_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 else
   echo "ds_drug_exposure - inserting data"
   bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -130,7 +128,7 @@ then
       c2.concept_name as MEASUREMENT_TYPE_CONCEPT_NAME, OPERATOR_CONCEPT_ID, c3.concept_name as OPERATOR_CONCEPT_NAME,
       VALUE_AS_NUMBER, VALUE_AS_CONCEPT_ID, c4.concept_name as VALUE_AS_CONCEPT_NAME, UNIT_CONCEPT_ID,
       c5.concept_name as UNIT_CONCEPT_NAME, RANGE_LOW, RANGE_HIGH, a.VISIT_OCCURRENCE_ID,
-      c6.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME, vd.VISIT_DETAIL_ID, MEASUREMENT_SOURCE_VALUE, MEASUREMENT_SOURCE_CONCEPT_ID,
+      c6.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME, a.VISIT_DETAIL_ID, MEASUREMENT_SOURCE_VALUE, MEASUREMENT_SOURCE_CONCEPT_ID,
       c7.concept_name as SOURCE_CONCEPT_NAME, c7.concept_code as SOURCE_CONCEPT_CODE, c7.vocabulary_id as SOURCE_VOCABULARY,
       UNIT_SOURCE_VALUE, VALUE_SOURCE_VALUE
   from \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
@@ -141,8 +139,7 @@ then
   left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.unit_concept_id = c5.concept_id
   left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.visit_occurrence_id = v.visit_occurrence_id
   left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c6 on v.visit_concept_id = c6.concept_id
-  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.measurement_source_concept_id = c7.concept_id
-  left join \`$BQ_PROJECT.$BQ_DATASET.visit_detail\` vd on a.VISIT_OCCURRENCE_ID = vd.VISIT_OCCURRENCE_ID"
+  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.measurement_source_concept_id = c7.concept_id"
 else
   echo "ds_measurement - inserting data"
   bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -190,7 +187,7 @@ then
       c2.concept_name as OBSERVATION_TYPE_CONCEPT_NAME, VALUE_AS_NUMBER, VALUE_AS_STRING, VALUE_AS_CONCEPT_ID,
       c3.concept_name as VALUE_AS_CONCEPT_NAME, QUALIFIER_CONCEPT_ID, c4.concept_name as QUALIFIER_CONCEPT_NAME,
       UNIT_CONCEPT_ID, c5.concept_name as UNIT_CONCEPT_NAME, a.VISIT_OCCURRENCE_ID, c6.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME,
-      vd.VISIT_DETAIL_ID, OBSERVATION_SOURCE_VALUE, OBSERVATION_SOURCE_CONCEPT_ID, c7.concept_name as SOURCE_CONCEPT_NAME,
+      a.VISIT_DETAIL_ID, OBSERVATION_SOURCE_VALUE, OBSERVATION_SOURCE_CONCEPT_ID, c7.concept_name as SOURCE_CONCEPT_NAME,
       c7.concept_code as SOURCE_CONCEPT_CODE, c7.vocabulary_id as SOURCE_VOCABULARY, UNIT_SOURCE_VALUE,
       QUALIFIER_SOURCE_VALUE, value_source_concept_id, value_source_value, questionnaire_response_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
@@ -201,8 +198,7 @@ then
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.unit_concept_id = c5.CONCEPT_ID
   left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
   left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c6 on v.visit_concept_id = c6.concept_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.OBSERVATION_SOURCE_CONCEPT_ID = c7.CONCEPT_ID
-  left join \`$BQ_PROJECT.$BQ_DATASET.visit_detail\` vd on a.VISIT_OCCURRENCE_ID = vd.VISIT_OCCURRENCE_ID"
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.OBSERVATION_SOURCE_CONCEPT_ID = c7.CONCEPT_ID"
 else
   echo "ds_observation - inserting data"
   bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -259,7 +255,7 @@ then
       a.PERSON_ID, PROCEDURE_CONCEPT_ID, c1.concept_name as STANDARD_CONCEPT_NAME, c1.concept_code as STANDARD_CONCEPT_CODE,
       c1.vocabulary_id as STANDARD_VOCABULARY, PROCEDURE_DATETIME, PROCEDURE_TYPE_CONCEPT_ID,
       c2.concept_name as PROCEDURE_TYPE_CONCEPT_NAME, MODIFIER_CONCEPT_ID, c3.concept_name as MODIFIER_CONCEPT_NAME,
-      QUANTITY, a.VISIT_OCCURRENCE_ID, c4.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME, vd.VISIT_DETAIL_ID, PROCEDURE_SOURCE_VALUE,
+      QUANTITY, a.VISIT_OCCURRENCE_ID, c4.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME, a.VISIT_DETAIL_ID, PROCEDURE_SOURCE_VALUE,
       PROCEDURE_SOURCE_CONCEPT_ID, c5.concept_name as SOURCE_CONCEPT_NAME, c5.concept_code as SOURCE_CONCEPT_CODE,
       c5.vocabulary_id as SOURCE_VOCABULARY, MODIFIER_SOURCE_VALUE
   from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
@@ -268,8 +264,7 @@ then
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.MODIFIER_CONCEPT_ID = c3.CONCEPT_ID
   left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
   left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.concept_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_ID = c5.CONCEPT_ID
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_detail\` vd on a.VISIT_OCCURRENCE_ID = vd.VISIT_OCCURRENCE_ID"
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 else
   echo "ds_procedure_occurrence - inserting data"
   bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
