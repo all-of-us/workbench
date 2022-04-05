@@ -71,14 +71,26 @@ def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
   # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
   common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_fq_dataset}}
-  common.run_inline %W{./copy-bq-dataset.sh
+  ingest_args = %W{./copy-bq-dataset.sh
       #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
       #{table_match_filter} #{table_skip_filter}}
+  ingest_dry_stdout = common.capture_stdout(ingest_args + %W{--dry-run}, err = nil)
+  common.run_inline ingest_args
 
   common.run_inline %W{bq mk -f --dataset #{dest_fq_dataset}}
-  common.run_inline %W{./copy-bq-dataset.sh
+  publish_args = %W{./copy-bq-dataset.sh
       #{ingest_fq_dataset} #{dest_fq_dataset} #{tier.fetch(:ingest_cdr_project)}
       #{table_match_filter} #{table_skip_filter}}
+  publish_dry_stdout = common.capture_stdout(publish_args + %W{--dry-run}, err = nil)
+
+  unless ingest_dry_stdout.lines.length == publish_dry_stdout.lines.length
+    raise RuntimeError.new(
+            "mismatched line count between ingest and publish:\n" +
+            "ingest:\n#{ingest_dry_stdout}\n" +
+            "publish:\n#{publish_dry_stdout}")
+  end
+
+  common.run_inline publish_args
 
   # Delete the intermediate dataset.
   common.run_inline %W{bq rm -r -f --dataset #{ingest_fq_dataset}}
