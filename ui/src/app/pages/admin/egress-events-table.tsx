@@ -84,6 +84,7 @@ export const EgressEventsTable = ({
     const updatedEvents = events.slice();
     updatedEvents.splice(i, 1, updatedEvent);
     setEvents(updatedEvents);
+    setPendingUpdateEvent(null);
     setLoading(false);
   }, [events, pendingUpdateEvent]);
 
