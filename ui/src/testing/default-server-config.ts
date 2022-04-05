@@ -81,6 +81,7 @@ const defaultServerConfig: ConfigResponse = {
   enableGpu: true,
   enablePersistentDisk: true,
   accessRenewalLookback: 330,
+  complianceTrainingRenewalLookback: 30,
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
   accessTiersVisibleToUsers: [

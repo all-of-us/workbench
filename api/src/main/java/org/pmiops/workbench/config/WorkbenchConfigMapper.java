@@ -53,6 +53,9 @@ public interface WorkbenchConfigMapper {
       source = "config.billing.defaultFreeCreditsDollarLimit")
   @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
   @Mapping(target = "complianceTrainingHost", source = "config.moodle.host")
+  @Mapping(
+      target = "complianceTrainingRenewalLookback",
+      source = "config.access.renewal.trainingLookbackPeriod")
   @Mapping(target = "enableEraCommons", source = "config.access.enableEraCommons")
   @Mapping(target = "unsafeAllowSelfBypass", source = "config.access.unsafeAllowSelfBypass")
   @Mapping(

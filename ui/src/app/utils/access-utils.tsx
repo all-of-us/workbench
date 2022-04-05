@@ -467,10 +467,19 @@ const withInvalidDateHandling = (date) => {
 export const hasExpired = (expiration: number): boolean =>
   !!expiration && getWholeDaysFromNow(expiration) < 0;
 
-export const isExpiringOrExpired = (expiration: number): boolean =>
-  !!expiration &&
-  getWholeDaysFromNow(expiration) <=
-    serverConfigStore.get().config.accessRenewalLookback;
+export const isExpiringOrExpired = (
+  expiration: number,
+  module: AccessModule
+): boolean => {
+  const trainingModules = [
+    AccessModule.COMPLIANCETRAINING,
+    AccessModule.CTCOMPLIANCETRAINING,
+  ];
+  const lookback = trainingModules.includes(module)
+    ? serverConfigStore.get().config.complianceTrainingRenewalLookback
+    : serverConfigStore.get().config.accessRenewalLookback;
+  return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
+};
 
 interface RenewalDisplayDates {
   lastConfirmedDate: string;
@@ -480,8 +489,12 @@ interface RenewalDisplayDates {
 export const computeRenewalDisplayDates = (
   status: AccessModuleStatus
 ): RenewalDisplayDates => {
-  const { completionEpochMillis, expirationEpochMillis, bypassEpochMillis } =
-    status || {};
+  const {
+    completionEpochMillis,
+    expirationEpochMillis,
+    bypassEpochMillis,
+    moduleName,
+  } = status || {};
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
   const userExpiredModule = !!expirationEpochMillis;
@@ -532,7 +545,7 @@ export const computeRenewalDisplayDates = (
       }),
     ],
     [
-      isExpiringOrExpired(expirationEpochMillis),
+      isExpiringOrExpired(expirationEpochMillis, moduleName),
       () => ({
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,

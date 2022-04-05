@@ -235,6 +235,9 @@ public class WorkbenchConfig {
       public Long expiryDays;
       // Lookback period - the point when we give users the option to update their compliance items
       public Long lookbackPeriod;
+      // Training lookback period - the point when we give users the option to take training for
+      // their compliance items
+      public Long trainingLookbackPeriod;
       // Thresholds for sending warning emails based on approaching module expiration, in days
       public List<Long> expiryDaysWarningThresholds;
     }
