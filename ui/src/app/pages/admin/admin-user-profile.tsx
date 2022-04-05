@@ -282,6 +282,7 @@ const EditableFields = ({
         <FlexRow>
           <FlexSpacer />
           <InstitutionalRoleOtherTextInput
+            containerStyle={{ marginRight: '1.1rem' }}
             affiliation={updatedProfile.verifiedInstitutionalAffiliation}
             previousOtherText={
               oldProfile.verifiedInstitutionalAffiliation
