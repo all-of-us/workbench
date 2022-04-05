@@ -1,0 +1,114 @@
+[
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "OBSERVATION_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "STANDARD_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "STANDARD_CONCEPT_CODE",
+    "type": "STRING"
+  },
+  {
+    "name": "STANDARD_VOCABULARY",
+    "type": "STRING"
+  },
+  {
+    "name": "OBSERVATION_DATETIME",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "OBSERVATION_TYPE_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "OBSERVATION_TYPE_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "VALUE_AS_NUMBER",
+    "type": "FLOAT"
+  },
+  {
+    "name": "VALUE_AS_STRING",
+    "type": "STRING"
+  },
+  {
+    "name": "VALUE_AS_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "VALUE_AS_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "QUALIFIER_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "QUALIFIER_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "UNIT_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "UNIT_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "VISIT_OCCURRENCE_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "VISIT_OCCURRENCE_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "OBSERVATION_SOURCE_VALUE",
+    "type": "STRING"
+  },
+  {
+    "name": "OBSERVATION_SOURCE_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SOURCE_CONCEPT_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "SOURCE_CONCEPT_CODE",
+    "type": "STRING"
+  },
+  {
+    "name": "SOURCE_VOCABULARY",
+    "type": "STRING"
+  },
+  {
+    "name": "UNIT_SOURCE_VALUE",
+    "type": "STRING"
+  },
+  {
+    "name": "QUALIFIER_SOURCE_VALUE",
+    "type": "STRING"
+  },
+  {
+    "name": "value_source_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "value_source_value",
+    "type": "STRING"
+  },
+  {
+    "name": "questionnaire_response_id",
+    "type": "INTEGER"
+  }
+]
