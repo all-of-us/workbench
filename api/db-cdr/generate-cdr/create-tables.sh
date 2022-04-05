@@ -8,15 +8,6 @@ export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
-if [[ "$TABLE_LIST" == *'visit_detail'* ]];
-  then
-    echo "Dataset is OMOP 5.3.1"
-    IS_OMOP_531=1
-  else
-    echo "Dataset is 5.2"
-    IS_OMOP_531=0
-  end
-fi
 
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4" "R2020Q4R3")
 
