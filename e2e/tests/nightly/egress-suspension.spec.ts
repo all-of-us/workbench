@@ -14,7 +14,7 @@ describe('egress suspension', () => {
   });
 
   const notebookName = makeRandomName('egress-notebook');
-  const egressFilename = 'generate-egress.py';
+  const egressFilename = 'create-data-files.py';
   const egressFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${egressFilename}`);
 
   test("VM egress suspends user's compute", async () => {
@@ -25,11 +25,15 @@ describe('egress suspension', () => {
 
     await notebookPage.uploadFile(egressFilename, egressFilePath);
 
-    // Start the egress notebook and let it run in a tab. It may not complete
-    // since our user may have their compute disabled while this is still
-    // running. Intentionally do not wait for completion or check output.
-    console.log('Generating egress via notebook');
-    await notebookPage.startCodeFile(1, egressFilename, 5 * 60 * 1000);
+    console.log('Generating a large file for download');
+    await notebookPage.runCodeFile(1, egressFilename, 60 * 1000);
+
+    const treePage = await notebookPage.selectFileOpenMenu();
+    for (let i = 0; i < 6; i++) {
+      const f = `data${i}.txt`;
+      console.log(`Downloading ${f} to generate egress`);
+      await notebookPage.downloadFileSameDirectory(treePage, f);
+    }
 
     console.log('Awaiting security suspension in a new page');
     const newPage = await browser.newPage();
