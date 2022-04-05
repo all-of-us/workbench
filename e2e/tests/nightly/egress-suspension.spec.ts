@@ -14,8 +14,8 @@ describe('egress suspension', () => {
   });
 
   const notebookName = makeRandomName('egress-notebook');
-  const egressFilename = 'create-data-files.py';
-  const egressFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${egressFilename}`);
+  const dataGenFilename = 'create-data-files.py';
+  const dataGenFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${dataGenFilename}`);
 
   test("VM egress suspends user's compute", async () => {
     await findOrCreateWorkspace(page);
@@ -23,11 +23,13 @@ describe('egress suspension', () => {
     const dataPage = new WorkspaceDataPage(page);
     const notebookPage = await dataPage.createNotebook(notebookName);
 
-    await notebookPage.uploadFile(egressFilename, egressFilePath);
+    await notebookPage.uploadFile(dataGenFilename, dataGenFilePath);
 
-    console.log('Generating a large file for download');
-    await notebookPage.runCodeFile(1, egressFilename, 60 * 1000);
+    // Generates 6 files currently. A single large file may time out.
+    console.log('Generating 30MB files for download');
+    await notebookPage.runCodeFile(1, dataGenFilename, 60 * 1000);
 
+    // Download these 30MB files one-by-one from the file tree, generating ~180MB egress.
     const treePage = await notebookPage.selectFileOpenMenu();
     for (let i = 0; i < 6; i++) {
       const f = `data${i}.txt`;
