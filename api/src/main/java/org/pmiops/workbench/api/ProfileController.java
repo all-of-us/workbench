@@ -313,8 +313,6 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      // If CT Is enabled on the environment, send the new welcome emails else send the existing
-      // welcome email
       if (workbenchConfigProvider
           .get()
           .access

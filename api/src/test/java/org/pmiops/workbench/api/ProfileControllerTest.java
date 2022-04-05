@@ -1010,9 +1010,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void sendUserInstructions_none() throws MessagingException {
+    config.access.tiersVisibleToUsers =
+        Arrays.asList(
+            AccessTierService.REGISTERED_TIER_SHORT_NAME,
+            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
-    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
     verifyNoMoreInteractions(mockMailService);

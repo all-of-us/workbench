@@ -144,12 +144,14 @@ public class MailServiceImplTest {
   }
 
   @Test
-  public void testSendWelcomeEmail_invalidEmail_RTAndCt() throws MessagingException {
-    assertThrows(
-        ServerErrorException.class,
-        () ->
-            mailService.sendWelcomeEmail(
-                "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
+  public void testSendWelcomeEmail_invalidEmail_RtAndCt() throws MessagingException {
+    ServerErrorException exception =
+        assertThrows(
+            ServerErrorException.class,
+            () ->
+                mailService.sendWelcomeEmail(
+                    "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
+    assertThat(exception.getMessage()).isEqualTo("Email: Nota valid email is invalid.");
   }
 
   @Test
