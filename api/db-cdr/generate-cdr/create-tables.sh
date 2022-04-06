@@ -16,7 +16,7 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   echo "Can't run CDR build indices against $BQ_DATASET!"
   exit 1
 fi
-
+done_ds_proc_occur=0
 schema_path=generate-cdr/bq-schemas
 for filename in generate-cdr/bq-schemas/*.json;
 do
@@ -51,15 +51,18 @@ do
         echo "Creating $table_name"
         bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
       fi
-    elif [[ "$table_name" == 'ds_procedure_occurrence' && "$TABLE_LIST" == *'visit_detail'* ]]
-       then
-         echo "Creating $table_name"
-         bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
-    elif [[ "$table_name" == 'ds_procedure_occurrence_52' && ! "$TABLE_LIST" == *'visit_detail'* ]]
-       then
-         echo "Creating ds_procedure_occurrence"
-         bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.ds_procedure_occurrence"
-    else
+    elif [[ "$TABLE_LIST" == *'visit_detail'* && "$table_name" == 'ds_procedure_occurrence' && "$done_ds_proc_occur" == 0 ]]
+    then
+      echo "Creating $table_name (OMOP v5.3.1)"
+      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
+      done_ds_proc_occur=1
+    elif [[ "$TABLE_LIST" != *'visit_detail'* && "$table_name" == 'ds_procedure_occurrence_52' && "$done_ds_proc_occur" == 0 ]]
+    then
+      echo "Creating ds_procedure_occurrence (OMOP v5.2) schema:$json_name -> table: ds_procedure_occurrence"
+      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.ds_procedure_occurrence"
+      done_ds_proc_occur=1
+   elif [[ ! $table_name =~ ds_procedure_occurrence|ds_procedure_occurrence_52 ]]
+    then
       echo "Creating $table_name"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
     fi
