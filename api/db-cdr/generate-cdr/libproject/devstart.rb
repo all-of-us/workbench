@@ -74,14 +74,14 @@ def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset
   ingest_args = %W{./copy-bq-dataset.sh
       #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
       #{table_match_filter} #{table_skip_filter}}
-  ingest_dry_stdout = common.capture_stdout(ingest_args + %W{--dry-run}, err = nil)
+  ingest_dry_stdout = common.capture_stdout(ingest_args + %W{--dry-run}, nil)
   common.run_inline ingest_args
 
   common.run_inline %W{bq mk -f --dataset #{dest_fq_dataset}}
   publish_args = %W{./copy-bq-dataset.sh
       #{ingest_fq_dataset} #{dest_fq_dataset} #{tier.fetch(:ingest_cdr_project)}
       #{table_match_filter} #{table_skip_filter}}
-  publish_dry_stdout = common.capture_stdout(publish_args + %W{--dry-run}, err = nil)
+  publish_dry_stdout = common.capture_stdout(publish_args + %W{--dry-run}, nil)
 
   unless ingest_dry_stdout.lines.length == publish_dry_stdout.lines.length
     raise RuntimeError.new(
