@@ -55,7 +55,7 @@ ds_zip_code_socioeconomic
 for t in "${backup_tables[@]}"
 do
     t_schema=$t".json"
-    if [[ ! "$TABLE_LIST" == *"visit_detail"* &&  "ds_procedure_occurrence" =~ $t ]]
+    if [[ ! "$TABLE_LIST" == *"visit_detail"* && "ds_procedure_occurrence" =~ $t ]]
     then
       t_schema=$t"_52.json"
     fi
