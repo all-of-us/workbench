@@ -364,7 +364,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CardCount> findEhrDomainCounts(String term) {
+  public List<CardCount> findUniversalDomainCounts(String term) {
     List<CardCount> cardCounts =
         findDomainCounts(
             term,
