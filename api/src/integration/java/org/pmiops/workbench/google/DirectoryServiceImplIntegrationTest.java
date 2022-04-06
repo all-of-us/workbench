@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth8.assertThat;
 
 import java.time.Clock;
 import java.util.Map;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore("RW-7743")
+  @Disabled("RW-7743")
   public void testCreateAndDeleteTestUser() {
     String userPrefix = String.format("integration.test.%d", Clock.systemUTC().millis());
     String username = userPrefix + "@" + config.googleDirectoryService.gSuiteDomain;
