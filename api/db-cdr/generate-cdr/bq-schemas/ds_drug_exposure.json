@@ -80,10 +80,6 @@
     "type": "STRING"
   },
   {
-    "name": "VISIT_DETAIL_ID",
-    "type": "INTEGER"
-  },
-  {
     "name": "DRUG_SOURCE_VALUE",
     "type": "STRING"
   },
