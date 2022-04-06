@@ -726,8 +726,8 @@
     "DOMAIN": "Procedure"
   },
   {
-    "DENORMALIZED_NAME": "QUALIFIER_SOURCE_VALUE",
-    "OMOP_SQL": "procedure.QUALIFIER_SOURCE_VALUE",
+    "DENORMALIZED_NAME": "MODIFIER_SOURCE_VALUE",
+    "OMOP_SQL": "procedure.MODIFIER_SOURCE_VALUE",
     "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
     "DOMAIN": "Procedure"
   },

@@ -12,6 +12,6 @@
     "visit_occurrence_id": 1,
     "procedure_source_value": "1",
     "procedure_source_concept_id": 1,
-    "qualifier_source_value": "s"
+    "modifier_source_value": "s"
   }
 ]
