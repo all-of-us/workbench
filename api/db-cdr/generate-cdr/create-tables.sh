@@ -23,7 +23,11 @@ do
     json_name=${filename##*/}
     table_name=${json_name%.json}
     echo "Deleting $table_name"
-    bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
+    if [[ "$table_name" != 'ds_procedure_occurrence_52' ]]
+    then
+      bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
+    fi
+
     if [[ "$table_name" == 'cb_person' ]]
     then
       echo "Skipping cb_person"
