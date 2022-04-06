@@ -53,8 +53,8 @@ do
          bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
     elif [[ "$table_name" == 'ds_procedure_occurrence_52' && ! "$TABLE_LIST" == *'visit_detail'* ]]
        then
-         echo "Creating $table_name"
-         bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
+         echo "Creating ds_procedure_occurrence"
+         bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.ds_procedure_occurrence"
     else
       echo "Creating $table_name"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
