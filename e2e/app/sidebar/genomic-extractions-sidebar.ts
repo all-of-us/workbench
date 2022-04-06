@@ -37,6 +37,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
     // Look for the spinner in the table. Return true when it's found. Otherwise return false.
     return this.page
       .waitForXPath(statusSpinnerXpath, {
+        visible: true,
         timeout: timeout
       })
       .then(() => true)
@@ -44,22 +45,11 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   }
 
   /**
-   * Open sidebar, wait for finished status, close sidebar.
-   */
-  async waitForJobDone(datasetName: string, timeout?: number): Promise<boolean> {
-    await this.open();
-    const inProgress = await this.isInProgress(datasetName, timeout);
-    await this.close();
-    return !inProgress;
-  }
-
-  /**
    * Look for job's success icon in Genomic Extraction History table in Extraction sidebar.
    */
   async isJobSuccess(datasetName: string): Promise<boolean> {
-    await this.open();
     const statusSuccessXpath = await this.getStatusSuccessXpath(datasetName);
-    return await this.page
+    return this.page
       .waitForXPath(statusSuccessXpath, {
         visible: true,
         timeout: 5000

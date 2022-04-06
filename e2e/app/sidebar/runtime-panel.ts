@@ -368,21 +368,23 @@ export default class RuntimePanel extends BaseSidebar {
   }
 
   /**
-   * Open Runtime sidebar, check status for running.
+   * Open Runtime sidebar, wait for running or error status.
    */
-  async waitForRunningAndClose(timeout?: number): Promise<boolean> {
-    const runtimeSidebar = new RuntimePanel(this.page);
-    await runtimeSidebar.open();
-    return runtimeSidebar
-      .waitForStartStopIconState(StartStopIconState.Running, timeout)
+  async waitForRunning(timeout?: number): Promise<boolean> {
+    return Promise.race([
+      this.waitForStartStopIconState(StartStopIconState.Running, timeout),
+      this.waitForStartStopIconState(StartStopIconState.Error, timeout)
+    ])
       .then(() => true)
-      .catch(() => false)
-      .finally(() => runtimeSidebar.close());
+      .catch(() => false);
   }
 
   async isRunning(): Promise<boolean> {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
-    return exists(this.page, xpath);
+    return this.page
+      .waitForXPath(xpath, { visible: true, timeout: 1000 })
+      .then(() => true)
+      .catch(() => false);
   }
 
   async isStopped(): Promise<boolean> {
