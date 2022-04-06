@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { Dialog, ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForFn, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/sidebar/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
@@ -134,14 +134,20 @@ export default class NotebookPage extends NotebookFrame {
         .then((e) => e.click());
     await findAndClickCheckbox();
 
-    const handleDialog = (d) => this.acceptDataUseDownloadDialog(treePage, d);
-    treePage.on('dialog', handleDialog);
+    let sawDialog = false;
+    treePage.once('dialog', async (d: Dialog) => {
+      await this.acceptDataUseDownloadDialog(treePage, d);
+      sawDialog = true;
+    });
     await treePage.waitForXPath('//button[@aria-label="Download selected"]', { visible: true }).then((e) => e.click());
-    treePage.off('dialog', handleDialog);
 
     // Uncheck afterwards, to restore the original state of the page.
+    await treePage.waitForTimeout(500);
     await findAndClickCheckbox();
+    await treePage.waitForTimeout(500);
 
+    // Fail if file download proceeded without a dialog prompt.
+    expect(await waitForFn(() => sawDialog)).toBeTruthy();
     return treePage;
   }
 
@@ -155,7 +161,6 @@ export default class NotebookPage extends NotebookFrame {
 
     // The modal requires you enter "affirm" to continue.
     await dialog.accept('affirm');
-    await page.waitForTimeout(500);
   }
 
   async acceptDataUseUploadDialog(page: Page, dialog: Dialog): Promise<void> {
@@ -166,7 +171,6 @@ export default class NotebookPage extends NotebookFrame {
     // If this is not the Data Use Policy dialog, error is thrown.
     expect(modalMessage).toContain(expectedMessage);
     await dialog.accept();
-    await page.waitForTimeout(500);
     logger.info('Accept "Data Use Policy" upload dialog');
   }
 
@@ -515,11 +519,17 @@ export default class NotebookPage extends NotebookFrame {
     // Select File menu => Open to open Upload tab.
     const newPage = await this.openUploadFilePage();
 
+    // Wait 5 seconds to allow extensions to load.
+    // TODO(RW-8114): Try waitForNetworkIdle here instead.
+    await newPage.waitForTimeout(5000);
+
     // Upload button that triggers file selection dialog.
-    const handleDialog = (d) => this.acceptDataUseUploadDialog(newPage, d);
-    newPage.on('dialog', handleDialog);
+    let sawDialog = false;
+    newPage.once('dialog', async (d: Dialog) => {
+      await this.acceptDataUseUploadDialog(newPage, d);
+      sawDialog = true;
+    });
     await this.chooseFile(newPage, filePath);
-    newPage.off('dialog', handleDialog);
 
     // Upload button that uploads the file is visible.
     const fileUploadButtonSelector =
@@ -552,6 +562,9 @@ export default class NotebookPage extends NotebookFrame {
 
     // In case page has to be checked after finish.
     await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
+
+    // Fail if upload proceeded without a dialog prompt.
+    expect(await waitForFn(() => sawDialog)).toBeTruthy();
 
     await newPage.close();
     await this.page.bringToFront();

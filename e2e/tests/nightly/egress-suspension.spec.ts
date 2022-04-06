@@ -29,8 +29,11 @@ describe('egress suspension', () => {
     console.log('Generating 30MB files for download');
     await notebookPage.runCodeFile(1, dataGenFilename, 60 * 1000);
 
-    // Download these 30MB files one-by-one from the file tree, generating ~180MB egress.
+    // Download these 30MB files one-by-one from the file tree, generating ~180MB egress
     const treePage = await notebookPage.selectFileOpenMenu();
+    // Allow some time for Jupyter extensions to load. Without this, download modal may fail to show.
+    // TODO(RW-8114): Try waitForNetworkIdle here instead.
+    await treePage.waitForTimeout(5000);
     for (let i = 0; i < 6; i++) {
       const f = `data${i}.txt`;
       console.log(`Downloading ${f} to generate egress`);
