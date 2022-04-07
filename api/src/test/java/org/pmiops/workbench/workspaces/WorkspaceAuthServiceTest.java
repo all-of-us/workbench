@@ -4,38 +4,51 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@SpringJUnitConfig
+@DataJpaTest
 public class WorkspaceAuthServiceTest {
+
+  @Autowired private AccessTierDao accessTierDao;
 
   @Autowired private WorkspaceAuthService workspaceAuthService;
 
+  @MockBean private AccessTierService mockAccessTierService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
 
   @TestConfiguration
-  @Import(WorkspaceAuthService.class)
-  @MockBean(AccessTierService.class)
+  @Import({FakeClockConfiguration.class, WorkspaceAuthService.class})
   static class Configuration {}
 
   @Test
@@ -132,13 +145,34 @@ public class WorkspaceAuthServiceTest {
         () -> workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required));
   }
 
-  private void stubDaoGetRequired(String namespace, String fcName, BillingStatus billingStatus) {
+  // TODO make this test do something
+
+  @Test
+  public void test_updateWorkspaceAcls() {
+    final String namespace = "wsns";
+    final String fcName = "firecloudname";
+
+    final Map<String, WorkspaceAccessLevel> acl1 = ImmutableMap.of();
+    final Map<String, FirecloudWorkspaceAccessEntry> acl2 = ImmutableMap.of();
+    List<FirecloudWorkspaceACLUpdate> acl3 = ImmutableList.of();
+
+    stubRegisteredTier();
+    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
+    stubFcGetAcl(namespace, fcName, acl2);
+    stubUpdateAcl(namespace, fcName, acl3);
+
+    workspaceAuthService.updateWorkspaceAcls(workspace, acl1);
+  }
+
+  private DbWorkspace stubDaoGetRequired(
+      String namespace, String fcName, BillingStatus billingStatus) {
     final DbWorkspace toReturn =
         new DbWorkspace()
             .setWorkspaceNamespace(namespace)
             .setFirecloudName(fcName)
             .setBillingStatus(billingStatus);
     when(mockWorkspaceDao.getRequired(namespace, fcName)).thenReturn(toReturn);
+    return toReturn;
   }
 
   private void stubFcGetWorkspace(String namespace, String fcName, String accessLevel) {
@@ -147,5 +181,24 @@ public class WorkspaceAuthServiceTest {
             .workspace(new FirecloudWorkspaceDetails().namespace(namespace).name(fcName))
             .accessLevel(accessLevel);
     when(mockFireCloudService.getWorkspace(namespace, fcName)).thenReturn(toReturn);
+  }
+
+  private void stubFcGetAcl(
+      String namespace, String fcName, Map<String, FirecloudWorkspaceAccessEntry> acl) {
+    final FirecloudWorkspaceACL toReturn = new FirecloudWorkspaceACL().acl(acl);
+    when(mockFireCloudService.getWorkspaceAclAsService(namespace, fcName)).thenReturn(toReturn);
+  }
+
+  private void stubRegisteredTier() {
+    when(mockAccessTierService.getRegisteredTierOrThrow())
+        .thenReturn(TestMockFactory.createRegisteredTierForTests(accessTierDao));
+  }
+
+  private void stubUpdateAcl(
+      String namespace, String fcName, List<FirecloudWorkspaceACLUpdate> aclUpdates) {
+    final FirecloudWorkspaceACLUpdateResponseList toReturn =
+        new FirecloudWorkspaceACLUpdateResponseList();
+    when(mockFireCloudService.updateWorkspaceACL(namespace, fcName, aclUpdates))
+        .thenReturn(toReturn);
   }
 }
