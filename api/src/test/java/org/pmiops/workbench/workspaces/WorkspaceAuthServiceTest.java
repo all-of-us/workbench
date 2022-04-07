@@ -13,6 +13,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -85,6 +86,50 @@ public class WorkspaceAuthServiceTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> workspaceAuthService.getWorkspaceAccessLevel(namespace, fcName));
+  }
+
+  private static Stream<Arguments> enforcedAccessLevels_valid() {
+    return Stream.of(
+        Arguments.of("OWNER", WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.OWNER),
+        Arguments.of("OWNER", WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.READER),
+        Arguments.of("WRITER", WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.READER),
+        Arguments.of("READER", WorkspaceAccessLevel.READER, WorkspaceAccessLevel.READER),
+        Arguments.of("PROJECT_OWNER", WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER));
+  }
+
+  private static Stream<Arguments> enforcedAccessLevels_invalid() {
+    return Stream.of(
+        Arguments.of("WRITER", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
+        Arguments.of("READER", WorkspaceAccessLevel.WRITER, ForbiddenException.class),
+        Arguments.of("NO ACCESS", WorkspaceAccessLevel.READER, ForbiddenException.class),
+        Arguments.of("NO ACCESS", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
+        Arguments.of("invalid status", WorkspaceAccessLevel.READER, ServerErrorException.class));
+  }
+
+  @ParameterizedTest(name = "enforceWorkspaceAccessLevel({0} user access, {2} required)")
+  @MethodSource("enforcedAccessLevels_valid")
+  public void test_enforceWorkspaceAccessLevel_valid(
+      String accessLevel, WorkspaceAccessLevel expected, WorkspaceAccessLevel required) {
+    final String namespace = "wsns";
+    final String fcName = "firecloudname";
+    stubFcGetWorkspace(namespace, fcName, accessLevel);
+    assertThat(workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required))
+        .isEqualTo(expected);
+  }
+
+  @ParameterizedTest(
+      name = "enforceWorkspaceAccessLevel({0} user access, {1} required, expected exception {2})")
+  @MethodSource("enforcedAccessLevels_invalid")
+  public void test_enforceWorkspaceAccessLevel_invalid(
+      String accessLevel,
+      WorkspaceAccessLevel required,
+      Class<? extends Throwable> expectedException) {
+    final String namespace = "wsns";
+    final String fcName = "firecloudname";
+    stubFcGetWorkspace(namespace, fcName, accessLevel);
+    assertThrows(
+        expectedException,
+        () -> workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required));
   }
 
   private void stubDaoGetRequired(String namespace, String fcName, BillingStatus billingStatus) {
