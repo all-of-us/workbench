@@ -39,6 +39,17 @@ public abstract class RetryHandler<E extends Exception> {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public final <T> T runAndLogOnError(RetryCallback<T, E> retryCallback, String errorLog) {
+    try {
+      return retryTemplate.execute(retryCallback);
+    } catch (RetryException retryException) {
+      throw new ServerErrorException(retryException.getCause());
+    } catch (Exception exception) {
+      throw convertException((E) exception);
+    }
+  }
+
   public final <T> T runAndThrowChecked(RetryCallback<T, E> retryCallback) throws E {
     return retryTemplate.execute(retryCallback);
   }

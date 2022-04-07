@@ -90,6 +90,12 @@ parameters:
     type: string
     description: The Workspace ID (a.k.a. the workspace's Firecloud name)
     required: true
+  appType:
+    in: path
+    name: appType
+    type: string
+    description: The app type to crate
+    required: true
   cohortId:
     in: path
     name: cohortId
@@ -789,6 +795,21 @@ paths:
           description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/apps/{workspaceNamespace}/{appType}":
+    post:
+      summary: Create a workspace app.
+      operationId: createApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/appType"
+      responses:
+        200:
+          description: App was created successfully
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+
   "/v1/runtimes/{workspaceNamespace}/localize":
     post:
       summary: Localize files to the user's runtime.
