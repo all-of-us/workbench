@@ -68,10 +68,14 @@ export async function matchText(page: Page, cssSelector: string, subString: stri
   return found;
 }
 
-export async function exists(page: Page, xpath: string, opt: { timeout?: number } = {}): Promise<boolean> {
-  const { timeout = 1000 } = opt;
+export async function exists(
+  page: Page,
+  xpath: string,
+  opt: { visible?: boolean; timeout?: number } = {}
+): Promise<boolean> {
+  const { visible = true, timeout = 1000 } = opt;
   return page
-    .waitForXPath(xpath, { visible: true, timeout })
+    .waitForXPath(xpath, { visible, timeout })
     .then(() => true)
     .catch(() => false);
 }

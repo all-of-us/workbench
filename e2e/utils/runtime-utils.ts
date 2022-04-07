@@ -20,8 +20,7 @@ export async function initializeRuntimeIfModalPresented(page: Page): Promise<voi
 }
 
 async function isSecuritySuspended(page: Page): Promise<boolean> {
-  const xpath = '//*[@data-test-id="security-suspended-msg"]';
-  return exists(page, xpath);
+  return exists(page, '//*[@data-test-id="security-suspended-msg"]');
 }
 
 export async function waitForSecuritySuspendedStatus(
