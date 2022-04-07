@@ -12,7 +12,6 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 
@@ -45,11 +44,6 @@ public interface WorkspaceAdminService {
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 
   void setAdminUnlockedState(String workspaceNamespace);
-
-  List<Workspace> getWorkspacesForReview();
-
-  void setResearchPurposeApproved(
-      String workspaceNamespace, String firecloudName, boolean approved);
 
   DbWorkspace setPublished(String workspaceNamespace, String firecloudName, boolean publish);
 }

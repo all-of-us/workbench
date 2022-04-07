@@ -61,7 +61,7 @@
   },
   {
     "type": "string",
-    "name": "qualifier_source_value",
+    "name": "modifier_source_value",
     "mode": "nullable"
   }
 ]

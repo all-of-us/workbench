@@ -133,6 +133,7 @@ interface AccessModuleUIConfig extends AccessModuleConfig {
   adminPageTitle: string;
   externalSyncAction?: Function;
   refreshAction?: Function;
+  renewalTimeEstimate?: number;
 }
 
 // This needs to be a function, because we want it to evaluate at call time,
@@ -234,6 +235,7 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
+        renewalTimeEstimate: 60,
       }),
     ],
 
@@ -252,6 +254,7 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
+        renewalTimeEstimate: 60,
       }),
     ],
 
@@ -263,6 +266,7 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
+        renewalTimeEstimate: 5,
       }),
     ],
 
@@ -273,6 +277,7 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
+        renewalTimeEstimate: 5,
       }),
     ],
 
@@ -284,6 +289,7 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
+        renewalTimeEstimate: 5,
       }),
     ]
   );

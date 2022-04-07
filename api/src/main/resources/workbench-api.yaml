@@ -1214,41 +1214,6 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
-
-  "/v1/admin/workspaces/review":
-    get:
-      tags:
-      - workspaceAdmin
-      description: 'Returns workspaces that need research purpose review. Requires
-        REVIEW_RESEARCH_PURPOSE authority.'
-      operationId: getWorkspacesForReview
-      responses:
-        200:
-          description: A list of workspaces
-          schema:
-            "$ref": "#/definitions/WorkspaceListResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    post:
-      tags:
-      - workspaceAdmin
-      consumes:
-      - application/json
-      description: Sets a research purpose review result.
-      operationId: reviewWorkspace
-      parameters:
-      - in: body
-        name: review
-        description: result of the research purpose review
-        schema:
-          "$ref": "#/definitions/ResearchPurposeReviewRequest"
-      responses:
-        200:
-          description: success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/audit":
     get:
       tags:
@@ -1772,6 +1737,19 @@ paths:
       responses:
         204:
           description: Runtimes were checked and handled successfully.
+  "/v1/cron/checkPersistentDisks":
+    get:
+      security: []
+      tags:
+      - offlineRuntime
+      - cron
+      description: 'Endpoint meant to be called offline to check for old / detached persistent disks.
+        Notifies workspace owners at configurable intervals about old disks. Only executable via App Engine cronjob.
+        Note: rerunning this out of band may result in the sending of duplicate emails.'
+      operationId: checkPersistentDisks
+      responses:
+        204:
+          description: Disks were checked and handled successfully.
   "/v1/cron/bulkAuditProjectAccess":
     get:
       security: []
@@ -3537,36 +3515,6 @@ paths:
           description: information on the domains
           schema:
             "$ref": "#/definitions/DomainCardResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaincard/{domain}/{standard}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-        - cohortBuilder
-      description: 'Returns a count of term matches per domain per standard flag'
-      operationId: findDomainCountByStandardSource
-      parameters:
-        - in: path
-          name: domain
-          type: string
-          required: true
-          description: the specific type of domain
-        - in: path
-          name: standard
-          type: boolean
-          required: true
-          description: is domain standard or Source
-        - in: query
-          name: term
-          type: string
-          required: true
-          description: the term to search for
-      responses:
-        200:
-          description: A count of matching concepts in this domain
-          schema:
-            "$ref": "#/definitions/DomainCount"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3582,31 +3530,6 @@ paths:
           description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule/{name}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-      - cohortBuilder
-      description: 'Returns a count of term matches per survey name'
-      operationId: findSurveyCount
-      parameters:
-      - in: path
-        name: name
-        type: string
-        required: true
-        description: the name of the survey
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
-      responses:
-        200:
-          description: A count of matching concepts per survey
-          schema:
-            "$ref": "#/definitions/SurveyCount"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/ehrDomainCounts":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4450,6 +4373,9 @@ definitions:
       complianceTrainingHost:
         type: string
         description: The hostname for constructing the compliance training URL.
+      complianceTrainingRenewalLookback:
+        type: number
+        description: the point when we give users the option to update their compliance items.
       enableEraCommons:
         type: boolean
         default: false
@@ -4618,8 +4544,6 @@ definitions:
     x-aou-note: |
       Authorities are a tool used to add discrete permissions to users. We currently
       define the following authorities:
-        * REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
-          the user has requested review to approve or reject.
         * DEVELOPER: Grants access to some internal-only
           administrative endpoints, including group management and runtime
           management. Intended to be granted for devops needs, e.g. for oncall.
@@ -4631,6 +4555,10 @@ definitions:
         * INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
         * RESEARCHER_DATA_VIEW: Allows a user to view admin-only data (or aggregations of data)
             for users, workspaces, and similar user-created content.
+
+      The following authorities are deprecated and should no longer be used:
+        * REVIEW_RESEARCH_PURPOSE
+
       Note on enum names: Swagger trims any common prefix from enum values' corresponding
       Java fields by default; this has no side-effect currently as there is
       no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
@@ -7518,36 +7446,6 @@ definitions:
         type: string
       languageConceptId:
         description: language concept id
-        type: integer
-        format: int64
-  DomainCount:
-    type: object
-    required:
-    - domain
-    - name
-    - conceptCount
-    properties:
-      domain:
-        description: the domain ID
-        "$ref": "#/definitions/Domain"
-      name:
-        description: display name of the domain
-        type: string
-      conceptCount:
-        description: number of concepts matching the search query in this domain
-        type: integer
-        format: int64
-  SurveyCount:
-    type: object
-    required:
-    - name
-    - conceptCount
-    properties:
-      name:
-        description: display name of the survey
-        type: string
-      conceptCount:
-        description: number of concepts matching the search query in this survey
         type: integer
         format: int64
   CreateReviewRequest:

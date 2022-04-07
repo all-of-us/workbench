@@ -71,6 +71,22 @@ it('should call onComplete when next button is pressed', async () => {
   expect(onCompleteSpy).toHaveBeenCalled();
 });
 
+it('should disable next button when next button is pressed', async () => {
+  const wrapper = mount(<AccountCreationTos {...props} />);
+
+  wrapper.setState({ hasReadEntireTos: true });
+  getPrivacyCheckbox(wrapper).simulate('change', { target: { checked: true } });
+  getTosCheckbox(wrapper).simulate('change', { target: { checked: true } });
+
+  // Next Button should be Enabled after checking Privacy and TOS checkbox
+  expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();
+
+  getNextButton(wrapper).simulate('click');
+
+  // After clicking Next, the button should be disabled
+  expect(getNextButton(wrapper).prop('disabled')).toBeTruthy();
+});
+
 it('should enable NEXT button and checkboxes should be selected if page is re-visited after Institution Page', async () => {
   props.afterPrev = true;
   const wrapper = mount(<AccountCreationTos {...props} />);

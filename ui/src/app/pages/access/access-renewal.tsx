@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
@@ -8,6 +9,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   Arrow,
+  Clock,
   ClrIcon,
   ExclamationTriangle,
   withCircleBackground,
@@ -22,7 +24,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { styles } from 'app/pages/profile/profile-styles';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
-import { cond, useId, withStyle } from 'app/utils';
+import { cond, switchCase, useId } from 'app/utils';
 import {
   accessRenewalModules,
   computeRenewalDisplayDates,
@@ -38,6 +40,9 @@ import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 const { useState, useEffect } = React;
 
+const REDCAP_PUBLICATIONS_SURVEY =
+  'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N';
+
 const renewalStyle = {
   h1: {
     fontSize: '0.83rem',
@@ -51,6 +56,13 @@ const renewalStyle = {
   h3: {
     fontSize: '0.675rem',
     fontWeight: 600,
+  },
+  dates: {
+    color: colors.primary,
+    margin: '0.5rem 0',
+    display: 'grid',
+    columnGap: '1rem',
+    gridTemplateColumns: 'auto 1fr',
   },
   completedButton: {
     height: '1.6rem',
@@ -219,44 +231,251 @@ const BackArrow = withCircleBackground(() => (
   <Arrow style={{ height: 21, width: 18 }} />
 ));
 
+export const RenewalCardBody = (props: {
+  moduleStatus: AccessModuleStatus;
+  setLoading: (boolean) => void;
+  hide?: boolean;
+  textStyle?: CSSProperties;
+  showTimeEstimate?: boolean;
+}) => {
+  const {
+    moduleStatus,
+    setLoading,
+    hide,
+    textStyle,
+    showTimeEstimate = false,
+  } = props;
+
+  const [, navigateByUrl] = useNavigation();
+  const noReportId = useId();
+  const reportId = useId();
+  const [publications, setPublications] = useState<boolean>(null);
+  const [trainingRefreshButtonDisabled, setTrainingRefreshButtonDisabled] =
+    useState(true);
+
+  const { AARTitleComponent, renewalTimeEstimate } = getAccessModuleConfig(
+    moduleStatus.moduleName
+  );
+  const { lastConfirmedDate, nextReviewDate } =
+    computeRenewalDisplayDates(moduleStatus);
+  const TimeEstimate = () =>
+    showTimeEstimate ? (
+      <div>
+        <span style={{ padding: 10 }}>
+          <Clock style={{ color: colors.disabled }} />
+        </span>
+        {renewalTimeEstimate} min
+      </div>
+    ) : null;
+
+  const Dates = () => (
+    <div style={{ ...renewalStyle.dates, ...textStyle }}>
+      <div>Last Updated On:</div>
+      <div>Next Review:</div>
+      <div>{lastConfirmedDate}</div>
+      <div>{nextReviewDate}</div>
+    </div>
+  );
+
+  const module = switchCase(
+    moduleStatus.moduleName,
+    [
+      AccessModule.PROFILECONFIRMATION,
+      () => (
+        <React.Fragment>
+          <Dates />
+          <div style={{ marginBottom: '0.5rem', ...textStyle }}>
+            Please update your profile information if any of it has changed
+            recently.
+          </div>
+          <div style={textStyle}>
+            Note that you are obliged by the Terms of Use of the Workbench to
+            keep your profile information up-to-date at all times.
+          </div>
+          <TimeEstimate />
+          <ActionButton
+            actionButtonText='Review'
+            completedButtonText='Confirmed'
+            moduleStatus={moduleStatus}
+            onClick={() =>
+              navigateByUrl('profile', { queryParams: { renewal: 1 } })
+            }
+          />
+        </React.Fragment>
+      ),
+    ],
+    [
+      AccessModule.PUBLICATIONCONFIRMATION,
+      () => {
+        const buttonsStyle = {
+          ...renewalStyle.publicationConfirmation,
+          ...textStyle,
+          color: isRenewalCompleteForModule(moduleStatus)
+            ? colors.disabled
+            : colors.primary,
+        };
+        return (
+          <React.Fragment>
+            <Dates />
+            <div style={textStyle}>
+              The <AoU /> Publication and Presentation Policy requires that you
+              report any upcoming publication or presentation resulting from the
+              use of <AoU /> Research Program Data at least two weeks before the
+              date of publication. If you are lead on or part of a publication
+              or presentation that hasn’t been reported to the program,{' '}
+              <a
+                target='_blank'
+                style={{ textDecoration: 'underline' }}
+                href={REDCAP_PUBLICATIONS_SURVEY}
+              >
+                please report it now.
+              </a>{' '}
+              For any questions, please contact <SupportMailto />
+            </div>
+            <TimeEstimate />
+            <div style={buttonsStyle}>
+              <ActionButton
+                actionButtonText='Confirm'
+                completedButtonText='Confirmed'
+                moduleStatus={moduleStatus}
+                onClick={async () => {
+                  setLoading(true);
+                  await confirmPublications();
+                  setLoading(false);
+                }}
+                disabled={publications === null}
+                style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
+              />
+              <RadioButton
+                data-test-id='nothing-to-report'
+                id={noReportId}
+                disabled={isRenewalCompleteForModule(moduleStatus)}
+                style={{ justifySelf: 'end' }}
+                checked={publications === true}
+                onChange={() => setPublications(true)}
+              />
+              <label htmlFor={noReportId}>
+                At this time, I have nothing to report
+              </label>
+              <RadioButton
+                data-test-id='report-submitted'
+                id={reportId}
+                disabled={isRenewalCompleteForModule(moduleStatus)}
+                style={{ justifySelf: 'end' }}
+                checked={publications === false}
+                onChange={() => setPublications(false)}
+              />
+              <label htmlFor={reportId}>Report submitted</label>
+            </div>
+          </React.Fragment>
+        );
+      },
+    ],
+    [
+      AccessModule.COMPLIANCETRAINING,
+      () => (
+        <React.Fragment>
+          <Dates />
+          <div style={textStyle}>
+            You are required to complete the refreshed ethics training courses
+            to understand the privacy safeguards and the compliance requirements
+            for using the <AoU /> Dataset.
+          </div>
+          {!isRenewalCompleteForModule(moduleStatus) && (
+            <div
+              style={{
+                ...renewalStyle.complianceTrainingExpiring,
+                ...textStyle,
+              }}
+            >
+              When you have completed the training click the refresh button or
+              reload the page.
+            </div>
+          )}
+          <TimeEstimate />
+          <FlexRow style={{ marginTop: 'auto' }}>
+            <ActionButton
+              actionButtonText='Complete Training'
+              completedButtonText='Completed'
+              moduleStatus={moduleStatus}
+              onClick={() => {
+                setTrainingRefreshButtonDisabled(false);
+                redirectToRegisteredTraining();
+              }}
+            />
+            {!isRenewalCompleteForModule(moduleStatus) && (
+              <Button
+                disabled={trainingRefreshButtonDisabled}
+                onClick={async () => {
+                  setLoading(true);
+                  await syncAndReloadTraining();
+                  setLoading(false);
+                }}
+                style={{
+                  height: '1.6rem',
+                  marginLeft: '0.75rem',
+                  width: 'max-content',
+                }}
+              >
+                Refresh
+              </Button>
+            )}
+          </FlexRow>
+        </React.Fragment>
+      ),
+    ],
+    [
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      () => (
+        <React.Fragment>
+          <Dates />
+          <div style={textStyle}>
+            Please review and sign the data user code of conduct consenting to
+            the <AoU /> data use policy.
+          </div>
+          <TimeEstimate />
+          <ActionButton
+            actionButtonText='View & Sign'
+            completedButtonText='Completed'
+            moduleStatus={moduleStatus}
+            onClick={() =>
+              navigateByUrl('data-code-of-conduct', {
+                queryParams: { renewal: 1 },
+              })
+            }
+          />
+        </React.Fragment>
+      ),
+    ]
+  );
+
+  return (
+    <React.Fragment>
+      <div style={renewalStyle.h3}>
+        <AARTitleComponent />
+      </div>
+      {!hide && module}
+    </React.Fragment>
+  );
+};
+
 interface CardProps {
   step: number;
-  moduleStatus: AccessModuleStatus;
-  style: React.CSSProperties;
-  children: string | React.ReactNode;
+  moduleName: AccessModule;
+  modules: AccessModuleStatus[];
+  setLoading: (boolean) => void;
 }
-const RenewalCard = withStyle(renewalStyle.card)(
-  ({ step, moduleStatus, style, children }: CardProps) => {
-    const { AARTitleComponent } = getAccessModuleConfig(
-      moduleStatus.moduleName
-    );
-    const { lastConfirmedDate, nextReviewDate } =
-      computeRenewalDisplayDates(moduleStatus);
-    return (
-      <FlexColumn style={style}>
-        <div style={renewalStyle.h3}>STEP {step}</div>
-        <div style={renewalStyle.h3}>
-          <AARTitleComponent />
-        </div>
-        <div
-          style={{
-            color: colors.primary,
-            margin: '0.5rem 0',
-            display: 'grid',
-            columnGap: '1rem',
-            gridTemplateColumns: 'auto 1fr',
-          }}
-        >
-          <div>Last Updated On:</div>
-          <div>Next Review:</div>
-          <div>{lastConfirmedDate}</div>
-          <div>{nextReviewDate}</div>
-        </div>
-        {children}
-      </FlexColumn>
-    );
-  }
-);
+const RenewalCard = ({ step, moduleName, modules, setLoading }: CardProps) => {
+  return (
+    <FlexColumn style={renewalStyle.card}>
+      <div style={renewalStyle.h3}>STEP {step}</div>
+      <RenewalCardBody
+        moduleStatus={getAccessModuleStatusByNameOrEmpty(modules, moduleName)}
+        setLoading={(v) => setLoading(v)}
+      />
+    </FlexColumn>
+  );
+};
 
 // Page to render
 export const AccessRenewal = fp.flow(withProfileErrorModal)(
@@ -271,12 +490,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
     const {
       config: { enableComplianceTraining },
     } = useStore(serverConfigStore);
-    const [publications, setPublications] = useState<boolean>(null);
-    const noReportId = useId();
-    const reportId = useId();
-    const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [, navigateByUrl] = useNavigation();
 
     const expirableModules = modules.filter((moduleStatus) =>
       accessRenewalModules.includes(moduleStatus.moduleName)
@@ -385,195 +599,32 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
             gap: '1rem',
           }}
         >
-          {/* Profile */}
           <RenewalCard
             step={1}
-            moduleStatus={getAccessModuleStatusByNameOrEmpty(
-              modules,
-              AccessModule.PROFILECONFIRMATION
-            )}
-          >
-            <div style={{ marginBottom: '0.5rem' }}>
-              Please update your profile information if any of it has changed
-              recently.
-            </div>
-            <div>
-              Note that you are obliged by the Terms of Use of the Workbench to
-              provide keep your profile information up-to-date at all times.
-            </div>
-            <ActionButton
-              actionButtonText='Review'
-              completedButtonText='Confirmed'
-              moduleStatus={getAccessModuleStatusByNameOrEmpty(
-                modules,
-                AccessModule.PROFILECONFIRMATION
-              )}
-              onClick={() =>
-                navigateByUrl('profile', { queryParams: { renewal: 1 } })
-              }
-            />
-          </RenewalCard>
-          {/* Publications */}
+            moduleName={AccessModule.PROFILECONFIRMATION}
+            modules={modules}
+            setLoading={(v: boolean) => setLoading(v)}
+          />
           <RenewalCard
             step={2}
-            moduleStatus={getAccessModuleStatusByNameOrEmpty(
-              modules,
-              AccessModule.PUBLICATIONCONFIRMATION
-            )}
-          >
-            <div>
-              The <AoU /> Publication and Presentation Policy requires that you
-              report any upcoming publication or presentation resulting from the
-              use of <AoU /> Research Program Data at least two weeks before the
-              date of publication. If you are lead on or part of a publication
-              or presentation that hasn’t been reported to the program,{' '}
-              <a
-                target='_blank'
-                style={{ textDecoration: 'underline' }}
-                href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}
-              >
-                please report it now.
-              </a>{' '}
-              For any questions, please contact <SupportMailto />
-            </div>
-            <div style={renewalStyle.publicationConfirmation}>
-              <ActionButton
-                actionButtonText='Confirm'
-                completedButtonText='Confirmed'
-                moduleStatus={getAccessModuleStatusByNameOrEmpty(
-                  modules,
-                  AccessModule.PUBLICATIONCONFIRMATION
-                )}
-                onClick={async () => {
-                  setLoading(true);
-                  await confirmPublications();
-                  setLoading(false);
-                }}
-                disabled={publications === null}
-                style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
-              />
-              <RadioButton
-                data-test-id='nothing-to-report'
-                id={noReportId}
-                disabled={isRenewalCompleteForModule(
-                  getAccessModuleStatusByNameOrEmpty(
-                    modules,
-                    AccessModule.PUBLICATIONCONFIRMATION
-                  )
-                )}
-                style={{ justifySelf: 'end' }}
-                checked={publications === true}
-                onChange={() => setPublications(true)}
-              />
-              <label htmlFor={noReportId}>
-                At this time, I have nothing to report
-              </label>
-              <RadioButton
-                data-test-id='report-submitted'
-                id={reportId}
-                disabled={isRenewalCompleteForModule(
-                  getAccessModuleStatusByNameOrEmpty(
-                    modules,
-                    AccessModule.PUBLICATIONCONFIRMATION
-                  )
-                )}
-                style={{ justifySelf: 'end' }}
-                checked={publications === false}
-                onChange={() => setPublications(false)}
-              />
-              <label htmlFor={reportId}>Report submitted</label>
-            </div>
-          </RenewalCard>
-          {/* Compliance Training */}
+            moduleName={AccessModule.PUBLICATIONCONFIRMATION}
+            modules={modules}
+            setLoading={(v: boolean) => setLoading(v)}
+          />
           {enableComplianceTraining && (
             <RenewalCard
               step={3}
-              moduleStatus={getAccessModuleStatusByNameOrEmpty(
-                modules,
-                AccessModule.COMPLIANCETRAINING
-              )}
-            >
-              <div>
-                {' '}
-                You are required to complete the refreshed ethics training
-                courses to understand the privacy safeguards and the compliance
-                requirements for using the <AoU /> Dataset.
-              </div>
-              {!isRenewalCompleteForModule(
-                getAccessModuleStatusByNameOrEmpty(
-                  modules,
-                  AccessModule.COMPLIANCETRAINING
-                )
-              ) && (
-                <div style={renewalStyle.complianceTrainingExpiring}>
-                  When you have completed the training click the refresh button
-                  or reload the page.
-                </div>
-              )}
-              <FlexRow style={{ marginTop: 'auto' }}>
-                <ActionButton
-                  actionButtonText='Complete Training'
-                  completedButtonText='Completed'
-                  moduleStatus={getAccessModuleStatusByNameOrEmpty(
-                    modules,
-                    AccessModule.COMPLIANCETRAINING
-                  )}
-                  onClick={() => {
-                    setRefreshButtonDisabled(false);
-                    redirectToRegisteredTraining();
-                  }}
-                />
-                {!isRenewalCompleteForModule(
-                  getAccessModuleStatusByNameOrEmpty(
-                    modules,
-                    AccessModule.COMPLIANCETRAINING
-                  )
-                ) && (
-                  <Button
-                    disabled={refreshButtonDisabled}
-                    onClick={async () => {
-                      setLoading(true);
-                      await syncAndReloadTraining();
-                      setLoading(false);
-                    }}
-                    style={{
-                      height: '1.6rem',
-                      marginLeft: '0.75rem',
-                      width: 'max-content',
-                    }}
-                  >
-                    Refresh
-                  </Button>
-                )}
-              </FlexRow>
-            </RenewalCard>
+              moduleName={AccessModule.COMPLIANCETRAINING}
+              modules={modules}
+              setLoading={(v: boolean) => setLoading(v)}
+            />
           )}
-          {/* DUCC */}
           <RenewalCard
             step={enableComplianceTraining ? 4 : 3}
-            moduleStatus={getAccessModuleStatusByNameOrEmpty(
-              modules,
-              AccessModule.DATAUSERCODEOFCONDUCT
-            )}
-          >
-            <div>
-              Please review and sign the data user code of conduct consenting to
-              the <AoU /> data use policy.
-            </div>
-            <ActionButton
-              actionButtonText='View & Sign'
-              completedButtonText='Completed'
-              moduleStatus={getAccessModuleStatusByNameOrEmpty(
-                modules,
-                AccessModule.DATAUSERCODEOFCONDUCT
-              )}
-              onClick={() =>
-                navigateByUrl('data-code-of-conduct', {
-                  queryParams: { renewal: 1 },
-                })
-              }
-            />
-          </RenewalCard>
+            moduleName={AccessModule.DATAUSERCODEOFCONDUCT}
+            modules={modules}
+            setLoading={(v: boolean) => setLoading(v)}
+          />
         </div>
         {loading && <SpinnerOverlay dark={true} opacity={0.6} />}
       </FadeBox>

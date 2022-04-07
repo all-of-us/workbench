@@ -72,7 +72,7 @@
     "type": "STRING"
   },
   {
-    "name": "QUALIFIER_SOURCE_VALUE",
+    "name": "MODIFIER_SOURCE_VALUE",
     "type": "STRING"
   }
 ]

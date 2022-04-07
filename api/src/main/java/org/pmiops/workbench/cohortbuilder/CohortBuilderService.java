@@ -72,8 +72,6 @@ public interface CohortBuilderService {
   List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
-  Long findDomainCountByStandard(String domain, String term, Boolean standard);
-
   List<CardCount> findEhrDomainCounts(String term);
 
   List<CardCount> findDomainCounts(String term);
@@ -98,8 +96,6 @@ public interface CohortBuilderService {
 
   List<String> findSortedConceptIdsByDomainIdAndType(
       String domainId, String sortColumn, String sortName);
-
-  Long findSurveyCount(String name, String term);
 
   List<SurveyModule> findSurveyModules();
 

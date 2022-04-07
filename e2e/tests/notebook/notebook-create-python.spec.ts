@@ -55,32 +55,30 @@ describe('Python Kernel Notebook Test', () => {
     const kernelName = await notebook.getKernelName();
     expect(kernelName).toBe('Python 3');
 
-    const cell1OutputText = await notebook.runCodeCell(1, {
+    let cellIndex = 1;
+    const cell1OutputText = await notebook.runCodeCell(cellIndex, {
       codeFile: 'resources/python-code/import-os.py'
     });
+    cellIndex++;
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
     expect(cell1OutputText).toMatch(/success$/);
 
     expect(
-      await notebook.runCodeCell(2, {
+      await notebook.runCodeCell(cellIndex, {
         codeFile: 'resources/python-code/import-libs.py'
       })
     ).toMatch(/success$/);
+    cellIndex++;
 
-    expect(
-      await notebook.runCodeCell(3, {
-        codeFile: 'resources/python-code/git-ignore-check.py',
-        markdownWorkaround: true
-      })
-    ).toMatch(/success$/);
-
-    await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    await notebook.runCodeCell(cellIndex, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(4);
+    const cell = notebook.findCell(cellIndex);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
+
+    cellIndex++;
 
     // Save, exit notebook then come back from Analysis page.
     await notebook.save();

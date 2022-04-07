@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -930,42 +931,92 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_messagingException() throws MessagingException {
+    config.access.tiersVisibleToUsers =
+        Arrays.asList(
+            AccessTierService.REGISTERED_TIER_SHORT_NAME,
+            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
     createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(null);
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mockMailService)
-        .sendWelcomeEmail_deprecated(any(), any(), any());
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2)).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService, times(2))
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
   public void resendWelcomeEmail_OK() throws MessagingException {
+    config.access.tiersVisibleToUsers =
+        Arrays.asList(
+            AccessTierService.REGISTERED_TIER_SHORT_NAME,
+            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
+
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing().when(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+    doNothing()
+        .when(mockMailService)
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2)).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService, times(2))
+        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
-  public void sendUserInstructions_none() throws MessagingException {
+  public void sendUserInstructions_none_deprecated() throws MessagingException {
+    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
     verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+
+    // don't send the user instructions email if there are no instructions
+    verifyNoMoreInteractions(mockMailService);
+  }
+
+  @Test
+  public void sendUserInstructions_withInstructions_deprecated() throws MessagingException {
+    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    final InstitutionUserInstructions instructions =
+        new InstitutionUserInstructions()
+            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
+            .instructions(
+                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\" />");
+    institutionService.setInstitutionUserInstructions(instructions);
+
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
+    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService)
+        .sendInstitutionUserInstructions(
+            CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
+  }
+
+  @Test
+  public void sendUserInstructions_none() throws MessagingException {
+    config.access.tiersVisibleToUsers =
+        Arrays.asList(
+            AccessTierService.REGISTERED_TIER_SHORT_NAME,
+            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
+    // default Institution in this test class has no instructions
+    createAccountAndDbUserWithAffiliation();
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
     verifyNoMoreInteractions(mockMailService);

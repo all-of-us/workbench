@@ -17,7 +17,7 @@
       "gce": [],
       "dataproc": []
     },
-    "gceVmZone": "us-central1-f"
+    "gceVmZone": "us-central1-c"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -109,7 +109,7 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableGpu": true,
-    "enablePersistentDisk": false,
+    "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": false,

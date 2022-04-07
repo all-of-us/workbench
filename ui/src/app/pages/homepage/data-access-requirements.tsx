@@ -23,7 +23,10 @@ import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
+import {
+  RenewalCardBody,
+  RenewalRequirementsText,
+} from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { cond, reactStyles, switchCase } from 'app/utils';
@@ -36,6 +39,7 @@ import {
   bypassAll,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
+  getAccessModuleStatusByNameOrEmpty,
   GetStartedButton,
   redirectToControlledTraining,
   redirectToNiH,
@@ -137,7 +141,6 @@ const styles = reactStyles({
     fontWeight: 600,
   },
   card: {
-    height: '375px',
     width: '1195px',
     borderRadius: '0.4rem',
     marginTop: '0.7rem',
@@ -261,10 +264,15 @@ const styles = reactStyles({
 });
 
 // in display order
-const rtModules = [
+const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.ERACOMMONS,
+  AccessModule.COMPLIANCETRAINING,
+];
+const renewalRtModules = [
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
 ];
 const ctModule = AccessModule.CTCOMPLIANCETRAINING;
@@ -272,9 +280,16 @@ const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
-export const requiredModules: AccessModule[] = [...rtModules, duccModule];
+export const initialRequiredModules: AccessModule[] = [
+  ...initialRtModules,
+  duccModule,
+];
 
-export const allModules: AccessModule[] = [...rtModules, ctModule, duccModule];
+export const allInitialModules: AccessModule[] = [
+  ...initialRtModules,
+  ctModule,
+  duccModule,
+];
 
 export enum DARPageMode {
   INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
@@ -352,7 +367,7 @@ const handleRasCallback = (
 const selfBypass = async (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function,
-  modules: AccessModule[] = allModules
+  modules: AccessModule[] = allInitialModules
 ) => {
   spinnerProps.showSpinner();
   await bypassAll(modules, true);
@@ -834,7 +849,7 @@ const Completed = () => (
   </FlexRow>
 );
 
-interface CardProps {
+interface InitialCardProps {
   profile: Profile;
   modules: AccessModule[];
   activeModule: AccessModule;
@@ -843,7 +858,7 @@ interface CardProps {
   children?: string | React.ReactNode;
 }
 
-const ModulesForCard = (props: CardProps) => {
+const ModulesForInitialRegistration = (props: InitialCardProps) => {
   const {
     profile,
     modules,
@@ -866,6 +881,48 @@ const ModulesForCard = (props: CardProps) => {
         />
       ))}
       {children}
+    </FlexColumn>
+  );
+};
+
+interface RenewalCardProps {
+  profile: Profile;
+  modules: AccessModule[];
+}
+
+const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
+  const { profile, modules } = props;
+  const showingStyle = {
+    ...styles.clickableModuleBox,
+    ...styles.clickableModuleText,
+  };
+  const hiddenStyle = {
+    ...styles.backgroundModuleBox,
+    ...styles.backgroundModuleText,
+  };
+  return (
+    <FlexColumn style={styles.modulesContainer}>
+      {modules.map((moduleName) => {
+        // TODO RW-7797.  Until then, hardcode
+        const showModule = true;
+        return (
+          <FlexColumn
+            data-test-id={`module-${moduleName}`}
+            style={showModule ? showingStyle : hiddenStyle}
+          >
+            <RenewalCardBody
+              moduleStatus={getAccessModuleStatusByNameOrEmpty(
+                profile.accessModules.modules,
+                moduleName
+              )}
+              setLoading={() => {}}
+              textStyle={{ fontSize: '0.6rem' }}
+              hide={!showModule}
+              showTimeEstimate={true}
+            />
+          </FlexColumn>
+        );
+      })}
     </FlexColumn>
   );
 };
@@ -955,15 +1012,19 @@ const RegisteredTierCard = (props: {
         <DataDetail icon='physical' text='Physical measurements' />
         <DataDetail icon='wearable' text='Wearable devices' />
       </FlexColumn>
-      <ModulesForCard
-        profile={profile}
-        modules={getEligibleModules(rtModules, profile)}
-        activeModule={activeModule}
-        clickableModules={clickableModules}
-        spinnerProps={spinnerProps}
-      >
-        {!enableRasLoginGovLinking && <TemporaryRASModule />}
-      </ModulesForCard>
+      {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
+        <ModulesForInitialRegistration
+          profile={profile}
+          modules={getEligibleModules(initialRtModules, profile)}
+          activeModule={activeModule}
+          clickableModules={clickableModules}
+          spinnerProps={spinnerProps}
+        >
+          {!enableRasLoginGovLinking && <TemporaryRASModule />}
+        </ModulesForInitialRegistration>
+      ) : (
+        <ModulesForAnnualRenewal profile={profile} modules={renewalRtModules} />
+      )}
     </FlexRow>
   );
 };
@@ -1087,7 +1148,7 @@ const ControlledTierCard = (props: {
             spinnerProps={spinnerProps}
           />
         )}
-        <ModulesForCard
+        <ModulesForInitialRegistration
           profile={profile}
           modules={[ctModule]}
           activeModule={activeModule}
@@ -1104,23 +1165,34 @@ const DuccCard = (props: {
   activeModule: AccessModule;
   clickableModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
+  pageMode: DARPageMode;
   stepNumber: number;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps, stepNumber } =
-    props;
+  const {
+    profile,
+    activeModule,
+    clickableModules,
+    spinnerProps,
+    pageMode,
+    stepNumber,
+  } = props;
   return (
-    <FlexRow style={{ ...styles.card, height: '125px' }}>
+    <FlexRow style={styles.card}>
       <FlexColumn>
         <div style={styles.cardStep}>Step {stepNumber}</div>
-        <div style={styles.cardHeader}>Sign the code of conduct</div>
+        <div style={styles.cardHeader}>Sign the Code of Conduct</div>
       </FlexColumn>
-      <ModulesForCard
-        profile={profile}
-        modules={[duccModule]}
-        activeModule={activeModule}
-        clickableModules={clickableModules}
-        spinnerProps={spinnerProps}
-      />
+      {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
+        <ModulesForInitialRegistration
+          profile={profile}
+          modules={[duccModule]}
+          activeModule={activeModule}
+          clickableModules={clickableModules}
+          spinnerProps={spinnerProps}
+        />
+      ) : (
+        <ModulesForAnnualRenewal profile={profile} modules={[duccModule]} />
+      )}
     </FlexRow>
   );
 };
@@ -1135,7 +1207,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     useEffect(() => {
       const onMount = async () => {
         await syncModulesExternal(
-          incompleteModules(getEligibleModules(allModules, profile), profile)
+          incompleteModules(
+            getEligibleModules(allInitialModules, profile),
+            profile
+          )
         );
         await reload();
         spinnerProps.hideSpinner();
@@ -1184,8 +1259,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const getNextActive = (modules: AccessModule[]) =>
       getActiveModule(getEligibleModules(modules, profile), profile);
-    const nextActive = getNextActive(allModules);
-    const nextRequired = getNextActive(requiredModules);
+    const nextActive = getNextActive(allInitialModules);
+    const nextRequired = getNextActive(initialRequiredModules);
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
@@ -1198,9 +1273,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
-    const showCtCard = accessTiersVisibleToUsers.includes(
-      AccessTierShortNames.Controlled
-    );
+    const showCtCard =
+      // RW-7798 add CT card for ANNUAL_RENEWAL
+      pageMode === DARPageMode.INITIAL_REGISTRATION &&
+      accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled);
 
     const rtCard = (
       <RegisteredTierCard
@@ -1229,6 +1305,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         activeModule={activeModule}
         clickableModules={clickableModules}
         spinnerProps={spinnerProps}
+        pageMode={pageMode}
         stepNumber={showCtCard ? 3 : 2}
       />
     );

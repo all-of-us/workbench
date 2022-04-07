@@ -7,7 +7,7 @@ import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { DomainCountStubVariables } from 'testing/stubs/cohort-builder-service-stub';
+import { CardCountStubVariables } from 'testing/stubs/cohort-builder-service-stub';
 import {
   ConceptSetsApiStub,
   ConceptStubVariables,
@@ -20,7 +20,7 @@ describe('ConceptAddModal', () => {
   let props;
   let conceptSetsApi: ConceptSetsApiStub;
   const stubConcepts = ConceptStubVariables.STUB_CONCEPTS;
-  const activeDomainTab = DomainCountStubVariables.STUB_DOMAIN_COUNTS[0];
+  const activeDomainTab = CardCountStubVariables.STUB_CARD_COUNTS[0];
 
   const component = () => {
     return mount(<ConceptAddModal {...props} />);
@@ -73,7 +73,7 @@ describe('ConceptAddModal', () => {
   });
 
   it('disables option to add to existing if concept set does not exist & defaults to create', async () => {
-    props.activeDomainTab = DomainCountStubVariables.STUB_DOMAIN_COUNTS[2];
+    props.activeDomainTab = CardCountStubVariables.STUB_CARD_COUNTS[2];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(

@@ -55,7 +55,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     if (!title.includes(PageTitle)) {
       await this.loadPage({ url: PageUrl.Workspaces });
     }
-    await waitWhileLoading(this.page);
+    await this.waitForLoad();
     return this;
   }
 

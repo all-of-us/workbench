@@ -9,20 +9,24 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.List;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.google.CloudStorageClientImpl;
+import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -32,82 +36,170 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
-import org.pmiops.workbench.test.Providers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import(FakeClockConfiguration.class)
 @SpringJUnitConfig
 public class MailServiceImplTest {
-
-  private MailServiceImpl service;
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String PASSWORD = "secretpassword";
+  private static final String INSTITUTION_NAME = "BROAD Institute";
   private static final String FULL_USER_NAME = "bob@researchallofus.org";
   private static final String API_KEY = "this-is-an-api-key";
   private static final String FROM_EMAIL = "test-donotreply@fake-research-aou.org";
 
-  private WorkbenchConfig workbenchConfig = createWorkbenchConfig();
+  private static WorkbenchConfig workbenchConfig;
+
+  @TestConfiguration
+  @Import({FakeClockConfiguration.class, MailServiceImpl.class})
+  @MockBean({CloudStorageClient.class, MandrillApi.class})
+  static class Configuration {
+    @Bean
+    @Scope("prototype")
+    public WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
+  }
 
   @Captor private ArgumentCaptor<MandrillApiKeyAndMessage> mandrillCaptor;
 
-  @Mock private CloudStorageClientImpl cloudStorageClient;
-  @Mock private MandrillApi mandrillApi;
-  @Mock private MandrillMessageStatus msgStatus;
+  @Autowired private CloudStorageClient mockcCloudStorageClient;
+  @Autowired private MandrillApi mockMandrillApi;
+
+  @Autowired private MailService mailService;
 
   @BeforeEach
   public void setUp() throws ApiException {
+    workbenchConfig = createWorkbenchConfig();
+
     MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
-    msgStatuses.add(msgStatus);
-    when(mandrillApi.send(any())).thenReturn(msgStatuses);
-    when(cloudStorageClient.readMandrillApiKey()).thenReturn(API_KEY);
-    when(cloudStorageClient.getImageUrl(any())).thenReturn("test_img");
-
-    service =
-        new MailServiceImpl(
-            Providers.of(mandrillApi),
-            Providers.of(cloudStorageClient),
-            Providers.of(workbenchConfig));
+    msgStatuses.add(new MandrillMessageStatus());
+    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
+    when(mockcCloudStorageClient.readMandrillApiKey()).thenReturn(API_KEY);
+    when(mockcCloudStorageClient.getImageUrl(any())).thenReturn("test_img");
   }
 
   @Test
-  public void testSendWelcomeEmail_throwsMessagingException() throws ApiException {
-    when(msgStatus.getRejectReason()).thenReturn("this was rejected");
+  public void testSendWelcomeEmail_throwsMessagingException_deprecated() throws ApiException {
+    MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
+    msgStatuses.add(new MandrillMessageStatus().rejectReason("bad email"));
+    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
     assertThrows(
         MessagingException.class,
-        () -> service.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
-    verify(mandrillApi, times(1)).send(any());
+        () -> mailService.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
+    verify(mockMandrillApi, times(1)).send(any());
   }
 
   @Test
-  public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
-    doThrow(ApiException.class).when(mandrillApi).send(any());
+  public void testSendWelcomeEmail_throwsApiException_deprecated() throws ApiException {
+    doThrow(ApiException.class).when(mockMandrillApi).send(any());
     assertThrows(
         MessagingException.class,
-        () -> service.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
-    verify(mandrillApi, times(3)).send(any());
+        () -> mailService.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
+    verify(mockMandrillApi, times(3)).send(any());
   }
 
   @Test
-  public void testSendWelcomeEmail_invalidEmail() throws MessagingException {
+  public void testSendWelcomeEmail_invalidEmail_deprecated() {
     assertThrows(
         ServerErrorException.class,
-        () -> service.sendWelcomeEmail_deprecated("Nota valid email", PASSWORD, FULL_USER_NAME));
+        () ->
+            mailService.sendWelcomeEmail_deprecated("Nota valid email", PASSWORD, FULL_USER_NAME));
   }
 
   @Test
   public void testSendWelcomeEmail() throws MessagingException, ApiException {
-    service.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME);
-    verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+    mailService.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME);
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+  }
+
+  @Test
+  public void testSendWelcomeEmail_throwsMessagingException() throws ApiException {
+    MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
+    msgStatuses.add(new MandrillMessageStatus().rejectReason("this was rejected"));
+    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
+    assertThrows(
+        MessagingException.class,
+        () ->
+            mailService.sendWelcomeEmail(
+                CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
+    verify(mockMandrillApi, times(1)).send(any());
+  }
+
+  @Test
+  public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
+    doThrow(ApiException.class).when(mockMandrillApi).send(any());
+    assertThrows(
+        MessagingException.class,
+        () ->
+            mailService.sendWelcomeEmail(
+                CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
+    verify(mockMandrillApi, times(3)).send(any());
+  }
+
+  @Test
+  public void testSendWelcomeEmail_invalidEmail_RtAndCt() throws MessagingException {
+    ServerErrorException exception =
+        assertThrows(
+            ServerErrorException.class,
+            () ->
+                mailService.sendWelcomeEmail(
+                    "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true));
+    assertThat(exception.getMessage()).isEqualTo("Email: Nota valid email is invalid.");
+  }
+
+  @Test
+  public void testSendWelcomeEmail_invalidEmail_OnlyRt() throws MessagingException {
+    assertThrows(
+        ServerErrorException.class,
+        () ->
+            mailService.sendWelcomeEmail(
+                "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, false));
+  }
+
+  @Test
+  public void testSendWelcomeEmail_invalidEmail_NoRtOrCt() throws MessagingException {
+    assertThrows(
+        ServerErrorException.class,
+        () ->
+            mailService.sendWelcomeEmail(
+                "Nota valid email", PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, false, false));
+  }
+
+  @Test
+  public void testSendWelcomeEmailRTAndCT() throws MessagingException, ApiException {
+    mailService.sendWelcomeEmail(
+        CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, true);
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+  }
+
+  @Test
+  public void testSendWelcomeEmailOnlyRT() throws MessagingException, ApiException {
+    mailService.sendWelcomeEmail(
+        CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, true, false);
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+  }
+
+  @Test
+  public void testSendWelcomeEmailNoRtAndCt() throws MessagingException, ApiException {
+    mailService.sendWelcomeEmail(
+        CONTACT_EMAIL, PASSWORD, FULL_USER_NAME, INSTITUTION_NAME, false, false);
+    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendInstructions() throws Exception {
-    service.sendInstitutionUserInstructions(
+    mailService.sendInstitutionUserInstructions(
         "asdf@gmail.com",
         "Ask for help at help@myinstitute.org <script>window.alert()</script>>",
         "asdf@fake-research");
-    verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
 
     MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
     assertThat(gotMessage.getTo())
@@ -124,9 +216,9 @@ public class MailServiceImplTest {
     DbUser user = createDbUser();
     SendBillingSetupEmailRequest request =
         new SendBillingSetupEmailRequest().institution("inst").phone("123456");
-    service.sendBillingSetupEmail(user, request);
+    mailService.sendBillingSetupEmail(user, request);
 
-    verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
 
     MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
 
@@ -149,9 +241,9 @@ public class MailServiceImplTest {
     DbUser user = createDbUser();
     SendBillingSetupEmailRequest request =
         new SendBillingSetupEmailRequest().institution("inst").isNihFunded(true).phone("123456");
-    service.sendBillingSetupEmail(user, request);
+    mailService.sendBillingSetupEmail(user, request);
 
-    verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
 
     MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
 
@@ -173,9 +265,9 @@ public class MailServiceImplTest {
   public void testSendEgressRemediationEmail_suspendCompute() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
     DbUser user = createDbUser();
-    service.sendEgressRemediationEmail(user, EgressRemediationAction.SUSPEND_COMPUTE);
+    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.SUSPEND_COMPUTE);
 
-    verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
 
     assertThat(((MandrillMessage) got.getMessage()).getFromEmail()).isEqualTo("egress@aou.com");
@@ -195,9 +287,9 @@ public class MailServiceImplTest {
     workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails =
         ImmutableList.of("egress-cc@aou.com");
     DbUser user = createDbUser();
-    service.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER);
+    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER);
 
-    verify(mandrillApi, times(1)).send(mandrillCaptor.capture());
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
 
     List<RecipientAddress> receipts = ((MandrillMessage) got.getMessage()).getTo();
@@ -208,6 +300,41 @@ public class MailServiceImplTest {
 
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("account has been disabled");
+    assertThat(gotHtml).doesNotContain("${");
+  }
+
+  @Test
+  public void testAlertUsersUnusedDiskWarning() throws Exception {
+    DbUser user = createDbUser();
+    mailService.alertUsersUnusedDiskWarningThreshold(
+        ImmutableList.of(user),
+        new DbWorkspace().setName("my workspace").setCreator(user),
+        new LeonardoListPersistentDiskResponse()
+            .diskType(LeonardoDiskType.SSD)
+            .size(123)
+            .auditInfo(
+                new LeonardoAuditInfo()
+                    .createdDate(
+                        FakeClockConfiguration.NOW
+                            .toInstant()
+                            .minus(Duration.ofDays(20))
+                            .toString())
+                    .creator(user.getUsername())),
+        14,
+        20.0);
+
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+
+    List<RecipientAddress> bcc = ((MandrillMessage) got.getMessage()).getTo();
+    assertThat(bcc)
+        .containsExactly(
+            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.BCC));
+
+    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    assertThat(gotHtml).contains("123 GB");
+    assertThat(gotHtml).contains("$20.91 per month");
+    assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
     assertThat(gotHtml).doesNotContain("${");
   }
 

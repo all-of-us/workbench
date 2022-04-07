@@ -3,6 +3,7 @@ package org.pmiops.workbench.mail;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -34,6 +36,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.PersistentDisks;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
@@ -73,6 +77,7 @@ public class MailServiceImpl implements MailService {
       "emails/egress_remediation_email/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_EMAIL =
       "emails/workspace_admin_locking_email/content.html";
+  private static final String UNUSED_DISK_EMAIL = "emails/unused_disk_email/content.html";
 
   private static final String OPEN_LI_TAG = "<li>";
   private static final String CLOSE_LI_TAG = "</li>";
@@ -265,6 +270,46 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void alertUsersUnusedDiskWarningThreshold(
+      List<DbUser> users,
+      DbWorkspace diskWorkspace,
+      LeonardoListPersistentDiskResponse disk,
+      int daysUnused,
+      @Nullable Double workspaceInitialCreditsRemaining)
+      throws MessagingException {
+    final String htmlMessage =
+        buildHtml(
+            UNUSED_DISK_EMAIL,
+            ImmutableMap.<EmailSubstitutionField, String>builder()
+                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+                .put(
+                    EmailSubstitutionField.DISK_SIZE,
+                    NumberFormat.getNumberInstance(Locale.US).format(disk.getSize()) + " GB")
+                .put(EmailSubstitutionField.WORKSPACE_NAME, diskWorkspace.getName())
+                .put(EmailSubstitutionField.DISK_UNUSED_DAYS, Integer.toString(daysUnused))
+                .put(
+                    EmailSubstitutionField.DISK_COST_PER_MONTH,
+                    String.format("$%.2f", PersistentDisks.costPerMonth(disk)))
+                .put(
+                    EmailSubstitutionField.DISK_CREATION_DATE,
+                    formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
+                .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
+                .put(
+                    EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
+                    buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
+                .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(diskWorkspace))
+                .build());
+    sendWithRetries(
+        workbenchConfigProvider.get().mandrill.fromEmail,
+        ImmutableList.of(),
+        ImmutableList.of(),
+        users.stream().map(DbUser::getContactEmail).collect(Collectors.toList()),
+        "Reminder - Unused Disk in your Workspace",
+        "Unused disk notification",
+        htmlMessage);
+  }
+
+  @Override
   public void sendBillingSetupEmail(DbUser dbUser, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
@@ -315,6 +360,7 @@ public class MailServiceImpl implements MailService {
         egressPolicy.notifyFromEmail,
         ImmutableList.of(dbUser.getContactEmail()),
         Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
+        ImmutableList.of(),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
@@ -532,6 +578,7 @@ public class MailServiceImpl implements MailService {
         workbenchConfigProvider.get().mandrill.fromEmail,
         toRecipientEmails,
         ccRecipientEmails,
+        ImmutableList.of(),
         subject,
         description,
         htmlMessage);
@@ -541,18 +588,17 @@ public class MailServiceImpl implements MailService {
       String from,
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,
+      List<String> bccRecipientEmails,
       String subject,
       String description,
       String htmlMessage)
       throws MessagingException {
     List<RecipientAddress> toAddresses =
-        toRecipientEmails.stream()
-            .map(a -> (validatedRecipient(a, RecipientType.TO)))
+        Streams.concat(
+                toRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.TO)),
+                ccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.CC)),
+                bccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.BCC)))
             .collect(Collectors.toList());
-    toAddresses.addAll(
-        ccRecipientEmails.stream()
-            .map(c -> (validatedRecipient(c, RecipientType.CC)))
-            .collect(Collectors.toList()));
     final MandrillMessage msg =
         new MandrillMessage()
             .to(toAddresses)
@@ -643,12 +689,40 @@ public class MailServiceImpl implements MailService {
     return NumberFormat.getCurrencyInstance().format(currentUsage);
   }
 
+  private String formatDateCentralTime(Instant date) {
+    // e.g. April 5, 2021
+    return DateTimeFormatter.ofPattern("MMMM d, yyyy")
+        .withLocale(Locale.US)
+        .withZone(ZoneId.of("America/Chicago"))
+        .format(date);
+  }
+
   private String formatCentralTime(Instant date) {
     // e.g. April 5, 2021 at 1:23PM Central Time
     return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
         .withLocale(Locale.US)
         .withZone(ZoneId.of("America/Chicago"))
         .format(date);
+  }
+
+  private String buildBillingAccountDescription(
+      DbWorkspace workspace, @Nullable Double initialCreditsRemaining) {
+    if (initialCreditsRemaining == null) {
+      return String.format(
+          "user-provided billing account \"%s\"", workspace.getBillingAccountName());
+    } else {
+      return String.format(
+          "%s's initial credits ($%.2f remaining)",
+          workspace.getCreator().getUsername(), initialCreditsRemaining);
+    }
+  }
+
+  private String buildWorkspaceUrl(DbWorkspace workspace) {
+    return String.format(
+        "%s/workspaces/%s/%s/about",
+        workbenchConfigProvider.get().server.uiBaseUrl,
+        workspace.getWorkspaceNamespace(),
+        workspace.getFirecloudName());
   }
 
   private String getURLAsHref() {

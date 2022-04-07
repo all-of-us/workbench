@@ -39,7 +39,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
-import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
@@ -95,7 +94,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final UserServiceAuditor userServiceAuditor;
 
   private final UserDao userDao;
-  private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -118,7 +116,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Random random,
       UserServiceAuditor userServiceAuditor,
       UserDao userDao,
-      AdminActionHistoryDao adminActionHistoryDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleNameMapper accessModuleNameMapper,
@@ -135,7 +132,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.random = random;
     this.userServiceAuditor = userServiceAuditor;
     this.userDao = userDao;
-    this.adminActionHistoryDao = adminActionHistoryDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleNameMapper = accessModuleNameMapper;
@@ -456,7 +452,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public void validateAllOfUsTermsOfService(Integer tosVersion) {
     if (tosVersion == null) {
-      throw new BadRequestException("Terms of Service version is NULL");
+      throw new BadRequestException("All of Us Terms of Service version is NULL");
     }
     if (tosVersion != LATEST_AOU_TOS_VERSION) {
       throw new BadRequestException("All of Us Terms of Service version is not up to date");
@@ -466,14 +462,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
   public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
-    try {
-      final int tosVersion =
-          userTermsOfServiceDao.findByUserIdOrThrow(dbUser.getUserId()).getTosVersion();
-      return tosVersion == LATEST_AOU_TOS_VERSION;
-    } catch (BadRequestException ex) {
-      // In case user doesnt have any terms of service
-      return false;
-    }
+    return userTermsOfServiceDao
+        .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
+        .map(u -> u.getTosVersion() == LATEST_AOU_TOS_VERSION)
+        .orElse(false);
   }
 
   // Returns true only if the user has accepted the latest version of both AoU and Terra terms of
@@ -545,29 +537,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public List<DbUser> getAllUsersExcludingDisabled() {
     return userDao.findUsersExcludingDisabled();
-  }
-
-  @Override
-  public void logAdminWorkspaceAction(
-      long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
-    logAdminAction(null, targetWorkspaceId, targetAction, oldValue, newValue);
-  }
-
-  private void logAdminAction(
-      Long targetUserId,
-      Long targetWorkspaceId,
-      String targetAction,
-      Object oldValue,
-      Object newValue) {
-    DbAdminActionHistory adminActionHistory = new DbAdminActionHistory();
-    adminActionHistory.setTargetUserId(targetUserId);
-    adminActionHistory.setTargetWorkspaceId(targetWorkspaceId);
-    adminActionHistory.setTargetAction(targetAction);
-    adminActionHistory.setOldValue(oldValue == null ? "null" : oldValue.toString());
-    adminActionHistory.setNewValue(newValue == null ? "null" : newValue.toString());
-    adminActionHistory.setAdminUserId(userProvider.get().getUserId());
-    adminActionHistory.setTimestamp();
-    adminActionHistoryDao.save(adminActionHistory);
   }
 
   /**

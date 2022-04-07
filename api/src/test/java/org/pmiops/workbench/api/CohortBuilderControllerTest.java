@@ -54,7 +54,6 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -1085,6 +1084,11 @@ public class CohortBuilderControllerTest {
           + "(a) Native query and not JPQL and (b) MATCH ... against... not H2 function")
   public void findSurveyCount() {}
 
+  @Disabled(
+      "Cannot be tested without underlying CBCriteriaDao's SQL/Java modifications for H2. "
+          + "(a) Native query and not JPQL and (b) MATCH ... against... not H2 function")
+  public void findEhrDomainCounts() {}
+
   @Test
   public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId() {
     jdbcTemplate.execute(
@@ -1173,58 +1177,6 @@ public class CohortBuilderControllerTest {
     List<AgeTypeCount> response =
         controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
     assertThat(response).isEqualTo(expected);
-  }
-
-  @Test
-  public void findDomainCountByStandardSource() {
-    // standardCriteria
-    for (int i = 0; i < 10; i++) {
-      cbCriteriaDao.save(
-          DbCriteria.builder()
-              .addDomainId(Domain.CONDITION.toString())
-              .addType(CriteriaType.SNOMED.toString())
-              .addCount(100L + i)
-              .addHierarchy(true)
-              .addConceptId(String.valueOf(1000 + i))
-              .addStandard(true)
-              .addSelectable(true)
-              .addCode("120")
-              .addName("Diabetes 1")
-              .addFullText("Diabetes 1[CONDITION_rank1]")
-              .build());
-    }
-    // sourceCriteria
-    cbCriteriaDao.save(
-        DbCriteria.builder()
-            .addDomainId(Domain.CONDITION.toString())
-            .addType(CriteriaType.ICD9CM.toString())
-            .addCount(200L)
-            .addHierarchy(false)
-            .addConceptId("13000")
-            .addStandard(false)
-            .addSelectable(true)
-            .addCode("130")
-            .addName("Other liver")
-            .addFullText("Other liver[CONDITION_rank1]")
-            .build());
-
-    DomainCount domainCountStd =
-        controller
-            .findDomainCountByStandardSource(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), Boolean.TRUE, "120")
-            .getBody();
-    assertThat(domainCountStd.getConceptCount()).isEqualTo(10);
-
-    DomainCount domainCountSrc =
-        controller
-            .findDomainCountByStandardSource(
-                WORKSPACE_NAMESPACE,
-                WORKSPACE_ID,
-                Domain.CONDITION.toString(),
-                Boolean.FALSE,
-                "130")
-            .getBody();
-    assertThat(domainCountSrc.getConceptCount()).isEqualTo(1);
   }
 
   @Test
