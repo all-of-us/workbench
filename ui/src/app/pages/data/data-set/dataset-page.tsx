@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
@@ -768,83 +768,91 @@ export const DatasetPage = fp.flow(
   withErrorModal(),
   withRouter
 )(
-  class extends React.Component<Props, State> {
-    dt: any;
-    constructor(props) {
-      super(props);
-      this.state = {
-        cohortList: [],
-        conceptSetList: [],
-        crossDomainConceptSetList: new Set(),
-        creatingConceptSet: false,
-        dataSet: undefined,
-        dataSetTouched: false,
-        domainValueSetIsLoading: new Set(),
-        domainValueSetLookup: new Map(),
-        includesAllParticipants: false,
-        loadingResources: true,
-        modalState: ModalState.None,
-        previewList: new Map(),
-        selectedCohortIds: [],
-        selectedConceptSetIds: [],
-        selectedDomains: new Set(),
-        selectedDomainsWithConceptSetIds: new Set(),
-        selectedPreviewDomain: Domain.CONDITION,
-        selectedPrepackagedConceptSets: new Set(),
-        selectedDomainValuePairs: [],
-        savingDataset: false,
-      };
-    }
+  ({
+    cdrVersionTiersResponse,
+    hideSpinner,
+    match: {
+      params: { dataSetId },
+    },
+    profileState: { profile, reload },
+    showErrorModal,
+    workspace,
+  }: Props) => {
+    let dt: any;
+    const [cohortList, setCohortList] = useState([]);
+    const [conceptSetList, setConceptSetList] = useState([]);
+    const [crossDomainConceptSetList, setCrossDomainConceptSetList] = useState(
+      new Set()
+    );
+    const [creatingConceptSet, setCreatingConceptSet] = useState(false);
+    const [dataSet, setDataSet] = useState(undefined);
+    const [dataSetTouched, setDataSetTouched] = useState(false);
+    const [domainValueSetIsLoading, setDomainValueSetIsLoading] = useState(
+      new Set()
+    );
+    const [domainValueSetLookup, setDomainValueSetLookup] = useState(new Map());
+    const [includesAllParticipants, setIncludesAllParticipants] =
+      useState(false);
+    const [loadingResources, setLoadingResources] = useState(true);
+    const [modalState, setModalState] = useState(ModalState.None);
+    const [previewList, setPreviewList] = useState(new Map());
+    const [selectedCohortIds, setSelectedCohortIds] = useState([]);
+    const [selectedConceptSetIds, setSelectedConceptSetIds] = useState([]);
+    const [selectedDomains, setSelectedDomains] = useState(new Set());
+    const [
+      selectedDomainsWithConceptSetIds,
+      setSelectedDomainsWithConceptSetIds,
+    ] = useState(new Set());
+    const [selectedPreviewDomain, setSelectedPreviewDomain] = useState(
+      Domain.CONDITION
+    );
+    const [selectedPrepackagedConceptSets, setSelectedPrepackagedConceptSets] =
+      useState(new Set());
+    const [selectedDomainValuePairs, setSelectedDomainValuePairs] = useState(
+      []
+    );
+    const [savingDataset, setSavingDataset] = useState(false);
 
-    get isCreatingNewDataset() {
-      return !this.state.dataSet;
-    }
+    useEffect(() => {
+      hideSpinner();
+      updatePrepackagedDomains();
 
-    async componentDidMount() {
-      this.props.hideSpinner();
-      this.updatePrepackagedDomains();
-
-      await this.loadResources();
-      if (this.props.match.params.dataSetId) {
-        this.fetchDataset();
+      (async () => await loadResources())();
+      if (dataSetId) {
+        fetchDataset();
       }
-    }
+    }, []);
 
-    loadDataset(dataset: DataSet, initialLoad?: boolean) {
+    const loadDataset = (dataset: DataSet, initialLoad?: boolean) => {
       // This is to set the URL to reference the newly created dataset and the user is staying on the dataset page
       // A bit of a hack but I couldn't find another way to change the URL without triggering a reload
       if (window.location.href.endsWith('data-sets')) {
         history.pushState({}, '', `${window.location.href}/${dataset.id}`);
       }
 
-      this.setState({ dataSet: dataset, dataSetTouched: false });
+      setDataSet(dataset);
+      setDataSetTouched(false);
       // We only need to set selections on the initial load of a saved dataset,
       // not for creating/updating since the selections will already be set
       if (initialLoad) {
-        this.setState({
-          includesAllParticipants: dataset.includesAllParticipants,
-          selectedConceptSetIds: dataset.conceptSets.map((cs) => cs.id),
-          selectedCohortIds: dataset.cohorts.map((c) => c.id),
-          selectedDomainValuePairs: domainValuePairsToLowercase(
-            dataset.domainValuePairs
-          ),
-          selectedDomains: this.getDomainsFromDataSet(dataset),
-          selectedDomainsWithConceptSetIds:
-            this.getDomainsWithConceptSetIdsFromDataSet(dataset),
-          selectedPrepackagedConceptSets: this.apiEnumToPrePackageConceptSets(
-            dataset.prePackagedConceptSet
-          ),
-        });
+        setIncludesAllParticipants(dataset.includesAllParticipants);
+        setSelectedConceptSetIds(dataset.conceptSets.map((cs) => cs.id));
+        setSelectedCohortIds(dataset.cohorts.map((c) => c.id));
+        setSelectedDomainValuePairs(
+          domainValuePairsToLowercase(dataset.domainValuePairs)
+        );
+        setSelectedDomains(getDomainsFromDataSet(dataset));
+        setSelectedDomainsWithConceptSetIds(
+          getDomainsWithConceptSetIdsFromDataSet(dataset)
+        );
+        setSelectedPrepackagedConceptSets(
+          apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
+        );
       }
-    }
+    };
 
-    private getCdrVersion(): CdrVersion {
-      const { workspace, cdrVersionTiersResponse } = this.props;
-      return getCdrVersion(workspace, cdrVersionTiersResponse);
-    }
-
-    updatePrepackagedDomains() {
-      if (this.getCdrVersion().hasFitbitData) {
+    const updatePrepackagedDomains = () => {
+      if (getCdrVersion(workspace, cdrVersionTiersResponse).hasFitbitData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
           ...PREPACKAGED_WITH_FITBIT_DOMAINS,
@@ -855,7 +863,7 @@ export const DatasetPage = fp.flow(
       // can be taken on genomics variant data from the dataset builder.
       if (
         serverConfigStore.get().config.enableGenomicExtraction &&
-        this.getCdrVersion().hasWgsData
+        getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
       ) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
@@ -863,94 +871,41 @@ export const DatasetPage = fp.flow(
         };
       }
       // Add Zipcode Socioeconomic status data if were in controlled tier dataset
-      if (this.props.workspace.accessTierShortName === 'controlled') {
+      if (workspace.accessTierShortName === 'controlled') {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC,
         };
       }
-    }
+    };
 
-    async fetchDataset() {
+    const fetchDataset = async () => {
       const dataset = await dataSetApi().getDataSet(
-        this.props.workspace.namespace,
-        this.props.workspace.id,
-        +this.props.match.params.dataSetId
+        workspace.namespace,
+        workspace.id,
+        +dataSetId
       );
-      this.loadDataset(dataset, true);
-    }
+      loadDataset(dataset, true);
+    };
 
-    async componentDidUpdate(prevProps, prevState: State) {
-      if (
-        hasNewValidProps(this.props, prevProps, [
-          (props) => props.workspace.namespace,
-          (props) => props.workspace.id,
-          (props) => props.cdrVersionTiersResponse,
-        ])
-      ) {
-        this.updatePrepackagedDomains();
-      }
+    useEffect(() => {
+      updatePrepackagedDomains();
+    }, [workspace.namespace, workspace.id, cdrVersionTiersResponse]);
 
-      if (
-        hasNewValidProps(this.props, prevProps, [
-          (props) => props.workspace.namespace,
-          (props) => props.workspace.id,
-          (props) => props.match.params.dataSetId,
-        ])
-      ) {
-        if (
-          hasNewValidProps(this.props, prevProps, [
-            (props) => props.match.params.dataSetId,
-          ])
-        ) {
-          this.fetchDataset();
-        }
-      }
+    useEffect(() => {
+      fetchDataset();
+    }, [workspace.namespace, workspace.id, dataSetId]);
 
-      // If any domains were dropped, we want to drop any domain/value pair selections.
-      const droppedDomains = Array.from(
-        prevState.selectedDomainsWithConceptSetIds
-      ).filter((d) => !this.state.selectedDomainsWithConceptSetIds.has(d));
-      if (droppedDomains.length > 0) {
-        const updatedDomains = Array.from(
-          this.state.selectedDomainsWithConceptSetIds
-        ).map(({ domain }) => domain);
-        this.setState(
-          ({ selectedDomainsWithConceptSetIds, selectedDomainValuePairs }) => ({
-            selectedDomains: new Set(updatedDomains),
-            selectedDomainValuePairs: selectedDomainValuePairs.filter((p) =>
-              Array.from(selectedDomainsWithConceptSetIds).some(
-                (d) => d.domain === p.domain
-              )
-            ),
-          })
-        );
-      }
-
-      // After a state update, first check whether any new domains have been added.
-      const newDomains = Array.from(
-        this.state.selectedDomainsWithConceptSetIds
-      ).filter((d) => !prevState.selectedDomainsWithConceptSetIds.has(d));
-      if (!newDomains.length) {
-        return;
-      }
-      newDomains.forEach((nd) => {
-        this.setState(({ domainValueSetIsLoading }) => ({
-          domainValueSetIsLoading: domainValueSetIsLoading.add(nd.domain),
-        }));
-        this.loadValueSetForDomain(nd);
-      });
-    }
-
-    private async loadValueSetForDomain(
+    const loadValueSetForDomain = async (
       domainWithConceptSetId: DomainWithConceptSetId
-    ) {
+    ) => {
       // TODO(RW-4426): There is a lot of complexity here around loading domain
       // values which is static data for a given CDR version. Consider
       // refactoring this page to load all schema data before rendering.
-      const { namespace, id } = this.props.workspace;
-      const { crossDomainConceptSetList, selectedDomainsWithConceptSetIds } =
-        this.state;
+      const { namespace, id } = workspace;
+      const updatedCrossDomainConceptSetList = crossDomainConceptSetList;
+      const updatedSelectedDomainsWithConceptSetIds =
+        selectedDomainsWithConceptSetIds;
       const values = await dataSetApi().getValuesFromDomain(
         namespace,
         id,
@@ -958,132 +913,107 @@ export const DatasetPage = fp.flow(
         domainWithConceptSetId.conceptSetId
       );
       // Delete the selected domain - conceptId pair and add the domains from the getValuesFromDomain response
-      selectedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
+      updatedSelectedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (domain !== domainWithConceptSetId.domain) {
-          crossDomainConceptSetList.add(domainWithConceptSetId.conceptSetId);
+          updatedCrossDomainConceptSetList.add(
+            domainWithConceptSetId.conceptSetId
+          );
         }
-        selectedDomainsWithConceptSetIds.add({
+        updatedSelectedDomainsWithConceptSetIds.add({
           conceptSetId: domainWithConceptSetId.conceptSetId,
           domain,
         });
         // If the domain has already been loaded, autoselect all of
         // its value pairs. The desired product behavior is that when a new
         // set of domain values appears, all boxes begin as checked.
-        if (this.state.domainValueSetLookup.has(domain)) {
-          this.setState(
-            ({
-              domainValueSetLookup,
-              selectedDomains,
-              selectedDomainValuePairs,
-            }) => {
-              const morePairs = domainValueSetLookup
-                .get(domain)
-                .values.map((v) => ({
-                  domain: reverseDomainEnum[domainWithDomainValues.domain],
-                  value: v.value,
-                }));
-              console.log(morePairs);
-              return {
-                selectedDomains: selectedDomains.add(domain),
-                selectedDomainValuePairs:
-                  selectedDomainValuePairs.concat(morePairs),
-              };
-            }
+        if (domainValueSetLookup.has(domain)) {
+          const morePairs = domainValueSetLookup
+            .get(domain)
+            .values.map((v) => ({
+              domain: reverseDomainEnum[domainWithDomainValues.domain],
+              value: v.value,
+            }));
+          setSelectedDomains(selectedDomains.add(domain));
+          setSelectedDomainValuePairs(
+            selectedDomainValuePairs.concat(morePairs)
           );
           // If any of the domain has not yet been loaded, add the schema
           // (value sets) for it.
         } else {
-          this.setState(
-            ({
-              dataSet,
-              domainValueSetLookup,
-              selectedDomains,
-              selectedDomainValuePairs,
-            }) => {
-              const newLookup = new Map(domainValueSetLookup);
-              newLookup.set(domain, {
-                domain,
-                values: domainWithDomainValues.items,
-              });
+          const newLookup = new Map(domainValueSetLookup);
+          newLookup.set(domain, {
+            domain,
+            values: domainWithDomainValues.items,
+          });
 
-              // Autoselect the newly added domain, except if we're editing an
-              // existing dataset which already covers the domain. This avoids having
-              // us overwrite the selected pairs on initial load.
-              const morePairs = [];
-              if (
-                this.isCreatingNewDataset ||
-                !this.getDomainsFromDataSet(dataSet).has(domain)
-              ) {
-                domainWithDomainValues.items.forEach((v) =>
-                  morePairs.push({
-                    domain: reverseDomainEnum[domainWithDomainValues.domain],
-                    value: v.value,
-                  })
-                );
-                console.log(morePairs);
-              }
-              return {
-                domainValueSetLookup: newLookup,
-                selectedDomains: selectedDomains.add(domain),
-                selectedDomainValuePairs:
-                  selectedDomainValuePairs.concat(morePairs),
-              };
-            }
+          // Autoselect the newly added domain, except if we're editing an
+          // existing dataset which already covers the domain. This avoids having
+          // us overwrite the selected pairs on initial load.
+          const morePairs = [];
+          if (!dataSet || !getDomainsFromDataSet(dataSet).has(domain)) {
+            domainWithDomainValues.items.forEach((v) =>
+              morePairs.push({
+                domain: reverseDomainEnum[domainWithDomainValues.domain],
+                value: v.value,
+              })
+            );
+          }
+          setDomainValueSetLookup(newLookup);
+          setSelectedDomains(selectedDomains.add(domain));
+          setSelectedDomainValuePairs(
+            selectedDomainValuePairs.concat(morePairs)
           );
         }
       });
-      this.setState(({ domainValueSetIsLoading }) => {
-        const newLoading = new Set(domainValueSetIsLoading);
-        newLoading.delete(domainWithConceptSetId.domain);
-        return {
-          crossDomainConceptSetList,
-          domainValueSetIsLoading: newLoading,
-          selectedDomainsWithConceptSetIds,
-        };
-      });
-    }
+      const newLoading = new Set(domainValueSetIsLoading);
+      newLoading.delete(domainWithConceptSetId.domain);
+      setCrossDomainConceptSetList(updatedCrossDomainConceptSetList);
+      setDomainValueSetIsLoading(newLoading);
+      setSelectedDomainsWithConceptSetIds(
+        updatedSelectedDomainsWithConceptSetIds
+      );
+    };
 
-    async loadResources(): Promise<void> {
+    const loadResources = async () => {
       try {
-        const { namespace, id } = this.props.workspace;
+        const { namespace, id } = workspace;
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id),
         ]);
-        this.setState({
-          conceptSetList: conceptSets.items,
-          cohortList: cohorts.items,
-          loadingResources: false,
-        });
+        setConceptSetList(conceptSets.items);
+        setCohortList(cohorts.items);
+        setLoadingResources(false);
         return Promise.resolve();
       } catch (error) {
         console.error(error);
         return Promise.resolve();
       }
-    }
+    };
 
-    private getDomainsFromDataSet(d: DataSet) {
+    const getDomainsFromDataSet = (d: DataSet) => {
       const domains = domainValuePairsToLowercase(d.domainValuePairs).map(
         ({ domain }) => domain
       );
       return new Set(domains);
-    }
+    };
 
-    private getDomainsWithConceptSetIdsFromDataSet(d: DataSet) {
-      const selectedPrepackagedConceptSets =
-        this.apiEnumToPrePackageConceptSets(d.prePackagedConceptSet);
-      return this.getIdsAndDomainsFromConceptSets(
+    const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
+      const selectedPrepackagedConceptSets = apiEnumToPrePackageConceptSets(
+        d.prePackagedConceptSet
+      );
+      return getIdsAndDomainsFromConceptSets(
         d.conceptSets,
         selectedPrepackagedConceptSets
       );
-    }
+    };
 
-    private getIdsAndDomainsFromConceptSets(
+    const getIdsAndDomainsFromConceptSets = (
       conceptSets: ConceptSet[],
       prepackagedConceptSets: Set<PrepackagedConceptSet>
-    ): Set<DomainWithConceptSetId> {
+    ) => {
       const conceptSetIdsWithDomains = conceptSets
         .map((cs) => ({
           conceptSetId: cs.id,
@@ -1099,154 +1029,139 @@ export const DatasetPage = fp.flow(
           }))
         );
       return new Set(conceptSetIdsWithDomains);
-    }
+    };
 
-    getPrePackagedList() {
+    const getPrePackagedList = () => {
       let prepackagedList = Object.keys(PrepackagedConceptSet);
-      if (!this.getCdrVersion().hasFitbitData) {
+      if (!getCdrVersion(workspace, cdrVersionTiersResponse).hasFitbitData) {
         prepackagedList = prepackagedList.filter(
           (prepack) => !fp.startsWith('FITBIT', prepack)
         );
       }
       if (
         !serverConfigStore.get().config.enableGenomicExtraction ||
-        !this.getCdrVersion().hasWgsData
+        !getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
       ) {
         prepackagedList = prepackagedList.filter(
           (prepack) => prepack !== 'WHOLEGENOME'
         );
       }
-      if (this.props.workspace.accessTierShortName !== 'controlled') {
+      if (workspace.accessTierShortName !== 'controlled') {
         prepackagedList = prepackagedList.filter(
           (prepack) => prepack !== 'ZIPCODESOCIOECONOMIC'
         );
       }
       return prepackagedList;
-    }
+    };
 
-    selectPrePackagedConceptSet(
+    const selectPrePackagedConceptSet = (
       prepackaged: PrepackagedConceptSet,
       selected: boolean
-    ) {
-      this.setState(
-        ({
-          selectedDomainsWithConceptSetIds,
-          selectedPrepackagedConceptSets,
-        }) => {
-          const updatedPrepackaged = new Set(selectedPrepackagedConceptSets);
-          const updatedDomainsWithConceptSetIds = new Set(
-            selectedDomainsWithConceptSetIds
-          );
-          if (selected) {
-            updatedPrepackaged.add(prepackaged);
-            updatedDomainsWithConceptSetIds.add({
-              conceptSetId: null,
-              domain: PREPACKAGED_DOMAINS[prepackaged],
-            });
-          } else {
-            updatedPrepackaged.delete(prepackaged);
-            updatedDomainsWithConceptSetIds.forEach(
-              (domainWithConceptSetId) => {
-                if (
-                  domainWithConceptSetId.conceptSetId === null &&
-                  domainWithConceptSetId.domain ===
-                    PREPACKAGED_DOMAINS[prepackaged]
-                ) {
-                  updatedDomainsWithConceptSetIds.delete(
-                    domainWithConceptSetId
-                  );
-                }
-              }
-            );
-          }
-          return {
-            selectedDomainsWithConceptSetIds: updatedDomainsWithConceptSetIds,
-            selectedPrepackagedConceptSets: updatedPrepackaged,
-            dataSetTouched: true,
-          };
-        }
+    ) => {
+      const updatedPrepackaged = new Set(selectedPrepackagedConceptSets);
+      const updatedDomainsWithConceptSetIds = new Set(
+        selectedDomainsWithConceptSetIds
       );
-    }
-
-    selectConceptSet(conceptSet: ConceptSet, selected: boolean): void {
-      this.setState(
-        ({
-          crossDomainConceptSetList,
-          selectedConceptSetIds,
-          selectedDomainsWithConceptSetIds,
-        }) => {
-          let updatedConceptSetIds: number[];
-          const updatedDomainsWithConceptSetIds = new Set(
-            selectedDomainsWithConceptSetIds
-          );
-          if (selected) {
-            updatedConceptSetIds = selectedConceptSetIds.concat([
-              conceptSet.id,
-            ]);
-            updatedDomainsWithConceptSetIds.add({
-              conceptSetId: conceptSet.id,
-              domain: conceptSet.domain,
-            });
-          } else {
-            updatedConceptSetIds = fp.pull(
-              conceptSet.id,
-              selectedConceptSetIds
-            );
-            // Iterate the set since it's possible to have multiple domains per concept set for some source concepts
-            updatedDomainsWithConceptSetIds.forEach(
-              (domainWithConceptSetId) => {
-                if (conceptSet.id === domainWithConceptSetId.conceptSetId) {
-                  updatedDomainsWithConceptSetIds.delete(
-                    domainWithConceptSetId
-                  );
-                }
-              }
-            );
-            crossDomainConceptSetList.delete(conceptSet.id);
-          }
-          return {
-            crossDomainConceptSetList,
-            selectedDomainsWithConceptSetIds: updatedDomainsWithConceptSetIds,
-            selectedConceptSetIds: updatedConceptSetIds,
-            dataSetTouched: true,
-          };
-        }
-      );
-    }
-
-    selectCohort(cohort: Cohort): void {
-      const selectedCohortList = toggleIncludes(
-        cohort.id,
-        this.state.selectedCohortIds
-      );
-      // If Workspace Cohort is selected, un-select Pre packaged cohort
-      if (selectedCohortList && selectedCohortList.length > 0) {
-        this.setState({
-          dataSetTouched: true,
-          selectedCohortIds: selectedCohortList,
-          includesAllParticipants: false,
+      if (selected) {
+        updatedPrepackaged.add(prepackaged);
+        updatedDomainsWithConceptSetIds.add({
+          conceptSetId: null,
+          domain: PREPACKAGED_DOMAINS[prepackaged],
         });
       } else {
-        this.setState({
-          dataSetTouched: true,
-          selectedCohortIds: selectedCohortList,
-        });
+        updatedPrepackaged.delete(prepackaged);
+        updatedDomainsWithConceptSetIds.forEach(
+          (domainWithConceptSetId: DomainWithConceptSetId) => {
+            if (
+              domainWithConceptSetId.conceptSetId === null &&
+              domainWithConceptSetId.domain === PREPACKAGED_DOMAINS[prepackaged]
+            ) {
+              updatedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
+            }
+          }
+        );
       }
-    }
+      setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
+      setSelectedPrepackagedConceptSets(updatedPrepackaged);
+      setDataSetTouched(true);
+    };
 
-    selectPrePackagedCohort(): void {
-      const { includesAllParticipants, selectedCohortIds } = this.state;
-      this.setState({
-        dataSetTouched: true,
-        includesAllParticipants: !includesAllParticipants,
-        // Un-select any workspace Cohort if Pre Packaged cohort is selected
-        selectedCohortIds: !includesAllParticipants ? [] : selectedCohortIds,
-      });
-    }
+    const selectConceptSet = (conceptSet: ConceptSet, selected: boolean) => {
+      let updatedConceptSetIds: number[];
+      const updatedDomainsWithConceptSetIds = new Set(
+        selectedDomainsWithConceptSetIds
+      );
+      if (selected) {
+        updatedConceptSetIds = selectedConceptSetIds.concat([conceptSet.id]);
+        updatedDomainsWithConceptSetIds.add({
+          conceptSetId: conceptSet.id,
+          domain: conceptSet.domain,
+        });
+      } else {
+        updatedConceptSetIds = fp.pull(conceptSet.id, selectedConceptSetIds);
+        // Iterate the set since it's possible to have multiple domains per concept set for some source concepts
+        updatedDomainsWithConceptSetIds.forEach(
+          (domainWithConceptSetId: DomainWithConceptSetId) => {
+            if (conceptSet.id === domainWithConceptSetId.conceptSetId) {
+              updatedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
+            }
+          }
+        );
+        crossDomainConceptSetList.delete(conceptSet.id);
+      }
+      setCrossDomainConceptSetList(crossDomainConceptSetList);
+      setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
+      setSelectedConceptSetIds(updatedConceptSetIds);
+      setDataSetTouched(true);
+      if (selected) {
+        setDomainValueSetIsLoading(
+          domainValueSetIsLoading.add(conceptSet.domain)
+        );
+        loadValueSetForDomain({
+          conceptSetId: conceptSet.id,
+          domain: conceptSet.domain,
+        });
+      } else {
+        const updatedDomains = Array.from(updatedDomainsWithConceptSetIds).map(
+          ({ domain }) => domain
+        );
+        setSelectedDomains(
+          new Set(
+            Array.from(updatedDomainsWithConceptSetIds).map(
+              ({ domain }) => domain
+            )
+          )
+        );
+        setSelectedDomainValuePairs(
+          selectedDomainValuePairs.filter((p) =>
+            Array.from(updatedDomainsWithConceptSetIds).some(
+              (d: DomainWithConceptSetId) => d.domain === p.domain
+            )
+          )
+        );
+      }
+    };
 
-    selectDomainValue(domain: Domain, domainValue: DomainValue): void {
-      const valueSets = this.state.domainValueSetLookup.get(domain).values;
-      const origSelected = this.state.selectedDomainValuePairs;
+    const selectCohort = (cohort: Cohort) => {
+      const selectedCohortList = toggleIncludes(cohort.id, selectedCohortIds);
+      setDataSetTouched(true);
+      setSelectedCohortIds(selectedCohortList);
+      // If Workspace Cohort is selected, un-select Pre packaged cohort
+      if (selectedCohortList && selectedCohortList.length > 0) {
+        setIncludesAllParticipants(false);
+      }
+    };
+
+    const selectPrePackagedCohort = () => {
+      setDataSetTouched(true);
+      setIncludesAllParticipants(!includesAllParticipants);
+      // Un-select any workspace Cohort if Pre Packaged cohort is selected
+      setSelectedCohortIds(!includesAllParticipants ? [] : selectedCohortIds);
+    };
+
+    const selectDomainValue = (domain: Domain, domainValue: DomainValue) => {
+      const valueSets = domainValueSetLookup.get(domain).values;
+      const origSelected = selectedDomainValuePairs;
       const selectObj = { domain: domain, value: domainValue.value };
       let valuesSelected;
       if (fp.some(selectObj, origSelected)) {
@@ -1264,39 +1179,37 @@ export const DatasetPage = fp.flow(
           valueSets.findIndex(({ value }) => a.value === value) -
           valueSets.findIndex(({ value }) => b.value === value)
       );
-      this.setState({
-        selectedDomainValuePairs: valuesSelected,
-        dataSetTouched: true,
-      });
-    }
+      setSelectedDomainValuePairs(valuesSelected);
+      setDataSetTouched(true);
+    };
 
     // Returns true if selected values set is empty or is not equal to the total values displayed
-    get allValuesSelected() {
+    const allValuesSelected = () => {
       return (
-        !fp.isEmpty(this.state.selectedDomainValuePairs) &&
-        this.state.selectedDomainValuePairs.length === this.valuesCount
+        !fp.isEmpty(selectedDomainValuePairs) &&
+        selectedDomainValuePairs.length === valuesCount()
       );
-    }
+    };
 
-    get valuesCount() {
+    const valuesCount = () => {
       let count = 0;
-      this.state.selectedDomains.forEach((d) => {
+      selectedDomains.forEach((d) => {
         // Only counted loaded domains.
-        const v = this.state.domainValueSetLookup.get(d);
+        const v = domainValueSetLookup.get(d);
         if (v) {
           count += v.values.length;
         }
       });
       return count;
-    }
+    };
 
-    selectAllValues() {
-      if (this.allValuesSelected) {
-        this.setState({ selectedDomainValuePairs: [] });
+    const selectAllValues = () => {
+      if (allValuesSelected) {
+        setSelectedDomainValuePairs([]);
         return;
       } else {
         const selectedValuesList = [];
-        this.state.domainValueSetLookup.forEach((valueSet) => {
+        domainValueSetLookup.forEach((valueSet) => {
           valueSet.values.map((value) => {
             selectedValuesList.push({
               domain: valueSet.domain,
@@ -1304,48 +1217,44 @@ export const DatasetPage = fp.flow(
             });
           });
         });
-        this.setState({ selectedDomainValuePairs: selectedValuesList });
+        setSelectedDomainValuePairs(selectedValuesList);
       }
-    }
+    };
 
-    get canWrite() {
-      return WorkspacePermissionsUtil.canWrite(
-        this.props.workspace.accessLevel
-      );
-    }
+    const canWrite = () => {
+      return WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
+    };
 
-    disableSave() {
+    const disableSave = () => {
       return (
-        !this.state.selectedConceptSetIds ||
-        (this.state.selectedConceptSetIds.length === 0 &&
-          this.state.selectedPrepackagedConceptSets.size === 0) ||
-        ((!this.state.selectedCohortIds ||
-          this.state.selectedCohortIds.length === 0) &&
-          !this.state.includesAllParticipants) ||
-        !this.state.selectedDomainValuePairs ||
-        this.state.selectedDomainValuePairs.length === 0
+        !selectedConceptSetIds ||
+        (selectedConceptSetIds.length === 0 &&
+          selectedPrepackagedConceptSets.size === 0) ||
+        ((!selectedCohortIds || selectedCohortIds.length === 0) &&
+          !includesAllParticipants) ||
+        !selectedDomainValuePairs ||
+        selectedDomainValuePairs.length === 0
       );
-    }
+    };
 
-    getDataTableValue(data) {
+    const getDataTableValue = (data) => {
       // convert data model from api :
       // [{value[0]: '', queryValue: []}, {value[1]: '', queryValue: []}]
       // to compatible with DataTable
       // {value[0]: queryValue[0], value[1]: queryValue[1]}
 
-      const tableData = fp.flow(
+      return fp.flow(
         fp.map(({ value, queryValue }) =>
           fp.map((v) => [value, v], queryValue)
         ),
         fp.unzip,
         fp.map(fp.fromPairs)
       )(data);
-      return tableData;
-    }
+    };
 
-    apiEnumToPrePackageConceptSets(
+    const apiEnumToPrePackageConceptSets = (
       v: Array<PrePackagedConceptSetEnum>
-    ): Set<PrepackagedConceptSet> {
+    ) => {
       const re: Set<PrepackagedConceptSet> = new Set<PrepackagedConceptSet>();
       v.map((pre) => {
         switch (pre) {
@@ -1392,10 +1301,9 @@ export const DatasetPage = fp.flow(
         }
       });
       return re;
-    }
+    };
 
-    getPrePackagedConceptSetApiEnum() {
-      const { selectedPrepackagedConceptSets } = this.state;
+    const getPrePackagedConceptSetApiEnum = () => {
       const selectedPrePackagedConceptSDetEnum =
         new Array<PrePackagedConceptSetEnum>();
       selectedPrepackagedConceptSets.forEach(
@@ -1445,13 +1353,11 @@ export const DatasetPage = fp.flow(
         }
       );
       return selectedPrePackagedConceptSDetEnum;
-    }
+    };
 
-    async getPreviewList() {
+    const getPreviewList = async () => {
       const domains = fp.uniq(
-        this.state.selectedDomainValuePairs.map(
-          (domainValue) => domainValue.domain
-        )
+        selectedDomainValuePairs.map((domainValue) => domainValue.domain)
       );
       const newPreviewList: Map<Domain, DataSetPreviewInfo> = new Map(
         domains.map<[Domain, DataSetPreviewInfo]>((domain) => [
@@ -1463,34 +1369,30 @@ export const DatasetPage = fp.flow(
           },
         ])
       );
-      this.setState({
-        previewList: newPreviewList,
-        selectedPreviewDomain: domains[0],
-      });
-      domains.forEach(async (domain) => {
-        this.getPreviewByDomain(domain);
-      });
-    }
+      setPreviewList(newPreviewList);
+      setSelectedPreviewDomain(domains[0]);
+      domains.forEach(async (domain) => getPreviewByDomain(domain));
+    };
 
-    async getPreviewByDomain(domain: Domain) {
+    const getPreviewByDomain = async (domain: Domain) => {
       if (domain === Domain.WHOLEGENOMEVARIANT) {
-        this.setState((state) => ({
-          previewList: state.previewList.set(domain, {
+        setPreviewList(
+          previewList.set(domain, {
             isLoading: false,
             errorText: null,
             values: [],
-          }),
-        }));
+          })
+        );
         return;
       }
-      const { namespace, id } = this.props.workspace;
+      const { namespace, id } = workspace;
       const domainRequest: DataSetPreviewRequest = {
         domain: domain,
-        conceptSetIds: this.state.selectedConceptSetIds,
-        includesAllParticipants: this.state.includesAllParticipants,
-        cohortIds: this.state.selectedCohortIds,
-        prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
-        values: this.state.selectedDomainValuePairs
+        conceptSetIds: selectedConceptSetIds,
+        includesAllParticipants: includesAllParticipants,
+        cohortIds: selectedCohortIds,
+        prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
+        values: selectedDomainValuePairs
           .filter((values) => values.domain === domain)
           .map((domainValue) => domainValue.value),
       };
@@ -1508,88 +1410,65 @@ export const DatasetPage = fp.flow(
       } catch (ex) {
         const exceptionResponse = (await ex.json()) as unknown as ErrorResponse;
         const errorText =
-          this.generateErrorTextFromPreviewException(exceptionResponse);
+          generateErrorTextFromPreviewException(exceptionResponse);
         newPreviewInformation = {
           isLoading: false,
           errorText: errorText,
           values: [],
         };
       }
-      this.setState((state) => ({
-        previewList: state.previewList.set(domain, newPreviewInformation),
-      }));
-    }
+      setPreviewList(previewList.set(domain, newPreviewInformation));
+    };
 
-    async createDataset(name, desc) {
+    const createDataset = async (datasetName, desc) => {
       AnalyticsTracker.DatasetBuilder.Create();
-      const { namespace, id } = this.props.workspace;
+      const { namespace, id } = workspace;
 
       return dataSetApi()
-        .createDataSet(namespace, id, this.createDatasetRequest(name, desc))
-        .then((dataset) => this.loadDataset(dataset));
-    }
+        .createDataSet(namespace, id, createDatasetRequest(datasetName, desc))
+        .then((dataset) => loadDataset(dataset));
+    };
 
-    async saveDataset() {
+    const saveDataset = async () => {
       AnalyticsTracker.DatasetBuilder.Save();
-      const { namespace, id } = this.props.workspace;
+      const { namespace, id } = workspace;
 
-      this.setState({ savingDataset: true });
+      setSavingDataset(true);
       dataSetApi()
-        .updateDataSet(
-          namespace,
-          id,
-          this.state.dataSet.id,
-          this.updateDatasetRequest()
-        )
-        .then((dataset) => this.loadDataset(dataset))
+        .updateDataSet(namespace, id, dataSet.id, updateDatasetRequest())
+        .then((dataset) => loadDataset(dataset))
         .catch((e) => {
           console.error(e);
-          this.props.showErrorModal(
-            'Save Dataset Error',
-            'Please refresh and try again'
-          );
+          showErrorModal('Save Dataset Error', 'Please refresh and try again');
         })
-        .finally(() => this.setState({ savingDataset: false }));
-    }
+        .finally(() => setSavingDataset(false));
+    };
 
-    createDatasetRequest(name, desc): DataSetRequest {
+    const createDatasetRequest = (datasetName, desc) => {
       return {
-        name,
+        name: datasetName,
         description: desc,
         ...{
-          includesAllParticipants: this.state.includesAllParticipants,
-          conceptSetIds: this.state.selectedConceptSetIds,
-          cohortIds: this.state.selectedCohortIds,
-          domainValuePairs: this.state.selectedDomainValuePairs,
-          prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
+          includesAllParticipants,
+          conceptSetIds: selectedConceptSetIds,
+          cohortIds: selectedCohortIds,
+          domainValuePairs: selectedDomainValuePairs,
+          prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
         },
       };
-    }
+    };
 
-    updateDatasetRequest(): DataSetRequest {
+    const updateDatasetRequest = () => {
       return {
-        ...this.createDatasetRequest(
-          this.state.dataSet.name,
-          this.state.dataSet.description
-        ),
-        etag: this.state.dataSet.etag,
+        ...createDatasetRequest(dataSet.name, dataSet.description),
+        etag: dataSet.etag,
       };
-    }
-
-    openZendeskWidget() {
-      const { profile } = this.props.profileState;
-      openZendeskWidget(
-        profile.givenName,
-        profile.familyName,
-        profile.username,
-        profile.contactEmail
-      );
-    }
+    };
 
     // TODO: Move to using a response based error handling method, rather than a error based one
-    generateErrorTextFromPreviewException(
+    const generateErrorTextFromPreviewException = (
       exceptionResponse: ErrorResponse
-    ): JSX.Element {
+    ) => {
       switch (exceptionResponse.statusCode) {
         case 400:
           return <div>{exceptionResponse.message}</div>;
@@ -1623,7 +1502,14 @@ export const DatasetPage = fp.flow(
                   style={{
                     display: 'inline-block',
                   }}
-                  onClick={() => this.openZendeskWidget()}
+                  onClick={() =>
+                    openZendeskWidget(
+                      profile.givenName,
+                      profile.familyName,
+                      profile.username,
+                      profile.contactEmail
+                    )
+                  }
                 >
                   contact us
                 </LinkButton>
@@ -1634,11 +1520,11 @@ export const DatasetPage = fp.flow(
             </FlexRow>
           );
       }
-    }
+    };
 
-    isEllipsisActive(text) {
-      if (this.dt) {
-        const columnIndex = this.dt.props.children.findIndex(
+    const isEllipsisActive = (text) => {
+      if (dt) {
+        const columnIndex = dt.props.children.findIndex(
           (child) => child.key === text
         );
         const columnTitlesDOM =
@@ -1652,9 +1538,9 @@ export const DatasetPage = fp.flow(
         }
       }
       return true;
-    }
+    };
 
-    getHeaderValue(value) {
+    const getHeaderValue = (value) => {
       const text = value.value;
       const dataTestId = 'data-test-id-' + text;
       return (
@@ -1662,7 +1548,7 @@ export const DatasetPage = fp.flow(
           data-test-id={dataTestId}
           side='top'
           content={text}
-          disabled={this.isEllipsisActive(text)}
+          disabled={isEllipsisActive(text)}
         >
           <div
             style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
@@ -1672,55 +1558,57 @@ export const DatasetPage = fp.flow(
           </div>
         </TooltipTrigger>
       );
-    }
+    };
 
-    renderPreviewDataTableSection() {
-      let selectedPreviewDomain = this.state.selectedPreviewDomain.toString();
+    const renderPreviewDataTableSection = () => {
+      let selectedPreviewDomainString = selectedPreviewDomain.toString();
       // Had to do the following since typescript changes the key by removing _ therefore changing the domain string
       // which resulted in map check from selectedPreviewDomain to give undefined result always
-      if (this.state.selectedPreviewDomain?.toString().startsWith('FITBIT')) {
-        switch (this.state.selectedPreviewDomain.toString()) {
+      if (selectedPreviewDomain?.toString().startsWith('FITBIT')) {
+        switch (selectedPreviewDomain.toString()) {
           case 'FITBITHEARTRATESUMMARY':
-            selectedPreviewDomain = 'FITBIT_HEART_RATE_SUMMARY';
+            selectedPreviewDomainString = 'FITBIT_HEART_RATE_SUMMARY';
             break;
           case 'FITBITHEARTRATELEVEL':
-            selectedPreviewDomain = 'FITBIT_HEART_RATE_LEVEL';
+            selectedPreviewDomainString = 'FITBIT_HEART_RATE_LEVEL';
             break;
           case 'FITBITACTIVITY':
-            selectedPreviewDomain = 'FITBIT_ACTIVITY';
+            selectedPreviewDomainString = 'FITBIT_ACTIVITY';
             break;
           case 'FITBITINTRADAYSTEPS':
-            selectedPreviewDomain = 'FITBIT_INTRADAY_STEPS';
+            selectedPreviewDomainString = 'FITBIT_INTRADAY_STEPS';
             break;
         }
       }
       let filteredPreviewData;
-      this.state.previewList.forEach((map, entry) => {
+      previewList.forEach((map, entry) => {
         if (
-          entry.toString() === selectedPreviewDomain &&
+          entry.toString() === selectedPreviewDomainString &&
           !filteredPreviewData
         ) {
           filteredPreviewData = map;
         }
       });
       return filteredPreviewData && filteredPreviewData.values.length > 0
-        ? this.renderPreviewDataTable(filteredPreviewData)
-        : this.renderPreviewDataTableSectionMessage(filteredPreviewData);
-    }
+        ? renderPreviewDataTable(filteredPreviewData)
+        : renderPreviewDataTableSectionMessage(filteredPreviewData);
+    };
 
-    renderPreviewDataTable(filteredPreviewData: DataSetPreviewInfo) {
+    const renderPreviewDataTable = (
+      filteredPreviewData: DataSetPreviewInfo
+    ) => {
       return (
         <DataTable
-          ref={(el) => (this.dt = el)}
-          key={this.state.selectedPreviewDomain}
+          ref={(el) => (dt = el)}
+          key={selectedPreviewDomain}
           scrollable={true}
           style={{ width: '100%' }}
-          value={this.getDataTableValue(filteredPreviewData.values)}
+          value={getDataTableValue(filteredPreviewData.values)}
         >
           {filteredPreviewData.values.map((value) => (
             <Column
               key={value.value}
-              header={this.getHeaderValue(value)}
+              header={getHeaderValue(value)}
               headerStyle={{ textAlign: 'left', width: '5rem' }}
               style={{ width: '5rem' }}
               bodyStyle={{ hyphens: 'auto' }}
@@ -1729,12 +1617,12 @@ export const DatasetPage = fp.flow(
           ))}
         </DataTable>
       );
-    }
+    };
 
-    renderPreviewDataTableSectionMessage(
+    const renderPreviewDataTableSectionMessage = (
       filteredPreviewData: DataSetPreviewInfo
-    ) {
-      const domainDisplayed = formatDomain(this.state.selectedPreviewDomain);
+    ) => {
+      const domainDisplayed = formatDomain(selectedPreviewDomain);
       return (
         <div style={styles.warningMessage}>
           {filteredPreviewData.isLoading ? (
@@ -1752,568 +1640,521 @@ export const DatasetPage = fp.flow(
           )}
         </div>
       );
-    }
+    };
 
-    onClickExport() {
-      this.setState((state) => {
-        return {
-          modalState: state.selectedDomains.has(Domain.WHOLEGENOMEVARIANT)
-            ? ModalState.Extract
-            : ModalState.Export,
-        };
-      });
-    }
+    const onClickExport = () => {
+      setModalState(
+        selectedDomains.has(Domain.WHOLEGENOMEVARIANT)
+          ? ModalState.Extract
+          : ModalState.Export
+      );
+    };
 
-    render() {
-      const { namespace, id } = this.props.workspace;
-      const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
-      const cohortsPath = pathPrefix + '/cohorts/build';
-      const conceptSetsPath = pathPrefix + '/concepts';
-      const {
-        crossDomainConceptSetList,
-        dataSet,
-        dataSetTouched,
-        domainValueSetIsLoading,
-        domainValueSetLookup,
-        includesAllParticipants,
-        loadingResources,
-        previewList,
-        selectedCohortIds,
-        selectedConceptSetIds,
-        selectedPreviewDomain,
-        selectedDomains,
-        selectedDomainValuePairs,
-        selectedPrepackagedConceptSets,
-      } = this.state;
-      const exportError = !this.canWrite
-        ? 'Requires Owner or Writer permission'
-        : dataSetTouched
-        ? 'Pending changes must be saved'
-        : '';
+    const { namespace, id } = workspace;
+    const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
+    const cohortsPath = pathPrefix + '/cohorts/build';
+    const conceptSetsPath = pathPrefix + '/concepts';
+    const exportError = !canWrite
+      ? 'Requires Owner or Writer permission'
+      : dataSetTouched
+      ? 'Pending changes must be saved'
+      : '';
 
-      return (
-        <React.Fragment>
-          {this.state.savingDataset && <SpinnerOverlay opacity={0.3} />}
+    return (
+      <React.Fragment>
+        {savingDataset && <SpinnerOverlay opacity={0.3} />}
 
-          <FadeBox style={{ paddingTop: '1rem' }}>
-            <h2 style={{ paddingTop: 0, marginTop: 0 }}>
-              Datasets
-              {!this.isCreatingNewDataset &&
-                dataSet !== undefined &&
-                ' - ' + dataSet.name}
-            </h2>
-            <div style={{ color: colors.primary, fontSize: '14px' }}>
-              Build a dataset by selecting the variables and values for one or
-              more of your cohorts. Then export the completed dataset to
-              Notebooks where you can perform your analysis
-            </div>
-            <div style={{ display: 'flex', paddingTop: '1rem' }}>
+        <FadeBox style={{ paddingTop: '1rem' }}>
+          <h2 style={{ paddingTop: 0, marginTop: 0 }}>
+            Datasets
+            {!!dataSet && ' - ' + dataSet.name}
+          </h2>
+          <div style={{ color: colors.primary, fontSize: '14px' }}>
+            Build a dataset by selecting the variables and values for one or
+            more of your cohorts. Then export the completed dataset to Notebooks
+            where you can perform your analysis
+          </div>
+          <div style={{ display: 'flex', paddingTop: '1rem' }}>
+            <div
+              style={{
+                width: '31%',
+                height: '80%',
+                minWidth: styles.selectBoxHeader.minWidth,
+              }}
+            >
               <div
                 style={{
-                  width: '31%',
-                  height: '80%',
-                  minWidth: styles.selectBoxHeader.minWidth,
+                  backgroundColor: 'white',
+                  border: `1px solid ${colors.light}`,
                 }}
               >
-                <div
-                  style={{
-                    backgroundColor: 'white',
-                    border: `1px solid ${colors.light}`,
-                  }}
+                <BoxHeader
+                  step='1'
+                  header='Select Cohorts'
+                  subHeader='Participants'
                 >
-                  <BoxHeader
-                    step='1'
-                    header='Select Cohorts'
-                    subHeader='Participants'
-                  >
-                    <PlusLink
-                      dataTestId='cohorts-link'
-                      path={cohortsPath}
-                      disable={!this.canWrite}
-                    />
-                  </BoxHeader>
-                  <div style={{ height: '9rem', overflowY: 'auto' }}>
-                    <Subheader>Prepackaged Cohorts</Subheader>
-                    <ImmutableListItem
-                      name='All Participants'
-                      data-test-id='all-participant'
-                      checked={includesAllParticipants}
-                      onChange={() => this.selectPrePackagedCohort()}
-                    />
-                    <Subheader>Workspace Cohorts</Subheader>
-                    {!loadingResources &&
-                      this.state.cohortList.map((cohort) => (
-                        <ImmutableWorkspaceCohortListItem
-                          key={cohort.id}
-                          name={cohort.name}
-                          data-test-id='cohort-list-item'
-                          checked={selectedCohortIds.includes(cohort.id)}
-                          cohortId={cohort.id}
-                          namespace={namespace}
-                          wid={id}
-                          onChange={() => this.selectCohort(cohort)}
-                        />
-                      ))}
-                    {loadingResources && (
-                      <Spinner
-                        style={{
-                          position: 'relative',
-                          top: '0.5rem',
-                          left: '7rem',
-                        }}
+                  <PlusLink
+                    dataTestId='cohorts-link'
+                    path={cohortsPath}
+                    disable={!canWrite}
+                  />
+                </BoxHeader>
+                <div style={{ height: '9rem', overflowY: 'auto' }}>
+                  <Subheader>Prepackaged Cohorts</Subheader>
+                  <ImmutableListItem
+                    name='All Participants'
+                    data-test-id='all-participant'
+                    checked={includesAllParticipants}
+                    onChange={() => selectPrePackagedCohort()}
+                  />
+                  <Subheader>Workspace Cohorts</Subheader>
+                  {!loadingResources &&
+                    cohortList.map((cohort) => (
+                      <ImmutableWorkspaceCohortListItem
+                        key={cohort.id}
+                        name={cohort.name}
+                        data-test-id='cohort-list-item'
+                        checked={selectedCohortIds.includes(cohort.id)}
+                        cohortId={cohort.id}
+                        namespace={namespace}
+                        wid={id}
+                        onChange={() => selectCohort(cohort)}
                       />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div
-                style={{
-                  width: '34.5%',
-                  height: '80%',
-                  marginLeft: '0.75rem',
-                  minWidth: styles.selectBoxHeader.minWidth,
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: 'white',
-                    border: `1px solid ${colors.light}`,
-                  }}
-                >
-                  <BoxHeader
-                    step='2'
-                    header='Select Concept Sets'
-                    subHeader='Rows'
-                    style={{ paddingRight: '1rem' }}
-                  >
-                    <PlusLink
-                      dataTestId='concept-sets-link'
-                      path={conceptSetsPath}
-                      disable={!this.canWrite}
-                    />
-                  </BoxHeader>
-                  <div
-                    style={{
-                      height: '9rem',
-                      overflowY: 'auto',
-                      pointerEvents:
-                        this.state.domainValueSetIsLoading.size > 0
-                          ? 'none'
-                          : 'auto',
-                    }}
-                    data-test-id='prePackage-concept-set'
-                  >
-                    <Subheader>Prepackaged Concept Sets</Subheader>
-                    {this.getPrePackagedList().map(
-                      (prepackaged: PrepackagedConceptSet) => {
-                        const p = PrepackagedConceptSet[prepackaged];
-                        return (
-                          <ImmutableListItem
-                            name={p}
-                            data-test-id='prePackage-concept-set-item'
-                            key={prepackaged}
-                            checked={selectedPrepackagedConceptSets.has(p)}
-                            onChange={() =>
-                              this.selectPrePackagedConceptSet(
-                                p,
-                                !selectedPrepackagedConceptSets.has(p)
-                              )
-                            }
-                          />
-                        );
-                      }
-                    )}
-                    <Subheader>Workspace Concept Sets</Subheader>
-                    {!loadingResources &&
-                      this.state.conceptSetList.map((conceptSet) => (
-                        <ImmutableListItem
-                          key={conceptSet.id}
-                          name={conceptSet.name}
-                          data-test-id='concept-set-list-item'
-                          checked={selectedConceptSetIds.includes(
-                            conceptSet.id
-                          )}
-                          onChange={() =>
-                            this.selectConceptSet(
-                              conceptSet,
-                              !selectedConceptSetIds.includes(conceptSet.id)
-                            )
-                          }
-                          showSourceConceptIcon={crossDomainConceptSetList.has(
-                            conceptSet.id
-                          )}
-                        />
-                      ))}
-                    {loadingResources && (
-                      <Spinner
-                        style={{
-                          position: 'relative',
-                          top: '2rem',
-                          left: '10rem',
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div
-                style={{
-                  width: '31.5%',
-                  height: '80%',
-                  marginLeft: '0.75rem',
-                  minWidth: styles.selectBoxHeader.minWidth,
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: 'white',
-                    border: `1px solid ${colors.light}`,
-                  }}
-                >
-                  <BoxHeader
-                    step='3'
-                    header='Select Values'
-                    subHeader='Columns'
-                  >
-                    <div style={styles.selectAllContainer}>
-                      <CheckBox
-                        style={{ height: 17, width: 17 }}
-                        manageOwnState={false}
-                        disabled={selectedDomains.size === 0}
-                        data-test-id='select-all'
-                        onChange={() => this.selectAllValues()}
-                        checked={this.allValuesSelected}
-                      />
-                      <div
-                        style={{
-                          marginLeft: '0.25rem',
-                          fontSize: '13px',
-                          lineHeight: '17px',
-                        }}
-                      >
-                        {this.allValuesSelected ? 'Deselect All' : 'Select All'}
-                      </div>
-                    </div>
-                  </BoxHeader>
-                  <div
-                    style={{
-                      height: selectedDomains.size > 0 ? '7.625rem' : '9rem',
-                      overflowY: 'auto',
-                    }}
-                  >
-                    {domainValueSetIsLoading.size > 0 && (
-                      <Spinner
-                        style={{
-                          position: 'relative',
-                          top: '2rem',
-                          left: 'calc(50% - 36px)',
-                        }}
-                      />
-                    )}
-                    {Array.from(selectedDomains)
-                      .sort(COMPARE_DOMAINS_FOR_DISPLAY)
-                      .map(
-                        (domain) =>
-                          domainValueSetLookup.has(domain) && (
-                            <div key={domain}>
-                              <Subheader style={{ fontWeight: 'bold' }}>
-                                {formatDomain(domain)}
-                              </Subheader>
-                              {domainValueSetLookup
-                                .get(domain)
-                                .values.map((domainValue) => (
-                                  <ValueListItem
-                                    data-test-id='value-list-items'
-                                    key={domainValue.value}
-                                    domain={domain}
-                                    domainValue={domainValue}
-                                    onChange={() =>
-                                      this.selectDomainValue(
-                                        domain,
-                                        domainValue
-                                      )
-                                    }
-                                    checked={fp.some(
-                                      {
-                                        domain: domain,
-                                        value: domainValue.value,
-                                      },
-                                      selectedDomainValuePairs
-                                    )}
-                                  />
-                                ))}
-                            </div>
-                          )
-                      )}
-                  </div>
-                  {selectedDomains.size > 0 && (
-                    <FlexRow
+                    ))}
+                  {loadingResources && (
+                    <Spinner
                       style={{
-                        width: '100%',
-                        height: '1.375rem',
-                        backgroundColor: colorWithWhiteness(colors.dark, 0.9),
-                        color: colors.primary,
-                        paddingLeft: '0.4rem',
-                        fontSize: '13px',
-                        lineHeight: '16px',
-                        alignItems: 'center',
+                        position: 'relative',
+                        top: '0.5rem',
+                        left: '7rem',
                       }}
-                    >
-                      <StyledExternalLink
-                        href={supportUrls.dataDictionary}
-                        target='_blank'
-                      >
-                        Learn more
-                      </StyledExternalLink>
-                      &nbsp;in the data dictionary
-                    </FlexRow>
+                    />
                   )}
                 </div>
               </div>
             </div>
-            {crossDomainConceptSetList.size > 0 && (
-              <AlertInfo>
-                <ClrIcon
-                  className='is-solid'
-                  shape='exclamation-triangle'
-                  size={20}
-                />
-                This Concept Set contains source concepts (ICD9CM/ICD10CM/CPT4)
-                that may be present in multiple domains, which may yield
-                multiple data tables.
-              </AlertInfo>
-            )}
-          </FadeBox>
-          <FadeBox style={{ marginTop: '1rem' }}>
             <div
               style={{
-                backgroundColor: 'white',
-                border: `1px solid ${colors.light}`,
+                width: '34.5%',
+                height: '80%',
+                marginLeft: '0.75rem',
+                minWidth: styles.selectBoxHeader.minWidth,
               }}
             >
-              <div style={styles.previewDataHeaderBox}>
-                <FlexColumn>
-                  <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                    <div style={styles.previewDataHeader}>
-                      <div>
-                        <StepNumber step='4' />
-                      </div>
-                      <label
-                        style={{ marginLeft: '0.5rem', color: colors.primary }}
-                      >
-                        Preview Dataset
-                      </label>
-                    </div>
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  border: `1px solid ${colors.light}`,
+                }}
+              >
+                <BoxHeader
+                  step='2'
+                  header='Select Concept Sets'
+                  subHeader='Rows'
+                  style={{ paddingRight: '1rem' }}
+                >
+                  <PlusLink
+                    dataTestId='concept-sets-link'
+                    path={conceptSetsPath}
+                    disable={!canWrite}
+                  />
+                </BoxHeader>
+                <div
+                  style={{
+                    height: '9rem',
+                    overflowY: 'auto',
+                    pointerEvents:
+                      domainValueSetIsLoading.size > 0 ? 'none' : 'auto',
+                  }}
+                  data-test-id='prePackage-concept-set'
+                >
+                  <Subheader>Prepackaged Concept Sets</Subheader>
+                  {getPrePackagedList().map(
+                    (prepackaged: PrepackagedConceptSet) => {
+                      const p = PrepackagedConceptSet[prepackaged];
+                      return (
+                        <ImmutableListItem
+                          name={p}
+                          data-test-id='prePackage-concept-set-item'
+                          key={prepackaged}
+                          checked={selectedPrepackagedConceptSets.has(p)}
+                          onChange={() =>
+                            selectPrePackagedConceptSet(
+                              p,
+                              !selectedPrepackagedConceptSets.has(p)
+                            )
+                          }
+                        />
+                      );
+                    }
+                  )}
+                  <Subheader>Workspace Concept Sets</Subheader>
+                  {!loadingResources &&
+                    conceptSetList.map((conceptSet) => (
+                      <ImmutableListItem
+                        key={conceptSet.id}
+                        name={conceptSet.name}
+                        data-test-id='concept-set-list-item'
+                        checked={selectedConceptSetIds.includes(conceptSet.id)}
+                        onChange={() =>
+                          selectConceptSet(
+                            conceptSet,
+                            !selectedConceptSetIds.includes(conceptSet.id)
+                          )
+                        }
+                        showSourceConceptIcon={crossDomainConceptSetList.has(
+                          conceptSet.id
+                        )}
+                      />
+                    ))}
+                  {loadingResources && (
+                    <Spinner
+                      style={{
+                        position: 'relative',
+                        top: '2rem',
+                        left: '10rem',
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                width: '31.5%',
+                height: '80%',
+                marginLeft: '0.75rem',
+                minWidth: styles.selectBoxHeader.minWidth,
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  border: `1px solid ${colors.light}`,
+                }}
+              >
+                <BoxHeader step='3' header='Select Values' subHeader='Columns'>
+                  <div style={styles.selectAllContainer}>
+                    <CheckBox
+                      style={{ height: 17, width: 17 }}
+                      manageOwnState={false}
+                      disabled={selectedDomains.size === 0}
+                      data-test-id='select-all'
+                      onChange={() => selectAllValues()}
+                      checked={allValuesSelected()}
+                    />
                     <div
                       style={{
-                        color: colors.primary,
-                        fontSize: '14px',
-                        width: '60%',
+                        marginLeft: '0.25rem',
+                        fontSize: '13px',
+                        lineHeight: '17px',
                       }}
                     >
-                      A visualization of your data table based on concept sets
-                      and values you selected above. Once complete, export for
-                      analysis
+                      {allValuesSelected ? 'Deselect All' : 'Select All'}
                     </div>
                   </div>
-                </FlexColumn>
-                <Clickable
-                  data-test-id='preview-button'
+                </BoxHeader>
+                <div
                   style={{
-                    marginTop: '0.5rem',
-                    cursor: this.disableSave() ? 'not-allowed' : 'pointer',
-                    height: '1.8rem',
-                    width: '6.5rem',
-                    color: this.disableSave()
-                      ? colorWithWhiteness(colors.dark, 0.6)
-                      : colors.accent,
-                  }}
-                  disabled={this.disableSave()}
-                  onClick={() => {
-                    AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
-                    this.getPreviewList();
+                    height: selectedDomains.size > 0 ? '7.625rem' : '9rem',
+                    overflowY: 'auto',
                   }}
                 >
-                  View Preview Table
-                </Clickable>
-              </div>
-              {fp.toPairs(previewList).length > 0 && (
-                <FlexColumn>
-                  <FlexRow style={{ paddingTop: '0.5rem' }}>
-                    {fp.toPairs(previewList).map((value) => {
-                      const domain: string = value[0];
-                      // Strip underscores so we get the correct enum value
-                      const domainEnumValue = Domain[domain.replace(/_/g, '')];
-                      const previewRow: DataSetPreviewInfo = value[1];
-                      return (
-                        <TooltipTrigger
-                          key={domain}
-                          content={
-                            'Preview for domain ' +
-                            formatDomainString(domain) +
-                            ' is still loading. It may take up to one minute'
-                          }
-                          disabled={!previewRow.isLoading}
-                          side='top'
-                        >
-                          <Clickable
-                            disabled={previewRow.isLoading}
-                            onClick={() =>
-                              this.setState({
-                                selectedPreviewDomain: domainEnumValue,
-                              })
-                            }
-                            style={stylesFunction.selectDomainForPreviewButton(
-                              selectedPreviewDomain === domainEnumValue
-                            )}
-                          >
-                            <FlexRow
-                              style={{
-                                alignItems: 'center',
-                                overflow: 'auto',
-                                wordBreak: 'break-all',
-                              }}
-                            >
-                              {formatDomainString(domain)}
-                              {previewRow.isLoading && (
-                                <Spinner
-                                  style={{
-                                    marginLeft: '4px',
-                                    height: '18px',
-                                    width: '18px',
-                                  }}
+                  {domainValueSetIsLoading.size > 0 && (
+                    <Spinner
+                      style={{
+                        position: 'relative',
+                        top: '2rem',
+                        left: 'calc(50% - 36px)',
+                      }}
+                    />
+                  )}
+                  {Array.from(selectedDomains)
+                    .sort(COMPARE_DOMAINS_FOR_DISPLAY)
+                    .map(
+                      (domain: Domain) =>
+                        domainValueSetLookup.has(domain) && (
+                          <div key={domain}>
+                            <Subheader style={{ fontWeight: 'bold' }}>
+                              {formatDomain(domain)}
+                            </Subheader>
+                            {domainValueSetLookup
+                              .get(domain)
+                              .values.map((domainValue) => (
+                                <ValueListItem
+                                  data-test-id='value-list-items'
+                                  key={domainValue.value}
+                                  domain={domain}
+                                  domainValue={domainValue}
+                                  onChange={() =>
+                                    selectDomainValue(domain, domainValue)
+                                  }
+                                  checked={fp.some(
+                                    {
+                                      domain: domain,
+                                      value: domainValue.value,
+                                    },
+                                    selectedDomainValuePairs
+                                  )}
                                 />
-                              )}
-                            </FlexRow>
-                          </Clickable>
-                        </TooltipTrigger>
-                      );
-                    })}
-                  </FlexRow>
-                  {this.renderPreviewDataTableSection()}
-                </FlexColumn>
-              )}
-              {fp.entries(previewList).length === 0 && (
-                <div style={styles.previewButtonBox}>
-                  <div
+                              ))}
+                          </div>
+                        )
+                    )}
+                </div>
+                {selectedDomains.size > 0 && (
+                  <FlexRow
                     style={{
-                      color: colorWithWhiteness(colors.dark, 0.6),
-                      fontSize: '20px',
-                      fontWeight: 400,
+                      width: '100%',
+                      height: '1.375rem',
+                      backgroundColor: colorWithWhiteness(colors.dark, 0.9),
+                      color: colors.primary,
+                      paddingLeft: '0.4rem',
+                      fontSize: '13px',
+                      lineHeight: '16px',
+                      alignItems: 'center',
                     }}
                   >
-                    Select cohorts, concept sets, and values above to generate a
-                    preview table
+                    <StyledExternalLink
+                      href={supportUrls.dataDictionary}
+                      target='_blank'
+                    >
+                      Learn more
+                    </StyledExternalLink>
+                    &nbsp;in the data dictionary
+                  </FlexRow>
+                )}
+              </div>
+            </div>
+          </div>
+          {crossDomainConceptSetList.size > 0 && (
+            <AlertInfo>
+              <ClrIcon
+                className='is-solid'
+                shape='exclamation-triangle'
+                size={20}
+              />
+              This Concept Set contains source concepts (ICD9CM/ICD10CM/CPT4)
+              that may be present in multiple domains, which may yield multiple
+              data tables.
+            </AlertInfo>
+          )}
+        </FadeBox>
+        <FadeBox style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              backgroundColor: 'white',
+              border: `1px solid ${colors.light}`,
+            }}
+          >
+            <div style={styles.previewDataHeaderBox}>
+              <FlexColumn>
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <div style={styles.previewDataHeader}>
+                    <div>
+                      <StepNumber step='4' />
+                    </div>
+                    <label
+                      style={{ marginLeft: '0.5rem', color: colors.primary }}
+                    >
+                      Preview Dataset
+                    </label>
+                  </div>
+                  <div
+                    style={{
+                      color: colors.primary,
+                      fontSize: '14px',
+                      width: '60%',
+                    }}
+                  >
+                    A visualization of your data table based on concept sets and
+                    values you selected above. Once complete, export for
+                    analysis
                   </div>
                 </div>
-              )}
-            </div>
-          </FadeBox>
-          <div style={styles.stickyFooter}>
-            <TooltipTrigger
-              data-test-id='save-tooltip'
-              content='Requires Owner or Writer permission'
-              disabled={this.canWrite}
-            >
-              {this.isCreatingNewDataset ? (
-                <Button
-                  style={{ marginBottom: '2rem', marginRight: '1rem' }}
-                  data-test-id='save-button'
-                  onClick={() =>
-                    this.setState({ modalState: ModalState.Create })
-                  }
-                  disabled={
-                    this.disableSave() || !this.canWrite || !dataSetTouched
-                  }
-                >
-                  Create Dataset
-                </Button>
-              ) : (
-                <Button
-                  style={{ marginBottom: '2rem', marginRight: '1rem' }}
-                  data-test-id='save-button'
-                  onClick={() => this.saveDataset()}
-                  disabled={
-                    this.state.savingDataset ||
-                    this.disableSave() ||
-                    !this.canWrite ||
-                    !dataSetTouched
-                  }
-                >
-                  Save Dataset
-                </Button>
-              )}
-            </TooltipTrigger>
-
-            <TooltipTrigger
-              data-test-id='export-tooltip'
-              content={exportError}
-              disabled={!exportError}
-            >
-              <Button
-                style={{ marginBottom: '2rem' }}
-                data-test-id='analyze-button'
-                onClick={() => this.onClickExport()}
-                disabled={this.disableSave() || !!exportError}
+              </FlexColumn>
+              <Clickable
+                data-test-id='preview-button'
+                style={{
+                  marginTop: '0.5rem',
+                  cursor: disableSave() ? 'not-allowed' : 'pointer',
+                  height: '1.8rem',
+                  width: '6.5rem',
+                  color: disableSave()
+                    ? colorWithWhiteness(colors.dark, 0.6)
+                    : colors.accent,
+                }}
+                disabled={disableSave()}
+                onClick={() => {
+                  AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
+                  getPreviewList();
+                }}
               >
-                Analyze
-              </Button>
-            </TooltipTrigger>
-          </div>
-
-          {switchCase(
-            this.state.modalState,
-            [
-              ModalState.Create,
-              () => (
-                <CreateModal
-                  entityName='Dataset'
-                  getExistingNames={async () => {
-                    const resources =
-                      await workspacesApi().getWorkspaceResources(
-                        namespace,
-                        id,
-                        { typesToFetch: [ResourceType.DATASET] }
-                      );
-                    return resources.map((resource) => resource.dataSet.name);
+                View Preview Table
+              </Clickable>
+            </div>
+            {fp.toPairs(previewList).length > 0 && (
+              <FlexColumn>
+                <FlexRow style={{ paddingTop: '0.5rem' }}>
+                  {fp.toPairs(previewList).map((value) => {
+                    const domain: string = value[0];
+                    // Strip underscores so we get the correct enum value
+                    const domainEnumValue = Domain[domain.replace(/_/g, '')];
+                    const previewRow: DataSetPreviewInfo = value[1];
+                    return (
+                      <TooltipTrigger
+                        key={domain}
+                        content={
+                          'Preview for domain ' +
+                          formatDomainString(domain) +
+                          ' is still loading. It may take up to one minute'
+                        }
+                        disabled={!previewRow.isLoading}
+                        side='top'
+                      >
+                        <Clickable
+                          disabled={previewRow.isLoading}
+                          onClick={() =>
+                            setSelectedPreviewDomain(domainEnumValue)
+                          }
+                          style={stylesFunction.selectDomainForPreviewButton(
+                            selectedPreviewDomain === domainEnumValue
+                          )}
+                        >
+                          <FlexRow
+                            style={{
+                              alignItems: 'center',
+                              overflow: 'auto',
+                              wordBreak: 'break-all',
+                            }}
+                          >
+                            {formatDomainString(domain)}
+                            {previewRow.isLoading && (
+                              <Spinner
+                                style={{
+                                  marginLeft: '4px',
+                                  height: '18px',
+                                  width: '18px',
+                                }}
+                              />
+                            )}
+                          </FlexRow>
+                        </Clickable>
+                      </TooltipTrigger>
+                    );
+                  })}
+                </FlexRow>
+                {renderPreviewDataTableSection()}
+              </FlexColumn>
+            )}
+            {fp.entries(previewList).length === 0 && (
+              <div style={styles.previewButtonBox}>
+                <div
+                  style={{
+                    color: colorWithWhiteness(colors.dark, 0.6),
+                    fontSize: '20px',
+                    fontWeight: 400,
                   }}
-                  save={(name, desc) => this.createDataset(name, desc)}
-                  close={() => this.setState({ modalState: ModalState.None })}
-                />
-              ),
-            ],
-            [
-              ModalState.Export,
-              () => (
-                <ExportDatasetModal
-                  dataset={dataSet}
-                  closeFunction={() =>
-                    this.setState({ modalState: ModalState.None })
-                  }
-                />
-              ),
-            ],
-            [
-              ModalState.Extract,
-              () => (
-                <GenomicExtractionModal
-                  dataSet={dataSet}
-                  workspaceNamespace={namespace}
-                  workspaceFirecloudName={id}
-                  title={
-                    'Would you like to extract genomic variant data as VCF files?'
-                  }
-                  cancelText={'Skip'}
-                  confirmText={'Extract & Continue'}
-                  closeFunction={() =>
-                    this.setState({ modalState: ModalState.Export })
-                  }
-                />
-              ),
-            ]
-          )}
-        </React.Fragment>
-      );
-    }
+                >
+                  Select cohorts, concept sets, and values above to generate a
+                  preview table
+                </div>
+              </div>
+            )}
+          </div>
+        </FadeBox>
+        <div style={styles.stickyFooter}>
+          <TooltipTrigger
+            data-test-id='save-tooltip'
+            content='Requires Owner or Writer permission'
+            disabled={canWrite}
+          >
+            {!dataSet ? (
+              <Button
+                style={{ marginBottom: '2rem', marginRight: '1rem' }}
+                data-test-id='save-button'
+                onClick={() => setModalState(ModalState.Create)}
+                disabled={disableSave() || !canWrite || !dataSetTouched}
+              >
+                Create Dataset
+              </Button>
+            ) : (
+              <Button
+                style={{ marginBottom: '2rem', marginRight: '1rem' }}
+                data-test-id='save-button'
+                onClick={() => saveDataset()}
+                disabled={
+                  savingDataset || disableSave() || !canWrite || !dataSetTouched
+                }
+              >
+                Save Dataset
+              </Button>
+            )}
+          </TooltipTrigger>
+
+          <TooltipTrigger
+            data-test-id='export-tooltip'
+            content={exportError}
+            disabled={!exportError}
+          >
+            <Button
+              style={{ marginBottom: '2rem' }}
+              data-test-id='analyze-button'
+              onClick={() => onClickExport()}
+              disabled={disableSave() || !!exportError}
+            >
+              Analyze
+            </Button>
+          </TooltipTrigger>
+        </div>
+
+        {switchCase(
+          modalState,
+          [
+            ModalState.Create,
+            () => (
+              <CreateModal
+                entityName='Dataset'
+                getExistingNames={async () => {
+                  const resources = await workspacesApi().getWorkspaceResources(
+                    namespace,
+                    id,
+                    { typesToFetch: [ResourceType.DATASET] }
+                  );
+                  return resources.map((resource) => resource.dataSet.name);
+                }}
+                save={(name, desc) => createDataset(name, desc)}
+                close={() => setModalState(ModalState.None)}
+              />
+            ),
+          ],
+          [
+            ModalState.Export,
+            () => (
+              <ExportDatasetModal
+                dataset={dataSet}
+                closeFunction={() => setModalState(ModalState.None)}
+              />
+            ),
+          ],
+          [
+            ModalState.Extract,
+            () => (
+              <GenomicExtractionModal
+                dataSet={dataSet}
+                workspaceNamespace={namespace}
+                workspaceFirecloudName={id}
+                title={
+                  'Would you like to extract genomic variant data as VCF files?'
+                }
+                cancelText={'Skip'}
+                confirmText={'Extract & Continue'}
+                closeFunction={() => setModalState(ModalState.Export)}
+              />
+            ),
+          ]
+        )}
+      </React.Fragment>
+    );
   }
 );
