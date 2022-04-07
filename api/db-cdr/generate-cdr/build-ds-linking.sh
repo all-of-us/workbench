@@ -20,7 +20,7 @@ MAX_ID_QRY="query --quiet --project_id=$BQ_PROJECT --nouse_legacy_sql --format=c
 # INSERT DATA
 ################################################
 echo "ds_linking - inserting condition data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -48,7 +48,7 @@ VALUES
     ($MAX_ID + 21, 'CONDITION_STATUS_CONCEPT_NAME', 'c_status.concept_name as condition_status_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_status ON c_occurrence.condition_status_concept_id = c_status.concept_id', 'Condition')"
 
 echo "ds_linking - inserting drug exposure data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -82,7 +82,7 @@ VALUES
     ($MAX_ID + 28, 'DOSE_UNIT_SOURCE_VALUE', 'd_exposure.dose_unit_source_value', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug')"
 
 echo "ds_linking - inserting measurement data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -114,7 +114,7 @@ VALUES
     ($MAX_ID + 27, 'VALUE_SOURCE_VALUE', 'measurement.value_source_value', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement')"
 
 echo "ds_linking - inserting observation data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -149,7 +149,7 @@ VALUES
     ($MAX_ID + 29, 'questionnaire_response_id', 'observation.questionnaire_response_id', 'FROM \`\${projectId}.\${dataSetId}.observation\` observation', 'Observation')"
 
 echo "ds_linking - inserting person data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -166,7 +166,7 @@ VALUES
     ($MAX_ID + 11, 'SEX_AT_BIRTH', 'p_sex_at_birth_concept.concept_name as sex_at_birth', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_sex_at_birth_concept ON person.sex_at_birth_concept_id = p_sex_at_birth_concept.concept_id', 'Person')"
 
 echo "ds_linking - inserting procedure data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -203,7 +203,7 @@ else
 fi
 
 echo "ds_linking - inserting survey data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -219,7 +219,7 @@ VALUES
     ($MAX_ID + 10, 'SURVEY_VERSION_NAME', 'answer.survey_version_name', ' ', 'Survey')"
 
 echo "ds_linking - inserting visit data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -246,7 +246,7 @@ VALUES
     ($MAX_ID + 21, 'DISCHARGE_TO_SOURCE_VALUE', 'visit.discharge_to_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit')"
 
 echo "ds_linking - inserting fitbit heart_rate_summary data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -260,7 +260,7 @@ VALUES
   ($MAX_ID + 8, 'CALORIE_COUNT', 'heart_rate_summary.calorie_count', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary')"
 
 echo "ds_linking - inserting fitbit heart_rate_level data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -270,7 +270,7 @@ VALUES
   ($MAX_ID + 4, 'HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level')"
 
 echo "ds_linking - inserting fitbit activity_summary data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -290,7 +290,7 @@ VALUES
 
 
 echo "ds_linking - inserting fitbit steps_intraday data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
@@ -300,7 +300,7 @@ VALUES
   ($MAX_ID + 4, 'STEPS', 'SUM(CAST(steps_intraday.steps AS INT64)) as sum_steps', 'FROM \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps')"
 
 echo "ds_linking - inserting zip code socioeconimic data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
