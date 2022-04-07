@@ -7,7 +7,7 @@ import {
   Page,
   WaitForSelectorOptions
 } from 'puppeteer';
-import { getAttrValue, getPropValue, getStyleValue } from 'utils/element-utils';
+import { exists, getAttrValue, getPropValue, getStyleValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 
@@ -421,14 +421,7 @@ export default class BaseElement {
   }
 
   async exists(timeout = 2000): Promise<boolean> {
-    return this.page
-      .waitForXPath(this.xpath, { visible: true, timeout })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+    return exists(this.page, this.getXpath(), { timeout });
   }
 
   /**

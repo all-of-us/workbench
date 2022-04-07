@@ -10,6 +10,7 @@ import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
 import Checkbox from 'app/element/checkbox';
 import { waitWhileLoading } from 'utils/waits-utils';
+import { exists } from 'utils/element-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -363,14 +364,7 @@ export default class RuntimePanel extends BaseSidebar {
   // runtime status spinner.
   async existStatusIcon(timeout?: number): Promise<boolean> {
     const runtimeStatusSpinner = '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="sync-alt"]';
-    return this.page
-      .waitForXPath(runtimeStatusSpinner, { visible: true, timeout })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+    return exists(this.page, runtimeStatusSpinner, { timeout });
   }
 
   /**
@@ -379,38 +373,21 @@ export default class RuntimePanel extends BaseSidebar {
   async waitForRunningAndClose(timeout?: number): Promise<boolean> {
     const runtimeSidebar = new RuntimePanel(this.page);
     await runtimeSidebar.open();
-    try {
-      await runtimeSidebar.waitForStartStopIconState(StartStopIconState.Running, timeout);
-      return true;
-    } catch (err) {
-      return false;
-    } finally {
-      await runtimeSidebar.close();
-    }
+    return runtimeSidebar
+      .waitForStartStopIconState(StartStopIconState.Running, timeout)
+      .then(() => true)
+      .catch(() => false)
+      .finally(() => runtimeSidebar.close());
   }
 
   async isRunning(): Promise<boolean> {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
-    return this.page
-      .waitForXPath(xpath, { visible: true, timeout: 1000 })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+    return exists(this.page, xpath);
   }
 
   async isStopped(): Promise<boolean> {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Stopped);
-    return this.page
-      .waitForXPath(xpath, { visible: true, timeout: 1000 })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+    return exists(this.page, xpath);
   }
 
   async clickDeleteEnvironmentButton(): Promise<void> {

@@ -10,6 +10,7 @@ import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
 import expect from 'expect';
+import HomePage from 'app/page/home-page';
 
 describe('Cohort UI Test', () => {
   beforeEach(async () => {
@@ -132,6 +133,7 @@ describe('Cohort UI Test', () => {
 
   async function openWorkspace(page: Page): Promise<string | null> {
     // Find all workspaces that are older than 30 min.
+    await new HomePage(page).goToAllWorkspacesPage();
     const allWorkspaceCards = await findAllCards(page, 1000 * 60 * 30);
     // Don't create new workspace if none found.
     if (allWorkspaceCards.length === 0) {

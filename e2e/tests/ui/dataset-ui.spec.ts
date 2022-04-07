@@ -4,6 +4,7 @@ import { findAllCards, signInWithAccessToken } from 'utils/test-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
+import HomePage from 'app/page/home-page';
 
 describe('Dataset UI Test', () => {
   beforeEach(async () => {
@@ -13,6 +14,7 @@ describe('Dataset UI Test', () => {
   // Test reuse workspace that is older than 10 min. Test does not create new workspace.
   test('Cannot Create Dataset if Required Fields are Empty', async () => {
     // Find all workspaces that are older than 10 min.
+    await new HomePage(page).goToAllWorkspacesPage();
     const allWorkspaceCards = await findAllCards(page, 1000 * 60 * 10);
     if (allWorkspaceCards.length === 0) {
       logger.info('Cannot find a suitable existing workspace (created at least 10 min ago). Test end early.');

@@ -41,18 +41,16 @@ export default class NotebookCell extends NotebookFrame {
     return this;
   }
 
-  async isSelected(cellIndx?: number): Promise<boolean> {
+  async isSelected(cellIndex?: number): Promise<boolean> {
     const iframe = await this.getIFrame();
-    cellIndx = cellIndx || this.getCellIndex();
-    const selector = this.cellSelector(cellIndx);
-    return iframe
-      .waitForSelector(`${selector}.selected`, { visible: true })
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+    cellIndex = cellIndex || this.getCellIndex();
+    const selector = this.cellSelector(cellIndex);
+    try {
+      await iframe.waitForSelector(`${selector}.selected`, { visible: true });
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
 
   /**

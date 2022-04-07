@@ -279,6 +279,7 @@ export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Prom
   const existingCards: WorkspaceCard[] = await workspaceCard.findAllCards({
     accessLevel: WorkspaceAccessLevel.Owner
   });
+
   // Filter to exclude Workspaces younger than 30 minutes.
   const halfHourAgoMillis = Date.now() - millisAgo;
   return Promise.all(

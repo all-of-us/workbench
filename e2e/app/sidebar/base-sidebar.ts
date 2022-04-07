@@ -67,16 +67,12 @@ export default abstract class BaseSidebar extends Container {
   }
 
   async isVisible(timeout = 1000): Promise<boolean> {
-    if (!(await super.isVisible())) return false;
-    try {
-      await Promise.all([
-        this.page.waitForXPath(this.getXpath(), { visible: true, timeout }),
-        this.page.waitForXPath(this.deleteIconXpath, { visible: true, timeout })
-      ]);
-      return true;
-    } catch (err) {
-      return false;
-    }
+    return Promise.all([
+      this.page.waitForXPath(this.getXpath(), { visible: true, timeout }),
+      this.page.waitForXPath(this.deleteIconXpath, { visible: true, timeout })
+    ])
+      .then(() => true)
+      .catch(() => false);
   }
 
   async waitUntilClose(): Promise<void> {
