@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { ElementHandle, Frame, Page } from 'puppeteer';
+import { Dialog, ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForFn, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/sidebar/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
@@ -115,11 +115,7 @@ export default class NotebookPage extends NotebookFrame {
 
   async openUploadFilePage(): Promise<Page> {
     // Select File menu => Open.
-    await this.selectFileOpenMenu();
-
-    // New tab opens. "browser" is a Jest-Puppeteer global variable.
-    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
-    const newPage = await newTarget.page();
+    const newPage = await this.selectFileOpenMenu();
 
     // Upload button that triggers file selection dialog.
     const uploadButtonSelector = 'input#upload_span_input';
@@ -127,18 +123,55 @@ export default class NotebookPage extends NotebookFrame {
     return newPage;
   }
 
-  async acceptDataUsePolicyDialog(page: Page): Promise<void> {
+  async downloadFileFromTree(treePage: Page, filename: string): Promise<Page> {
+    // Check the box for the given filename and download.
+    const findAndClickCheckbox = () =>
+      treePage
+        .waitForXPath(
+          `//*[@id="notebook_list"]//a[@class="item_link"][span[text()="${filename}"]]/preceding-sibling::input`,
+          { visible: true }
+        )
+        .then((e) => e.click());
+    await findAndClickCheckbox();
+
+    let sawDialog = false;
+    treePage.once('dialog', async (d: Dialog) => {
+      await this.acceptDataUseDownloadDialog(treePage, d);
+      sawDialog = true;
+    });
+    await treePage.waitForXPath('//button[@aria-label="Download selected"]', { visible: true }).then((e) => e.click());
+
+    // Uncheck afterwards, to restore the original state of the page.
+    await treePage.waitForTimeout(500);
+    await findAndClickCheckbox();
+    await treePage.waitForTimeout(500);
+
+    // Fail if file download proceeded without a dialog prompt.
+    expect(await waitForFn(() => sawDialog)).toBeTruthy();
+    return treePage;
+  }
+
+  async acceptDataUseDownloadDialog(page: Page, dialog: Dialog): Promise<void> {
+    const expectedMessage = 'All of Us Data Use Policies prohibit you from removing participant-level data';
+    await page.waitForTimeout(250);
+    const modalMessage = dialog.message();
+
+    // Verify this is the data policy modal.
+    expect(modalMessage).toContain(expectedMessage);
+
+    // The modal requires you enter "affirm" to continue.
+    await dialog.accept('affirm');
+  }
+
+  async acceptDataUseUploadDialog(page: Page, dialog: Dialog): Promise<void> {
     const expectedMessage =
       'It is All of Us data use policy to not upload data or files containing personally identifiable information';
-    page.on('dialog', async (dialog) => {
-      await page.waitForTimeout(250);
-      const modalMessage = dialog.message();
-      // If this is not the Data Use Policy dialog, error is thrown.
-      expect(modalMessage).toContain(expectedMessage);
-      await dialog.accept();
-      await page.waitForTimeout(500);
-      logger.info('Accept "Data Use Policy" dialog');
-    });
+    await page.waitForTimeout(250);
+    const modalMessage = dialog.message();
+    // If this is not the Data Use Policy dialog, error is thrown.
+    expect(modalMessage).toContain(expectedMessage);
+    await dialog.accept();
+    logger.info('Accept "Data Use Policy" upload dialog');
   }
 
   async chooseFile(page: Page, pyFilePath: string): Promise<void> {
@@ -187,7 +220,7 @@ export default class NotebookPage extends NotebookFrame {
     await this.page.waitForTimeout(500);
   }
 
-  async selectFileOpenMenu(): Promise<void> {
+  async selectFileOpenMenu(): Promise<Page> {
     const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
       await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
         element.hover();
@@ -212,7 +245,7 @@ export default class NotebookPage extends NotebookFrame {
         return;
       }
       if (maxRetries <= 0) {
-        throw new Error('Failed to click File menu -> Download.');
+        throw new Error('Failed to click File menu -> Open.');
       }
       maxRetries--;
       await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
@@ -221,6 +254,10 @@ export default class NotebookPage extends NotebookFrame {
     const frame = await this.getIFrame();
     await clickAndCheck(frame);
     await this.page.waitForTimeout(500);
+
+    // New tab opens. "browser" is a Jest-Puppeteer global variable.
+    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
+    return newTarget.page();
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
@@ -482,10 +519,16 @@ export default class NotebookPage extends NotebookFrame {
     // Select File menu => Open to open Upload tab.
     const newPage = await this.openUploadFilePage();
 
-    // The first dialog that open up is "Data Use Policy" dialog: verify message and close dialog.
-    await this.acceptDataUsePolicyDialog(newPage);
+    // Wait 5 seconds to allow extensions to load.
+    // TODO(RW-8114): Try waitForNetworkIdle here instead.
+    await newPage.waitForTimeout(5000);
 
     // Upload button that triggers file selection dialog.
+    let sawDialog = false;
+    newPage.once('dialog', async (d: Dialog) => {
+      await this.acceptDataUseUploadDialog(newPage, d);
+      sawDialog = true;
+    });
     await this.chooseFile(newPage, filePath);
 
     // Upload button that uploads the file is visible.
@@ -519,6 +562,9 @@ export default class NotebookPage extends NotebookFrame {
 
     // In case page has to be checked after finish.
     await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
+
+    // Fail if upload proceeded without a dialog prompt.
+    expect(await waitForFn(() => sawDialog)).toBeTruthy();
 
     await newPage.close();
     await this.page.bringToFront();
