@@ -20,7 +20,7 @@ MAX_ID_QRY="query --quiet --project_id=$BQ_PROJECT --nouse_legacy_sql --format=c
 # INSERT DATA
 ################################################
 echo "ds_linking - inserting condition data"
-MAX_ID=$(bq $MAX_ID_QRY | awk '{is(NR>1)print}')
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
