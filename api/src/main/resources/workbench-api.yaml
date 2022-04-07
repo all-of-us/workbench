@@ -4450,9 +4450,6 @@ definitions:
       complianceTrainingHost:
         type: string
         description: The hostname for constructing the compliance training URL.
-      complianceTrainingRenewalLookback:
-        type: number
-        description: the point when we give users the option to update their compliance items.
       enableEraCommons:
         type: boolean
         default: false
@@ -4503,7 +4500,10 @@ definitions:
         description: The RAS base host name.
       accessRenewalLookback:
         type: number
-        description: the point when we give users the option to update their compliance items.
+        description: the point when we give users the option to update the affirmations needed to use the system.
+      complianceTrainingRenewalLookback:
+        type: number
+        description: the point when we give users the option to update their compliance items that involve training.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
