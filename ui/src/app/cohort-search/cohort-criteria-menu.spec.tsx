@@ -59,7 +59,7 @@ describe('CohortCriteriaMenu', () => {
       .simulate('click');
     const domainCountsSpy = jest.spyOn(
       cohortBuilderApi(),
-      'findEhrDomainCounts'
+      'findUniversalDomainCounts'
     );
     expect(domainCountsSpy).toHaveBeenCalledTimes(0);
 
