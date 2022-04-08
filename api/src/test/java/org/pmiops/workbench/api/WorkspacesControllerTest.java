@@ -2516,6 +2516,7 @@ public class WorkspacesControllerTest {
 
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 
+    // mock the current workspace ACLs
     when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             createWorkspaceACL(
@@ -2549,7 +2550,9 @@ public class WorkspacesControllerTest {
             .workspaceEtag(workspace.getEtag())
             // Removing writer.
             .addItemsItem(
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER));
+                new UserRole()
+                    .email(writerUser.getUsername())
+                    .role(WorkspaceAccessLevel.NO_ACCESS));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
@@ -2561,8 +2564,6 @@ public class WorkspacesControllerTest {
             eq(
                 ImmutableList.of(
                     // Specifically, the Registered Tier group should not be removed by this update.
-                    FirecloudTransforms.buildAclUpdate(
-                        currentUser.getUsername(), WorkspaceAccessLevel.OWNER),
                     FirecloudTransforms.buildAclUpdate(
                         writerUser.getUsername(), WorkspaceAccessLevel.NO_ACCESS))));
   }
