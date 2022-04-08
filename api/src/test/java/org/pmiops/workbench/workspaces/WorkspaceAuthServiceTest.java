@@ -7,10 +7,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
@@ -155,39 +155,30 @@ public class WorkspaceAuthServiceTest {
   private static Stream<Arguments> updateWorkspaceAcls() {
     return Stream.of(
         // trivial case: do nothing to empty ACL
-        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableList.of()),
+        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()),
 
         // add one entry to empty ACL -> expect that one entry in response
         Arguments.of(
             ImmutableMap.of(),
             ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
-            ImmutableList.of(
-                FirecloudTransforms.buildAclUpdate("newuser", WorkspaceAccessLevel.OWNER))),
+            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER)),
 
         // update 1 of an existing ACL of 2 -> expect to see that update and remove the other
         Arguments.of(
             ImmutableMap.of(
-                "user1",
-                    new FirecloudWorkspaceAccessEntry()
-                        .accessLevel(WorkspaceAccessLevel.WRITER.toString()),
-                "user2",
-                    new FirecloudWorkspaceAccessEntry()
-                        .accessLevel(WorkspaceAccessLevel.OWNER.toString())),
+                "user1", WorkspaceAccessLevel.WRITER,
+                "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
-            buildAclUpdates(
-                ImmutableMap.of(
-                    "user1",
-                    WorkspaceAccessLevel.READER,
-                    "user2",
-                    WorkspaceAccessLevel.NO_ACCESS))));
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.READER, "user2", WorkspaceAccessLevel.NO_ACCESS)));
   }
 
   @ParameterizedTest
   @MethodSource("updateWorkspaceAcls")
   public void test_updateWorkspaceAcls(
-      Map<String, FirecloudWorkspaceAccessEntry> originalAcl,
+      Map<String, WorkspaceAccessLevel> originalAcl,
       Map<String, WorkspaceAccessLevel> updates,
-      List<FirecloudWorkspaceACLUpdate> expectedFcUpdates) {
+      Map<String, WorkspaceAccessLevel> expectedFcUpdates) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
 
@@ -197,7 +188,8 @@ public class WorkspaceAuthServiceTest {
     stubUpdateAcl(namespace, fcName);
 
     workspaceAuthService.updateWorkspaceAcls(workspace, updates);
-    verify(mockFireCloudService).updateWorkspaceACL(namespace, fcName, expectedFcUpdates);
+    verify(mockFireCloudService)
+        .updateWorkspaceACL(namespace, fcName, buildAclUpdates(expectedFcUpdates));
   }
 
   private DbWorkspace stubDaoGetRequired(
@@ -220,9 +212,18 @@ public class WorkspaceAuthServiceTest {
   }
 
   private void stubFcGetAcl(
-      String namespace, String fcName, Map<String, FirecloudWorkspaceAccessEntry> acl) {
-    final FirecloudWorkspaceACL toReturn = new FirecloudWorkspaceACL().acl(acl);
-    when(mockFireCloudService.getWorkspaceAclAsService(namespace, fcName)).thenReturn(toReturn);
+      String namespace, String fcName, Map<String, WorkspaceAccessLevel> acl) {
+    when(mockFireCloudService.getWorkspaceAclAsService(namespace, fcName))
+        .thenReturn(
+            new FirecloudWorkspaceACL()
+                .acl(
+                    acl.entrySet().stream()
+                        .collect(
+                            Collectors.toMap(
+                                Entry::getKey,
+                                e ->
+                                    new FirecloudWorkspaceAccessEntry()
+                                        .accessLevel(e.getValue().toString())))));
   }
 
   private void stubRegisteredTier() {
