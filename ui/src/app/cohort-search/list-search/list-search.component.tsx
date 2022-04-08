@@ -316,8 +316,10 @@ export const ListSearch = fp.flow(
         hoverId: undefined,
         loading: false,
         searching: false,
-        searchSource:
-          props.searchContext.domain === Domain.PHYSICALMEASUREMENTCSS,
+        searchSource: [
+          Domain.PHYSICALMEASUREMENT,
+          Domain.PHYSICALMEASUREMENTCSS,
+        ].includes(props.searchContext.domain),
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,

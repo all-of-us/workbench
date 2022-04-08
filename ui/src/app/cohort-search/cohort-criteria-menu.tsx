@@ -166,7 +166,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     const getDomainCounts = () => {
       const { id, namespace } = workspace;
       cohortBuilderApi()
-        .findEhrDomainCounts(namespace, id, searchTerms)
+        .findUniversalDomainCounts(namespace, id, searchTerms)
         .then((response) => {
           setDomainCounts(response.items);
           setDomainCountsLoading(false);
