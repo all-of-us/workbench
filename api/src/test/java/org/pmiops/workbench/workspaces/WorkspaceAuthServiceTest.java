@@ -163,14 +163,56 @@ public class WorkspaceAuthServiceTest {
             ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER)),
 
-        // update 1 of an existing ACL of 2 -> expect to see that update and remove the other
+        // implicitly remove all from existing ACL by omission
+        Arguments.of(
+            ImmutableMap.of(
+                "user1",
+                WorkspaceAccessLevel.OWNER,
+                "user2",
+                WorkspaceAccessLevel.WRITER,
+                "user3",
+                WorkspaceAccessLevel.READER),
+            ImmutableMap.of(),
+            ImmutableMap.of(
+                "user1",
+                WorkspaceAccessLevel.NO_ACCESS,
+                "user2",
+                WorkspaceAccessLevel.NO_ACCESS,
+                "user3",
+                WorkspaceAccessLevel.NO_ACCESS)),
+
+        // add 1 entry to an existing ACL of 1 by explicitly including all existing -> expect all
+        Arguments.of(
+            ImmutableMap.of("user1", WorkspaceAccessLevel.WRITER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER)),
+
+        // update 1 of an existing ACL of 2 -> expect to see that update and implicitly remove the
+        // other by omission
         Arguments.of(
             ImmutableMap.of(
                 "user1", WorkspaceAccessLevel.WRITER,
                 "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.READER, "user2", WorkspaceAccessLevel.NO_ACCESS)));
+                "user1", WorkspaceAccessLevel.READER, "user2", WorkspaceAccessLevel.NO_ACCESS)),
+
+        // add 1 to an existing ACL of 1 but implicitly remove the existing 1 by omission
+        Arguments.of(
+            ImmutableMap.of("user1", WorkspaceAccessLevel.WRITER),
+            ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER)),
+
+        // add 1 to an existing ACL of 1 and explicitly remove the existing 1
+        Arguments.of(
+            ImmutableMap.of("user1", WorkspaceAccessLevel.WRITER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER)));
   }
 
   @ParameterizedTest
@@ -183,9 +225,9 @@ public class WorkspaceAuthServiceTest {
     final String fcName = "firecloudname";
 
     stubRegisteredTier();
-    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
-    stubFcGetAcl(namespace, fcName, originalAcl);
     stubUpdateAcl(namespace, fcName);
+    stubFcGetAcl(namespace, fcName, originalAcl);
+    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
 
     workspaceAuthService.updateWorkspaceAcls(workspace, updates);
     verify(mockFireCloudService)
