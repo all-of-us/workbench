@@ -22,6 +22,7 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -155,13 +156,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
           Stream.concat(
                   Arrays.stream(opts.getOptionValue(ownersOpt.getLongOpt()).split(",")),
                   Arrays.stream(new String[] {workspace.getCreatedBy()}))
-              .map(
-                  email ->
-                      new FirecloudWorkspaceACLUpdate()
-                          .email(email)
-                          .accessLevel(WorkspaceAccessLevel.OWNER.toString())
-                          .canCompute(true)
-                          .canShare(true))
+              .map(email -> FirecloudTransforms.buildAclUpdate(email, WorkspaceAccessLevel.OWNER))
               .collect(Collectors.toList());
       apiClientFactory
           .workspacesApi()

@@ -2,13 +2,18 @@ package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,6 +26,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
@@ -145,23 +151,53 @@ public class WorkspaceAuthServiceTest {
         () -> workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required));
   }
 
-  // TODO make this test do something
+  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL)
+  private static Stream<Arguments> updateWorkspaceAcls() {
+    return Stream.of(
+        // trivial case: do nothing to empty ACL
+        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableList.of()),
 
-  @Test
-  public void test_updateWorkspaceAcls() {
+        // add one entry to empty ACL -> expect that one entry in response
+        Arguments.of(
+            ImmutableMap.of(),
+            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
+            ImmutableList.of(
+                FirecloudTransforms.buildAclUpdate("newuser", WorkspaceAccessLevel.OWNER))),
+
+        // update 1 of an existing ACL of 2 -> expect to see that update and remove the other
+        Arguments.of(
+            ImmutableMap.of(
+                "user1",
+                    new FirecloudWorkspaceAccessEntry()
+                        .accessLevel(WorkspaceAccessLevel.WRITER.toString()),
+                "user2",
+                    new FirecloudWorkspaceAccessEntry()
+                        .accessLevel(WorkspaceAccessLevel.OWNER.toString())),
+            ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
+            buildAclUpdates(
+                ImmutableMap.of(
+                    "user1",
+                    WorkspaceAccessLevel.READER,
+                    "user2",
+                    WorkspaceAccessLevel.NO_ACCESS))));
+  }
+
+  @ParameterizedTest
+  @MethodSource("updateWorkspaceAcls")
+  public void test_updateWorkspaceAcls(
+      Map<String, FirecloudWorkspaceAccessEntry> originalAcl,
+      Map<String, WorkspaceAccessLevel> updates,
+      List<FirecloudWorkspaceACLUpdate> expectedFcUpdates) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
 
-    final Map<String, WorkspaceAccessLevel> acl1 = ImmutableMap.of();
-    final Map<String, FirecloudWorkspaceAccessEntry> acl2 = ImmutableMap.of();
-    List<FirecloudWorkspaceACLUpdate> acl3 = ImmutableList.of();
-
     stubRegisteredTier();
     DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
-    stubFcGetAcl(namespace, fcName, acl2);
-    stubUpdateAcl(namespace, fcName, acl3);
+    stubFcGetAcl(namespace, fcName, originalAcl);
+    stubUpdateAcl(namespace, fcName);
 
-    workspaceAuthService.updateWorkspaceAcls(workspace, acl1);
+    workspaceAuthService.updateWorkspaceAcls(workspace, updates);
+    verify(mockFireCloudService).updateWorkspaceACL(namespace, fcName, expectedFcUpdates);
   }
 
   private DbWorkspace stubDaoGetRequired(
@@ -194,11 +230,16 @@ public class WorkspaceAuthServiceTest {
         .thenReturn(TestMockFactory.createRegisteredTierForTests(accessTierDao));
   }
 
-  private void stubUpdateAcl(
-      String namespace, String fcName, List<FirecloudWorkspaceACLUpdate> aclUpdates) {
-    final FirecloudWorkspaceACLUpdateResponseList toReturn =
-        new FirecloudWorkspaceACLUpdateResponseList();
-    when(mockFireCloudService.updateWorkspaceACL(namespace, fcName, aclUpdates))
-        .thenReturn(toReturn);
+  private void stubUpdateAcl(String namespace, String fcName) {
+    when(mockFireCloudService.updateWorkspaceACL(eq(namespace), eq(fcName), any()))
+        .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
+  }
+
+  @NotNull
+  private static List<FirecloudWorkspaceACLUpdate> buildAclUpdates(
+      Map<String, WorkspaceAccessLevel> aclUpdates) {
+    return aclUpdates.entrySet().stream()
+        .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
   }
 }
