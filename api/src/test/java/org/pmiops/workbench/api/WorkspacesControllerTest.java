@@ -32,7 +32,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -2602,22 +2601,8 @@ public class WorkspacesControllerTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    UserRole creator = new UserRole();
-    creator.setEmail(LOGGED_IN_USER_EMAIL);
-    creator.setRole(WorkspaceAccessLevel.OWNER);
-    shareWorkspaceRequest.addItemsItem(creator);
-    UserRole writer = new UserRole();
-    writer.setEmail("writerfriend@gmail.com");
-    writer.setRole(WorkspaceAccessLevel.WRITER);
-    shareWorkspaceRequest.addItemsItem(writer);
-    UserRole reader = new UserRole();
-    reader.setEmail("readerfriend@gmail.com");
-    reader.setRole(WorkspaceAccessLevel.NO_ACCESS);
-    shareWorkspaceRequest.addItemsItem(reader);
 
-    // Mock firecloud ACLs
+    // Mock the existing workspace's Firecloud ACLs
     FirecloudWorkspaceACL workspaceACLs =
         createWorkspaceACL(
             new JSONObject()
@@ -2628,13 +2613,13 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true))
                 .put(
-                    "writerfriend@gmail.com",
+                    writerUser.getUsername(),
                     new JSONObject()
                         .put("accessLevel", "WRITER")
                         .put("canCompute", true)
                         .put("canShare", false))
                 .put(
-                    "readerfriend@gmail.com",
+                    readerUser.getUsername(),
                     new JSONObject()
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
@@ -2643,10 +2628,14 @@ public class WorkspacesControllerTest {
 
     fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
-    shareWorkspaceRequest = new ShareWorkspaceRequest();
+
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    shareWorkspaceRequest.addItemsItem(creator);
-    shareWorkspaceRequest.addItemsItem(writer);
+
+    UserRole reader = new UserRole();
+    reader.setEmail(readerUser.getUsername());
+    reader.setRole(WorkspaceAccessLevel.NO_ACCESS);
+    shareWorkspaceRequest.addItemsItem(reader);
 
     WorkspaceUserRolesResponse shareResp =
         workspacesController
@@ -2659,18 +2648,10 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    // add the reader with NO_ACCESS to mock
-    shareWorkspaceRequest.addItemsItem(reader);
+    // the unshare request for a single user does not affect other users
     List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
-    verify(fireCloudService)
-        .updateWorkspaceACL(
-            any(),
-            any(),
-            eq(
-                updateACLRequestList.stream()
-                    .sorted(Comparator.comparing(FirecloudWorkspaceACLUpdate::getEmail))
-                    .collect(Collectors.toList())));
+    verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
   }
 
   @Test
