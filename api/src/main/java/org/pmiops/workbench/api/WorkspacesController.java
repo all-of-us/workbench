@@ -602,6 +602,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+    final CloneWorkspaceResponse response = new CloneWorkspaceResponse().workspace(savedWorkspace);
 
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
@@ -612,13 +614,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
-      iamService.grantWorkflowRunnerRoleForUsers(
-          dbWorkspace.getGoogleProject(), usersGainPermission);
+      List<String> failedGrants =
+          iamService.grantWorkflowRunnerRoleForUsers(
+              dbWorkspace.getGoogleProject(), usersGainPermission);
+      if (!failedGrants.isEmpty()) {
+        response.setFailedWorkflowGrants(failedGrants);
+      }
     }
-    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
-    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
+    return ResponseEntity.ok(response);
   }
 
   /** Gets a FireCloud Billing project. */
@@ -683,6 +689,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
+    WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
+
     List<String> workflowUsers = new ArrayList<>();
     // Revoke lifescience permission before asking Firecloud to remove users; after unsharing
     // in Firecloud, we can no longer get the user's petSA from SAM using their credentials.
@@ -704,15 +712,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                               || WorkspaceAccessLevel.WRITER.equals(u.getRole()))
                           && !finalWorkflowUsers.contains(u.getEmail())
                           && !u.getEmail().equals(userProvider.get().getUsername()))
-              .map(u -> u.getEmail())
+              .map(UserRole::getEmail)
               .collect(Collectors.toList());
-      iamService.revokeWorkflowRunnerRoleForUsers(
-          dbWorkspace.getGoogleProject(), userLostPermission);
+      List<String> failedRevocations =
+          iamService.revokeWorkflowRunnerRoleForUsers(
+              dbWorkspace.getGoogleProject(), userLostPermission);
+      if (!failedRevocations.isEmpty()) {
+        resp.setFailedWorkflowRevocations(failedRevocations);
+      }
     }
 
     // This automatically enforces the "canShare" permission.
     dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
-    WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     List<UserRole> userRolesAfterShare =
@@ -721,7 +732,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
       // grant newly workspace OWNER and WRITER Lifescience Runner permission
-      iamService.grantWorkflowRunnerRoleForUsers(dbWorkspace.getGoogleProject(), workflowUsers);
+      List<String> failedGrants =
+          iamService.grantWorkflowRunnerRoleForUsers(dbWorkspace.getGoogleProject(), workflowUsers);
+      if (!failedGrants.isEmpty()) {
+        resp.setFailedWorkflowGrants(failedGrants);
+      }
     }
     workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());

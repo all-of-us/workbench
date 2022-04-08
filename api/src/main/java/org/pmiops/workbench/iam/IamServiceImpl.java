@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.google.CloudIamClient;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.sam.api.GoogleApi;
@@ -24,40 +27,64 @@ public class IamServiceImpl implements IamService {
   private static final String SERVICE_ACCOUNT_USER_ROLE = "roles/iam.serviceAccountUser";
   private static final String LIFESCIENCE_RUNNER_ROLE = "roles/lifesciences.workflowsRunner";
 
-  private final SamApiClientFactory samApiClientFactory;
   private final CloudIamClient cloudIamClient;
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final Provider<GoogleApi> endUserGoogleApiProvider;
+  private final FirecloudApiClientFactory firecloudApiClientFactory;
+  private final SamApiClientFactory samApiClientFactory;
   private final SamRetryHandler samRetryHandler;
+  private final Provider<GoogleApi> endUserGoogleApiProvider;
 
   @Autowired
   public IamServiceImpl(
-      SamApiClientFactory samApiClientFactory,
       CloudIamClient cloudIamClient,
       CloudResourceManagerService cloudResourceManagerService,
-      @Qualifier(SAM_END_USER_GOOGLE_API) Provider<GoogleApi> endUserGoogleApiProvider,
-      SamRetryHandler samRetryHandler) {
-    this.samApiClientFactory = samApiClientFactory;
+      FirecloudApiClientFactory firecloudApiClientFactory,
+      SamApiClientFactory samApiClientFactory,
+      SamRetryHandler samRetryHandler,
+      @Qualifier(SAM_END_USER_GOOGLE_API) Provider<GoogleApi> endUserGoogleApiProvider) {
     this.cloudIamClient = cloudIamClient;
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.endUserGoogleApiProvider = endUserGoogleApiProvider;
+    this.firecloudApiClientFactory = firecloudApiClientFactory;
+    this.samApiClientFactory = samApiClientFactory;
     this.samRetryHandler = samRetryHandler;
+    this.endUserGoogleApiProvider = endUserGoogleApiProvider;
   }
 
-  @Override
-  public void grantWorkflowRunnerRoleToCurrentUser(String googleProject) {
-    String petServiceAccountName =
-        getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
-    grantServiceAccountUserRole(googleProject, petServiceAccountName);
-    grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
-  }
-
-  /** Gets a Terra pet service account from SAM. SAM will create one if user does not have it. */
+  /** Gets a Terra pet service account from SAM. SAM will create one if one does not yet exist. */
   private String getOrCreatePetServiceAccount(String googleProject, GoogleApi googleApi) {
-    return samRetryHandler.run(
-        (context) -> {
-          return googleApi.getPetServiceAccount(googleProject);
-        });
+    return samRetryHandler.run((context) -> googleApi.getPetServiceAccount(googleProject));
+  }
+
+  /**
+   * Gets a Terra pet service account from SAM as the current user. SAM will create one if one does
+   * not yet exist.
+   */
+  private String getOrCreatePetServiceAccountAsCurrentUser(String googleProject) {
+    return getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
+  }
+
+  /**
+   * Gets a Terra pet service account from SAM as the given user using impersonation, if possible.
+   *
+   * <p>If the user has not yet accepted the latest Terms of Service, impersonation will not be
+   * possible, and we will return Empty instead.
+   */
+  private Optional<String> getOrCreatePetServiceAccountUsingImpersonation(
+      String googleProject, String userEmail) throws IOException, ApiException {
+
+    boolean userAcceptedLatestTos =
+        Boolean.TRUE.equals(
+            new TermsOfServiceApi(firecloudApiClientFactory.newImpersonatedApiClient(userEmail))
+                .getTermsOfServiceStatus());
+
+    if (userAcceptedLatestTos) {
+      return Optional.of(
+          getOrCreatePetServiceAccount(
+              googleProject,
+              new GoogleApi(samApiClientFactory.newImpersonatedApiClient(userEmail))));
+    } else {
+      return Optional.empty();
+    }
   }
 
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
@@ -72,40 +99,61 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void grantWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails) {
-    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
-    try {
-      List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
-      for (String userEmail : userEmails) {
-        googleApiAsImpersonatedUser.setApiClient(
-            samApiClientFactory.newImpersonatedApiClient(userEmail));
-        String petServiceAccountName =
-            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-        petServiceAccountsToGrantPermission.add(petServiceAccountName);
-        grantServiceAccountUserRole(googleProject, petServiceAccountName);
-      }
-      grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
-    }
+  public void grantWorkflowRunnerRoleToCurrentUser(String googleProject) {
+    String petServiceAccountName = getOrCreatePetServiceAccountAsCurrentUser(googleProject);
+    grantServiceAccountUserRole(googleProject, petServiceAccountName);
+    grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
   }
 
   @Override
-  public void revokeWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails) {
-    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
+  public List<String> grantWorkflowRunnerRoleForUsers(
+      String googleProject, List<String> userEmails) {
+    List<String> petServiceAccountFailures = new ArrayList<>();
+
+    try {
+      List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
+      for (String userEmail : userEmails) {
+        // TODO can we make these requests in parallel?
+        Optional<String> petSaMaybe =
+            getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
+        if (petSaMaybe.isPresent()) {
+          petServiceAccountsToGrantPermission.add(petSaMaybe.get());
+          grantServiceAccountUserRole(googleProject, petSaMaybe.get());
+        } else {
+          petServiceAccountFailures.add(userEmail);
+        }
+      }
+      grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
+    } catch (IOException | ApiException e) {
+      throw new ServerErrorException(e);
+    }
+
+    return petServiceAccountFailures;
+  }
+
+  @Override
+  public List<String> revokeWorkflowRunnerRoleForUsers(
+      String googleProject, List<String> userEmails) {
+    List<String> petServiceAccountFailures = new ArrayList<>();
+
     try {
       List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
       for (String userEmail : userEmails) {
-        googleApiAsImpersonatedUser.setApiClient(
-            samApiClientFactory.newImpersonatedApiClient(userEmail));
-        String petServiceAccountName =
-            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-        petServiceAccountsToRevokePermission.add(petServiceAccountName);
+        // TODO can we make these requests in parallel?
+        Optional<String> petSaMaybe =
+            getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
+        if (petSaMaybe.isPresent()) {
+          petServiceAccountsToRevokePermission.add(petSaMaybe.get());
+        } else {
+          petServiceAccountFailures.add(userEmail);
+        }
       }
       revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
-    } catch (IOException e) {
+    } catch (IOException | ApiException e) {
       throw new ServerErrorException(e);
     }
+
+    return petServiceAccountFailures;
   }
 
   /** Grants life science runner role to list of service accounts. */
