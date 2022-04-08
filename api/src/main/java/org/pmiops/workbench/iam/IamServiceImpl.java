@@ -113,6 +113,7 @@ public class IamServiceImpl implements IamService {
     try {
       List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
       for (String userEmail : userEmails) {
+        // TODO can we make these requests in parallel?
         Optional<String> petSaMaybe =
             getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
         if (petSaMaybe.isPresent()) {
@@ -138,6 +139,7 @@ public class IamServiceImpl implements IamService {
     try {
       List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
       for (String userEmail : userEmails) {
+        // TODO can we make these requests in parallel?
         Optional<String> petSaMaybe =
             getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
         if (petSaMaybe.isPresent()) {
