@@ -119,7 +119,8 @@ public class WorkspaceAuthService {
   // Workbench API should expose a similar PATCH API, allowing the client to only send a delta.
   // If this change were made, concurrency etag support could also be dropped from the Workbench
   // shareWorkspace API.
-  public DbWorkspace updateWorkspaceAcls(
+  @Deprecated // use patchWorkspaceAcls() to only specify the access controls being changed
+  public DbWorkspace updateAllWorkspaceAcls(
       DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
     // existingAclsMap is a map of the old permissions for ALL users on the ws
     Map<String, FirecloudWorkspaceAccessEntry> existingAclsMap =

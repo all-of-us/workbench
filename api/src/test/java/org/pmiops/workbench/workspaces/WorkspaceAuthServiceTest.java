@@ -152,7 +152,7 @@ public class WorkspaceAuthServiceTest {
   }
 
   // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL)
-  private static Stream<Arguments> updateWorkspaceAcls() {
+  private static Stream<Arguments> updateAllWorkspaceAcls() {
     return Stream.of(
         // trivial case: do nothing to empty ACL
         Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()),
@@ -271,8 +271,8 @@ public class WorkspaceAuthServiceTest {
   }
 
   @ParameterizedTest
-  @MethodSource("updateWorkspaceAcls")
-  public void test_updateWorkspaceAcls(
+  @MethodSource("updateAllWorkspaceAcls")
+  public void test_updateAllWorkspaceAcls(
       Map<String, WorkspaceAccessLevel> originalAcl,
       Map<String, WorkspaceAccessLevel> updates,
       Map<String, WorkspaceAccessLevel> expectedFcUpdates) {
@@ -284,7 +284,7 @@ public class WorkspaceAuthServiceTest {
     stubFcGetAcl(namespace, fcName, originalAcl);
     DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
 
-    workspaceAuthService.updateWorkspaceAcls(workspace, updates);
+    workspaceAuthService.updateAllWorkspaceAcls(workspace, updates);
     verify(mockFireCloudService)
         .updateWorkspaceACL(namespace, fcName, buildAclUpdates(expectedFcUpdates));
   }
