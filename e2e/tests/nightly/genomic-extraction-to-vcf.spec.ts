@@ -31,7 +31,7 @@ describe('Genomics Extraction Test', () => {
     await signInWithAccessToken(page);
   });
 
-  const waitForCompletionMaxTime = 60 * 60 * 1000;
+  const waitForCompletionMaxTime = 50 * 60 * 1000;
   const workspaceName = 'e2eGenomicExtractionToVcfTest';
   const notebookName = makeRandomName('genomicDataToVcf');
 
@@ -65,9 +65,9 @@ describe('Genomics Extraction Test', () => {
 
     // Total Count should be greater than or equal to 1 and less than or equal to 5.
     // At the time of writing test, Total Count is 2. Total Count can change if synthetic dataset changes.
-    // We want keep Total Count is larger, it will take longer time to for the extraction job to complete.
+    // We want to keep Total Count small. Otherwise it will take longer time to for the extraction job to complete.
     expect(totalCount).toBeGreaterThanOrEqual(1);
-    expect(totalCount).toBeLessThanOrEqual(10);
+    expect(totalCount).toBeLessThanOrEqual(5);
 
     // Save cohort.
     const cohortName = await cohortBuildPage.createCohort();
@@ -221,7 +221,7 @@ describe('Genomics Extraction Test', () => {
     while (Date.now() - startTime <= maxTime) {
       let isSuccess = false;
       await runtimeSidebar.open();
-      isDone = await runtimeSidebar.waitForRunning(pollInterval);
+      isDone = await runtimeSidebar.waitForFinish(pollInterval);
       if (isDone) {
         isSuccess = await runtimeSidebar.isRunning();
         if (!isSuccess) {

@@ -3,8 +3,8 @@ import { SideBarLink } from 'app/text-labels';
 import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
 import DataTable from 'app/component/data-table';
-import { waitWhileLoading } from 'utils/waits-utils';
 import { exists } from 'utils/element-utils';
+import Cell from '../component/cell';
 
 export default class GenomicExtractionsSidebar extends BaseSidebar {
   constructor(page: Page) {
@@ -35,13 +35,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   async isInProgress(datasetName: string, timeout?: number): Promise<boolean> {
     const statusSpinnerXpath = await this.getStatusSpinnerXpath(datasetName);
     // Look for the spinner in the table. Return true when it's found. Otherwise return false.
-    return this.page
-      .waitForXPath(statusSpinnerXpath, {
-        visible: true,
-        timeout: timeout
-      })
-      .then(() => true)
-      .catch(() => false);
+    return exists(this.page, statusSpinnerXpath, { timeout });
   }
 
   /**
@@ -59,9 +53,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   }
 
   private async getStatusSpinnerXpath(datasetName: string): Promise<string> {
-    const historyTable = this.getHistoryTable();
-    await historyTable.waitUntilVisible();
-    const statusCell = await historyTable.findCellByRowValue('DATASET NAME', datasetName, 'STATUS');
+    const statusCell = await this.getStatusCell(datasetName);
     return (
       statusCell.getXpath() +
       '/*[.//*[@data-icon="sync-alt" and @role="img" and contains(@style,"animation-name: spin")]]'
@@ -69,9 +61,13 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
   }
 
   private async getStatusSuccessXpath(datasetName: string): Promise<string> {
+    const statusCell = await this.getStatusCell(datasetName);
+    return statusCell.getXpath() + '/*[.//*[@data-icon="check-circle" and @role="img"]]';
+  }
+
+  private async getStatusCell(datasetName: string): Promise<Cell> {
     const historyTable = this.getHistoryTable();
     await historyTable.waitUntilVisible();
-    const statusCell = await historyTable.findCellByRowValue('DATASET NAME', datasetName, 'STATUS');
-    return statusCell.getXpath() + '/*[.//*[@data-icon="check-circle" and @role="img"]]';
+    return historyTable.findCellByRowValue('DATASET NAME', datasetName, 'STATUS');
   }
 }

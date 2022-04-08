@@ -400,6 +400,7 @@ export default class NotebookPage extends NotebookFrame {
   async findLastCell(cellType: CellType = CellType.Code): Promise<NotebookCell | null> {
     const cell = new NotebookCell(this.page, cellType);
     await cell.getLastCell();
+    await cell.focus();
     return cell;
   }
 
