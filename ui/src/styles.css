@@ -4,6 +4,10 @@ h3, h3 > * {
   color: rgb(38, 34, 98);
 }
 
+body .h-color {
+  color: rgb(38, 34, 98);
+}
+
 h1 {
   font-size: 36px;
 }

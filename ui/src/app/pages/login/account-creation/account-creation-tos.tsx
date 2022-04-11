@@ -48,9 +48,8 @@ export interface AccountCreationTosProps {
 }
 
 interface AccountCreationTosState {
-  hasReadEntireTos: boolean;
-  hasAckedPrivacyStatement: boolean;
-  hasAckedTermsOfService: boolean;
+  hasReadEntireAgreement: boolean;
+  hasAckedAgreement: boolean;
   hasClickedNext: boolean;
 }
 
@@ -62,30 +61,45 @@ export class AccountCreationTos extends React.Component<
   constructor(props: AccountCreationTosProps) {
     super(props);
     this.state = {
-      hasReadEntireTos: props.afterPrev,
-      hasAckedPrivacyStatement: props.afterPrev,
-      hasAckedTermsOfService: props.afterPrev,
+      hasReadEntireAgreement: props.afterPrev,
+      hasAckedAgreement: props.afterPrev,
       hasClickedNext: false,
     };
   }
 
   render() {
-    const {
-      hasReadEntireTos,
-      hasAckedTermsOfService,
-      hasAckedPrivacyStatement,
-      hasClickedNext,
-    } = this.state;
+    const { hasReadEntireAgreement, hasAckedAgreement, hasClickedNext } =
+      this.state;
 
     return (
       <FlexColumn
         data-test-id='account-creation-tos'
         style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
       >
+        <div
+          style={{
+            marginBottom: '0.5rem',
+            padding: '0.75rem',
+            backgroundColor: 'aliceblue',
+            borderRadius: 4,
+            boxShadow: '1px 1px 6px gray',
+          }}
+        >
+          <h3 style={{ marginTop: 0, fontWeight: 'bold' }}>
+            Please review and re-accept the <AoU /> Research Program Researcher
+            Workbench Terms of Use and Privacy Statement
+          </h3>
+          <p className='h-color' style={{ marginTop: '0.25rem' }}>
+            The Terra Platform terms, which are incorporated by reference into
+            the <AoU /> terms, have been updated. This updated replaces
+            references to specific federal datasets with a more broad reference
+            to federal datasets as a type of data.
+          </p>
+        </div>
         <HtmlViewer
-          ariaLabel='terms of service agreement'
+          ariaLabel='terms of use and privacy statement'
           containerStyles={{ backgroundColor: colors.white }}
-          onLastPage={() => this.setState({ hasReadEntireTos: true })}
+          onLastPage={() => this.setState({ hasReadEntireAgreement: true })}
           filePath={this.props.filePath}
         />
         {hasClickedNext && <SpinnerOverlay />}
@@ -109,51 +123,28 @@ export class AccountCreationTos extends React.Component<
               <div style={{ fontWeight: 400 }}>
                 By clicking below, or continuing with the registration process
                 or accessing the Researcher Workbench, you agree to these terms
-                and make the following certifications:
+                and make the following certification:
               </div>
-            </div>
-            <div style={{ marginBottom: '.25rem' }}>
-              <CheckBox
-                data-test-id='privacy-statement-check'
-                checked={hasAckedPrivacyStatement}
-                disabled={!hasReadEntireTos}
-                onChange={(checked) =>
-                  this.setState({ hasAckedPrivacyStatement: checked })
-                }
-                style={styles.checkbox}
-                labelStyle={
-                  hasReadEntireTos
-                    ? styles.checkboxLabel
-                    : styles.disabledCheckboxLabel
-                }
-                wrapperStyle={{ marginBottom: '0.5rem' }}
-                label={
-                  <span>
-                    I have read, understand, and agree to the <AoU /> Program
-                    Privacy Statement.
-                  </span>
-                }
-              />
             </div>
             <div>
               <CheckBox
-                data-test-id='terms-of-service-check'
-                checked={hasAckedTermsOfService}
-                disabled={!hasReadEntireTos}
+                data-test-id='agreement-check'
+                checked={hasAckedAgreement}
+                disabled={!hasReadEntireAgreement}
                 onChange={(checked) =>
-                  this.setState({ hasAckedTermsOfService: checked })
+                  this.setState({ hasAckedAgreement: checked })
                 }
                 style={styles.checkbox}
                 labelStyle={
-                  hasReadEntireTos
+                  hasReadEntireAgreement
                     ? styles.checkboxLabel
                     : styles.disabledCheckboxLabel
                 }
-                wrapperStyle={{ marginBottom: '0.5rem' }}
+                wrapperStyle={{ marginBottom: '0.5rem', display: 'flex' }}
                 label={
                   <span>
-                    I have read, understand, and agree to the Terms of Use
-                    described above.
+                    I have read, understand, and agree to the <AoU /> Terms of
+                    Use and Privacy Statement described above.
                   </span>
                 }
               />
@@ -174,10 +165,7 @@ export class AccountCreationTos extends React.Component<
                 margin: '.25rem .5rem .25rem 0',
               }}
               disabled={
-                !hasReadEntireTos ||
-                !hasAckedPrivacyStatement ||
-                !hasAckedTermsOfService ||
-                hasClickedNext
+                !hasReadEntireAgreement || !hasAckedAgreement || hasClickedNext
               }
               onClick={() => {
                 this.setState({ hasClickedNext: true });
