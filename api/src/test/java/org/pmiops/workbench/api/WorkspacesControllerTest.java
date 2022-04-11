@@ -2382,8 +2382,6 @@ public class WorkspacesControllerTest {
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
             .addItemsItem(
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
-            .addItemsItem(
                 new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
             .addItemsItem(
                 new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
@@ -2391,6 +2389,7 @@ public class WorkspacesControllerTest {
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
     verify(fireCloudService, times(1))
         .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
     verify(fireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
@@ -2430,27 +2429,39 @@ public class WorkspacesControllerTest {
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
             .addItemsItem(
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
+                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER))
             .addItemsItem(
                 new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
-            .addItemsItem(
-                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER))
             .addItemsItem(
                 new UserRole().email(readerUser.getUsername()).role(WorkspaceAccessLevel.READER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
+    // add the new ownerUser to the BP but no others
     verify(fireCloudService, times(1))
         .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
     verify(fireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
+    verify(fireCloudService, never()).addOwnerToBillingProject(eq(readerUser.getUsername()), any());
+    verify(fireCloudService, never())
+        .addOwnerToBillingProject(eq(previousWriter.getUsername()), any());
+    // would like to show the below as well, but this is executed as part of createWorkspace
+    // verify(fireCloudService, never()).addOwnerToBillingProject(eq(currentUser.getUsername()),
+    // any());
+
+    // don't remove any BP access
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
-    verify(mockIamService)
+
+    // add the new ownerUser and writerUser to WF Runner
+    verify(mockIamService, times(1))
         .grantWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT,
-            ImmutableList.of(writerUser.getUsername(), ownerUser.getUsername()));
-    verify(mockIamService)
+            ImmutableList.of(ownerUser.getUsername(), writerUser.getUsername()));
+
+    // remove the previousWriter from WF Runner
+    verify(mockIamService, times(1))
         .revokeWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT, ImmutableList.of(previousWriter.getUsername()));
   }
@@ -2460,6 +2471,14 @@ public class WorkspacesControllerTest {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    // creator is added to BP as part of createTerraBillingProject()
+    verify(fireCloudService, times(1))
+        .addOwnerToBillingProject(eq(currentUser.getUsername()), any());
+    // but the other owner does not yet have access
+    verify(fireCloudService, never()).addOwnerToBillingProject(eq(ownerUser.getUsername()), any());
 
     when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
@@ -2484,29 +2503,28 @@ public class WorkspacesControllerTest {
                             .put("canCompute", true)
                             .put("canShare", true))));
 
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
-
     ShareWorkspaceRequest shareWorkspaceRequest =
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
-            .addItemsItem(
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
-            // Removed WRITER, demoted OWNER to READER.
+            // demote OWNER to READER.
             .addItemsItem(
                 new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
     verify(fireCloudService, times(1))
         .removeOwnerFromBillingProject(
             ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
+
+    // currentUser was not specified in the share request, so we do not unshare
+    verify(fireCloudService, never())
+        .removeOwnerFromBillingProject(eq(currentUser.getUsername()), any(), eq(Optional.empty()));
+
+    // writerUser did not have BP ownership, so is not affected
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
-    // Times still 1 happended during workspace creation
-    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
   }
 
   @Test
@@ -2572,8 +2590,7 @@ public class WorkspacesControllerTest {
   public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     stubFcGetWorkspaceACL();
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
+    final Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     addUserRoleToShareWorkspaceRequest(
@@ -2585,13 +2602,12 @@ public class WorkspacesControllerTest {
     // Simulate time between API calls to trigger last-modified/@Version changes.
     fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
-    try {
-      workspacesController.shareWorkspace(
-          workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
-      fail("expected bad request exception for no role");
-    } catch (BadRequestException e) {
-      // Expected
-    }
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            workspacesController.shareWorkspace(
+                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest));
   }
 
   @Test
@@ -2658,9 +2674,8 @@ public class WorkspacesControllerTest {
   @Test
   public void testStaleShareWorkspace() {
     stubFcGetGroup();
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    final Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    final ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     addUserRoleToShareWorkspaceRequest(
         shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
@@ -2674,16 +2689,15 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     fakeClock.increment(1000);
-    shareWorkspaceRequest = new ShareWorkspaceRequest();
+    final ShareWorkspaceRequest newShareRequest = new ShareWorkspaceRequest();
     // Use the initial etag, not the updated value from shareWorkspace.
-    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    try {
-      workspacesController.shareWorkspace(
-          workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
-      fail("expected conflict exception when sharing with stale etag");
-    } catch (ConflictException e) {
-      // Expected
-    }
+    newShareRequest.setWorkspaceEtag(workspace.getEtag());
+
+    assertThrows(
+        ConflictException.class,
+        () ->
+            workspacesController.shareWorkspace(
+                workspace.getNamespace(), workspace.getName(), newShareRequest));
   }
 
   @Test
