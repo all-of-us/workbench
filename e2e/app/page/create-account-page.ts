@@ -98,22 +98,17 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async agreementLoaded(): Promise<boolean> {
-    const iframe = await findIframe(this.page, 'terms of service agreement');
+    const iframe = await findIframe(this.page, 'terms of use and privacy statement');
     const bodyHandle = await iframe.$('body');
     return iframe.evaluate((body) => body.scrollHeight > 0, bodyHandle);
   }
 
   async readAgreement(): Promise<Frame> {
-    const iframe = await findIframe(this.page, 'terms of service agreement');
+    const iframe = await findIframe(this.page, 'terms of use and privacy statement');
     const bodyHandle = await iframe.$('body');
     await iframe.evaluate((body) => body.scrollTo(0, body.scrollHeight), bodyHandle);
     await this.page.waitForTimeout(1000);
     return iframe;
-  }
-
-  getPrivacyStatementCheckbox(): Checkbox {
-    const selector = '//*[@id=//label[contains(normalize-space(), "All of Us Program Privacy Statement")]/@for]';
-    return new Checkbox(this.page, selector);
   }
 
   getTermsOfUseCheckbox(): Checkbox {
@@ -196,13 +191,11 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Accepting Terms of Use and Privacy statement.
   async acceptTermsOfUseAgreement(): Promise<void> {
-    const privacyStatementCheckbox = this.getPrivacyStatementCheckbox();
     const termsOfUseCheckbox = this.getTermsOfUseCheckbox();
 
     await this.readAgreement();
 
     // check by click on label works
-    await privacyStatementCheckbox.check();
     await termsOfUseCheckbox.check();
   }
 

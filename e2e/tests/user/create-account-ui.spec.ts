@@ -17,11 +17,6 @@ describe('Account creation UI tests:', () => {
     expect(await createAccountPage.agreementLoaded()).toBe(true);
 
     // Before user read all pdf pages, checkboxes are unchecked and disabled
-    const privacyStatementCheckbox = createAccountPage.getPrivacyStatementCheckbox();
-    expect(privacyStatementCheckbox).toBeTruthy();
-    expect(await privacyStatementCheckbox.isDisabled()).toBe(true);
-    expect(await privacyStatementCheckbox.isChecked()).toBe(false);
-
     const termsOfUseCheckbox = createAccountPage.getTermsOfUseCheckbox();
     expect(termsOfUseCheckbox).toBeTruthy();
     expect(await termsOfUseCheckbox.isDisabled()).toBe(true);
@@ -30,18 +25,15 @@ describe('Account creation UI tests:', () => {
     let nextButton = createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
-    // scroll to last pdf file will enables checkboxes
+    // scroll to last pdf file will enables checkbox
     await createAccountPage.readAgreement();
-    expect(await privacyStatementCheckbox.isDisabled()).toBe(false);
     expect(await termsOfUseCheckbox.isDisabled()).toBe(false);
 
-    // check both checkboxes
-    await createAccountPage.getPrivacyStatementCheckbox().check();
+    // check checkbox
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
     await createAccountPage.getTermsOfUseCheckbox().check();
 
     // verify checked
-    expect(await privacyStatementCheckbox.isChecked()).toBe(true);
     expect(await termsOfUseCheckbox.isChecked()).toBe(true);
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
 
@@ -49,8 +41,7 @@ describe('Account creation UI tests:', () => {
     await createAccountPage.getTermsOfUseCheckbox().unCheck();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
-    // check checkboxes
-    await createAccountPage.getPrivacyStatementCheckbox().check();
+    // check checkbox
     await createAccountPage.getTermsOfUseCheckbox().check();
     const agreementPageButton = createAccountPage.getNextButton();
     await agreementPageButton.clickWithEval();
