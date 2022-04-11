@@ -223,11 +223,11 @@ public class WorkspaceAuthServiceTest {
         Arguments.of(
             ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
             1, // remove user1
-            0));
+            1)); // add user2
   }
 
   @ParameterizedTest
@@ -267,7 +267,7 @@ public class WorkspaceAuthServiceTest {
             ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
             0,
-            1),
+            1), // add newuser
 
         // do nothing to existing ACL -> expect no updates
         Arguments.of(
@@ -280,27 +280,27 @@ public class WorkspaceAuthServiceTest {
                 WorkspaceAccessLevel.READER),
             ImmutableMap.of(),
             ImmutableMap.of(),
-            0,
+            0, // user1 should be ignored, NOT removed
             0),
 
         // add 1 entry to an existing ACL of 1 and explicitly include all existing -> expect all
         Arguments.of(
-            ImmutableMap.of("user1", WorkspaceAccessLevel.WRITER),
+            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER),
+                "user1", WorkspaceAccessLevel.OWNER, "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER),
+                "user1", WorkspaceAccessLevel.OWNER, "user2", WorkspaceAccessLevel.OWNER),
             0,
             1),
 
         // update 1 of an existing ACL of 2 -> expect to see that update only
         Arguments.of(
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.WRITER,
+                "user1", WorkspaceAccessLevel.OWNER,
                 "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
             ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
-            0,
+            1, // remove user1 but ignore user2
             0),
 
         // add 1 to an existing ACL of 1 -> expect only that addition
@@ -308,18 +308,18 @@ public class WorkspaceAuthServiceTest {
             ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
             ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
-            0,
+            0, // user1 should be ignored, NOT removed
             0),
 
         // add 1 to an existing ACL of 1 and explicitly remove the existing 1
         Arguments.of(
             ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
-            1,
-            0));
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
+            1, // user1 should be removed
+            1)); // user2 should be added
   }
 
   @ParameterizedTest
