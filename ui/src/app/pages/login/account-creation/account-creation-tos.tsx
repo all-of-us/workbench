@@ -89,7 +89,7 @@ export class AccountCreationTos extends React.Component<
             Please review and re-accept the <AoU /> Research Program Researcher
             Workbench Terms of Use and Privacy Statement
           </h3>
-          <p className="h-color" style={{ marginTop: '0.25rem' }}>
+          <p className='h-color' style={{ marginTop: '0.25rem' }}>
             The Terra Platform terms, which are incorporated by reference into
             the <AoU /> terms, have been updated. This updated replaces
             references to specific federal datasets with a more broad reference
