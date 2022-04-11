@@ -99,35 +99,47 @@ export default class Table extends Container {
     return this.page.waitForXPath(cellXpath, { visible: true });
   }
 
-  async getCellByValue(rowValue: string, columnHeader: string): Promise<Cell | null> {
-    // Find the row which contains cell
-    let rowIndex = -1;
-    const rows = await this.getRows();
-    for (let i = 0; i < rows.length; i++) {
-      const tds = await rows[i].$x('./td');
-      for (let j = 0; j < tds.length; j++) {
-        const v = await getPropValue<string>(tds[j], 'innerText');
-        if (v === rowValue) {
-          rowIndex = i;
-          break;
-        }
-      }
-    }
+  /**
+   * In table, find the cell value in one column based on the cell value in another column.
+   * Two table cells have to be in the same row.
+   *
+   * @param searchColumnHeader Column header: Search for cell value in this column. The row that contains this cell is
+   *   used to find the other cell in resultColumnHeader
+   * @param searchCellValue Cell value: Text to search for in searchColumnHeader
+   * @param resultColumnHeader Column header: Find the cell in this column in the same row
+   *
+   * @returns Table cell in resultColumnHeader
+   */
+  async findCellByRowValue(
+    searchColumnHeader: string,
+    searchCellValue: string,
+    resultColumnHeader: string
+  ): Promise<Cell | null> {
+    // Find the searchColumnHeader index
+    const allColumns = await this.getColumns();
+    const colValues = await Promise.all(allColumns.map((column) => getPropValue<string>(column, 'innerText')));
 
-    // Find the column with correct header
-    let columnIndex = -1;
-    const columns = await this.getColumns();
-    for (let i = 0; i < columns.length; i++) {
-      if ((await getPropValue<string>(columns[i], 'innerText')) === columnHeader) {
-        columnIndex = i;
-        break;
-      }
-    }
-
-    if (columnIndex === -1 || rowIndex === -1) {
+    const columnIndex = colValues.findIndex((v) => v === searchColumnHeader);
+    const resultColumnIndex = colValues.findIndex((v) => v === resultColumnHeader);
+    if (columnIndex === -1 || resultColumnIndex === -1) {
       return null;
     }
-    return new Cell(this.page, this.getCellXpath(rowIndex + 1, columnIndex + 1));
+
+    // Find the row index which contains searchCellValue
+    const allRows = await this.getRows();
+    const searchColumnTdValues = await Promise.all(
+      allRows.map(async (row) => {
+        const td = await row.$x('./td');
+        return getPropValue<string>(td[columnIndex], 'innerText');
+      })
+    );
+
+    const searchRowIndex = searchColumnTdValues.findIndex((v) => v === searchCellValue);
+    if (searchRowIndex === -1) {
+      return null;
+    }
+
+    return new Cell(this.page, this.getCellXpath(searchRowIndex + 1, resultColumnIndex + 1));
   }
 
   getCellXpath(rowIndex: number, columnIndex: number): string {

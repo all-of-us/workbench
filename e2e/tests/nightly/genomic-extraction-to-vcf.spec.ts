@@ -22,17 +22,17 @@ import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
 import { range } from 'lodash';
 
-// 70 minutes. Test could take a long time.
+// 60 minutes. Test could take a long time.
 // Since refresh token expires in 60 min. test may fail if running takes longer than 60 min.
-jest.setTimeout(70 * 60 * 1000);
+jest.setTimeout(60 * 60 * 1000);
 
 describe('Genomics Extraction Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const waitForCompletionMaxTime = 60 * 60 * 1000;
-  const workspaceName = makeRandomName('e2eGenomicExtractionToVcfTest');
+  const waitForCompletionMaxTime = 50 * 60 * 1000;
+  const workspaceName = 'e2eGenomicExtractionToVcfTest';
   const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
@@ -63,8 +63,11 @@ describe('Genomics Extraction Test', () => {
     await group2.getGroupCount();
     totalCount = await cohortBuildPage.getTotalCount();
 
-    // Total Count should be greater than 1.
+    // Total Count should be greater than or equal to 1 and less than or equal to 5.
+    // At the time of writing test, Total Count is 2. Total Count can change if synthetic dataset changes.
+    // We want to keep Total Count small. Otherwise it will take longer time to for the extraction job to complete.
     expect(totalCount).toBeGreaterThanOrEqual(1);
+    expect(totalCount).toBeLessThanOrEqual(5);
 
     // Save cohort.
     const cohortName = await cohortBuildPage.createCohort();
@@ -167,7 +170,8 @@ describe('Genomics Extraction Test', () => {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // LONG WAIT: Wait for VCF files extraction and runtime creation to finish.
-    await waitForComplete(page, waitForCompletionMaxTime);
+    await waitForRuntimeComplete(page, waitForCompletionMaxTime);
+    await waitForExtractionComplete(page, datasetName, waitForCompletionMaxTime);
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // RUN NOTEBOOK CODE.
@@ -208,35 +212,67 @@ describe('Genomics Extraction Test', () => {
     // Not waiting for delete to finish.
   });
 
-  // Check creation status.
-  async function waitForComplete(page: Page, maxTime: number): Promise<boolean> {
+  async function waitForRuntimeComplete(page: Page, maxTime: number): Promise<boolean> {
+    let isDone = false;
     const pollInterval = 10 * 1000;
-    let isRuntimeReady = false;
-    let isExtractionReady = false;
     const runtimeSidebar = new RuntimePanel(page);
-    const genomicSidebar = new GenomicExtractionsSidebar(page);
+
     const startTime = Date.now();
     while (Date.now() - startTime <= maxTime) {
-      isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunningAndClose(pollInterval) : true;
-      // At the time of writing this test, it takes 30 - 40 minutes to create VCF files.
-      isExtractionReady = !isExtractionReady ? await genomicSidebar.waitForCompletionAndClose(pollInterval) : true;
-      if (isRuntimeReady && isExtractionReady) {
-        logger.info('Runtime is running and Genomic data extraction is done.');
+      let isSuccess = false;
+      await runtimeSidebar.open();
+      isDone = await runtimeSidebar.waitForFinish(pollInterval);
+      if (isDone) {
+        isSuccess = await runtimeSidebar.isRunning();
+        if (!isSuccess) {
+          // Take screenshot for manual verification.
+          await takeScreenshot(page, 'genomic-extraction-test-runtime-sidebar');
+          break;
+        }
+      }
+      await runtimeSidebar.close();
+      if (isSuccess) {
+        logger.info('Runtime is running.');
         return true;
       }
-      await page.waitForTimeout(pollInterval);
       const timeSpentInMin = Math.round((Date.now() - startTime) / 1000) / 60;
-      logger.info(`Waited [ ${timeSpentInMin} ] minutes for runtime and genomic extraction to finish.`);
+      logger.info(`Waited [ ${timeSpentInMin} ] minutes for runtime to start running.`);
+      await page.waitForTimeout(pollInterval);
     }
-    // Take screenshot for manual checking.
-    await runtimeSidebar.open();
-    await takeScreenshot(page, 'genomic-extraction-test-runtime-sidebar');
-    await runtimeSidebar.close();
 
-    await genomicSidebar.open();
-    await takeScreenshot(page, 'genomic-extraction-test-history-sidebar');
-    await genomicSidebar.close();
+    throw new Error('Runtime is not running or it has failed.');
+  }
 
-    throw new Error('Runtime is not running or/and genomic extraction is not done.');
+  // Check creation status.
+  async function waitForExtractionComplete(page: Page, datasetName: string, maxTime: number): Promise<boolean> {
+    let isDone = false;
+    const pollInterval = 10 * 1000;
+    const genomicSidebar = new GenomicExtractionsSidebar(page);
+
+    const startTime = Date.now();
+    while (Date.now() - startTime <= maxTime) {
+      let isSuccess = false;
+      await genomicSidebar.open();
+      // At the time of writing this test, it takes 30 - 40 minutes to create the VCF file.
+      isDone = !(await genomicSidebar.isInProgress(datasetName, pollInterval));
+      if (isDone) {
+        isSuccess = await genomicSidebar.isJobSuccess(datasetName);
+        if (!isSuccess) {
+          // Take screenshot for manual verification.
+          await takeScreenshot(page, 'genomic-extraction-test-history-sidebar');
+          break;
+        }
+      }
+      await genomicSidebar.close();
+      if (isSuccess) {
+        logger.info('Genomic extraction job completed successfully.');
+        return true;
+      }
+      const timeSpentInMin = Math.round((Date.now() - startTime) / 1000) / 60;
+      logger.info(`Waited [ ${timeSpentInMin} ] minutes for genomic extraction job to finish.`);
+      await page.waitForTimeout(pollInterval);
+    }
+
+    throw new Error('Genomic extraction job is not done or it has failed.');
   }
 });
