@@ -4,7 +4,7 @@ import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
 import DataTable from 'app/component/data-table';
 import { exists } from 'utils/element-utils';
-import Cell from '../component/cell';
+import Cell from 'app/component/cell';
 
 export default class GenomicExtractionsSidebar extends BaseSidebar {
   constructor(page: Page) {
