@@ -48,7 +48,9 @@ it('should enable checkbox and next button with user input', async () => {
   expect(getNextButton(wrapper).prop('disabled')).toBeTruthy();
 
   // Now, simulate checking the box, which should enable the "next" button.
-  getAgreementCheckbox(wrapper).simulate('change', { target: { checked: true } });
+  getAgreementCheckbox(wrapper).simulate('change', {
+    target: { checked: true },
+  });
 
   expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();
 });
@@ -57,7 +59,9 @@ it('should call onComplete when next button is pressed', async () => {
   const wrapper = mount(<AccountCreationTos {...props} />);
 
   wrapper.setState({ hasReadEntireAgreement: true });
-  getAgreementCheckbox(wrapper).simulate('change', { target: { checked: true } });
+  getAgreementCheckbox(wrapper).simulate('change', {
+    target: { checked: true },
+  });
 
   getNextButton(wrapper).simulate('click');
 
@@ -68,7 +72,9 @@ it('should disable next button when next button is pressed', async () => {
   const wrapper = mount(<AccountCreationTos {...props} />);
 
   wrapper.setState({ hasReadEntireAgreement: true });
-  getAgreementCheckbox(wrapper).simulate('change', { target: { checked: true } });
+  getAgreementCheckbox(wrapper).simulate('change', {
+    target: { checked: true },
+  });
 
   // Next Button should be Enabled after checking Privacy and TOS checkbox
   expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();
