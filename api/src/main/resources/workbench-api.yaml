@@ -4418,6 +4418,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable Universal Search feature in Cohort Builder
+      enableMultiReview:
+        type: boolean
+        default: false
+        description: Whether to enable Multiple Cohort Review feature in Cohort Review
       rasHost:
         type: string
         description: The RAS base host name.
