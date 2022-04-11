@@ -1275,9 +1275,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const showCtCard =
       // RW-7798 add CT card for ANNUAL_RENEWAL
-      pageMode === DARPageMode.INITIAL_REGISTRATION &&
-      accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled);
-
+      (pageMode === DARPageMode.INITIAL_REGISTRATION &&
+        accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)) ||
+      pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard
         key='rt'
