@@ -172,7 +172,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    FirecloudWorkspaceId workspaceId = getFcBillingProject(accessTier, workspace);
+    FirecloudWorkspaceId workspaceId = createTerraBillingProject(accessTier, workspace);
     FirecloudWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
             workspaceId.getWorkspaceNamespace(),
@@ -563,7 +563,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    FirecloudWorkspaceId toFcWorkspaceId = getFcBillingProject(accessTier, toWorkspace);
+    FirecloudWorkspaceId toFcWorkspaceId = createTerraBillingProject(accessTier, toWorkspace);
     FirecloudWorkspaceDetails toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
@@ -627,15 +627,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  /** Gets a FireCloud Billing project. */
-  private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
+  /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
+  private FirecloudWorkspaceId createTerraBillingProject(
+      DbAccessTier accessTier, Workspace workspace) {
     DbUser user = userProvider.get();
     String billingProject = fireCloudService.createBillingProjectName();
     fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
 
-    // We use AoU Service Account to create the billing account then assign owner role to user.
-    // In this way, we can make sure AoU Service Account is still the owner of this billing
-    // account.
+    // We use the AoU Application Service Account to create the billing account, then add the user
+    // as an additional owner.  In this way, we can make sure that the AoU App SA is an owner on
+    // all billing projects.
     fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
     return generateFirecloudWorkspaceId(billingProject, workspace.getName());
   }
