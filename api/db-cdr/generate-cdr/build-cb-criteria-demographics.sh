@@ -123,6 +123,32 @@ FROM
     ) a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.gender_concept_id = b.concept_id"
 
+# Need to use the concept name for the source concept id since the survey uses this name
+# https://precisionmedicineinitiative.atlassian.net/browse/RW-8178
+echo "CB_CRITERIA - update gender identity name for Woman"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr
+ SET cr.name = y.name
+ FROM (SELECT DISTINCT gender_concept_id as concept_id, REGEXP_REPLACE(c.concept_name, r'^.+:\s', '') as name
+             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+             JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on p.gender_source_concept_id = c.concept_id
+             WHERE p.gender_concept_id = 45878463) y
+ WHERE cr.concept_id = y.concept_id
+ AND domain_id = 'PERSON'
+ AND type = 'GENDER'"
+
+ echo "CB_CRITERIA - update gender identity name for Man"
+ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+ "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr
+  SET cr.name = y.name
+  FROM (SELECT DISTINCT gender_concept_id as concept_id, REGEXP_REPLACE(c.concept_name, r'^.+:\s', '') as name
+              FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+              JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on p.gender_source_concept_id = c.concept_id
+              WHERE p.gender_concept_id = 45880669) y
+  WHERE cr.concept_id = y.concept_id
+  AND domain_id = 'PERSON'
+  AND type = 'GENDER'"
+
 #if [[ "$DATA_BROWSER" == false ]]
 #then
   echo "DEMOGRAPHICS - Sex at Birth"
