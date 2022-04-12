@@ -13,6 +13,7 @@ import {
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
+import { ppiQuestions } from 'app/cohort-search/search-state.service';
 import { domainToTitle } from 'app/cohort-search/utils';
 import { AlertDanger } from 'app/components/alert';
 import { Clickable, StyledExternalLink } from 'app/components/buttons';
@@ -281,7 +282,7 @@ interface State {
   cdrVersion: CdrVersion;
   data: any;
   hoverId: string;
-  ingredients: any;
+  childNodes: any;
   inputErrors: Array<string>;
   loading: boolean;
   searching: boolean;
@@ -311,7 +312,7 @@ export const ListSearch = fp.flow(
         apiError: false,
         cdrVersion: undefined,
         data: null,
-        ingredients: {},
+        childNodes: {},
         inputErrors: [],
         hoverId: undefined,
         loading: false,
@@ -418,13 +419,23 @@ export const ListSearch = fp.flow(
           value.trim(),
           surveyName
         );
-        const data =
-          source !== 'cohort' && this.isSurvey
-            ? resp.items.filter(
-                (survey) =>
-                  survey.subtype === CriteriaSubType.QUESTION.toString()
-              )
-            : resp.items;
+        let data;
+        if (this.isSurvey) {
+          if (source === 'cohort') {
+            const questions = ppiQuestions.getValue();
+            resp.items.forEach(({ conceptId, count, id: questionId, name }) => {
+              questions[questionId] = { conceptId, count, name };
+            });
+            ppiQuestions.next(questions);
+            data = resp.items;
+          } else {
+            data = resp.items.filter(
+              (survey) => survey.subtype === CriteriaSubType.QUESTION.toString()
+            );
+          }
+        } else {
+          data = resp.items;
+        }
         this.setState({ data, totalCount: resp.totalCount });
       } catch (err) {
         console.error(err);
@@ -454,12 +465,19 @@ export const ListSearch = fp.flow(
     }
 
     selectItem = (row: any) => {
+      const { domainId, group, name, parentId } = row;
       let param = { parameterId: this.getParamId(row), ...row, attributes: [] };
-      if (row.domainId === Domain.SURVEY) {
+      if (domainId === Domain.SURVEY.toString()) {
         param = {
           ...param,
           surveyName: this.props.searchContext.selectedSurvey,
         };
+        if (!group) {
+          const question = ppiQuestions.getValue()[parentId];
+          if (question) {
+            param.name = `${question.name} - ${name}`;
+          }
+        }
       }
       this.props.select(param);
     };
@@ -474,47 +492,59 @@ export const ListSearch = fp.flow(
       this.props.hierarchy(row);
     };
 
-    showIngredients = (row: any) => {
-      const { ingredients } = this.state;
-      if (ingredients[row.id]) {
-        if (ingredients[row.id].error) {
-          ingredients[row.id] = undefined;
+    showChildren = async (row: any) => {
+      const { childNodes } = this.state;
+      const { conceptId, domainId, id: rowId, isStandard, type } = row;
+      if (childNodes[rowId]) {
+        if (childNodes[rowId].error) {
+          childNodes[rowId] = undefined;
         } else {
-          ingredients[row.id].open = !ingredients[row.id].open;
+          childNodes[rowId].open = !childNodes[rowId].open;
         }
-        this.setState({ ingredients });
+        this.setState({ childNodes });
       } else {
         try {
-          ingredients[row.id] = {
+          childNodes[rowId] = {
             open: false,
             loading: true,
             error: false,
             items: [],
           };
-          this.setState({ ingredients });
+          this.setState({ childNodes });
           const {
             workspace: { id, namespace },
           } = this.props;
-          cohortBuilderApi()
-            .findDrugIngredientByConceptId(namespace, id, row.conceptId)
-            .then((resp) => {
-              ingredients[row.id] = {
-                open: true,
-                loading: false,
-                error: false,
-                items: resp.items,
-              };
-              this.setState({ ingredients });
-            });
+          const childResponse =
+            domainId === Domain.DRUG.toString()
+              ? await cohortBuilderApi().findDrugIngredientByConceptId(
+                  namespace,
+                  id,
+                  conceptId
+                )
+              : await cohortBuilderApi().findCriteriaBy(
+                  namespace,
+                  id,
+                  domainId,
+                  type,
+                  isStandard,
+                  rowId
+                );
+          childNodes[rowId] = {
+            open: true,
+            loading: false,
+            error: false,
+            items: childResponse.items,
+          };
+          this.setState({ childNodes });
         } catch (error) {
           console.error(error);
-          ingredients[row.id] = {
+          childNodes[rowId] = {
             open: true,
             loading: false,
             error: true,
             items: [],
           };
-          this.setState({ ingredients });
+          this.setState({ childNodes });
         }
       }
     };
@@ -597,18 +627,21 @@ export const ListSearch = fp.flow(
     }
 
     renderRow(row: any, child: boolean, elementId: string) {
-      const { hoverId, ingredients } = this.state;
+      const { hoverId, childNodes } = this.state;
       const attributes =
         this.props.searchContext.source === 'cohort' && row.hasAttributes;
-      const brand = row.type === CriteriaType.BRAND;
-      const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
+      const parent =
+        row.type === CriteriaType.BRAND ||
+        row.subtype === CriteriaSubType.QUESTION;
+      const displayName =
+        row.name + (row.type === CriteriaType.BRAND ? ' (BRAND NAME)' : '');
       const selected =
         !attributes &&
-        !brand &&
+        !parent &&
         this.props.selectedIds.includes(this.getParamId(row));
-      const unselected = !attributes && !brand && !this.isSelected(row);
-      const open = ingredients[row.id]?.open;
-      const loadingIngredients = ingredients[row.id]?.loading;
+      const unselected = !attributes && !parent && !this.isSelected(row);
+      const open = childNodes[row.id]?.open;
+      const loadingChildren = childNodes[row.id]?.loading;
       const columnStyle = child
         ? { ...styles.columnBodyName, paddingLeft: '1.25rem' }
         : styles.columnBodyName;
@@ -652,15 +685,15 @@ export const ListSearch = fp.flow(
                     onClick={() => this.selectItem(row)}
                   />
                 )}
-                {brand && !loadingIngredients && (
+                {parent && !loadingChildren && (
                   <ClrIcon
                     style={styles.brandIcon}
                     shape={'angle ' + (open ? 'down' : 'right')}
                     size='20'
-                    onClick={() => this.showIngredients(row)}
+                    onClick={() => this.showChildren(row)}
                   />
                 )}
-                {loadingIngredients && <Spinner size={16} />}
+                {loadingChildren && <Spinner size={16} />}
               </div>
             )}
             <TooltipTrigger
@@ -694,7 +727,7 @@ export const ListSearch = fp.flow(
           >
             {row.isStandard ? 'Standard' : 'Source'}
           </td>
-          <td style={{ ...columnBodyStyle }}>{!brand && row.type}</td>
+          <td style={{ ...columnBodyStyle }}>{!parent && row.type}</td>
           <td
             style={{
               ...columnBodyStyle,
@@ -761,7 +794,7 @@ export const ListSearch = fp.flow(
         apiError,
         cdrVersion,
         data,
-        ingredients,
+        childNodes,
         inputErrors,
         loading,
         searching,
@@ -951,14 +984,14 @@ export const ListSearch = fp.flow(
                     >
                       <tbody className='p-datatable-tbody'>
                         {displayData.map((row, index) => {
-                          const open = ingredients[row.id]?.open;
-                          const err = ingredients[row.id]?.error;
+                          const open = childNodes[row.id]?.open;
+                          const err = childNodes[row.id]?.error;
                           return (
                             <React.Fragment key={index}>
                               {this.renderRow(row, false, index)}
                               {open &&
                                 !err &&
-                                ingredients[row.id].items.map((item, i) => {
+                                childNodes[row.id].items.map((item, i) => {
                                   return (
                                     <React.Fragment key={i}>
                                       {this.renderRow(
