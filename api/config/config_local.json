@@ -113,7 +113,8 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": true,
-    "enableUniversalSearch": false
+    "enableUniversalSearch": false,
+    "enableMultiReview": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

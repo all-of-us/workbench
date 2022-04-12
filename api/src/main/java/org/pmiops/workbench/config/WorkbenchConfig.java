@@ -276,6 +276,8 @@ public class WorkbenchConfig {
     public boolean enableDSCREntryInRecentModified;
     // If true, enable Universal Search for Cohort Builder - both backend and UI
     public boolean enableUniversalSearch;
+    // If true, enable Multiple Reviews for Cohort Review - both backend and UI
+    public boolean enableMultiReview;
   }
 
   public static class ActionAuditConfig {
