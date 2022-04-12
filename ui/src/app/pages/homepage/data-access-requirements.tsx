@@ -1071,8 +1071,10 @@ const ControlledTierCard = (props: {
   clickableModules: AccessModule[];
   reload: Function;
   spinnerProps: WithSpinnerOverlayProps;
+  pageMode: DARPageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps } = props;
+  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+    props;
   const controlledTierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
   );
@@ -1152,13 +1154,17 @@ const ControlledTierCard = (props: {
             spinnerProps={spinnerProps}
           />
         )}
-        <ModulesForInitialRegistration
-          profile={profile}
-          modules={[ctModule]}
-          activeModule={activeModule}
-          clickableModules={clickableModules}
-          spinnerProps={spinnerProps}
-        />
+        {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
+          <ModulesForInitialRegistration
+            profile={profile}
+            modules={[ctModule]}
+            activeModule={activeModule}
+            clickableModules={clickableModules}
+            spinnerProps={spinnerProps}
+          />
+        ) : (
+          <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
+        )}
       </FlexColumn>
     </FlexRow>
   );
@@ -1299,6 +1305,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         clickableModules={clickableModules}
         reload={reload}
         spinnerProps={spinnerProps}
+        pageMode={pageMode}
       />
     ) : null;
     const dCard = (
