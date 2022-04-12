@@ -6,7 +6,6 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
 import {
-  CdrVersion,
   CdrVersionTiersResponse,
   Cohort,
   ConceptSet,
@@ -14,7 +13,6 @@ import {
   DataSet,
   DataSetPreviewRequest,
   DataSetPreviewValueList,
-  DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
@@ -22,7 +20,6 @@ import {
   PrePackagedConceptSetEnum,
   Profile,
   ResourceType,
-  ValueSet,
 } from 'generated/fetch';
 
 import { AlertInfo } from 'app/components/alert';
@@ -58,7 +55,6 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  hasNewValidProps,
   reactStyles,
   switchCase,
   toggleIncludes,
@@ -734,33 +730,6 @@ enum ModalState {
   Extract,
 }
 
-interface State {
-  cohortList: Cohort[];
-  conceptSetList: ConceptSet[];
-  crossDomainConceptSetList: Set<number>;
-  creatingConceptSet: boolean;
-  dataSet: DataSet;
-  dataSetTouched: boolean;
-
-  // Lazily poplulated. This information is static, so entries are not removed
-  // even if no concept sets for a given domain are actively selected.
-  domainValueSetIsLoading: Set<Domain>;
-  domainValueSetLookup: Map<Domain, ValueSet>;
-
-  includesAllParticipants: boolean;
-  loadingResources: boolean;
-  modalState: ModalState;
-  previewList: Map<Domain, DataSetPreviewInfo>;
-  selectedCohortIds: number[];
-  selectedConceptSetIds: number[];
-  selectedDomains: Set<Domain>;
-  selectedDomainsWithConceptSetIds: Set<DomainWithConceptSetId>;
-  selectedDomainValuePairs: DomainValuePair[];
-  selectedPrepackagedConceptSets: Set<PrepackagedConceptSet>;
-  selectedPreviewDomain: Domain;
-  savingDataset: boolean;
-}
-
 export const DatasetPage = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
@@ -774,7 +743,7 @@ export const DatasetPage = fp.flow(
     match: {
       params: { dataSetId },
     },
-    profileState: { profile, reload },
+    profileState: { profile },
     showErrorModal,
     workspace,
   }: Props) => {
@@ -784,7 +753,6 @@ export const DatasetPage = fp.flow(
     const [crossDomainConceptSetList, setCrossDomainConceptSetList] = useState(
       new Set()
     );
-    const [creatingConceptSet, setCreatingConceptSet] = useState(false);
     const [dataSet, setDataSet] = useState(undefined);
     const [dataSetTouched, setDataSetTouched] = useState(false);
     const [domainValueSetIsLoading, setDomainValueSetIsLoading] = useState(
@@ -812,44 +780,6 @@ export const DatasetPage = fp.flow(
       []
     );
     const [savingDataset, setSavingDataset] = useState(false);
-
-    useEffect(() => {
-      hideSpinner();
-      updatePrepackagedDomains();
-
-      (async () => await loadResources())();
-      if (dataSetId) {
-        fetchDataset();
-      }
-    }, []);
-
-    const loadDataset = (dataset: DataSet, initialLoad?: boolean) => {
-      // This is to set the URL to reference the newly created dataset and the user is staying on the dataset page
-      // A bit of a hack but I couldn't find another way to change the URL without triggering a reload
-      if (window.location.href.endsWith('data-sets')) {
-        history.pushState({}, '', `${window.location.href}/${dataset.id}`);
-      }
-
-      setDataSet(dataset);
-      setDataSetTouched(false);
-      // We only need to set selections on the initial load of a saved dataset,
-      // not for creating/updating since the selections will already be set
-      if (initialLoad) {
-        setIncludesAllParticipants(dataset.includesAllParticipants);
-        setSelectedConceptSetIds(dataset.conceptSets.map((cs) => cs.id));
-        setSelectedCohortIds(dataset.cohorts.map((c) => c.id));
-        setSelectedDomainValuePairs(
-          domainValuePairsToLowercase(dataset.domainValuePairs)
-        );
-        setSelectedDomains(getDomainsFromDataSet(dataset));
-        setSelectedDomainsWithConceptSetIds(
-          getDomainsWithConceptSetIdsFromDataSet(dataset)
-        );
-        setSelectedPrepackagedConceptSets(
-          apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
-        );
-      }
-    };
 
     const updatePrepackagedDomains = () => {
       if (getCdrVersion(workspace, cdrVersionTiersResponse).hasFitbitData) {
@@ -879,6 +809,137 @@ export const DatasetPage = fp.flow(
       }
     };
 
+    const loadResources = async () => {
+      try {
+        const { namespace, id } = workspace;
+        const [conceptSets, cohorts] = await Promise.all([
+          conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
+          cohortsApi().getCohortsInWorkspace(namespace, id),
+        ]);
+        setConceptSetList(conceptSets.items);
+        setCohortList(cohorts.items);
+        setLoadingResources(false);
+        return Promise.resolve();
+      } catch (error) {
+        console.error(error);
+        return Promise.resolve();
+      }
+    };
+
+    const getDomainsFromDataSet = (d: DataSet) => {
+      const domains = domainValuePairsToLowercase(d.domainValuePairs).map(
+        ({ domain }) => domain
+      );
+      return new Set(domains);
+    };
+
+    const apiEnumToPrePackageConceptSets = (
+      v: Array<PrePackagedConceptSetEnum>
+    ) => {
+      const re: Set<PrepackagedConceptSet> = new Set<PrepackagedConceptSet>();
+      v.map((pre) => {
+        switch (pre) {
+          case PrePackagedConceptSetEnum.BOTH: {
+            re.add(PrepackagedConceptSet.PERSON),
+              re.add(PrepackagedConceptSet.SURVEYS);
+            break;
+          }
+          case PrePackagedConceptSetEnum.PERSON: {
+            re.add(PrepackagedConceptSet.PERSON);
+            break;
+          }
+          case PrePackagedConceptSetEnum.SURVEY: {
+            re.add(PrepackagedConceptSet.SURVEYS);
+            break;
+          }
+          case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
+            re.add(PrepackagedConceptSet.FITBITHEARTRATESUMMARY);
+            break;
+          }
+          case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
+            re.add(PrepackagedConceptSet.FITBITHEARTRATELEVEL);
+            break;
+          }
+          case PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS: {
+            re.add(PrepackagedConceptSet.FITBITINTRADAYSTEPS);
+            break;
+          }
+          case PrePackagedConceptSetEnum.FITBITACTIVITY: {
+            re.add(PrepackagedConceptSet.FITBITACTIVITY);
+            break;
+          }
+          case PrePackagedConceptSetEnum.WHOLEGENOME: {
+            re.add(PrepackagedConceptSet.WHOLEGENOME);
+            break;
+          }
+          case PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC: {
+            re.add(PrepackagedConceptSet.ZIPCODESOCIOECONOMIC);
+            break;
+          }
+          case PrePackagedConceptSetEnum.NONE:
+          default:
+            break;
+        }
+      });
+      return re;
+    };
+
+    const getIdsAndDomainsFromConceptSets = (
+      conceptSets: ConceptSet[],
+      prepackagedConceptSets: Set<PrepackagedConceptSet>
+    ) => {
+      const conceptSetIdsWithDomains = conceptSets
+        .map((cs) => ({
+          conceptSetId: cs.id,
+          domain:
+            cs.domain === Domain.PHYSICALMEASUREMENT
+              ? Domain.MEASUREMENT
+              : cs.domain,
+        }))
+        .concat(
+          Array.from(prepackagedConceptSets).map((p) => ({
+            conceptSetId: null,
+            domain: PREPACKAGED_DOMAINS[p],
+          }))
+        );
+      return new Set(conceptSetIdsWithDomains);
+    };
+
+    const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
+      return getIdsAndDomainsFromConceptSets(
+        d.conceptSets,
+        apiEnumToPrePackageConceptSets(d.prePackagedConceptSet)
+      );
+    };
+
+    const loadDataset = (dataset: DataSet, initialLoad?: boolean) => {
+      // This is to set the URL to reference the newly created dataset and the user is staying on the dataset page
+      // A bit of a hack but I couldn't find another way to change the URL without triggering a reload
+      if (window.location.href.endsWith('data-sets')) {
+        history.pushState({}, '', `${window.location.href}/${dataset.id}`);
+      }
+
+      setDataSet(dataset);
+      setDataSetTouched(false);
+      // We only need to set selections on the initial load of a saved dataset,
+      // not for creating/updating since the selections will already be set
+      if (initialLoad) {
+        setIncludesAllParticipants(dataset.includesAllParticipants);
+        setSelectedConceptSetIds(dataset.conceptSets.map((cs) => cs.id));
+        setSelectedCohortIds(dataset.cohorts.map((c) => c.id));
+        setSelectedDomainValuePairs(
+          domainValuePairsToLowercase(dataset.domainValuePairs)
+        );
+        setSelectedDomains(getDomainsFromDataSet(dataset));
+        setSelectedDomainsWithConceptSetIds(
+          getDomainsWithConceptSetIdsFromDataSet(dataset)
+        );
+        setSelectedPrepackagedConceptSets(
+          apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
+        );
+      }
+    };
+
     const fetchDataset = async () => {
       const dataset = await dataSetApi().getDataSet(
         workspace.namespace,
@@ -887,6 +948,16 @@ export const DatasetPage = fp.flow(
       );
       loadDataset(dataset, true);
     };
+
+    useEffect(() => {
+      hideSpinner();
+      updatePrepackagedDomains();
+
+      (async () => await loadResources())();
+      if (dataSetId) {
+        fetchDataset();
+      }
+    }, []);
 
     useEffect(() => {
       updatePrepackagedDomains();
@@ -974,61 +1045,6 @@ export const DatasetPage = fp.flow(
       setSelectedDomainsWithConceptSetIds(
         updatedSelectedDomainsWithConceptSetIds
       );
-    };
-
-    const loadResources = async () => {
-      try {
-        const { namespace, id } = workspace;
-        const [conceptSets, cohorts] = await Promise.all([
-          conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-          cohortsApi().getCohortsInWorkspace(namespace, id),
-        ]);
-        setConceptSetList(conceptSets.items);
-        setCohortList(cohorts.items);
-        setLoadingResources(false);
-        return Promise.resolve();
-      } catch (error) {
-        console.error(error);
-        return Promise.resolve();
-      }
-    };
-
-    const getDomainsFromDataSet = (d: DataSet) => {
-      const domains = domainValuePairsToLowercase(d.domainValuePairs).map(
-        ({ domain }) => domain
-      );
-      return new Set(domains);
-    };
-
-    const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
-      const selectedPrepackagedConceptSets = apiEnumToPrePackageConceptSets(
-        d.prePackagedConceptSet
-      );
-      return getIdsAndDomainsFromConceptSets(
-        d.conceptSets,
-        selectedPrepackagedConceptSets
-      );
-    };
-
-    const getIdsAndDomainsFromConceptSets = (
-      conceptSets: ConceptSet[],
-      prepackagedConceptSets: Set<PrepackagedConceptSet>
-    ) => {
-      const conceptSetIdsWithDomains = conceptSets
-        .map((cs) => ({
-          conceptSetId: cs.id,
-          domain:
-            cs.domain === Domain.PHYSICALMEASUREMENT
-              ? Domain.MEASUREMENT
-              : cs.domain,
-        }))
-        .concat(
-          Array.from(prepackagedConceptSets).map((p) => ({
-            conceptSetId: null,
-            domain: PREPACKAGED_DOMAINS[p],
-          }))
-        );
-      return new Set(conceptSetIdsWithDomains);
     };
 
     const getPrePackagedList = () => {
@@ -1122,9 +1138,6 @@ export const DatasetPage = fp.flow(
           domain: conceptSet.domain,
         });
       } else {
-        const updatedDomains = Array.from(updatedDomainsWithConceptSetIds).map(
-          ({ domain }) => domain
-        );
         setSelectedDomains(
           new Set(
             Array.from(updatedDomainsWithConceptSetIds).map(
@@ -1183,14 +1196,6 @@ export const DatasetPage = fp.flow(
       setDataSetTouched(true);
     };
 
-    // Returns true if selected values set is empty or is not equal to the total values displayed
-    const allValuesSelected = () => {
-      return (
-        !fp.isEmpty(selectedDomainValuePairs) &&
-        selectedDomainValuePairs.length === valuesCount()
-      );
-    };
-
     const valuesCount = () => {
       let count = 0;
       selectedDomains.forEach((d) => {
@@ -1201,6 +1206,14 @@ export const DatasetPage = fp.flow(
         }
       });
       return count;
+    };
+
+    // Returns true if selected values set is empty or is not equal to the total values displayed
+    const allValuesSelected = () => {
+      return (
+        !fp.isEmpty(selectedDomainValuePairs) &&
+        selectedDomainValuePairs.length === valuesCount()
+      );
     };
 
     const selectAllValues = () => {
@@ -1250,57 +1263,6 @@ export const DatasetPage = fp.flow(
         fp.unzip,
         fp.map(fp.fromPairs)
       )(data);
-    };
-
-    const apiEnumToPrePackageConceptSets = (
-      v: Array<PrePackagedConceptSetEnum>
-    ) => {
-      const re: Set<PrepackagedConceptSet> = new Set<PrepackagedConceptSet>();
-      v.map((pre) => {
-        switch (pre) {
-          case PrePackagedConceptSetEnum.BOTH: {
-            re.add(PrepackagedConceptSet.PERSON),
-              re.add(PrepackagedConceptSet.SURVEYS);
-            break;
-          }
-          case PrePackagedConceptSetEnum.PERSON: {
-            re.add(PrepackagedConceptSet.PERSON);
-            break;
-          }
-          case PrePackagedConceptSetEnum.SURVEY: {
-            re.add(PrepackagedConceptSet.SURVEYS);
-            break;
-          }
-          case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
-            re.add(PrepackagedConceptSet.FITBITHEARTRATESUMMARY);
-            break;
-          }
-          case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
-            re.add(PrepackagedConceptSet.FITBITHEARTRATELEVEL);
-            break;
-          }
-          case PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS: {
-            re.add(PrepackagedConceptSet.FITBITINTRADAYSTEPS);
-            break;
-          }
-          case PrePackagedConceptSetEnum.FITBITACTIVITY: {
-            re.add(PrepackagedConceptSet.FITBITACTIVITY);
-            break;
-          }
-          case PrePackagedConceptSetEnum.WHOLEGENOME: {
-            re.add(PrepackagedConceptSet.WHOLEGENOME);
-            break;
-          }
-          case PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC: {
-            re.add(PrepackagedConceptSet.ZIPCODESOCIOECONOMIC);
-            break;
-          }
-          case PrePackagedConceptSetEnum.NONE:
-          default:
-            break;
-        }
-      });
-      return re;
     };
 
     const getPrePackagedConceptSetApiEnum = () => {
@@ -1353,116 +1315,6 @@ export const DatasetPage = fp.flow(
         }
       );
       return selectedPrePackagedConceptSDetEnum;
-    };
-
-    const getPreviewList = async () => {
-      const domains = fp.uniq(
-        selectedDomainValuePairs.map((domainValue) => domainValue.domain)
-      );
-      const newPreviewList: Map<Domain, DataSetPreviewInfo> = new Map(
-        domains.map<[Domain, DataSetPreviewInfo]>((domain) => [
-          domain,
-          {
-            isLoading: true,
-            errorText: null,
-            values: [],
-          },
-        ])
-      );
-      setPreviewList(newPreviewList);
-      setSelectedPreviewDomain(domains[0]);
-      domains.forEach(async (domain) => getPreviewByDomain(domain));
-    };
-
-    const getPreviewByDomain = async (domain: Domain) => {
-      if (domain === Domain.WHOLEGENOMEVARIANT) {
-        setPreviewList(
-          previewList.set(domain, {
-            isLoading: false,
-            errorText: null,
-            values: [],
-          })
-        );
-        return;
-      }
-      const { namespace, id } = workspace;
-      const domainRequest: DataSetPreviewRequest = {
-        domain: domain,
-        conceptSetIds: selectedConceptSetIds,
-        includesAllParticipants: includesAllParticipants,
-        cohortIds: selectedCohortIds,
-        prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
-        values: selectedDomainValuePairs
-          .filter((values) => values.domain === domain)
-          .map((domainValue) => domainValue.value),
-      };
-      let newPreviewInformation;
-      try {
-        const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
-          () =>
-            dataSetApi().previewDataSetByDomain(namespace, id, domainRequest)
-        );
-        newPreviewInformation = {
-          isLoading: false,
-          errorText: null,
-          values: domainPreviewResponse.values,
-        };
-      } catch (ex) {
-        const exceptionResponse = (await ex.json()) as unknown as ErrorResponse;
-        const errorText =
-          generateErrorTextFromPreviewException(exceptionResponse);
-        newPreviewInformation = {
-          isLoading: false,
-          errorText: errorText,
-          values: [],
-        };
-      }
-      setPreviewList(previewList.set(domain, newPreviewInformation));
-    };
-
-    const createDataset = async (datasetName, desc) => {
-      AnalyticsTracker.DatasetBuilder.Create();
-      const { namespace, id } = workspace;
-
-      return dataSetApi()
-        .createDataSet(namespace, id, createDatasetRequest(datasetName, desc))
-        .then((dataset) => loadDataset(dataset));
-    };
-
-    const saveDataset = async () => {
-      AnalyticsTracker.DatasetBuilder.Save();
-      const { namespace, id } = workspace;
-
-      setSavingDataset(true);
-      dataSetApi()
-        .updateDataSet(namespace, id, dataSet.id, updateDatasetRequest())
-        .then((dataset) => loadDataset(dataset))
-        .catch((e) => {
-          console.error(e);
-          showErrorModal('Save Dataset Error', 'Please refresh and try again');
-        })
-        .finally(() => setSavingDataset(false));
-    };
-
-    const createDatasetRequest = (datasetName, desc) => {
-      return {
-        name: datasetName,
-        description: desc,
-        ...{
-          includesAllParticipants,
-          conceptSetIds: selectedConceptSetIds,
-          cohortIds: selectedCohortIds,
-          domainValuePairs: selectedDomainValuePairs,
-          prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
-        },
-      };
-    };
-
-    const updateDatasetRequest = () => {
-      return {
-        ...createDatasetRequest(dataSet.name, dataSet.description),
-        etag: dataSet.etag,
-      };
     };
 
     // TODO: Move to using a response based error handling method, rather than a error based one
@@ -1522,6 +1374,116 @@ export const DatasetPage = fp.flow(
       }
     };
 
+    const getPreviewByDomain = async (domain: Domain) => {
+      if (domain === Domain.WHOLEGENOMEVARIANT) {
+        setPreviewList(
+          previewList.set(domain, {
+            isLoading: false,
+            errorText: null,
+            values: [],
+          })
+        );
+        return;
+      }
+      const { namespace, id } = workspace;
+      const domainRequest: DataSetPreviewRequest = {
+        domain: domain,
+        conceptSetIds: selectedConceptSetIds,
+        includesAllParticipants: includesAllParticipants,
+        cohortIds: selectedCohortIds,
+        prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
+        values: selectedDomainValuePairs
+          .filter((values) => values.domain === domain)
+          .map((domainValue) => domainValue.value),
+      };
+      let newPreviewInformation;
+      try {
+        const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
+          () =>
+            dataSetApi().previewDataSetByDomain(namespace, id, domainRequest)
+        );
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: null,
+          values: domainPreviewResponse.values,
+        };
+      } catch (ex) {
+        const exceptionResponse = (await ex.json()) as unknown as ErrorResponse;
+        const errorText =
+          generateErrorTextFromPreviewException(exceptionResponse);
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: errorText,
+          values: [],
+        };
+      }
+      setPreviewList(previewList.set(domain, newPreviewInformation));
+    };
+
+    const getPreviewList = async () => {
+      const domains = fp.uniq(
+        selectedDomainValuePairs.map((domainValue) => domainValue.domain)
+      );
+      const newPreviewList: Map<Domain, DataSetPreviewInfo> = new Map(
+        domains.map<[Domain, DataSetPreviewInfo]>((domain) => [
+          domain,
+          {
+            isLoading: true,
+            errorText: null,
+            values: [],
+          },
+        ])
+      );
+      setPreviewList(newPreviewList);
+      setSelectedPreviewDomain(domains[0]);
+      domains.forEach(async (domain) => getPreviewByDomain(domain));
+    };
+
+    const createDatasetRequest = (datasetName, desc) => {
+      return {
+        name: datasetName,
+        description: desc,
+        ...{
+          includesAllParticipants,
+          conceptSetIds: selectedConceptSetIds,
+          cohortIds: selectedCohortIds,
+          domainValuePairs: selectedDomainValuePairs,
+          prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
+        },
+      };
+    };
+
+    const createDataset = async (datasetName, desc) => {
+      AnalyticsTracker.DatasetBuilder.Create();
+      const { namespace, id } = workspace;
+
+      return dataSetApi()
+        .createDataSet(namespace, id, createDatasetRequest(datasetName, desc))
+        .then((dataset) => loadDataset(dataset));
+    };
+
+    const updateDatasetRequest = () => {
+      return {
+        ...createDatasetRequest(dataSet.name, dataSet.description),
+        etag: dataSet.etag,
+      };
+    };
+
+    const saveDataset = async () => {
+      AnalyticsTracker.DatasetBuilder.Save();
+      const { namespace, id } = workspace;
+
+      setSavingDataset(true);
+      dataSetApi()
+        .updateDataSet(namespace, id, dataSet.id, updateDatasetRequest())
+        .then((dataset) => loadDataset(dataset))
+        .catch((e) => {
+          console.error(e);
+          showErrorModal('Save Dataset Error', 'Please refresh and try again');
+        })
+        .finally(() => setSavingDataset(false));
+    };
+
     const isEllipsisActive = (text) => {
       if (dt) {
         const columnIndex = dt.props.children.findIndex(
@@ -1558,40 +1520,6 @@ export const DatasetPage = fp.flow(
           </div>
         </TooltipTrigger>
       );
-    };
-
-    const renderPreviewDataTableSection = () => {
-      let selectedPreviewDomainString = selectedPreviewDomain.toString();
-      // Had to do the following since typescript changes the key by removing _ therefore changing the domain string
-      // which resulted in map check from selectedPreviewDomain to give undefined result always
-      if (selectedPreviewDomain?.toString().startsWith('FITBIT')) {
-        switch (selectedPreviewDomain.toString()) {
-          case 'FITBITHEARTRATESUMMARY':
-            selectedPreviewDomainString = 'FITBIT_HEART_RATE_SUMMARY';
-            break;
-          case 'FITBITHEARTRATELEVEL':
-            selectedPreviewDomainString = 'FITBIT_HEART_RATE_LEVEL';
-            break;
-          case 'FITBITACTIVITY':
-            selectedPreviewDomainString = 'FITBIT_ACTIVITY';
-            break;
-          case 'FITBITINTRADAYSTEPS':
-            selectedPreviewDomainString = 'FITBIT_INTRADAY_STEPS';
-            break;
-        }
-      }
-      let filteredPreviewData;
-      previewList.forEach((map, entry) => {
-        if (
-          entry.toString() === selectedPreviewDomainString &&
-          !filteredPreviewData
-        ) {
-          filteredPreviewData = map;
-        }
-      });
-      return filteredPreviewData && filteredPreviewData.values.length > 0
-        ? renderPreviewDataTable(filteredPreviewData)
-        : renderPreviewDataTableSectionMessage(filteredPreviewData);
     };
 
     const renderPreviewDataTable = (
@@ -1640,6 +1568,40 @@ export const DatasetPage = fp.flow(
           )}
         </div>
       );
+    };
+
+    const renderPreviewDataTableSection = () => {
+      let selectedPreviewDomainString = selectedPreviewDomain.toString();
+      // Had to do the following since typescript changes the key by removing _ therefore changing the domain string
+      // which resulted in map check from selectedPreviewDomain to give undefined result always
+      if (selectedPreviewDomain?.toString().startsWith('FITBIT')) {
+        switch (selectedPreviewDomain.toString()) {
+          case 'FITBITHEARTRATESUMMARY':
+            selectedPreviewDomainString = 'FITBIT_HEART_RATE_SUMMARY';
+            break;
+          case 'FITBITHEARTRATELEVEL':
+            selectedPreviewDomainString = 'FITBIT_HEART_RATE_LEVEL';
+            break;
+          case 'FITBITACTIVITY':
+            selectedPreviewDomainString = 'FITBIT_ACTIVITY';
+            break;
+          case 'FITBITINTRADAYSTEPS':
+            selectedPreviewDomainString = 'FITBIT_INTRADAY_STEPS';
+            break;
+        }
+      }
+      let filteredPreviewData;
+      previewList.forEach((map, entry) => {
+        if (
+          entry.toString() === selectedPreviewDomainString &&
+          !filteredPreviewData
+        ) {
+          filteredPreviewData = map;
+        }
+      });
+      return filteredPreviewData && filteredPreviewData.values.length > 0
+        ? renderPreviewDataTable(filteredPreviewData)
+        : renderPreviewDataTableSectionMessage(filteredPreviewData);
     };
 
     const onClickExport = () => {
