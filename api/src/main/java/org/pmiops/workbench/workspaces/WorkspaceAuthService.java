@@ -115,6 +115,30 @@ public class WorkspaceAuthService {
         fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName));
   }
 
+  private void updateAcl(
+      DbWorkspace workspace, List<FirecloudWorkspaceACLUpdate> updateACLRequestList) {
+
+    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
+        fireCloudService.updateWorkspaceACL(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+
+    if (!fireCloudResponse.getUsersNotFound().isEmpty()) {
+      throw new BadRequestException(
+          "users not found: "
+              + fireCloudResponse.getUsersNotFound().stream()
+                  .map(FirecloudWorkspaceACLUpdate::getEmail)
+                  .collect(Collectors.joining(", ")));
+    }
+  }
+
+  private void updateAcl(DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
+    updateAcl(
+        workspace,
+        updatedAclsMap.entrySet().stream()
+            .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))
+            .collect(Collectors.toList()));
+  }
+
   private void synchronizeOwnerBillingProjects(
       String billingProjectName,
       Set<String> usersToSynchronize,
@@ -186,16 +210,7 @@ public class WorkspaceAuthService {
           FirecloudTransforms.buildAclUpdate(remainingRole.getKey(), remainingRole.getValue()));
     }
 
-    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
-        fireCloudService.updateWorkspaceACL(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
-    if (!fireCloudResponse.getUsersNotFound().isEmpty()) {
-      throw new BadRequestException(
-          "users not found: "
-              + fireCloudResponse.getUsersNotFound().stream()
-                  .map(FirecloudWorkspaceACLUpdate::getEmail)
-                  .collect(Collectors.joining(", ")));
-    }
+    updateAcl(workspace, updateACLRequestList);
 
     // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
     // canCompute on the workspace / billing project, nor does it grant the ability to grant
@@ -211,25 +226,8 @@ public class WorkspaceAuthService {
 
   public DbWorkspace patchWorkspaceAcls(
       DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
-    // existingAclsMap is a map of the old permissions for ALL users on the ws
-    Map<String, FirecloudWorkspaceAccessEntry> existingAclsMap =
-        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
-    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
-        updatedAclsMap.entrySet().stream()
-            .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))
-            .collect(Collectors.toList());
-
-    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
-        fireCloudService.updateWorkspaceACL(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
-    if (!fireCloudResponse.getUsersNotFound().isEmpty()) {
-      throw new BadRequestException(
-          "users not found: "
-              + fireCloudResponse.getUsersNotFound().stream()
-                  .map(FirecloudWorkspaceACLUpdate::getEmail)
-                  .collect(Collectors.joining(", ")));
-    }
+    updateAcl(workspace, updatedAclsMap);
 
     // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
     // canCompute on the workspace / billing project, nor does it grant the ability to grant
@@ -238,7 +236,7 @@ public class WorkspaceAuthService {
         workspace.getWorkspaceNamespace(),
         updatedAclsMap.keySet(),
         updatedAclsMap,
-        existingAclsMap);
+        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
     return workspaceDao.saveWithLastModified(workspace);
   }
