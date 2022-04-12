@@ -304,3 +304,12 @@ then
   SELECT *
   FROM \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`"
 fi
+
+#######################
+# ds_device #
+#######################
+echo "Inserting ds_device"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$BACKUP_DATASET.ds_device\`
+SELECT *
+FROM \`$BQ_PROJECT.$BQ_DATASET.ds_device\`"

@@ -37,6 +37,25 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.conc
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.CONDITION_SOURCE_CONCEPT_ID = c4.CONCEPT_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.CONDITION_STATUS_CONCEPT_ID = c5.CONCEPT_ID"
 
+echo "ds_device - inserting data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_device\`
+     (PERSON_ID, DEVICE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
+     DEVICE_EXPOSURE_START_DATETIME, DEVICE_EXPOSURE_END_DATETIME, DEVICE_TYPE_CONCEPT_ID, DEVICE_TYPE_CONCEPT_NAME,
+     VISIT_OCCURRENCE_ID, VISIT_OCCURRENCE_CONCEPT_NAME, DEVICE_SOURCE_VALUE, DEVICE_SOURCE_CONCEPT_ID,
+     SOURCE_CONCEPT_NAME, SOURCE_CONCEPT_CODE, SOURCE_VOCABULARY)
+ select a.PERSON_ID, DEVICE_CONCEPT_ID, c1.concept_name as STANDARD_CONCEPT_NAME, c1.concept_code as STANDARD_CONCEPT_CODE,
+     c1.vocabulary_id as STANDARD_VOCABULARY, DEVICE_EXPOSURE_START_DATETIME, DEVICE_EXPOSURE_END_DATETIME, DEVICE_TYPE_CONCEPT_ID,
+     c2.concept_name as DEVICE_TYPE_CONCEPT_NAME, a.VISIT_OCCURRENCE_ID, c3.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME,
+     DEVICE_SOURCE_VALUE, DEVICE_SOURCE_CONCEPT_ID, c4.concept_name as SOURCE_CONCEPT_NAME, c4.concept_code as SOURCE_CONCEPT_CODE,
+     c4.vocabulary_id as SOURCE_VOCABULARY
+ from \`$BQ_PROJECT.$BQ_DATASET.device_exposure\` a
+ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.DEVICE_CONCEPT_ID = c1.CONCEPT_ID
+ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.DEVICE_TYPE_CONCEPT_ID = c2.CONCEPT_ID
+ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
+ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.DEVICE_SOURCE_CONCEPT_ID = c4.CONCEPT_ID"
+
 echo "ds_drug_exposure - inserting data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_drug_exposure\`
