@@ -2047,6 +2047,61 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
+  ////////// getCohortReviewsInWorkspace  //////////
+  @ParameterizedTest(
+      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void getCohortReviewsByCohortIdAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    DbCohortReview cohortReviewMult =
+        cohortReviewDao.save(
+            new DbCohortReview()
+                .cohortId(cohort.getCohortId())
+                .cdrVersionId(cdrVersion.getCdrVersionId())
+                .reviewSize(10)
+                .creationTime(new Timestamp(new Date().getTime())));
+
+    List<CohortReview> expected =
+        ImmutableList.of(
+            cohortReviewMapper.dbModelToClient(cohortReview),
+            cohortReviewMapper.dbModelToClient(cohortReviewMult));
+
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    List<CohortReview> actual =
+        cohortReviewController
+            .getCohortReviewsByCohortId(
+                workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+            .getBody()
+            .getItems();
+
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @ParameterizedTest(
+      name = "getCohortReviewsInWorkspaceForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void getCohortReviewsByCohortIdForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.getCohortReviewsByCohortId(
+                    workspace.getNamespace(), workspace.getId(), cohort.getCohortId()));
+
+    assertForbiddenException(exception);
+  }
+
   ////////// getCohortChartData - See CohortReviewControllerBQTest   //////////
   @ParameterizedTest(name = "getCohortChartDataAllowedAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(

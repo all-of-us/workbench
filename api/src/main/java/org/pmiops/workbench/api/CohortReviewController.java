@@ -257,6 +257,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  public ResponseEntity<CohortReviewListResponse> getCohortReviewsByCohortId(
+      String workspaceNamespace, String workspaceId, Long cohortId) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    return ResponseEntity.ok(
+        new CohortReviewListResponse()
+            .items(cohortReviewService.getCohortReviewsByCohortId(cohortId)));
+  }
+
+  @Override
   public ResponseEntity<CohortReviewListResponse> getCohortReviewsInWorkspace(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.

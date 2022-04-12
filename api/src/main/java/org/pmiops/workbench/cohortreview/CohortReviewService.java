@@ -39,6 +39,8 @@ public interface CohortReviewService {
   /** Find the {@link DbCohortReview} for the specified ns and firecloudName. */
   List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName);
 
+  List<CohortReview> getCohortReviewsByCohortId(Long cohortId);
+
   /** Save the specified {@link CohortReview}. */
   CohortReview saveCohortReview(CohortReview cohortReview, DbUser creator);
 
