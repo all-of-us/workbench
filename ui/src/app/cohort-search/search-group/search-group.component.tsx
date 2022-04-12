@@ -11,6 +11,7 @@ import {
   TemporalTime,
 } from 'generated/fetch';
 
+import { CohortCriteriaMenu } from 'app/cohort-search/cohort-criteria-menu';
 import { SearchGroupItem } from 'app/cohort-search/search-group-item/search-group-item.component';
 import {
   criteriaMenuOptionsStore,
@@ -33,6 +34,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -661,6 +663,7 @@ export const SearchGroup = withCurrentWorkspace()(
       } = this.props;
       const {
         count,
+        criteriaMenuOptions,
         error,
         inputError,
         inputTouched,
@@ -735,21 +738,30 @@ export const SearchGroup = withCurrentWorkspace()(
               </div>
             ))}
             {/* Criteria menu for main search item list/temporal group 0 items */}
-            <div style={styles.cardBlock}>
-              <TieredMenu
-                style={{ ...styles.menu, padding: '0.5rem 0' }}
-                appendTo={document.body}
-                model={this.criteriaMenuItems(0)}
-                popup
-                ref={(el) => (this.criteriaMenu = el)}
+            {!serverConfigStore.get().config.enableUniversalSearch ? (
+              <CohortCriteriaMenu
+                launchSearch={(criteria, searchTerms) =>
+                  this.launchSearch(criteria, searchTerms)
+                }
+                menuOptions={criteriaMenuOptions}
               />
-              <button
-                style={styles.menuButton}
-                onClick={(e) => this.criteriaMenu.toggle(e)}
-              >
-                Add Criteria <ClrIcon shape='caret down' size={12} />
-              </button>
-            </div>
+            ) : (
+              <div style={styles.cardBlock}>
+                <TieredMenu
+                  style={{ ...styles.menu, padding: '0.5rem 0' }}
+                  appendTo={document.body}
+                  model={this.criteriaMenuItems(0)}
+                  popup
+                  ref={(el) => (this.criteriaMenu = el)}
+                />
+                <button
+                  style={styles.menuButton}
+                  onClick={(e) => this.criteriaMenu.toggle(e)}
+                >
+                  Add Criteria <ClrIcon shape='caret down' size={12} />
+                </button>
+              </div>
+            )}
             {temporal && (
               <React.Fragment>
                 {/* Temporal time dropdown */}

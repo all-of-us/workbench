@@ -14,6 +14,7 @@ const styles = reactStyles({
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
     padding: '0.5rem 0.5rem 0.5rem 0.75rem',
+    position: 'relative',
   },
   count: {
     alignItems: 'center',
@@ -78,14 +79,13 @@ const styles = reactStyles({
   dropdownMenu: {
     position: 'absolute',
     top: '100%',
-    left: '1.25rem',
     display: 'flex',
     flexDirection: 'column',
     background: colors.white,
     padding: '.25rem 0',
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
-    marginTop: '-1rem',
+    marginTop: '-0.5rem',
     minHeight: '1.25rem',
     width: '15rem',
     borderRadius: '.125rem',

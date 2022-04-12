@@ -220,11 +220,10 @@ export const CriteriaSearch = fp.flow(
         conceptSearchTerms,
       } = this.props;
       return (
-        domain === Domain.VISIT ||
-        (source === 'cohort' &&
-          domain === Domain.PHYSICALMEASUREMENT &&
-          !conceptSearchTerms) ||
-        (source === 'cohort' && domain === Domain.SURVEY)
+        (domain === Domain.VISIT ||
+          (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT) ||
+          (source === 'cohort' && domain === Domain.SURVEY)) &&
+        !conceptSearchTerms
       );
     }
 
