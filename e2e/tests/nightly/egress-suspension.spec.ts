@@ -4,11 +4,14 @@ import { makeRandomName } from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import path from 'path';
 import { waitForSecuritySuspendedStatus } from 'utils/runtime-utils';
+import { logger } from 'libs/logger';
 
 // 45 minutes. Test could take a long time.
 jest.setTimeout(45 * 60 * 1000);
 
 describe('egress suspension', () => {
+  let notebookUrl: string;
+
   beforeEach(async () => {
     await signInWithAccessToken(page, config.EGRESS_TEST_USER);
   });
@@ -26,7 +29,7 @@ describe('egress suspension', () => {
     await notebookPage.uploadFile(dataGenFilename, dataGenFilePath);
 
     // Generates 6 files currently. A single large file may time out.
-    console.log('Generating 30MB files for download');
+    logger.info('Generating 30MB files for download');
     await notebookPage.runCodeFile(1, dataGenFilename, 60 * 1000);
 
     // Download these 30MB files one-by-one from the file tree, generating ~180MB egress
@@ -36,17 +39,25 @@ describe('egress suspension', () => {
     await treePage.waitForTimeout(5000);
     for (let i = 0; i < 6; i++) {
       const f = `data${i}.txt`;
-      console.log(`Downloading ${f} to generate egress`);
+      logger.info(`Downloading ${f} to generate egress`);
       await notebookPage.downloadFileFromTree(treePage, f);
+      // Short pause after download file to simulate real user behavior
+      // Very fast test playback speed doesn't seems to reliably trigger egress event
+      await page.waitForTimeout(5000);
     }
+    await treePage.close();
 
-    console.log('Awaiting security suspension in a new page');
-    const newPage = await browser.newPage();
-    await signInWithAccessToken(newPage, config.EGRESS_TEST_USER);
-    // Open the current notebook URL again; this will instead show a suspended
-    // error on reload once the user becomes suspended.
-    await newPage.goto(page.url());
+    logger.info('Awaiting security suspension in notebook page');
+    await page.bringToFront();
+    notebookUrl = page.url();
+    await notebookPage.waitForLoad();
 
-    await waitForSecuritySuspendedStatus(newPage);
+    await waitForSecuritySuspendedStatus(page);
+  });
+
+  test('Verify analysis environment is suspended due to security egress suspension', async () => {
+    await signInWithAccessToken(page, config.EGRESS_TEST_USER);
+    await page.goto(notebookUrl, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 60 * 1000 });
+    await waitForSecuritySuspendedStatus(page);
   });
 });
