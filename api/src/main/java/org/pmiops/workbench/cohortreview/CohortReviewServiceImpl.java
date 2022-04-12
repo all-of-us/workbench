@@ -203,6 +203,13 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
+  public List<CohortReview> getCohortReviewsByCohortId(Long cohortId) {
+    return cohortReviewDao.findAllByCohortId(cohortId).stream()
+        .map(cohortReviewMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public CohortReview saveCohortReview(CohortReview cohortReview, DbUser creator) {
     return cohortReviewMapper.dbModelToClient(
         cohortReviewDao.save(cohortReviewMapper.clientToDbModel(cohortReview, creator)));

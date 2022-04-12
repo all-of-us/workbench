@@ -2053,6 +2053,26 @@ paths:
           description: A list of cohort definitions.
           schema:
             "$ref": "#/definitions/CohortReviewListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortId}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - in: path
+        name: cohortId
+        type: integer
+        format: int64
+        required: true
+        description: cohort primary key
+    get:
+      tags:
+        - cohortReview
+      description: Returns all cohort reviews per cohortId
+      operationId: getCohortReviewsByCohortId
+      responses:
+        200:
+          description: A list of cohort reviews.
+          schema:
+            "$ref": "#/definitions/CohortReviewListResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortReviewId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
