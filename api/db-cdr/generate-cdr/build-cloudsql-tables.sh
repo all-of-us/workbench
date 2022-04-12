@@ -110,7 +110,7 @@ VALUES
 (4,'Domains',5,'Observations','Observations',0,0,1,4),
 (5,'Domains',6,'Procedures','Procedures',0,0,1,5),
 (6,'Program Physical Measurements',19,'Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process(program physical measurements)',0,0,0,8),
-(7,'Devices',2,'Devices','Devices',0,0,1,9)"
+(7,'Domains',2,'Devices','Devices',0,0,1,6)"
 
 # Populate survey_module
 #################
@@ -375,6 +375,28 @@ from (select count(distinct se.person_id) as participant_count
       where c.domain_id = 'PHYSICAL_MEASUREMENT_CSS') c
 where d.domain = 19"
 
+# Set concept_count for standard device
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
+set d.concept_count = c.concept_count
+from (select count(distinct concept_id) as concept_count
+      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+      where full_text like '%device_rank1%'
+      and is_standard = 1) c
+where d.domain = 2
+and d.is_standard = 1"
+
+# Set participant_count for standard Device
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
+set d.participant_count = c.participant_count
+from (select count(distinct person_id) as participant_count
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+       where domain = 'Device'
+         and is_standard = 1) c
+where d.domain = 2
+and d.is_standard = 1"
+
 ##########################################
 # survey count updates                   #
 ##########################################
@@ -412,3 +434,4 @@ FROM
         GROUP BY 1
     ) y
 WHERE x.concept_id = y.ancestor_concept_id"
+
