@@ -222,7 +222,7 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: enableComplianceTraining,
         AARTitleComponent: () => (
           <div>
-            <AoU /> Responsible Conduct of Research Training
+            Complete <AoU /> research Registered Tier training
           </div>
         ),
         DARTitleComponent: () => (
