@@ -229,7 +229,7 @@ public class WorkspaceAuthService {
 
     updateAcl(workspace, updatedAclsMap);
 
-    // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
+    // Keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
     // canCompute on the workspace / billing project, nor does it grant the ability to grant
     // canCompute to other users. See RW-3009 for details.
     synchronizeOwnerBillingProjects(
