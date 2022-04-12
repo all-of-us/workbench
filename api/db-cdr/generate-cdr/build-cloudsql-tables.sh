@@ -109,7 +109,8 @@ VALUES
 (3,'Domains',4,'Labs and Measurements','Labs and Measurements',0,0,1,3),
 (4,'Domains',5,'Observations','Observations',0,0,1,4),
 (5,'Domains',6,'Procedures','Procedures',0,0,1,5),
-(6,'Program Physical Measurements',19,'Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process(program physical measurements)',0,0,0,8)"
+(6,'Program Physical Measurements',19,'Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process(program physical measurements)',0,0,0,8),
+(7,'Devices',2,'Devices','Devices',0,0,1,9)"
 
 # Populate survey_module
 #################

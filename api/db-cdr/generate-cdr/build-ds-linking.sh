@@ -319,3 +319,27 @@ VALUES
   ($MAX_ID + 10, 'VACANT_HOUSING', 'zip_code.fraction_vacant_housing as vacant_housing', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
   ($MAX_ID + 11, 'DEPRIVATION_INDEX', 'zip_code.deprivation_index', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
   ($MAX_ID + 12, 'AMERICAN_COMMUNITY_SURVEY_YEAR', 'zip_code.acs as american_community_survey_year', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic')"
+
+echo "ds_linking - inserting device data"
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+ VALUES
+     # We add the core table for domain row to ensure we have a single place to make certain we load in the base table.
+     ($MAX_ID + 1, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 2, 'PERSON_ID', 'device.person_id', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 3, 'DEVICE_CONCEPT_ID', 'device.device_concept_id', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 4, 'STANDARD_CONCEPT_NAME', 'd_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_standard_concept ON device.device_concept_id = d_standard_concept.concept_id', 'Device'),
+     ($MAX_ID + 5, 'STANDARD_CONCEPT_CODE', 'd_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_standard_concept ON device.device_concept_id = d_standard_concept.concept_id', 'Device'),
+     ($MAX_ID + 6, 'STANDARD_VOCABULARY', 'd_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_standard_concept ON device.device_concept_id = d_standard_concept.concept_id', 'Device'),
+     ($MAX_ID + 7, 'DEVICE_EXPOSURE_START_DATETIME', 'device.device_exposure_start_datetime', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 8, 'DEVICE_EXPOSURE_END_DATETIME', 'device.device_exposure_end_datetime', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 9, 'DEVICE_TYPE_CONCEPT_ID', 'device.device_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 10, 'DEVICE_TYPE_CONCEPT_NAME', 'd_type.concept_name as device_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_type ON device.device_type_concept_id = d_type.concept_id', 'Device'),
+     ($MAX_ID + 11, 'VISIT_OCCURRENCE_ID', 'device.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 12, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON d_occurrence.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` visit ON v.visit_concept_id = visit.concept_id', 'Device'),
+     ($MAX_ID + 13, 'DEVICE_SOURCE_VALUE', 'device.device_source_value', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 14, 'DEVICE_SOURCE_CONCEPT_ID', 'device.device_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.device_exposure\` device', 'Device'),
+     ($MAX_ID + 15, 'SOURCE_CONCEPT_NAME', 'd_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON device.device_source_concept_id = d_source_concept.concept_id', 'Device'),
+     ($MAX_ID + 16, 'SOURCE_CONCEPT_CODE', 'd_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON device.device_source_concept_id = d_source_concept.concept_id', 'Device'),
+     ($MAX_ID + 17, 'SOURCE_VOCABULARY', 'd_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON device.device_source_concept_id = d_source_concept.concept_id', 'Device')"
