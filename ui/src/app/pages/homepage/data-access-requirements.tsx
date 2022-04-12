@@ -999,7 +999,11 @@ const RegisteredTierCard = (props: {
     <FlexRow style={styles.card}>
       <FlexColumn>
         <div style={styles.cardStep}>Step 1</div>
-        <div style={styles.cardHeader}>Complete Registration</div>
+        <div style={styles.cardHeader}>
+          {pageMode === DARPageMode.ANNUAL_RENEWAL
+            ? 'Basic Data Access'
+            : 'Complete Registration'}
+        </div>
         <FlexRow>
           <RegisteredTierBadge />
           <div style={styles.dataHeader}>{rtDisplayName} data</div>
@@ -1274,7 +1278,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     }, [nextActive, nextRequired]);
 
     const showCtCard =
-      // RW-7798 add CT card for ANNUAL_RENEWAL
       (pageMode === DARPageMode.INITIAL_REGISTRATION &&
         accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)) ||
       pageMode === DARPageMode.ANNUAL_RENEWAL;
