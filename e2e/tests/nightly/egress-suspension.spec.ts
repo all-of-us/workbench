@@ -6,7 +6,6 @@ import RuntimePanel from 'app/sidebar/runtime-panel';
 import path from 'path';
 import { waitForSecuritySuspendedStatus } from 'utils/runtime-utils';
 import { logger } from 'libs/logger';
-import fs from 'fs-extra';
 
 // 45 minutes. Test could take a long time.
 jest.setTimeout(45 * 60 * 1000);
@@ -17,15 +16,9 @@ describe('egress suspension', () => {
   const notebookName = makeRandomName('egress-notebook');
   const dataGenFilename = 'create-data-files.py';
   const dataGenFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${dataGenFilename}`);
-  const downloadPath = path.resolve('logs/download');
 
   beforeEach(async () => {
     await signInWithAccessToken(page, config.EGRESS_TEST_USER);
-    await (await page.target().createCDPSession()).send('Page.setDownloadBehavior', {
-      behavior: 'allow',
-      downloadPath
-    });
-    await fs.ensureDir(downloadPath);
   });
 
   test("VM egress suspends user's compute", async () => {
@@ -50,8 +43,6 @@ describe('egress suspension', () => {
       const f = `data${i}.txt`;
       logger.info(`Downloading ${f} to generate egress`);
       await notebookPage.downloadFileFromTree(treePage, f);
-      console.log(`${downloadPath}/${f}`);
-      expect(fs.existsSync(`${downloadPath}/${f}`)).toBe(true);
     }
     await treePage.close();
 
@@ -66,7 +57,7 @@ describe('egress suspension', () => {
   test('Cloud Analysis Environment is auto suspended', async () => {
     await signInWithAccessToken(page, config.EGRESS_TEST_USER);
     await page.goto(notebookUrl, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 60 * 1000 });
-    await waitForSecuritySuspendedStatus(page);
+    await waitForSecuritySuspendedStatus(page, true, 30 * 1000);
 
     // egress handling will auto. suspend cloud analysis environment.
     const runtimePanel = new RuntimePanel(page);

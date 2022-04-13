@@ -37,13 +37,14 @@ export async function waitForSecuritySuspendedStatus(
 
     if ((await isSecuritySuspended(page)) === suspended) {
       // Success
-      logger.info(`Egress security suspended took ${(Date.now() - startTime) / 1000 / 60} minutes`);
       break;
     }
 
-    if (Date.now() - startTime > timeOut - pollPeriod) {
+    const waited = Date.now() - startTime;
+    if (waited > timeOut - pollPeriod) {
       throw new Error(`Timed out waiting for egress security suspension status = ${suspended}`);
     }
+    logger.info(`Waited for ${(waited / 1000 / 60).toFixed(2)} minutes`);
     await page.waitForTimeout(pollPeriod);
   }
 }
