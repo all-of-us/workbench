@@ -38,6 +38,7 @@ cb_survey_version
 ds_activity_summary
 ds_condition_occurrence
 ds_data_dictionary
+ds_device
 ds_drug_exposure
 ds_heart_rate_minute_level
 ds_heart_rate_summary
@@ -50,7 +51,6 @@ ds_steps_intraday
 ds_survey
 ds_visit_occurrence
 ds_zip_code_socioeconomic
-ds_device
 )
 
 for t in "${backup_tables[@]}"
@@ -195,6 +195,15 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 SELECT *
 FROM \`$BQ_PROJECT.$BQ_DATASET.ds_data_dictionary\`"
 
+#######################
+# ds_device #
+#######################
+echo "Inserting ds_device"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$BACKUP_DATASET.ds_device\`
+SELECT *
+FROM \`$BQ_PROJECT.$BQ_DATASET.ds_device\`"
+
 ####################
 # ds_drug_exposure #
 ####################
@@ -306,11 +315,3 @@ then
   FROM \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`"
 fi
 
-#######################
-# ds_device #
-#######################
-echo "Inserting ds_device"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$BACKUP_DATASET.ds_device\`
-SELECT *
-FROM \`$BQ_PROJECT.$BQ_DATASET.ds_device\`"
