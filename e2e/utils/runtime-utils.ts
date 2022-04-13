@@ -20,7 +20,7 @@ export async function initializeRuntimeIfModalPresented(page: Page): Promise<voi
 }
 
 async function isSecuritySuspended(page: Page): Promise<boolean> {
-  return exists(page, '//*[@data-test-id="security-suspended-msg"]');
+  return exists(page, '//*[@data-test-id="security-suspended-msg"]', { timeout: 10000 });
 }
 
 export async function waitForSecuritySuspendedStatus(
@@ -39,9 +39,11 @@ export async function waitForSecuritySuspendedStatus(
       break;
     }
 
-    if (Date.now() - startTime > timeOut - pollPeriod) {
+    const waited = Date.now() - startTime;
+    if (waited > timeOut - pollPeriod) {
       throw new Error('timed out waiting for security suspension status = ' + suspended);
     }
+    console.log(`waited for ${(waited/1000/60).toFixed(2)} minutes`);
     await page.waitForTimeout(pollPeriod);
   }
 }
