@@ -18,7 +18,10 @@ set -x
 # own default extensions: https://github.com/DataBiosphere/terra-docker/blob/master/terra-jupyter-base/scripts/extension/install_jupyter_contrib_nbextensions.sh
 sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable snippets_menu/main
 
-# Section represents the jupyter page to which the extension will be applied to
+# Enable activity checking on all views, not just notebooks, e.g. to capture terminal or tree interactions.
+sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable activity-checker-extension/main --section=common
+
+# Install on the tree view, which is the only place where this extension applies.
 sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-file-tree-policy-extension/main --section=tree
 
 sudo -E -u jupyter /opt/conda/bin/nbstripout --install --global
