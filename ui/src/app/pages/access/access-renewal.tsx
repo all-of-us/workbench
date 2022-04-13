@@ -32,6 +32,7 @@ import {
   getAccessModuleStatusByNameOrEmpty,
   isExpiringOrExpired,
   maybeDaysRemaining,
+  redirectToControlledTraining,
   redirectToRegisteredTraining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
@@ -379,7 +380,7 @@ export const RenewalCardBody = (props: {
           <div style={textStyle}>
             You are required to complete the refreshed ethics training courses
             to understand the privacy safeguards and the compliance requirements
-            for using the <AoU /> Dataset.
+            for using the <AoU /> Registered Tier Dataset.
           </div>
           {!isRenewalCompleteForModule(moduleStatus) && (
             <div
@@ -401,6 +402,59 @@ export const RenewalCardBody = (props: {
               onClick={() => {
                 setTrainingRefreshButtonDisabled(false);
                 redirectToRegisteredTraining();
+              }}
+            />
+            {!isRenewalCompleteForModule(moduleStatus) && (
+              <Button
+                disabled={trainingRefreshButtonDisabled}
+                onClick={async () => {
+                  setLoading(true);
+                  await syncAndReloadTraining();
+                  setLoading(false);
+                }}
+                style={{
+                  height: '1.6rem',
+                  marginLeft: '0.75rem',
+                  width: 'max-content',
+                }}
+              >
+                Refresh
+              </Button>
+            )}
+          </FlexRow>
+        </React.Fragment>
+      ),
+    ],
+    [
+      AccessModule.CTCOMPLIANCETRAINING,
+      () => (
+        <React.Fragment>
+          <Dates />
+          <div style={textStyle}>
+            You are required to complete the refreshed ethics training courses
+            to understand the privacy safeguards and the compliance requirements
+            for using the <AoU /> Controlled Tier Dataset.
+          </div>
+          {!isRenewalCompleteForModule(moduleStatus) && (
+            <div
+              style={{
+                ...renewalStyle.complianceTrainingExpiring,
+                ...textStyle,
+              }}
+            >
+              When you have completed the training click the refresh button or
+              reload the page.
+            </div>
+          )}
+          <TimeEstimate />
+          <FlexRow style={{ marginTop: 'auto' }}>
+            <ActionButton
+              actionButtonText='Complete Training'
+              completedButtonText='Completed'
+              moduleStatus={moduleStatus}
+              onClick={() => {
+                setTrainingRefreshButtonDisabled(false);
+                redirectToControlledTraining();
               }}
             />
             {!isRenewalCompleteForModule(moduleStatus) && (
