@@ -35,10 +35,8 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
-  getStatusText,
   isCompliant,
   isEligibleModule,
-  redirectToNiH,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
@@ -53,10 +51,9 @@ import { ReactComponent as survey } from 'assets/icons/DAR/survey.svg';
 import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
 import { MaybeModule } from './maybe-module';
-import { ModuleBox } from './module-box';
 import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
-import { Refresh } from './refresh';
+import { OtherModule } from './other-module';
 
 export const styles = reactStyles({
   initialRegistrationOuterHeader: {
@@ -434,61 +431,23 @@ const ControlledTierEraModule = (props: {
   spinnerProps: WithSpinnerOverlayProps;
 }): JSX.Element => {
   const { profile, eligible, spinnerProps } = props;
-  // whether to show the refresh button: this module has been clicked
-  const [showRefresh, setShowRefresh] = useState(false);
+
   const moduleName = AccessModule.ERACOMMONS;
-  const { DARTitleComponent, refreshAction, isEnabledInEnvironment } =
-    getAccessModuleConfig(moduleName);
+
   const status = getAccessModuleStatusByName(profile, moduleName);
 
   // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
   const clickable = eligible && !isCompliant(status);
 
-  const Module = () => {
-    return (
-      <FlexRow data-test-id={`module-${moduleName}`}>
-        <FlexRow style={styles.moduleCTA}>
-          {showRefresh && refreshAction && (
-            <Refresh
-              refreshAction={refreshAction}
-              showSpinner={spinnerProps.showSpinner}
-            />
-          )}
-        </FlexRow>
-        <ModuleBox
-          clickable={clickable}
-          action={() => {
-            setShowRefresh(true);
-            redirectToNiH();
-          }}
-        >
-          <ModuleIcon
-            moduleName={moduleName}
-            eligible={eligible}
-            completedOrBypassed={isCompliant(status)}
-          />
-          <FlexColumn>
-            <div
-              style={
-                clickable
-                  ? styles.clickableModuleText
-                  : styles.backgroundModuleText
-              }
-            >
-              <DARTitleComponent />
-            </div>
-            {isCompliant(status) && (
-              <div style={styles.moduleDate}>{getStatusText(status)}</div>
-            )}
-          </FlexColumn>
-        </ModuleBox>
-      </FlexRow>
-    );
-  };
-
-  return isEnabledInEnvironment ? (
-    <Module data-test-id={`module-${moduleName}`} />
-  ) : null;
+  return (
+    <OtherModule
+      clickable={clickable}
+      eligible={eligible}
+      moduleName={moduleName}
+      spinnerProps={spinnerProps}
+      status={status}
+    />
+  );
 };
 
 // the header(s) outside the Fadebox
