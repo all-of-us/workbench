@@ -27,6 +27,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 
+import { AccessTierShortNames } from './access-tiers';
 import {
   displayDateWithoutHours,
   getWholeDaysFromNow,
@@ -598,4 +599,35 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
       }
     })
   );
+};
+
+export const isCompleted = (status: AccessModuleStatus): boolean =>
+  !!status?.completionEpochMillis;
+export const isBypassed = (status: AccessModuleStatus): boolean =>
+  !!status?.bypassEpochMillis;
+export const isCompliant = (status: AccessModuleStatus) =>
+  isCompleted(status) || isBypassed(status);
+
+export const isEligibleModule = (module: AccessModule, profile: Profile) => {
+  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+    // Currently a user can only be ineligible for CT modules.
+    // Note: eRA Commons is an edge case which is handled elsewhere. It is
+    // technically also possible for CT eRA commons to be ineligible.
+    return true;
+  }
+  const controlledTierEligibility = profile.tierEligibilities.find(
+    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
+  );
+  return !!controlledTierEligibility?.eligible;
+};
+
+export const getStatusText = (status: AccessModuleStatus) => {
+  console.assert(
+    isCompliant(status),
+    'Cannot provide status text for incomplete module'
+  );
+  const { completionEpochMillis, bypassEpochMillis } = status;
+  return isCompleted(status)
+    ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
+    : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };

@@ -2,34 +2,29 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
+import { AccessModule, Profile } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
-import { Button, Clickable } from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
 import {
-  ArrowRight,
   CheckCircle,
   ControlledTierBadge,
   MinusCircle,
   RegisteredTierBadge,
-  Repeat,
 } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import {
-  RenewalCardBody,
-  RenewalRequirementsText,
-} from 'app/pages/access/access-renewal';
+import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { cond, reactStyles, switchCase } from 'app/utils';
+import { reactStyles, switchCase } from 'app/utils';
 import {
   AccessTierDisplayNames,
   AccessTierShortNames,
@@ -39,20 +34,15 @@ import {
   bypassAll,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
-  getAccessModuleStatusByNameOrEmpty,
   GetStartedButton,
-  redirectToControlledTraining,
+  getStatusText,
+  isCompliant,
+  isEligibleModule,
   redirectToNiH,
-  redirectToRas,
-  redirectToRegisteredTraining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
-import { AnalyticsTracker } from 'app/utils/analytics';
-import { displayDateWithoutHours } from 'app/utils/dates';
-import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
-import { openZendeskWidget } from 'app/utils/zendesk';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
 import { ReactComponent as genomic } from 'assets/icons/DAR/genomic.svg';
@@ -62,9 +52,13 @@ import { ReactComponent as physical } from 'assets/icons/DAR/physical.svg';
 import { ReactComponent as survey } from 'assets/icons/DAR/survey.svg';
 import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
-import { TwoFactorAuthModal } from './two-factor-auth-modal';
+import { MaybeModule } from './maybe-module';
+import { ModuleBox } from './module-box';
+import { ModuleIcon } from './module-icon';
+import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
+import { Refresh } from './refresh';
 
-const styles = reactStyles({
+export const styles = reactStyles({
   initialRegistrationOuterHeader: {
     marginLeft: '3%',
     width: '50%',
@@ -296,24 +290,6 @@ export enum DARPageMode {
   ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
 }
 
-const isCompleted = (status: AccessModuleStatus): boolean =>
-  !!status?.completionEpochMillis;
-const isBypassed = (status: AccessModuleStatus): boolean =>
-  !!status?.bypassEpochMillis;
-const isCompliant = (status: AccessModuleStatus) =>
-  isCompleted(status) || isBypassed(status);
-
-const getStatusText = (status: AccessModuleStatus) => {
-  console.assert(
-    isCompliant(status),
-    'Cannot provide status text for incomplete module'
-  );
-  const { completionEpochMillis, bypassEpochMillis } = status;
-  return isCompleted(status)
-    ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
-    : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
-};
-
 const handleTerraShibbolethCallback = (
   token: string,
   spinnerProps: WithSpinnerOverlayProps,
@@ -396,19 +372,6 @@ const isEraCommonsModuleRequiredByInstitution = (
   )(profile.tierEligibilities);
 };
 
-const isEligibleModule = (module: AccessModule, profile: Profile) => {
-  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
-    // Currently a user can only be ineligible for CT modules.
-    // Note: eRA Commons is an edge case which is handled elsewhere. It is
-    // technically also possible for CT eRA commons to be ineligible.
-    return true;
-  }
-  const controlledTierEligibility = profile.tierEligibilities.find(
-    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
-  );
-  return !!controlledTierEligibility?.eligible;
-};
-
 // exported for test
 export const getEligibleModules = (
   modules: AccessModule[],
@@ -439,74 +402,6 @@ export const getActiveModule = (
   profile: Profile
 ): AccessModule => incompleteModules(modules, profile)[0];
 
-const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
-  const { showSpinner, refreshAction } = props;
-  return (
-    <Button
-      type='primary'
-      style={styles.refreshButton}
-      onClick={async () => {
-        showSpinner();
-        await refreshAction();
-        location.reload(); // also hides spinner
-      }}
-    >
-      <Repeat style={styles.refreshIcon} /> Refresh
-    </Button>
-  );
-};
-
-const Next = () => (
-  <FlexRow style={styles.nextElement}>
-    <span data-test-id='next-module-cta' style={styles.nextText}>
-      NEXT
-    </span>{' '}
-    <ArrowRight style={styles.nextIcon} />
-  </FlexRow>
-);
-
-const ModuleIcon = (props: {
-  moduleName: AccessModule;
-  completedOrBypassed: boolean;
-  eligible?: boolean;
-}) => {
-  const { moduleName, completedOrBypassed, eligible = true } = props;
-
-  return (
-    <div style={styles.moduleIcon}>
-      {cond(
-        [
-          !eligible,
-          () => (
-            <MinusCircle
-              data-test-id={`module-${moduleName}-ineligible`}
-              style={{ color: colors.disabled }}
-            />
-          ),
-        ],
-        [
-          eligible && completedOrBypassed,
-          () => (
-            <CheckCircle
-              data-test-id={`module-${moduleName}-complete`}
-              style={{ color: colors.success }}
-            />
-          ),
-        ],
-        [
-          eligible && !completedOrBypassed,
-          () => (
-            <CheckCircle
-              data-test-id={`module-${moduleName}-incomplete`}
-              style={{ color: colors.disabled }}
-            />
-          ),
-        ]
-      )}
-    </div>
-  );
-};
-
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = () => {
   const moduleName = AccessModule.RASLINKLOGINGOV;
@@ -531,185 +426,6 @@ const TemporaryRASModule = () => {
       </FlexRow>
     </FlexRow>
   );
-};
-
-const ContactUs = (props: { profile: Profile }) => {
-  const {
-    profile: { givenName, familyName, username, contactEmail },
-  } = props;
-  return (
-    <div data-test-id='contact-us'>
-      <span
-        style={styles.link}
-        onClick={(e) => {
-          openZendeskWidget(givenName, familyName, username, contactEmail);
-          // prevents the enclosing Clickable's onClick() from triggering instead
-          e.stopPropagation();
-        }}
-      >
-        Contact us
-      </span>{' '}
-      if you’re having trouble completing this step.
-    </div>
-  );
-};
-
-const LoginGovHelpText = (props: {
-  profile: Profile;
-  afterInitialClick: boolean;
-}) => {
-  const { profile, afterInitialClick } = props;
-
-  // don't return help text if complete or bypassed
-  const needsHelp = !isCompliant(
-    getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV)
-  );
-
-  return (
-    needsHelp &&
-    (afterInitialClick ? (
-      <div style={styles.loginGovHelp}>
-        <div>
-          Looks like you still need to complete this action, please try again.
-        </div>
-        <ContactUs profile={profile} />
-      </div>
-    ) : (
-      <div style={styles.loginGovHelp}>
-        <div>
-          Verifying your identity helps us keep participant data safe. You’ll
-          need to provide your state ID, social security number, and phone
-          number.
-        </div>
-        <ContactUs profile={profile} />
-      </div>
-    ))
-  );
-};
-
-const ModuleBox = (props: {
-  clickable: boolean;
-  action: Function;
-  children;
-}) => {
-  const { clickable, action, children } = props;
-  return clickable ? (
-    <Clickable onClick={() => action()}>
-      <FlexRow style={styles.clickableModuleBox}>{children}</FlexRow>
-    </Clickable>
-  ) : (
-    <FlexRow style={styles.backgroundModuleBox}>{children}</FlexRow>
-  );
-};
-
-interface ModuleProps {
-  profile: Profile;
-  moduleName: AccessModule;
-  active: boolean;
-  clickable: boolean;
-  spinnerProps: WithSpinnerOverlayProps;
-}
-
-// Renders a module when it's enabled via feature flags.  Returns null if not.
-const MaybeModule = ({
-  profile,
-  moduleName,
-  active,
-  clickable,
-  spinnerProps,
-}: ModuleProps): JSX.Element => {
-  // whether to show the refresh button: this module has been clicked
-  const [showRefresh, setShowRefresh] = useState(false);
-
-  // whether to show the Two Factor Auth Modal
-  const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
-  const [navigate] = useNavigation();
-
-  // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
-  const moduleAction: Function = switchCase(
-    moduleName,
-    [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
-    [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
-    [AccessModule.ERACOMMONS, () => redirectToNiH],
-    [AccessModule.COMPLIANCETRAINING, () => redirectToRegisteredTraining],
-    [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
-    [
-      AccessModule.DATAUSERCODEOFCONDUCT,
-      () => () => {
-        AnalyticsTracker.Registration.EnterDUCC();
-        navigate(['data-code-of-conduct']);
-      },
-    ]
-  );
-
-  const { DARTitleComponent, refreshAction, isEnabledInEnvironment } =
-    getAccessModuleConfig(moduleName);
-  const eligible = isEligibleModule(moduleName, profile);
-  const Module = () => {
-    const status = getAccessModuleStatusByName(profile, moduleName);
-    return (
-      <FlexRow data-test-id={`module-${moduleName}`}>
-        <FlexRow style={styles.moduleCTA}>
-          {cond(
-            [
-              clickable && showRefresh && !!refreshAction,
-              () => (
-                <Refresh
-                  refreshAction={refreshAction}
-                  showSpinner={spinnerProps.showSpinner}
-                />
-              ),
-            ],
-            [active, () => <Next />]
-          )}
-        </FlexRow>
-        <ModuleBox
-          clickable={clickable}
-          action={() => {
-            setShowRefresh(true);
-            moduleAction();
-          }}
-        >
-          <ModuleIcon
-            moduleName={moduleName}
-            eligible={eligible}
-            completedOrBypassed={isCompliant(status)}
-          />
-          <FlexColumn>
-            <div
-              data-test-id={`module-${moduleName}-${
-                clickable ? 'clickable' : 'unclickable'
-              }-text`}
-              style={
-                clickable
-                  ? styles.clickableModuleText
-                  : styles.backgroundModuleText
-              }
-            >
-              <DARTitleComponent />
-              {moduleName === AccessModule.RASLINKLOGINGOV && (
-                <LoginGovHelpText
-                  profile={profile}
-                  afterInitialClick={showRefresh}
-                />
-              )}
-            </div>
-            {isCompliant(status) && (
-              <div style={styles.moduleDate}>{getStatusText(status)}</div>
-            )}
-          </FlexColumn>
-        </ModuleBox>
-        {showTwoFactorAuthModal && (
-          <TwoFactorAuthModal
-            onClick={() => setShowTwoFactorAuthModal(false)}
-            onCancel={() => setShowTwoFactorAuthModal(false)}
-          />
-        )}
-      </FlexRow>
-    );
-  };
-
-  return isEnabledInEnvironment ? <Module /> : null;
 };
 
 const ControlledTierEraModule = (props: {
@@ -881,48 +597,6 @@ const ModulesForInitialRegistration = (props: InitialCardProps) => {
         />
       ))}
       {children}
-    </FlexColumn>
-  );
-};
-
-interface RenewalCardProps {
-  profile: Profile;
-  modules: AccessModule[];
-}
-
-const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
-  const { profile, modules } = props;
-  const showingStyle = {
-    ...styles.clickableModuleBox,
-    ...styles.clickableModuleText,
-  };
-  const hiddenStyle = {
-    ...styles.backgroundModuleBox,
-    ...styles.backgroundModuleText,
-  };
-  return (
-    <FlexColumn style={styles.modulesContainer}>
-      {modules.map((moduleName) => {
-        // TODO RW-7797.  Until then, hardcode
-        const showModule = true;
-        return (
-          <FlexColumn
-            data-test-id={`module-${moduleName}`}
-            style={showModule ? showingStyle : hiddenStyle}
-          >
-            <RenewalCardBody
-              moduleStatus={getAccessModuleStatusByNameOrEmpty(
-                profile.accessModules.modules,
-                moduleName
-              )}
-              setLoading={() => {}}
-              textStyle={{ fontSize: '0.6rem' }}
-              hide={!showModule}
-              showTimeEstimate={true}
-            />
-          </FlexColumn>
-        );
-      })}
     </FlexColumn>
   );
 };
