@@ -50,6 +50,7 @@ ds_steps_intraday
 ds_survey
 ds_visit_occurrence
 ds_zip_code_socioeconomic
+ds_device
 )
 
 for t in "${backup_tables[@]}"
