@@ -126,6 +126,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
       ImmutableList.of(
           Domain.CONDITION,
+          Domain.DEVICE,
           Domain.DRUG,
           Domain.MEASUREMENT,
           Domain.OBSERVATION,
