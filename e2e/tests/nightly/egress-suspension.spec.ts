@@ -1,4 +1,4 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
@@ -29,7 +29,7 @@ describe('egress suspension', () => {
   });
 
   test("VM egress suspends user's compute", async () => {
-    await findOrCreateWorkspace(page);
+    await createWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     const notebookPage = await dataPage.createNotebook(notebookName);
