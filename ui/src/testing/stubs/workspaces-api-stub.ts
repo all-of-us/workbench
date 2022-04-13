@@ -193,19 +193,13 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  // deprecated so let's passthrough to the version we're keeping
   shareWorkspace(
     workspaceNamespace: string,
     workspaceId: string,
     body?: ShareWorkspaceRequest
   ): Promise<WorkspaceUserRolesResponse> {
-    return new Promise<WorkspaceUserRolesResponse>((resolve) => {
-      const newEtag = fp.defaults(2, body.workspaceEtag + 1);
-      const newItems = fp.defaults([], body.items);
-      resolve({
-        workspaceEtag: newEtag,
-        items: newItems,
-      });
-    });
+    return this.shareWorkspacePatch(workspaceNamespace, workspaceId, body);
   }
 
   shareWorkspacePatch(
