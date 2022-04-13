@@ -1154,7 +1154,7 @@ const ControlledTierCard = (props: {
             spinnerProps={spinnerProps}
           />
         )}
-        {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
+        {pageMode === DARPageMode.INITIAL_REGISTRATION && (
           <ModulesForInitialRegistration
             profile={profile}
             modules={[ctModule]}
@@ -1162,7 +1162,8 @@ const ControlledTierCard = (props: {
             clickableModules={clickableModules}
             spinnerProps={spinnerProps}
           />
-        ) : (
+        )}
+        {pageMode === DARPageMode.ANNUAL_RENEWAL && isEligible && (
           <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
         )}
       </FlexColumn>
