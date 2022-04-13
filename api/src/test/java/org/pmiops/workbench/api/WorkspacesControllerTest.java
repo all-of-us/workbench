@@ -2993,8 +2993,6 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    // add the reader with NO_ACCESS to mock
-    shareWorkspaceRequest.addItemsItem(reader);
     List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService)
