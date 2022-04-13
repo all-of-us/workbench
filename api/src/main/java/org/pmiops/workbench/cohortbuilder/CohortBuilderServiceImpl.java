@@ -182,14 +182,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -387,7 +389,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 Domain.DRUG,
                 Domain.MEASUREMENT,
                 Domain.OBSERVATION,
-                Domain.PROCEDURE));
+                Domain.PROCEDURE,
+                Domain.DEVICE));
     cardCounts.addAll(
         findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
     cardCounts.addAll(findSurveyCounts(term));

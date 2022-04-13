@@ -32,6 +32,11 @@ public enum BigQueryDataSetTableInfo {
       "ds_measurement",
       " measurement_concept_id IN unnest(@standardConceptIds)",
       " measurement_source_concept_id IN unnest(@sourceConceptIds)"),
+  DEVICE(
+      Domain.DEVICE,
+      "ds_device",
+      " device_concept_id IN unnest(@standardConceptIds)",
+      " device_source_concept_id IN unnest(@sourceConceptIds)"),
   SURVEY(Domain.SURVEY, "ds_survey", null, " question_concept_id IN unnest(@sourceConceptIds)"),
   PERSON(Domain.PERSON, "ds_person", null, null),
   OBSERVATION(
