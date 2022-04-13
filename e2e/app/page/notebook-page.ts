@@ -137,7 +137,7 @@ export default class NotebookPage extends NotebookFrame {
     await findAndClickCheckbox();
 
 
-    const downloadPath = fs.mkdtempSync(path.join(os.tmpdir(), 'egress'));
+    const downloadPath = fs.mkdtempSync(path.join(os.tmpdir(), 'egress-'));
     const client = await treePage.target().createCDPSession();
     await client.send('Page.setDownloadBehavior', {
       behavior: 'allow',
