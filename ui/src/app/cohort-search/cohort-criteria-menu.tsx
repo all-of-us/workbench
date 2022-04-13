@@ -151,7 +151,7 @@ const styles = reactStyles({
 });
 
 export const CohortCriteriaMenu = withCurrentWorkspace()(
-  ({ launchSearch, menuOptions, workspace }) => {
+  ({ launchSearch, menuOptions, workspace, temporalGroup }) => {
     const [domainCounts, setDomainCounts] = useState(null);
     const [domainCountsError, setDomainCountsError] = useState(false);
     const [domainCountsLoading, setDomainCountsLoading] = useState(false);
@@ -208,6 +208,15 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
       setDomainCountsError(false);
       setInputError(null);
       setSearchTerms('');
+    };
+
+    const onMenuItemClick = (menuItem) => {
+      if (typeof temporalGroup !== 'undefined') {
+        launchSearch(menuItem, temporalGroup, searchTerms);
+      } else {
+        launchSearch(menuItem, searchTerms);
+      }
+      closeAndClearMenu();
     };
 
     const onClickOutside = (event) => {
@@ -348,8 +357,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                             }}
                             onClick={() => {
                               if (!menuItem.group) {
-                                launchSearch(menuItem, searchTerms);
-                                closeAndClearMenu();
+                                onMenuItemClick(menuItem);
                               }
                             }}
                           >
@@ -396,11 +404,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                           }}
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            launchSearch(
-                                              subMenuItem,
-                                              searchTerms
-                                            );
-                                            closeAndClearMenu();
+                                            onMenuItemClick(menuItem);
                                           }}
                                         >
                                           {subMenuItem.name}

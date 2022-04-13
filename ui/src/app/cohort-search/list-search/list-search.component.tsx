@@ -142,12 +142,12 @@ const styles = reactStyles({
     lineHeight: '0.8rem',
   },
   selectDiv: {
-    width: '6%',
+    minWidth: '6%',
     float: 'left',
     lineHeight: '0.6rem',
   },
   nameDiv: {
-    width: '94%',
+    width: '80%',
     float: 'left',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -630,16 +630,17 @@ export const ListSearch = fp.flow(
       const { hoverId, childNodes } = this.state;
       const attributes =
         this.props.searchContext.source === 'cohort' && row.hasAttributes;
+      const brand = row.type === CriteriaType.BRAND;
       const parent =
-        row.type === CriteriaType.BRAND ||
-        row.subtype === CriteriaSubType.QUESTION;
-      const displayName =
-        row.name + (row.type === CriteriaType.BRAND ? ' (BRAND NAME)' : '');
+        brand ||
+        (this.props.searchContext.source === 'cohort' &&
+          row.subtype === CriteriaSubType.QUESTION);
+      const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected =
         !attributes &&
-        !parent &&
+        !brand &&
         this.props.selectedIds.includes(this.getParamId(row));
-      const unselected = !attributes && !parent && !this.isSelected(row);
+      const unselected = !attributes && !brand && !this.isSelected(row);
       const open = childNodes[row.id]?.open;
       const loadingChildren = childNodes[row.id]?.loading;
       const columnStyle = child
@@ -661,6 +662,14 @@ export const ListSearch = fp.flow(
           >
             {row.selectable && (
               <div style={styles.selectDiv}>
+                {parent && !loadingChildren && (
+                  <ClrIcon
+                    style={styles.brandIcon}
+                    shape={'angle ' + (open ? 'down' : 'right')}
+                    size='20'
+                    onClick={() => this.showChildren(row)}
+                  />
+                )}
                 {attributes && (
                   <ClrIcon
                     style={styles.attrIcon}
@@ -683,14 +692,6 @@ export const ListSearch = fp.flow(
                     shape='plus-circle'
                     size='16'
                     onClick={() => this.selectItem(row)}
-                  />
-                )}
-                {parent && !loadingChildren && (
-                  <ClrIcon
-                    style={styles.brandIcon}
-                    shape={'angle ' + (open ? 'down' : 'right')}
-                    size='20'
-                    onClick={() => this.showChildren(row)}
                   />
                 )}
                 {loadingChildren && <Spinner size={16} />}

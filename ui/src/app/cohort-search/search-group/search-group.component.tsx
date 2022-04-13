@@ -446,8 +446,10 @@ export const SearchGroup = withCurrentWorkspace()(
       }
     }
 
-    launchSearch(criteria: any, temporalGroup: number) {
-      this.criteriaMenu.hide();
+    launchSearch(criteria: any, temporalGroup: number, searchTerms?: string) {
+      if (this.criteriaMenu) {
+        this.criteriaMenu.hide();
+      }
       const { group, setSearchContext, role } = this.props;
       const { domain, type, standard } = criteria;
       if (temporalGroup === 1) {
@@ -471,6 +473,7 @@ export const SearchGroup = withCurrentWorkspace()(
         item,
         domain,
         type,
+        searchTerms,
         standard,
         role,
         groupId,
@@ -740,10 +743,11 @@ export const SearchGroup = withCurrentWorkspace()(
             {/* Criteria menu for main search item list/temporal group 0 items */}
             {!serverConfigStore.get().config.enableUniversalSearch ? (
               <CohortCriteriaMenu
-                launchSearch={(criteria, searchTerms) =>
-                  this.launchSearch(criteria, searchTerms)
+                launchSearch={(criteria, temporalGroup, searchTerms) =>
+                  this.launchSearch(criteria, temporalGroup, searchTerms)
                 }
                 menuOptions={criteriaMenuOptions}
+                temporalGroup={0}
               />
             ) : (
               <div style={styles.cardBlock}>
