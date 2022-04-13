@@ -378,9 +378,9 @@ export const RenewalCardBody = (props: {
         <React.Fragment>
           <Dates />
           <div style={textStyle}>
-            You are required to complete the refreshed ethics training courses
-            to understand the privacy safeguards and the compliance requirements
-            for using the <AoU /> Dataset.
+            You are required to complete the refreshed Registered Tier ethics
+            training courses to understand the privacy safeguards and the
+            compliance requirements for using the <AoU /> Dataset.
           </div>
           {!isRenewalCompleteForModule(moduleStatus) && (
             <div
@@ -431,9 +431,9 @@ export const RenewalCardBody = (props: {
         <React.Fragment>
           <Dates />
           <div style={textStyle}>
-            You are required to complete the refreshed ethics training courses
-            to understand the privacy safeguards and the compliance requirements
-            for using the <AoU /> Dataset.
+            You are required to complete the refreshed Controlled Tier ethics
+            training courses to understand the privacy safeguards and the
+            compliance requirements for using the <AoU /> Dataset.
           </div>
           {!isRenewalCompleteForModule(moduleStatus) && (
             <div
