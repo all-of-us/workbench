@@ -258,7 +258,7 @@ describe('WorkspaceShare', () => {
       .simulate('click');
     wrapper.update();
 
-    const spy = jest.spyOn(workspacesApi(), 'shareWorkspace');
+    const spy = jest.spyOn(workspacesApi(), 'shareWorkspacePatch');
     wrapper.find('[data-test-id="save"]').first().simulate('click');
     expect(spy).toHaveBeenCalledWith(
       tomRiddleDiary.namespace,

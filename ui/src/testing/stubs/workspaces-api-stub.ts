@@ -208,6 +208,21 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  shareWorkspacePatch(
+    workspaceNamespace: string,
+    workspaceId: string,
+    body?: ShareWorkspaceRequest
+  ): Promise<WorkspaceUserRolesResponse> {
+    return new Promise<WorkspaceUserRolesResponse>((resolve) => {
+      const newEtag = fp.defaults(2, body.workspaceEtag + 1);
+      const newItems = fp.defaults([], body.items);
+      resolve({
+        workspaceEtag: newEtag,
+        items: newItems,
+      });
+    });
+  }
+
   getWorkspace(
     workspaceNamespace: string,
     workspaceId: string

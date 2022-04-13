@@ -235,7 +235,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       }
       this.setState({ saving: true, workspaceShareError: false });
       workspacesApi()
-        .shareWorkspace(
+        .shareWorkspacePatch(
           this.props.workspace.namespace,
           this.props.workspace.id,
           {
