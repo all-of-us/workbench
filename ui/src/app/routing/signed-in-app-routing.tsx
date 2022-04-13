@@ -10,6 +10,7 @@ import {
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { AccessRenewal } from 'app/pages/access/access-renewal';
+import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
 import { AdminBanner } from 'app/pages/admin/admin-banner';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';
 import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
@@ -24,7 +25,6 @@ import { AdminWorkspace } from 'app/pages/admin/admin-workspace';
 import { WorkspaceAudit } from 'app/pages/admin/admin-workspace-audit';
 import { AdminWorkspaceSearch } from 'app/pages/admin/admin-workspace-search';
 import { UserAudit } from 'app/pages/admin/user-audit';
-import { DataAccessRequirements } from 'app/pages/homepage/data-access-requirements';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
