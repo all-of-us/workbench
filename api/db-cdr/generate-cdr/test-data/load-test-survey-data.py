@@ -14,7 +14,7 @@ surveys = ['ENGLISHWinterMinuteSurveyOnCOV_DataDictionary',
 # in parsing out of the redcap files
 headers = ['concept_code']
 
-home_dir = "../csv"
+home_dir = "../../csv"
 
 
 def main():
@@ -31,6 +31,13 @@ def main():
         shutil.rmtree(home_dir)
     os.mkdir(home_dir)
 
+    max_id = 100000000
+
+    # cleanup data if previously created
+    print("deleting survey data")
+    delete_survey(bigquery_client, destination, max_id)
+    print("survey data deletion complete")
+
     for name in surveys:
         rows = read_csv(get_filename(name, date))
         concept_codes = []
@@ -40,18 +47,20 @@ def main():
 
         concept_codes_string = "'" + "','".join(concept_codes) + "'"
 
-        # cleanup data if previously created
-        print("deleting data for " + name + " in dataset " + destination)
-        delete_from_observation(bigquery_client, destination,
-                                concept_codes_string)
-        print(
-            "deletion complete data for " + name + " in dataset " + destination)
+        # insert data for survey
+        print("inserting data for " + name)
+        insert_survey(bigquery_client, source, destination,
+                      concept_codes_string, max_id)
+        print("data insertion complete")
+        if name == "ENGLISHWinterMinuteSurveyOnCOV_DataDictionary":
+            print("inserting survey version")
+            insert_version(bigquery_client, source, destination,
+                           concept_codes_string, max_id)
+            print("data insertion complete")
 
-        rows = get_questions(bigquery_client, source, destination,
-                             concept_codes_string)
-
+        rows = get_max_id(bigquery_client, destination)
         for row in rows:
-            print(row.observation_id)
+            max_id = row.id
 
 
 # when done remove directory and all files
@@ -109,27 +118,80 @@ def init_bigquery_client():
     return bigquery_client
 
 
-def delete_from_observation(bigquery_client, destination, concept_codes_string):
+def get_max_id(bigquery_client, destination):
     query = (
-        "DELETE FROM `all-of-us-ehr-dev.{destination}.observation` "
-        "WHERE observation_source_concept_id in ("
-        "SELECT concept_id FROM `all-of-us-ehr-dev.{destination}.concept` "
-        "WHERE lower(concept_code) in ({codes}))"
-            .format(destination=destination, codes=concept_codes_string)
+        "SELECT MAX(observation_id) as id FROM "
+        "`all-of-us-ehr-dev.{destination}.observation`"
+            .format(destination=destination)
     )
     query_job = bigquery_client.query(query)
     return query_job.result()
 
 
-def get_questions(bigquery_client, source, destination, concept_codes_string):
+def delete_survey(bigquery_client, destination, max_id):
     query = (
-        "SELECT * FROM `all-of-us-ehr-dev.{source}.observation` "
+        "DELETE FROM `all-of-us-ehr-dev.{destination}.observation_ext` "
+        "WHERE observation_id >= {max_id}"
+            .format(destination=destination, max_id=max_id)
+    )
+    query_job = bigquery_client.query(query)
+    query_job.result()
+    query = (
+        "DELETE FROM `all-of-us-ehr-dev.{destination}.observation` "
+        "WHERE observation_id >= {max_id}"
+            .format(destination=destination, max_id=max_id)
+    )
+    query_job = bigquery_client.query(query)
+    return query_job.result()
+
+
+def insert_survey(bigquery_client, source, destination, concept_codes_string,
+    max_id):
+    query = (
+        "INSERT INTO `all-of-us-ehr-dev.{destination}.observation` "
+        "(observation_id, person_id, observation_concept_id, observation_date, "
+        "observation_datetime, observation_type_concept_id, value_as_number, "
+        "value_as_string, value_as_concept_id, qualifier_concept_id, "
+        "unit_concept_id, provider_id, visit_occurrence_id, visit_detail_id, "
+        "observation_source_value, observation_source_concept_id, "
+        "unit_source_value, qualifier_source_value, value_source_concept_id, "
+        "value_source_value, questionnaire_response_id"
+        ")"
+        "SELECT ROW_NUMBER() OVER (ORDER BY observation_id) "
+        "+ {max_id}, person_id, "
+        "observation_concept_id, observation_date, observation_datetime, "
+        "observation_type_concept_id, value_as_number, value_as_string, "
+        "value_as_concept_id, qualifier_concept_id, unit_concept_id, "
+        "provider_id, visit_occurrence_id, visit_detail_id, "
+        "observation_source_value, observation_source_concept_id, "
+        "unit_source_value, qualifier_source_value, value_source_concept_id, "
+        "value_source_value, questionnaire_response_id "
+        "FROM `all-of-us-ehr-dev.{source}.observation` "
         "WHERE observation_source_concept_id in ("
         "SELECT concept_id FROM `all-of-us-ehr-dev.{destination}.concept` "
         "WHERE lower(concept_code) in ({codes}))"
             .format(source=source, destination=destination,
-                    codes=concept_codes_string)
+                    codes=concept_codes_string, max_id=max_id)
     )
+    query_job = bigquery_client.query(query)
+    return query_job.result()
+
+
+def insert_version(bigquery_client, source, destination,
+    concept_codes_string, max_id):
+    query = ("INSERT INTO `all-of-us-ehr-dev.{destination}.observation_ext`"
+             "SELECT ROW_NUMBER() OVER (ORDER BY observation_id) "
+             "+ {max_id}, src_id, survey_version_concept_id "
+             "FROM `all-of-us-ehr-dev.{source}.observation_ext` "
+             "WHERE observation_id in ("
+             "SELECT observation_id "
+             "FROM `all-of-us-ehr-dev.{source}.observation` "
+             "WHERE observation_source_concept_id in ("
+             "SELECT concept_id FROM `all-of-us-ehr-dev.test_R2019q4r3.concept` "
+             "WHERE lower(concept_code) in ({codes})))"
+             .format(source=source, destination=destination,
+                     codes=concept_codes_string, max_id=max_id)
+             )
     query_job = bigquery_client.query(query)
     return query_job.result()
 
