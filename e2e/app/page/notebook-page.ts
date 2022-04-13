@@ -558,9 +558,6 @@ export default class NotebookPage extends NotebookFrame {
     const fileSizeElement = await newPage.waitForXPath(fileSizeXpath, { visible: true });
     const fileSize = await getPropValue(fileSizeElement, 'textContent');
 
-    // In case page has to be checked after finish.
-    await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
-
     // Fail if upload proceeded without a dialog prompt.
     expect(await waitForFn(() => sawDialog)).toBeTruthy();
 

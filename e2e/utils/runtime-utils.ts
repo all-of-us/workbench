@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
 import { exists } from './element-utils';
+import { logger } from 'libs/logger';
 
 const Selector = {
   runtimeInitializerCreateButton: '//*[@role="dialog"]//*[text()="Create Environment" and @role="button"]'
@@ -20,7 +21,7 @@ export async function initializeRuntimeIfModalPresented(page: Page): Promise<voi
 }
 
 async function isSecuritySuspended(page: Page): Promise<boolean> {
-  return exists(page, '//*[@data-test-id="security-suspended-msg"]', { timeout: 5000 });
+  return exists(page, '//*[@data-test-id="security-suspended-msg"]', { timeout: 10000 });
 }
 
 export async function waitForSecuritySuspendedStatus(
@@ -36,11 +37,12 @@ export async function waitForSecuritySuspendedStatus(
 
     if ((await isSecuritySuspended(page)) === suspended) {
       // Success
+      logger.info(`Egress security suspended took ${(Date.now() - startTime) / 1000 / 60} minutes`);
       break;
     }
 
     if (Date.now() - startTime > timeOut - pollPeriod) {
-      throw new Error(`Timed out waiting for security suspension status = ${suspended}`);
+      throw new Error(`Timed out waiting for egress security suspension status = ${suspended}`);
     }
     await page.waitForTimeout(pollPeriod);
   }
