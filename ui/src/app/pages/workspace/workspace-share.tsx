@@ -242,8 +242,8 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
           currentWorkspaceStore.next({
             ...currentWorkspaceStore.getValue(),
             etag: resp.workspaceEtag,
-            userRoles: resp.items,
           } as WorkspaceData);
+          this.setState({ userRoles: resp.items });
           this.props.onClose();
         })
         .catch((error) => {
