@@ -1155,13 +1155,7 @@ const ControlledTierCard = (props: {
           />
         )}
         {pageMode === DARPageMode.INITIAL_REGISTRATION && (
-          <ModulesForInitialRegistration
-            profile={profile}
-            modules={[ctModule]}
-            activeModule={activeModule}
-            clickableModules={clickableModules}
-            spinnerProps={spinnerProps}
-          />
+          <ModulesForInitialRegistration {{...props, modules: [ctModule]}} />
         )}
         {pageMode === DARPageMode.ANNUAL_RENEWAL && isEligible && (
           <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
