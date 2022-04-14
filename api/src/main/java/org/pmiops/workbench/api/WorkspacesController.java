@@ -725,7 +725,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    // This automatically enforces the "canShare" permission.
     dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
