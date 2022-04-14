@@ -394,4 +394,10 @@ export default class RuntimePanel extends BaseSidebar {
     await this.clickButton(LinkText.DeleteEnvironment);
     await this.clickButton(LinkText.Delete);
   }
+
+  async isRuntimeSuspended(): Promise<boolean> {
+    return exists(this.page, '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="lock"]', {
+      timeout: 2000
+    });
+  }
 }

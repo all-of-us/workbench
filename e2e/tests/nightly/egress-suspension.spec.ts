@@ -1,24 +1,26 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import RuntimePanel from 'app/sidebar/runtime-panel';
 import path from 'path';
 import { waitForSecuritySuspendedStatus } from 'utils/runtime-utils';
+import { logger } from 'libs/logger';
 
 // 45 minutes. Test could take a long time.
 jest.setTimeout(45 * 60 * 1000);
 
 describe('egress suspension', () => {
-  beforeEach(async () => {
-    await signInWithAccessToken(page, config.EGRESS_TEST_USER);
-  });
-
   const notebookName = makeRandomName('egress-notebook');
   const dataGenFilename = 'create-data-files.py';
   const dataGenFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${dataGenFilename}`);
 
+  beforeEach(async () => {
+    await signInWithAccessToken(page, config.EGRESS_TEST_USER);
+  });
+
   test("VM egress suspends user's compute", async () => {
-    await findOrCreateWorkspace(page);
+    await createWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     const notebookPage = await dataPage.createNotebook(notebookName);
@@ -26,8 +28,9 @@ describe('egress suspension', () => {
     await notebookPage.uploadFile(dataGenFilename, dataGenFilePath);
 
     // Generates 6 files currently. A single large file may time out.
-    console.log('Generating 30MB files for download');
+    logger.info('Generating 30MB files for download');
     await notebookPage.runCodeFile(1, dataGenFilename, 60 * 1000);
+    await notebookPage.save();
 
     // Download these 30MB files one-by-one from the file tree, generating ~180MB egress
     const treePage = await notebookPage.selectFileOpenMenu();
@@ -36,17 +39,19 @@ describe('egress suspension', () => {
     await treePage.waitForTimeout(5000);
     for (let i = 0; i < 6; i++) {
       const f = `data${i}.txt`;
-      console.log(`Downloading ${f} to generate egress`);
+      logger.info(`Downloading ${f} to generate egress`);
       await notebookPage.downloadFileFromTree(treePage, f);
     }
+    await treePage.close();
 
-    console.log('Awaiting security suspension in a new page');
-    const newPage = await browser.newPage();
-    await signInWithAccessToken(newPage, config.EGRESS_TEST_USER);
-    // Open the current notebook URL again; this will instead show a suspended
-    // error on reload once the user becomes suspended.
-    await newPage.goto(page.url());
+    logger.info('Awaiting security suspension in the notebook page');
+    await page.bringToFront();
+    await notebookPage.waitForLoad();
 
-    await waitForSecuritySuspendedStatus(newPage);
+    await waitForSecuritySuspendedStatus(page);
+
+    // egress handling will auto. suspend cloud analysis environment.
+    const runtimePanel = new RuntimePanel(page);
+    expect(await runtimePanel.isRuntimeSuspended()).toBe(true);
   });
 });
