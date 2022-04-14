@@ -10,7 +10,6 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
-import { RegisteredTierBadge } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
@@ -20,10 +19,7 @@ import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, switchCase } from 'app/utils';
-import {
-  AccessTierDisplayNames,
-  AccessTierShortNames,
-} from 'app/utils/access-tiers';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,
   bypassAll,
@@ -47,8 +43,7 @@ import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 import { ControlledTierCard } from './controlled-tier-card';
 import { DuccCard } from './ducc-card';
 import { MaybeModule } from './maybe-module';
-import { ModuleIcon } from './module-icon';
-import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
+import { RegisteredTierCard } from './registered-tier-card';
 
 export const styles = reactStyles({
   initialRegistrationOuterHeader: {
@@ -250,13 +245,13 @@ export const styles = reactStyles({
 });
 
 // in display order
-const initialRtModules = [
+export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
 ];
-const renewalRtModules = [
+export const renewalRtModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
@@ -394,32 +389,6 @@ export const getActiveModule = (
   profile: Profile
 ): AccessModule => incompleteModules(modules, profile)[0];
 
-// Sep 16 hack while we work out some RAS bugs
-const TemporaryRASModule = () => {
-  const moduleName = AccessModule.RASLINKLOGINGOV;
-  const { DARTitleComponent } = getAccessModuleConfig(moduleName);
-  return (
-    <FlexRow data-test-id={`module-${moduleName}`}>
-      <FlexRow style={styles.moduleCTA} />
-      <FlexRow style={styles.backgroundModuleBox}>
-        <ModuleIcon
-          moduleName={moduleName}
-          completedOrBypassed={false}
-          eligible={false}
-        />
-        <FlexColumn style={styles.backgroundModuleText}>
-          <DARTitleComponent />
-          <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
-            <b>Temporarily disabled.</b> Due to technical difficulties, this
-            step is disabled. In the future, you'll be prompted to complete
-            identity verification to continue using the workbench.
-          </div>
-        </FlexColumn>
-      </FlexRow>
-    </FlexRow>
-  );
-};
-
 // the header(s) outside the Fadebox
 
 const InitialOuterHeader = () => (
@@ -531,7 +500,6 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
 };
 
 // TODO is there a better way?
-
 const Additional = additional;
 const Electronic = electronic;
 const Genomic = genomic;
@@ -554,84 +522,12 @@ const renderIcon = (iconName: string) =>
     ['wearable', () => <Wearable style={styles.dataDetailsIcon} />]
   );
 
-const RtDataDetailHeader = (props: { pageMode: DARPageMode }) => {
-  return switchCase(
-    props.pageMode,
-    [
-      DARPageMode.INITIAL_REGISTRATION,
-      () => (
-        <div style={styles.dataDetails}>
-          Once registered, you’ll have access to:
-        </div>
-      ),
-    ],
-    [
-      DARPageMode.ANNUAL_RENEWAL,
-      () => (
-        <div style={styles.dataDetails}>
-          Once renewed, you’ll have access to:
-        </div>
-      ),
-    ]
-  );
-};
-
 export const DataDetail = (props: { icon: string; text: string }) => {
   const { icon, text } = props;
   return (
     <FlexRow>
       {renderIcon(icon)}
       <div style={styles.dataDetails}>{text}</div>
-    </FlexRow>
-  );
-};
-
-const RegisteredTierCard = (props: {
-  profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
-  spinnerProps: WithSpinnerOverlayProps;
-  pageMode: DARPageMode;
-}) => {
-  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
-    props;
-  const rtDisplayName = AccessTierDisplayNames.Registered;
-  const { enableRasLoginGovLinking } = serverConfigStore.get().config;
-
-  return (
-    <FlexRow style={styles.card}>
-      <FlexColumn>
-        <div style={styles.cardStep}>Step 1</div>
-        <div style={styles.cardHeader}>
-          {pageMode === DARPageMode.ANNUAL_RENEWAL
-            ? 'Basic Data Access'
-            : 'Complete Registration'}
-        </div>
-        <FlexRow>
-          <RegisteredTierBadge />
-          <div style={styles.dataHeader}>{rtDisplayName} data</div>
-        </FlexRow>
-        <RtDataDetailHeader pageMode={pageMode} />
-        <DataDetail icon='individual' text='Individual (not aggregated) data' />
-        <DataDetail icon='identifying' text='Identifying information removed' />
-        <DataDetail icon='electronic' text='Electronic health records' />
-        <DataDetail icon='survey' text='Survey responses' />
-        <DataDetail icon='physical' text='Physical measurements' />
-        <DataDetail icon='wearable' text='Wearable devices' />
-      </FlexColumn>
-      {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
-        <ModulesForInitialRegistration
-          profile={profile}
-          modules={getEligibleModules(initialRtModules, profile)}
-          activeModule={activeModule}
-          clickableModules={clickableModules}
-          spinnerProps={spinnerProps}
-        >
-          {!enableRasLoginGovLinking && <TemporaryRASModule />}
-        </ModulesForInitialRegistration>
-      ) : (
-        <ModulesForAnnualRenewal profile={profile} modules={renewalRtModules} />
-      )}
     </FlexRow>
   );
 };
