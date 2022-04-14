@@ -31,6 +31,7 @@ import {
   getAccessModuleStatusByNameOrEmpty,
   isExpiringOrExpired,
   isRenewalCompleteForModule,
+  isRtRenewalComplete,
   maybeDaysRemaining,
   redirectToControlledTraining,
   redirectToRegisteredTraining,
@@ -536,9 +537,6 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
     const expirableModules = modules.filter((moduleStatus) =>
       rtAccessRenewalModules.includes(moduleStatus.moduleName)
     );
-    const accessRenewalCompleted = expirableModules.every(
-      isRenewalCompleteForModule
-    );
 
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
     useEffect(() => {
@@ -561,7 +559,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
 
     const maybeHeader = cond(
       // Completed - no icon or button
-      [accessRenewalCompleted, () => null],
+      [isRtRenewalComplete(profile), () => null],
       // Access expired icon
       [
         maybeDaysRemaining(profile) < 0,
@@ -604,14 +602,14 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
           {maybeHeader}
           <div
             style={
-              accessRenewalCompleted
+              isRtRenewalComplete(profile)
                 ? { gridColumn: '1 / span 2' }
                 : { gridColumnStart: 2 }
             }
           >
             <RenewalRequirementsText />
           </div>
-          {accessRenewalCompleted && (
+          {isRtRenewalComplete(profile) && (
             <div
               style={{
                 ...renewalStyle.completionBox,

@@ -498,15 +498,14 @@ export const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
   );
 };
 
-export const isRtRenewalComplete = (profile: Profile): boolean =>
-  rtAccessRenewalModules.every((moduleName) =>
+export const isRtRenewalComplete = (profile: Profile): boolean => {
+  const modules = profile?.accessModules?.modules;
+  return rtAccessRenewalModules.every((moduleName) =>
     isRenewalCompleteForModule(
-      getAccessModuleStatusByNameOrEmpty(
-        profile?.accessModules?.modules,
-        moduleName
-      )
+      getAccessModuleStatusByNameOrEmpty(modules, moduleName)
     )
   );
+};
 
 interface RenewalDisplayDates {
   lastConfirmedDate: string;
