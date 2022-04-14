@@ -52,9 +52,9 @@ import { ReactComponent as survey } from 'assets/icons/DAR/survey.svg';
 import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
 import { MaybeModule } from './maybe-module';
+import { Module } from './module';
 import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
-import { OtherModule } from './other-module';
 
 export const styles = reactStyles({
   initialRegistrationOuterHeader: {
@@ -441,7 +441,7 @@ const ControlledTierEraModule = (props: {
   const clickable = eligible && !isCompliant(status);
 
   return (
-    <OtherModule
+    <Module
       active={false}
       clickable={clickable}
       eligible={eligible}
