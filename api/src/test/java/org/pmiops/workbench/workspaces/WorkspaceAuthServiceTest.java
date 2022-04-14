@@ -255,7 +255,8 @@ public class WorkspaceAuthServiceTest {
         .addOwnerToBillingProject(anyString(), anyString());
   }
 
-  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL)
+  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL),
+  // (expected remove BP from owner count), (expected add BP to owner count)
   private static Stream<Arguments> patchWorkspaceAcls() {
     return Stream.of(
         // trivial case: do nothing to empty ACL
