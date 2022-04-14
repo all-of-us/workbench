@@ -13,6 +13,7 @@ import {
   DataSet,
   DataSetPreviewRequest,
   DataSetPreviewValueList,
+  DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
@@ -835,7 +836,7 @@ export const DatasetPage = fp.flow(
 
     const apiEnumToPrePackageConceptSets = (
       v: Array<PrePackagedConceptSetEnum>
-    ) => {
+    ): Set<PrepackagedConceptSet> => {
       const re: Set<PrepackagedConceptSet> = new Set<PrepackagedConceptSet>();
       v.map((pre) => {
         switch (pre) {
@@ -887,7 +888,7 @@ export const DatasetPage = fp.flow(
     const getIdsAndDomainsFromConceptSets = (
       conceptSets: ConceptSet[],
       prepackagedConceptSets: Set<PrepackagedConceptSet>
-    ) => {
+    ): Set<DomainWithConceptSetId> => {
       const conceptSetIdsWithDomains = conceptSets
         .map((cs) => ({
           conceptSetId: cs.id,
@@ -1096,10 +1097,33 @@ export const DatasetPage = fp.flow(
             }
           }
         );
+        setSelectedDomains(
+          new Set(
+            Array.from(updatedDomainsWithConceptSetIds).map(
+              ({ domain }) => domain
+            )
+          )
+        );
+        setSelectedDomainValuePairs(
+          selectedDomainValuePairs.filter((p) =>
+            Array.from(updatedDomainsWithConceptSetIds).some(
+              (d: DomainWithConceptSetId) => d.domain === p.domain
+            )
+          )
+        );
       }
       setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
       setSelectedPrepackagedConceptSets(updatedPrepackaged);
       setDataSetTouched(true);
+      if (selected) {
+        setDomainValueSetIsLoading(
+          domainValueSetIsLoading.add(PREPACKAGED_DOMAINS[prepackaged])
+        );
+        loadValueSetForDomain({
+          conceptSetId: null,
+          domain: PREPACKAGED_DOMAINS[prepackaged],
+        });
+      }
     };
 
     const selectConceptSet = (conceptSet: ConceptSet, selected: boolean) => {
@@ -1124,20 +1148,6 @@ export const DatasetPage = fp.flow(
           }
         );
         crossDomainConceptSetList.delete(conceptSet.id);
-      }
-      setCrossDomainConceptSetList(crossDomainConceptSetList);
-      setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
-      setSelectedConceptSetIds(updatedConceptSetIds);
-      setDataSetTouched(true);
-      if (selected) {
-        setDomainValueSetIsLoading(
-          domainValueSetIsLoading.add(conceptSet.domain)
-        );
-        loadValueSetForDomain({
-          conceptSetId: conceptSet.id,
-          domain: conceptSet.domain,
-        });
-      } else {
         setSelectedDomains(
           new Set(
             Array.from(updatedDomainsWithConceptSetIds).map(
@@ -1152,6 +1162,19 @@ export const DatasetPage = fp.flow(
             )
           )
         );
+      }
+      setCrossDomainConceptSetList(crossDomainConceptSetList);
+      setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
+      setSelectedConceptSetIds(updatedConceptSetIds);
+      setDataSetTouched(true);
+      if (selected) {
+        setDomainValueSetIsLoading(
+          domainValueSetIsLoading.add(conceptSet.domain)
+        );
+        loadValueSetForDomain({
+          conceptSetId: conceptSet.id,
+          domain: conceptSet.domain,
+        });
       }
     };
 
@@ -1320,7 +1343,7 @@ export const DatasetPage = fp.flow(
     // TODO: Move to using a response based error handling method, rather than a error based one
     const generateErrorTextFromPreviewException = (
       exceptionResponse: ErrorResponse
-    ) => {
+    ): JSX.Element => {
       switch (exceptionResponse.statusCode) {
         case 400:
           return <div>{exceptionResponse.message}</div>;
@@ -1439,7 +1462,7 @@ export const DatasetPage = fp.flow(
       domains.forEach(async (domain) => getPreviewByDomain(domain));
     };
 
-    const createDatasetRequest = (datasetName, desc) => {
+    const createDatasetRequest = (datasetName, desc): DataSetRequest => {
       return {
         name: datasetName,
         description: desc,
@@ -1457,12 +1480,12 @@ export const DatasetPage = fp.flow(
       AnalyticsTracker.DatasetBuilder.Create();
       const { namespace, id } = workspace;
 
-      return dataSetApi()
+      dataSetApi()
         .createDataSet(namespace, id, createDatasetRequest(datasetName, desc))
         .then((dataset) => loadDataset(dataset));
     };
 
-    const updateDatasetRequest = () => {
+    const updateDatasetRequest = (): DataSetRequest => {
       return {
         ...createDatasetRequest(dataSet.name, dataSet.description),
         etag: dataSet.etag,
@@ -1616,7 +1639,7 @@ export const DatasetPage = fp.flow(
     const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
     const cohortsPath = pathPrefix + '/cohorts/build';
     const conceptSetsPath = pathPrefix + '/concepts';
-    const exportError = !canWrite
+    const exportError = !canWrite()
       ? 'Requires Owner or Writer permission'
       : dataSetTouched
       ? 'Pending changes must be saved'
@@ -1658,7 +1681,7 @@ export const DatasetPage = fp.flow(
                   <PlusLink
                     dataTestId='cohorts-link'
                     path={cohortsPath}
-                    disable={!canWrite}
+                    disable={!canWrite()}
                   />
                 </BoxHeader>
                 <div style={{ height: '9rem', overflowY: 'auto' }}>
@@ -1718,7 +1741,7 @@ export const DatasetPage = fp.flow(
                   <PlusLink
                     dataTestId='concept-sets-link'
                     path={conceptSetsPath}
-                    disable={!canWrite}
+                    disable={!canWrite()}
                   />
                 </BoxHeader>
                 <div
@@ -2029,14 +2052,14 @@ export const DatasetPage = fp.flow(
           <TooltipTrigger
             data-test-id='save-tooltip'
             content='Requires Owner or Writer permission'
-            disabled={canWrite}
+            disabled={canWrite()}
           >
             {!dataSet ? (
               <Button
                 style={{ marginBottom: '2rem', marginRight: '1rem' }}
                 data-test-id='save-button'
                 onClick={() => setModalState(ModalState.Create)}
-                disabled={disableSave() || !canWrite || !dataSetTouched}
+                disabled={disableSave() || !canWrite() || !dataSetTouched}
               >
                 Create Dataset
               </Button>
@@ -2046,7 +2069,10 @@ export const DatasetPage = fp.flow(
                 data-test-id='save-button'
                 onClick={() => saveDataset()}
                 disabled={
-                  savingDataset || disableSave() || !canWrite || !dataSetTouched
+                  savingDataset ||
+                  disableSave() ||
+                  !canWrite() ||
+                  !dataSetTouched
                 }
               >
                 Save Dataset
