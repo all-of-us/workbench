@@ -10,14 +10,9 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
-import {
-  CheckCircle,
-  ControlledTierBadge,
-  MinusCircle,
-  RegisteredTierBadge,
-} from 'app/components/icons';
+import { RegisteredTierBadge } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
-import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
+import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -37,11 +32,9 @@ import {
   GetStartedButton,
   isCompliant,
   isEligibleModule,
-  redirectToNiH,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
-import { getCustomOrDefaultUrl } from 'app/utils/urls';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
 import { ReactComponent as genomic } from 'assets/icons/DAR/genomic.svg';
@@ -51,9 +44,9 @@ import { ReactComponent as physical } from 'assets/icons/DAR/physical.svg';
 import { ReactComponent as survey } from 'assets/icons/DAR/survey.svg';
 import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
+import { ControlledTierCard } from './controlled-tier-card';
 import { DuccCard } from './ducc-card';
 import { MaybeModule } from './maybe-module';
-import { Module } from './module';
 import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 
@@ -427,34 +420,6 @@ const TemporaryRASModule = () => {
   );
 };
 
-const ControlledTierEraModule = (props: {
-  profile: Profile;
-  eligible: boolean;
-  spinnerProps: WithSpinnerOverlayProps;
-}): JSX.Element => {
-  const { profile, eligible, spinnerProps } = props;
-
-  const moduleName = AccessModule.ERACOMMONS;
-
-  const status = getAccessModuleStatusByName(profile, moduleName);
-
-  // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
-  const clickable = eligible && !isCompliant(status);
-
-  return (
-    <Module
-      active={false}
-      clickable={clickable}
-      eligible={eligible}
-      moduleAction={redirectToNiH}
-      moduleName={moduleName}
-      profile={profile}
-      spinnerProps={spinnerProps}
-      status={status}
-    />
-  );
-};
-
 // the header(s) outside the Fadebox
 
 const InitialOuterHeader = () => (
@@ -611,7 +576,7 @@ const RtDataDetailHeader = (props: { pageMode: DARPageMode }) => {
   );
 };
 
-const DataDetail = (props: { icon: string; text: string }) => {
+export const DataDetail = (props: { icon: string; text: string }) => {
   const { icon, text } = props;
   return (
     <FlexRow>
@@ -667,144 +632,6 @@ const RegisteredTierCard = (props: {
       ) : (
         <ModulesForAnnualRenewal profile={profile} modules={renewalRtModules} />
       )}
-    </FlexRow>
-  );
-};
-
-const handleClickSupportButton = (url) => () => {
-  const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);
-  window.open(adjustedUrl);
-};
-
-const ControlledTierStep = (props: { enabled: boolean; text: String }) => {
-  return (
-    <FlexRow>
-      <FlexRow style={styles.moduleCTA} />
-      {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
-      <FlexRow style={styles.backgroundModuleBox}>
-        <div style={styles.moduleIcon}>
-          {props.enabled ? (
-            <CheckCircle
-              data-test-id='eligible'
-              style={{ color: colors.success }}
-            />
-          ) : (
-            <MinusCircle
-              data-test-id='ineligible'
-              style={{ color: colors.disabled }}
-            />
-          )}
-        </div>
-        <FlexColumn style={styles.backgroundModuleText}>
-          <div>{props.text}</div>
-        </FlexColumn>
-      </FlexRow>
-    </FlexRow>
-  );
-};
-
-const ControlledTierCard = (props: {
-  profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
-  reload: Function;
-  spinnerProps: WithSpinnerOverlayProps;
-  pageMode: DARPageMode;
-}) => {
-  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
-    props;
-  const controlledTierEligibility = profile.tierEligibilities.find(
-    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
-  );
-  const registeredTierEligibility = profile.tierEligibilities.find(
-    (tier) => tier.accessTierShortName === AccessTierShortNames.Registered
-  );
-  const isSigned = !!controlledTierEligibility;
-  const isEligible = isSigned && controlledTierEligibility.eligible;
-  const {
-    verifiedInstitutionalAffiliation: {
-      institutionDisplayName,
-      institutionRequestAccessUrl,
-    },
-  } = profile;
-  // Display era in CT if:
-  // 1) Institution has signed the CT institution agreement,
-  // 2) Registered Tier DOES NOT require era
-  // 3) CT Requirement DOES require era
-  const displayEraCommons =
-    isSigned &&
-    !registeredTierEligibility?.eraRequired &&
-    controlledTierEligibility.eraRequired;
-  const rtDisplayName = AccessTierDisplayNames.Registered;
-  const ctDisplayName = AccessTierDisplayNames.Controlled;
-
-  return (
-    <FlexRow data-test-id='controlled-card' style={styles.card}>
-      <FlexColumn>
-        <div style={styles.cardStep}>Step 2</div>
-        <div style={styles.cardHeader}>Additional Data Access</div>
-        <FlexRow>
-          <ControlledTierBadge />
-          <div style={styles.dataHeader}>{ctDisplayName} data - </div>
-          <div style={styles.ctDataOptional}>&nbsp;Optional</div>
-        </FlexRow>
-        {isEligible ? (
-          <div data-test-id='eligible-text' style={styles.dataDetails}>
-            You are eligible to access {ctDisplayName} data.
-          </div>
-        ) : (
-          <div>
-            <div data-test-id='ineligible-text' style={styles.dataDetails}>
-              You are not currently eligible; action by {institutionDisplayName}{' '}
-              is required.
-            </div>
-            <div style={styles.requestAccess}>
-              <Button
-                onClick={handleClickSupportButton(institutionRequestAccessUrl)}
-              >
-                Request Access
-              </Button>
-            </div>
-          </div>
-        )}
-        <div style={styles.dataDetails}>
-          In addition to {rtDisplayName} data, the {ctDisplayName} curated
-          dataset contains:
-        </div>
-        <DataDetail icon='genomic' text='Genomic data' />
-        <DataDetail icon='additional' text='Additional demographic details' />
-      </FlexColumn>
-      <FlexColumn style={styles.modulesContainer}>
-        <ControlledTierStep
-          data-test-id='controlled-signed'
-          enabled={isSigned}
-          text={`${institutionDisplayName} must sign an institutional agreement`}
-        />
-        <ControlledTierStep
-          data-test-id='controlled-user-email'
-          enabled={isEligible}
-          text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}
-        />
-        {displayEraCommons && (
-          <ControlledTierEraModule
-            profile={profile}
-            eligible={isEligible}
-            spinnerProps={spinnerProps}
-          />
-        )}
-        {pageMode === DARPageMode.INITIAL_REGISTRATION && (
-          <ModulesForInitialRegistration
-            profile={profile}
-            modules={[ctModule]}
-            activeModule={activeModule}
-            clickableModules={clickableModules}
-            spinnerProps={spinnerProps}
-          />
-        )}
-        {pageMode === DARPageMode.ANNUAL_RENEWAL && isEligible && (
-          <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
-        )}
-      </FlexColumn>
     </FlexRow>
   );
 };
