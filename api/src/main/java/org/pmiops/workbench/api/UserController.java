@@ -205,9 +205,6 @@ public class UserController implements UserApiDelegate {
   }
 
   /**
-   * <p>Return the Free Tier account only when the user has remaining
-   * Free Credits.
-   *
    * @return the free tier billing account, if the user has free credits OR billing upgrade is
    *     disabled
    */
