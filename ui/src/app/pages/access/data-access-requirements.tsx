@@ -51,6 +51,7 @@ import { ReactComponent as physical } from 'assets/icons/DAR/physical.svg';
 import { ReactComponent as survey } from 'assets/icons/DAR/survey.svg';
 import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
+import { DuccCard } from './ducc-card';
 import { MaybeModule } from './maybe-module';
 import { Module } from './module';
 import { ModuleIcon } from './module-icon';
@@ -537,7 +538,7 @@ interface InitialCardProps {
   children?: string | React.ReactNode;
 }
 
-const ModulesForInitialRegistration = (props: InitialCardProps) => {
+export const ModulesForInitialRegistration = (props: InitialCardProps) => {
   const {
     profile,
     modules,
@@ -804,43 +805,6 @@ const ControlledTierCard = (props: {
           <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
         )}
       </FlexColumn>
-    </FlexRow>
-  );
-};
-
-const DuccCard = (props: {
-  profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
-  spinnerProps: WithSpinnerOverlayProps;
-  pageMode: DARPageMode;
-  stepNumber: number;
-}) => {
-  const {
-    profile,
-    activeModule,
-    clickableModules,
-    spinnerProps,
-    pageMode,
-    stepNumber,
-  } = props;
-  return (
-    <FlexRow style={styles.card}>
-      <FlexColumn>
-        <div style={styles.cardStep}>Step {stepNumber}</div>
-        <div style={styles.cardHeader}>Sign the Code of Conduct</div>
-      </FlexColumn>
-      {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
-        <ModulesForInitialRegistration
-          profile={profile}
-          modules={[duccModule]}
-          activeModule={activeModule}
-          clickableModules={clickableModules}
-          spinnerProps={spinnerProps}
-        />
-      ) : (
-        <ModulesForAnnualRenewal profile={profile} modules={[duccModule]} />
-      )}
     </FlexRow>
   );
 };
