@@ -9,37 +9,14 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { cond } from 'app/utils';
 import {
   getAccessModuleConfig,
-  getAccessModuleStatusByName,
   getStatusText,
   isCompliant,
 } from 'app/utils/access-utils';
-import { openZendeskWidget } from 'app/utils/zendesk';
 
 import { styles } from './data-access-requirements';
 import { ModuleBox } from './module-box';
 import { ModuleIcon } from './module-icon';
 import { Refresh } from './refresh';
-
-const ContactUs = (props: { profile: Profile }) => {
-  const {
-    profile: { givenName, familyName, username, contactEmail },
-  } = props;
-  return (
-    <div data-test-id='contact-us'>
-      <span
-        style={styles.link}
-        onClick={(e) => {
-          openZendeskWidget(givenName, familyName, username, contactEmail);
-          // prevents the enclosing Clickable's onClick() from triggering instead
-          e.stopPropagation();
-        }}
-      >
-        Contact us
-      </span>{' '}
-      if you’re having trouble completing this step.
-    </div>
-  );
-};
 
 const Next = () => (
   <FlexRow style={styles.nextElement}>
@@ -49,39 +26,6 @@ const Next = () => (
     <ArrowRight style={styles.nextIcon} />
   </FlexRow>
 );
-
-const LoginGovHelpText = (props: {
-  profile: Profile;
-  afterInitialClick: boolean;
-}) => {
-  const { profile, afterInitialClick } = props;
-
-  // don't return help text if complete or bypassed
-  const needsHelp = !isCompliant(
-    getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV)
-  );
-
-  return (
-    needsHelp &&
-    (afterInitialClick ? (
-      <div style={styles.loginGovHelp}>
-        <div>
-          Looks like you still need to complete this action, please try again.
-        </div>
-        <ContactUs profile={profile} />
-      </div>
-    ) : (
-      <div style={styles.loginGovHelp}>
-        <div>
-          Verifying your identity helps us keep participant data safe. You’ll
-          need to provide your state ID, social security number, and phone
-          number.
-        </div>
-        <ContactUs profile={profile} />
-      </div>
-    ))
-  );
-};
 
 export const Module = (props: {
   active: boolean;
@@ -150,13 +94,10 @@ export const Module = (props: {
                 : styles.backgroundModuleText
             }
           >
-            <DARTitleComponent />
-            {moduleName === AccessModule.RASLINKLOGINGOV && (
-              <LoginGovHelpText
-                profile={profile}
-                afterInitialClick={showRefresh}
-              />
-            )}
+            <DARTitleComponent
+              profile={profile}
+              afterInitialClick={showRefresh}
+            />
           </div>
           {isCompliant(status) && (
             <div style={styles.moduleDate}>{getStatusText(status)}</div>

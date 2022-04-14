@@ -16,6 +16,7 @@ import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -127,10 +128,15 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 export const ACCESS_RENEWAL_PATH = '/access-renewal';
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
+interface DARTitleComponentConfig {
+  profile: Profile;
+  afterInitialClick: boolean;
+}
+
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   AARTitleComponent: () => JSX.Element;
-  DARTitleComponent: () => JSX.Element;
+  DARTitleComponent: (DARTitleComponentConfig) => JSX.Element;
   adminPageTitle: string;
   externalSyncAction?: Function;
   refreshAction?: Function;
@@ -186,18 +192,23 @@ export const getAccessModuleConfig = (
         requiredForRTAccess: enforceRasLoginGovLinking,
         requiredForCTAccess: enforceRasLoginGovLinking,
 
-        DARTitleComponent: () => (
-          <div>
-            Verify your identity with Login.gov{' '}
-            <TooltipTrigger
-              content={
-                'For additional security, we require you to verify your identity by uploading a photo of your ID.'
-              }
-            >
-              <InfoIcon style={{ margin: '0 0.3rem' }} />
-            </TooltipTrigger>
-          </div>
-        ),
+        DARTitleComponent: (props: DARTitleComponentConfig) => {
+          return !!props.profile ? (
+            <>
+              <div>
+                Verify your identity with Login.gov{' '}
+                <TooltipTrigger
+                  content={
+                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
+                  }
+                >
+                  <InfoIcon style={{ margin: '0 0.3rem' }} />
+                </TooltipTrigger>
+              </div>
+              <LoginGovHelpText {...props} />
+            </>
+          ) : null;
+        },
         adminPageTitle: 'Verify your identity with Login.gov',
         refreshAction: () => redirectToRas(false),
       }),

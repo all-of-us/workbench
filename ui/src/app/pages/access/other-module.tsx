@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 
@@ -18,13 +18,15 @@ import { ModuleIcon } from './module-icon';
 import { Refresh } from './refresh';
 
 export const OtherModule = (props: {
+  children?: ReactNode;
   clickable: boolean;
   eligible: boolean;
   moduleName: AccessModule;
   spinnerProps: WithSpinnerOverlayProps;
   status: AccessModuleStatus;
 }) => {
-  const { clickable, eligible, moduleName, spinnerProps, status } = props;
+  const { children, clickable, eligible, moduleName, spinnerProps, status } =
+    props;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -33,7 +35,7 @@ export const OtherModule = (props: {
   return isEnabledInEnvironment ? (
     <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {showRefresh && refreshAction && (
+        {showRefresh && !!refreshAction && (
           <Refresh
             refreshAction={refreshAction}
             showSpinner={spinnerProps.showSpinner}
@@ -67,6 +69,7 @@ export const OtherModule = (props: {
           )}
         </FlexColumn>
       </ModuleBox>
+      {children}
     </FlexRow>
   ) : null;
 };
