@@ -663,7 +663,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     List<UserRole> userRolesBeforeShare =
