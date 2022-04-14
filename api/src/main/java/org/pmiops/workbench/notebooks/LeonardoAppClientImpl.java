@@ -11,11 +11,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
+import org.pmiops.workbench.leonardo.model.*;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +46,7 @@ public class LeonardoAppClientImpl implements LeonardoAppClient {
         this.leonardoRetryHandler = leonardoRetryHandler;
     }
 
+    @Override
     public void createLeonardoApp(String googleProject, String name, LeonardoAppType appType)
             throws WorkbenchException, ApiException {
         DbWorkspace workspace = workspaceDao.getByGoogleProject(googleProject).get();
@@ -64,7 +61,7 @@ public class LeonardoAppClientImpl implements LeonardoAppClient {
                         .appType(appType)
                         .customEnvironmentVariables(customEnvironmentVariables)
                         .diskConfig(
-                                new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(500).name("yonghao-disk-2"));
+                                new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(500).name("yonghao-disk-3"));
         if (!appType.equals(LeonardoAppType.CROMWELL)) {
             leonardoCreateAppRequest.setDescriptorPath(
                     "https://github.com/DataBiosphere/terra-app/blob/main/apps/rstudio/app.yaml");
@@ -73,5 +70,22 @@ public class LeonardoAppClientImpl implements LeonardoAppClient {
         System.out.println("~~~22222");
         System.out.println(googleProject);
         appsApi.createApp(googleProject, "aou-test-" + name.toLowerCase(), leonardoCreateAppRequest);
+    }
+
+    @Override
+    public String getLeonardoApp(String googleProject, String name)
+            throws WorkbenchException, ApiException {
+        DbWorkspace workspace = workspaceDao.getByGoogleProject(googleProject).get();
+        AppsApi appsApi = appsApiProvider.get();
+
+        LeonardoGetAppResponse response =  appsApi.getApp(googleProject, "aou-test-" + name.toLowerCase());
+
+        System.out.println("~~~33333");
+        System.out.println("~~~33333");
+        System.out.println(response);
+        System.out.println(response.getProxyUrls());
+        System.out.println(response.getDiskName());
+
+        return null;
     }
 }

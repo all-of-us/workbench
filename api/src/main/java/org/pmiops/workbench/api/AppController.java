@@ -109,4 +109,27 @@ public class AppController implements AppApiDelegate {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    public ResponseEntity<EmptyResponse> getApp(String workspaceNamespace, String appType) {
+        try {
+            System.out.println("~~~~~~~");
+            System.out.println("~~~~~~~");
+            System.out.println("~~~~~~~");
+            System.out.println("~~~~~~~");
+            System.out.println(appType);
+            if(appType.equals("Cromwell")) {
+                leonardoAppClient.getLeonardoApp(
+                        workspaceDao.getByNamespace(workspaceNamespace).get().getGoogleProject(),
+                        "cromwell");
+            } else {
+                leonardoAppClient.getLeonardoApp(
+                        workspaceDao.getByNamespace(workspaceNamespace).get().getGoogleProject(),
+                        "rstudio");
+            }
+            return ResponseEntity.ok(new EmptyResponse());
+        } catch (Exception e) {
+            log.log(Level.WARNING, "fail", e);
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }
