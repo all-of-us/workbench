@@ -32,6 +32,7 @@ def main():
     os.mkdir(home_dir)
 
     max_id = 100000000
+    insert_id = max_id
 
     # cleanup data if previously created
     print("deleting survey data")
@@ -50,17 +51,26 @@ def main():
         # insert data for survey
         print("inserting data for " + name)
         insert_survey(bigquery_client, source, destination,
-                      concept_codes_string, max_id)
+                      concept_codes_string, insert_id)
         print("data insertion complete")
         if name == "ENGLISHWinterMinuteSurveyOnCOV_DataDictionary":
-            print("inserting survey version")
+            print("inserting survey version for " + name)
             insert_version(bigquery_client, source, destination,
-                           concept_codes_string, max_id)
+                           concept_codes_string, insert_id)
             print("data insertion complete")
 
         rows = get_max_id(bigquery_client, destination)
         for row in rows:
-            max_id = row.id
+            insert_id = row.id
+
+    person_ids_old = get_person_ids_old(bigquery_client, destination, max_id)
+    person_ids_new = get_person_ids_new(bigquery_client, destination,
+                                        person_ids_old.total_rows)
+    for old, new in zip(person_ids_old, person_ids_new):
+        print("updating person_id from " + str(old.person_id) + " to " + str(
+            new.person_id))
+        update_person_id(bigquery_client, destination, old.person_id,
+                         new.person_id)
 
 
 # when done remove directory and all files
@@ -191,6 +201,36 @@ def insert_version(bigquery_client, source, destination,
              "WHERE lower(concept_code) in ({codes})))"
              .format(source=source, destination=destination,
                      codes=concept_codes_string, max_id=max_id)
+             )
+    query_job = bigquery_client.query(query)
+    return query_job.result()
+
+
+def get_person_ids_old(bigquery_client, destination, max_id):
+    query = ("SELECT DISTINCT person_id FROM "
+             "`all-of-us-ehr-dev.{destination}.observation` "
+             "WHERE observation_id >= {max_id} ORDER BY person_id"
+             .format(destination=destination, max_id=max_id)
+             )
+    query_job = bigquery_client.query(query)
+    return query_job.result()
+
+
+def get_person_ids_new(bigquery_client, destination, limit):
+    query = ("SELECT person_id FROM "
+             "`all-of-us-ehr-dev.{destination}.person` "
+             "ORDER BY person_id LIMIT {limit}"
+             .format(destination=destination, limit=limit)
+             )
+    query_job = bigquery_client.query(query)
+    return query_job.result()
+
+
+def update_person_id(bigquery_client, destination, old, new):
+    query = ("UPDATE `all-of-us-ehr-dev.{destination}.observation` "
+             "SET person_id = {new} "
+             "WHERE person_id = {old}"
+             .format(destination=destination, old=old, new=new)
              )
     query_job = bigquery_client.query(query)
     return query_job.result()
