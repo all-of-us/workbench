@@ -26,14 +26,16 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { cond, switchCase, useId } from 'app/utils';
 import {
-  accessRenewalModules,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByNameOrEmpty,
   isExpiringOrExpired,
+  isRenewalCompleteForModule,
+  isRtRenewalComplete,
   maybeDaysRemaining,
   redirectToControlledTraining,
   redirectToRegisteredTraining,
+  rtAccessRenewalModules,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { useNavigation } from 'app/utils/navigation';
@@ -153,20 +155,6 @@ export const RenewalRequirementsText = () => (
     days after the date of authorization to access <AoU /> data).
   </span>
 );
-
-// Helper Functions
-
-// is the module "renewal complete" ?
-// meaning (bypassed || (complete and not expiring))
-const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
-  const isComplete = !!status?.completionEpochMillis;
-  const wasBypassed = !!status?.bypassEpochMillis;
-  return (
-    wasBypassed ||
-    (isComplete &&
-      !isExpiringOrExpired(status?.expirationEpochMillis, status.moduleName))
-  );
-};
 
 // Helper / Stateless Components
 interface CompletedButtonInterface {
@@ -547,10 +535,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
     const [loading, setLoading] = useState(false);
 
     const expirableModules = modules.filter((moduleStatus) =>
-      accessRenewalModules.includes(moduleStatus.moduleName)
-    );
-    const accessRenewalCompleted = expirableModules.every(
-      isRenewalCompleteForModule
+      rtAccessRenewalModules.includes(moduleStatus.moduleName)
     );
 
     // onMount - as we move between pages, let's make sure we have the latest profile and external module information
@@ -574,7 +559,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
 
     const maybeHeader = cond(
       // Completed - no icon or button
-      [accessRenewalCompleted, () => null],
+      [isRtRenewalComplete(profile), () => null],
       // Access expired icon
       [
         maybeDaysRemaining(profile) < 0,
@@ -617,14 +602,14 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)(
           {maybeHeader}
           <div
             style={
-              accessRenewalCompleted
+              isRtRenewalComplete(profile)
                 ? { gridColumn: '1 / span 2' }
                 : { gridColumnStart: 2 }
             }
           >
             <RenewalRequirementsText />
           </div>
-          {accessRenewalCompleted && (
+          {isRtRenewalComplete(profile) && (
             <div
               style={{
                 ...renewalStyle.completionBox,

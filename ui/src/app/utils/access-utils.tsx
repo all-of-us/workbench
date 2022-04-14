@@ -300,8 +300,8 @@ export const getAccessModuleConfig = (
   );
 };
 
-// the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
-export const accessRenewalModules = [
+// the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
+export const rtAccessRenewalModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
@@ -484,6 +484,31 @@ export const isExpiringOrExpired = (
     ? serverConfigStore.get().config.complianceTrainingRenewalLookback
     : serverConfigStore.get().config.accessRenewalLookback;
   return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
+};
+
+// is the module "renewal complete" ?
+// meaning (bypassed || (complete and not expiring))
+export const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
+  const isComplete = !!status?.completionEpochMillis;
+  const wasBypassed = !!status?.bypassEpochMillis;
+  return (
+    wasBypassed ||
+    (isComplete &&
+      !isExpiringOrExpired(status?.expirationEpochMillis, status.moduleName))
+  );
+};
+
+export const isRtRenewalComplete = (profile: Profile): boolean => {
+  const modules = profile?.accessModules?.modules;
+  return rtAccessRenewalModules
+    .filter(
+      (moduleName) => getAccessModuleConfig(moduleName).isEnabledInEnvironment
+    )
+    .every((moduleName) =>
+      isRenewalCompleteForModule(
+        getAccessModuleStatusByNameOrEmpty(modules, moduleName)
+      )
+    );
 };
 
 interface RenewalDisplayDates {
