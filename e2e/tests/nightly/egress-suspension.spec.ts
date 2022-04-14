@@ -11,8 +11,6 @@ import { logger } from 'libs/logger';
 jest.setTimeout(45 * 60 * 1000);
 
 describe('egress suspension', () => {
-  let notebookUrl: string;
-
   const notebookName = makeRandomName('egress-notebook');
   const dataGenFilename = 'create-data-files.py';
   const dataGenFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${dataGenFilename}`);
@@ -48,16 +46,9 @@ describe('egress suspension', () => {
 
     logger.info('Awaiting security suspension in the notebook page');
     await page.bringToFront();
-    notebookUrl = page.url();
     await notebookPage.waitForLoad();
 
     await waitForSecuritySuspendedStatus(page);
-  });
-
-  test('Cloud Analysis Environment is auto suspended', async () => {
-    await signInWithAccessToken(page, config.EGRESS_TEST_USER);
-    await page.goto(notebookUrl, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 60 * 1000 });
-    await waitForSecuritySuspendedStatus(page, true, 30 * 1000);
 
     // egress handling will auto. suspend cloud analysis environment.
     const runtimePanel = new RuntimePanel(page);
