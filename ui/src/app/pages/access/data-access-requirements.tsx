@@ -442,10 +442,12 @@ const ControlledTierEraModule = (props: {
 
   return (
     <OtherModule
+      active={false}
       clickable={clickable}
       eligible={eligible}
       moduleAction={redirectToNiH}
       moduleName={moduleName}
+      profile={profile}
       spinnerProps={spinnerProps}
       status={status}
     />

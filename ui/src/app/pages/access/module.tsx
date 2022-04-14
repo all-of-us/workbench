@@ -60,7 +60,9 @@ export const Module = (props: {
       <FlexRow style={styles.moduleCTA}>
         {cond(
           [
-            clickable && showRefresh && !!refreshAction,
+            (clickable || moduleName === AccessModule.ERACOMMONS) &&
+              showRefresh &&
+              !!refreshAction,
             () => (
               <Refresh
                 refreshAction={refreshAction}
