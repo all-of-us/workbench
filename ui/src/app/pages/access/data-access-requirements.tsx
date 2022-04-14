@@ -37,6 +37,7 @@ import {
   GetStartedButton,
   isCompliant,
   isEligibleModule,
+  redirectToNiH,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
@@ -443,6 +444,7 @@ const ControlledTierEraModule = (props: {
     <OtherModule
       clickable={clickable}
       eligible={eligible}
+      moduleAction={redirectToNiH}
       moduleName={moduleName}
       spinnerProps={spinnerProps}
       status={status}

@@ -9,7 +9,6 @@ import {
   getAccessModuleConfig,
   getStatusText,
   isCompliant,
-  redirectToNiH,
 } from 'app/utils/access-utils';
 
 import { styles } from './data-access-requirements';
@@ -21,12 +20,20 @@ export const OtherModule = (props: {
   children?: ReactNode;
   clickable: boolean;
   eligible: boolean;
+  moduleAction: Function;
   moduleName: AccessModule;
   spinnerProps: WithSpinnerOverlayProps;
   status: AccessModuleStatus;
 }) => {
-  const { children, clickable, eligible, moduleName, spinnerProps, status } =
-    props;
+  const {
+    children,
+    clickable,
+    eligible,
+    moduleAction,
+    moduleName,
+    spinnerProps,
+    status,
+  } = props;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -46,7 +53,7 @@ export const OtherModule = (props: {
         clickable={clickable}
         action={() => {
           setShowRefresh(true);
-          redirectToNiH();
+          moduleAction();
         }}
       >
         <ModuleIcon
