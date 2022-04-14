@@ -43,7 +43,7 @@ import {
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
 
-import { authorityGuard, expiredGuard, registrationGuard } from './guards';
+import { authorityGuard, registrationGuard, rtExpiredGuard } from './guards';
 
 const AccessRenewalPage = fp.flow(
   withRouteData,
@@ -127,7 +127,7 @@ const WorkspaceSearchAdminPage = fp.flow(
 export const SignedInRoutes = () => {
   return (
     <Switch>
-      <AppRoute exact path='/' guards={[expiredGuard, registrationGuard]}>
+      <AppRoute exact path='/' guards={[rtExpiredGuard, registrationGuard]}>
         <HomepagePage routeData={{ title: 'Homepage' }} />
       </AppRoute>
       <AppRoute exact path={ACCESS_RENEWAL_PATH}>
@@ -320,7 +320,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         exact
         path='/library'
-        guards={[expiredGuard, registrationGuard]}
+        guards={[rtExpiredGuard, registrationGuard]}
       >
         <WorkspaceLibraryPage
           routeData={{ title: 'Workspace Library', minimizeChrome: false }}
@@ -329,7 +329,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         exact
         path='/workspaces'
-        guards={[expiredGuard, registrationGuard]}
+        guards={[rtExpiredGuard, registrationGuard]}
       >
         <WorkspaceListPage
           routeData={{
@@ -341,7 +341,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         exact
         path='/workspaces/build'
-        guards={[expiredGuard, registrationGuard]}
+        guards={[rtExpiredGuard, registrationGuard]}
       >
         <WorkspaceEditPage
           routeData={{ title: 'Create Workspace' }}
@@ -351,7 +351,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         path='/workspaces/:ns/:wsid'
         exact={false}
-        guards={[expiredGuard, registrationGuard]}
+        guards={[rtExpiredGuard, registrationGuard]}
       >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>

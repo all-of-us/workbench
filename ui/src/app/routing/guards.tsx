@@ -46,7 +46,7 @@ export const registrationGuard: Guard = {
   redirectPath: DATA_ACCESS_REQUIREMENTS_PATH,
 };
 
-export const expiredGuard: Guard = {
+export const rtExpiredGuard: Guard = {
   allowed: (): boolean => isRtRenewalComplete(profileStore.get().profile),
   redirectPath: ACCESS_RENEWAL_PATH,
 };
