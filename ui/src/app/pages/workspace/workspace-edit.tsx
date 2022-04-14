@@ -1647,7 +1647,6 @@ export const WorkspaceEdit = fp.flow(
                             style={{ width: '20rem' }}
                             value={billingAccountName}
                             options={this.buildBillingAccountOptions()}
-                            disabled={initialCreditsBalance < 0.0}
                             onChange={(e) => {
                               this.setState(
                                 fp.set(
