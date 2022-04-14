@@ -1440,7 +1440,6 @@ export const WorkspaceEdit = fp.flow(
         profileState: { profile },
       } = this.props;
       const { freeTierDollarQuota, freeTierUsage } = profile;
-      const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
 
       const errors = this.validate();
       return (
