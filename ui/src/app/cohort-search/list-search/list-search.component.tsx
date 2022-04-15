@@ -4,12 +4,14 @@ import * as fp from 'lodash/fp';
 import { InputSwitch } from 'primereact/inputswitch';
 
 import {
+  AttrName,
   CdrVersion,
   CdrVersionTiersResponse,
   Criteria,
   CriteriaSubType,
   CriteriaType,
   Domain,
+  Operator,
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
@@ -29,6 +31,7 @@ import {
   reactStyles,
   validateInputForMySQL,
   withCdrVersions,
+  withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
 } from 'app/utils';
@@ -39,6 +42,7 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
@@ -268,6 +272,7 @@ const sourceStandardTooltip = (
 interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   concept?: Array<Criteria>;
+  criteria: Array<Criteria>;
   hierarchy: Function;
   searchContext: any;
   searchTerms: string;
@@ -303,7 +308,8 @@ const tableBodyOverlayStyle = `
 export const ListSearch = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
-  withCurrentConcept()
+  withCurrentConcept(),
+  withCurrentCohortCriteria()
 )(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -465,7 +471,7 @@ export const ListSearch = fp.flow(
     }
 
     selectItem = (row: any) => {
-      const { domainId, group, name, parentId } = row;
+      const { conceptId, domainId, group, name, parentId, value } = row;
       let param = { parameterId: this.getParamId(row), ...row, attributes: [] };
       if (domainId === Domain.SURVEY.toString()) {
         param = {
@@ -477,6 +483,15 @@ export const ListSearch = fp.flow(
           if (question) {
             param.name = `${question.name} - ${name}`;
           }
+          param.attributes.push(
+            conceptId === 1585747
+              ? {
+                  name: AttrName.NUM,
+                  operator: Operator.EQUAL,
+                  operands: [value],
+                }
+              : { name: AttrName.CAT, operator: Operator.IN, operands: [value] }
+          );
         }
       }
       this.props.select(param);
@@ -635,12 +650,17 @@ export const ListSearch = fp.flow(
         brand ||
         (this.props.searchContext.source === 'cohort' &&
           row.subtype === CriteriaSubType.QUESTION);
+      // Only show child nodes of selected parents as selected when enableUniversalSearch enabled for now
+      const parentSelected =
+        !serverConfigStore.get().config.enableUniversalSearch &&
+        this.props.criteria.find(({ id }) =>
+          row.path.split('.').includes(id.toString())
+        );
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected =
-        !attributes &&
-        !brand &&
-        this.props.selectedIds.includes(this.getParamId(row));
-      const unselected = !attributes && !brand && !this.isSelected(row);
+        !attributes && !brand && (this.isSelected(row) || parentSelected);
+      const unselected =
+        !attributes && !brand && !(this.isSelected(row) || parentSelected);
       const open = childNodes[row.id]?.open;
       const loadingChildren = childNodes[row.id]?.loading;
       const columnStyle = child
@@ -662,6 +682,9 @@ export const ListSearch = fp.flow(
           >
             {row.selectable && (
               <div style={styles.selectDiv}>
+                {loadingChildren && (
+                  <Spinner style={{ marginRight: '0.4rem' }} size={16} />
+                )}
                 {parent && !loadingChildren && (
                   <ClrIcon
                     style={styles.brandIcon}
@@ -694,7 +717,6 @@ export const ListSearch = fp.flow(
                     onClick={() => this.selectItem(row)}
                   />
                 )}
-                {loadingChildren && <Spinner size={16} />}
               </div>
             )}
             <TooltipTrigger
