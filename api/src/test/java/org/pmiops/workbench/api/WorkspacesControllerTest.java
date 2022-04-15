@@ -2413,6 +2413,40 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testShareWorkspace_deprecated_needsOwner() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+
+    String namespace = "namespace";
+    String name = "name";
+    stubGetWorkspace(namespace, name, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
+
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag("etag");
+
+    assertThrows(
+        ForbiddenException.class,
+        () -> workspacesController.shareWorkspace(namespace, name, shareWorkspaceRequest));
+  }
+
+  @Test
+  public void testShareWorkspacePatch_needsOwner() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+
+    String namespace = "namespace";
+    String name = "name";
+    stubGetWorkspace(namespace, name, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
+
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag("etag");
+
+    assertThrows(
+        ForbiddenException.class,
+        () -> workspacesController.shareWorkspacePatch(namespace, name, shareWorkspaceRequest));
+  }
+
+  @Test
   public void testShareWorkspaceAddBillingProjectUser_deprecated() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
