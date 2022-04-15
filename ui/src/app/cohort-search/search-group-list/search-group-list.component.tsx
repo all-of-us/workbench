@@ -330,7 +330,7 @@ const SearchGroupList = fp.flow(
                 Group {groups.length + index + 1}
               </div>
             </div>
-            {!serverConfigStore.get().config.enableUniversalSearch ? (
+            {serverConfigStore.get().config.enableUniversalSearch ? (
               <CohortCriteriaMenu
                 launchSearch={(criteria, searchTerms) =>
                   this.launchSearch(criteria, searchTerms)

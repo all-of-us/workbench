@@ -652,7 +652,7 @@ export const ListSearch = fp.flow(
           row.subtype === CriteriaSubType.QUESTION);
       // Only show child nodes of selected parents as selected when enableUniversalSearch enabled for now
       const parentSelected =
-        !serverConfigStore.get().config.enableUniversalSearch &&
+        serverConfigStore.get().config.enableUniversalSearch &&
         this.props.criteria?.find(({ id }) =>
           row.path.split('.').includes(id.toString())
         );

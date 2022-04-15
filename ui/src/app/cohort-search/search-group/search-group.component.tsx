@@ -741,7 +741,7 @@ export const SearchGroup = withCurrentWorkspace()(
               </div>
             ))}
             {/* Criteria menu for main search item list/temporal group 0 items */}
-            {!serverConfigStore.get().config.enableUniversalSearch ? (
+            {serverConfigStore.get().config.enableUniversalSearch ? (
               <CohortCriteriaMenu
                 launchSearch={(criteria, temporalGroup, searchTerms) =>
                   this.launchSearch(criteria, temporalGroup, searchTerms)
