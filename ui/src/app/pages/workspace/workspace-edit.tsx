@@ -1439,7 +1439,6 @@ export const WorkspaceEdit = fp.flow(
         cdrVersionTiersResponse,
         profileState: { profile },
       } = this.props;
-      const { freeTierDollarQuota, freeTierUsage } = profile;
 
       const errors = this.validate();
       return (
