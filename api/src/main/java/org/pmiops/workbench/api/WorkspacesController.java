@@ -662,6 +662,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
     }
 
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
+
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     List<UserRole> userRolesBeforeShare =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
@@ -722,7 +725,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    // This automatically enforces the "canShare" permission.
     dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
