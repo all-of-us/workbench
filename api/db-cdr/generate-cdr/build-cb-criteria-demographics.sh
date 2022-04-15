@@ -127,7 +127,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.gender_concept_id = b.conce
 # https://precisionmedicineinitiative.atlassian.net/browse/RW-8178
 echo "CB_CRITERIA - update gender identity name for Woman"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
  SET cr.name = y.name
  FROM (SELECT DISTINCT gender_concept_id as concept_id, REGEXP_REPLACE(c.concept_name, r'^.+:\s', '') as name
              FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
@@ -139,7 +139,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 
  echo "CB_CRITERIA - update gender identity name for Man"
  bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
- "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr
+ "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
   SET cr.name = y.name
   FROM (SELECT DISTINCT gender_concept_id as concept_id, REGEXP_REPLACE(c.concept_name, r'^.+:\s', '') as name
               FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
