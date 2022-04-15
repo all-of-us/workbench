@@ -205,8 +205,7 @@ public class UserController implements UserApiDelegate {
   }
 
   /**
-   * @return the free tier billing account, if the user has free credits OR billing upgrade is
-   *     disabled
+   * @return the free tier billing account, if the user has free credits
    */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
     if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
