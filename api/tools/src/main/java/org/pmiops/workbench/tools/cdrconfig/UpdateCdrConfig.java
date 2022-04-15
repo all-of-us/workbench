@@ -45,10 +45,9 @@ public class UpdateCdrConfig {
       AccessTierDao accessTierDao, CdrVersionDao cdrVersionDao, CdrConfigVOMapper cdrConfigMapper)
       throws IOException {
     return (args) -> {
-      if (args.length != 2 && args.length != 3) {
+      if (args.length != 2) {
         throw new IllegalArgumentException(
-            "Expected 2-3 args (file, dry_run, allow_empty_tiers=false). Got "
-                + Arrays.asList(args));
+            "Expected 2 args (file, dry_run). Got " + Arrays.asList(args));
       }
 
       final Gson gson =
@@ -60,10 +59,8 @@ public class UpdateCdrConfig {
         cdrConfig = gson.fromJson(cdrConfigReader, CdrConfigVO.class);
       }
       boolean dryRun = Boolean.parseBoolean(args[1]);
-      // RW-7931 consider removal of this option after CT rollout is complete
-      boolean allowEmptyTiers = args.length > 2 && Boolean.parseBoolean(args[2]);
 
-      preCheck(cdrConfig, allowEmptyTiers);
+      preCheck(cdrConfig);
 
       updateDB(dryRun, cdrConfig, gson, accessTierDao, cdrVersionDao, cdrConfigMapper);
     };
@@ -86,14 +83,9 @@ public class UpdateCdrConfig {
    *   <li>duplicate IDs (or lack one)
    *   <li>have an archived default version
    *   <li>belong to a tier which is not also present in this file
-   *   <li>have more than one default version per tier
-   *   <li>have fewer than one default version per tier (unless allowEmptyTiers is set and the tier
-   *       is empty)
    * </ul>
-   *
-   * <p>Unless allowEmptyTiers is set, CDR Versions must also have at least one version per tier
    */
-  private void preCheck(CdrConfigVO cdrConfig, boolean allowEmptyTiers) {
+  private void preCheck(CdrConfigVO cdrConfig) {
     Set<Long> accessTierIds = new HashSet<>();
     Set<String> accessTierShortNames = new HashSet<>();
     Set<String> accessTierDisplayNames = new HashSet<>();
@@ -174,14 +166,7 @@ public class UpdateCdrConfig {
 
     accessTierShortNames.forEach(
         t -> {
-          if (!allowEmptyTiers && !cdrVersionsPerTier.containsKey(t)) {
-            throw new IllegalArgumentException(
-                String.format("No CDR versions are present for Access Tier '%s'.", t));
-          }
-
-          // check if a tier has CDR Versions but no default
-          // (empty is OK if it passed the previous check)
-          if (cdrVersionsPerTier.containsKey(t) && !cdrDefaultVersionPerTier.containsKey(t)) {
+          if (!cdrVersionsPerTier.containsKey(t)) {
             throw new IllegalArgumentException(
                 String.format("Missing default CDR version for Access Tier '%s'.", t));
           }
