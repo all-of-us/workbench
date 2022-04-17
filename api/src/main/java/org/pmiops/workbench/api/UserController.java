@@ -204,9 +204,7 @@ public class UserController implements UserApiDelegate {
         new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
   }
 
-  /**
-   * @return the free tier billing account, if the user has free credits
-   */
+  /** @return the free tier billing account, if the user has free credits */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
     if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
       return Stream.empty();
