@@ -183,6 +183,10 @@ gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
 
 while IFS=$'|' read -r concept_code survey_name topic answers;
 do
+  if [[ "$concept_code" == *"_date"* ]]
+  then
+    continue
+  fi
   # Build custom order by clause
   if [[ -z "$answers" ]]
   then
