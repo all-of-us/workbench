@@ -6,6 +6,10 @@ from google.cloud import bigquery
 from google.cloud import storage
 from io import StringIO
 
+# Load test survey data into a destination dataset
+# Example: python load-test-survey-data.py --date 2022-02-04
+# --source survey_latest --destination test_R2019q4r3
+
 # These are redcap files for Minute and SDOH Surveys
 surveys = ['ENGLISHWinterMinuteSurveyOnCOV_DataDictionary',
            'ENGLISHSocialDeterminantsOfHea_DataDictionary']
