@@ -77,7 +77,7 @@ export class AccountCreationTos extends React.Component<
         data-test-id='account-creation-tos'
         style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
       >
-        {this.props.showReAcceptNotification &&
+        {this.props.showReAcceptNotification && (
           <div
             style={{
               marginBottom: '0.5rem',
@@ -88,16 +88,17 @@ export class AccountCreationTos extends React.Component<
             }}
           >
             <h3 style={{ marginTop: 0, fontWeight: 'bold' }}>
-              Please review and re-accept the <AoU /> Research Program Researcher
-              Workbench Terms of Use and Privacy Statement
+              Please review and re-accept the <AoU /> Research Program
+              Researcher Workbench Terms of Use and Privacy Statement
             </h3>
             <p className='h-color' style={{ marginTop: '0.25rem' }}>
               The Terra Platform terms, which are incorporated by reference into
               the <AoU /> terms, have been updated. This updated replaces
-              references to specific federal datasets with a more broad reference
-              to federal datasets as a type of data.
+              references to specific federal datasets with a more broad
+              reference to federal datasets as a type of data.
             </p>
-          </div>}
+          </div>
+        )}
         <HtmlViewer
           ariaLabel='terms of use and privacy statement'
           containerStyles={{ backgroundColor: colors.white }}
