@@ -30,7 +30,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import { Ethnicity, GenderIdentity, Sex } from 'app/page/cohort-participants-group';
+import { Ethnicity, GenderIdentity } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
