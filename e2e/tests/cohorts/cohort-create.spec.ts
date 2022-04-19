@@ -1,4 +1,11 @@
-import { Ethnicity, FilterSign, GenderIdentity, PhysicalMeasurementsCriteria, Race, Sex } from 'app/page/cohort-participants-group';
+import {
+  Ethnicity,
+  FilterSign,
+  GenderIdentity,
+  PhysicalMeasurementsCriteria,
+  Race,
+  Sex
+} from 'app/page/cohort-participants-group';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
