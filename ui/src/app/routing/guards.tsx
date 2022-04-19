@@ -1,4 +1,7 @@
+import { Profile } from 'generated/fetch';
+
 import { Guard } from 'app/components/app-router';
+import { cond } from 'app/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
@@ -28,26 +31,54 @@ const userIsEnabled = (userDisabledInDb: boolean) =>
   !userDisabledInDb &&
   eligibleForTier(profileStore.get().profile, AccessTierShortNames.Registered);
 
+// TODO use redirectTo?
 export const disabledGuard = (userDisabledInDb: boolean): Guard => ({
   // Show disabled screen when user account is disabled by admin or removed from institution registered tier requirement.
   allowed: (): boolean => userIsEnabled(userDisabledInDb),
   redirectPath: '/user-disabled',
 });
 
+// TODO use redirectTo?
 export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
   // enabled users should be redirected to the homepage if they visit the /user-disabled page
   allowed: (): boolean => !userIsEnabled(userDisabledInDb),
   redirectPath: '/',
 });
 
+// where a user should be redirected to, depending on the current status of their access modules
+export enum AccessModulesRedirection {
+  NO_REDIRECT,
+  DATA_ACCESS_REQUIREMENTS,
+  ACCESS_RENEWAL,
+}
+
+// use this for all access-module routing decisions, to ensure only one routing is chosen
+export const redirectTo = (profile: Profile): AccessModulesRedirection => {
+  return cond(
+    [
+      profile?.accessModules?.anyModuleHasExpired,
+      () => AccessModulesRedirection.ACCESS_RENEWAL,
+    ],
+    [
+      !hasRegisteredTierAccess(profile),
+      () => AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
+    ],
+    () => AccessModulesRedirection.NO_REDIRECT
+  );
+};
+
+// TODO combine these into an "RT Access Guard" or similar?
 export const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredTierAccess(profileStore.get().profile),
+  allowed: () =>
+    redirectTo(profileStore.get().profile) ===
+    AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
   redirectPath: DATA_ACCESS_REQUIREMENTS_PATH,
 };
 
 export const rtExpiredGuard: Guard = {
-  allowed: (): boolean =>
-    !profileStore.get().profile.accessModules.anyModuleHasExpired,
+  allowed: () =>
+    redirectTo(profileStore.get().profile) ===
+    AccessModulesRedirection.ACCESS_RENEWAL,
   redirectPath: ACCESS_RENEWAL_PATH,
 };
 
