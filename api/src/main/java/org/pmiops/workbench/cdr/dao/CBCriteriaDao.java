@@ -128,6 +128,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria c1 "
               + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
+              + "and c1.fullText like '%[SURVEY_rank1]%'"
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
               + "                     where c.domainId = 'SURVEY' "

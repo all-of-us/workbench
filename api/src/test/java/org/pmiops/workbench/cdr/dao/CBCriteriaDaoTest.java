@@ -55,6 +55,7 @@ public class CBCriteriaDaoTest {
                 .addStandard(false)
                 .addSelectable(true)
                 .addName("The Basics")
+                .addFullText("term[SURVEY_rank1]")
                 .build());
     // adding a survey answer
     cbCriteriaDao.save(
