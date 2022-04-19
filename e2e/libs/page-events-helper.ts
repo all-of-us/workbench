@@ -44,7 +44,8 @@ const isWorkbenchRequest = (request: Request): Request | null => {
   ];
   return request &&
     !unwantedRequests.some((urlPart) => request.url().includes(urlPart)) &&
-    /all-of-us-workbench-(test|staging).appspot.com/.exec(request.url()) != null
+    /all-of-us-workbench-test.appspot.com/.exec(request.url()) != null &&
+    /all-of-us-rw-staging.appspot.com/.exec(request.url()) != null
     ? request
     : null;
 };
