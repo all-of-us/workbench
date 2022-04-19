@@ -31,6 +31,11 @@ export enum Surveys {
   OVERALLHEALTH = 'Overall Health',
   PERSONALMEDICALHISTORY = 'Personal Medical History'
 }
+export enum GenderIdentity {
+  WOMAN = 'Woman',
+  MAN = 'Man',
+  SKIPPED = 'Not Man Only, Not Woman Only, Prefer Not To Answer, Or Skipped'
+}
 export enum Sex {
   FEMALE = 'Female',
   MALE = 'Male',
