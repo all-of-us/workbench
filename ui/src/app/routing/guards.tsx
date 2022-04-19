@@ -7,7 +7,6 @@ import {
   ACCESS_RENEWAL_PATH,
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
-  isRtRenewalComplete,
 } from 'app/utils/access-utils';
 import {
   AuthorityGuardedAction,
@@ -47,7 +46,8 @@ export const registrationGuard: Guard = {
 };
 
 export const rtExpiredGuard: Guard = {
-  allowed: (): boolean => isRtRenewalComplete(profileStore.get().profile),
+  allowed: (): boolean =>
+    !profileStore.get().profile.accessModules.anyModuleHasExpired,
   redirectPath: ACCESS_RENEWAL_PATH,
 };
 
