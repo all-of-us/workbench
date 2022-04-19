@@ -2774,7 +2774,7 @@ def deploy(cmd_name, args)
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run, op.opts.allow_empty_tiers)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 
     # Keep the cloud proxy context open for the service account credentials.
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
