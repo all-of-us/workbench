@@ -38,6 +38,7 @@ const styles = reactStyles({
 });
 
 export interface AccountCreationTosProps {
+  showReAcceptNotification: boolean;
   // Callback which will be called by this component when the user clicks "Next".
   onComplete: (tosVersion) => void;
   // Path to the Terms of Service file to be displayed.
@@ -76,26 +77,27 @@ export class AccountCreationTos extends React.Component<
         data-test-id='account-creation-tos'
         style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
       >
-        <div
-          style={{
-            marginBottom: '0.5rem',
-            padding: '0.75rem',
-            backgroundColor: 'aliceblue',
-            borderRadius: 4,
-            boxShadow: '1px 1px 6px gray',
-          }}
-        >
-          <h3 style={{ marginTop: 0, fontWeight: 'bold' }}>
-            Please review and re-accept the <AoU /> Research Program Researcher
-            Workbench Terms of Use and Privacy Statement
-          </h3>
-          <p className='h-color' style={{ marginTop: '0.25rem' }}>
-            The Terra Platform terms, which are incorporated by reference into
-            the <AoU /> terms, have been updated. This updated replaces
-            references to specific federal datasets with a more broad reference
-            to federal datasets as a type of data.
-          </p>
-        </div>
+        {this.props.showReAcceptNotification &&
+          <div
+            style={{
+              marginBottom: '0.5rem',
+              padding: '0.75rem',
+              backgroundColor: 'aliceblue',
+              borderRadius: 4,
+              boxShadow: '1px 1px 6px gray',
+            }}
+          >
+            <h3 style={{ marginTop: 0, fontWeight: 'bold' }}>
+              Please review and re-accept the <AoU /> Research Program Researcher
+              Workbench Terms of Use and Privacy Statement
+            </h3>
+            <p className='h-color' style={{ marginTop: '0.25rem' }}>
+              The Terra Platform terms, which are incorporated by reference into
+              the <AoU /> terms, have been updated. This updated replaces
+              references to specific federal datasets with a more broad reference
+              to federal datasets as a type of data.
+            </p>
+          </div>}
         <HtmlViewer
           ariaLabel='terms of use and privacy statement'
           containerStyles={{ backgroundColor: colors.white }}

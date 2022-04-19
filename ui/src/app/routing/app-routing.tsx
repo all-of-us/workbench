@@ -302,6 +302,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
             )}
             {doesUserNeedToAcceptTOS && (
               <AccountCreationTos
+                showReAcceptNotification={true}
                 onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
                 filePath={'/aou-tos.html'}
                 afterPrev={false}
