@@ -39,11 +39,23 @@ const allCompleteExpiringSoon: AccessModuleStatus[] = Object.keys(
   expirationEpochMillis: nowPlusDays(1),
 }));
 
-// DUCC is expired
-const allCompleteOneExpired: AccessModuleStatus[] = allCompleteNotExpiring
-  .filter(({ moduleName }) => moduleName !== AccessModule.DATAUSERCODEOFCONDUCT)
-  .concat({
-    moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+// 2FA is missing (initial, not renewable)
+const allCompleteMissingOneInitial: AccessModuleStatus[] =
+  allCompleteNotExpiring.filter(
+    ({ moduleName }) => moduleName !== AccessModule.TWOFACTORAUTH
+  );
+
+// RW-8203
+// artificial state for test users - Publications is missing (renewable, not initial registration)
+const allCompleteMissingOneRenewable: AccessModuleStatus[] =
+  allCompleteNotExpiring.filter(
+    ({ moduleName }) => moduleName !== AccessModule.PUBLICATIONCONFIRMATION
+  );
+
+// PUBLICATIONCONFIRMATION is expired
+const allCompleteOneExpired: AccessModuleStatus[] =
+  allCompleteMissingOneRenewable.concat({
+    moduleName: AccessModule.PUBLICATIONCONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(-1),
   });
@@ -110,6 +122,31 @@ describe('redirectTo', () => {
         accessModules: {
           anyModuleHasExpired: true,
           modules: allCompleteOneExpired,
+        },
+      },
+    ],
+    [
+      'all complete but missing one (initial, not expirable/renewable)',
+      AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
+      {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessTierShortNames: [],
+        accessModules: {
+          anyModuleHasExpired: false,
+          modules: allCompleteMissingOneInitial,
+        },
+      },
+    ],
+    // RW-8203 this fails
+    [
+      'all complete but missing one (renewable, not initial)',
+      AccessModulesRedirection.ACCESS_RENEWAL,
+      {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessTierShortNames: [],
+        accessModules: {
+          anyModuleHasExpired: false,
+          modules: allCompleteMissingOneRenewable,
         },
       },
     ],
