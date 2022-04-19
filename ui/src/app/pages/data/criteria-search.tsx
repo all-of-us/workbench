@@ -217,11 +217,13 @@ export const CriteriaSearch = fp.flow(
     get initTree() {
       const {
         cohortContext: { domain, source },
+        conceptSearchTerms,
       } = this.props;
       return (
-        domain === Domain.VISIT ||
-        (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT) ||
-        (source === 'cohort' && domain === Domain.SURVEY)
+        (domain === Domain.VISIT ||
+          (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT) ||
+          (source === 'cohort' && domain === Domain.SURVEY)) &&
+        !conceptSearchTerms
       );
     }
 
@@ -276,16 +278,15 @@ export const CriteriaSearch = fp.flow(
         cohortContext: { source },
         match: { params },
       } = this.props;
+      const { selectedCriteriaList } = this.state;
       // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
       if (!this.isConcept && !!attributesSelectionStore.getValue()) {
         this.closeSidebar();
       }
-      let criteriaList = this.state.selectedCriteriaList;
-      if (criteriaList && criteriaList.length > 0) {
-        criteriaList.push(selectCriteria);
-      } else {
-        criteriaList = [selectCriteria];
-      }
+      const criteriaList =
+        selectedCriteriaList && selectedCriteriaList.length > 0
+          ? [...selectedCriteriaList, selectCriteria]
+          : [selectCriteria];
       // Save selections in local storage in case of error or page refresh
       if (source === 'cohort') {
         const { wsid } = params;

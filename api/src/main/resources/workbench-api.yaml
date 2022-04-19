@@ -3550,7 +3550,7 @@ paths:
           description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/ehrDomainCounts":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/universalDomainCounts":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3558,7 +3558,7 @@ paths:
       tags:
         - cohortBuilder
       description: 'Returns a count of term matches per domain for EHR domains'
-      operationId: findEhrDomainCounts
+      operationId: findUniversalDomainCounts
       parameters:
         - in: query
           name: term
