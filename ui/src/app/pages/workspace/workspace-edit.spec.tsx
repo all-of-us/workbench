@@ -471,6 +471,18 @@ describe('WorkspaceEdit', () => {
     'enables access tier selection on creation when multiple tiers are present' +
       ' and the user has access to multiple',
     async () => {
+      const twoTiers = [
+        AccessTierShortNames.Registered,
+        AccessTierShortNames.Controlled,
+      ];
+      workspaceEditMode = WorkspaceEditMode.Create;
+      profileStore.set({
+        ...profileStore.get(),
+        profile: {
+          ...profileStore.get().profile,
+          accessTierShortNames: twoTiers,
+        },
+      });
       const wrapper = component();
       await waitOneTickAndUpdate(wrapper);
 
@@ -503,7 +515,6 @@ describe('WorkspaceEdit', () => {
       ]);
 
       // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
-
       await simulateSelection(
         accessTierSelection,
         AccessTierShortNames.Controlled
