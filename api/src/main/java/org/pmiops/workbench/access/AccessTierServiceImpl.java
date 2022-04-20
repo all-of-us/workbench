@@ -47,8 +47,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * Return all access tiers in the database, in alphabetical order by shortName. To return only the
-   * tiers which are visible to users, use getAllTiersVisibleToUsers().
+   * Return all access tiers in the database, in alphabetical order by shortName.
    *
    * @return the List of all DbAccessTiers in the database
    */

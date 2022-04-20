@@ -12,8 +12,7 @@ public interface AccessTierService {
   String CONTROLLED_TIER_SHORT_NAME = "controlled";
 
   /**
-   * Return all access tiers in the database, in alphabetical order by shortName. To return only the
-   * tiers which are visible to users, use getAllTiersVisibleToUsers().
+   * Return all access tiers in the database, in alphabetical order by shortName.x
    *
    * @return the List of all DbAccessTiers in the database
    */
