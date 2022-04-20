@@ -14,6 +14,7 @@ import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.auth.AuthService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
+import org.pmiops.workbench.model.SignInRequestBody;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -77,6 +79,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final InstitutionService institutionService;
   private final PageVisitMapper pageVisitMapper;
   private final ProfileAuditor profileAuditor;
+  private final AuthService authService;
   private final ProfileService profileService;
   private final Provider<DbUser> userProvider;
   private final Provider<MailService> mailServiceProvider;
@@ -99,6 +102,7 @@ public class ProfileController implements ProfileApiDelegate {
       InstitutionService institutionService,
       PageVisitMapper pageVisitMapper,
       ProfileAuditor profileAuditor,
+      AuthService authService,
       ProfileService profileService,
       Provider<DbUser> userProvider,
       Provider<MailService> mailServiceProvider,
@@ -116,6 +120,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.directoryService = directoryService;
     this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
+    this.authService = authService;
     this.mailServiceProvider = mailServiceProvider;
     this.pageVisitMapper = pageVisitMapper;
     this.profileAuditor = profileAuditor;
@@ -545,6 +550,16 @@ public class ProfileController implements ProfileApiDelegate {
     DbUser dbUser =
         rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
     return ResponseEntity.ok(profileService.getProfile(dbUser));
+  }
+
+  @Override
+  public ResponseEntity<Profile> signIn(SignInRequestBody body) {
+    try {
+      authService.googleOAuth(body.getAuthCode(), body.getRedirectUrl());
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    return ResponseEntity.ok(null);
   }
 
   @Override

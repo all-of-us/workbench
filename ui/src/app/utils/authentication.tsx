@@ -14,6 +14,7 @@ import {
 import { delay } from 'app/utils/subscribable';
 
 declare const gapi: any;
+import { profileApi } from 'app/services/swagger-fetch-clients';
 
 // for e2e tests: provide your own oauth token to obviate Google's oauth UI
 // flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
@@ -71,21 +72,42 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
   });
 };
 
+// export const signIn = (): void => {
+//   AnalyticsTracker.Registration.SignIn();
+//
+//   gapi.load('auth2', () => {
+//     gapi.auth2.getAuthInstance().signIn({
+//       prompt: 'select_account',
+//       ux_mode: 'redirect',
+//       redirect_uri: `${window.location.protocol}//${window.location.host}`,
+//     });
+//   });
+// };
+
 export const signIn = (): void => {
   AnalyticsTracker.Registration.SignIn();
 
   gapi.load('auth2', () => {
-    gapi.auth2.getAuthInstance().signIn({
-      prompt: 'select_account',
-      ux_mode: 'redirect',
-      redirect_uri: `${window.location.protocol}//${window.location.host}`,
-    });
+    // gapi.auth2.getAuthInstance().signIn({
+    //   prompt: 'select_account',
+    //   ux_mode: 'redirect',
+    //   redirect_uri: `${window.location.protocol}//${window.location.host}`,
+    // });
+    gapi.auth2.grantOfflineAccess().then(signInCallback);
   });
 };
 
 export const signOut = (): void => {
   authStore.set({ ...authStore.get(), isSignedIn: false });
 };
+
+export const signInCallback = (authResult): void => {
+  profileApi().signIn({
+    authCode: authResult['code'],
+    redirectUrl: `${window.location.protocol}//${window.location.host}`,
+  });
+};
+
 
 function clearIdToken(): void {
   // Using the full page redirect puts a long "id_token" parameter in the
