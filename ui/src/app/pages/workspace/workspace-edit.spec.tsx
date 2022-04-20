@@ -510,7 +510,7 @@ describe('WorkspaceEdit', () => {
       );
 
       expect(cdrVersionsSelect().props().value).toBe(
-        AccessTierShortNames.Controlled
+        controlledCdrVersion.cdrVersionId
       );
       expect(cdrVersionSelectOptions()).toEqual([
         controlledCdrVersion.cdrVersionId,
