@@ -20,7 +20,6 @@ import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import { DEFAULT, switchCase, withCurrentWorkspace } from 'app/utils';
-import { formatUsd } from 'app/utils/numbers';
 import { useGenomicExtractionJobs } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
@@ -154,13 +153,6 @@ const mapJobToTableRow = (
     ) : (
       <MissingCell />
     ),
-    cost: job.cost,
-    costDisplay:
-      job.cost === null ? ( // !!job.cost doesn't work here because 0 is a valid value
-        <MissingCell />
-      ) : (
-        formatUsd(job.cost)
-      ),
     size: job.vcfSizeMb,
     sizeDisplay:
       job.vcfSizeMb === null ? (
@@ -283,12 +275,6 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
                     field='dateStartedDisplay'
                     sortable
                     sortField='dateStarted'
-                  />
-                  <Column
-                    header='Cost'
-                    field='costDisplay'
-                    sortable
-                    sortField='cost'
                   />
                   <Column
                     header='Size'
