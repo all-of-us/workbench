@@ -26,15 +26,6 @@ const expectAccessStatus = (wrapper, rtStatus: boolean, ctStatus: boolean) => {
   expect(findCTDenied(wrapper).exists()).not.toEqual(ctStatus);
 };
 
-const expectAccessStatusRtOnly = (wrapper, rtStatus: boolean) => {
-  expect(findRTGranted(wrapper).exists()).toEqual(rtStatus);
-  expect(findRTDenied(wrapper).exists()).not.toEqual(rtStatus);
-
-  // Controlled Tier does not render at all
-  expect(findCTGranted(wrapper).exists()).toBeFalsy();
-  expect(findCTDenied(wrapper).exists()).toBeFalsy();
-};
-
 describe('Data Access Panel', () => {
   const component = (props: DataAccessPanelProps) => {
     return mount(
