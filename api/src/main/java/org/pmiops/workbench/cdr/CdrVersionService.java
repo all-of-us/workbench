@@ -89,7 +89,7 @@ public class CdrVersionService {
 
     return new CdrVersionTiersResponse()
         .tiers(
-            accessTierService.getAllTiersVisibleToUsers().stream()
+            accessTierService.getAllTiers().stream()
                 .map(this::getVersionsForTier)
                 .collect(Collectors.toList()));
   }

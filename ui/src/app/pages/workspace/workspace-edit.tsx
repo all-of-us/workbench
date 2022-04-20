@@ -74,6 +74,7 @@ import {
   AccessTierShortNames,
   displayNameForTier,
   hasTierAccess,
+  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { ensureBillingScope, hasBillingScope } from 'app/utils/authentication';
@@ -1369,15 +1370,6 @@ export const WorkspaceEdit = fp.flow(
       return validate(values, constraints, { fullMessages: false });
     }
 
-    // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
-    enableAccessTierSelection(): boolean {
-      const {
-        config: { accessTiersVisibleToUsers },
-      } = serverConfigStore.get();
-
-      return accessTiersVisibleToUsers.length > 1;
-    }
-
     onAccessTierChange(
       v: React.FormEvent<HTMLSelectElement>,
       profile: Profile,
@@ -1404,9 +1396,6 @@ export const WorkspaceEdit = fp.flow(
     }
 
     render() {
-      const {
-        config: { accessTiersVisibleToUsers },
-      } = serverConfigStore.get();
       const {
         workspace: {
           name,
@@ -1507,50 +1496,48 @@ export const WorkspaceEdit = fp.flow(
                     }
                   />
                 </FlexColumn>
-                {this.enableAccessTierSelection() && (
-                  <FlexColumn>
-                    <div style={styles.fieldHeader}>
-                      Data access tier
-                      <TooltipTrigger content={toolTipText.tierSelect}>
-                        <InfoIcon style={styles.infoIcon} />
-                      </TooltipTrigger>
-                    </div>
-                    <TooltipTrigger
-                      content='To use a different access tier, create a new workspace.'
-                      disabled={this.isMode(WorkspaceEditMode.Create)}
+                <FlexColumn>
+                  <div style={styles.fieldHeader}>
+                    Data access tier
+                    <TooltipTrigger content={toolTipText.tierSelect}>
+                      <InfoIcon style={styles.infoIcon} />
+                    </TooltipTrigger>
+                  </div>
+                  <TooltipTrigger
+                    content='To use a different access tier, create a new workspace.'
+                    disabled={this.isMode(WorkspaceEditMode.Create)}
+                  >
+                    <div
+                      data-test-id='select-access-tier'
+                      style={{
+                        ...styles.select,
+                        ...styles.accessTierSpacing,
+                      }}
                     >
-                      <div
-                        data-test-id='select-access-tier'
+                      <select
                         style={{
-                          ...styles.select,
+                          ...styles.selectInput,
                           ...styles.accessTierSpacing,
                         }}
+                        value={accessTierShortName}
+                        onChange={(value) =>
+                          this.onAccessTierChange(
+                            value,
+                            profile,
+                            cdrVersionTiersResponse
+                          )
+                        }
+                        disabled={!this.isMode(WorkspaceEditMode.Create)}
                       >
-                        <select
-                          style={{
-                            ...styles.selectInput,
-                            ...styles.accessTierSpacing,
-                          }}
-                          value={accessTierShortName}
-                          onChange={(value) =>
-                            this.onAccessTierChange(
-                              value,
-                              profile,
-                              cdrVersionTiersResponse
-                            )
-                          }
-                          disabled={!this.isMode(WorkspaceEditMode.Create)}
-                        >
-                          {accessTiersVisibleToUsers.map((shortName) => (
-                            <option key={shortName} value={shortName}>
-                              {displayNameForTier(shortName)}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </TooltipTrigger>
-                  </FlexColumn>
-                )}
+                        {orderedAccessTierShortNames.map((shortName) => (
+                          <option key={shortName} value={shortName}>
+                            {displayNameForTier(shortName)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </TooltipTrigger>
+                </FlexColumn>
                 <FlexColumn>
                   <div style={styles.fieldHeader}>
                     Dataset version

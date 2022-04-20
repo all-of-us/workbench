@@ -6,11 +6,9 @@ import {
   DataAccessPanel,
   DataAccessPanelProps,
 } from 'app/pages/profile/data-access-panel';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
-import { updateVisibleTiers } from 'testing/test-utils';
 
 const findRTGranted = (wrapper) =>
   wrapper.find('[data-test-id="registered-tier-access-granted"]');
@@ -48,10 +46,6 @@ describe('Data Access Panel', () => {
 
   beforeEach(() => {
     cdrVersionStore.set(cdrVersionTiersResponse);
-    updateVisibleTiers([
-      AccessTierShortNames.Registered,
-      AccessTierShortNames.Controlled,
-    ]);
   });
 
   it('Should show success status for registered tier when the user has access', async () => {
@@ -74,19 +68,5 @@ describe('Data Access Panel', () => {
   it('Should not show success status when the user is not in the registered tier or controlled tier', async () => {
     const wrapper = component({ userAccessTiers: [] });
     expectAccessStatus(wrapper, false, false);
-  });
-
-  it('Should only show the registered tier in environments without a controlled tier (user has access)', async () => {
-    updateVisibleTiers([AccessTierShortNames.Registered]);
-
-    const wrapper = component({ userAccessTiers: ['registered'] });
-    expectAccessStatusRtOnly(wrapper, true);
-  });
-
-  it('Should only show the registered tier in environments without a controlled tier (user does not have access)', async () => {
-    updateVisibleTiers([AccessTierShortNames.Registered]);
-
-    const wrapper = component({ userAccessTiers: [] });
-    expectAccessStatusRtOnly(wrapper, false);
   });
 });

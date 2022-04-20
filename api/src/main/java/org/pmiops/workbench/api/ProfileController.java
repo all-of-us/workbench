@@ -313,12 +313,6 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      if (workbenchConfigProvider
-          .get()
-          .access
-          .tiersVisibleToUsers
-          .contains(AccessTierService.CONTROLLED_TIER_SHORT_NAME)) {
-
         boolean showEraStepInRT =
             eraRequiredForTier(userInstitution, AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
@@ -334,10 +328,7 @@ public class ProfileController implements ProfileApiDelegate {
             userInstitution.getDisplayName(),
             showEraStepInRT,
             showEraStepInCT);
-      } else {
-        mail.sendWelcomeEmail_deprecated(
-            user.getContactEmail(), googleUser.getPassword(), user.getUsername());
-      }
+
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }

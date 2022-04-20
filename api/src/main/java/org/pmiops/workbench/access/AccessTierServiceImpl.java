@@ -60,21 +60,6 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * Return all access tiers in the database which are visible to users, in alphabetical order by
-   * shortName. To return all tiers, use getAllTiers().
-   *
-   * @return the List of all DbAccessTiers in the database which are visible to users
-   */
-  @Override
-  public List<DbAccessTier> getAllTiersVisibleToUsers() {
-    return accessTierDao.findAll().stream()
-        .filter(
-            tier -> configProvider.get().access.tiersVisibleToUsers.contains(tier.getShortName()))
-        .sorted(Comparator.comparing(DbAccessTier::getShortName))
-        .collect(Collectors.toList());
-  }
-
-  /**
    * Add memberships to all tiers for a user if they don't exist by inserting DB row(s) set to
    * ENABLED. For any memberships which exist and are DISABLED, set them to ENABLED.
    *

@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -247,7 +246,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     super.setUp();
 
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
-    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -931,10 +929,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_messagingException() throws MessagingException {
-    config.access.tiersVisibleToUsers =
-        Arrays.asList(
-            AccessTierService.REGISTERED_TIER_SHORT_NAME,
-            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
     createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(null);
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
@@ -954,11 +948,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_OK() throws MessagingException {
-    config.access.tiersVisibleToUsers =
-        Arrays.asList(
-            AccessTierService.REGISTERED_TIER_SHORT_NAME,
-            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
-
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doNothing()
@@ -976,44 +965,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void sendUserInstructions_none_deprecated() throws MessagingException {
-    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
-
-    // default Institution in this test class has no instructions
-    createAccountAndDbUserWithAffiliation();
-    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
-
-    // don't send the user instructions email if there are no instructions
-    verifyNoMoreInteractions(mockMailService);
-  }
-
-  @Test
-  public void sendUserInstructions_withInstructions_deprecated() throws MessagingException {
-    config.access.tiersVisibleToUsers = Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME);
-
-    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        createVerifiedInstitutionalAffiliation();
-
-    final InstitutionUserInstructions instructions =
-        new InstitutionUserInstructions()
-            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
-            .instructions(
-                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\" />");
-    institutionService.setInstitutionUserInstructions(instructions);
-
-    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
-    verify(mockMailService)
-        .sendInstitutionUserInstructions(
-            CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
-  }
-
-  @Test
   public void sendUserInstructions_none() throws MessagingException {
-    config.access.tiersVisibleToUsers =
-        Arrays.asList(
-            AccessTierService.REGISTERED_TIER_SHORT_NAME,
-            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
     verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
@@ -1035,7 +987,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
     verify(mockMailService)
         .sendInstitutionUserInstructions(
             CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
@@ -1056,7 +1008,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail_deprecated(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
     verifyNoMoreInteractions(mockMailService);

@@ -1212,7 +1212,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass, accessTiersVisibleToUsers },
+      config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
     useEffect(() => {
@@ -1285,8 +1285,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     }, [nextActive, nextRequired]);
 
     const showCtCard =
-      (pageMode === DARPageMode.INITIAL_REGISTRATION &&
-        accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)) ||
+      pageMode === DARPageMode.INITIAL_REGISTRATION ||
       pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard

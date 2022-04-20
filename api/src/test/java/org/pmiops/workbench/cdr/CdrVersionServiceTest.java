@@ -5,11 +5,9 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -102,11 +100,6 @@ public class CdrVersionServiceTest {
 
   @BeforeEach
   public void setUp() {
-
-    config.access.tiersVisibleToUsers =
-        ImmutableList.of(
-            AccessTierService.REGISTERED_TIER_SHORT_NAME,
-            AccessTierService.CONTROLLED_TIER_SHORT_NAME);
 
     user = new DbUser();
     user.setUsername("user");
@@ -204,25 +197,6 @@ public class CdrVersionServiceTest {
     addMembershipForTest(registeredTier);
     CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
     assertExpectedResponse(response);
-  }
-
-  // but we should not show the CT if it is not visible in this environment
-
-  @Test
-  public void testGetCdrVersionsByTierOnlyRegisteredIsVisible() {
-    config.access.tiersVisibleToUsers = Collections.singletonList(registeredTier.getShortName());
-
-    addMembershipForTest(registeredTier);
-    CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
-
-    List<String> shortNames =
-        response.getTiers().stream()
-            .map(CdrVersionTier::getAccessTierShortName)
-            .collect(Collectors.toList());
-    assertThat(shortNames).containsExactly(registeredTier.getShortName());
-
-    assertExpectedTier(
-        response, registeredTier.getShortName(), defaultCdrVersion, nonDefaultCdrVersion);
   }
 
   @Test
