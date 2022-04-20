@@ -1,9 +1,7 @@
 package org.pmiops.workbench;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import java.io.IOException;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -18,7 +16,17 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
+import java.io.IOException;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
+
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
+  // RW-8212: This test requires that these two users keep their Terra-ToS compliance statuses
+  // integration-test-user (created by gjordan) is non-compliant
+  // integration-test-user-with-tos (created by thibault) is compliant
+  private static final String NON_COMPLIANT_USER = "integration-test-user@fake-research-aou.org";
+  private static final String COMPLIANT_USER = "integration-test-user-with-tos@fake-research-aou.org";
 
   @Autowired private FireCloudService service;
   @Autowired private FirecloudApiClientFactory firecloudApiClientFactory;
@@ -51,20 +59,17 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
    * Ensures we can successfully use delegation of authority to make FireCloud API calls on behalf
    * of AoU users.
    *
-   * <p>This test depends on there being an active account in FireCloud dev with the email address
-   * integration-test-user@fake-research-aou.org.
+   * <p>This test depends on there being an active and Terms-of-Service-compliant account in
+   * FireCloud dev with the matching email address.
    */
   @Test
   public void testImpersonatedProfileCall() throws Exception {
-    ApiClient apiClient =
-        firecloudApiClientFactory.newImpersonatedApiClient(
-            "integration-test-user@fake-research-aou.org");
+    ApiClient apiClient = firecloudApiClientFactory.newImpersonatedApiClient(COMPLIANT_USER);
 
     // Run the most basic API call against the /me/ endpoint.
     ProfileApi profileApi = new ProfileApi(apiClient);
     FirecloudMe me = profileApi.me();
-    assertThat(me.getUserInfo().getUserEmail())
-        .isEqualTo("integration-test-user@fake-research-aou.org");
+    assertThat(me.getUserInfo().getUserEmail()).isEqualTo(COMPLIANT_USER);
     assertThat(me.getUserInfo().getUserSubjectId()).isEqualTo("101727030557929965916");
 
     // Run a test against a different FireCloud endpoint. This is important, because the /me/
@@ -81,5 +86,14 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
       responseCode = e.getCode();
     }
     assertThat(responseCode).isEqualTo(404);
+  }
+
+  @Test
+  public void testImpersonatedProfileCall_tos_non_compliant() throws Exception {
+    ApiClient apiClient = firecloudApiClientFactory.newImpersonatedApiClient(NON_COMPLIANT_USER);
+
+    // Run the most basic API call against the /me/ endpoint.
+    ProfileApi profileApi = new ProfileApi(apiClient);
+    assertThrows(ForbiddenException.class, profileApi::me);
   }
 }
