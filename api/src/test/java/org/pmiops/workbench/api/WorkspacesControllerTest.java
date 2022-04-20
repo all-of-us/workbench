@@ -1238,7 +1238,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspace() throws Exception {
+  public void testCloneWorkspace() {
     stubFcGetGroup();
     stubFcGetWorkspaceACL();
     Workspace originalWorkspace = createWorkspace();
@@ -1254,7 +1254,7 @@ public class WorkspacesControllerTest {
         shareWorkspaceRequest, writerUser.getUsername(), WorkspaceAccessLevel.WRITER);
 
     stubFcUpdateWorkspaceACL();
-    workspacesController.shareWorkspace(
+    workspacesController.shareWorkspacePatch(
         originalWorkspace.getNamespace(), originalWorkspace.getName(), shareWorkspaceRequest);
 
     final ResearchPurpose modPurpose = new ResearchPurpose();
@@ -2330,7 +2330,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspace() {
+  public void testShareWorkspace_deprecated() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
@@ -2371,7 +2371,83 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceAddBillingProjectUser() {
+  public void testShareWorkspacePatch() {
+    stubFcGetGroup();
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
+
+    stubFcGetWorkspaceACL();
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, "readerfriend@gmail.com", WorkspaceAccessLevel.READER);
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    fakeClock.increment(1000);
+    stubFcUpdateWorkspaceACL();
+    WorkspaceUserRolesResponse shareResp =
+        workspacesController
+            .shareWorkspacePatch(
+                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+            .getBody();
+
+    verify(mockWorkspaceAuditor).fireCollaborateAction(anyLong(), anyMap());
+
+    Workspace workspace2 =
+        workspacesController
+            .getWorkspace(workspace.getNamespace(), workspace.getName())
+            .getBody()
+            .getWorkspace();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
+
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+        convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+    verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
+    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
+    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
+  }
+
+  @Test
+  public void testShareWorkspace_deprecated_needsOwner() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+
+    String namespace = "namespace";
+    String name = "name";
+    stubGetWorkspace(namespace, name, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
+
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag("etag");
+
+    assertThrows(
+        ForbiddenException.class,
+        () -> workspacesController.shareWorkspace(namespace, name, shareWorkspaceRequest));
+  }
+
+  @Test
+  public void testShareWorkspacePatch_needsOwner() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+
+    String namespace = "namespace";
+    String name = "name";
+    stubGetWorkspace(namespace, name, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
+
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag("etag");
+
+    assertThrows(
+        ForbiddenException.class,
+        () -> workspacesController.shareWorkspacePatch(namespace, name, shareWorkspaceRequest));
+  }
+
+  @Test
+  public void testShareWorkspaceAddBillingProjectUser_deprecated() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -2400,7 +2476,35 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspace_grantWorkflowRunner_controlledTier() {
+  public void testShareWorkspacePatch_AddBillingProjectUser() {
+    stubFcGetGroup();
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
+
+    stubFcGetWorkspaceACL();
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            .addItemsItem(
+                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
+            .addItemsItem(
+                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspacePatch(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
+    verify(fireCloudService, times(1))
+        .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
+    verify(fireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
+    verify(fireCloudService, never())
+        .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
+  }
+
+  @Test
+  public void testShareWorkspace_grantWorkflowRunner_controlledTier_deprecated() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -2457,7 +2561,64 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceRemoveBillingProjectUser() {
+  public void testShareWorkspacePatch_grantWorkflowRunner_controlledTier() {
+    stubFcGetGroup();
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
+    DbUser readerUser = createAndSaveUser("reader@gmail.com", 126L);
+    DbUser previousWriter = createAndSaveUser("revoke-writer@gmail.com", 126L);
+
+    stubFcGetWorkspaceACL(
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    currentUser.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    previousWriter.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "WRITER")
+                        .put("canCompute", true)
+                        .put("canShare", false))));
+    DbCdrVersion controlledTierCdr =
+        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 2);
+    Workspace workspace =
+        createWorkspace().cdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            .addItemsItem(
+                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER))
+            .addItemsItem(
+                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
+            .addItemsItem(
+                new UserRole().email(readerUser.getUsername()).role(WorkspaceAccessLevel.READER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspacePatch(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
+    verify(fireCloudService, times(1))
+        .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
+    verify(fireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
+    verify(fireCloudService, never()).addOwnerToBillingProject(eq(readerUser.getUsername()), any());
+    verify(fireCloudService, never())
+        .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
+    verify(mockIamService)
+        .grantWorkflowRunnerRoleForUsers(
+            DEFAULT_GOOGLE_PROJECT,
+            ImmutableList.of(ownerUser.getUsername(), writerUser.getUsername()));
+    verify(mockIamService)
+        .revokeWorkflowRunnerRoleForUsers(
+            DEFAULT_GOOGLE_PROJECT, ImmutableList.of(previousWriter.getUsername()));
+  }
+
+  @Test
+  public void testShareWorkspaceRemoveBillingProjectUser_deprecated() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -2511,7 +2672,63 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspacePublishedWorkspace() {
+  public void testShareWorkspacePatch_removeBillingProjectUser() {
+    stubFcGetGroup();
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
+
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
+        .thenReturn(
+            createWorkspaceACL(
+                new JSONObject()
+                    .put(
+                        currentUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        writerUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "WRITER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        ownerUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))));
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    // added as part of the createWorkspace() process
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
+
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            // Removed WRITER, demoted OWNER to READER.
+            .addItemsItem(
+                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.NO_ACCESS))
+            .addItemsItem(
+                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspacePatch(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
+    verify(fireCloudService, times(1))
+        .removeOwnerFromBillingProject(
+            ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
+    verify(fireCloudService, never())
+        .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
+    verify(fireCloudService, never())
+        .removeOwnerFromBillingProject(eq(currentUser.getUsername()), any(), eq(Optional.empty()));
+  }
+
+  @Test
+  public void testShareWorkspacePublishedWorkspace_deprecated() {
     DbCdrVersion ctCdrVersion =
         TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 5L);
 
@@ -2569,7 +2786,66 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceNoRoleFailure() {
+  public void testShareWorkspacePatch_publishedWorkspace() {
+    DbCdrVersion ctCdrVersion =
+        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 5L);
+
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
+        .thenReturn(
+            createWorkspaceACL(
+                new JSONObject()
+                    .put(
+                        // Specifically, the REGISTERED tier is used for publishing.
+                        registeredTier.getAuthDomainGroupEmail(),
+                        new JSONObject()
+                            .put("accessLevel", "READER")
+                            .put("canCompute", false)
+                            .put("canShare", false))
+                    .put(
+                        currentUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        writerUser.getUsername(),
+                        new JSONObject()
+                            .put("accessLevel", "WRITER")
+                            .put("canCompute", true)
+                            .put("canShare", true))));
+
+    Workspace workspace =
+        createWorkspace().cdrVersionId(Long.toString(ctCdrVersion.getCdrVersionId()));
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            // Removing writer.
+            .addItemsItem(
+                new UserRole()
+                    .email(writerUser.getUsername())
+                    .role(WorkspaceAccessLevel.NO_ACCESS));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspacePatch(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
+    verify(fireCloudService)
+        .updateWorkspaceACL(
+            any(),
+            any(),
+            eq(
+                ImmutableList.of(
+                    // Specifically, the Registered Tier group should not be removed by this update.
+                    FirecloudTransforms.buildAclUpdate(
+                        writerUser.getUsername(), WorkspaceAccessLevel.NO_ACCESS))));
+  }
+
+  @Test
+  public void testShareWorkspaceNoRoleFailure_deprecated() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
@@ -2595,7 +2871,30 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUnshareWorkspace() {
+  public void testSharePatch_workspaceNoRoleFailure() {
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    stubFcGetWorkspaceACL();
+    final Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    shareWorkspaceRequest.addItemsItem(writer);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    fakeClock.increment(1000);
+    stubFcUpdateWorkspaceACL();
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            workspacesController.shareWorkspacePatch(
+                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest));
+  }
+
+  @Test
+  public void testUnshareWorkspace_deprecated() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
@@ -2674,7 +2973,74 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testStaleShareWorkspace() {
+  public void testUnshareWorkspace() {
+    stubFcGetGroup();
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    // Mock firecloud ACLs
+    FirecloudWorkspaceACL workspaceACLs =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    LOGGED_IN_USER_EMAIL,
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    writerUser.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "WRITER")
+                        .put("canCompute", true)
+                        .put("canShare", false))
+                .put(
+                    readerUser.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", false)
+                        .put("canShare", false)));
+    when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
+
+    fakeClock.increment(1000);
+    stubFcUpdateWorkspaceACL();
+
+    final ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    UserRole reader = new UserRole();
+    reader.setEmail(readerUser.getUsername());
+    reader.setRole(WorkspaceAccessLevel.NO_ACCESS);
+    shareWorkspaceRequest.addItemsItem(reader);
+
+    WorkspaceUserRolesResponse shareResp =
+        workspacesController
+            .shareWorkspacePatch(
+                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+            .getBody();
+    Workspace workspace2 =
+        workspacesController
+            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getBody()
+            .getWorkspace();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
+
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+        convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+    verify(fireCloudService)
+        .updateWorkspaceACL(
+            any(),
+            any(),
+            eq(
+                updateACLRequestList.stream()
+                    .sorted(Comparator.comparing(FirecloudWorkspaceACLUpdate::getEmail))
+                    .collect(Collectors.toList())));
+  }
+
+  @Test
+  public void testStaleShareWorkspace_deprecated() {
     stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2705,7 +3071,33 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUnableToShareWithNonExistentUser() {
+  public void testShareWorkspacePatch_staleEtag() {
+    stubFcGetGroup();
+    final Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest1 = new ShareWorkspaceRequest();
+    shareWorkspaceRequest1.setWorkspaceEtag(workspace.getEtag());
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    fakeClock.increment(1000);
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+    workspacesController.shareWorkspacePatch(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest1);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    fakeClock.increment(1000);
+    ShareWorkspaceRequest shareWorkspaceRequest2 = new ShareWorkspaceRequest();
+    // Use the initial etag, not the updated value from shareWorkspace.
+    shareWorkspaceRequest2.setWorkspaceEtag(workspace.getEtag());
+    assertThrows(
+        ConflictException.class,
+        () ->
+            workspacesController.shareWorkspacePatch(
+                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest2));
+  }
+
+  @Test
+  public void testUnableToShareWithNonExistentUser_deprecated() {
     assertThrows(
         BadRequestException.class,
         () -> {
@@ -2717,6 +3109,22 @@ public class WorkspacesControllerTest {
           addUserRoleToShareWorkspaceRequest(
               shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
           workspacesController.shareWorkspace(
+              workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+        });
+  }
+
+  @Test
+  public void testUnableToShareWithNonExistentUser() {
+    Workspace workspace = createWorkspace();
+    workspacesController.createWorkspace(workspace);
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, "does-not-exist@gmail.com", WorkspaceAccessLevel.WRITER);
+
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          workspacesController.shareWorkspacePatch(
               workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
         });
   }

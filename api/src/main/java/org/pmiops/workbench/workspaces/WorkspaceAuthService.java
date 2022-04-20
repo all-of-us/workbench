@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
@@ -114,15 +115,67 @@ public class WorkspaceAuthService {
         fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName));
   }
 
+  private void updateAcl(
+      DbWorkspace workspace, List<FirecloudWorkspaceACLUpdate> updateACLRequestList) {
+
+    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
+        fireCloudService.updateWorkspaceACL(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+
+    if (!fireCloudResponse.getUsersNotFound().isEmpty()) {
+      throw new BadRequestException(
+          "users not found: "
+              + fireCloudResponse.getUsersNotFound().stream()
+                  .map(FirecloudWorkspaceACLUpdate::getEmail)
+                  .collect(Collectors.joining(", ")));
+    }
+  }
+
+  private void updateAcl(DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
+    updateAcl(
+        workspace,
+        updatedAclsMap.entrySet().stream()
+            .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))
+            .collect(Collectors.toList()));
+  }
+
+  private void synchronizeOwnerBillingProjects(
+      String billingProjectName,
+      Set<String> usersToSynchronize,
+      Map<String, WorkspaceAccessLevel> updatedAclsMap,
+      Map<String, FirecloudWorkspaceAccessEntry> existingAclsMap) {
+
+    for (String email : usersToSynchronize) {
+      String fromAccess =
+          existingAclsMap
+              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel("NO ACCESS"))
+              .getAccessLevel();
+      WorkspaceAccessLevel toAccess =
+          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
+
+      if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
+        log.info(
+            String.format(
+                "removing user '%s' from billing project '%s'", email, billingProjectName));
+        fireCloudService.removeOwnerFromBillingProject(email, billingProjectName, Optional.empty());
+      } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
+        log.info(
+            String.format("adding user '%s' to billing project '%s'", email, billingProjectName));
+        fireCloudService.addOwnerToBillingProject(email, billingProjectName);
+      }
+    }
+  }
+
   // TODO(RW-8065): This method incurs undue concurrency risk by performing a full read / write
   // replacement, while the underlying Rawls method already supports patch semantics. Instead, the
   // Workbench API should expose a similar PATCH API, allowing the client to only send a delta.
   // If this change were made, concurrency etag support could also be dropped from the Workbench
   // shareWorkspace API.
-  public DbWorkspace updateWorkspaceAcls(
+  @Deprecated // use patchWorkspaceAcls() to only specify the access controls being changed
+  public DbWorkspace updateAllWorkspaceAcls(
       DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
-    // userRoleMap is a map of the new permissions for ALL users on the ws
-    Map<String, FirecloudWorkspaceAccessEntry> aclsMap =
+    // existingAclsMap is a map of the old permissions for ALL users on the ws
+    Map<String, FirecloudWorkspaceAccessEntry> existingAclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
     // TODO(RW-8065): This logic should no longer be necessary.
@@ -134,7 +187,7 @@ public class WorkspaceAuthService {
     // Iterate through existing roles, update/remove them
     List<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : aclsMap.entrySet()) {
+    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : existingAclsMap.entrySet()) {
       String email = entry.getKey();
       WorkspaceAccessLevel updatedAccess = toAdd.get(email);
       if (updatedAccess != null) {
@@ -156,42 +209,34 @@ public class WorkspaceAuthService {
       updateACLRequestList.add(
           FirecloudTransforms.buildAclUpdate(remainingRole.getKey(), remainingRole.getValue()));
     }
-    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
-        fireCloudService.updateWorkspaceACL(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
-    if (!fireCloudResponse.getUsersNotFound().isEmpty()) {
-      throw new BadRequestException(
-          "users not found: "
-              + fireCloudResponse.getUsersNotFound().stream()
-                  .map(FirecloudWorkspaceACLUpdate::getEmail)
-                  .collect(Collectors.joining(", ")));
-    }
+
+    updateAcl(workspace, updateACLRequestList);
 
     // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
     // canCompute on the workspace / billing project, nor does it grant the ability to grant
     // canCompute to other users. See RW-3009 for details.
-    for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
-      String fromAccess =
-          aclsMap
-              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel("NO ACCESS"))
-              .getAccessLevel();
-      WorkspaceAccessLevel toAccess =
-          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
-      if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
-        log.info(
-            String.format(
-                "removing user '%s' from billing project '%s'",
-                email, workspace.getWorkspaceNamespace()));
-        fireCloudService.removeOwnerFromBillingProject(
-            email, workspace.getWorkspaceNamespace(), Optional.empty());
-      } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
-        log.info(
-            String.format(
-                "adding user '%s' to billing project '%s'",
-                email, workspace.getWorkspaceNamespace()));
-        fireCloudService.addOwnerToBillingProject(email, workspace.getWorkspaceNamespace());
-      }
-    }
+    synchronizeOwnerBillingProjects(
+        workspace.getWorkspaceNamespace(),
+        Sets.union(updatedAclsMap.keySet(), existingAclsMap.keySet()),
+        updatedAclsMap,
+        existingAclsMap);
+
+    return workspaceDao.saveWithLastModified(workspace);
+  }
+
+  public DbWorkspace patchWorkspaceAcls(
+      DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
+
+    updateAcl(workspace, updatedAclsMap);
+
+    // Keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
+    // canCompute on the workspace / billing project, nor does it grant the ability to grant
+    // canCompute to other users. See RW-3009 for details.
+    synchronizeOwnerBillingProjects(
+        workspace.getWorkspaceNamespace(),
+        updatedAclsMap.keySet(),
+        updatedAclsMap,
+        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
     return workspaceDao.saveWithLastModified(workspace);
   }
