@@ -1,5 +1,9 @@
 package org.pmiops.workbench;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
+
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -16,17 +20,13 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-import java.io.IOException;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
-
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
   // RW-8212: This test requires that these two users keep their Terra-ToS compliance statuses
   // integration-test-user (created by gjordan) is non-compliant
   // integration-test-user-with-tos (created by thibault) is compliant
   private static final String NON_COMPLIANT_USER = "integration-test-user@fake-research-aou.org";
-  private static final String COMPLIANT_USER = "integration-test-user-with-tos@fake-research-aou.org";
+  private static final String COMPLIANT_USER =
+      "integration-test-user-with-tos@fake-research-aou.org";
 
   @Autowired private FireCloudService service;
   @Autowired private FirecloudApiClientFactory firecloudApiClientFactory;
