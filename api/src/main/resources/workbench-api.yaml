@@ -458,7 +458,7 @@ paths:
         200:
           description: The user's profile
           schema:
-            "$ref": "#/definitions/Profile"
+            "$ref": "#/definitions/EmptyResponse"
         400:
           description: Bad request
           schema:
