@@ -12,8 +12,9 @@ interface ZendeskUrls {
   gettingStarted: string;
   gpus: string;
   helpCenter: string;
-  tableOfContents: string;
+  persistentDisk: string;
   researchPurpose: string;
+  tableOfContents: string;
   workspaceBucket: string;
 }
 
@@ -64,8 +65,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
       genomicExtraction: article('4558187754772'),
       gettingStarted: category('360002157352'),
       gpus: article('4421259211668'),
-      tableOfContents: category('360002625291'),
+      persistentDisk: article('5140493753620'),
       researchPurpose: article('360042673211'),
+      tableOfContents: category('360002625291'),
       workspaceBucket: article('360040043072'),
     },
     [ZendeskEnv.Preprod]: {
@@ -78,8 +80,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
       genomicExtraction: article('4403537387412'),
       gpus: article('4428626363668'),
       gettingStarted: category('360005884571'),
-      tableOfContents: category('360005884591'),
+      persistentDisk: article('404'),
       researchPurpose: article('360058861612'),
+      tableOfContents: category('360005884591'),
       workspaceBucket: article('360044796611'),
     },
     [ZendeskEnv.Sandbox]: {
@@ -92,8 +95,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
       genomicExtraction: article('404'),
       gettingStarted: category('360003430652'),
       gpus: article('4421259211668'),
-      tableOfContents: category('360003430672'),
+      persistentDisk: article('404'),
       researchPurpose: article('360044334652'),
+      tableOfContents: category('360003430672'),
       workspaceBucket: article('360044796611'),
     },
   };
