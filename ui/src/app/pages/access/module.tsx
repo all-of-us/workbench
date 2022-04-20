@@ -3,6 +3,7 @@ import { ReactNode, useState } from 'react';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ArrowRight } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -14,7 +15,6 @@ import {
 } from 'app/utils/access-utils';
 
 import { styles } from './data-access-requirements';
-import { ModuleBox } from './module-box';
 import { ModuleIcon } from './module-icon';
 import { Refresh } from './refresh';
 
@@ -26,6 +26,21 @@ const Next = () => (
     <ArrowRight style={styles.nextIcon} />
   </FlexRow>
 );
+
+const ModuleBox = (props: {
+  clickable: boolean;
+  action: Function;
+  children;
+}) => {
+  const { clickable, action, children } = props;
+  return clickable ? (
+    <Clickable onClick={() => action()}>
+      <FlexRow style={styles.clickableModuleBox}>{children}</FlexRow>
+    </Clickable>
+  ) : (
+    <FlexRow style={styles.backgroundModuleBox}>{children}</FlexRow>
+  );
+};
 
 export const Module = (props: {
   active: boolean;
