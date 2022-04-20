@@ -193,7 +193,7 @@ export const getAccessModuleConfig = (
         requiredForCTAccess: enforceRasLoginGovLinking,
 
         DARTitleComponent: (props: DARTitleComponentConfig) => {
-          return !!props.profile ? (
+          return (
             <>
               <div>
                 Verify your identity with Login.gov{' '}
@@ -207,7 +207,7 @@ export const getAccessModuleConfig = (
               </div>
               <LoginGovHelpText {...props} />
             </>
-          ) : null;
+          );
         },
         adminPageTitle: 'Verify your identity with Login.gov',
         refreshAction: () => redirectToRas(false),

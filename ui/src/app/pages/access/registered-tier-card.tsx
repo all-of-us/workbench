@@ -23,7 +23,7 @@ import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
 // Sep 16 hack while we work out some RAS bugs
-const TemporaryRASModule = () => {
+const TemporaryRASModule = (props: { profile: Profile }) => {
   const moduleName = AccessModule.RASLINKLOGINGOV;
   const { DARTitleComponent } = getAccessModuleConfig(moduleName);
   return (
@@ -36,7 +36,7 @@ const TemporaryRASModule = () => {
           eligible={false}
         />
         <FlexColumn style={styles.backgroundModuleText}>
-          <DARTitleComponent />
+          <DARTitleComponent profile={props.profile} />
           <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
             <b>Temporarily disabled.</b> Due to technical difficulties, this
             step is disabled. In the future, you'll be prompted to complete
@@ -111,7 +111,9 @@ export const RegisteredTierCard = (props: {
           clickableModules={clickableModules}
           spinnerProps={spinnerProps}
         >
-          {!enableRasLoginGovLinking && <TemporaryRASModule />}
+          {!enableRasLoginGovLinking && (
+            <TemporaryRASModule profile={profile} />
+          )}
         </ModulesForInitialRegistration>
       ) : (
         <ModulesForAnnualRenewal profile={profile} modules={renewalRtModules} />
