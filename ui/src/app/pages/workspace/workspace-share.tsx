@@ -194,12 +194,15 @@ const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
         must occur, in order:
         <ol>
           <li>
-            The researchers must log in to the <AoU /> Research Workbench
+            The researchers must log in to the <AoU /> Research Workbench and
+            accept the updated <AoU /> Terms of Service agreement.
           </li>
-          <li>This workspace must be shared with the researchers as Readers</li>
+          <li>
+            This workspace must be shared with the researchers as Readers.
+          </li>
           <li>
             This workspace must then be shared with the researchers as Writers
-            or Owners
+            or Owners.
           </li>
         </ol>
       </div>
