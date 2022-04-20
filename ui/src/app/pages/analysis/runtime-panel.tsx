@@ -946,7 +946,7 @@ const DiskSelector = ({
         <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
           Storage disk options
         </span>
-        <StyledExternalLink href='https://support.terra.bio/hc/en-us/articles/360047318551'>
+        <StyledExternalLink href={supportUrls.persistentDisk}>
           View documentation
         </StyledExternalLink>
       </FlexRow>
