@@ -36,6 +36,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
@@ -553,7 +554,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> signIn(SignInRequestBody body) {
+  public ResponseEntity<EmptyResponse> signIn(SignInRequestBody body) {
     try {
       authService.googleOAuth(body.getAuthCode(), body.getRedirectUrl());
     } catch (Exception e) {
