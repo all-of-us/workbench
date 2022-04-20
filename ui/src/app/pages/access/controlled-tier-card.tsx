@@ -23,14 +23,10 @@ import {
 } from 'app/utils/access-utils';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
-import {
-  DARPageMode,
-  DataDetail,
-  ModulesForInitialRegistration,
-  styles,
-} from './data-access-requirements';
+import { DARPageMode, DataDetail, styles } from './data-access-requirements';
 import { Module } from './module';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
+import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
 const handleClickSupportButton = (url) => () => {
   const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);

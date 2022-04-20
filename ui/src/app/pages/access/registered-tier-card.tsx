@@ -15,12 +15,12 @@ import {
   DataDetail,
   getEligibleModules,
   initialRtModules,
-  ModulesForInitialRegistration,
   renewalRtModules,
   styles,
 } from './data-access-requirements';
 import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
+import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = () => {

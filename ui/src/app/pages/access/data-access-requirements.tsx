@@ -42,7 +42,6 @@ import { ReactComponent as wearable } from 'assets/icons/DAR/wearable.svg';
 
 import { ControlledTierCard } from './controlled-tier-card';
 import { DuccCard } from './ducc-card';
-import { MaybeModule } from './maybe-module';
 import { RegisteredTierCard } from './registered-tier-card';
 
 export const styles = reactStyles({
@@ -462,42 +461,6 @@ const Completed = () => (
     <GetStartedButton style={{ marginLeft: 'auto' }} />
   </FlexRow>
 );
-
-interface InitialCardProps {
-  profile: Profile;
-  modules: AccessModule[];
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
-  spinnerProps: WithSpinnerOverlayProps;
-  children?: string | React.ReactNode;
-}
-
-export const ModulesForInitialRegistration = (props: InitialCardProps) => {
-  const {
-    profile,
-    modules,
-    activeModule,
-    clickableModules,
-    spinnerProps,
-    children,
-  } = props;
-
-  return (
-    <FlexColumn style={styles.modulesContainer}>
-      {modules.map((moduleName) => (
-        <MaybeModule
-          key={moduleName}
-          moduleName={moduleName}
-          profile={profile}
-          active={activeModule === moduleName}
-          clickable={clickableModules.includes(moduleName)}
-          spinnerProps={spinnerProps}
-        />
-      ))}
-      {children}
-    </FlexColumn>
-  );
-};
 
 // TODO is there a better way?
 const Additional = additional;
