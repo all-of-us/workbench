@@ -571,13 +571,17 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
+    const showCtCard =
+      (pageMode === DARPageMode.INITIAL_REGISTRATION &&
+        accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)) ||
+      pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard
         {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
         key='rt'
       />
     );
-    const ctCard = (
+    const ctCard = showCtCard ? (
       <ControlledTierCard
         {...{
           profile,
@@ -589,16 +593,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         }}
         key='ct'
       />
-    );
+    ) : null;
     const dCard = (
       <DuccCard
         {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
         key='dt'
-        stepNumber={3}
+        stepNumber={showCtCard ? 3 : 2}
       />
     );
 
-    const cards = [rtCard, ctCard, dCard];
+    const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
 
     return (
       <FlexColumn style={styles.pageWrapper}>
