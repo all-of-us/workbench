@@ -139,7 +139,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser initializeUserIfNeeded() {
+  private DbUser maybeInitializeUserWithTerra() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
     DbUser dbUser = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
@@ -147,14 +147,18 @@ public class ProfileController implements ProfileApiDelegate {
       return dbUser;
     }
 
-    // On first sign-in, create a FC user, billing project, and set the first sign in time.
+    // On first sign-in register with Terra, submit the Terra ToS (if user accepted latest), and set
+    // the first sign in time. All actions taken here must be idempotent to avoid improper user
+    // initialization.
     if (dbUser.getFirstSignInTime() == null) {
-      // If the user is already registered, their profile will get updated.
+      // This call should be idempotent. If the user is already registered, their profile will get
+      // updated.
       fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
 
       // By approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
       // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos
-      // will take care of scenario by re-directing them to AoU terms of service page
+      // will take care of scenario by re-directing them to AoU terms of service page. This call
+      // should be idempotent.
       if (userService.validateAllOfUsTermsOfServiceVersion(dbUser)) {
         userService.acceptTerraTermsOfService(dbUser);
       }
@@ -173,14 +177,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> getMe() {
-    // Record that the user signed in
-    // and create the user's FireCloud user and free tier billing
-    // project if they haven't been created already.
-    // This means they can start using the NIH billing account in FireCloud (without access to
-    // the CDR); we will probably need a job that deactivates accounts after some period of
-    // not accepting the terms of use.
-
-    DbUser dbUser = initializeUserIfNeeded();
+    // Record that the user signed in and run Terra initialization as needed.
+    DbUser dbUser = maybeInitializeUserWithTerra();
     profileAuditor.fireLoginAction(dbUser);
     return getProfileResponse(dbUser);
   }
@@ -273,7 +271,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     // we can't call submitTerraTermsOfService() yet because the Terra account doesn't exist yet.
-    // see initializeUserIfNeeded()
+    // see maybeInitializeUserWithTerra()
     userService.submitAouTermsOfService(user, request.getTermsOfServiceVersion());
     String institutionShortName =
         profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName();

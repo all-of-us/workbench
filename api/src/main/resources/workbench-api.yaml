@@ -1106,7 +1106,9 @@ paths:
       - workspaces
       consumes:
       - application/json
-      description: 'Shares a workspace with the given users and permissions. Note
+      description: 'DEPRECATED in favor of shareWorkspacePatch.  
+        Shares/unshares a workspace with the given users and permissions.  Use the 
+        WorkspaceAccessLevel enum value "NO ACCESS" to unshare. Note
         that the entire ACL must be provided to this method (including all existing
         users and roles), not just the additional roles desired. Clients should first
         fetch existing ACLs via the getFirecloudWorkspaceUserRoles method, make any
@@ -1115,9 +1117,29 @@ paths:
       parameters:
       - in: body
         name: body
-        description: users to share the workspace with
+        description: users to share/unshare the workspace with
         schema:
           "$ref": "#/definitions/ShareWorkspaceRequest"
+      responses:
+        200:
+          description: Successful share response
+          schema:
+            "$ref": "#/definitions/WorkspaceUserRolesResponse"
+    patch:
+      tags:
+        - workspaces
+      consumes:
+        - application/json
+      description: 'Shares/unshares a workspace with the given users and permissions. Use the 
+        WorkspaceAccessLevel enum value "NO ACCESS" to unshare.  All existing users and roles 
+        who are not specified in this request are not affected.'
+      operationId: shareWorkspacePatch
+      parameters:
+        - in: body
+          name: body
+          description: users to share/unshare the workspace with
+          schema:
+            "$ref": "#/definitions/ShareWorkspaceRequest"
       responses:
         200:
           description: Successful share response
@@ -3550,7 +3572,7 @@ paths:
           description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/ehrDomainCounts":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/universalDomainCounts":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3558,7 +3580,7 @@ paths:
       tags:
         - cohortBuilder
       description: 'Returns a count of term matches per domain for EHR domains'
-      operationId: findEhrDomainCounts
+      operationId: findUniversalDomainCounts
       parameters:
         - in: query
           name: term

@@ -456,6 +456,7 @@ export const CohortSearch = fp.flow(
                   <CriteriaSearch
                     backFn={() => this.checkUnsavedChanges()}
                     cohortContext={cohortContext}
+                    conceptSearchTerms={cohortContext.searchTerms}
                   />
                 )}
               </div>

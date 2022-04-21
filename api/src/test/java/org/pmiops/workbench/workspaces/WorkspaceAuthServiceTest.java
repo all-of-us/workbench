@@ -3,7 +3,9 @@ package org.pmiops.workbench.workspaces;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -151,17 +153,20 @@ public class WorkspaceAuthServiceTest {
         () -> workspaceAuthService.enforceWorkspaceAccessLevel(namespace, fcName, required));
   }
 
-  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL)
-  private static Stream<Arguments> updateWorkspaceAcls() {
+  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL),
+  // (expected remove BP from owner count), (expected add BP to owner count)
+  private static Stream<Arguments> updateAllWorkspaceAcls() {
     return Stream.of(
         // trivial case: do nothing to empty ACL
-        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()),
+        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), 0, 0),
 
         // add one entry to empty ACL -> expect that one entry in response
         Arguments.of(
             ImmutableMap.of(),
             ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
-            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER)),
+            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
+            0,
+            1), // add newuser
 
         // implicitly remove all from existing ACL by omission
         Arguments.of(
@@ -179,7 +184,9 @@ public class WorkspaceAuthServiceTest {
                 "user2",
                 WorkspaceAccessLevel.NO_ACCESS,
                 "user3",
-                WorkspaceAccessLevel.NO_ACCESS)),
+                WorkspaceAccessLevel.NO_ACCESS),
+            1, // remove user1
+            0),
 
         // add 1 entry to an existing ACL of 1 by explicitly including all existing -> expect all
         Arguments.of(
@@ -187,7 +194,9 @@ public class WorkspaceAuthServiceTest {
             ImmutableMap.of(
                 "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER)),
+                "user1", WorkspaceAccessLevel.WRITER, "user2", WorkspaceAccessLevel.OWNER),
+            0,
+            1), // add user2
 
         // update 1 of an existing ACL of 2 -> expect to see that update and implicitly remove the
         // other by omission
@@ -197,30 +206,38 @@ public class WorkspaceAuthServiceTest {
                 "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.READER, "user2", WorkspaceAccessLevel.NO_ACCESS)),
+                "user1", WorkspaceAccessLevel.READER, "user2", WorkspaceAccessLevel.NO_ACCESS),
+            1, // remove user2
+            0),
 
         // add 1 to an existing ACL of 1 but implicitly remove the existing 1 by omission
         Arguments.of(
-            ImmutableMap.of("user1", WorkspaceAccessLevel.WRITER),
+            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER)),
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
+            1, // remove user1
+            0),
 
         // add 1 to an existing ACL of 1 and explicitly remove the existing 1
         Arguments.of(
-            ImmutableMap.of("user1", WorkspaceAccessLevel.WRITER),
+            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER),
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
             ImmutableMap.of(
-                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.READER)));
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
+            1, // remove user1
+            1)); // add user2
   }
 
   @ParameterizedTest
-  @MethodSource("updateWorkspaceAcls")
-  public void test_updateWorkspaceAcls(
+  @MethodSource("updateAllWorkspaceAcls")
+  public void test_updateAllWorkspaceAcls(
       Map<String, WorkspaceAccessLevel> originalAcl,
       Map<String, WorkspaceAccessLevel> updates,
-      Map<String, WorkspaceAccessLevel> expectedFcUpdates) {
+      Map<String, WorkspaceAccessLevel> expectedFcUpdates,
+      int expectedBpRemovals,
+      int expectedBpAdditions) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
 
@@ -229,9 +246,106 @@ public class WorkspaceAuthServiceTest {
     stubFcGetAcl(namespace, fcName, originalAcl);
     DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
 
-    workspaceAuthService.updateWorkspaceAcls(workspace, updates);
+    workspaceAuthService.updateAllWorkspaceAcls(workspace, updates);
     verify(mockFireCloudService)
         .updateWorkspaceACL(namespace, fcName, buildAclUpdates(expectedFcUpdates));
+    verify(mockFireCloudService, times(expectedBpRemovals))
+        .removeOwnerFromBillingProject(anyString(), anyString(), any());
+    verify(mockFireCloudService, times(expectedBpAdditions))
+        .addOwnerToBillingProject(anyString(), anyString());
+  }
+
+  // Arguments are (original Workspace ACL), (ACL updates to make), (expected result Workspace ACL),
+  // (expected remove BP from owner count), (expected add BP to owner count)
+  private static Stream<Arguments> patchWorkspaceAcls() {
+    return Stream.of(
+        // trivial case: do nothing to empty ACL
+        Arguments.of(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), 0, 0),
+
+        // add one entry to empty ACL -> expect that one entry in response
+        Arguments.of(
+            ImmutableMap.of(),
+            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of("newuser", WorkspaceAccessLevel.OWNER),
+            0,
+            1), // add newuser
+
+        // do nothing to existing ACL -> expect no updates
+        Arguments.of(
+            ImmutableMap.of(
+                "user1",
+                WorkspaceAccessLevel.OWNER,
+                "user2",
+                WorkspaceAccessLevel.WRITER,
+                "user3",
+                WorkspaceAccessLevel.READER),
+            ImmutableMap.of(),
+            ImmutableMap.of(),
+            0, // user1 should be ignored, NOT removed
+            0),
+
+        // add 1 entry to an existing ACL of 1 and explicitly include all existing -> expect all
+        Arguments.of(
+            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.OWNER, "user2", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.OWNER, "user2", WorkspaceAccessLevel.OWNER),
+            0,
+            1),
+
+        // update 1 of an existing ACL of 2 -> expect to see that update only
+        Arguments.of(
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.OWNER,
+                "user2", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
+            ImmutableMap.of("user1", WorkspaceAccessLevel.READER),
+            1, // remove user1 but ignore user2
+            0),
+
+        // add 1 to an existing ACL of 1 -> expect only that addition
+        Arguments.of(
+            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
+            ImmutableMap.of("user2", WorkspaceAccessLevel.READER),
+            0, // user1 should be ignored, NOT removed
+            0),
+
+        // add 1 to an existing ACL of 1 and explicitly remove the existing 1
+        Arguments.of(
+            ImmutableMap.of("user1", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
+            ImmutableMap.of(
+                "user1", WorkspaceAccessLevel.NO_ACCESS, "user2", WorkspaceAccessLevel.OWNER),
+            1, // user1 should be removed
+            1)); // user2 should be added
+  }
+
+  @ParameterizedTest
+  @MethodSource("patchWorkspaceAcls")
+  public void test_patchWorkspaceAcls(
+      Map<String, WorkspaceAccessLevel> originalAcl,
+      Map<String, WorkspaceAccessLevel> updates,
+      Map<String, WorkspaceAccessLevel> expectedFcUpdates,
+      int expectedBpRemovals,
+      int expectedBpAdditions) {
+    final String namespace = "wsns";
+    final String fcName = "firecloudname";
+
+    stubRegisteredTier();
+    stubUpdateAcl(namespace, fcName);
+    stubFcGetAcl(namespace, fcName, originalAcl);
+    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
+
+    workspaceAuthService.patchWorkspaceAcls(workspace, updates);
+    verify(mockFireCloudService)
+        .updateWorkspaceACL(namespace, fcName, buildAclUpdates(expectedFcUpdates));
+    verify(mockFireCloudService, times(expectedBpRemovals))
+        .removeOwnerFromBillingProject(anyString(), anyString(), any());
+    verify(mockFireCloudService, times(expectedBpAdditions))
+        .addOwnerToBillingProject(anyString(), anyString());
   }
 
   private DbWorkspace stubDaoGetRequired(

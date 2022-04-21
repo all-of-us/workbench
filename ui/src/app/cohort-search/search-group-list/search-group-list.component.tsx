@@ -9,6 +9,7 @@ import {
   SearchRequest,
 } from 'generated/fetch';
 
+import { CohortCriteriaMenu } from 'app/cohort-search/cohort-criteria-menu';
 import { SearchGroup } from 'app/cohort-search/search-group/search-group.component';
 import {
   criteriaMenuOptionsStore,
@@ -25,6 +26,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -263,8 +265,10 @@ const SearchGroupList = fp.flow(
       }
     }
 
-    launchSearch(criteria: any) {
-      this.criteriaMenu.hide();
+    launchSearch(criteria: any, searchTerms?: string) {
+      if (this.criteriaMenu) {
+        this.criteriaMenu.hide();
+      }
       const { role } = this.props;
       const { domain, type, standard } = criteria;
       const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
@@ -279,14 +283,22 @@ const SearchGroupList = fp.flow(
       const itemId = generateId('items');
       const groupId = null;
       const item = initItem(itemId, domain);
-      const context = { item, domain, type, standard, role, groupId };
+      const context = {
+        item,
+        domain,
+        type,
+        searchTerms,
+        standard,
+        role,
+        groupId,
+      };
       this.props.setSearchContext(context);
     }
 
     render() {
       const { groups, setSearchContext, role, updated, updateRequest } =
         this.props;
-      const { index } = this.state;
+      const { criteriaMenuOptions, index } = this.state;
       return (
         <React.Fragment>
           <style>{css}</style>
@@ -318,21 +330,30 @@ const SearchGroupList = fp.flow(
                 Group {groups.length + index + 1}
               </div>
             </div>
-            <div style={styles.cardBlock}>
-              <TieredMenu
-                style={{ ...styles.menu, padding: '0.5rem 0' }}
-                appendTo={document.body}
-                model={this.criteriaMenuItems}
-                popup
-                ref={(el) => (this.criteriaMenu = el)}
+            {serverConfigStore.get().config.enableUniversalSearch ? (
+              <CohortCriteriaMenu
+                launchSearch={(criteria, searchTerms) =>
+                  this.launchSearch(criteria, searchTerms)
+                }
+                menuOptions={criteriaMenuOptions}
               />
-              <button
-                style={styles.menuButton}
-                onClick={(e) => this.criteriaMenu.toggle(e)}
-              >
-                Add Criteria <ClrIcon shape='caret down' size={12} />
-              </button>
-            </div>
+            ) : (
+              <div style={styles.cardBlock}>
+                <TieredMenu
+                  style={{ ...styles.menu, padding: '0.5rem 0' }}
+                  appendTo={document.body}
+                  model={this.criteriaMenuItems}
+                  popup
+                  ref={(el) => (this.criteriaMenu = el)}
+                />
+                <button
+                  style={styles.menuButton}
+                  onClick={(e) => this.criteriaMenu.toggle(e)}
+                >
+                  Add Criteria <ClrIcon shape='caret down' size={12} />
+                </button>
+              </div>
+            )}
           </div>
         </React.Fragment>
       );

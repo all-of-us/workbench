@@ -1,4 +1,11 @@
-import { Ethnicity, FilterSign, PhysicalMeasurementsCriteria, Race, Sex } from 'app/page/cohort-participants-group';
+import {
+  Ethnicity,
+  FilterSign,
+  GenderIdentity,
+  PhysicalMeasurementsCriteria,
+  Race,
+  Sex
+} from 'app/page/cohort-participants-group';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
@@ -128,7 +135,7 @@ describe('Create Cohorts Test', () => {
 
     // Include Group 3: Demographics Gender Identity.
     const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
-    await group3.includeGenderIdentity([Sex.FEMALE]);
+    await group3.includeGenderIdentity([GenderIdentity.WOMAN]);
     await group3.getGroupCount();
     expect(Number.isNaN(await group3.getGroupCount())).toBe(false);
 

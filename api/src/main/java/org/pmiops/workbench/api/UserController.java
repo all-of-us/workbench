@@ -204,19 +204,7 @@ public class UserController implements UserApiDelegate {
         new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
   }
 
-  /**
-   * The logic here is a little weird. See RW-4857.
-   *
-   * <p>When Billing Upgrade is true: return the Free Tier account only when the user has remaining
-   * Free Credits.
-   *
-   * <p>When Billing Upgrade is false: the user's only option is the Free Tier account, so return it
-   * even if the user has expired their Free Credits. The UI will disable selection of this option
-   * if expired.
-   *
-   * @return the free tier billing account, if the user has free credits OR billing upgrade is
-   *     disabled
-   */
+  /** @return the free tier billing account, if the user has free credits */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
     if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
       return Stream.empty();

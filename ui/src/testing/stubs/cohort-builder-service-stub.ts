@@ -455,4 +455,8 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
       resolve({ items: [] })
     );
   }
+
+  findUniversalDomainCounts(): Promise<CardCountResponse> {
+    return new Promise<CardCountResponse>((resolve) => resolve({ items: [] }));
+  }
 }

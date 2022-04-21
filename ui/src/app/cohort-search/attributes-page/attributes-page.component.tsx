@@ -10,7 +10,10 @@ import {
   ppiSurveys,
 } from 'app/cohort-search/search-state.service';
 import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
-import { COPE_SURVEY_GROUP_NAME } from 'app/cohort-search/tree-node/tree-node.component';
+import {
+  COPE_SURVEY_GROUP_NAME,
+  MINUTE_SURVEY_GROUP_NAME,
+} from 'app/cohort-search/tree-node/tree-node.component';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -279,6 +282,7 @@ interface State {
   formErrors: Array<string>;
   formValid: boolean;
   isCOPESurvey: boolean;
+  isCOPEOrMinuteSurvey: boolean;
   loading: boolean;
   options: any;
 }
@@ -297,6 +301,7 @@ export const AttributesPage = fp.flow(
         formErrors: [],
         formValid: false,
         isCOPESurvey: false,
+        isCOPEOrMinuteSurvey: false,
         loading: true,
         options: [
           { label: 'Equals', value: Operator.EQUAL },
@@ -370,7 +375,12 @@ export const AttributesPage = fp.flow(
       const surveyNode =
         !!ppiSurveys.getValue()[cdrVersionId] &&
         ppiSurveys.getValue()[cdrVersionId].find((n) => n.id === +surveyId);
-      if (!!surveyNode && surveyNode.name === COPE_SURVEY_GROUP_NAME) {
+      if (
+        !!surveyNode &&
+        [COPE_SURVEY_GROUP_NAME, MINUTE_SURVEY_GROUP_NAME].includes(
+          surveyNode.name
+        )
+      ) {
         const promises = [];
         if (
           subtype === CriteriaSubType.QUESTION ||
@@ -434,7 +444,7 @@ export const AttributesPage = fp.flow(
         this.setState({
           count: null,
           form,
-          isCOPESurvey: true,
+          isCOPEOrMinuteSurvey: true,
           loading: false,
         });
       } else {
@@ -442,8 +452,9 @@ export const AttributesPage = fp.flow(
           label: optionUtil.ANY.display,
           value: AttrName[AttrName.ANY],
         });
-        this.setState({ formValid: true, isCOPESurvey: false, options }, () =>
-          this.getAttributes()
+        this.setState(
+          { formValid: true, isCOPEOrMinuteSurvey: true, options },
+          () => this.getAttributes()
         );
       }
     }
@@ -553,10 +564,10 @@ export const AttributesPage = fp.flow(
     }
 
     validateForm() {
-      const { form, isCOPESurvey } = this.state;
+      const { form, isCOPEOrMinuteSurvey } = this.state;
       if (
-        (form.anyValue || (isCOPESurvey && form.num.length === 0)) &&
-        (!isCOPESurvey || form.anyVersion)
+        (form.anyValue || (isCOPEOrMinuteSurvey && form.num.length === 0)) &&
+        (!isCOPEOrMinuteSurvey || form.anyVersion)
       ) {
         this.setState({ formValid: true, formErrors: [] });
       } else {
@@ -602,7 +613,7 @@ export const AttributesPage = fp.flow(
         if ((this.isMeasurement || this.isObservation) && formValid) {
           formValid = operatorSelected || form.cat.some((attr) => attr.checked);
         }
-        if (isCOPESurvey && formValid) {
+        if (isCOPEOrMinuteSurvey && formValid) {
           formValid =
             (form.num.length === 0 || form.anyValue || operatorSelected) &&
             (form.anyVersion || form.cat.some((attr) => attr.checked));
@@ -627,7 +638,7 @@ export const AttributesPage = fp.flow(
       const {
         node: { conceptId, id, value },
       } = this.props;
-      const { form, isCOPESurvey } = this.state;
+      const { form, isCOPEOrMinuteSurvey } = this.state;
       const code = form.anyValue
         ? 'Any'
         : form.num.reduce((acc, attr) => {
@@ -636,7 +647,8 @@ export const AttributesPage = fp.flow(
             }
             return acc;
           }, '');
-      const paramConceptId = isCOPESurvey && !!value ? value : conceptId;
+      const paramConceptId =
+        isCOPEOrMinuteSurvey && !!value ? value : conceptId;
       // make sure param ID is unique for different checkbox combinations
       const catValues = form.cat
         .filter((c) => c.checked)
@@ -657,12 +669,12 @@ export const AttributesPage = fp.flow(
         node,
         node: { name, subtype, value },
       } = this.props;
-      const { form, isCOPESurvey } = this.state;
+      const { form, isCOPEOrMinuteSurvey } = this.state;
       let paramName;
       const attrs = [];
-      if (!isCOPESurvey && form.anyValue) {
+      if (!isCOPEOrMinuteSurvey && form.anyValue) {
         paramName = name + ` (${optionUtil.ANY.display})`;
-      } else if (isCOPESurvey && form.anyValue && form.anyVersion) {
+      } else if (isCOPEOrMinuteSurvey && form.anyValue && form.anyVersion) {
         paramName = name + ' (Any version AND any value)';
       } else {
         form.num
@@ -691,13 +703,13 @@ export const AttributesPage = fp.flow(
             }
             return checked;
           }, []);
-          if (isCOPESurvey && !form.anyVersion) {
+          if (isCOPEOrMinuteSurvey && !form.anyVersion) {
             attrs.push({
               name: AttrName.SURVEYVERSIONCONCEPTID,
               operator: Operator.IN,
               operands: catOperands,
             });
-          } else if (!isCOPESurvey) {
+          } else if (!isCOPEOrMinuteSurvey) {
             attrs.push({
               name: AttrName.CAT,
               operator: Operator.IN,
@@ -707,7 +719,11 @@ export const AttributesPage = fp.flow(
         }
         paramName = this.paramName;
       }
-      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER && !!value) {
+      if (
+        isCOPEOrMinuteSurvey &&
+        subtype === CriteriaSubType.ANSWER &&
+        !!value
+      ) {
         attrs.push({
           name: AttrName.CAT,
           operator: Operator.IN,
@@ -896,12 +912,13 @@ export const AttributesPage = fp.flow(
     }
 
     get disableCalculateButton() {
-      const { calculating, count, form, formValid, isCOPESurvey } = this.state;
+      const { calculating, count, form, formValid, isCOPEOrMinuteSurvey } =
+        this.state;
       return (
         calculating ||
         !formValid ||
         (form.anyValue && count !== null) ||
-        (isCOPESurvey &&
+        (isCOPEOrMinuteSurvey &&
           !form.anyVersion &&
           !form.cat.some((attr) => attr.checked)) ||
         (!this.isSurvey &&
@@ -914,14 +931,14 @@ export const AttributesPage = fp.flow(
       const {
         node: { count, subtype },
       } = this.props;
-      const { form, isCOPESurvey, options } = this.state;
+      const { form, isCOPEOrMinuteSurvey, options } = this.state;
       return (
         form.num.length > 0 && (
           <React.Fragment>
             {(this.isMeasurement || this.isObservation) && (
               <div style={styles.label}>Numeric Values</div>
             )}
-            {isCOPESurvey && (
+            {isCOPEOrMinuteSurvey && (
               <div>
                 <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)} />{' '}
                 Any value
@@ -930,13 +947,15 @@ export const AttributesPage = fp.flow(
                 )}
               </div>
             )}
-            {!(isCOPESurvey && form.anyValue) &&
+            {!(isCOPEOrMinuteSurvey && form.anyValue) &&
               form.num.map((attr, a) => (
                 <div key={a}>
                   {this.isBloodPressure && (
                     <div style={styles.label}>{attr.name}</div>
                   )}
-                  {isCOPESurvey && <div style={styles.orCircle}>OR</div>}
+                  {isCOPEOrMinuteSurvey && (
+                    <div style={styles.orCircle}>OR</div>
+                  )}
                   <Dropdown
                     data-test-id={`numerical-dropdown-${a}`}
                     style={{ marginBottom: '0.5rem', width: '100%' }}
@@ -1001,11 +1020,11 @@ export const AttributesPage = fp.flow(
       const {
         node: { count },
       } = this.props;
-      const { form, isCOPESurvey } = this.state;
+      const { form, isCOPEOrMinuteSurvey } = this.state;
       return (
         form.cat.length > 0 && (
           <React.Fragment>
-            {isCOPESurvey && (
+            {isCOPEOrMinuteSurvey && (
               <div>
                 <CheckBox onChange={(v) => this.toggleAnyVersionCheckbox(v)} />{' '}
                 Any version
@@ -1014,12 +1033,12 @@ export const AttributesPage = fp.flow(
                 )}
               </div>
             )}
-            {!(isCOPESurvey && form.anyVersion) && (
+            {!(isCOPEOrMinuteSurvey && form.anyVersion) && (
               <React.Fragment>
                 {(form.num.length > 0 || this.isObservation) && (
                   <div style={styles.orCircle}>OR</div>
                 )}
-                {!isCOPESurvey && (
+                {!isCOPEOrMinuteSurvey && (
                   <div style={styles.label}>Categorical Values</div>
                 )}
                 {form.cat.map((attr, a) => (
@@ -1053,14 +1072,14 @@ export const AttributesPage = fp.flow(
         countError,
         form,
         formErrors,
-        isCOPESurvey,
+        isCOPEOrMinuteSurvey,
         loading,
       } = this.state;
       return loading ? (
         <SpinnerOverlay />
       ) : (
         <div id='attributes-form' style={{ marginTop: '0.5rem' }}>
-          {isCOPESurvey ? (
+          {isCOPEOrMinuteSurvey ? (
             <div>
               <h3
                 style={{
@@ -1127,7 +1146,7 @@ export const AttributesPage = fp.flow(
               ))}
             </div>
           )}
-          {isCOPESurvey ? (
+          {isCOPEOrMinuteSurvey ? (
             <div>
               {this.renderCategoricalAttributes()}
               {form.num.length > 0 && form.cat.length > 0 && (
