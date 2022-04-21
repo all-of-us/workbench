@@ -32,26 +32,27 @@ const userIsEnabled = (userDisabledInDb: boolean) =>
   !userDisabledInDb &&
   eligibleForTier(profileStore.get().profile, AccessTierShortNames.Registered);
 
-// TODO use redirectTo?
 export const disabledGuard = (userDisabledInDb: boolean): Guard => ({
   // Show disabled screen when user account is disabled by admin or removed from institution registered tier requirement.
   allowed: (): boolean => userIsEnabled(userDisabledInDb),
   redirectPath: '/user-disabled',
 });
 
-// TODO use redirectTo?
 export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
   // enabled users should be redirected to the homepage if they visit the /user-disabled page
   allowed: (): boolean => !userIsEnabled(userDisabledInDb),
   redirectPath: '/',
 });
 
-const isCompleteOrBypassed = (profile: Profile, moduleName: AccessModule) => {
-  const status = getAccessModuleStatusByNameOrEmpty(
-    profile?.accessModules?.modules,
-    moduleName
-  );
-  return !!status?.completionEpochMillis || !!status?.bypassEpochMillis;
+const allCompleteOrBypassed = (
+  profile: Profile,
+  moduleNames: AccessModule[]
+) => {
+  const modules = profile?.accessModules?.modules;
+  return moduleNames.every((moduleName) => {
+    const status = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
+    return !!status?.completionEpochMillis || !!status?.bypassEpochMillis;
+  });
 };
 
 // use this for all access-module routing decisions, to ensure only one routing is chosen
@@ -60,8 +61,10 @@ export const shouldRedirectTo = (profile: Profile): string => {
     [profile?.accessModules?.anyModuleHasExpired, () => ACCESS_RENEWAL_PATH],
     // not a common scenario (mainly test users) but AAR is the only way to recover if these modules are missing
     [
-      !isCompleteOrBypassed(profile, AccessModule.PROFILECONFIRMATION) ||
-        !isCompleteOrBypassed(profile, AccessModule.PUBLICATIONCONFIRMATION),
+      !allCompleteOrBypassed(profile, [
+        AccessModule.PROFILECONFIRMATION,
+        AccessModule.PUBLICATIONCONFIRMATION,
+      ]),
       () => ACCESS_RENEWAL_PATH,
     ],
     [!hasRegisteredTierAccess(profile), () => DATA_ACCESS_REQUIREMENTS_PATH]
