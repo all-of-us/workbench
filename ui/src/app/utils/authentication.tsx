@@ -41,6 +41,7 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
           client_id: environment.clientId,
           hosted_domain: config.gsuiteDomain,
           scope: 'https://www.googleapis.com/auth/plus.login openid profile',
+          max_age: '0'
         })
         .then(
           // onInit
@@ -86,14 +87,13 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
 
 export const signIn = (): void => {
   AnalyticsTracker.Registration.SignIn();
-
   gapi.load('auth2', () => {
     // gapi.auth2.getAuthInstance().signIn({
     //   prompt: 'select_account',
     //   ux_mode: 'redirect',
     //   redirect_uri: `${window.location.protocol}//${window.location.host}`,
     // });
-    gapi.auth2.grantOfflineAccess().then(signInCallback);
+    gapi.auth2.getAuthInstance().grantOfflineAccess({max_age: 0}).then(signInCallback);
   });
 };
 
@@ -107,7 +107,6 @@ export const signInCallback = (authResult): void => {
     redirectUrl: `${window.location.protocol}//${window.location.host}`,
   });
 };
-
 
 function clearIdToken(): void {
   // Using the full page redirect puts a long "id_token" parameter in the

@@ -560,7 +560,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (Exception e) {
       System.out.println(e);
     }
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

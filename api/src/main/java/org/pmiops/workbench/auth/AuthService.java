@@ -20,7 +20,8 @@ public class AuthService {
   private final CloudStorageClient cloudStorageClient;
 
   @Autowired
-  public AuthService(CloudStorageClient cloudStorageClient) {
+  public AuthService(
+      CloudStorageClient cloudStorageClient) {
     this.cloudStorageClient = cloudStorageClient;
   }
 

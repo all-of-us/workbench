@@ -446,6 +446,7 @@ paths:
         - profile
       consumes:
         - application/json
+      security: []
       description: Signin User
       operationId: signIn
       parameters:
