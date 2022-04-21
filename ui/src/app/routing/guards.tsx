@@ -56,7 +56,7 @@ const allCompleteOrBypassed = (
 };
 
 // use this for all access-module routing decisions, to ensure only one routing is chosen
-export const shouldRedirectTo = (profile: Profile): string => {
+export const shouldRedirectToMaybe = (profile: Profile): string | undefined => {
   return cond(
     [profile?.accessModules?.anyModuleHasExpired, () => ACCESS_RENEWAL_PATH],
     // not a common scenario (mainly test users) but AAR is the only way to recover if these modules are missing
@@ -74,7 +74,7 @@ export const shouldRedirectTo = (profile: Profile): string => {
 
 // use this for all access-module routing decisions, to ensure only one routing is chosen
 export const getAccessModuleGuard = (): Guard => {
-  const redirectPath = shouldRedirectTo(profileStore.get().profile);
+  const redirectPath = shouldRedirectToMaybe(profileStore.get().profile);
   return {
     allowed: () => !redirectPath,
     redirectPath,
