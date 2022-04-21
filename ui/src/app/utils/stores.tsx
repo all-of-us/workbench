@@ -5,15 +5,16 @@ import {
   CdrVersionTier,
   ConfigResponse,
   Disk,
-  GenomicExtractionJob,
   Profile,
   Runtime,
+  TerraJobStatus,
 } from 'generated/fetch';
 
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
-import { profileApi } from 'app/services/swagger-fetch-clients';
+import { dataSetApi, profileApi } from 'app/services/swagger-fetch-clients';
 import { Atom, atom } from 'app/utils/subscribable';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
+import useSWR from 'swr';
 
 const { useEffect, useState } = React;
 
@@ -46,20 +47,32 @@ interface CdrVersionStore {
 
 export const cdrVersionStore = atom<CdrVersionStore>({});
 
-export interface GenomicExtractionStore {
-  [workspaceNamespace: string]: GenomicExtractionJob[];
-}
+export const genomicExtractionJobsSWRKey = (workspaceNamespace: string, workspaceId: string) =>
+  `/api/workspaces/${workspaceNamespace}/${workspaceId}/genomicExtractionJobs`;
 
-export const genomicExtractionStore = atom<GenomicExtractionStore>({});
+export const useGenomicExtractionJobs = (workspaceNamespace: string, workspaceId: string, pollWhileNonTerminal = true) =>
+ useSWR(genomicExtractionJobsSWRKey(workspaceNamespace, workspaceId),
+         () => dataSetApi().getGenomicExtractionJobs(workspaceNamespace, workspaceId).then(({jobs}) => jobs), {
+           refreshInterval: (data) => {
+             if (pollWhileNonTerminal &&
+                 (data || []).some(({status}) => [TerraJobStatus.RUNNING, TerraJobStatus.ABORTING].includes(status))) {
+               return 10 * 1000;
+             }
+             return 0;
+           }
+         });
 
-export const updateGenomicExtractionStore = (
-  workspaceNamespace: string,
-  extractions: GenomicExtractionJob[]
-) => {
-  genomicExtractionStore.set({
-    ...genomicExtractionStore.get(),
-    [workspaceNamespace]: extractions,
-  });
+
+// HOC for genomic extraction jobs compatibility with class-based components.
+// New components should use the useGenomicExtractionJobs() hook.
+export const withGenomicExtractionJobs = (WrappedComponent) => (props) => {
+  const {data} = useGenomicExtractionJobs(props.workspace.namespace, props.workspace.id);
+  return (
+    <WrappedComponent
+      genomicExtractionJobs={data}
+      {...props}
+    />
+  );
 };
 
 export interface ProfileStore {

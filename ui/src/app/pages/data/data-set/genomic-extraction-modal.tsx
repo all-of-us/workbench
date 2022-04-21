@@ -16,12 +16,13 @@ import { TooltipTrigger } from 'app/components/popups';
 import { TextColumn } from 'app/components/text-column';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import {
-  genomicExtractionStore,
-  updateGenomicExtractionStore,
+  genomicExtractionJobsSWRKey,
+  useGenomicExtractionJobs,
   useStore,
 } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 import moment from 'moment';
+import { useSWRConfig } from 'swr';
 
 const { useState } = React;
 
@@ -59,12 +60,12 @@ export const GenomicExtractionModal = ({
   cancelText,
   confirmText,
 }: Props) => {
-  const [loading, setLoading] = useState(true);
+  const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<{ status: number; message: string }>(null);
   const isClientError = error && 400 <= error.status && error.status < 500;
 
-  const genomicExtractions = useStore(genomicExtractionStore);
-  const extractsForWorkspace = genomicExtractions?.[workspaceNamespace] || [];
+  const {mutate} = useSWRConfig();
+  const {data: jobs} = useGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName);
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter(
       (extract: GenomicExtractionJob) => extract.datasetName === dataSet.name
@@ -76,16 +77,11 @@ export const GenomicExtractionModal = ({
       'desc'
     ),
     fp.head
-  )(extractsForWorkspace);
+  )(jobs || []);
 
-  useEffect(() => {
-    dataSetApi()
-      .getGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName)
-      .then((resp) =>
-        updateGenomicExtractionStore(workspaceNamespace, resp.jobs)
-      )
-      .finally(() => setLoading(false));
-  }, [workspaceNamespace]);
+  const loading = !jobs || launching;
+
+  const jobsSWRKey = genomicExtractionJobsSWRKey(workspaceNamespace, workspaceFirecloudName);
 
   const runningExtract =
     mostRecentExtract && mostRecentExtract.status === TerraJobStatus.RUNNING;
@@ -181,21 +177,17 @@ export const GenomicExtractionModal = ({
           disabled={loading || isClientError}
           style={{ marginLeft: '0.5rem' }}
           onClick={async () => {
-            setLoading(true);
+            setLaunching(true);
             try {
-              const job = await dataSetApi().extractGenomicData(
-                workspaceNamespace,
-                workspaceFirecloudName,
-                dataSet.id
-              );
-              updateGenomicExtractionStore(
-                workspaceNamespace,
-                fp.concat(
-                  genomicExtractionStore.get()[workspaceNamespace] || [],
-                  job
-                )
-              );
-              closeFunction();
+              await mutate(jobsSWRKey, async () => {
+                const job = await dataSetApi().extractGenomicData(
+                  workspaceNamespace,
+                  workspaceFirecloudName,
+                  dataSet.id
+                );
+                closeFunction();
+                return fp.concat(jobs, job);
+              });
             } catch (e) {
               const errJson = (await e.json().catch(() => {})) || {};
               setError({
@@ -203,7 +195,7 @@ export const GenomicExtractionModal = ({
                 message: errJson.message || 'unknown error',
               });
             }
-            setLoading(false);
+            setLaunching(false);
           }}
         >
           {confirmText || 'Extract'}

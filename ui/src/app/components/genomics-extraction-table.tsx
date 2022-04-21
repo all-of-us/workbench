@@ -19,19 +19,18 @@ import { GenomicsExtractionMenu } from 'app/components/genomics-extraction-menu'
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
-import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { DEFAULT, switchCase, withCurrentWorkspace } from 'app/utils';
 import { formatUsd } from 'app/utils/numbers';
 import {
-  genomicExtractionStore,
-  updateGenomicExtractionStore,
-  withStore,
+  genomicExtractionJobsSWRKey,
+  useGenomicExtractionJobs,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
 
 import { SupportMailto } from './support';
+import { useSWRConfig } from 'swr';
 
 const styles = {
   spinStyles: {
@@ -106,7 +105,8 @@ const MissingCell = () => <span style={{ fontSize: '.4rem' }}>&mdash;</span>;
 
 const mapJobToTableRow = (
   job: GenomicExtractionJob,
-  workspace: WorkspaceData
+  workspace: WorkspaceData,
+  mutateJob: (updateFn: () => Promise<void>, optimisticValue: GenomicExtractionJob) => void
 ) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment =
@@ -173,7 +173,7 @@ const mapJobToTableRow = (
       ) : (
         (job.vcfSizeMb / 1000).toFixed(1) + 'GB'
       ),
-    menuJsx: <GenomicsExtractionMenu job={job} workspace={workspace} />,
+    menuJsx: <GenomicsExtractionMenu {...{job, workspace, mutateJob}} />,
   };
 };
 
@@ -220,21 +220,8 @@ const FailedRequestMessage = () => (
 
 export const GenomicsExtractionTable = fp.flow(
   withCurrentWorkspace(),
-  withStore(genomicExtractionStore, 'genomicExtraction')
-)(({ workspace, genomicExtraction }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    dataSetApi()
-      .getGenomicExtractionJobs(workspace.namespace, workspace.id)
-      .then((resp) =>
-        updateGenomicExtractionStore(workspace.namespace, resp.jobs)
-      )
-      .finally(() => setIsLoading(false));
-  }, [workspace]);
-
-  const workspaceExtractionJobs = genomicExtraction[workspace.namespace];
-  const requestFailed = !isLoading && workspaceExtractionJobs === undefined;
+)(({ workspace }) => {
+  const {data: jobs, error, mutate} = useGenomicExtractionJobs(workspace.namespace, workspace.id);
 
   return (
     <div
@@ -244,7 +231,7 @@ export const GenomicsExtractionTable = fp.flow(
       <div className='slim-scroll-bar'>
         <SwitchTransition>
           <CSSTransition
-            key={isLoading}
+            key={!jobs}
             classNames='switch-transition'
             addEndListener={(node, done) => {
               node.addEventListener(
@@ -258,23 +245,36 @@ export const GenomicsExtractionTable = fp.flow(
               );
             }}
           >
-            {isLoading ? (
+            {!jobs ? (
               <Spinner style={{ display: 'block', margin: '3rem auto' }} />
-            ) : requestFailed ? (
+            ) : error ? (
               <FailedRequestMessage />
             ) : (
               <DataTable
                 autoLayout
                 emptyMessage={<EmptyTableMessage />}
                 sortField={
-                  !workspaceExtractionJobs ||
-                  workspaceExtractionJobs.length !== 0
+                  !jobs ||
+                  jobs.length > 0
                     ? 'dateStarted'
                     : ''
                 }
                 sortOrder={-1}
-                value={workspaceExtractionJobs.map((job) =>
-                  mapJobToTableRow(job, workspace)
+                value={jobs.map((job) =>
+                  mapJobToTableRow(job, workspace, (updateFn, optimisticValue) => {
+                    // Update the extraction job list optimistically.
+                    const optimisticData = jobs.map(j => {
+                      if (j.genomicExtractionJobId === job.genomicExtractionJobId) {
+                        return optimisticValue;
+                      }
+                      return j;
+                    });
+                    mutate(async () => {
+                      await updateFn();
+                      // Callback result is ignored due to populateCache: false
+                      return undefined;
+                    }, { optimisticData, populateCache: false, rollbackOnError: true });
+                  })
                 )}
                 style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
               >

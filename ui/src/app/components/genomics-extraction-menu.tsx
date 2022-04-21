@@ -13,10 +13,6 @@ import { PopupTrigger } from 'app/components/popups';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { switchCase } from 'app/utils';
-import {
-  genomicExtractionStore,
-  updateGenomicExtractionStore,
-} from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -38,9 +34,10 @@ const styles = {
 interface Props {
   job: GenomicExtractionJob;
   workspace: WorkspaceData;
+  mutateJob: (updateFn: () => Promise<void>, optimisticValue: GenomicExtractionJob) => void;
 }
 
-export const GenomicsExtractionMenu = ({ job, workspace }: Props) => {
+export const GenomicsExtractionMenu = ({ job, workspace, mutateJob }: Props) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
   const tooltip = switchCase(
@@ -79,23 +76,16 @@ export const GenomicsExtractionMenu = ({ job, workspace }: Props) => {
               faIcon={faBan}
               disabled={!isRunning || !canWrite}
               onClick={() => {
-                dataSetApi().abortGenomicExtractionJob(
-                  workspace.namespace,
-                  workspace.id,
-                  job.genomicExtractionJobId.toString()
-                );
-                const workspaceJobs =
-                  genomicExtractionStore.get()[workspace.namespace];
-                const abortedJobIndex = fp.findIndex(
-                  (j) =>
-                    j.genomicExtractionJobId === job.genomicExtractionJobId,
-                  workspaceJobs
-                );
-                workspaceJobs[abortedJobIndex].status = TerraJobStatus.ABORTING;
-                updateGenomicExtractionStore(
-                  workspace.namespace,
-                  workspaceJobs
-                );
+                mutateJob(async () => {
+                  await dataSetApi().abortGenomicExtractionJob(
+                    workspace.namespace,
+                    workspace.id,
+                    job.genomicExtractionJobId.toString()
+                  );
+                }, {
+                  ...job,
+                  status: TerraJobStatus.ABORTING
+                });
               }}
               tooltip={tooltip}
             >
