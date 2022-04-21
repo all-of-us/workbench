@@ -155,7 +155,8 @@ describe('redirectTo', () => {
     ],
     [
       'all bypassed except Profile and Publications are missing',
-      undefined,
+      // Access Renewal is the only page which allows progress on these modules
+      ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
@@ -225,9 +226,10 @@ describe('redirectTo', () => {
         },
       },
     ],
-    // RW-8203 this fails
+    // RW-8203
     [
       'all complete but missing one (renewable, not initial)',
+      // Access Renewal is the only page which allows progress on PUBLICATIONCONFIRMATION
       ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -238,9 +240,10 @@ describe('redirectTo', () => {
         },
       },
     ],
-    // RW-8203 this fails
+    // RW-8203
     [
       'all complete but missing one each (1 renewable, 1 initial)',
+      // Access Renewal is the only page which allows progress on PUBLICATIONCONFIRMATION
       ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
@@ -251,7 +254,7 @@ describe('redirectTo', () => {
         },
       },
     ],
-    // RW-8203 this fails
+    // RW-8203
     [
       'all complete but Profile + Publication Confirmations are missing',
       // Access Renewal is the only page which allows progress on these modules
@@ -265,7 +268,7 @@ describe('redirectTo', () => {
         },
       },
     ],
-    // RW-8203 this fails
+    // RW-8203
     [
       'all incomplete',
       // Such a user would have to visit Access Renewal first, allowing progress on Profile + Publication.
@@ -281,7 +284,7 @@ describe('redirectTo', () => {
         },
       },
     ],
-  ])('%s', (desc, expected: AccessModulesRedirection, profile: Profile) => {
+  ])('%s', (desc, expected: string, profile: Profile) => {
     expect(shouldRedirectTo(profile)).toEqual(expected);
   });
 });

@@ -1,4 +1,4 @@
-import { Profile } from 'generated/fetch';
+import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { Guard } from 'app/components/app-router';
 import { cond } from 'app/utils';
@@ -10,6 +10,7 @@ import {
   ACCESS_RENEWAL_PATH,
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
+  getAccessModuleStatusByNameOrEmpty,
 } from 'app/utils/access-utils';
 import {
   AuthorityGuardedAction,
@@ -45,10 +46,24 @@ export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
   redirectPath: '/',
 });
 
+const isCompleteOrBypassed = (profile: Profile, moduleName: AccessModule) => {
+  const status = getAccessModuleStatusByNameOrEmpty(
+    profile?.accessModules?.modules,
+    moduleName
+  );
+  return !!status?.completionEpochMillis || !!status?.bypassEpochMillis;
+};
+
 // use this for all access-module routing decisions, to ensure only one routing is chosen
 export const shouldRedirectTo = (profile: Profile): string => {
   return cond(
     [profile?.accessModules?.anyModuleHasExpired, () => ACCESS_RENEWAL_PATH],
+    // not a common scenario (mainly test users) but AAR is the only way to recover if these modules are missing
+    [
+      !isCompleteOrBypassed(profile, AccessModule.PROFILECONFIRMATION) ||
+        !isCompleteOrBypassed(profile, AccessModule.PUBLICATIONCONFIRMATION),
+      () => ACCESS_RENEWAL_PATH,
+    ],
     [!hasRegisteredTierAccess(profile), () => DATA_ACCESS_REQUIREMENTS_PATH]
     // by default: no redirect
   );
