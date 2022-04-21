@@ -45,41 +45,22 @@ export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
   redirectPath: '/',
 });
 
-// where a user should be redirected to, depending on the current status of their access modules
-export enum AccessModulesRedirection {
-  NO_REDIRECT,
-  DATA_ACCESS_REQUIREMENTS,
-  ACCESS_RENEWAL,
-}
-
 // use this for all access-module routing decisions, to ensure only one routing is chosen
-export const redirectTo = (profile: Profile): AccessModulesRedirection => {
+export const shouldRedirectTo = (profile: Profile): string => {
   return cond(
-    [
-      profile?.accessModules?.anyModuleHasExpired,
-      () => AccessModulesRedirection.ACCESS_RENEWAL,
-    ],
-    [
-      !hasRegisteredTierAccess(profile),
-      () => AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
-    ],
-    () => AccessModulesRedirection.NO_REDIRECT
+    [profile?.accessModules?.anyModuleHasExpired, () => ACCESS_RENEWAL_PATH],
+    [!hasRegisteredTierAccess(profile), () => DATA_ACCESS_REQUIREMENTS_PATH]
+    // by default: no redirect
   );
 };
 
-// TODO combine these into an "RT Access Guard" or similar?
-export const registrationGuard: Guard = {
-  allowed: () =>
-    redirectTo(profileStore.get().profile) !==
-    AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
-  redirectPath: DATA_ACCESS_REQUIREMENTS_PATH,
-};
-
-export const rtExpiredGuard: Guard = {
-  allowed: () =>
-    redirectTo(profileStore.get().profile) !==
-    AccessModulesRedirection.ACCESS_RENEWAL,
-  redirectPath: ACCESS_RENEWAL_PATH,
+// use this for all access-module routing decisions, to ensure only one routing is chosen
+export const getAccessModuleGuard = (): Guard => {
+  const redirectPath = shouldRedirectTo(profileStore.get().profile);
+  return {
+    allowed: () => !redirectPath,
+    redirectPath,
+  };
 };
 
 export const adminLockedGuard = (ns: string, wsid: string): Guard => {

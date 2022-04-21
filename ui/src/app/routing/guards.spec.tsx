@@ -7,7 +7,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
-import { AccessModulesRedirection, redirectTo } from './guards';
+import { AccessModulesRedirection, shouldRedirectTo } from './guards';
 
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
@@ -181,6 +181,6 @@ describe('redirectTo', () => {
       },
     ],
   ])('%s', (desc, expected: AccessModulesRedirection, profile: Profile) => {
-    expect(redirectTo(profile)).toEqual(expected);
+    expect(shouldRedirectTo(profile)).toEqual(expected);
   });
 });
