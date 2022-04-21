@@ -1,13 +1,17 @@
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import {
+  ACCESS_RENEWAL_PATH,
+  DATA_ACCESS_REQUIREMENTS_PATH,
+} from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
-import { AccessModulesRedirection, shouldRedirectTo } from './guards';
+import { shouldRedirectTo } from './guards';
 
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
@@ -39,6 +43,24 @@ const allCompleteExpiringSoon: AccessModuleStatus[] = Object.keys(
   expirationEpochMillis: nowPlusDays(1),
 }));
 
+const allBypassedPPComplete: AccessModuleStatus[] = Object.keys(
+  AccessModule
+).map((key) => {
+  const moduleName = AccessModule[key];
+  return [
+    AccessModule.PROFILECONFIRMATION,
+    AccessModule.PUBLICATIONCONFIRMATION,
+  ].includes(moduleName)
+    ? {
+        moduleName: AccessModule[key],
+        completionEpochMillis: Date.now(),
+      }
+    : {
+        moduleName: AccessModule[key],
+        bypassEpochMillis: Date.now(),
+      };
+});
+
 // 2FA is missing (initial, not renewable)
 const allCompleteMissingOneInitial: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
@@ -52,6 +74,15 @@ const allCompleteMissingOneRenewable: AccessModuleStatus[] =
     ({ moduleName }) => moduleName !== AccessModule.PUBLICATIONCONFIRMATION
   );
 
+const allCompleteMissingOneEach: AccessModuleStatus[] =
+  allCompleteNotExpiring.filter(
+    ({ moduleName }) =>
+      ![
+        AccessModule.TWOFACTORAUTH,
+        AccessModule.PUBLICATIONCONFIRMATION,
+      ].includes(moduleName)
+  );
+
 // PUBLICATIONCONFIRMATION is expired
 const allCompleteOneExpired: AccessModuleStatus[] =
   allCompleteMissingOneRenewable.concat({
@@ -59,6 +90,17 @@ const allCompleteOneExpired: AccessModuleStatus[] =
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(-1),
   });
+
+const allCompleteCtTrainingExpired: AccessModuleStatus[] =
+  allCompleteNotExpiring
+    .filter(
+      ({ moduleName }) => moduleName !== AccessModule.CTCOMPLIANCETRAINING
+    )
+    .concat({
+      moduleName: AccessModule.CTCOMPLIANCETRAINING,
+      completionEpochMillis: Date.now(),
+      expirationEpochMillis: nowPlusDays(-1),
+    });
 
 // RW-8203
 // artificial state for test users - all complete but Profile/Publications are missing
@@ -71,6 +113,16 @@ const allCompleteMissingPP: AccessModuleStatus[] =
       ].includes(moduleName)
   );
 
+// RW-8203
+// artificial state for test users - all bypassed but Profile/Publications are missing
+const allBypassedMissingPP: AccessModuleStatus[] = allBypassedPPComplete.filter(
+  ({ moduleName }) =>
+    ![
+      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PUBLICATIONCONFIRMATION,
+    ].includes(moduleName)
+);
+
 describe('redirectTo', () => {
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
@@ -79,7 +131,7 @@ describe('redirectTo', () => {
   test.each([
     [
       'all complete and not expiring',
-      AccessModulesRedirection.NO_REDIRECT,
+      undefined,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
@@ -91,7 +143,7 @@ describe('redirectTo', () => {
     ],
     [
       'all complete but expiring soon',
-      AccessModulesRedirection.NO_REDIRECT,
+      undefined,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
@@ -102,8 +154,32 @@ describe('redirectTo', () => {
       },
     ],
     [
+      'all bypassed except Profile and Publications are missing',
+      undefined,
+      {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessTierShortNames: [AccessTierShortNames.Registered],
+        accessModules: {
+          anyModuleHasExpired: false,
+          modules: allBypassedMissingPP,
+        },
+      },
+    ],
+    [
+      'all bypassed except Profile and Publications are complete',
+      undefined,
+      {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessTierShortNames: [AccessTierShortNames.Registered],
+        accessModules: {
+          anyModuleHasExpired: false,
+          modules: allBypassedPPComplete,
+        },
+      },
+    ],
+    [
       'initially created state',
-      AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
+      DATA_ACCESS_REQUIREMENTS_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
@@ -115,7 +191,7 @@ describe('redirectTo', () => {
     ],
     [
       'all complete but one module is expired',
-      AccessModulesRedirection.ACCESS_RENEWAL,
+      ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
@@ -126,8 +202,20 @@ describe('redirectTo', () => {
       },
     ],
     [
+      'all complete but Controlled Tier training is expired',
+      undefined,
+      {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessTierShortNames: [AccessTierShortNames.Registered],
+        accessModules: {
+          anyModuleHasExpired: false,
+          modules: allCompleteCtTrainingExpired,
+        },
+      },
+    ],
+    [
       'all complete but missing one (initial, not expirable/renewable)',
-      AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
+      DATA_ACCESS_REQUIREMENTS_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
@@ -140,7 +228,7 @@ describe('redirectTo', () => {
     // RW-8203 this fails
     [
       'all complete but missing one (renewable, not initial)',
-      AccessModulesRedirection.ACCESS_RENEWAL,
+      ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
@@ -152,9 +240,22 @@ describe('redirectTo', () => {
     ],
     // RW-8203 this fails
     [
+      'all complete but missing one each (1 renewable, 1 initial)',
+      ACCESS_RENEWAL_PATH,
+      {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessTierShortNames: [],
+        accessModules: {
+          anyModuleHasExpired: false,
+          modules: allCompleteMissingOneEach,
+        },
+      },
+    ],
+    // RW-8203 this fails
+    [
       'all complete but Profile + Publication Confirmations are missing',
       // Access Renewal is the only page which allows progress on these modules
-      AccessModulesRedirection.ACCESS_RENEWAL,
+      ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
@@ -167,10 +268,10 @@ describe('redirectTo', () => {
     // RW-8203 this fails
     [
       'all incomplete',
-      // such a user would have to visit Access Renewal first, allowing progress on Profile + Publication
-      // after the user does this, they are in the "initially created" state with respect to modules
+      // Such a user would have to visit Access Renewal first, allowing progress on Profile + Publication.
+      // After the user does this, they are in the "initially created" state with respect to modules
       // so they would be redirected to Data Access Requirements
-      AccessModulesRedirection.ACCESS_RENEWAL,
+      ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
