@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
@@ -22,15 +21,11 @@ import { TextColumn } from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import { DEFAULT, switchCase, withCurrentWorkspace } from 'app/utils';
 import { formatUsd } from 'app/utils/numbers';
-import {
-  genomicExtractionJobsSWRKey,
-  useGenomicExtractionJobs,
-} from 'app/utils/stores';
+import { useGenomicExtractionJobs } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
 
 import { SupportMailto } from './support';
-import { useSWRConfig } from 'swr';
 
 const styles = {
   spinStyles: {
@@ -106,7 +101,10 @@ const MissingCell = () => <span style={{ fontSize: '.4rem' }}>&mdash;</span>;
 const mapJobToTableRow = (
   job: GenomicExtractionJob,
   workspace: WorkspaceData,
-  mutateJob: (updateFn: () => Promise<void>, optimisticValue: GenomicExtractionJob) => void
+  mutateJob: (
+    updateFn: () => Promise<void>,
+    optimisticValue: GenomicExtractionJob
+  ) => void
 ) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment =
@@ -173,7 +171,7 @@ const mapJobToTableRow = (
       ) : (
         (job.vcfSizeMb / 1000).toFixed(1) + 'GB'
       ),
-    menuJsx: <GenomicsExtractionMenu {...{job, workspace, mutateJob}} />,
+    menuJsx: <GenomicsExtractionMenu {...{ job, workspace, mutateJob }} />,
   };
 };
 
@@ -218,114 +216,127 @@ const FailedRequestMessage = () => (
   </div>
 );
 
-export const GenomicsExtractionTable = fp.flow(
-  withCurrentWorkspace(),
-)(({ workspace }) => {
-  const {data: jobs, error, mutate} = useGenomicExtractionJobs(workspace.namespace, workspace.id);
+export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
+  ({ workspace }) => {
+    const {
+      data: jobs,
+      error,
+      mutate,
+    } = useGenomicExtractionJobs(workspace.namespace, workspace.id);
 
-  return (
-    <div
-      id='extraction-data-table-container'
-      className='extraction-data-table-container'
-    >
-      <div className='slim-scroll-bar'>
-        <SwitchTransition>
-          <CSSTransition
-            key={!jobs}
-            classNames='switch-transition'
-            addEndListener={(node, done) => {
-              node.addEventListener(
-                'transitionend',
-                (e) => {
-                  if (node.isEqualNode(e.target)) {
-                    done(e);
-                  }
-                },
-                false
-              );
-            }}
-          >
-            {!jobs ? (
-              <Spinner style={{ display: 'block', margin: '3rem auto' }} />
-            ) : error ? (
-              <FailedRequestMessage />
-            ) : (
-              <DataTable
-                autoLayout
-                emptyMessage={<EmptyTableMessage />}
-                sortField={
-                  !jobs ||
-                  jobs.length > 0
-                    ? 'dateStarted'
-                    : ''
-                }
-                sortOrder={-1}
-                value={jobs.map((job) =>
-                  mapJobToTableRow(job, workspace, (updateFn, optimisticValue) => {
-                    // Update the extraction job list optimistically.
-                    const optimisticData = jobs.map(j => {
-                      if (j.genomicExtractionJobId === job.genomicExtractionJobId) {
-                        return optimisticValue;
+    return (
+      <div
+        id='extraction-data-table-container'
+        className='extraction-data-table-container'
+      >
+        <div className='slim-scroll-bar'>
+          <SwitchTransition>
+            <CSSTransition
+              key={!jobs}
+              classNames='switch-transition'
+              addEndListener={(node, done) => {
+                node.addEventListener(
+                  'transitionend',
+                  (e) => {
+                    if (node.isEqualNode(e.target)) {
+                      done(e);
+                    }
+                  },
+                  false
+                );
+              }}
+            >
+              {!jobs ? (
+                <Spinner style={{ display: 'block', margin: '3rem auto' }} />
+              ) : error ? (
+                <FailedRequestMessage />
+              ) : (
+                <DataTable
+                  autoLayout
+                  emptyMessage={<EmptyTableMessage />}
+                  sortField={!jobs || jobs.length > 0 ? 'dateStarted' : ''}
+                  sortOrder={-1}
+                  value={jobs.map((job) =>
+                    mapJobToTableRow(
+                      job,
+                      workspace,
+                      (updateFn, optimisticValue) => {
+                        // Update the extraction job list optimistically.
+                        const optimisticData = jobs.map((j) => {
+                          if (
+                            j.genomicExtractionJobId ===
+                            job.genomicExtractionJobId
+                          ) {
+                            return optimisticValue;
+                          }
+                          return j;
+                        });
+                        mutate(
+                          async () => {
+                            await updateFn();
+                            // Callback result is ignored due to populateCache: false
+                            return undefined;
+                          },
+                          {
+                            optimisticData,
+                            populateCache: false,
+                            rollbackOnError: true,
+                          }
+                        );
                       }
-                      return j;
-                    });
-                    mutate(async () => {
-                      await updateFn();
-                      // Callback result is ignored due to populateCache: false
-                      return undefined;
-                    }, { optimisticData, populateCache: false, rollbackOnError: true });
-                  })
-                )}
-                style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
-              >
-                <Column
-                  header='Dataset Name'
-                  field='datasetNameDisplay'
-                  sortable
-                  sortField='datasetName'
-                  style={{
-                    maxWidth: '8rem',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                  }}
-                />
-                <Column
-                  header='Status'
-                  field='statusDisplay'
-                  sortable
-                  sortField='statusOrdinal'
-                />
-                <Column
-                  header='Date Started'
-                  field='dateStartedDisplay'
-                  sortable
-                  sortField='dateStarted'
-                />
-                <Column
-                  header='Cost'
-                  field='costDisplay'
-                  sortable
-                  sortField='cost'
-                />
-                <Column
-                  header='Size'
-                  field='sizeDisplay'
-                  sortable
-                  sortField='size'
-                />
-                <Column
-                  header='Duration'
-                  field='durationDisplay'
-                  sortable
-                  sortField='duration'
-                />
-                <Column header='' field='menuJsx' />
-              </DataTable>
-            )}
-          </CSSTransition>
-        </SwitchTransition>
+                    )
+                  )}
+                  style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
+                >
+                  <Column
+                    header='Dataset Name'
+                    field='datasetNameDisplay'
+                    sortable
+                    sortField='datasetName'
+                    style={{
+                      maxWidth: '8rem',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                    }}
+                  />
+                  <Column
+                    header='Status'
+                    field='statusDisplay'
+                    sortable
+                    sortField='statusOrdinal'
+                  />
+                  <Column
+                    header='Date Started'
+                    field='dateStartedDisplay'
+                    sortable
+                    sortField='dateStarted'
+                  />
+                  <Column
+                    header='Cost'
+                    field='costDisplay'
+                    sortable
+                    sortField='cost'
+                  />
+                  <Column
+                    header='Size'
+                    field='sizeDisplay'
+                    sortable
+                    sortField='size'
+                  />
+                  <Column
+                    header='Duration'
+                    field='durationDisplay'
+                    sortable
+                    sortField='duration'
+                  />
+                  <Column header='' field='menuJsx' />
+                </DataTable>
+              )}
+            </CSSTransition>
+          </SwitchTransition>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);

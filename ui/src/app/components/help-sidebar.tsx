@@ -45,7 +45,6 @@ import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { participantStore } from 'app/services/review-state.service';
-import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
@@ -500,7 +499,6 @@ export const HelpSidebar = fp.flow(
           }
         })
       );
-
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -704,7 +702,7 @@ export const HelpSidebar = fp.flow(
     }
 
     displayExtractionIcon(icon: IconConfig) {
-      const {genomicExtractionJobs} = this.props;
+      const { genomicExtractionJobs } = this.props;
       const jobsByStatus = fp.groupBy('status', genomicExtractionJobs);
       let status;
       // If any jobs are currently active, show the 'sync' icon corresponding to their status.

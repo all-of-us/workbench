@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import * as React from 'react';
-import * as fp from 'lodash/fp';
 import { faBan, faEllipsisV, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { faLocationCircle } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -34,10 +33,17 @@ const styles = {
 interface Props {
   job: GenomicExtractionJob;
   workspace: WorkspaceData;
-  mutateJob: (updateFn: () => Promise<void>, optimisticValue: GenomicExtractionJob) => void;
+  mutateJob: (
+    updateFn: () => Promise<void>,
+    optimisticValue: GenomicExtractionJob
+  ) => void;
 }
 
-export const GenomicsExtractionMenu = ({ job, workspace, mutateJob }: Props) => {
+export const GenomicsExtractionMenu = ({
+  job,
+  workspace,
+  mutateJob,
+}: Props) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
   const tooltip = switchCase(
@@ -76,16 +82,19 @@ export const GenomicsExtractionMenu = ({ job, workspace, mutateJob }: Props) => 
               faIcon={faBan}
               disabled={!isRunning || !canWrite}
               onClick={() => {
-                mutateJob(async () => {
-                  await dataSetApi().abortGenomicExtractionJob(
-                    workspace.namespace,
-                    workspace.id,
-                    job.genomicExtractionJobId.toString()
-                  );
-                }, {
-                  ...job,
-                  status: TerraJobStatus.ABORTING
-                });
+                mutateJob(
+                  async () => {
+                    await dataSetApi().abortGenomicExtractionJob(
+                      workspace.namespace,
+                      workspace.id,
+                      job.genomicExtractionJobId.toString()
+                    );
+                  },
+                  {
+                    ...job,
+                    status: TerraJobStatus.ABORTING,
+                  }
+                );
               }}
               tooltip={tooltip}
             >
