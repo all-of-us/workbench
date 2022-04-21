@@ -12,9 +12,7 @@ set -e
 # found under the "deploy" command in api/libproject/devstart.rb .
 
 DRY_RUN=false
-# RW-7931 consider switching to false or removal of this option after CT rollout is complete
-ALLOW_EMPTY_TIER=true
-./gradlew --daemon updateCdrConfig -PappArgs="['config/cdr_config_local.json',${DRY_RUN},${ALLOW_EMPTY_TIER}]"
+./gradlew --daemon updateCdrConfig -PappArgs="['config/cdr_config_local.json',${DRY_RUN}]"
 
 ./gradlew --daemon loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
 ./gradlew --daemon loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
