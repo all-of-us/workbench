@@ -174,15 +174,16 @@ interface WorkflowRolesProps {
 }
 const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
   <Modal>
-    <ModalTitle>Workflow sharing successful but incomplete</ModalTitle>
+    <ModalTitle>Workspace sharing was successful but incomplete</ModalTitle>
     <ModalBody>
       <div style={styles.workflowRolesText}>
         The Researcher Workbench has successfully shared the workspace with the
-        specified collaborators, but with limited functionality for some.
+        specified collaborators, but with limited functionality for some
+        researchers.
       </div>
       <div style={styles.workflowRolesText}>
         For compliance reasons, we were unable to grant the following
-        researchers appropriate access to run workflows in this workspace:
+        researchers the appropriate access to run workflows in this workspace:
         <ul>
           {props.usernames.sort().map((item) => (
             <li>{item}</li>
@@ -198,11 +199,12 @@ const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
             accept the updated <AoU /> Terms of Service agreement.
           </li>
           <li>
-            This workspace must be shared with the researchers as Readers.
+            The workspace access level for these users must be changed to
+            Reader.
           </li>
           <li>
-            This workspace must then be shared with the researchers as Writers
-            or Owners.
+            The workspace access levels for these users may then be changed to
+            Writers or Owners, as appropriate.
           </li>
         </ol>
       </div>
