@@ -21,6 +21,7 @@ import {
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
+import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -209,7 +210,8 @@ const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
         </ol>
       </div>
       <div style={styles.workflowRolesText}>
-        We apologize for the inconvenience.
+        We apologize for the inconvenience. For any questions, please contact{' '}
+        <SupportMailto />
       </div>
     </ModalBody>
     <ModalFooter>
