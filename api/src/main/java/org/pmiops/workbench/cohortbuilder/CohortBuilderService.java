@@ -72,7 +72,7 @@ public interface CohortBuilderService {
   List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
-  List<CardCount> findEhrDomainCounts(String term);
+  List<CardCount> findUniversalDomainCounts(String term);
 
   List<CardCount> findDomainCounts(String term);
 

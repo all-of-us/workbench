@@ -268,6 +268,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       case SignInStep.TERMS_OF_SERVICE:
         return (
           <AccountCreationTos
+            showReAcceptNotification={false}
             filePath='/aou-tos.html'
             onComplete={(tosVersion) => {
               AnalyticsTracker.Registration.TOS();

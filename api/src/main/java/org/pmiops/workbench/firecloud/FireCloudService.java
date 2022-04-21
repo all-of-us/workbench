@@ -89,6 +89,15 @@ public interface FireCloudService {
 
   FirecloudWorkspaceACL getWorkspaceAclAsService(String workspaceNamespace, String firecloudName);
 
+  /**
+   * Make a Terra PATCH request with a list of ACL update requests for a specific workspace. Only
+   * makes the changes specified. Choose the access level "NO ACCESS" to remove access.
+   *
+   * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
+   * @param firecloudName the Terra Name of the Workspace to modify
+   * @param aclUpdates
+   * @return
+   */
   FirecloudWorkspaceACLUpdateResponseList updateWorkspaceACL(
       String workspaceNamespace,
       String firecloudName,

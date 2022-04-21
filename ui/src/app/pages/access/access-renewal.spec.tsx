@@ -15,7 +15,7 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { accessRenewalModules } from 'app/utils/access-utils';
+import { rtAccessRenewalModules } from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
@@ -50,7 +50,7 @@ describe('Access Renewal Page', () => {
     const newProfile = fp.set(
       'accessModules',
       {
-        modules: accessRenewalModules.map(
+        modules: rtAccessRenewalModules.map(
           (m) =>
             ({
               moduleName: m,

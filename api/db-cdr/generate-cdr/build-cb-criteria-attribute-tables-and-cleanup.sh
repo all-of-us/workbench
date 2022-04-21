@@ -346,3 +346,9 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
+
+echo "CLEAN UP - remove any survey with zero est_count"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+WHERE domain_id = 'SURVEY'
+AND est_count = 0"

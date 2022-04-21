@@ -1,4 +1,6 @@
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { Dialog, ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitForFn, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
@@ -131,23 +133,42 @@ export default class NotebookPage extends NotebookFrame {
           `//*[@id="notebook_list"]//a[@class="item_link"][span[text()="${filename}"]]/preceding-sibling::input`,
           { visible: true }
         )
-        .then((e) => e.click());
+        .then((e) => e.click())
+        .then(() => treePage.waitForTimeout(500));
     await findAndClickCheckbox();
+
+    const downloadPath = fs.mkdtempSync(path.join(os.tmpdir(), 'egress-'));
+    const client = await treePage.target().createCDPSession();
+    await client.send('Page.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath
+    });
 
     let sawDialog = false;
     treePage.once('dialog', async (d: Dialog) => {
       await this.acceptDataUseDownloadDialog(treePage, d);
       sawDialog = true;
     });
-    await treePage.waitForXPath('//button[@aria-label="Download selected"]', { visible: true }).then((e) => e.click());
+
+    await treePage
+      .waitForXPath('//button[@aria-label="Download selected"]', { visible: true })
+      .then((e) => e.click())
+      .then(() => treePage.waitForTimeout(500));
 
     // Uncheck afterwards, to restore the original state of the page.
-    await treePage.waitForTimeout(500);
     await findAndClickCheckbox();
-    await treePage.waitForTimeout(500);
+
+    // Wait for file existence locally, to confirm download completion.
+    const downloadFilename = path.join(downloadPath, filename);
+    expect(
+      await waitForFn(() => fs.existsSync(downloadFilename), /* interval */ undefined, /* timeout */ 90 * 1000)
+    ).toBeTruthy();
+
+    const downloadSizeMB = fs.statSync(downloadFilename).size / 1e6;
+    logger.info(`confirmed download @ ${downloadFilename} of ${downloadSizeMB.toFixed(2)} MB`);
 
     // Fail if file download proceeded without a dialog prompt.
-    expect(await waitForFn(() => sawDialog)).toBeTruthy();
+    expect(sawDialog).toBeTruthy();
     return treePage;
   }
 
@@ -557,9 +578,6 @@ export default class NotebookPage extends NotebookFrame {
     await waitForNumericalString(newPage, fileSizeXpath);
     const fileSizeElement = await newPage.waitForXPath(fileSizeXpath, { visible: true });
     const fileSize = await getPropValue(fileSizeElement, 'textContent');
-
-    // In case page has to be checked after finish.
-    await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
 
     // Fail if upload proceeded without a dialog prompt.
     expect(await waitForFn(() => sawDialog)).toBeTruthy();

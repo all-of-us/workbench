@@ -362,18 +362,22 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CardCount> findEhrDomainCounts(String term) {
-    return findDomainCounts(
-        term,
-        true,
-        ImmutableList.of(
-            Domain.CONDITION,
-            Domain.DRUG,
-            Domain.MEASUREMENT,
-            Domain.OBSERVATION,
-            Domain.PROCEDURE,
-            Domain.DEVICE,
-            Domain.VISIT));
+  public List<CardCount> findUniversalDomainCounts(String term) {
+    List<CardCount> cardCounts =
+        findDomainCounts(
+            term,
+            true,
+            ImmutableList.of(
+                Domain.CONDITION,
+                Domain.DRUG,
+                Domain.MEASUREMENT,
+                Domain.OBSERVATION,
+                Domain.PROCEDURE,
+                Domain.DEVICE,
+                Domain.VISIT));
+    cardCounts.addAll(findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT)));
+    cardCounts.addAll(findSurveyCounts(term));
+    return cardCounts;
   }
 
   @Override
@@ -387,7 +391,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 Domain.DRUG,
                 Domain.MEASUREMENT,
                 Domain.OBSERVATION,
-                Domain.PROCEDURE));
+                Domain.PROCEDURE,
+                Domain.DEVICE));
     cardCounts.addAll(
         findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
     cardCounts.addAll(findSurveyCounts(term));

@@ -16,7 +16,7 @@ export interface IPathConfig {
 
 export interface IEnvConfig {
   LOGIN_URL_DOMAIN_NAME: string;
-  API_URL: string;
+  API_HOSTNAME: string;
   EMAIL_DOMAIN_NAME: string;
   WRITER_USER: string;
   READER_USER: string;

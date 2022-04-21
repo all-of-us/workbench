@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Select from 'react-select';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import {
   User,
@@ -86,6 +86,15 @@ describe('WorkspaceShare', () => {
     return '.' + user.email.replace(/[@\.]/g, '') + '-user-role__single-value';
   };
 
+  const searchForUser = async (wrapper: ReactWrapper, clock, value: string) => {
+    wrapper
+      .find('[data-test-id="search"]')
+      .simulate('change', { target: { value } });
+    clock.tick(401);
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.update();
+  };
+
   beforeEach(() => {
     registerApiClient(
       UserApi,
@@ -163,12 +172,7 @@ describe('WorkspaceShare', () => {
   it('adds user correctly', async () => {
     const clock = Lolex.install({ shouldAdvanceTime: true });
     const wrapper = component();
-    wrapper
-      .find('[data-test-id="search"]')
-      .simulate('change', { target: { value: 'luna' } });
-    clock.tick(401);
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.update();
+    await searchForUser(wrapper, clock, 'luna');
     clock.uninstall();
     wrapper
       .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
@@ -203,23 +207,40 @@ describe('WorkspaceShare', () => {
   it('saves acl correctly after changes made', async () => {
     const clock = Lolex.install({ shouldAdvanceTime: true });
     const wrapper = component();
-    wrapper
-      .find('[data-test-id="search"]')
-      .simulate('change', { target: { value: 'luna' } });
-    clock.tick(401);
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.update();
-    clock.uninstall();
-    // add luna to acl
+    await searchForUser(wrapper, clock, 'luna');
+
+    // Luna: add, remove, add again
     wrapper
       .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
       .first()
       .simulate('click');
-    // remove ron from acl
+    wrapper
+      .find('[data-test-id="remove-collab-luna.lovegood@hogwarts.edu"]')
+      .first()
+      .simulate('click');
+    await searchForUser(wrapper, clock, 'luna');
+    wrapper
+      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
+      .first()
+      .simulate('click');
+
+    // Ron: remove, add, remove again
     wrapper
       .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
       .first()
       .simulate('click');
+    await searchForUser(wrapper, clock, 'ron');
+    wrapper
+      .find('[data-test-id="add-collab-ron.weasley@hogwarts.edu"]')
+      .first()
+      .simulate('click');
+    wrapper
+      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
+      .first()
+      .simulate('click');
+
+    clock.uninstall();
+
     // change hermione's access to owner
     const selectComponent = wrapper
       .find('[data-test-id="hermione.granger@hogwarts.edu-user-role"]')
@@ -236,18 +257,19 @@ describe('WorkspaceShare', () => {
       .first()
       .simulate('click');
     wrapper.update();
-    const spy = jest.spyOn(workspacesApi(), 'shareWorkspace');
+
+    const spy = jest.spyOn(workspacesApi(), 'shareWorkspacePatch');
     wrapper.find('[data-test-id="save"]').first().simulate('click');
     expect(spy).toHaveBeenCalledWith(
       tomRiddleDiary.namespace,
       tomRiddleDiary.name,
       {
         workspaceEtag: tomRiddleDiary.etag,
-        items: fp.sortBy('familyName', [
-          harryRole,
-          { ...hermioneRole, role: WorkspaceAccessLevel.OWNER },
+        items: [
           { ...lunaRole, role: WorkspaceAccessLevel.READER },
-        ]),
+          { ...ronRole, role: WorkspaceAccessLevel.NOACCESS },
+          { ...hermioneRole, role: WorkspaceAccessLevel.OWNER },
+        ],
       }
     );
   });

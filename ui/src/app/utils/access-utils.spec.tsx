@@ -438,13 +438,11 @@ describe('hasExpired', () => {
   });
 
   it('should return hasExpired=false for a null date', () => {
-    const testTime = nowPlusDays(null);
-    expect(hasExpired(testTime)).toBeFalsy();
+    expect(hasExpired(null)).toBeFalsy();
   });
 
   it('should return hasExpired=false for an undefined date', () => {
-    const testTime = nowPlusDays(undefined);
-    expect(hasExpired(testTime)).toBeFalsy();
+    expect(hasExpired(undefined)).toBeFalsy();
   });
 });
 

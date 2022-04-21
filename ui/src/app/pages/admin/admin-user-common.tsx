@@ -40,12 +40,12 @@ import {
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import {
-  accessRenewalModules,
   AccessRenewalStatus,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   getAccessModuleStatusByNameOrEmpty,
+  rtAccessRenewalModules,
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
 import { getRoleOptions } from 'app/utils/institutions';
@@ -653,8 +653,8 @@ export const AccessModuleExpirations = ({ profile }: ExpirationProps) => {
   // compliance training is feature-flagged in some environments
   const { enableComplianceTraining } = serverConfigStore.get().config;
   const moduleNames = enableComplianceTraining
-    ? accessRenewalModules
-    : accessRenewalModules.filter(
+    ? rtAccessRenewalModules
+    : rtAccessRenewalModules.filter(
         (moduleName) => moduleName !== AccessModule.COMPLIANCETRAINING
       );
 

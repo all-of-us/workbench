@@ -153,6 +153,7 @@ export interface State {
   workspaceUpdateConflictError: boolean;
   loadingUserRoles: boolean;
   userRoles: UserRole[];
+  userRolesToChange: UserRole[];
   searchTerm: string;
   dropDown: boolean;
 }
@@ -183,6 +184,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         workspaceUpdateConflictError: false,
         loadingUserRoles: true,
         userRoles: [],
+        userRolesToChange: [],
         searchTerm: '',
         dropDown: false,
       };
@@ -214,7 +216,10 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
           this.props.workspace.namespace,
           this.props.workspace.id
         );
-        this.setState({ userRoles: fp.sortBy('familyName', resp.items) });
+        this.setState({
+          userRoles: fp.sortBy('familyName', resp.items),
+          userRolesToChange: [],
+        });
       } catch (error) {
         if (error.status === 404) {
           this.setState({ workspaceFound: false });
@@ -230,20 +235,23 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       }
       this.setState({ saving: true, workspaceShareError: false });
       workspacesApi()
-        .shareWorkspace(
+        .shareWorkspacePatch(
           this.props.workspace.namespace,
           this.props.workspace.id,
           {
             workspaceEtag: this.props.workspace.etag,
-            items: this.state.userRoles,
+            items: this.state.userRolesToChange,
           }
         )
         .then((resp: WorkspaceUserRolesResponse) => {
           currentWorkspaceStore.next({
             ...currentWorkspaceStore.getValue(),
             etag: resp.workspaceEtag,
-            userRoles: resp.items,
           } as WorkspaceData);
+          this.setState({
+            userRoles: resp.items,
+            userRolesToChange: [],
+          });
           this.props.onClose();
         })
         .catch((error) => {
@@ -263,10 +271,22 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
     }
 
     removeCollaborator(user: UserRole): void {
+      // remove from userRoles if it exists
+      const userRoles = this.state.userRoles.filter(
+        ({ email }) => user.email !== email
+      );
+
+      // may or may not exist in the changeset (may have been added previously)
+      const userRolesToChange = this.state.userRolesToChange
+        .filter(({ email }) => user.email !== email)
+        .concat({
+          ...user,
+          role: WorkspaceAccessLevel.NOACCESS,
+        });
+
       this.setState({
-        userRoles: fp.remove(({ email }) => {
-          return user.email === email;
-        }, this.state.userRoles),
+        userRoles,
+        userRolesToChange,
       });
     }
 
@@ -277,15 +297,24 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         email: user.email,
         role: WorkspaceAccessLevel.READER,
       };
+
+      const userRoles = fp.sortBy(
+        'familyName',
+        this.state.userRoles.concat(userRole)
+      );
+
+      // may or may not exist in the changeset (may have been set to NOACCESS previously)
+      const userRolesToChange = this.state.userRolesToChange
+        .filter(({ email }) => user.email !== email)
+        .concat(userRole);
+
       this.setState({
         searchTerm: '',
         autocompleteLoading: false,
         autocompleteUsers: [],
         dropDown: false,
-        userRoles: fp.sortBy(
-          'familyName',
-          this.state.userRoles.concat(userRole)
-        ),
+        userRoles,
+        userRolesToChange,
       });
     }
 
@@ -322,20 +351,19 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         });
     }
 
-    setRole(e, user): void {
-      const oldUserRoles = this.state.userRoles;
-      const newUserRoleList = fp.map((u) => {
+    setRole(e, user: UserRole): void {
+      const userRoles = fp.map((u) => {
         return u.email === user.email ? { ...u, role: e } : u;
-      }, oldUserRoles);
-      this.setState({ userRoles: newUserRoleList });
-    }
+      }, this.state.userRoles);
 
-    resetModalState(): void {
+      // may or may not already exist in the changeset
+      const userRolesToChange = this.state.userRolesToChange
+        .filter(({ email }) => user.email !== email)
+        .concat({ ...user, role: e });
+
       this.setState({
-        userNotFound: '',
-        workspaceShareError: false,
-        workspaceUpdateConflictError: false,
-        saving: false,
+        userRoles,
+        userRolesToChange,
       });
     }
 

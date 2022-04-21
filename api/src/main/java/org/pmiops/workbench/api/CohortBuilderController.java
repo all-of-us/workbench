@@ -215,14 +215,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CardCountResponse> findEhrDomainCounts(
+  public ResponseEntity<CardCountResponse> findUniversalDomainCounts(
       String workspaceNamespace, String workspaceId, String term) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateTerm(term);
 
     return ResponseEntity.ok(
-        new CardCountResponse().items(cohortBuilderService.findEhrDomainCounts(term)));
+        new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
   }
 
   @Override

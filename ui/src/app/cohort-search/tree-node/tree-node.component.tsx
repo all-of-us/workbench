@@ -28,8 +28,10 @@ import {
 } from 'app/utils/navigation';
 
 const COPE_SURVEY_ID = 1333342;
+const MINUTE_SURVEY_ID = 765936;
 export const COPE_SURVEY_GROUP_NAME =
   'COVID-19 Participant Experience (COPE) Survey';
+export const MINUTE_SURVEY_GROUP_NAME = 'COVID-19 Vaccine Survey';
 const styles = reactStyles({
   code: {
     color: colors.dark,
@@ -398,14 +400,15 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     setSidebarActiveIconStore.next('criteria');
   }
 
-  get isCOPESurvey() {
+  get isCOPEOrMinuteSurvey() {
     const {
       node: { conceptId, name, subtype },
     } = this.props;
     return (
-      subtype === CriteriaSubType.SURVEY.toString() &&
-      conceptId === COPE_SURVEY_ID &&
-      name === COPE_SURVEY_GROUP_NAME
+      (subtype === CriteriaSubType.SURVEY.toString() &&
+        conceptId === COPE_SURVEY_ID &&
+        name === COPE_SURVEY_GROUP_NAME) ||
+      (conceptId === MINUTE_SURVEY_ID && name === MINUTE_SURVEY_GROUP_NAME)
     );
   }
 
@@ -540,7 +543,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                   style={searchMatch ? styles.searchMatch : {}}
                 >
                   {displayName}
-                  {this.isCOPESurvey && (
+                  {this.isCOPEOrMinuteSurvey && (
                     <span style={{ paddingRight: '0.1rem' }}>
                       {' '}
                       - <i> Versioned</i>{' '}

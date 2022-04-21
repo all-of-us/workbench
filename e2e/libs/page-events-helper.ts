@@ -1,6 +1,7 @@
 import fp from 'lodash/fp';
 import { JSHandle, Request } from 'puppeteer';
 import { logger } from 'libs/logger';
+import { config } from 'resources/workbench-config';
 
 export const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
   return jsHandle
@@ -33,6 +34,7 @@ const stringifyData = (data: string): string => {
  *  Returns null if this request matches the exclude pattern.
  */
 const isWorkbenchRequest = (request: Request): Request | null => {
+  const apiHostName = config.API_HOSTNAME;
   const unwantedRequests = [
     'google',
     'content-security-index-report',
@@ -44,7 +46,7 @@ const isWorkbenchRequest = (request: Request): Request | null => {
   ];
   return request &&
     !unwantedRequests.some((urlPart) => request.url().includes(urlPart)) &&
-    /all-of-us-workbench-(test|staging).appspot.com/.exec(request.url()) != null
+    request.url().includes(apiHostName)
     ? request
     : null;
 };
