@@ -141,7 +141,6 @@ const styles = reactStyles({
     color: colors.primary,
     margin: '1em 0 1em 0',
     fontSize: 14,
-    fontWeight: 500,
   },
 });
 
@@ -312,11 +311,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       if (this.state.saving) {
         return;
       }
-      this.setState({
-        saving: true,
-        workspaceShareError: false,
-        workflowRolesErrors: [],
-      });
+      this.setState({ saving: true });
       workspacesApi()
         .shareWorkspacePatch(
           this.props.workspace.namespace,
