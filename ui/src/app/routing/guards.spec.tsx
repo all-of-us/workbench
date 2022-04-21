@@ -159,7 +159,7 @@ describe('redirectTo', () => {
       ACCESS_RENEWAL_PATH,
       {
         ...ProfileStubVariables.PROFILE_STUB,
-        accessTierShortNames: [AccessTierShortNames.Registered],
+        accessTierShortNames: [],
         accessModules: {
           anyModuleHasExpired: false,
           modules: allBypassedMissingPP,
