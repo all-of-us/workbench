@@ -60,14 +60,16 @@ export const MaybeModule = ({
   const status = getAccessModuleStatusByName(profile, moduleName);
   return (
     <Module
-      active={active}
-      clickable={clickable}
-      eligible={eligible}
-      moduleAction={moduleAction}
-      moduleName={moduleName}
-      profile={profile}
-      spinnerProps={spinnerProps}
-      status={status}
+      {...{
+        active,
+        clickable,
+        eligible,
+        moduleAction,
+        moduleName,
+        profile,
+        spinnerProps,
+        status,
+      }}
     >
       {showTwoFactorAuthModal && (
         <TwoFactorAuthModal

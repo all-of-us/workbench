@@ -31,12 +31,10 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
     <FlexColumn style={styles.modulesContainer}>
       {modules.map((moduleName) => (
         <MaybeModule
+          {...{ moduleName, profile, spinnerProps }}
           key={moduleName}
-          moduleName={moduleName}
-          profile={profile}
           active={activeModule === moduleName}
           clickable={clickableModules.includes(moduleName)}
-          spinnerProps={spinnerProps}
         />
       ))}
       {children}

@@ -31,7 +31,7 @@ const TemporaryRASModule = (props: { profile: Profile }) => {
       <FlexRow style={styles.moduleCTA} />
       <FlexRow style={styles.backgroundModuleBox}>
         <ModuleIcon
-          moduleName={moduleName}
+          {...{ moduleName }}
           completedOrBypassed={false}
           eligible={false}
         />
@@ -105,18 +105,13 @@ export const RegisteredTierCard = (props: {
       </FlexColumn>
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
-          profile={profile}
+          {...{ profile, activeModule, clickableModules, spinnerProps }}
           modules={getEligibleModules(initialRtModules, profile)}
-          activeModule={activeModule}
-          clickableModules={clickableModules}
-          spinnerProps={spinnerProps}
         >
-          {!enableRasLoginGovLinking && (
-            <TemporaryRASModule profile={profile} />
-          )}
+          {!enableRasLoginGovLinking && <TemporaryRASModule {...{ profile }} />}
         </ModulesForInitialRegistration>
       ) : (
-        <ModulesForAnnualRenewal profile={profile} modules={renewalRtModules} />
+        <ModulesForAnnualRenewal {...{ profile }} modules={renewalRtModules} />
       )}
     </FlexRow>
   );

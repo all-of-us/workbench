@@ -49,7 +49,7 @@ export const LoginGovHelpText = (props: {
         <div>
           Looks like you still need to complete this action, please try again.
         </div>
-        <ContactUs profile={profile} />
+        <ContactUs {...{ profile }} />
       </div>
     ) : (
       <div style={styles.loginGovHelp}>
@@ -58,7 +58,7 @@ export const LoginGovHelpText = (props: {
           need to provide your state ID, social security number, and phone
           number.
         </div>
-        <ContactUs profile={profile} />
+        <ContactUs {...{ profile }} />
       </div>
     ))
   );

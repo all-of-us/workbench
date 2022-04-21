@@ -34,14 +34,11 @@ export const DuccCard = (props: {
       </FlexColumn>
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
-          profile={profile}
+          {...{ profile, activeModule, clickableModules, spinnerProps }}
           modules={[duccModule]}
-          activeModule={activeModule}
-          clickableModules={clickableModules}
-          spinnerProps={spinnerProps}
         />
       ) : (
-        <ModulesForAnnualRenewal profile={profile} modules={[duccModule]} />
+        <ModulesForAnnualRenewal {...{ profile }} modules={[duccModule]} />
       )}
     </FlexRow>
   );

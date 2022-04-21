@@ -64,6 +64,7 @@ export const Module = (props: {
     spinnerProps,
     status,
   } = props;
+  const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -78,26 +79,20 @@ export const Module = (props: {
             (clickable || moduleName === AccessModule.ERACOMMONS) &&
               showRefresh &&
               !!refreshAction,
-            () => (
-              <Refresh
-                refreshAction={refreshAction}
-                showSpinner={spinnerProps.showSpinner}
-              />
-            ),
+            () => <Refresh {...{ refreshAction, showSpinner }} />,
           ],
           [active, () => <Next />]
         )}
       </FlexRow>
       <ModuleBox
-        clickable={clickable}
+        {...{ clickable }}
         action={() => {
           setShowRefresh(true);
           moduleAction();
         }}
       >
         <ModuleIcon
-          moduleName={moduleName}
-          eligible={eligible}
+          {...{ moduleName, eligible }}
           completedOrBypassed={isCompliant(status)}
         />
         <FlexColumn>
@@ -112,7 +107,7 @@ export const Module = (props: {
             }
           >
             <DARTitleComponent
-              profile={profile}
+              {...{ profile }}
               afterInitialClick={showRefresh}
             />
           </div>

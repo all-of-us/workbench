@@ -577,33 +577,27 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard
+        {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
         key='rt'
-        profile={profile}
-        activeModule={activeModule}
-        clickableModules={clickableModules}
-        spinnerProps={spinnerProps}
-        pageMode={pageMode}
       />
     );
     const ctCard = showCtCard ? (
       <ControlledTierCard
+        {...{
+          profile,
+          activeModule,
+          clickableModules,
+          reload,
+          spinnerProps,
+          pageMode,
+        }}
         key='ct'
-        profile={profile}
-        activeModule={activeModule}
-        clickableModules={clickableModules}
-        reload={reload}
-        spinnerProps={spinnerProps}
-        pageMode={pageMode}
       />
     ) : null;
     const dCard = (
       <DuccCard
+        {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
         key='dt'
-        profile={profile}
-        activeModule={activeModule}
-        clickableModules={clickableModules}
-        spinnerProps={spinnerProps}
-        pageMode={pageMode}
         stepNumber={showCtCard ? 3 : 2}
       />
     );
@@ -612,13 +606,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     return (
       <FlexColumn style={styles.pageWrapper}>
-        <OuterHeader pageMode={pageMode} />
+        <OuterHeader {...{ pageMode }} />
         {profile && !nextRequired && <Completed />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>
-          <InnerHeader pageMode={pageMode} />
+          <InnerHeader {...{ pageMode }} />
           <React.Fragment>{cards}</React.Fragment>
         </FadeBox>
       </FlexColumn>

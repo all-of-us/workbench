@@ -51,14 +51,9 @@ const ControlledTierEraModule = (props: {
 
   return (
     <Module
+      {...{ clickable, eligible, moduleName, profile, spinnerProps, status }}
       active={false}
-      clickable={clickable}
-      eligible={eligible}
       moduleAction={redirectToNiH}
-      moduleName={moduleName}
-      profile={profile}
-      spinnerProps={spinnerProps}
-      status={status}
     />
   );
 };
@@ -174,18 +169,14 @@ export const ControlledTierCard = (props: {
         />
         {displayEraCommons && (
           <ControlledTierEraModule
-            profile={profile}
+            {...{ profile, spinnerProps }}
             eligible={isEligible}
-            spinnerProps={spinnerProps}
           />
         )}
         {pageMode === DARPageMode.INITIAL_REGISTRATION && (
           <ModulesForInitialRegistration
-            profile={profile}
+            {...{ profile, activeModule, clickableModules, spinnerProps }}
             modules={[ctModule]}
-            activeModule={activeModule}
-            clickableModules={clickableModules}
-            spinnerProps={spinnerProps}
           />
         )}
         {pageMode === DARPageMode.ANNUAL_RENEWAL && isEligible && (
