@@ -70,14 +70,14 @@ export const redirectTo = (profile: Profile): AccessModulesRedirection => {
 // TODO combine these into an "RT Access Guard" or similar?
 export const registrationGuard: Guard = {
   allowed: () =>
-    redirectTo(profileStore.get().profile) ===
+    redirectTo(profileStore.get().profile) !==
     AccessModulesRedirection.DATA_ACCESS_REQUIREMENTS,
   redirectPath: DATA_ACCESS_REQUIREMENTS_PATH,
 };
 
 export const rtExpiredGuard: Guard = {
   allowed: () =>
-    redirectTo(profileStore.get().profile) ===
+    redirectTo(profileStore.get().profile) !==
     AccessModulesRedirection.ACCESS_RENEWAL,
   redirectPath: ACCESS_RENEWAL_PATH,
 };
