@@ -1284,9 +1284,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
-    const showCtCard =
-      pageMode === DARPageMode.INITIAL_REGISTRATION ||
-      pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard
         key='rt'
@@ -1297,7 +1294,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         pageMode={pageMode}
       />
     );
-    const ctCard = showCtCard ? (
+    const ctCard = (
       <ControlledTierCard
         key='ct'
         profile={profile}
@@ -1307,7 +1304,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         spinnerProps={spinnerProps}
         pageMode={pageMode}
       />
-    ) : null;
+    );
     const dCard = (
       <DuccCard
         key='dt'
@@ -1316,11 +1313,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         clickableModules={clickableModules}
         spinnerProps={spinnerProps}
         pageMode={pageMode}
-        stepNumber={showCtCard ? 3 : 2}
+        stepNumber={3}
       />
     );
 
-    const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
+    const cards = [rtCard, ctCard, dCard];
 
     return (
       <FlexColumn style={styles.pageWrapper}>
