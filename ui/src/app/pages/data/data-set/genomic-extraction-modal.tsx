@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import * as fp from 'lodash/fp';
 
 import { DataSet, GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
@@ -15,14 +14,9 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { TextColumn } from 'app/components/text-column';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
-import {
-  genomicExtractionJobsSWRKey,
-  useGenomicExtractionJobs,
-  useStore,
-} from 'app/utils/stores';
+import { useGenomicExtractionJobs } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 import moment from 'moment';
-import { useSWRConfig } from 'swr';
 
 const { useState } = React;
 
@@ -64,8 +58,10 @@ export const GenomicExtractionModal = ({
   const [error, setError] = useState<{ status: number; message: string }>(null);
   const isClientError = error && 400 <= error.status && error.status < 500;
 
-  const {mutate} = useSWRConfig();
-  const {data: jobs} = useGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName);
+  const { data: jobs, mutate } = useGenomicExtractionJobs(
+    workspaceNamespace,
+    workspaceFirecloudName
+  );
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter(
       (extract: GenomicExtractionJob) => extract.datasetName === dataSet.name
@@ -80,8 +76,6 @@ export const GenomicExtractionModal = ({
   )(jobs || []);
 
   const loading = !jobs || launching;
-
-  const jobsSWRKey = genomicExtractionJobsSWRKey(workspaceNamespace, workspaceFirecloudName);
 
   const runningExtract =
     mostRecentExtract && mostRecentExtract.status === TerraJobStatus.RUNNING;
@@ -179,7 +173,7 @@ export const GenomicExtractionModal = ({
           onClick={async () => {
             setLaunching(true);
             try {
-              await mutate(jobsSWRKey, async () => {
+              await mutate(async () => {
                 const job = await dataSetApi().extractGenomicData(
                   workspaceNamespace,
                   workspaceFirecloudName,
