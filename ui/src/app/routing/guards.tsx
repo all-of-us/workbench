@@ -1,4 +1,4 @@
-import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
+import { AccessModule, Profile } from 'generated/fetch';
 
 import { Guard } from 'app/components/app-router';
 import { cond } from 'app/utils';
