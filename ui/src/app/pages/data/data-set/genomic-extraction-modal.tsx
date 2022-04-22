@@ -173,15 +173,13 @@ export const GenomicExtractionModal = ({
           onClick={async () => {
             setLaunching(true);
             try {
-              await mutate(async () => {
-                const job = await dataSetApi().extractGenomicData(
-                  workspaceNamespace,
-                  workspaceFirecloudName,
-                  dataSet.id
-                );
-                closeFunction();
-                return fp.concat(jobs, job);
-              });
+              const job = await dataSetApi().extractGenomicData(
+                workspaceNamespace,
+                workspaceFirecloudName,
+                dataSet.id
+              );
+              mutate(fp.concat(jobs, job));
+              closeFunction();
             } catch (e) {
               const errJson = (await e.json().catch(() => {})) || {};
               setError({
