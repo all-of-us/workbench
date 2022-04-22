@@ -1,4 +1,7 @@
+import { AccessModule, Profile } from 'generated/fetch';
+
 import { Guard } from 'app/components/app-router';
+import { cond } from 'app/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
@@ -7,6 +10,7 @@ import {
   ACCESS_RENEWAL_PATH,
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
+  getAccessModuleStatusByNameOrEmpty,
 } from 'app/utils/access-utils';
 import {
   AuthorityGuardedAction,
@@ -40,15 +44,41 @@ export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
   redirectPath: '/',
 });
 
-export const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredTierAccess(profileStore.get().profile),
-  redirectPath: DATA_ACCESS_REQUIREMENTS_PATH,
+const allCompleteOrBypassed = (
+  profile: Profile,
+  moduleNames: AccessModule[]
+) => {
+  const modules = profile?.accessModules?.modules;
+  return moduleNames.every((moduleName) => {
+    const status = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
+    return !!status?.completionEpochMillis || !!status?.bypassEpochMillis;
+  });
 };
 
-export const rtExpiredGuard: Guard = {
-  allowed: (): boolean =>
-    !profileStore.get().profile.accessModules.anyModuleHasExpired,
-  redirectPath: ACCESS_RENEWAL_PATH,
+// use this for all access-module routing decisions, to ensure only one routing is chosen
+export const shouldRedirectToMaybe = (profile: Profile): string | undefined => {
+  return cond(
+    [profile?.accessModules?.anyModuleHasExpired, () => ACCESS_RENEWAL_PATH],
+    // not a common scenario (mainly test users) but AAR is the only way to recover if these modules are missing
+    [
+      !allCompleteOrBypassed(profile, [
+        AccessModule.PROFILECONFIRMATION,
+        AccessModule.PUBLICATIONCONFIRMATION,
+      ]),
+      () => ACCESS_RENEWAL_PATH,
+    ],
+    [!hasRegisteredTierAccess(profile), () => DATA_ACCESS_REQUIREMENTS_PATH]
+    // by default: no redirect
+  );
+};
+
+// use this for all access-module routing decisions, to ensure only one routing is chosen
+export const getAccessModuleGuard = (): Guard => {
+  const redirectPath = shouldRedirectToMaybe(profileStore.get().profile);
+  return {
+    allowed: () => !redirectPath,
+    redirectPath,
+  };
 };
 
 export const adminLockedGuard = (ns: string, wsid: string): Guard => {
