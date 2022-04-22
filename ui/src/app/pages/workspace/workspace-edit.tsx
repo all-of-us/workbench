@@ -761,6 +761,7 @@ export const WorkspaceEdit = fp.flow(
         ? 'pi pi-angle-down'
         : 'pi pi-angle-right';
     }
+
     /**
      * Creates a form element containing the checkbox, header, and description
      * (plus optional child elements) for each of the "primary purpose of your
@@ -822,6 +823,7 @@ export const WorkspaceEdit = fp.flow(
         )
       );
     }
+
     /**
      * Creates a form element containing the checkbox, header, and description
      * (plus optional child elements) for each of the "Disseminate Research" options.
@@ -870,6 +872,7 @@ export const WorkspaceEdit = fp.flow(
         </div>
       );
     }
+
     /**
      * Creates the form element for each of the "focus on specific populations"
      * options.
