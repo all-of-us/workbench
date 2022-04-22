@@ -252,6 +252,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
         </button>
         {menuOpen && (
           <div
+            className='p-tieredmenu p-menu-overlay-visible'
             data-test-id='criteria-menu-dropdown'
             ref={menuRef}
             style={styles.dropdownMenu}
@@ -315,7 +316,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   menuOptions.map((category, index) => (
                     <div key={index}>
                       {categoryHasResults(index) && (
-                        <div style={styles.dropdownHeader}>
+                        <div style={styles.dropdownHeader} className='menuitem-header'>
                           <span style={styles.dropdownHeaderText}>
                             {category[0].category}
                           </span>
@@ -331,6 +332,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                         )
                         .map((menuItem, m) => (
                           <div
+                            role='menuitem'
                             key={m}
                             style={{
                               ...styles.dropdownItem,
