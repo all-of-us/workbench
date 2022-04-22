@@ -33,6 +33,7 @@ handlers:
         'self'
         'unsafe-inline'
         https://apis.google.com
+        https://accounts.google.com/gsi/client
         https://*.googleapis.com
         https://static.zdassets.com
         https://www.googletagmanager.com

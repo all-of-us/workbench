@@ -14,6 +14,7 @@ import {
 import { delay } from 'app/utils/subscribable';
 
 declare const gapi: any;
+declare const google: any;
 import { profileApi } from 'app/services/swagger-fetch-clients';
 
 // for e2e tests: provide your own oauth token to obviate Google's oauth UI
@@ -33,42 +34,78 @@ export const isTestAccessTokenActive = () => {
   );
 };
 
+// const makeAuth2 = (config: ConfigResponse): Promise<any> => {
+//   return new Promise((resolve, reject) => {
+//     gapi.load('auth2', () => {
+//       gapi.auth2
+//         .init({
+//           client_id: environment.clientId,
+//           hosted_domain: config.gsuiteDomain,
+//           scope: 'https://www.googleapis.com/auth/plus.login openid profile',
+//           max_age: '0'
+//         })
+//         .then(
+//           // onInit
+//           () => {
+//             authStore.set({
+//               ...authStore.get(),
+//               authLoaded: true,
+//               isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get(),
+//             });
+//
+//             gapi.auth2
+//               .getAuthInstance()
+//               .isSignedIn.listen((nextIsSignedIn: boolean) => {
+//                 authStore.set({
+//                   ...authStore.get(),
+//                   isSignedIn: nextIsSignedIn,
+//                 });
+//               });
+//           },
+//           // onError
+//           ({ error, details }) => {
+//             const authError = `${error}: ${details}`;
+//             authStore.set({ ...authStore.get(), authError });
+//             reject(authError);
+//           }
+//         );
+//       resolve(gapi.auth2);
+//     });
+//   });
+// };
+
 const makeAuth2 = (config: ConfigResponse): Promise<any> => {
   return new Promise((resolve, reject) => {
-    gapi.load('auth2', () => {
-      gapi.auth2
-        .init({
-          client_id: environment.clientId,
-          hosted_domain: config.gsuiteDomain,
-          scope: 'https://www.googleapis.com/auth/plus.login openid profile',
-          max_age: '0'
-        })
-        .then(
-          // onInit
-          () => {
-            authStore.set({
-              ...authStore.get(),
-              authLoaded: true,
-              isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get(),
-            });
-
-            gapi.auth2
-              .getAuthInstance()
-              .isSignedIn.listen((nextIsSignedIn: boolean) => {
-                authStore.set({
-                  ...authStore.get(),
-                  isSignedIn: nextIsSignedIn,
-                });
-              });
-          },
-          // onError
-          ({ error, details }) => {
-            const authError = `${error}: ${details}`;
-            authStore.set({ ...authStore.get(), authError });
-            reject(authError);
-          }
-        );
-      resolve(gapi.auth2);
+    google.accounts.oauth2.initCodeClient({
+      client_id: 'YOUR_CLIENT_ID',
+      scope: 'https://www.googleapis.com/auth/calendar.readonly',
+      ux_mode: 'popup',
+      callback: (response) => {
+        profileApi().signIn({
+          authCode: response['code'],
+          redirectUrl: `${window.location.protocol}//${window.location.host}`,
+        });
+      },
+    }););
+   google.accounts.oauth2.initCodeClient({
+      client_id: 'YOUR_CLIENT_ID',
+      scope: 'https://www.googleapis.com/auth/calendar.readonly',
+      ux_mode: 'popup',
+      callback: (response) => {
+        var code_receiver_uri = 'YOUR_AUTHORIZATION_CODE_ENDPOINT_URI',
+          // Send auth code to your backend platform
+          const xhr = new XMLHttpRequest();
+        xhr.open('POST', code_receiver_uri, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+          console.log('Signed in as: ' + xhr.responseText);
+        };
+        xhr.send('code=' + code);
+        // After receipt, the code is exchanged for an access token and
+        // refresh token, and the platform then updates this web app
+        // running in user's browser with the requested calendar info.
+      },
     });
   });
 };
@@ -86,6 +123,19 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
 // };
 
 export const signIn = (): void => {
+  AnalyticsTracker.Registration.SignIn();
+  gapi.load('auth2', () => {
+    // gapi.auth2.getAuthInstance().signIn({
+    //   prompt: 'select_account',
+    //   ux_mode: 'redirect',
+    //   redirect_uri: `${window.location.protocol}//${window.location.host}`,
+    // });
+    gapi.auth2.getAuthInstance().grantOfflineAccess({max_age: 0}).then(signInCallback);
+  });
+};
+
+
+export const signIn2 = (): void => {
   AnalyticsTracker.Registration.SignIn();
   gapi.load('auth2', () => {
     // gapi.auth2.getAuthInstance().signIn({
