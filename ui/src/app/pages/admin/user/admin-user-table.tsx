@@ -9,7 +9,7 @@ import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { AdminUserBypass } from 'app/pages/admin/admin-user-bypass';
+import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
 import {
   authDomainApi,
   userAdminApi,
@@ -79,7 +79,7 @@ interface State {
  * Users with the ACCESS_MODULE_ADMIN permission use this
  * to manually set (approve/reject) access module bypasses.
  */
-export const AdminUsers = withUserProfile()(
+export const AdminUserTable = withUserProfile()(
   class extends React.Component<Props, State> {
     debounceUpdateFilter: Function;
     constructor(props) {

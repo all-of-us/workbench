@@ -17,6 +17,7 @@ import { SmallHeader } from 'app/components/headers';
 import { TextInputWithLabel, Toggle } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { hasNewValidProps, isBlank, reactStyles } from 'app/utils';
 import {
@@ -41,7 +42,6 @@ import {
   updateAccountProperties,
   UserAdminTableLink,
 } from './admin-user-common';
-import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -130,7 +130,7 @@ interface State {
   verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
 }
 
-export const AdminUser = withRouter(
+export const DeprecatedAdminUser = withRouter(
   class extends React.Component<Props, State> {
     private aborter: AbortController;
 
