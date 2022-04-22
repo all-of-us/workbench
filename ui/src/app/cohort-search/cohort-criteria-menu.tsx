@@ -316,7 +316,10 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   menuOptions.map((category, index) => (
                     <div key={index}>
                       {categoryHasResults(index) && (
-                        <div style={styles.dropdownHeader} className='menuitem-header'>
+                        <div
+                          style={styles.dropdownHeader}
+                          className='menuitem-header'
+                        >
                           <span style={styles.dropdownHeaderText}>
                             {category[0].category}
                           </span>
