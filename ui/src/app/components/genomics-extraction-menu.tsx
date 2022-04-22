@@ -33,17 +33,10 @@ const styles = {
 interface Props {
   job: GenomicExtractionJob;
   workspace: WorkspaceData;
-  mutateJob: (
-    updateFn: () => Promise<void>,
-    optimisticValue: GenomicExtractionJob
-  ) => void;
+  onMutate: () => void;
 }
 
-export const GenomicsExtractionMenu = ({
-  job,
-  workspace,
-  mutateJob,
-}: Props) => {
+export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
   const tooltip = switchCase(
@@ -81,20 +74,13 @@ export const GenomicsExtractionMenu = ({
               style={styles.menuItem}
               faIcon={faBan}
               disabled={!isRunning || !canWrite}
-              onClick={() => {
-                mutateJob(
-                  async () => {
-                    await dataSetApi().abortGenomicExtractionJob(
-                      workspace.namespace,
-                      workspace.id,
-                      job.genomicExtractionJobId.toString()
-                    );
-                  },
-                  {
-                    ...job,
-                    status: TerraJobStatus.ABORTING,
-                  }
+              onClick={async () => {
+                await dataSetApi().abortGenomicExtractionJob(
+                  workspace.namespace,
+                  workspace.id,
+                  job.genomicExtractionJobId.toString()
                 );
+                onMutate();
               }}
               tooltip={tooltip}
             >

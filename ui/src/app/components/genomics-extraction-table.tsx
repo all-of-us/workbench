@@ -101,10 +101,7 @@ const MissingCell = () => <span style={{ fontSize: '.4rem' }}>&mdash;</span>;
 const mapJobToTableRow = (
   job: GenomicExtractionJob,
   workspace: WorkspaceData,
-  mutateJob: (
-    updateFn: () => Promise<void>,
-    optimisticValue: GenomicExtractionJob
-  ) => void
+  onMutate: () => void
 ) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment =
@@ -171,7 +168,7 @@ const mapJobToTableRow = (
       ) : (
         (job.vcfSizeMb / 1000).toFixed(1) + 'GB'
       ),
-    menuJsx: <GenomicsExtractionMenu {...{ job, workspace, mutateJob }} />,
+    menuJsx: <GenomicsExtractionMenu {...{ job, workspace, onMutate }} />,
   };
 };
 
@@ -257,34 +254,9 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
                   sortField={!jobs || jobs.length > 0 ? 'dateStarted' : ''}
                   sortOrder={-1}
                   value={jobs.map((job) =>
-                    mapJobToTableRow(
-                      job,
-                      workspace,
-                      (updateFn, optimisticValue) => {
-                        // Update the extraction job list optimistically.
-                        const optimisticData = jobs.map((j) => {
-                          if (
-                            j.genomicExtractionJobId ===
-                            job.genomicExtractionJobId
-                          ) {
-                            return optimisticValue;
-                          }
-                          return j;
-                        });
-                        mutate(
-                          async () => {
-                            await updateFn();
-                            // Callback result is ignored due to populateCache: false
-                            return undefined;
-                          },
-                          {
-                            optimisticData,
-                            populateCache: false,
-                            rollbackOnError: true,
-                          }
-                        );
-                      }
-                    )
+                    mapJobToTableRow(job, workspace, () => {
+                      mutate();
+                    })
                   )}
                   style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
                 >
