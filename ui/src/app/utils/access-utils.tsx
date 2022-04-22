@@ -10,7 +10,6 @@ import {
   Profile,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
@@ -390,11 +389,7 @@ export const useNeedsToAcceptTOS = () => {
   const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] =
     useState<boolean>(false);
   useEffect(() => {
-    if (
-      !authLoaded ||
-      !isSignedIn ||
-      !environment.enableTOSRedirectForLoggedInUser
-    ) {
+    if (!authLoaded || !isSignedIn) {
       setUserRequiredToAcceptTOS(false);
     } else if (profile) {
       // wait for profile to load, to  ensure user initialization happens
