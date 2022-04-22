@@ -499,7 +499,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass, accessTiersVisibleToUsers },
+      config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
     useEffect(() => {
@@ -571,17 +571,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
-    const showCtCard =
-      (pageMode === DARPageMode.INITIAL_REGISTRATION &&
-        accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)) ||
-      pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard
         {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
         key='rt'
       />
     );
-    const ctCard = showCtCard ? (
+    const ctCard = (
       <ControlledTierCard
         {...{
           profile,
@@ -593,16 +589,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         }}
         key='ct'
       />
-    ) : null;
+    );
     const dCard = (
       <DuccCard
         {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
         key='dt'
-        stepNumber={showCtCard ? 3 : 2}
+        stepNumber={3}
       />
     );
 
-    const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
+    const cards = [rtCard, ctCard, dCard];
 
     return (
       <FlexColumn style={styles.pageWrapper}>

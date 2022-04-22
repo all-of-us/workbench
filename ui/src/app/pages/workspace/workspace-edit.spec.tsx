@@ -50,7 +50,6 @@ import {
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import { updateVisibleTiers } from 'testing/test-utils';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
@@ -468,17 +467,6 @@ describe('WorkspaceEdit', () => {
     ).toBeFalsy();
   });
 
-  it('does not display the access tier dropdown when multiple tiers are not available', async () => {
-    updateVisibleTiers([AccessTierShortNames.Registered]);
-
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(
-      wrapper.find('[data-test-id="select-access-tier"]').exists()
-    ).toBeFalsy();
-  });
-
   it(
     'enables access tier selection on creation when multiple tiers are present' +
       ' and the user has access to multiple',
@@ -487,7 +475,6 @@ describe('WorkspaceEdit', () => {
         AccessTierShortNames.Registered,
         AccessTierShortNames.Controlled,
       ];
-      updateVisibleTiers(twoTiers);
       workspaceEditMode = WorkspaceEditMode.Create;
       profileStore.set({
         ...profileStore.get(),
@@ -496,7 +483,6 @@ describe('WorkspaceEdit', () => {
           accessTierShortNames: twoTiers,
         },
       });
-
       const wrapper = component();
       await waitOneTickAndUpdate(wrapper);
 
@@ -529,7 +515,6 @@ describe('WorkspaceEdit', () => {
       ]);
 
       // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
-
       await simulateSelection(
         accessTierSelection,
         AccessTierShortNames.Controlled
@@ -548,10 +533,6 @@ describe('WorkspaceEdit', () => {
     'enables the access tier selection dropdown on creation when multiple tiers are present' +
       ' but prevents selection when the user does not have access',
     async () => {
-      updateVisibleTiers([
-        AccessTierShortNames.Registered,
-        AccessTierShortNames.Controlled,
-      ]);
       workspaceEditMode = WorkspaceEditMode.Create;
       profileStore.set({
         ...profileStore.get(),

@@ -43,7 +43,7 @@ import {
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
 
-import { authorityGuard, registrationGuard, rtExpiredGuard } from './guards';
+import { authorityGuard, getAccessModuleGuard } from './guards';
 
 const AccessRenewalPage = fp.flow(
   withRouteData,
@@ -127,7 +127,7 @@ const WorkspaceSearchAdminPage = fp.flow(
 export const SignedInRoutes = () => {
   return (
     <Switch>
-      <AppRoute exact path='/' guards={[rtExpiredGuard, registrationGuard]}>
+      <AppRoute exact path='/' guards={[getAccessModuleGuard()]}>
         <HomepagePage routeData={{ title: 'Homepage' }} />
       </AppRoute>
       <AppRoute exact path={ACCESS_RENEWAL_PATH}>
@@ -317,20 +317,12 @@ export const SignedInRoutes = () => {
           routeData={{ title: 'Data Access Requirements' }}
         />
       </AppRoute>
-      <AppRoute
-        exact
-        path='/library'
-        guards={[rtExpiredGuard, registrationGuard]}
-      >
+      <AppRoute exact path='/library' guards={[getAccessModuleGuard()]}>
         <WorkspaceLibraryPage
           routeData={{ title: 'Workspace Library', minimizeChrome: false }}
         />
       </AppRoute>
-      <AppRoute
-        exact
-        path='/workspaces'
-        guards={[rtExpiredGuard, registrationGuard]}
-      >
+      <AppRoute exact path='/workspaces' guards={[getAccessModuleGuard()]}>
         <WorkspaceListPage
           routeData={{
             title: 'View Workspaces',
@@ -341,7 +333,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         exact
         path='/workspaces/build'
-        guards={[rtExpiredGuard, registrationGuard]}
+        guards={[getAccessModuleGuard()]}
       >
         <WorkspaceEditPage
           routeData={{ title: 'Create Workspace' }}
@@ -351,7 +343,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         path='/workspaces/:ns/:wsid'
         exact={false}
-        guards={[rtExpiredGuard, registrationGuard]}
+        guards={[getAccessModuleGuard()]}
       >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>

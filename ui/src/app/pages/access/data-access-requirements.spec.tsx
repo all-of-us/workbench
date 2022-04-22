@@ -29,7 +29,6 @@ import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
-import { updateVisibleTiers } from 'testing/test-utils';
 
 import {
   allInitialModules,
@@ -950,32 +949,15 @@ describe('DataAccessRequirements', () => {
   });
 
   it('Should display the CT card when the environment has a Controlled Tier', async () => {
-    updateVisibleTiers([
-      AccessTierShortNames.Registered,
-      AccessTierShortNames.Controlled,
-    ]);
-
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(findControlledTierCard(wrapper).exists()).toBeTruthy();
-  });
-
-  it('Should not display the CT card when the environment does not have a Controlled Tier', async () => {
-    updateVisibleTiers([AccessTierShortNames.Registered]);
-
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(findControlledTierCard(wrapper).exists()).toBeFalsy();
   });
 
   it(
     'Should display eraCommons module in CT card ' +
       'when the user institution has signed agreement and CT requires eraCommons and RT does not',
     async () => {
-      updateVisibleTiers([
-        AccessTierShortNames.Registered,
-        AccessTierShortNames.Controlled,
-      ]);
       let wrapper = component();
       await waitOneTickAndUpdate(wrapper);
 
