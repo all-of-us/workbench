@@ -12,12 +12,7 @@ import {
   eligibleForTier,
 } from 'app/utils/access-utils';
 import { cookiesEnabled } from 'app/utils/cookies';
-import {
-  cdrVersionStore,
-  profileStore,
-  serverConfigStore,
-  useStore,
-} from 'app/utils/stores';
+import { cdrVersionStore, profileStore, useStore } from 'app/utils/stores';
 
 import { StyledRouterLink } from './buttons';
 import { AoU } from './text-wrappers';
@@ -27,8 +22,7 @@ const CT_COOKIE_KEY = 'controlled-tier-available';
 
 const shouldShowBanner = (
   profile: Profile,
-  cdrVersionTiers: CdrVersionTier[],
-  accessTiersVisibleToUsers: string[]
+  cdrVersionTiers: CdrVersionTier[]
 ) => {
   const ctCdrVersions = cdrVersionTiers?.find(
     (v) => v.accessTierShortName === AccessTierShortNames.Controlled
@@ -38,8 +32,6 @@ const shouldShowBanner = (
   const shouldShow =
     profile &&
     ctCdrVersions &&
-    // the environment allows users to see the CT
-    accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled) &&
     // the user is eligible for the CT
     eligibleForTier(profile, AccessTierShortNames.Controlled) &&
     // the user does not currently have CT access
@@ -61,15 +53,9 @@ export const CTAvailableBannerMaybe = () => {
   const [showBanner, setShowBanner] = useState(false);
   const { profile } = useStore(profileStore);
   const { tiers } = useStore(cdrVersionStore);
-  const {
-    config: { accessTiersVisibleToUsers },
-  } = useStore(serverConfigStore);
 
   useEffect(
-    () =>
-      setShowBanner(
-        shouldShowBanner(profile, tiers, accessTiersVisibleToUsers)
-      ),
+    () => setShowBanner(shouldShowBanner(profile, tiers)),
     [profile, tiers]
   );
 

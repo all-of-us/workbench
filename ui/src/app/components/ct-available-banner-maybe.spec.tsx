@@ -11,7 +11,6 @@ import { cdrVersionStore, profileStore } from 'app/utils/stores';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
-import { updateVisibleTiers } from 'testing/test-utils';
 
 import { CTAvailableBannerMaybe } from './ct-available-banner-maybe';
 
@@ -62,12 +61,6 @@ describe('CTAvailableBannerMaybe', () => {
   };
 
   const fulfillAllBannerRequirements = () => {
-    // the environment allows users to see the CT (in the UI)
-    updateVisibleTiers([
-      AccessTierShortNames.Registered,
-      AccessTierShortNames.Controlled,
-    ]);
-
     // the user is eligible for the CT
     const newTierEligibilities: UserTierEligibility[] = [
       {
@@ -120,9 +113,6 @@ describe('CTAvailableBannerMaybe', () => {
     expect(ctBannerExists(wrapper)).toBeTruthy();
   });
 
-  const ctNotVisible = () => {
-    updateVisibleTiers([AccessTierShortNames.Registered]);
-  };
   const userIneligible = () => {
     const newTierEligibilities: UserTierEligibility[] = [
       {
@@ -150,7 +140,6 @@ describe('CTAvailableBannerMaybe', () => {
   };
 
   test.each([
-    ['there is no visible CT', ctNotVisible, () => {}],
     ['the user is not CT eligible', userIneligible, () => {}],
     ['the user has CT access already', ctAccess, () => {}],
     ['the user is too new', userIsNew, () => {}],

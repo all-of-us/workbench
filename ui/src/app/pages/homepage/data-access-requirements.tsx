@@ -1107,7 +1107,7 @@ const ControlledTierCard = (props: {
         <div style={styles.cardHeader}>Additional Data Access</div>
         <FlexRow>
           <ControlledTierBadge />
-          <div style={styles.dataHeader}>{ctDisplayName} data - </div>
+          <div style={styles.dataHeader}>{ctDisplayName} data -</div>
           <div style={styles.ctDataOptional}>&nbsp;Optional</div>
         </FlexRow>
         {isEligible ? (
@@ -1212,7 +1212,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass, accessTiersVisibleToUsers },
+      config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
     useEffect(() => {
@@ -1284,10 +1284,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
-    const showCtCard =
-      (pageMode === DARPageMode.INITIAL_REGISTRATION &&
-        accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)) ||
-      pageMode === DARPageMode.ANNUAL_RENEWAL;
     const rtCard = (
       <RegisteredTierCard
         key='rt'
@@ -1298,7 +1294,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         pageMode={pageMode}
       />
     );
-    const ctCard = showCtCard ? (
+    const ctCard = (
       <ControlledTierCard
         key='ct'
         profile={profile}
@@ -1308,7 +1304,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         spinnerProps={spinnerProps}
         pageMode={pageMode}
       />
-    ) : null;
+    );
     const dCard = (
       <DuccCard
         key='dt'
@@ -1317,11 +1313,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         clickableModules={clickableModules}
         spinnerProps={spinnerProps}
         pageMode={pageMode}
-        stepNumber={showCtCard ? 3 : 2}
+        stepNumber={3}
       />
     );
 
-    const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
+    const cards = [rtCard, ctCard, dCard];
 
     return (
       <FlexColumn style={styles.pageWrapper}>
