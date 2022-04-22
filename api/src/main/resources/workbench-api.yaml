@@ -1727,25 +1727,6 @@ paths:
       responses:
         204:
           description: The egress event was successfully handled.
-  "/v1/cron/auditBigQuery":
-    x-aou-note: |
-      Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
-      true, which app engine itself only sets when invoking as a cronjob.
-      See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
-      and o.p.w.interceptors.CronInterceptor which implements the header check.
-    get:
-      security: []
-      tags:
-      - offlineAudit
-      - cron
-      description: 'Endpoint meant to be called offline to trigger BigQuery auditing;
-        may be slow to execute. Only executable via App Engine cronjob.'
-      operationId: auditBigQuery
-      responses:
-        200:
-          description: Audit was successful.
-          schema:
-            "$ref": "#/definitions/AuditBigQueryResponse"
   "/v1/cron/checkRuntimes":
     get:
       security: []
