@@ -26,6 +26,7 @@ declare global {
   }
 }
 
+let client
 /** Returns true if use access token, this is used by Puppeteer test. */
 export const isTestAccessTokenActive = () => {
   return (
@@ -76,35 +77,15 @@ export const isTestAccessTokenActive = () => {
 
 const makeAuth2 = (config: ConfigResponse): Promise<any> => {
   return new Promise((resolve, reject) => {
-    google.accounts.oauth2.initCodeClient({
-      client_id: 'YOUR_CLIENT_ID',
-      scope: 'https://www.googleapis.com/auth/calendar.readonly',
+    client = google.accounts.oauth2.initCodeClient({
+     client_id: environment.clientId,
+     scope: 'https://www.googleapis.com/auth/plus.login openid profile',
       ux_mode: 'popup',
       callback: (response) => {
         profileApi().signIn({
           authCode: response['code'],
           redirectUrl: `${window.location.protocol}//${window.location.host}`,
         });
-      },
-    }););
-   google.accounts.oauth2.initCodeClient({
-      client_id: 'YOUR_CLIENT_ID',
-      scope: 'https://www.googleapis.com/auth/calendar.readonly',
-      ux_mode: 'popup',
-      callback: (response) => {
-        var code_receiver_uri = 'YOUR_AUTHORIZATION_CODE_ENDPOINT_URI',
-          // Send auth code to your backend platform
-          const xhr = new XMLHttpRequest();
-        xhr.open('POST', code_receiver_uri, true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.onload = function() {
-          console.log('Signed in as: ' + xhr.responseText);
-        };
-        xhr.send('code=' + code);
-        // After receipt, the code is exchanged for an access token and
-        // refresh token, and the platform then updates this web app
-        // running in user's browser with the requested calendar info.
       },
     });
   });
@@ -124,14 +105,7 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
 
 export const signIn = (): void => {
   AnalyticsTracker.Registration.SignIn();
-  gapi.load('auth2', () => {
-    // gapi.auth2.getAuthInstance().signIn({
-    //   prompt: 'select_account',
-    //   ux_mode: 'redirect',
-    //   redirect_uri: `${window.location.protocol}//${window.location.host}`,
-    // });
-    gapi.auth2.getAuthInstance().grantOfflineAccess({max_age: 0}).then(signInCallback);
-  });
+  client.requestCode();
 };
 
 
