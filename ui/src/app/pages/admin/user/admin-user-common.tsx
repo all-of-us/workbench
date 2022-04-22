@@ -1,6 +1,8 @@
 // this is a temporary file to assist with the migration from (class-based) AdminUser to (functional) AdminUserProfile
 // for RW-7536
 
+// TODO how many of these conditions can be removed now that AdminUser is gone?
+
 import * as React from 'react';
 import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
