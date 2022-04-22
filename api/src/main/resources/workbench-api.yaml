@@ -809,6 +809,19 @@ paths:
           description: App was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
+    get:
+      summary: Get a workspace app.
+      operationId: getApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/appType"
+      responses:
+        200:
+          description: App was created successfully
+          schema:
+            "$ref": "#/definitions/GetAppResponse"
 
   "/v1/runtimes/{workspaceNamespace}/localize":
     post:
@@ -6397,6 +6410,15 @@ definitions:
           requested files were localized. This is the "API" directory in Jupyter terms,
           which means it is a relative path in the Jupyter user-facing file system,
           e.g. "foo/bar.ipynb".'
+  GetAppResponse:
+    type: object
+    required:
+      - proxyUrl
+    properties:
+      proxyUrl:
+        type: string
+      appName: string
+
   UsernameTakenResponse:
     type: object
     required:

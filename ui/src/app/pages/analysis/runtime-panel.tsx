@@ -1605,6 +1605,7 @@ const CreatePanel = ({
         >
           Cromwell App
         </Button>
+        <a href="htps://leonardo.dsde-dev.broadinstitute.org/api/google/v1/apps/terra-vpc-sc-dev-02c8b221/cromwell">Open Cromwell</a>
         <Button
             type='secondarySmall'
             onClick={() => createApp('Rstudio')}

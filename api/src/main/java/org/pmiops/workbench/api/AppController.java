@@ -16,6 +16,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.GetAppResponse;
 import org.pmiops.workbench.notebooks.LeonardoAppClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -110,7 +111,10 @@ public class AppController implements AppApiDelegate {
         }
     }
 
-    public ResponseEntity<EmptyResponse> getApp(String workspaceNamespace, String appType) {
+    @Override
+    public ResponseEntity<GetAppResponse> getApp(String workspaceNamespace, String appType) {
+        GetAppResponse response = new GetAppResponse();
+        String url;
         try {
             System.out.println("~~~~~~~");
             System.out.println("~~~~~~~");
@@ -118,15 +122,15 @@ public class AppController implements AppApiDelegate {
             System.out.println("~~~~~~~");
             System.out.println(appType);
             if(appType.equals("Cromwell")) {
-                leonardoAppClient.getLeonardoApp(
+                url = leonardoAppClient.getLeonardoApp(
                         workspaceDao.getByNamespace(workspaceNamespace).get().getGoogleProject(),
                         "cromwell");
             } else {
-                leonardoAppClient.getLeonardoApp(
+                url = leonardoAppClient.getLeonardoApp(
                         workspaceDao.getByNamespace(workspaceNamespace).get().getGoogleProject(),
                         "rstudio");
             }
-            return ResponseEntity.ok(new EmptyResponse());
+            return ResponseEntity.ok(response.proxyUrl(url));
         } catch (Exception e) {
             log.log(Level.WARNING, "fail", e);
             return ResponseEntity.badRequest().body(null);
