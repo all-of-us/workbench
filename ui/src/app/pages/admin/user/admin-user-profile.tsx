@@ -24,6 +24,7 @@ import { CaretRight, ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
@@ -65,7 +66,6 @@ import {
   UserAdminTableLink,
   UserAuditLink,
 } from './admin-user-common';
-import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   ...commonStyles,

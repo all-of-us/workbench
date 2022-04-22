@@ -17,13 +17,13 @@ import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
 import { AdminInstitution } from 'app/pages/admin/admin-institution';
 import { AdminInstitutionEdit } from 'app/pages/admin/admin-institution-edit';
 import { AdminNotebookView } from 'app/pages/admin/admin-notebook-view';
-import { AdminUser } from 'app/pages/admin/admin-user';
-import { AdminUserAccess } from 'app/pages/admin/admin-user-access';
-import { AdminUserProfile } from 'app/pages/admin/admin-user-profile';
-import { AdminUsers } from 'app/pages/admin/admin-users';
 import { AdminWorkspace } from 'app/pages/admin/admin-workspace';
 import { WorkspaceAudit } from 'app/pages/admin/admin-workspace-audit';
 import { AdminWorkspaceSearch } from 'app/pages/admin/admin-workspace-search';
+import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
+import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
+import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
+import { DeprecatedAdminUser } from 'app/pages/admin/user/deprecated-admin-user';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
@@ -50,10 +50,6 @@ const AccessRenewalPage = fp.flow(
   withRoutingSpinner
 )(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
-const AdminNotebookViewPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(AdminNotebookView);
 const AdminEgressAuditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -62,6 +58,14 @@ const AdminEgressEventsPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminEgressEvents);
+const AdminNotebookViewPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminNotebookView);
+const BatchSyncUserAccessPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(BatchSyncUserAccess);
 const DataAccessRequirementsPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -71,6 +75,10 @@ const DataUserCodeOfConductPage = fp.flow(
   withFullHeight,
   withRoutingSpinner
 )(DataUserCodeOfConduct);
+const DeprecatedUserAdminPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(DeprecatedAdminUser);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(
   withRouteData,
@@ -84,17 +92,15 @@ const ProfilePage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(ProfileComponent);
-const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
 const UserAdminProfilePage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(AdminUserProfile);
-const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
-const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
-const UserAccessPage = fp.flow(
+const UserAdminTablePage = fp.flow(
   withRouteData,
   withRoutingSpinner
-)(AdminUserAccess);
+)(AdminUserTable);
+const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
 const WorkspaceWrapperPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -197,7 +203,7 @@ export const SignedInRoutes = () => {
         path='/admin/users'
         guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}
       >
-        <UsersAdminPage
+        <UserAdminTablePage
           routeData={{ title: 'User Admin Table', minimizeChrome: true }}
         />
       </AppRoute>
@@ -206,7 +212,7 @@ export const SignedInRoutes = () => {
         path='/admin/users-deprecated/:usernameWithoutGsuiteDomain'
         guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}
       >
-        <UserAdminPage
+        <DeprecatedUserAdminPage
           routeData={{ title: 'User Admin', minimizeChrome: true }}
         />
       </AppRoute>
@@ -233,7 +239,7 @@ export const SignedInRoutes = () => {
         path='/admin/bulk-sync-user-access'
         guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}
       >
-        <UserAccessPage
+        <BatchSyncUserAccessPage
           routeData={{ title: 'Bulk Sync User Access', minimizeChrome: true }}
         />
       </AppRoute>

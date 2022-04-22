@@ -11,7 +11,7 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
-export const AdminUserAccess = (spinnerProps: WithSpinnerOverlayProps) => {
+export const BatchSyncUserAccess = (spinnerProps: WithSpinnerOverlayProps) => {
   const styles = reactStyles({
     accessContainer: {
       width: '25rem',

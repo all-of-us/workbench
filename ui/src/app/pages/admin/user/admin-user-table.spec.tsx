@@ -12,15 +12,15 @@ import { AuthDomainApiStub } from 'testing/stubs/auth-domain-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
-import { AdminUsers } from './admin-users';
+import { AdminUserTable } from './admin-user-table';
 
-describe('AdminUsers', () => {
+describe('AdminUserTable', () => {
   let props: { profile: Profile; hideSpinner: () => {}; showSpinner: () => {} };
 
   const component = () => {
     return mount(
       <MemoryRouter>
-        <AdminUsers {...props} />
+        <AdminUserTable {...props} />
       </MemoryRouter>
     );
   };
