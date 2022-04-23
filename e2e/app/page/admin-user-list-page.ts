@@ -82,7 +82,7 @@ export default class UserAdminPage extends AuthenticatedPage {
     return textContent;
   }
 
-  //extract only the User name text to verify the search box result
+  // extract only the User name text to verify the search box result
   async getUserNameText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();

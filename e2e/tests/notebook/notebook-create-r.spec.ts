@@ -96,7 +96,7 @@ describe('Create R kernel notebook', () => {
   });
 
   // Helper functions: Load previously saved URL instead clicks thru links to open workspace data page.
-  async function loadWorkspace(page: Page, workspaceName?: string): Promise<string> {
+  async function loadWorkspace(page: Page, name?: string): Promise<string> {
     if (workspaceUrl !== undefined) {
       await page.goto(workspaceUrl, { waitUntil: ['load', 'networkidle0'] });
       logger.info(`Goto workspace URL: ${workspaceUrl}`);
@@ -104,8 +104,8 @@ describe('Create R kernel notebook', () => {
       return;
     }
 
-    workspaceName = await findOrCreateWorkspace(page, { workspaceName });
+    const workspace = await findOrCreateWorkspace(page, { workspaceName: name });
     workspaceUrl = page.url(); // Save URL for load workspace directly without search.
-    return workspaceName;
+    return workspace;
   }
 });

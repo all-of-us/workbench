@@ -1,5 +1,5 @@
 import { findOrCreateWorkspace, isValidDate, openTab, signInWithAccessToken } from 'utils/test-utils';
-import { MenuOption, LinkText, ResourceCard, Tabs } from 'app/text-labels';
+import { LinkText, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
@@ -273,11 +273,11 @@ describe('Cohort review set tests', () => {
     expect(await new DataResourceCard(page).findCard({ name: newCohortReviewName })).toBeFalsy();
   });
 
-  async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<DataResourceCard> {
+  async function findOrCreateCohortCard(page: Page, cohort: string): Promise<DataResourceCard> {
     const dataPage = new WorkspaceDataPage(page);
 
     // Search for Cohort first. If found, return Cohort card.
-    const existingCohortsCard = await dataPage.findCohortCard(cohortName);
+    const existingCohortsCard = await dataPage.findCohortCard(cohort);
     if (existingCohortsCard) {
       return existingCohortsCard;
     }

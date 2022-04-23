@@ -13,8 +13,7 @@ import { config } from 'resources/workbench-config';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { LinkText, Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
-
-const faker = require('faker/locale/en_US');
+import * as faker from 'faker/locale/en';
 
 export const EducationLevelValue = {
   Doctorate: 'Doctorate'

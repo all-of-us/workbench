@@ -114,7 +114,7 @@ export default class GoogleLoginPage {
       waitUntil: ['networkidle0', 'domcontentloaded', 'load'],
       timeout: 2 * 60 * 1000
     });
-    if (response && response.ok()) {
+    if (response?.ok()) {
       return;
     }
     // Retry load Login page.

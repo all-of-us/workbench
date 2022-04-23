@@ -125,7 +125,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return modal;
   }
 
-  //get the runtime status in the Status col
+  // get the runtime status in the Status col
   async getRuntimeStatus(): Promise<string> {
     const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::*[1]';
     const element = BaseElement.asBaseElement(

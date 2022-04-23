@@ -203,9 +203,7 @@ export default class NotebookPage extends NotebookFrame {
       page
         .waitForSelector(uploadButtonSelector)
         .then((button) => button.click({ delay: 10 }))
-        .then(() => {
-          page.waitForTimeout(500);
-        })
+        .then(() => page.waitForTimeout(500))
     ]);
     await fileChooser.accept([pyFilePath]);
   }
@@ -243,25 +241,21 @@ export default class NotebookPage extends NotebookFrame {
 
   async selectFileOpenMenu(): Promise<Page> {
     const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
-      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
-        element.hover();
-        element.click();
-      });
+      const element = await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 });
+      await element.hover();
+      await element.click();
     };
 
     let maxRetries = 3;
     const clickAndCheck = async (iframe: Frame): Promise<void> => {
       await clickFileMenuIcon(iframe);
-      const succeeded = await iframe
-        .waitForXPath(Xpath.open, { visible: true, timeout: 2000 })
-        .then((menuitem) => {
-          menuitem.hover();
-          menuitem.click();
-        })
-        .then(() => true)
-        .catch(() => false);
-      if (succeeded) {
+      try {
+        const menuItem = await iframe.waitForXPath(Xpath.open, { visible: true, timeout: 2000 });
+        await menuItem.hover();
+        await menuItem.click();
         return;
+      } catch (err) {
+        // Blank
       }
       if (maxRetries <= 0) {
         throw new Error('Failed to click File menu -> Open.');
@@ -281,10 +275,9 @@ export default class NotebookPage extends NotebookFrame {
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
     const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
-      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
-        element.hover();
-        element.click();
-      });
+      const element = await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 });
+      await element.hover();
+      await element.click();
     };
 
     let maxRetries = 3;
@@ -292,9 +285,7 @@ export default class NotebookPage extends NotebookFrame {
       await clickFileMenuIcon(iframe);
       const succeeded = await iframe
         .waitForXPath(Xpath.downloadMenuDropdown, { visible: true, timeout: 2000 })
-        .then((menuitem) => {
-          menuitem.hover();
-        })
+        .then((menuitem) => menuitem.hover())
         .then(() => true)
         .catch(() => false);
 
@@ -302,7 +293,7 @@ export default class NotebookPage extends NotebookFrame {
         return;
       }
       if (maxRetries <= 0) {
-        throw new Error('Failed to click File menu -> Download.');
+        throw new Error('Failed to click File menu -> Download as');
       }
       maxRetries--;
       await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
@@ -410,8 +401,7 @@ export default class NotebookPage extends NotebookFrame {
    * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
    */
   findCell(cellIndex: number, cellType: CellType = CellType.Code): NotebookCell {
-    const cell = new NotebookCell(this.page, cellType, cellIndex);
-    return cell;
+    return new NotebookCell(this.page, cellType, cellIndex);
   }
 
   /**
@@ -492,7 +482,7 @@ export default class NotebookPage extends NotebookFrame {
     return codeCell;
   }
 
-  async runCodeFile(cellIndex: number, fileName: string, timeout?: number) {
+  async runCodeFile(cellIndex: number, fileName: string, timeout?: number): Promise<string> {
     const codeCell = await this.startCodeFile(cellIndex, fileName, timeout);
     await this.waitForKernelIdle(timeout, 2000);
 

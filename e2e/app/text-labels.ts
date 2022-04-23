@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import { config } from 'resources/workbench-config';
 import { IPageUrl } from 'types';
 

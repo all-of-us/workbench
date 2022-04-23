@@ -60,7 +60,7 @@ export async function signInWithAccessToken(
   if (isBlank(tokenJson)) {
     throw Error(`Token found at ${tokenLocation} is blank`);
   }
-  const { token } = JSON.parse(tokenJson);
+  const { token: accessToken } = JSON.parse(tokenJson);
 
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
@@ -72,7 +72,7 @@ export async function signInWithAccessToken(
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
   await page.evaluate((token) => {
     window.setTestAccessTokenOverride(token);
-  }, token);
+  }, accessToken);
 
   // Force a page reload; auth will be re-initialized with the token now that
   // localstorage has been updated.
@@ -271,6 +271,9 @@ export async function findOrCreateWorkspaceCard(
   return cardFound;
 }
 
+export const asyncFilter = (arr: any[], predicate: (any) => any): any =>
+  arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
+
 /**
  * Find a suitable workspace among existing workspaces with OWNER role and older than specified time difference.
  */
@@ -333,9 +336,6 @@ export function isValidDate(date: string): boolean {
   }
   return d.toISOString().slice(0, 10) === date;
 }
-
-export const asyncFilter = async (arr, predicate) =>
-  arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
 
 /**
  * Generates a two factor auth code by given secret.

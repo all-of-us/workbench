@@ -30,9 +30,9 @@ export async function getPropValue<T>(element: ElementHandle, property: string):
 export async function getStyleValue<T>(page: Page, element: ElementHandle, styleName: string): Promise<T> {
   const value = await page
     .evaluateHandle(
-      (element, styleName) => {
-        const style = window.getComputedStyle(element);
-        return style.getPropertyValue(styleName);
+      (elemt, style) => {
+        const computedStyle = window.getComputedStyle(elemt);
+        return computedStyle?.getPropertyValue(style);
       },
       element,
       styleName

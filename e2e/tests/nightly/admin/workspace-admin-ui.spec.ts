@@ -25,10 +25,10 @@ describe('Workspace Admin', () => {
     await workspacesPage.createWorkspace(workspaceName);
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
-    //extract the Workspace-Namespace
+    // extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
 
-    //create the dataset and notebook
+    // create the dataset and notebook
     await createDatasetNotebook(page, pyNotebookName);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
@@ -38,17 +38,17 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
 
-    //verify if the admin navigated to correct workspace-Namespace-admin page
+    // verify if the admin navigated to correct workspace-Namespace-admin page
     expect(await workspaceAdminPage.getWorkspaceNamespaceText()).toEqual(workspaceNamespace);
 
     const cloudStorageCols = await workspaceAdminPage.getcloudStorageColNames();
     expect(cloudStorageCols).toEqual(
       expect.arrayContaining([CloudStorageHeader.Location, CloudStorageHeader.Filename, CloudStorageHeader.FileSize])
     );
-    //verify that this newly created workspace has NO active runtime and also expect the RUNTIME DELETE button is falsy.
+    // verify that this newly created workspace has NO active runtime and also expect the RUNTIME DELETE button is falsy.
     expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeFalsy();
 
-    //click on the LOCK WORKSPACE button
+    // click on the LOCK WORKSPACE button
     const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton(workspaceStatus.Lock);
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
 
@@ -66,12 +66,12 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
 
-    //verify that the Notebook Preview button is disabled
+    // verify that the Notebook Preview button is disabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(true);
     const accessReasonText = 'testing purposes';
     await workspaceAdminPage.getAccessReasonTextArea().type(accessReasonText);
 
-    //verify that the Notebook Preview button is now enabled
+    // verify that the Notebook Preview button is now enabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(false);
     await workspaceAdminPage.clickNotebookPreviewButton();
     const adminNotebookPreviewPage = new AdminNotebookPreviewPage(page);
@@ -95,7 +95,7 @@ describe('Workspace Admin', () => {
     const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName });
     await workspaceCard.clickName();
     const dataPage = await new WorkspaceDataPage(page).waitForLoad();
-    //extract the Workspace-Namespace
+    // extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.open();
@@ -123,7 +123,7 @@ describe('Workspace Admin', () => {
     await page.waitForTimeout(50000);
     await workspaceAdminPage.getDeleteStatus();
 
-    //verify the runtime status is deleting
+    // verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
   });
 });

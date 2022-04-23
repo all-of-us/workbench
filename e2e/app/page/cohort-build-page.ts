@@ -37,7 +37,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await this.page
       .waitForXPath(FieldSelector.ItemList, { visible: true, timeout: 1000 })
       .then(() => {
-        this.getTotalCount();
+        return this.getTotalCount();
       })
       .catch(() => {
         // Ignore
@@ -64,13 +64,14 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await menu.select(menuOption);
 
     switch (menuOption) {
-      case MenuOption.SaveAs:
+      case MenuOption.SaveAs: {
         cohortName = makeRandomName();
         const modal = new CohortSaveAsModal(this.page);
         await modal.waitForLoad();
         await modal.typeCohortName(cohortName);
         await modal.clickSaveButton();
         break;
+      }
       default:
         break;
     }

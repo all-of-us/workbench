@@ -36,7 +36,9 @@ export default class BaseElement {
    * @param {WaitForSelectorOptions} waitOptions
    */
   async waitForXPath(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
-    if (this.getXpath() === undefined && this.element !== undefined) return this.element.asElement();
+    if (this.getXpath() === undefined && this.element !== undefined) {
+      return this.element.asElement();
+    }
     return this.page
       .waitForXPath(this.xpath, waitOptions)
       .then((element) => {
@@ -136,8 +138,7 @@ export default class BaseElement {
     };
 
     const boxModel = async (element: ElementHandle): Promise<BoxModel | null> => {
-      const boxModel = await element.boxModel();
-      return boxModel;
+      return await element.boxModel();
     };
 
     return this.asElementHandle()
@@ -226,7 +227,7 @@ export default class BaseElement {
       maxRetries--;
       await this.page.waitForTimeout(1000).then(typeAndCheck); // 1 second pause and retry type
     };
-    await waitForFn(() => this.isVisible());
+    await waitForFn(async () => await this.isVisible());
     await typeAndCheck();
     return this;
   }

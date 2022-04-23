@@ -547,7 +547,7 @@ describe('User Profile Admin page', () => {
     const elements: ElementHandle[] = await cell.getContent(CellContent.SVG);
     const svg: ElementHandle[] = await asyncFilter(
       elements,
-      async (svg: ElementHandle) => tier === (await getPropValue<string>(svg, 'textContent'))
+      async (element: ElementHandle) => tier === (await getPropValue<string>(element, 'textContent'))
     );
     return svg.length > 0;
   }

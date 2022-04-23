@@ -3,6 +3,7 @@ import RuntimePanel from 'app/sidebar/runtime-panel';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import path from 'path';
+import expect from 'expect';
 
 jest.setTimeout(30 * 60 * 1000);
 

@@ -13,7 +13,9 @@ export default class HelpTipsSidebar extends BaseSidebar {
 
   async open(): Promise<void> {
     const isOpen = await this.isVisible();
-    if (isOpen) return;
+    if (isOpen) {
+      return;
+    }
     await this.clickIcon(SideBarLink.HelpTips);
     await this.waitUntilVisible();
     await waitForText(this.page, sidebarTitle, { container: this });

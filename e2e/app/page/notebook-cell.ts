@@ -36,7 +36,9 @@ export default class NotebookCell extends NotebookFrame {
 
   async getLastCell(): Promise<NotebookCell | null> {
     const elements = await this.findAllCells();
-    if (elements.length === 0) return null;
+    if (elements.length === 0) {
+      return null;
+    }
     this.cellIndex = elements.length;
     return this;
   }
@@ -198,7 +200,7 @@ export default class NotebookCell extends NotebookFrame {
     const jsHandle = await iframe.waitForFunction(
       (css, prop, value) => {
         const element = document.querySelector(css);
-        return element && element[prop].includes(value);
+        return element?.[prop].includes(value);
       },
       {},
       cssSelector,

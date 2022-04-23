@@ -15,8 +15,7 @@ import WorkspaceAboutPage from './workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import WorkspaceCard from 'app/component/card/workspace-card';
 import { openTab } from 'utils/test-utils';
-
-const faker = require('faker/locale/en_US');
+import * as faker from 'faker/locale/en';
 
 export const PageTitle = 'View Workspace';
 

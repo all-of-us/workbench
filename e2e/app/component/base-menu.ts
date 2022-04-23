@@ -19,13 +19,14 @@ export default abstract class BaseMenu extends Container {
    */
   async select(menuSelections: string | MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
     const { waitForNav = false } = opt;
-
+    let rootXpath = this.getXpath();
     let maxAttempts = 3;
-    const click = async (menuItem: string, xpath: string, waitForNav = false): Promise<void> => {
+
+    const click = async (menuItem: string, xpath: string, waitForNavigation = false): Promise<void> => {
       const menuItemLink = await this.findMenuItemLink(menuItem, xpath);
       const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
       if (!hasPopup || hasPopup === 'false') {
-        if (waitForNav) {
+        if (waitForNavigation) {
           const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
           await menuItemLink.click();
           await navigationPromise;
@@ -57,7 +58,6 @@ export default abstract class BaseMenu extends Container {
     await this.waitUntilVisible();
 
     // Iterate orderly.
-    let rootXpath = this.getXpath();
     const len = selections.length;
     for (let i = 0; i < len; i++) {
       await click(selections[i], rootXpath, i === len - 1 ? waitForNav : false);

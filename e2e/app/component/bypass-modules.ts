@@ -23,7 +23,7 @@ export default class BypassPopup extends BaseMenu {
     return `${this.getXpath()}//span[text()= "${accessModule}"]/preceding-sibling::div/input[@type='checkbox']`;
   }
 
-  //get status of each bypass access modules
+  // get status of each bypass access modules
   async getAccessModuleStatus(accessModule: string): Promise<boolean> {
     const selector = this.getMenuItemXpath(accessModule);
     const btn = new Checkbox(this.page, selector);

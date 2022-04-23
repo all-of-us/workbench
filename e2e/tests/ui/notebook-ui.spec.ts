@@ -58,9 +58,9 @@ describe('Notebook and Runtime UI Test', () => {
     expect(await analysisPage.isLoaded()).toBe(true);
   });
 
-  async function openWorkspace(page: Page, workspaceName: string): Promise<boolean> {
+  async function openWorkspace(page: Page, name: string): Promise<boolean> {
     await new HomePage(page).goToAllWorkspacesPage();
-    const workspaceCard = await new WorkspaceCard(page).findCard({ name: workspaceName, timeout: 2000 });
+    const workspaceCard = await new WorkspaceCard(page).findCard({ name, timeout: 2000 });
     // Don't create new workspace if none found.
     if (!workspaceCard) {
       return false;
