@@ -82,10 +82,10 @@ describe('Workspace owner can copy notebook', () => {
 
     // Copy to destination Workspace and give notebook a new name.
     const copiedNotebookName = makeRandomName('copy-of');
-    await analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName).catch(() => {
+    await analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName).catch(() =>
       // Retry. Sometimes POST /notebooks/[notebook-name]/copy request fails.
-      analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName);
-    });
+      analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName)
+    );
 
     // Verify Copy Success modal.
     const modal = new Modal(page);

@@ -3,13 +3,12 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
-import { Tabs } from 'app/text-labels';
+import { Tabs, MenuOption } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 
 describe('Workspace Admin lock-workspace', () => {
@@ -28,9 +27,9 @@ describe('Workspace Admin lock-workspace', () => {
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
     const dataPage = new WorkspaceDataPage(page);
-    //extract the Workspace-Namespace
+    // extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
-    //create the dataset and notebook
+    // create the dataset and notebook
     await createDatasetNotebook(page, pyNotebookName);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
@@ -38,7 +37,7 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
-    //click on the LOCK WORKSPACE button
+    // click on the LOCK WORKSPACE button
     const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton(workspaceStatus.Lock);
     // verify the lock-workspace is enables only after the locking-reason is typed
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);

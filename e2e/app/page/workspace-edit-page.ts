@@ -14,8 +14,7 @@ import { config } from 'resources/workbench-config';
 import BaseElement from 'app/element/base-element';
 import { makeWorkspaceName } from 'utils/str-utils';
 import WorkspaceDataPage from './workspace-data-page';
-
-const faker = require('faker/locale/en_US');
+import * as faker from 'faker/locale/en';
 
 export const PageTitle = 'Create|Duplicate|Edit Workspace';
 

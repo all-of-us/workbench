@@ -33,7 +33,7 @@ describe('Institution Admin', () => {
       ])
     );
 
-    //click on the Institution Name link
+    // click on the Institution Name link
     await institutionAdminPage.clickInstitutionNameLink(testInstitutionName);
     // navigate to Institution edit page
     const institutionEditPage = new InstitutionEditPage(page);
@@ -48,7 +48,7 @@ describe('Institution Admin', () => {
     expect(await institutionEditPage.getRtEratoggle().isChecked()).toBe(true);
     expect(await institutionEditPage.getRtEmailAcceptedValue()).toBe(AcceptedAddressSelectValue.Individual);
 
-    //verify that the Accepted Email Addresses text area is present in registered-card-details
+    // verify that the Accepted Email Addresses text area is present in registered-card-details
     const rtEmailAddressTextArea = institutionEditPage.getRtEmailAddressInput();
     expect(await rtEmailAddressTextArea.asElementHandle()).toBeTruthy();
     expect(await institutionEditPage.getCtEnabledtoggle().isChecked()).toBe(true);
@@ -56,7 +56,7 @@ describe('Institution Admin', () => {
     // verify that the Accepted Email Domains text area is present in controlled-card-details
     const ctEmailDomainsTextArea = institutionEditPage.getCtEmailDomainsInput();
     expect(await ctEmailDomainsTextArea.asElementHandle()).toBeTruthy();
-    //verify that the save button is disabled
+    // verify that the save button is disabled
     expect(await institutionEditPage.getSaveButton().isCursorNotAllowed()).toBe(true);
     await institutionEditPage.clickCancelButton();
     await institutionAdminPage.waitForLoad();
@@ -73,7 +73,7 @@ describe('Institution Admin', () => {
     await institutionEditPage.getAddNewInstitutionFields();
     expect(await institutionEditPage.getRtEratoggle().isChecked()).toBe(false);
     await institutionEditPage.selectRtEmailOption(AcceptedAddressSelectValue.Domains);
-    //verify if the Accepted Email Domains textarea now displays in registered-card-details div
+    // verify if the Accepted Email Domains textarea now displays in registered-card-details div
     const rtEmailDomainsTextArea = institutionEditPage.getRtEmailDomainsInput();
     expect(await rtEmailDomainsTextArea.asElementHandle()).toBeTruthy();
     expect(await institutionEditPage.getCtEratoggle().isDisabled()).toBe(true);
@@ -82,12 +82,12 @@ describe('Institution Admin', () => {
     expect(await institutionEditPage.getCtEnabledtoggle().isChecked()).toBe(true);
     expect(await institutionEditPage.getCtEmailAcceptedValue()).toBe(AcceptedAddressSelectValue.Domains);
 
-    //verify if the Accepted Email Domains textarea now displays in controlled-card-details div
+    // verify if the Accepted Email Domains textarea now displays in controlled-card-details div
     const ctEmailDomainsTextArea = institutionEditPage.getCtEmailDomainsInput();
     expect(await ctEmailDomainsTextArea.asElementHandle()).toBeTruthy();
     // select from dropdown option- Individual email address is listed below:
     await institutionEditPage.selectCtEmailOption(AcceptedAddressSelectValue.Individual);
-    //verify if the Accepted Email Addresses textarea now displays in controlled-card-details div
+    // verify if the Accepted Email Addresses textarea now displays in controlled-card-details div
     const ctEmailAddressTextArea = institutionEditPage.getCtEmailAddressInput();
     expect(await ctEmailAddressTextArea.asElementHandle()).toBeTruthy();
     // verify that the ADD button is disabled

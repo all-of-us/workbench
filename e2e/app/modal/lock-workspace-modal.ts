@@ -42,7 +42,7 @@ export default class LockWorkspaceModal extends Modal {
   }
 
   async clickCancelButton(): Promise<void> {
-    this.getCancelButton();
+    await this.getCancelButton().click();
   }
 
   async clickModalLockWorkspace(): Promise<void> {

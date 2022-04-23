@@ -1,9 +1,35 @@
 // const NodeEnvironment = require('jest-environment-node');
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
-const fs = require('fs-extra');
-const path = require('path');
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 require('jest-circus');
+
+// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
+const takeScreenshot = async (page, fileName) => {
+  const dir = 'logs/screenshot';
+  await fs.ensureDir(dir);
+  await page.screenshot({ type: 'png', path: `${dir}/${fileName}`, fullPage: true });
+  console.info(`Saved screenshot file: ${fileName}`);
+};
+
+// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
+const savePageToFile = async (page, fileName) => {
+  const dir = 'logs/html';
+  await fs.ensureDir(dir);
+  const htmlContent = await page.content();
+  return new Promise((resolve, reject) => {
+    fs.writeFile(`${dir}/${fileName}`, htmlContent, 'utf8', (error) => {
+      if (error) {
+        console.error(`Failed to save html file. \n${error}`);
+        reject(false);
+      } else {
+        console.info(`Saved html file: ${fileName}`);
+        resolve(true);
+      }
+    });
+  });
+};
 
 // TODO Replace PuppeteerEnvironment with NodeEnvironment: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
@@ -66,31 +92,5 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     }
   }
 }
-
-// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
-const takeScreenshot = async (page, fileName) => {
-  const dir = 'logs/screenshot';
-  await fs.ensureDir(dir);
-  await page.screenshot({ type: 'png', path: `${dir}/${fileName}`, fullPage: true });
-  console.info(`Saved screenshot file: ${fileName}`);
-};
-
-// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
-const savePageToFile = async (page, fileName) => {
-  const dir = 'logs/html';
-  await fs.ensureDir(dir);
-  const htmlContent = await page.content();
-  return new Promise((resolve, reject) => {
-    fs.writeFile(`${dir}/${fileName}`, htmlContent, 'utf8', (error) => {
-      if (error) {
-        console.error('Failed to save html file. ' + error);
-        reject(false);
-      } else {
-        console.info(`Saved html file: ${fileName}`);
-        resolve(true);
-      }
-    });
-  });
-};
 
 module.exports = PuppeteerCustomEnvironment;

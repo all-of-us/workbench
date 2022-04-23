@@ -1,12 +1,14 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
+  plugins: [
+    '@typescript-eslint',
+    'jest',
+    'prefer-arrow',
+    'simple-import-sort',
+  ],
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'prettier/@typescript-eslint',
     'plugin:prettier/recommended'
   ],
   env: {
@@ -19,7 +21,8 @@ module.exports = {
     page: true,
     browser: true,
     context: true,
-    jestPuppeteer: true
+    jestPuppeteer: true,
+    globalThis: "readonly"
   },
   parserOptions: {
     project: './tsconfig.json',
@@ -28,82 +31,64 @@ module.exports = {
   },
   ignorePatterns: ['tsc-out', 'node_modules', '.eslintrc.js'],
   rules: {
-    // 2 == error, 1 == warning, 0 == off
-    // TODO Fix to 120
-    'prettier/prettier': [
-      'error',
-      {
-        singleQuote: true,
-        tabWidth: 2
-      }
-    ],
+    /* Style */
+    'prettier/prettier': ['warn', {singleQuote: true, tabWidth: 2}],
     'max-len': [
-      2,
-      120,
+      'warn', 120,
       {
+        ignorePattern: '^import |^export\\{(.*?)\\}',
         ignoreComments: true,
         ignoreUrls: true,
         tabWidth: 2,
         ignoreRegExpLiterals: true
-      }
-    ],
-    'no-implicit-coercion': [
-      2,
-      {
-        boolean: false,
-        number: true,
-        string: true
-      }
-    ],
-    'no-unused-expressions': [
-      1,
-      {
-        allowShortCircuit: true,
-        allowTernary: true
-      }
-    ],
-    '@typescript-eslint/no-explicit-any': 1,
-    // TODO Fix rule warnings, then remove the rule in this file.
-    '@typescript-eslint/restrict-template-expressions': 1,
-    '@typescript-eslint/no-non-null-assertion': 1,
-    '@typescript-eslint/no-unsafe-member-access': 1,
-    '@typescript-eslint/no-unsafe-assignment': 1,
-    '@typescript-eslint/no-unsafe-call': 1,
-    '@typescript-eslint/no-unsafe-return': 1,
-    '@typescript-eslint/no-var-requires': 1,
-    '@typescript-eslint/no-inferrable-types': 1,
-    '@typescript-eslint/await-thenable': 1,
-    '@typescript-eslint/no-misused-promises': 1,
-    '@typescript-eslint/unbound-method': 1,
-    'no-case-declarations': 1,
-    '@typescript-eslint/prefer-regexp-exec': 1,
-    'no-constant-condition': 1,
-    'no-empty': 1,
-    '@typescript-eslint/restrict-plus-operands': 1,
-    '@typescript-eslint/require-await': 1,
-    '@typescript-eslint/no-floating-promises': 1,
-    'quotes': [1, 'single', 'avoid-escape'],
-    'eqeqeq': [1, 'smart'],
-    'semi': [2, 'always'],
-    'require-jsdoc': 0,
-    'valid-jsdoc': 0,
-    'no-var': 2,
-    'no-console': 0,
-    'prefer-const': 2,
-    'comma-dangle': 0,
-    'arrow-parens': 0,
-    'no-trailing-spaces': 2,
-    'eol-last': [2, 'always'],
-    'no-ternary': 'off',
-    'no-duplicate-imports': 1,
+      }],
+
+    /* Code Quality */
+    'no-constant-condition': 'off',
+    'quotes': ['warn', 'single', 'avoid-escape'],
+    'quote-props': ['warn', 'consistent-as-needed'],
+    'eqeqeq': ['warn', 'always', { null: 'ignore' }],
+    'guard-for-in': 'warn',
+    'no-bitwise': 'warn',
+    'no-caller': 'warn',
+    'no-debugger': 'warn',
+    'no-empty': 'warn',
+    'no-eval': 'warn',
+    'no-fallthrough': 'warn', // For switch statements
+    'no-new-wrappers': 'warn',
+    'semi': ['warn', 'always'],
+    'no-duplicate-imports': 'warn',
+    'no-restricted-imports': ['warn', { paths: ['rxjs'], patterns: ['../'] }],
+    'no-throw-literal': 'warn',
+    'no-undef-init': 'warn',
+    'no-var': 'warn',
+    'prefer-const': ['warn', { destructuring: 'all' }],
+    '@typescript-eslint/no-use-before-define': ['warn', { "functions": false }],
+    'no-unused-vars': 'off', // Needed for the below rule
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '_' }],
+    '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
+    '@typescript-eslint/dot-notation': 'warn',
+    '@typescript-eslint/no-inferrable-types': ['warn', { ignoreParameters: true },],
+    '@typescript-eslint/no-misused-new': 'warn',
+    '@typescript-eslint/no-non-null-assertion': 'warn',
+    '@typescript-eslint/no-shadow': 'warn',
+    '@typescript-eslint/prefer-optional-chain': 'warn',
+    '@typescript-eslint/unified-signatures': 'warn',
+    '@typescript-eslint/require-await': 'warn',
+    '@typescript-eslint/no-floating-promises': 'warn',
+
+    'comma-dangle': 'error',
+    'arrow-parens': 'error',
+    'eol-last': ['error', 'always'],
     'space-before-function-paren': [
-      2,
+      'warn',
       {
         anonymous: 'always',
         named: 'never',
         asyncArrow: 'always'
-      }
-    ],
-    'quote-props': [2, 'consistent-as-needed']
+    }],
+
+    /* Jest */
+    'jest/no-focused-tests': 'warn',
   }
 };

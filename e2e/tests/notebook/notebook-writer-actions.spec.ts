@@ -142,11 +142,11 @@ describe('Workspace WRITER notebook tests', () => {
     await newAnalysisPage.deleteResource(notebookCopyName, ResourceCard.Notebook);
   });
 
-  async function verifyWriterNotebookPermission(page: Page, notebookName: string): Promise<DataResourceCard> {
+  async function verifyWriterNotebookPermission(page: Page, notebook: string): Promise<DataResourceCard> {
     // Notebook snowman actions Rename, Duplicate and Delete are enabled.
     const dataResourceCard = new DataResourceCard(page);
     const notebookCard = await dataResourceCard.findCard({
-      name: notebookName,
+      name: notebook,
       cardType: ResourceCard.Notebook,
       timeout: 60 * 1000
     });

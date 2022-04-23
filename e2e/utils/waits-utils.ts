@@ -269,12 +269,12 @@ export async function waitForAttributeEquality(
     try {
       const jsHandle = await page.waitForFunction(
         (xpath, attributeName, attributeValue) => {
-          const element: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+          const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
           return (
             element &&
-            element.attributes[attributeName as string] &&
-            element.attributes[attributeName as string].value === attributeValue
+            (element as Element).attributes[attributeName as string] &&
+            (element as Element).attributes[attributeName as string].value === attributeValue
           );
         },
         { timeout: timeout || 30000 },
@@ -338,9 +338,9 @@ export async function waitForText(
 
   try {
     await page.waitForFunction(
-      (xpath, text) => {
+      (xPath, text) => {
         const regExp = new RegExp(text);
-        const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        const element = document.evaluate(xPath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
         return element && regExp.test(element.textContent);
       },
@@ -376,7 +376,7 @@ export async function waitWhileSpinnerDisplayed(
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
-  const waitForHidden = async (maxTime: number): Promise<void> => {
+  const waitForSpinnerHidden = async (maxTime: number): Promise<void> => {
     const startTime = Date.now();
     try {
       await Promise.all([
@@ -408,10 +408,10 @@ export async function waitWhileSpinnerDisplayed(
     }
 
     await page.waitForTimeout(500);
-    await waitForHidden(maxTime - spentTime); // unused time
+    await waitForSpinnerHidden(maxTime - spentTime); // unused time
   };
 
-  await waitForHidden(timeout);
+  await waitForSpinnerHidden(timeout);
 }
 
 /**

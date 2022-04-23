@@ -220,13 +220,13 @@ describe('Create Cohorts Test', () => {
   });
 
   // Helper functions
-  async function loadWorkspaceUrl(page: Page, workspaceName: string): Promise<void> {
+  async function loadWorkspaceUrl(page: Page, workspace: string): Promise<void> {
     if (workspaceUrl) {
       // Faster: Load previously saved URL instead clicks thru links to open workspace data page.
       await page.goto(workspaceUrl, { waitUntil: ['load', 'networkidle0'] });
       return;
     }
-    await findOrCreateWorkspace(page, { workspaceName });
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
     workspaceUrl = page.url(); // Save URL for load workspace directly without search.
   }
 });

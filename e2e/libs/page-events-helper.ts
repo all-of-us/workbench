@@ -12,13 +12,15 @@ export const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
       }
       return obj;
     }, jsHandle)
-    .then(async (jsHandle) => {
-      return (await jsHandle.jsonValue()) as string;
+    .then(async (elementHandle) => {
+      return (await elementHandle.jsonValue()) as string;
     });
 };
 
 const stringifyData = (data: string): string => {
-  if (!data) return '';
+  if (!data) {
+    return '';
+  }
   try {
     return JSON.stringify(JSON.parse(data), null, 2);
   } catch (err) {
@@ -57,7 +59,7 @@ const isWorkbenchRequest = (request: Request): Request | null => {
  */
 const includeXhrResourceType = (request: Request): Request | null => {
   const filters = ['xhr', 'fetch', 'websocket', 'other'];
-  return filters.some((resource) => request && request.resourceType().includes(resource)) ? request : null;
+  return filters.some((resource) => request?.resourceType().includes(resource)) ? request : null;
 };
 
 // Disable logging of API response body in test log to make log less cluttered.
@@ -82,16 +84,16 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/institutions',
     '/admin/users/list'
   ];
-  return !filters.some((partialUrl) => request && request.url().includes(partialUrl));
+  return !filters.some((partialUrl) => request?.url().includes(partialUrl));
 };
 
 // Truncate long Api response.
 const isResponseTruncatable = (request: Request): boolean => {
-  return request && request.url().endsWith('/v1/workspaces');
+  return request?.url().endsWith('/v1/workspaces');
 };
 
 const getRequestPostData = (request: Request): string | undefined => {
-  return request && request.postData() ? request.postData() : undefined;
+  return request?.postData() ? request.postData() : undefined;
 };
 
 const notRedirectRequest = (request: Request): boolean => {
@@ -105,7 +107,7 @@ const getResponseText = async (request: Request): Promise<string> => {
   const NO_CONTENT_RESPONSE_CODE = 204;
   const response = request.response();
   // Log response if response it's not a redirect or no-content
-  const status = response && response.status();
+  const status = response?.status();
   if (
     status &&
     !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
