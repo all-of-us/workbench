@@ -1036,7 +1036,14 @@ export const useRuntimeStatus = (
     );
     setRuntimeStatus(req);
   };
-  return [runtime ? runtime.status : undefined, setStatusRequest];
+
+  // runtimeStore may be outdated in certain scenarios; ensure we only return the
+  // requested project so we aren't showing stale data.
+  let status: RuntimeStatus;
+  if (runtime?.googleProject === currentGoogleProject) {
+    status = runtime.status;
+  }
+  return [status, setStatusRequest];
 };
 
 // useCustomRuntime Hook can request a new runtime config
