@@ -9,6 +9,7 @@ module.exports = {
   ],
   extends: [
     'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended'
   ],
   env: {
@@ -87,6 +88,10 @@ module.exports = {
         named: 'never',
         asyncArrow: 'always'
     }],
+
+    /* Disable rules in @typescript-eslint/recommended */
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
 
     /* Jest */
     'jest/no-focused-tests': 'warn',
