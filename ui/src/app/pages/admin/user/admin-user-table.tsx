@@ -19,6 +19,7 @@ import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
+import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
 
@@ -159,9 +160,7 @@ export const AdminUserTable = withUserProfile()(
           AuthorityGuardedAction.INSTITUTION_ADMIN
         );
       return shouldShowLink ? (
-        <StyledRouterLink
-          path={`/admin/institution/edit/${tableRow.institutionShortName}`}
-        >
+        <StyledRouterLink path={getAdminUrl(tableRow.institutionShortName)}>
           {tableRow.institutionName}
         </StyledRouterLink>
       ) : (
