@@ -314,16 +314,16 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   </div>
                 ) : (
                   menuOptions.map((category, index) => (
-                    <div key={index}>
+                    <ul key={index}>
                       {categoryHasResults(index) && (
-                        <div
+                        <li
                           style={styles.dropdownHeader}
                           className='menuitem-header'
                         >
                           <span style={styles.dropdownHeaderText}>
                             {category[0].category}
                           </span>
-                        </div>
+                        </li>
                       )}
                       {category
                         .filter(
@@ -334,8 +334,9 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                             )
                         )
                         .map((menuItem, m) => (
-                          <div
+                          <li
                             role='menuitem'
+                            aria-haspopup={menuItem.group}
                             key={m}
                             style={{
                               ...styles.dropdownItem,
@@ -383,46 +384,51 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                   className='pi pi-sort-down'
                                 />
                                 {subMenuOpen && (
-                                  <div style={styles.subMenu}>
+                                  <ul style={styles.subMenu}>
                                     {menuItem.children?.map(
                                       (subMenuItem, s) => (
-                                        <div
-                                          key={s}
-                                          style={{
-                                            ...styles.subMenuItem,
-                                            ...(subHoverId ===
-                                            `${index}-${m}-${s}`
-                                              ? {
-                                                  background:
-                                                    colorWithWhiteness(
-                                                      colors.light,
-                                                      0.5
-                                                    ),
-                                                }
-                                              : {}),
-                                          }}
-                                          onMouseEnter={() =>
-                                            setSubHoverId(`${index}-${m}-${s}`)
-                                          }
-                                          onMouseLeave={() => {
-                                            setSubHoverId(null);
-                                          }}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            onMenuItemClick(menuItem);
-                                          }}
-                                        >
-                                          {subMenuItem.name}
-                                        </div>
+                                        <li>
+                                          <div
+                                            role='menuitem'
+                                            key={s}
+                                            style={{
+                                              ...styles.subMenuItem,
+                                              ...(subHoverId ===
+                                              `${index}-${m}-${s}`
+                                                ? {
+                                                    background:
+                                                      colorWithWhiteness(
+                                                        colors.light,
+                                                        0.5
+                                                      ),
+                                                  }
+                                                : {}),
+                                            }}
+                                            onMouseEnter={() =>
+                                              setSubHoverId(
+                                                `${index}-${m}-${s}`
+                                              )
+                                            }
+                                            onMouseLeave={() => {
+                                              setSubHoverId(null);
+                                            }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onMenuItemClick(subMenuItem);
+                                            }}
+                                          >
+                                            {subMenuItem.name}
+                                          </div>
+                                        </li>
                                       )
                                     )}
-                                  </div>
+                                  </ul>
                                 )}
                               </React.Fragment>
                             )}
-                          </div>
+                          </li>
                         ))}
-                    </div>
+                    </ul>
                   ))
                 )}
               </React.Fragment>
