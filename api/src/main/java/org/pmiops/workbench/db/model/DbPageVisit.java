@@ -26,8 +26,9 @@ public class DbPageVisit {
     return pageVisitId;
   }
 
-  public void setPageVisitId(long pageVisitId) {
+  public DbPageVisit setPageVisitId(long pageVisitId) {
     this.pageVisitId = pageVisitId;
+    return this;
   }
 
   @ManyToOne
@@ -36,8 +37,9 @@ public class DbPageVisit {
     return user;
   }
 
-  public void setUser(DbUser user) {
+  public DbPageVisit setUser(DbUser user) {
     this.user = user;
+    return this;
   }
 
   @Column(name = "page_id")
@@ -45,8 +47,9 @@ public class DbPageVisit {
     return pageId;
   }
 
-  public void setPageId(String pageId) {
+  public DbPageVisit setPageId(String pageId) {
     this.pageId = pageId;
+    return this;
   }
 
   @Column(name = "first_visit")
@@ -54,7 +57,8 @@ public class DbPageVisit {
     return firstVisit;
   }
 
-  public void setFirstVisit(Timestamp firstVisit) {
+  public DbPageVisit setFirstVisit(Timestamp firstVisit) {
     this.firstVisit = firstVisit;
+    return this;
   }
 }

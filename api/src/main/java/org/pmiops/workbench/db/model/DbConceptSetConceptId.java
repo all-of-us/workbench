@@ -16,8 +16,9 @@ public class DbConceptSetConceptId {
     return conceptId;
   }
 
-  public void setConceptId(Long conceptId) {
+  public DbConceptSetConceptId setConceptId(Long conceptId) {
     this.conceptId = conceptId;
+    return this;
   }
 
   @Column(name = "is_standard")
@@ -25,8 +26,9 @@ public class DbConceptSetConceptId {
     return standard;
   }
 
-  public void setStandard(Boolean standard) {
+  public DbConceptSetConceptId setStandard(Boolean standard) {
     this.standard = standard;
+    return this;
   }
 
   @Override

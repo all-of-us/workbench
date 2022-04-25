@@ -82,8 +82,9 @@ public class DbConceptSet {
     return conceptSetId;
   }
 
-  public void setConceptSetId(long conceptSetId) {
+  public DbConceptSet setConceptSetId(long conceptSetId) {
     this.conceptSetId = conceptSetId;
+    return this;
   }
 
   @Version
@@ -92,8 +93,9 @@ public class DbConceptSet {
     return version;
   }
 
-  public void setVersion(int version) {
+  public DbConceptSet setVersion(int version) {
     this.version = version;
+    return this;
   }
 
   @Column(name = "name")
@@ -101,8 +103,9 @@ public class DbConceptSet {
     return name;
   }
 
-  public void setName(String name) {
+  public DbConceptSet setName(String name) {
     this.name = name;
+    return this;
   }
 
   @Column(name = "domain")
@@ -110,8 +113,9 @@ public class DbConceptSet {
     return domain;
   }
 
-  public void setDomain(short domain) {
+  public DbConceptSet setDomain(short domain) {
     this.domain = domain;
+    return this;
   }
 
   @Transient
@@ -119,8 +123,9 @@ public class DbConceptSet {
     return DbStorageEnums.domainFromStorage(domain);
   }
 
-  public void setDomainEnum(Domain domain) {
+  public DbConceptSet setDomainEnum(Domain domain) {
     this.domain = DbStorageEnums.domainToStorage(domain);
+    return this;
   }
 
   @Column(name = "survey")
@@ -128,8 +133,9 @@ public class DbConceptSet {
     return survey;
   }
 
-  public void setSurvey(Short survey) {
+  public DbConceptSet setSurvey(Short survey) {
     this.survey = survey;
+    return this;
   }
 
   @Transient
@@ -137,8 +143,9 @@ public class DbConceptSet {
     return DbStorageEnums.surveysFromStorage(survey);
   }
 
-  public void setSurveysEnum(Surveys survey) {
+  public DbConceptSet setSurveysEnum(Surveys survey) {
     this.survey = DbStorageEnums.surveysToStorage(survey);
+    return this;
   }
 
   @Column(name = "description")
@@ -146,8 +153,9 @@ public class DbConceptSet {
     return description;
   }
 
-  public void setDescription(String description) {
+  public DbConceptSet setDescription(String description) {
     this.description = description;
+    return this;
   }
 
   @Column(name = "workspace_id")
@@ -155,8 +163,9 @@ public class DbConceptSet {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbConceptSet setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   @ManyToOne
@@ -165,8 +174,9 @@ public class DbConceptSet {
     return creator;
   }
 
-  public void setCreator(DbUser creator) {
+  public DbConceptSet setCreator(DbUser creator) {
     this.creator = creator;
+    return this;
   }
 
   @Column(name = "creation_time")
@@ -174,8 +184,9 @@ public class DbConceptSet {
     return creationTime;
   }
 
-  public void setCreationTime(Timestamp creationTime) {
+  public DbConceptSet setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "last_modified_time")
@@ -183,8 +194,9 @@ public class DbConceptSet {
     return lastModifiedTime;
   }
 
-  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+  public DbConceptSet setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
@@ -196,8 +208,9 @@ public class DbConceptSet {
     return dbConceptSetConceptIds;
   }
 
-  public void setConceptSetConceptIds(Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
+  public DbConceptSet setConceptSetConceptIds(Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
     this.dbConceptSetConceptIds = dbConceptSetConceptIds;
+    return this;
   }
 
   @Override

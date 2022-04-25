@@ -25,8 +25,9 @@ public class DbRdrExport {
     return exportId;
   }
 
-  public void setExportId(int exportId) {
+  public DbRdrExport setExportId(int exportId) {
     this.exportId = exportId;
+    return this;
   }
 
   @Column(name = "entity_type")
@@ -34,8 +35,9 @@ public class DbRdrExport {
     return entityType;
   }
 
-  public void setEntityType(Short entityType) {
+  public DbRdrExport setEntityType(Short entityType) {
     this.entityType = entityType;
+    return this;
   }
 
   @Transient
@@ -44,8 +46,9 @@ public class DbRdrExport {
     return RdrEntityEnums.entityFromStorage(entityType);
   }
 
-  public void setEntityTypeEnum(RdrEntity entityTypeEnum) {
+  public DbRdrExport setEntityTypeEnum(RdrEntity entityTypeEnum) {
     this.entityType = RdrEntityEnums.entityToStorage(entityTypeEnum);
+    return this;
   }
 
   @Column(name = "entity_id")
@@ -53,8 +56,9 @@ public class DbRdrExport {
     return entityId;
   }
 
-  public void setEntityId(long id) {
+  public DbRdrExport setEntityId(long id) {
     this.entityId = id;
+    return this;
   }
 
   @Column(name = "last_export_date")
@@ -62,7 +66,8 @@ public class DbRdrExport {
     return lastExportDate;
   }
 
-  public void setLastExportDate(Timestamp exportDate) {
+  public DbRdrExport setLastExportDate(Timestamp exportDate) {
     this.lastExportDate = exportDate;
+    return this;
   }
 }

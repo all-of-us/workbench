@@ -23,8 +23,9 @@ public class DbConfig {
     return configId;
   }
 
-  public void setConfigId(String configId) {
+  public DbConfig setConfigId(String configId) {
     this.configId = configId;
+    return this;
   }
 
   @Column(name = "configuration")
@@ -32,7 +33,8 @@ public class DbConfig {
     return configuration;
   }
 
-  public void setConfiguration(String configuration) {
+  public DbConfig setConfiguration(String configuration) {
     this.configuration = configuration;
+    return this;
   }
 }
