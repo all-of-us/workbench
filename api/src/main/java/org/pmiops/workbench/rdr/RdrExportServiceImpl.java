@@ -7,10 +7,8 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -18,23 +16,20 @@ import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
-import org.pmiops.workbench.rdr.model.ResearcherVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,14 +42,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class RdrExportServiceImpl implements RdrExportService {
 
-  private Clock clock;
-  private Provider<RdrApi> rdrApiProvider;
-  private RdrExportDao rdrExportDao;
-  private WorkspaceDao workspaceDao;
-  private UserDao userDao;
+  private final Clock clock;
+  private final Provider<RdrApi> rdrApiProvider;
+  private final RdrExportDao rdrExportDao;
+  private final WorkspaceDao workspaceDao;
+  private final UserDao userDao;
 
-  private InstitutionService institutionService;
-  private WorkspaceService workspaceService;
+  private final InstitutionService institutionService;
+  private final WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final RdrMapper rdrMapper;
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
@@ -192,127 +187,34 @@ public class RdrExportServiceImpl implements RdrExportService {
     }
   }
 
-  // Convert workbench DBUser to RDR Model
   private RdrResearcher toRdrResearcher(DbUser dbUser) {
-    RdrResearcher researcher = new RdrResearcher();
-    researcher.setUserId((int) dbUser.getUserId());
-    // RDR will start accepting null creation Time and later once workbench works on story
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3741 RDR will create API to
-    // backfill data
-    if (null != researcher.getCreationTime()) {
-      researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
-    }
-    researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-
-    researcher.setGivenName(dbUser.getGivenName());
-    researcher.setFamilyName(dbUser.getFamilyName());
-    researcher.setDegrees(
-        dbUser.getDegreesEnum().stream()
-            .map(RdrExportEnums::degreeToRdrDegree)
-            .collect(Collectors.toList()));
-
-    if (dbUser.getContactEmail() != null) {
-      researcher.setEmail(dbUser.getContactEmail());
-    }
-
-    if (dbUser.getAddress() != null) {
-      researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
-      researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
-      researcher.setCity(dbUser.getAddress().getCity());
-      researcher.setState(dbUser.getAddress().getState());
-      researcher.setCountry(dbUser.getAddress().getCountry());
-      researcher.setZipCode(dbUser.getAddress().getZipCode());
-    }
-    DbDemographicSurvey dbDemographicSurvey = dbUser.getDemographicSurvey();
-    if (null != dbDemographicSurvey) {
-      researcher.setDisability(
-          RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-      researcher.setEducation(
-          RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-      researcher.setEthnicity(
-          Optional.ofNullable(dbDemographicSurvey.getEthnicityEnum())
-              .map(RdrExportEnums::ethnicityToRdrEthnicity)
-              .orElse(null));
-
-      researcher.setSexAtBirth(
-          Optional.ofNullable(
-                  dbDemographicSurvey.getSexAtBirthEnum().stream()
-                      .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
-                      .collect(Collectors.toList()))
-              .orElse(new ArrayList<>()));
-      researcher.setGender(
-          Optional.ofNullable(
-                  dbDemographicSurvey.getGenderIdentityEnumList().stream()
-                      .map(RdrExportEnums::genderToRdrGender)
-                      .collect(Collectors.toList()))
-              .orElse(new ArrayList<>()));
-
-      researcher.setDisability(
-          RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-
-      researcher.setRace(
-          Optional.ofNullable(
-                  dbDemographicSurvey.getRaceEnum().stream()
-                      .map(RdrExportEnums::raceToRdrRace)
-                      .collect(Collectors.toList()))
-              .orElse(new ArrayList<>()));
-
-      researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
-      researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
-    }
-
-    // Deprecated old-style institutional affiliations
-    // To be removed in RW-4362
-    researcher.setAffiliations(Collections.emptyList());
-
-    verifiedInstitutionalAffiliationDao
-        .findFirstByUser(dbUser)
-        .ifPresent(
-            verifiedInstitutionalAffiliation -> {
-              final InstitutionalRole roleEnum =
-                  verifiedInstitutionalAffiliation.getInstitutionalRoleEnum();
-              final String role =
-                  (roleEnum == InstitutionalRole.OTHER)
-                      ? verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText()
-                      : roleEnum.toString();
-
-              researcher.setVerifiedInstitutionalAffiliation(
-                  new ResearcherVerifiedInstitutionalAffiliation()
-                      .institutionShortName(
-                          verifiedInstitutionalAffiliation.getInstitution().getShortName())
-                      .institutionDisplayName(
-                          verifiedInstitutionalAffiliation.getInstitution().getDisplayName())
-                      .institutionalRole(role));
-            });
-    return researcher;
+    DbVerifiedInstitutionalAffiliation affiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null);
+    return rdrMapper.toRdrResearcher(dbUser, affiliation);
   }
 
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
-    RdrWorkspace rdrWorkspace = rdrMapper.toRdrModel(dbWorkspace);
+    RdrWorkspace rdrWorkspace = rdrMapper.toRdrWorkspace(dbWorkspace);
     setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
 
-    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
-      rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
-    }
     rdrWorkspace.setWorkspaceUsers(new ArrayList<>());
-    if (dbWorkspace.getWorkspaceActiveStatusEnum().equals(WorkspaceActiveStatus.ACTIVE)) {
+    if (WorkspaceActiveStatus.ACTIVE.equals(dbWorkspace.getWorkspaceActiveStatusEnum())) {
       try {
         // Call Firecloud to get a list of Collaborators
-        List<UserRole> collaboratorsMap =
+        List<UserRole> collaborators =
             workspaceService.getFirecloudUserRoles(
                 dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-        // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
-        // COLLABORATOR as ACTIVE
-        collaboratorsMap.forEach(
-            (userRole) -> {
-              RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
-              workspaceUserMap.setUserId(
-                  (int) userDao.findUserByUsername(userRole.getEmail()).getUserId());
-              workspaceUserMap.setRole(
-                  RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()));
-              workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
-              rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
-            });
+        rdrWorkspace.setWorkspaceUsers(
+            collaborators.stream()
+                .map(
+                    (userRole) ->
+                        new RdrWorkspaceUser()
+                            .userId(
+                                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId())
+                            .role(
+                                RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()))
+                            .status(RdrWorkspaceUser.StatusEnum.ACTIVE))
+                .collect(Collectors.toList()));
       } catch (Exception ex) {
         log.warning(
             String.format(
@@ -393,10 +295,9 @@ public class RdrExportServiceImpl implements RdrExportService {
     verifiedInstitutionalAffiliationDao
         .findFirstByUser(creatorUser)
         .ifPresent(
-            verifiedInstitutionalAffiliation -> {
-              rdrWorkspace.setExcludeFromPublicDirectory(
-                  institutionService.validateOperationalUser(
-                      verifiedInstitutionalAffiliation.getInstitution()));
-            });
+            verifiedInstitutionalAffiliation ->
+                rdrWorkspace.setExcludeFromPublicDirectory(
+                    institutionService.validateOperationalUser(
+                        verifiedInstitutionalAffiliation.getInstitution())));
   }
 }

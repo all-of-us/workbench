@@ -9,11 +9,32 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.Disability;
+import org.pmiops.workbench.model.Education;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.Race;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.rdr.model.RdrDegree;
+import org.pmiops.workbench.rdr.model.RdrDisability;
+import org.pmiops.workbench.rdr.model.RdrEducation;
+import org.pmiops.workbench.rdr.model.RdrEthnicity;
+import org.pmiops.workbench.rdr.model.RdrGender;
+import org.pmiops.workbench.rdr.model.RdrRace;
+import org.pmiops.workbench.rdr.model.RdrResearcher;
+import org.pmiops.workbench.rdr.model.RdrResearcherVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.rdr.model.RdrSexAtBirth;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspace.AccessTierEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
@@ -21,6 +42,8 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface RdrMapper {
+  ZoneOffset offset = OffsetDateTime.now().getOffset();
+
   @Mapping(source = "anticipatedFindings", target = "findingsFromStudy")
   @Mapping(source = "ethics", target = "ethicalLegalSocialImplications")
   // excludeFromPublicDirectory requires checking workspace creator institution information
@@ -38,9 +61,56 @@ public interface RdrMapper {
   // Workspace User will be populated by a call to FireCloud
   // This will be handle in ServiceImpl Class
   @Mapping(target = "workspaceUsers", ignore = true)
-  RdrWorkspace toRdrModel(DbWorkspace dbWorkspace);
+  RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace);
 
-  ZoneOffset offset = OffsetDateTime.now().getOffset();
+  @AfterMapping
+  default void addOtherPopulationDetails(DbWorkspace source, @MappingTarget RdrWorkspace target) {
+    if (source.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
+      target.getWorkspaceDemographic().others(source.getOtherPopulationDetails());
+    }
+  }
+
+  @Mapping(source = "dbUser.lastModifiedTime", target = "modifiedTime")
+  @Mapping(source = "dbUser.contactEmail", target = "email")
+  @Mapping(source = "dbUser.degreesEnum", target = "degrees")
+  @Mapping(source = "dbUser.address.streetAddress1", target = "streetAddress1")
+  @Mapping(source = "dbUser.address.streetAddress2", target = "streetAddress2")
+  @Mapping(source = "dbUser.address.city", target = "city")
+  @Mapping(source = "dbUser.address.state", target = "state")
+  @Mapping(source = "dbUser.address.country", target = "country")
+  @Mapping(source = "dbUser.address.zipCode", target = "zipCode")
+  @Mapping(source = "dbUser.demographicSurvey.disabilityEnum", target = "disability")
+  @Mapping(source = "dbUser.demographicSurvey.educationEnum", target = "education")
+  @Mapping(source = "dbUser.demographicSurvey.ethnicityEnum", target = "ethnicity")
+  @Mapping(source = "dbUser.demographicSurvey.sexAtBirthEnum", target = "sexAtBirth")
+  @Mapping(source = "dbUser.demographicSurvey.genderIdentityEnumList", target = "gender")
+  @Mapping(source = "dbUser.demographicSurvey.raceEnum", target = "race")
+  @Mapping(source = "dbUser.demographicSurvey.lgbtqIdentity", target = "lgbtqIdentity")
+  @Mapping(source = "dbUser.demographicSurvey.identifiesAsLgbtq", target = "identifiesAsLgbtq")
+  RdrResearcher toRdrResearcher(
+      DbUser dbUser, @Nullable DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation);
+
+  @Mapping(source = "institution.shortName", target = "institutionShortName")
+  @Mapping(source = "institution.displayName", target = "institutionDisplayName")
+  @Mapping(ignore = true, target = "institutionalRole")
+  RdrResearcherVerifiedInstitutionalAffiliation toRdrAffiliation(
+      DbVerifiedInstitutionalAffiliation v);
+
+  @AfterMapping
+  default void addOtherRoleAffiliation(
+      DbVerifiedInstitutionalAffiliation source,
+      @MappingTarget RdrResearcherVerifiedInstitutionalAffiliation target) {
+    if (source == null) {
+      return;
+    }
+    final Optional<InstitutionalRole> maybeRoleEnum =
+        Optional.ofNullable(source.getInstitutionalRoleEnum());
+    final String role =
+        InstitutionalRole.OTHER.equals(maybeRoleEnum)
+            ? source.getInstitutionalRoleOtherText()
+            : maybeRoleEnum.map(InstitutionalRole::toString).orElse(null);
+    target.setInstitutionalRole(role);
+  }
 
   default OffsetDateTime toModelOffsetTime(@Nullable Timestamp dbTime) {
     if (dbTime == null) {
@@ -59,6 +129,34 @@ public interface RdrMapper {
     return workspaceActiveStatus == WorkspaceActiveStatus.ACTIVE
         ? RdrWorkspace.StatusEnum.ACTIVE
         : RdrWorkspace.StatusEnum.INACTIVE;
+  }
+
+  default RdrDegree toRdrDegree(Degree d) {
+    return RdrExportEnums.degreeToRdrDegree(d);
+  }
+
+  default RdrDisability toRdrDisability(Disability d) {
+    return RdrExportEnums.disabilityToRdrDisability(d);
+  }
+
+  default RdrEducation toRdrEducation(Education e) {
+    return RdrExportEnums.educationToRdrEducation(e);
+  }
+
+  default RdrEthnicity toRdrEthnicity(Ethnicity e) {
+    return RdrExportEnums.ethnicityToRdrEthnicity(e);
+  }
+
+  default RdrSexAtBirth toRdrSexAtBirth(SexAtBirth s) {
+    return RdrExportEnums.sexAtBirthToRdrSexAtBirth(s);
+  }
+
+  default RdrGender toRdrGender(GenderIdentity g) {
+    return RdrExportEnums.genderToRdrGender(g);
+  }
+
+  default RdrRace toRdrRace(Race r) {
+    return RdrExportEnums.raceToRdrRace(r);
   }
 
   default boolean toModelFocusOnUnderrepresentedPopulation(
