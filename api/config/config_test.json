@@ -113,7 +113,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": false,
-    "enableUniversalSearch": true,
+    "enableUniversalSearch": false,
     "enableMultiReview": false
   },
   "actionAudit": {
