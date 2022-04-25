@@ -35,30 +35,7 @@ public class DbDemographicSurvey {
   private List<Short> race;
   private List<Short> genderIdentityList;
   private List<Short> sexAtBirth;
-  private int year_of_birth;
-
-  public DbDemographicSurvey() {}
-
-  public DbDemographicSurvey(org.pmiops.workbench.model.DemographicSurvey demographicSurvey) {
-    this.disability = DbStorageEnums.disabilityToStorage(demographicSurvey.getDisability());
-    this.education = DbStorageEnums.educationToStorage(demographicSurvey.getEducation());
-    this.ethnicity = DbStorageEnums.ethnicityToStorage(demographicSurvey.getEthnicity());
-    this.identifiesAsLgbtq = demographicSurvey.getIdentifiesAsLgbtq();
-    this.lgbtqIdentity = demographicSurvey.getLgbtqIdentity();
-    this.race =
-        demographicSurvey.getRace().stream()
-            .map(DbStorageEnums::raceToStorage)
-            .collect(Collectors.toList());
-    this.sexAtBirth =
-        demographicSurvey.getSexAtBirth().stream()
-            .map(DbStorageEnums::sexAtBirthToStorage)
-            .collect(Collectors.toList());
-    this.year_of_birth = demographicSurvey.getYearOfBirth().intValue();
-    this.genderIdentityList =
-        demographicSurvey.getGenderIdentityList().stream()
-            .map(DbStorageEnums::genderIdentityToStorage)
-            .collect(Collectors.toList());
-  }
+  private int yearOfBirth;
 
   @Column(name = "disability")
   public Short getDisability() {
@@ -98,7 +75,7 @@ public class DbDemographicSurvey {
   }
 
   @Column(name = "ethnicity")
-  public Short getEthnicity() {
+  public Short get_Ethnicity() {
     return ethnicity;
   }
 
@@ -193,7 +170,7 @@ public class DbDemographicSurvey {
 
   @Transient
   public List<GenderIdentity> getGenderIdentityEnumList() {
-    if (genderIdentityList == null) return new ArrayList<GenderIdentity>();
+    if (genderIdentityList == null) return new ArrayList<>();
     return this.genderIdentityList.stream()
         .map(DbStorageEnums::genderIdentityFromStorage)
         .collect(Collectors.toList());
@@ -235,11 +212,11 @@ public class DbDemographicSurvey {
   }
 
   @Column(name = "year_of_birth")
-  public int getYear_of_birth() {
-    return year_of_birth;
+  public int getYearOfBirth() {
+    return yearOfBirth;
   }
 
-  public void setYear_of_birth(int year_of_birth) {
-    this.year_of_birth = year_of_birth;
+  public void setYearOfBirth(int yearOfBirth) {
+    this.yearOfBirth = yearOfBirth;
   }
 }
