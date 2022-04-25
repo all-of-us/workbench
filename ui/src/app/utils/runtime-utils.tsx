@@ -1041,7 +1041,7 @@ export const useRuntimeStatus = (
   // requested project so we aren't showing stale data.
   let status: RuntimeStatus;
   if (runtime?.googleProject === currentGoogleProject) {
-    status = runtime.status;
+    status = runtime?.status;
   }
   return [status, setStatusRequest];
 };
