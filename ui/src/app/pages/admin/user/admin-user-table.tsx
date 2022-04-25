@@ -153,13 +153,15 @@ export const AdminUserTable = withUserProfile()(
 
     private displayInstitutionName(user: AdminTableUser) {
       const adminUserProfile = this.props.profileState.profile;
-      const shouldShowLink = hasAuthorityForAction(
-        adminUserProfile,
-        AuthorityGuardedAction.INSTITUTION_ADMIN
-      );
+      const shouldShowLink =
+        user.institutionShortName &&
+        hasAuthorityForAction(
+          adminUserProfile,
+          AuthorityGuardedAction.INSTITUTION_ADMIN
+        );
       return shouldShowLink ? (
         <StyledRouterLink
-          path={`admin/institution/edit/${user.institutionShortName}`}
+          path={`/admin/institution/edit/${user.institutionShortName}`}
         >
           {user.institutionName}
         </StyledRouterLink>
