@@ -157,6 +157,7 @@ public class DbCohort {
   public DbCohort setCohortReviews(Set<DbCohortReview> cohortReviews) {
     if (this.cohortReviews == null) {
       this.cohortReviews = cohortReviews;
+      return this;
     }
     this.cohortReviews.addAll(cohortReviews);
     return this;

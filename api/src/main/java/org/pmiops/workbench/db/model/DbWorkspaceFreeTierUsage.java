@@ -78,7 +78,7 @@ public class DbWorkspaceFreeTierUsage {
     return lastUpdateTime;
   }
 
-  private DbWorkspaceFreeTierUsage setLastUpdateTime(Timestamp lastUpdateTime) {
+  public DbWorkspaceFreeTierUsage setLastUpdateTime(Timestamp lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
     return this;
   }
