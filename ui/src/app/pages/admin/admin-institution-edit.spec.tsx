@@ -11,6 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -90,9 +91,9 @@ const findCTDomainError = (wrapper) =>
   findSaveButtonDisabled(wrapper).controlledTierEmailDomains;
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
-  const component = (institution = VERILY.shortName) => {
+  const component = (institutionShortName = VERILY.shortName) => {
     return mount(
-      <MemoryRouter initialEntries={[`/admin/institution/edit/${institution}`]}>
+      <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
         <Route path='/admin/institution/edit/:institutionId'>
           <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
         </Route>
