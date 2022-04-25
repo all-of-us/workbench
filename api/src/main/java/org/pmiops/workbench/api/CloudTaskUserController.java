@@ -31,6 +31,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           "400176686919", // test.firecloud.org
           "386193000800", // firecloud.org
           "394551486437", // pmi-ops.org
+          // Terra Data Repo seemingly shares some data globally to all users. Our research users
+          // therefore have access to some projects here.
+          "815384374864", // Terra Data Repo (prod)
+          "270278425081", // Terra Data Repo (dev)
           // TODO(calbach): Consider moving this into cdr_config_*.json
           "737976594150", // terra_dev_aou_test
           "272722258246", // terra_dev_aou_test_2
