@@ -75,7 +75,7 @@ public class DbDemographicSurvey {
   }
 
   @Column(name = "ethnicity")
-  public Short getEthnicity() {
+  public Short get_Ethnicity() {
     return ethnicity;
   }
 
