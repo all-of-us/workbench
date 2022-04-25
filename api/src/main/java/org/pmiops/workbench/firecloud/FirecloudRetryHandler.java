@@ -2,9 +2,12 @@ package org.pmiops.workbench.firecloud;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,10 @@ import org.springframework.stereotype.Service;
 public class FirecloudRetryHandler extends RetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(FirecloudRetryHandler.class.getName());
+  private static final String TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE =
+      "User has not accepted the Terra Terms of Service";
+
+  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
 
   private static class FirecloudRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -49,12 +56,37 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
   }
 
   @Autowired
-  public FirecloudRetryHandler(BackOffPolicy backoffPolicy) {
+  public FirecloudRetryHandler(
+      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(backoffPolicy, new FirecloudRetryPolicy());
+    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
+    if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
+      // ToS non-compliance causes Firecloud to return 401/Unauth - but that's not the only
+      // reason we might see 401 here.  Call Firecloud again to check ToS status.
+      return checkToSCompliance(exception);
+    }
+
     return ExceptionUtils.convertFirecloudException(exception);
+  }
+
+  private WorkbenchException checkToSCompliance(ApiException e) {
+    boolean tosCompliant = false;
+    String tosExceptionMessage = TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE;
+
+    try {
+      tosCompliant = Boolean.TRUE.equals(termsOfServiceApiProvider.get().getTermsOfServiceStatus());
+    } catch (ApiException tosException) {
+      tosExceptionMessage =
+          "An exception was thrown checking the user's Terra Terms of Service Status: "
+              + tosException.getMessage();
+    }
+    
+    return tosCompliant
+        ? ExceptionUtils.convertFirecloudException(e)
+        : new UnauthorizedException(tosExceptionMessage, e);
   }
 }
