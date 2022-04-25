@@ -5,7 +5,7 @@ import { DataTable } from 'primereact/datatable';
 
 import { AdminTableUser, Profile } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledRouterLink } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -15,6 +15,10 @@ import {
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
 import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
+import {
+  AuthorityGuardedAction,
+  hasAuthorityForAction,
+} from 'app/utils/authorities';
 import { serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
 
@@ -117,32 +121,6 @@ export const AdminUserTable = withUserProfile()(
       this.setState({ loading: false });
     }
 
-    sortProfileList(profileList: Array<Profile>): Array<Profile> {
-      return profileList.sort((a, b) => {
-        // put disabled accounts at the bottom
-        if (a.disabled && b.disabled) {
-          return this.nameCompare(a, b);
-        }
-        if (a.disabled) {
-          return 1;
-        }
-        return 1;
-      });
-    }
-
-    private nameCompare(a: Profile, b: Profile): number {
-      if (a.familyName === null) {
-        return 1;
-      }
-      if (a.familyName.localeCompare(b.familyName) === 0) {
-        if (a.givenName === null) {
-          return 1;
-        }
-        return a.givenName.localeCompare(b.givenName);
-      }
-      return a.familyName.localeCompare(b.familyName);
-    }
-
     /**
      * Returns the appropriate cell contents (icon plus tooltip) for an access module cell
      * in the table.
@@ -171,6 +149,23 @@ export const AdminUserTable = withUserProfile()(
       } else {
         return '';
       }
+    }
+
+    private displayInstitutionName(user: AdminTableUser) {
+      const adminUserProfile = this.props.profileState.profile;
+      const shouldShowLink = hasAuthorityForAction(
+        adminUserProfile,
+        AuthorityGuardedAction.INSTITUTION_ADMIN
+      );
+      return shouldShowLink ? (
+        <StyledRouterLink
+          path={`admin/institution/edit/${user.institutionShortName}`}
+        >
+          {user.institutionName}
+        </StyledRouterLink>
+      ) : (
+        user.institutionName
+      );
     }
 
     /**
@@ -218,7 +213,7 @@ export const AdminUserTable = withUserProfile()(
           user.firstSignInTime
         ),
         firstSignInTimestamp: user.firstSignInTime,
-        institutionName: user.institutionName,
+        institutionName: this.displayInstitutionName(user),
         name: (
           <a
             href={`/admin/users/${usernameWithoutDomain(user.username)}`}
