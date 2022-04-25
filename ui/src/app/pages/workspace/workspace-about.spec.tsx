@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { mount } from 'enzyme';
 
@@ -48,7 +49,9 @@ describe('WorkspaceAbout', () => {
 
   const component = () => {
     return mount(
-      <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
+      <MemoryRouter>
+        <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
+      </MemoryRouter>
     );
   };
 
@@ -101,7 +104,7 @@ describe('WorkspaceAbout', () => {
         .find('[data-test-id="workspaceUser-' + i + '"]')
         .text();
       expect(userRoleText).toContain(role.email);
-      expect(userRoleText).toContain(role.role);
+      expect(userRoleText).toContain(role.role.toString());
     });
   });
 
