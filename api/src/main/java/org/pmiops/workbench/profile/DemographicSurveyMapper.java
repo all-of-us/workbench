@@ -28,6 +28,5 @@ public interface DemographicSurveyMapper {
   @Mapping(target = "raceEnum", source = "race")
   @Mapping(target = "sexAtBirthEnum", source = "sexAtBirth")
   @Mapping(target = "user", ignore = true) // set by UserService.createUser
-  @Mapping(target = "year_of_birth", source = "yearOfBirth")
   DbDemographicSurvey demographicSurveyToDbDemographicSurvey(DemographicSurvey demographicSurvey);
 }
