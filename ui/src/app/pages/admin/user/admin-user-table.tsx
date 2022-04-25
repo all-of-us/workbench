@@ -218,12 +218,12 @@ export const AdminUserTable = withUserProfile()(
         firstSignInTimestamp: user.firstSignInTime,
         institutionName: this.displayInstitutionName(user),
         name: (
-          <a
-            href={`/admin/users/${usernameWithoutDomain(user.username)}`}
+          <StyledRouterLink
+            path={`/admin/users/${usernameWithoutDomain(user.username)}`}
             target='_blank'
           >
             {user.familyName + ', ' + user.givenName}
-          </a>
+          </StyledRouterLink>
         ),
         nameText: user.familyName + ' ' + user.givenName,
         status: user.disabled ? 'Disabled' : 'Active',

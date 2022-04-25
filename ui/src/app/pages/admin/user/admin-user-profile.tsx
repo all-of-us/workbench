@@ -17,7 +17,7 @@ import {
 } from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
-import { Button } from 'app/components/buttons';
+import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
@@ -244,9 +244,9 @@ const EditableFields = ({
             onChange={(event) => onChangeInstitution(event.value)}
           />
           {showGoToInstitutionLink && (
-            <a
+            <StyledRouterLink
               style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
-              href={getAdminUrl(
+              path={getAdminUrl(
                 updatedProfile.verifiedInstitutionalAffiliation
                   ?.institutionShortName
               )}
@@ -258,7 +258,7 @@ const EditableFields = ({
               >
                 <FontAwesomeIcon icon={faLink} />
               </TooltipTrigger>
-            </a>
+            </StyledRouterLink>
           )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
