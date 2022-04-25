@@ -152,7 +152,7 @@ export const AdminUserTable = withUserProfile()(
       }
     }
 
-    private displayInstitutionName(tableRow: AdminTableUser) {
+    displayInstitutionName(tableRow: AdminTableUser) {
       const shouldShowLink =
         tableRow.institutionShortName &&
         hasAuthorityForAction(
@@ -160,7 +160,10 @@ export const AdminUserTable = withUserProfile()(
           AuthorityGuardedAction.INSTITUTION_ADMIN
         );
       return shouldShowLink ? (
-        <StyledRouterLink path={getAdminUrl(tableRow.institutionShortName)}>
+        <StyledRouterLink
+          path={getAdminUrl(tableRow.institutionShortName)}
+          target='_blank'
+        >
           {tableRow.institutionName}
         </StyledRouterLink>
       ) : (
