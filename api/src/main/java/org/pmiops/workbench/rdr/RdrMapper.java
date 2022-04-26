@@ -97,18 +97,17 @@ public interface RdrMapper {
       DbVerifiedInstitutionalAffiliation v);
 
   @AfterMapping
-  default void addOtherRoleAffiliation(
+  default void addInstitutionalRole(
       DbVerifiedInstitutionalAffiliation source,
       @MappingTarget RdrResearcherVerifiedInstitutionalAffiliation target) {
-    if (source == null) {
+    if (source == null || source.getInstitutionalRoleEnum() == null) {
       return;
     }
-    final Optional<InstitutionalRole> maybeRoleEnum =
-        Optional.ofNullable(source.getInstitutionalRoleEnum());
+    final InstitutionalRole roleEnum = source.getInstitutionalRoleEnum();
     final String role =
-        InstitutionalRole.OTHER.equals(maybeRoleEnum)
+        InstitutionalRole.OTHER.equals(roleEnum)
             ? source.getInstitutionalRoleOtherText()
-            : maybeRoleEnum.map(InstitutionalRole::toString).orElse(null);
+            : roleEnum.toString();
     target.setInstitutionalRole(role);
   }
 
