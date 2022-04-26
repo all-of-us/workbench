@@ -3,7 +3,7 @@ package org.pmiops.workbench.rdr;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +13,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -130,33 +131,28 @@ public interface RdrMapper {
         : RdrWorkspace.StatusEnum.INACTIVE;
   }
 
-  default RdrDegree toRdrDegree(Degree d) {
-    return RdrExportEnums.degreeToRdrDegree(d);
-  }
+  @ValueMapping(source = "NONE", target = "UNSET")
+  RdrDegree toRdrDegree(Degree d);
 
-  default RdrDisability toRdrDisability(Disability d) {
-    return RdrExportEnums.disabilityToRdrDisability(d);
-  }
+  @ValueMapping(source = "TRUE", target = "YES")
+  @ValueMapping(source = "FALSE", target = "NO")
+  @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
+  RdrDisability toRdrDisability(Disability d);
 
-  default RdrEducation toRdrEducation(Education e) {
-    return RdrExportEnums.educationToRdrEducation(e);
-  }
+  @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
+  RdrEducation toRdrEducation(Education e);
 
-  default RdrEthnicity toRdrEthnicity(Ethnicity e) {
-    return RdrExportEnums.ethnicityToRdrEthnicity(e);
-  }
+  @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
+  RdrEthnicity toRdrEthnicity(Ethnicity e);
 
-  default RdrSexAtBirth toRdrSexAtBirth(SexAtBirth s) {
-    return RdrExportEnums.sexAtBirthToRdrSexAtBirth(s);
-  }
+  @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
+  RdrSexAtBirth toRdrSexAtBirth(SexAtBirth s);
 
-  default RdrGender toRdrGender(GenderIdentity g) {
-    return RdrExportEnums.genderToRdrGender(g);
-  }
+  @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
+  RdrGender toRdrGender(GenderIdentity g);
 
-  default RdrRace toRdrRace(Race r) {
-    return RdrExportEnums.raceToRdrRace(r);
-  }
+  @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
+  RdrRace toRdrRace(Race r);
 
   default boolean toModelFocusOnUnderrepresentedPopulation(
       Set<SpecificPopulationEnum> dbSpecificPopulationSet) {
@@ -215,7 +211,7 @@ public interface RdrMapper {
 
     if (rdrDemographic.getRaceEthnicity().isEmpty()) {
       rdrDemographic.setRaceEthnicity(
-          Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
+          Collections.singletonList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
     }
 
     rdrDemographic.setAge(
@@ -225,7 +221,7 @@ public interface RdrMapper {
             .collect(Collectors.toList()));
 
     if (rdrDemographic.getAge().isEmpty()) {
-      rdrDemographic.setAge(Arrays.asList(RdrWorkspaceDemographic.AgeEnum.UNSET));
+      rdrDemographic.setAge(Collections.singletonList(RdrWorkspaceDemographic.AgeEnum.UNSET));
     }
 
     return rdrDemographic;

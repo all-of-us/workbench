@@ -399,6 +399,7 @@ definitions:
       - UNDERGRADUATE
       - MASTER
       - DOCTORATE
+      - PREFER_NOT_TO_ANSWER
 
   Disability:
     type: string
