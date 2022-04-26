@@ -39,8 +39,10 @@ public class DbWgsExtractCromwellSubmission {
     return wgsExtractCromwellSubmissionId;
   }
 
-  public void setWgsExtractCromwellSubmissionId(long wgsExtractCromwellSubmissionId) {
+  public DbWgsExtractCromwellSubmission setWgsExtractCromwellSubmissionId(
+      long wgsExtractCromwellSubmissionId) {
     this.wgsExtractCromwellSubmissionId = wgsExtractCromwellSubmissionId;
+    return this;
   }
 
   @Column(name = "submission_id")
@@ -48,8 +50,9 @@ public class DbWgsExtractCromwellSubmission {
     return submissionId;
   }
 
-  public void setSubmissionId(String submissionId) {
+  public DbWgsExtractCromwellSubmission setSubmissionId(String submissionId) {
     this.submissionId = submissionId;
+    return this;
   }
 
   @ManyToOne
@@ -58,8 +61,9 @@ public class DbWgsExtractCromwellSubmission {
     return workspace;
   }
 
-  public void setWorkspace(DbWorkspace workspace) {
+  public DbWgsExtractCromwellSubmission setWorkspace(DbWorkspace workspace) {
     this.workspace = workspace;
+    return this;
   }
 
   @ManyToOne
@@ -68,8 +72,9 @@ public class DbWgsExtractCromwellSubmission {
     return creator;
   }
 
-  public void setCreator(DbUser creator) {
+  public DbWgsExtractCromwellSubmission setCreator(DbUser creator) {
     this.creator = creator;
+    return this;
   }
 
   @ManyToOne
@@ -78,8 +83,9 @@ public class DbWgsExtractCromwellSubmission {
     return dataset;
   }
 
-  public void setDataset(DbDataset dataset) {
+  public DbWgsExtractCromwellSubmission setDataset(DbDataset dataset) {
     this.dataset = dataset;
+    return this;
   }
 
   @Column(name = "sample_count")
@@ -87,8 +93,9 @@ public class DbWgsExtractCromwellSubmission {
     return sampleCount;
   }
 
-  public void setSampleCount(Long sampleCount) {
+  public DbWgsExtractCromwellSubmission setSampleCount(Long sampleCount) {
     this.sampleCount = sampleCount;
+    return this;
   }
 
   @Column(name = "vcf_size_mb")
@@ -96,8 +103,9 @@ public class DbWgsExtractCromwellSubmission {
     return vcfSizeMb;
   }
 
-  public void setVcfSizeMb(Long vcfSizeMb) {
+  public DbWgsExtractCromwellSubmission setVcfSizeMb(Long vcfSizeMb) {
     this.vcfSizeMb = vcfSizeMb;
+    return this;
   }
 
   @Column(name = "output_dir")
@@ -105,8 +113,9 @@ public class DbWgsExtractCromwellSubmission {
     return outputDir;
   }
 
-  public void setOutputDir(String outputDir) {
+  public DbWgsExtractCromwellSubmission setOutputDir(String outputDir) {
     this.outputDir = outputDir;
+    return this;
   }
 
   @Column(name = "user_cost")
@@ -114,8 +123,9 @@ public class DbWgsExtractCromwellSubmission {
     return userCost;
   }
 
-  public void setUserCost(BigDecimal userCost) {
+  public DbWgsExtractCromwellSubmission setUserCost(BigDecimal userCost) {
     this.userCost = userCost;
+    return this;
   }
 
   @Column(name = "creation_time")
@@ -123,8 +133,9 @@ public class DbWgsExtractCromwellSubmission {
     return creationTime;
   }
 
-  public void setCreationTime(Timestamp creationTime) {
+  public DbWgsExtractCromwellSubmission setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "completion_time")
@@ -132,8 +143,9 @@ public class DbWgsExtractCromwellSubmission {
     return completionTime;
   }
 
-  public void setCompletionTime(Timestamp completionTime) {
+  public DbWgsExtractCromwellSubmission setCompletionTime(Timestamp completionTime) {
     this.completionTime = completionTime;
+    return this;
   }
 
   @Column(name = "terra_status")
@@ -141,8 +153,9 @@ public class DbWgsExtractCromwellSubmission {
     return terraStatus;
   }
 
-  private void setTerraStatus(Short terraStatus) {
+  private DbWgsExtractCromwellSubmission setTerraStatus(Short terraStatus) {
     this.terraStatus = terraStatus;
+    return this;
   }
 
   @Transient
@@ -150,8 +163,9 @@ public class DbWgsExtractCromwellSubmission {
     return DbStorageEnums.terraJobStatusFromStorage(getTerraStatus());
   }
 
-  public void setTerraStatusEnum(TerraJobStatus terraJobStatus) {
+  public DbWgsExtractCromwellSubmission setTerraStatusEnum(TerraJobStatus terraJobStatus) {
     setTerraStatus(DbStorageEnums.terraJobStatusToStorage(terraJobStatus));
+    return this;
   }
 
   @Column(name = "terra_submission_date")
@@ -159,8 +173,9 @@ public class DbWgsExtractCromwellSubmission {
     return terraSubmissionDate;
   }
 
-  public void setTerraSubmissionDate(Timestamp terra_submission_date) {
+  public DbWgsExtractCromwellSubmission setTerraSubmissionDate(Timestamp terra_submission_date) {
     this.terraSubmissionDate = terra_submission_date;
+    return this;
   }
 
   @Override
