@@ -1,6 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
 import java.net.SocketTimeoutException;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
@@ -64,16 +65,20 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
+    Function<ApiException, WorkbenchException> defaultHandler =
+        ExceptionUtils::convertFirecloudException;
+    
     if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
-      // ToS non-compliance causes Firecloud to return 401/Unauth - but that's not the only
-      // reason we might see 401 here.  Call Firecloud again to check ToS status.
-      return checkToSCompliance(exception);
+      return checkToSCompliance(exception, defaultHandler);
     }
 
-    return ExceptionUtils.convertFirecloudException(exception);
+    return defaultHandler.apply(exception);
   }
 
-  private WorkbenchException checkToSCompliance(ApiException e) {
+  // ToS non-compliance causes Firecloud to return 401/Unauth - but that's not the only
+  // reason we might see 401 here.  Call Firecloud again to check ToS status.
+  private WorkbenchException checkToSCompliance(
+      ApiException exception, Function<ApiException, WorkbenchException> defaultHandler) {
     boolean tosCompliant = false;
     String tosExceptionMessage = TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE;
 
@@ -84,9 +89,9 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
           "An exception was thrown checking the user's Terra Terms of Service Status: "
               + tosException.getMessage();
     }
-    
+
     return tosCompliant
-        ? ExceptionUtils.convertFirecloudException(e)
-        : new UnauthorizedException(tosExceptionMessage, e);
+        ? defaultHandler.apply(exception)
+        : new UnauthorizedException(tosExceptionMessage, exception);
   }
 }
