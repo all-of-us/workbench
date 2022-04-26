@@ -6,8 +6,10 @@ import { DataTable } from 'primereact/datatable';
 import { AdminTableUser, Profile } from 'generated/fetch';
 
 import { Button, StyledRouterLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
+import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
 import {
@@ -152,6 +154,19 @@ export const AdminUserTable = withUserProfile()(
       }
     }
 
+    dataAccessContents(user: AdminTableUser): JSX.Element {
+      console.log(user.accessTierShortNames);
+      return (
+        <FlexRow style={{ justifyContent: 'space-evenly' }}>
+          {user.accessTierShortNames.length > 0
+            ? user.accessTierShortNames.map((accessTierShortName) => (
+                <TierBadge {...{ accessTierShortName }} />
+              ))
+            : 'N/A'}
+        </FlexRow>
+      );
+    }
+
     displayInstitutionName(tableRow: AdminTableUser) {
       const shouldShowLink =
         tableRow.institutionShortName &&
@@ -206,6 +221,7 @@ export const AdminUserTable = withUserProfile()(
           'ctComplianceTraining'
         ),
         contactEmail: user.contactEmail,
+        dataAccess: this.dataAccessContents(user),
         dataUseAgreement: this.accessModuleCellContents(
           user,
           'dataUseAgreement'
@@ -334,6 +350,14 @@ export const AdminUserTable = withUserProfile()(
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
                   sortField={'firstSignInTimestamp'}
+                />
+                <Column
+                  field='dataAccess'
+                  bodyStyle={{ ...styles.colStyle }}
+                  excludeGlobalFilter={true}
+                  header='Data Access'
+                  headerStyle={{ ...styles.colStyle, width: '100px' }}
+                  sortable={false}
                 />
                 <Column
                   field='twoFactorAuth'
