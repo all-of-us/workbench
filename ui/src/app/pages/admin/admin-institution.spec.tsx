@@ -31,7 +31,7 @@ describe('AdminInstitutionSpec', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should display all institution', async () => {
+  it('should display all institutions', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('tbody').first().find('tr').length).toBe(4);
