@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.EnumMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -157,13 +158,11 @@ public interface RdrMapper {
   @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
   RdrRace toRdrRace(Race r);
 
-  @ValueMapping(source = "RACE_AA", target = "AA")
-  @ValueMapping(source = "RACE_AIAN", target = "AIAN")
-  @ValueMapping(source = "RACE_ASIAN", target = "ASIAN")
-  @ValueMapping(source = "RACE_NHPI", target = "NHPI")
-  @ValueMapping(source = "RACE_MENA", target = "MENA")
-  @ValueMapping(source = "RACE_HISPANIC", target = "HISPANIC")
   @ValueMapping(source = "RACE_MORE_THAN_ONE", target = "MULTI")
+  // RACE_ASIAN -> ASIAN, etc
+  @EnumMapping(
+      nameTransformationStrategy = MappingConstants.STRIP_PREFIX_TRANSFORMATION,
+      configuration = "RACE_")
   @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)
   RaceEthnicityEnum toRdrRaceEthnicity(SpecificPopulationEnum specificPopulationEnum);
 
