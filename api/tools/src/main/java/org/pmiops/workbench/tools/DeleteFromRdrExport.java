@@ -80,6 +80,7 @@ public class DeleteFromRdrExport {
         null,
         null,
         userDao,
+        accessTierService,
         verifiedInstitutionalAffiliationDao);
   }
 

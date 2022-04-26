@@ -4,21 +4,19 @@ import com.google.common.annotations.VisibleForTesting;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -49,11 +47,11 @@ public class RdrExportServiceImpl implements RdrExportService {
   private final UserDao userDao;
 
   private final InstitutionService institutionService;
+  private final AccessTierService accessTierService;
   private final WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final RdrMapper rdrMapper;
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
-  ZoneOffset offset = OffsetDateTime.now().getOffset();
 
   @Autowired
   public RdrExportServiceImpl(
@@ -63,6 +61,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       RdrMapper rdrMapper,
       WorkspaceDao workspaceDao,
       InstitutionService institutionService,
+      AccessTierService accessTierService,
       WorkspaceService workspaceService,
       UserDao userDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
@@ -72,6 +71,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.rdrMapper = rdrMapper;
     this.workspaceDao = workspaceDao;
     this.institutionService = institutionService;
+    this.accessTierService = accessTierService;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
@@ -188,9 +188,10 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   private RdrResearcher toRdrResearcher(DbUser dbUser) {
-    DbVerifiedInstitutionalAffiliation affiliation =
-        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null);
-    return rdrMapper.toRdrResearcher(dbUser, affiliation);
+    return rdrMapper.toRdrResearcher(
+        dbUser,
+        accessTierService.getAccessTiersForUser(dbUser),
+        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
   }
 
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
