@@ -231,6 +231,6 @@ public class RdrMapperTest {
   @Test
   public void testMapRdrResearcher_noAccess() {
     RdrResearcher got = rdrMapper.toRdrResearcher(new DbUser(), ImmutableList.of(), null);
-    assertThat(got.getAccessTierShortNames()).containsExactly(RdrAccessTier.UNSET);
+    assertThat(got.getAccessTierShortNames()).isEmpty();
   }
 }

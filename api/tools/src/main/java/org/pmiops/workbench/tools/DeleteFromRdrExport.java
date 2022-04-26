@@ -106,7 +106,8 @@ public class DeleteFromRdrExport {
             workspaceIdListToDelete.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 20))
                 .values();
-        result.parallelStream()
+        result
+            .parallelStream()
             .forEach(
                 (workspaceIdList) -> {
                   if (!dryRun) {

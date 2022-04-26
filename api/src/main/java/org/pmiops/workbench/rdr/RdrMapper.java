@@ -1,6 +1,5 @@
 package org.pmiops.workbench.rdr;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -108,9 +107,6 @@ public interface RdrMapper {
       DbVerifiedInstitutionalAffiliation v);
 
   default List<RdrAccessTier> toRdrAccessTiers(List<DbAccessTier> dbAccessTiers) {
-    if (dbAccessTiers.isEmpty()) {
-      return ImmutableList.of(RdrAccessTier.UNSET);
-    }
     return dbAccessTiers.stream()
         .map(DbAccessTier::getShortName)
         .map(this::toModelAccessTier)
