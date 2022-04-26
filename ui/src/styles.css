@@ -264,7 +264,7 @@ iframe#launcher {
 
 .p-datatable-scrollable-wrapper > .p-datatable-frozen-view > .p-datatable-scrollable-body > table > .p-datatable-tbody > tr > td,
 .p-datatable-scrollable-wrapper > .p-datatable-frozen-view > .p-datatable-scrollable-header > .p-datatable-scrollable-header-box > table > .p-datatable-thead > tr > th {
-  border: none;
+  border-bottom: none;
   border-left: 1px solid #c8c8c8;
   border-right: 1px solid #c8c8c8;
   border-top: 1px solid #c8c8c8;
