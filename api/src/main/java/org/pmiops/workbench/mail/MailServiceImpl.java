@@ -108,25 +108,6 @@ public class MailServiceImpl implements MailService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  // This will be called for all the environments were Controlled Tier is not enabled
-  // We can delete this method once CT is enabled on all enivornment for some time
-  @Override
-  public void sendWelcomeEmail_deprecated(
-      final String contactEmail, final String password, final String username)
-      throws MessagingException {
-    final String htmlMessage =
-        buildHtml(
-            WELCOME_RESOURCE_DEPRECATED,
-            welcomeMessageSubstitutionMap(password, username, "", false, false));
-
-    sendWithRetries(
-        Collections.singletonList(contactEmail),
-        Collections.emptyList(),
-        "Your new All of Us Researcher Workbench Account",
-        String.format("Welcome for %s", username),
-        htmlMessage);
-  }
-
   @Override
   public void sendWelcomeEmail(
       final String contactEmail,
