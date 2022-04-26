@@ -209,4 +209,16 @@ public class RdrMapperTest {
                         .institutionDisplayName("Foo Bar")
                         .institutionalRole("FELLOW")));
   }
+
+  @Test
+  public void testMapRdrResearcher_otherRole() {
+    RdrResearcher got =
+        rdrMapper.toRdrResearcher(
+            new DbUser(),
+            new DbVerifiedInstitutionalAffiliation()
+                .setInstitution(new DbInstitution().setShortName("Foo").setDisplayName("Foo Bar"))
+                .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
+                .setInstitutionalRoleOtherText("CEO"));
+    assertThat(got.getVerifiedInstitutionalAffiliation().getInstitutionalRole()).isEqualTo("CEO");
+  }
 }
