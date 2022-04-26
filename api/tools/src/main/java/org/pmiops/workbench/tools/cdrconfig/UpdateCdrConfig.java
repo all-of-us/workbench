@@ -83,7 +83,11 @@ public class UpdateCdrConfig {
    *   <li>duplicate IDs (or lack one)
    *   <li>have an archived default version
    *   <li>belong to a tier which is not also present in this file
+   *   <li>have more than one default version per tier
+   *   <li>have fewer than one default version per tier
    * </ul>
+   *
+   * CDR Versions must also have at least one version per tier
    */
   private void preCheck(CdrConfigVO cdrConfig) {
     Set<Long> accessTierIds = new HashSet<>();
@@ -167,6 +171,13 @@ public class UpdateCdrConfig {
     accessTierShortNames.forEach(
         t -> {
           if (!cdrVersionsPerTier.containsKey(t)) {
+            throw new IllegalArgumentException(
+                String.format("No CDR versions are present for Access Tier '%s'.", t));
+          }
+
+          // check if a tier has CDR Versions but no default
+          // (empty is OK if it passed the previous check)
+          if (cdrVersionsPerTier.containsKey(t) && !cdrDefaultVersionPerTier.containsKey(t)) {
             throw new IllegalArgumentException(
                 String.format("Missing default CDR version for Access Tier '%s'.", t));
           }
