@@ -66,7 +66,9 @@ public class RdrExportServiceImplTest {
   @Autowired private WorkspaceService mockWorkspaceService;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
-  private DbWorkspace workspace, deletedWorkspace, creatorWorkspace;
+  private DbWorkspace workspace;
+  private DbWorkspace deletedWorkspace;
+  private DbWorkspace creatorWorkspace;
 
   private static final Instant NOW = Instant.now();
   private static final Timestamp NOW_TIMESTAMP = Timestamp.from(NOW);
