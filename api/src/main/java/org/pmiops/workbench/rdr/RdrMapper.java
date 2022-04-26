@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.db.model.DbUser;
@@ -39,6 +40,8 @@ import org.pmiops.workbench.rdr.model.RdrSexAtBirth;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspace.AccessTierEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
@@ -154,6 +157,23 @@ public interface RdrMapper {
   @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
   RdrRace toRdrRace(Race r);
 
+  @ValueMapping(source = "RACE_AA", target = "AA")
+  @ValueMapping(source = "RACE_AIAN", target = "AIAN")
+  @ValueMapping(source = "RACE_ASIAN", target = "ASIAN")
+  @ValueMapping(source = "RACE_NHPI", target = "NHPI")
+  @ValueMapping(source = "RACE_MENA", target = "MENA")
+  @ValueMapping(source = "RACE_HISPANIC", target = "HISPANIC")
+  @ValueMapping(source = "RACE_MORE_THAN_ONE", target = "MULTI")
+  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)
+  RaceEthnicityEnum toRdrRaceEthnicity(SpecificPopulationEnum specificPopulationEnum);
+
+  @ValueMapping(source = "AGE_CHILDREN", target = "AGE_0_11")
+  @ValueMapping(source = "AGE_ADOLESCENTS", target = "AGE_12_17")
+  @ValueMapping(source = "AGE_OLDER", target = "AGE_65_74")
+  @ValueMapping(source = "AGE_OLDER_MORE_THAN_75", target = "AGE_75_AND_MORE")
+  @ValueMapping(source = MappingConstants.ANY_REMAINING, target = MappingConstants.NULL)
+  AgeEnum toRdrAge(SpecificPopulationEnum specificPopulationEnum);
+
   default boolean toModelFocusOnUnderrepresentedPopulation(
       Set<SpecificPopulationEnum> dbSpecificPopulationSet) {
     return dbSpecificPopulationSet != null && dbSpecificPopulationSet.size() > 0;
@@ -205,7 +225,7 @@ public interface RdrMapper {
 
     rdrDemographic.setRaceEthnicity(
         dbPopulationEnumSet.stream()
-            .map(RdrExportEnums::specificPopulationToRaceEthnicity)
+            .map(this::toRdrRaceEthnicity)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
 
@@ -216,7 +236,7 @@ public interface RdrMapper {
 
     rdrDemographic.setAge(
         dbPopulationEnumSet.stream()
-            .map(RdrExportEnums::specificPopulationToAge)
+            .map(this::toRdrAge)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
 
