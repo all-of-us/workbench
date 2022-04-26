@@ -7,12 +7,12 @@ import { environment } from 'environments/environment';
 import { FlexColumn } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { PUBLIC_HEADER_IMAGE } from 'app/components/public-layout';
+import { TermsOfService } from 'app/components/terms-of-service';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
 import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
-import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
 import { LoginReactComponent } from 'app/pages/login/login';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
@@ -267,7 +267,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         );
       case SignInStep.TERMS_OF_SERVICE:
         return (
-          <AccountCreationTos
+          <TermsOfService
             showReAcceptNotification={false}
             filePath='/aou-tos.html'
             onComplete={(tosVersion) => {
