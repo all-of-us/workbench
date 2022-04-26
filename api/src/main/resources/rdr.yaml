@@ -58,7 +58,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/RdrWorkspace"
+              $ref: "#/definitions/Workspace"
       responses:
         200:
           description: successful operation
@@ -78,7 +78,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/RdrResearcher"
+              $ref: "#/definitions/Researcher"
       responses:
         200:
           description: successful operation
@@ -86,7 +86,7 @@ paths:
 
 
 definitions:
-  RdrWorkspace:
+  Workspace:
     type: object
     properties:
       workspaceId:
@@ -95,7 +95,7 @@ definitions:
         type: string
       creator:
         description: Information about the creator of the workspace
-        $ref: "#/definitions/RdrWorkspaceCreator"
+        $ref: "#/definitions/WorkspaceCreator"
       creationTime:
         type: string
         format: date-time
@@ -111,7 +111,7 @@ definitions:
       workspaceUsers:
         type: array
         items:
-          $ref: '#/definitions/RdrWorkspaceUser'
+          $ref: '#/definitions/WorkspaceUser'
       excludeFromPublicDirectory:
         type: boolean
         description: Set to true if the creator of the workspace is an Operational User
@@ -154,8 +154,8 @@ definitions:
       reviewRequested:
         type: boolean
       workspaceDemographic:
-        $ref: '#/definitions/RdrWorkspaceDemographic'
-      cdrVersionName: 
+        $ref: '#/definitions/WorkspaceDemographic'
+      cdrVersionName:
         type: string
       accessTier:
         type: string
@@ -164,7 +164,7 @@ definitions:
           - REGISTERED
           - CONTROLLED
 
-  RdrWorkspaceDemographic:
+  WorkspaceDemographic:
     type: object
     properties:
       raceEthnicity:
@@ -233,7 +233,7 @@ definitions:
       others:
         type: string
 
-  RdrWorkspaceUser:
+  WorkspaceUser:
     type: object
     properties:
       userId:
@@ -251,7 +251,7 @@ definitions:
           - ACTIVE
           - INACTIVE
 
-  RdrWorkspaceCreator:
+  WorkspaceCreator:
     type: object
     description: Details for workspace creator
     required:
@@ -268,7 +268,7 @@ definitions:
       familyName:
         type: string
 
-  RdrResearcher:
+  Researcher:
     type: object
     properties:
       userId:
@@ -321,24 +321,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Degree'
-      affiliations:
-        type: array
-        items:
-          $ref: '#/definitions/ResearcherAffiliation'
       verifiedInstitutionalAffiliation:
         $ref: '#/definitions/ResearcherVerifiedInstitutionalAffiliation'
       email:
         type: string
-
-  ResearcherAffiliation:
-    type: object
-    properties:
-      institution:
-        type: string
-      role:
-        type: string
-      nonAcademicAffiliation:
-        type: boolean
 
   ResearcherVerifiedInstitutionalAffiliation:
     type: object
