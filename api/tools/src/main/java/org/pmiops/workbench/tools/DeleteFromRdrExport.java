@@ -79,8 +79,8 @@ public class DeleteFromRdrExport {
         workspaceDao,
         null,
         null,
+        null,
         userDao,
-        accessTierService,
         verifiedInstitutionalAffiliationDao);
   }
 
@@ -106,8 +106,7 @@ public class DeleteFromRdrExport {
             workspaceIdListToDelete.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 20))
                 .values();
-        result
-            .parallelStream()
+        result.parallelStream()
             .forEach(
                 (workspaceIdList) -> {
                   if (!dryRun) {
