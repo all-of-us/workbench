@@ -9,6 +9,7 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
   protected WorkbenchException convertException(ApiException exception) {
     Function<ApiException, WorkbenchException> defaultHandler =
         ExceptionUtils::convertFirecloudException;
-    
+
     if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
       return checkToSCompliance(exception, defaultHandler);
     }
@@ -92,6 +93,8 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
 
     return tosCompliant
         ? defaultHandler.apply(exception)
-        : new UnauthorizedException(tosExceptionMessage, exception);
+        : new UnauthorizedException(
+            WorkbenchException.errorResponse(
+                tosExceptionMessage, ErrorCode.TERRA_TOS_NON_COMPLIANT));
   }
 }
