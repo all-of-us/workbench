@@ -155,7 +155,6 @@ export const AdminUserTable = withUserProfile()(
     }
 
     dataAccessContents(user: AdminTableUser): JSX.Element {
-      console.log(user.accessTierShortNames);
       return (
         <FlexRow style={{ justifyContent: 'space-evenly' }}>
           {user.accessTierShortNames.length > 0
