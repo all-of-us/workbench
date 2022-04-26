@@ -19,7 +19,7 @@ import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { capStringWithEllipsis, reactStyles } from 'app/utils';
 import { orderedAccessTierShortNames } from 'app/utils/access-tiers';
-import { getTierConfig } from 'app/utils/institutions';
+import { getAdminUrl, getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -90,7 +90,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
     }
 
     renderInstitutionName(institution: Institution) {
-      const link = `admin/institution/edit/${institution.shortName}`;
+      const link = getAdminUrl(institution.shortName);
       return <a href={link}>{institution.displayName}</a>;
     }
 

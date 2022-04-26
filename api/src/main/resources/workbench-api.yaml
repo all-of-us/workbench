@@ -5835,7 +5835,10 @@ definitions:
       contactEmail:
         type: string
       institutionName:
-        description: Verified institution name
+        description: Display name of the user's affiliated institution, if it exists
+        type: string
+      institutionShortName:
+        description: Short name of the user's affiliated institution, if it exists
         type: string
       firstSignInTime:
         type: integer

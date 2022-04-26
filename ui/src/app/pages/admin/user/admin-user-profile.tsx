@@ -35,6 +35,7 @@ import {
 } from 'app/utils/authorities';
 import {
   checkInstitutionalEmail,
+  getAdminUrl,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import {
@@ -245,7 +246,10 @@ const EditableFields = ({
           {showGoToInstitutionLink && (
             <a
               style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
-              href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
+              href={getAdminUrl(
+                updatedProfile.verifiedInstitutionalAffiliation
+                  ?.institutionShortName
+              )}
               target='_blank'
             >
               <TooltipTrigger

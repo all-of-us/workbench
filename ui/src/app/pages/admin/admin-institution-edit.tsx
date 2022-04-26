@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
@@ -16,6 +17,7 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SemiBoldHeader } from 'app/components/headers';
+import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
 import { TextArea, TextInputWithLabel } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
 import {
@@ -42,7 +44,6 @@ import {
 import { convertAPIError } from 'app/utils/errors';
 import {
   defaultTierConfig,
-  getTierBadge,
   getTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains,
@@ -218,6 +219,26 @@ const DomainTextArea = (props: {
       onChange={onChange}
     />
   );
+};
+
+const getTierBadge = (accessTierShortName: string): (() => JSX.Element) => {
+  const tierBadgeStyle: CSSProperties = {
+    marginTop: '0.6rem',
+    marginLeft: '0.6rem',
+  };
+
+  return () =>
+    switchCase(
+      accessTierShortName,
+      [
+        AccessTierShortNames.Registered,
+        () => <RegisteredTierBadge style={tierBadgeStyle} />,
+      ],
+      [
+        AccessTierShortNames.Controlled,
+        () => <ControlledTierBadge style={tierBadgeStyle} />,
+      ]
+    );
 };
 
 interface TierConfigProps {

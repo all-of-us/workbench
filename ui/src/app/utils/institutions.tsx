@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
 
 import {
@@ -10,7 +9,6 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 
-import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -288,22 +286,5 @@ export function updateEnableControlledTier(
   return mergeTierConfigs(tierConfigs, newCtConfig);
 }
 
-export function getTierBadge(accessTierShortName: string): () => JSX.Element {
-  const tierBadgeStyle: CSSProperties = {
-    marginTop: '0.6rem',
-    marginLeft: '0.6rem',
-  };
-
-  return () =>
-    switchCase(
-      accessTierShortName,
-      [
-        AccessTierShortNames.Registered,
-        () => <RegisteredTierBadge style={tierBadgeStyle} />,
-      ],
-      [
-        AccessTierShortNames.Controlled,
-        () => <ControlledTierBadge style={tierBadgeStyle} />,
-      ]
-    );
-}
+export const getAdminUrl = (shortName: string) =>
+  `/admin/institution/edit/${shortName}`;

@@ -103,6 +103,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     String getInstitutionName();
 
+    String getInstitutionShortName();
+
     void setInstitutionName(String institutionName);
 
     Timestamp getFirstSignInTime();
@@ -152,6 +154,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "u.family_name AS familyName, "
               + "u.contact_email AS contactEmail, "
               + "i.display_name AS institutionName, "
+              + "i.short_name AS institutionShortName, "
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
               + "uamd.data_use_agreement_bypass_time AS dataUseAgreementBypassTime, "
