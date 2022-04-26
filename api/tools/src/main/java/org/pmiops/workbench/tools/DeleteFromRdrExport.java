@@ -79,6 +79,7 @@ public class DeleteFromRdrExport {
         workspaceDao,
         null,
         null,
+        null,
         userDao,
         verifiedInstitutionalAffiliationDao);
   }

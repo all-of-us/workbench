@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -58,6 +59,7 @@ public class RdrExportServiceImplTest {
   @Autowired private RdrExportService rdrExportService;
   @Autowired private RdrMapper rdrMapper;
 
+  @Autowired private AccessTierService mockAccessTierService;
   @Autowired private ApiClient mockApiClient;
   @Autowired private RdrApi mockRdrApi;
   @Autowired private RdrExportDao rdrExportDao;
@@ -81,6 +83,7 @@ public class RdrExportServiceImplTest {
   @TestConfiguration
   @Import({FakeClockConfiguration.class, RdrExportServiceImpl.class, RdrMapperImpl.class})
   @MockBean({
+    AccessTierService.class,
     ApiClient.class,
     RdrApi.class,
     RdrExportDao.class,
@@ -100,6 +103,7 @@ public class RdrExportServiceImplTest {
   @BeforeEach
   public void setUp() {
     rdrExportService = spy(rdrExportService);
+    when(mockAccessTierService.getAccessTiersForUser(any())).thenReturn(ImmutableList.of());
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
 
     dbUserWithEmail =

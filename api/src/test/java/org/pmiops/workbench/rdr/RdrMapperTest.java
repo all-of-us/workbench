@@ -29,6 +29,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDisability;
 import org.pmiops.workbench.rdr.model.RdrEducation;
@@ -39,7 +40,6 @@ import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrResearcherVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.rdr.model.RdrSexAtBirth;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
-import org.pmiops.workbench.rdr.model.RdrWorkspace.AccessTierEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AccessToCareEnum;
@@ -72,16 +72,16 @@ public class RdrMapperTest {
 
   private static Stream<Arguments> accessTierCases() {
     return Stream.of(
-        Arguments.of("controlled", AccessTierEnum.CONTROLLED),
-        Arguments.of("registered", AccessTierEnum.REGISTERED),
-        Arguments.of(null, AccessTierEnum.UNSET),
-        Arguments.of("asdf", AccessTierEnum.UNSET));
+        Arguments.of("controlled", RdrAccessTier.CONTROLLED),
+        Arguments.of("registered", RdrAccessTier.REGISTERED),
+        Arguments.of(null, RdrAccessTier.UNSET),
+        Arguments.of("asdf", RdrAccessTier.UNSET));
   }
 
   @ParameterizedTest
   @MethodSource("accessTierCases")
   public void testMapRdrWorkspace_accessTiers(
-      @Nullable String tierShortName, AccessTierEnum wantRdrTier) {
+      @Nullable String tierShortName, RdrAccessTier wantRdrTier) {
     DbAccessTier accessTier = new DbAccessTier();
     accessTier.setShortName(tierShortName);
 
@@ -132,7 +132,7 @@ public class RdrMapperTest {
                         .accessToCare(AccessToCareEnum.UNSET)
                         .educationLevel(EducationLevelEnum.UNSET)
                         .incomeLevel(IncomeLevelEnum.UNSET))
-                .accessTier(AccessTierEnum.UNSET));
+                .accessTier(RdrAccessTier.UNSET));
   }
 
   @Test
@@ -176,6 +176,9 @@ public class RdrMapperTest {
                             .setDisabilityEnum(Disability.TRUE))
                     .setDegreesEnum(ImmutableList.of(Degree.MD))
                     .setContactEmail("contact@asdf.com"),
+                ImmutableList.of(
+                    new DbAccessTier().setShortName("registered"),
+                    new DbAccessTier().setShortName("controlled")),
                 new DbVerifiedInstitutionalAffiliation()
                     .setInstitution(
                         new DbInstitution().setShortName("Foo").setDisplayName("Foo Bar"))
@@ -203,6 +206,8 @@ public class RdrMapperTest {
                 .disability(RdrDisability.YES)
                 .degrees(ImmutableList.of(RdrDegree.MD))
                 .email("contact@asdf.com")
+                .accessTierShortNames(
+                    ImmutableList.of(RdrAccessTier.REGISTERED, RdrAccessTier.CONTROLLED))
                 .verifiedInstitutionalAffiliation(
                     new RdrResearcherVerifiedInstitutionalAffiliation()
                         .institutionShortName("Foo")
@@ -215,10 +220,17 @@ public class RdrMapperTest {
     RdrResearcher got =
         rdrMapper.toRdrResearcher(
             new DbUser(),
+            ImmutableList.of(),
             new DbVerifiedInstitutionalAffiliation()
                 .setInstitution(new DbInstitution().setShortName("Foo").setDisplayName("Foo Bar"))
                 .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
                 .setInstitutionalRoleOtherText("CEO"));
     assertThat(got.getVerifiedInstitutionalAffiliation().getInstitutionalRole()).isEqualTo("CEO");
+  }
+
+  @Test
+  public void testMapRdrResearcher_noAccess() {
+    RdrResearcher got = rdrMapper.toRdrResearcher(new DbUser(), ImmutableList.of(), null);
+    assertThat(got.getAccessTierShortNames()).isEmpty();
   }
 }

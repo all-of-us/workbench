@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -29,6 +31,7 @@ import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDisability;
 import org.pmiops.workbench.rdr.model.RdrEducation;
@@ -39,7 +42,6 @@ import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrResearcherVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.rdr.model.RdrSexAtBirth;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
-import org.pmiops.workbench.rdr.model.RdrWorkspace.AccessTierEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum;
@@ -92,14 +94,27 @@ public interface RdrMapper {
   @Mapping(source = "dbUser.demographicSurvey.raceEnum", target = "race")
   @Mapping(source = "dbUser.demographicSurvey.lgbtqIdentity", target = "lgbtqIdentity")
   @Mapping(source = "dbUser.demographicSurvey.identifiesAsLgbtq", target = "identifiesAsLgbtq")
+  @Mapping(source = "accessTiers", target = "accessTierShortNames")
   RdrResearcher toRdrResearcher(
-      DbUser dbUser, @Nullable DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation);
+      DbUser dbUser,
+      List<DbAccessTier> accessTiers,
+      @Nullable DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation);
 
   @Mapping(source = "institution.shortName", target = "institutionShortName")
   @Mapping(source = "institution.displayName", target = "institutionDisplayName")
   @Mapping(ignore = true, target = "institutionalRole")
   RdrResearcherVerifiedInstitutionalAffiliation toRdrAffiliation(
       DbVerifiedInstitutionalAffiliation v);
+
+  default List<RdrAccessTier> toRdrAccessTiers(List<DbAccessTier> dbAccessTiers) {
+    return dbAccessTiers.stream()
+        .map(DbAccessTier::getShortName)
+        .map(this::toModelAccessTier)
+        // UNSET will be returned for any unknown tier. We don't want to send that as an element to
+        // RDR, e.g. because we added a new tier and forgot to update the RDR enum.
+        .filter(tier -> !RdrAccessTier.UNSET.equals(tier))
+        .collect(Collectors.toList());
+  }
 
   @AfterMapping
   default void addInstitutionalRole(
@@ -123,10 +138,10 @@ public interface RdrMapper {
     return dbTime.toLocalDateTime().atOffset(offset);
   }
 
-  default RdrWorkspace.AccessTierEnum toModelAccessTier(@Nullable String accessTier) {
+  default RdrAccessTier toModelAccessTier(@Nullable String accessTier) {
     return Optional.ofNullable(accessTier)
-        .map(t -> AccessTierEnum.fromValue(t.toUpperCase()))
-        .orElse(AccessTierEnum.UNSET);
+        .map(t -> RdrAccessTier.fromValue(t.toUpperCase()))
+        .orElse(RdrAccessTier.UNSET);
   }
 
   default RdrWorkspace.StatusEnum toModelStatus(WorkspaceActiveStatus workspaceActiveStatus) {

@@ -158,11 +158,7 @@ definitions:
       cdrVersionName:
         type: string
       accessTier:
-        type: string
-        enum:
-          - UNSET
-          - REGISTERED
-          - CONTROLLED
+        $ref: '#/definitions/AccessTier'
 
   WorkspaceDemographic:
     type: object
@@ -325,6 +321,10 @@ definitions:
         $ref: '#/definitions/ResearcherVerifiedInstitutionalAffiliation'
       email:
         type: string
+      accessTierShortNames:
+        type: array
+        items:
+          $ref: '#/definitions/AccessTier'
 
   ResearcherVerifiedInstitutionalAffiliation:
     type: object
@@ -342,6 +342,13 @@ definitions:
       institutionalRole:
         type: string
         description: The user's Institutional Role at this Institution, as text
+
+  AccessTier:
+    type: string
+    enum:
+      - UNSET
+      - REGISTERED
+      - CONTROLLED
 
   Ethnicity:
     type: string
