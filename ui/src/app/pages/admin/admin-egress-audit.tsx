@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
@@ -8,6 +9,7 @@ import { TabPanel, TabView } from 'primereact/tabview';
 
 import { AuditEgressEventResponse, EgressEvent } from 'generated/fetch';
 
+import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -124,9 +126,9 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
           {new Date(event.creationTime).toLocaleString()}
         </DetailRow>
         <DetailRow label='Source user'>
-          <StyledRouterLink path={`/admin/users/${username}`}>
+          <AdminUserLink {...{ username }}>
             {event.sourceUserEmail}
-          </StyledRouterLink>
+          </AdminUserLink>
         </DetailRow>
         <DetailRow label='Source workspace'>
           <StyledRouterLink
