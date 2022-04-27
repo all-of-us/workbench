@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -6,6 +7,7 @@ import { Dropdown } from 'primereact/dropdown';
 
 import { EgressEvent } from 'generated/fetch';
 
+import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { StyledRouterLink } from 'app/components/buttons';
 import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
 import { mutableEgressEventStatuses } from 'app/utils/egress-events';
@@ -149,11 +151,7 @@ export const EgressEventsTable = ({
         field='sourceUserEmail'
         body={({ sourceUserEmail: email }) => {
           const [username] = email.split('@');
-          return (
-            <StyledRouterLink path={`/admin/users/${username}`}>
-              {email}
-            </StyledRouterLink>
-          );
+          return <AdminUserLink {...{ username }}>{email}</AdminUserLink>;
         }}
         header='Source User'
         headerStyle={{ width: '300px' }}
