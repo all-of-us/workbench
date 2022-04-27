@@ -206,7 +206,9 @@ export const AdminUserTable = withUserProfile()(
           user,
           'ctComplianceTraining'
         ),
-        contactEmail: user.contactEmail,
+        contactEmail: (
+          <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
+        ),
         dataUseAgreement: this.accessModuleCellContents(
           user,
           'dataUseAgreement'
@@ -223,10 +225,15 @@ export const AdminUserTable = withUserProfile()(
             {user.familyName + ', ' + user.givenName}
           </AdminUserLink>
         ),
+        // used for filter and sorting
         nameText: user.familyName + ' ' + user.givenName,
         status: user.disabled ? 'Disabled' : 'Active',
         twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
-        username: user.username,
+        username: (
+          <AdminUserLink username={user.username} target='_blank'>
+            {user.username}
+          </AdminUserLink>
+        ),
         userLockout: (
           <LockoutButton
             disabled={false}
