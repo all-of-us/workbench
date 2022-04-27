@@ -121,7 +121,7 @@ const styles = reactStyles({
   },
   subMenu: {
     position: 'absolute',
-    top: 'calc(100% - 1.75rem)',
+    top: 'calc(100% - 3.75rem)',
     left: '100%',
     display: 'flex',
     flexDirection: 'column',
