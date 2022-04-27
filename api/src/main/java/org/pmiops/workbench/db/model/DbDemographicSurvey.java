@@ -35,38 +35,16 @@ public class DbDemographicSurvey {
   private List<Short> race;
   private List<Short> genderIdentityList;
   private List<Short> sexAtBirth;
-  private int year_of_birth;
-
-  public DbDemographicSurvey() {}
-
-  public DbDemographicSurvey(org.pmiops.workbench.model.DemographicSurvey demographicSurvey) {
-    this.disability = DbStorageEnums.disabilityToStorage(demographicSurvey.getDisability());
-    this.education = DbStorageEnums.educationToStorage(demographicSurvey.getEducation());
-    this.ethnicity = DbStorageEnums.ethnicityToStorage(demographicSurvey.getEthnicity());
-    this.identifiesAsLgbtq = demographicSurvey.getIdentifiesAsLgbtq();
-    this.lgbtqIdentity = demographicSurvey.getLgbtqIdentity();
-    this.race =
-        demographicSurvey.getRace().stream()
-            .map(DbStorageEnums::raceToStorage)
-            .collect(Collectors.toList());
-    this.sexAtBirth =
-        demographicSurvey.getSexAtBirth().stream()
-            .map(DbStorageEnums::sexAtBirthToStorage)
-            .collect(Collectors.toList());
-    this.year_of_birth = demographicSurvey.getYearOfBirth().intValue();
-    this.genderIdentityList =
-        demographicSurvey.getGenderIdentityList().stream()
-            .map(DbStorageEnums::genderIdentityToStorage)
-            .collect(Collectors.toList());
-  }
+  private int yearOfBirth;
 
   @Column(name = "disability")
   public Short getDisability() {
     return disability;
   }
 
-  public void setDisability(Short disability) {
+  public DbDemographicSurvey setDisability(Short disability) {
     this.disability = disability;
+    return this;
   }
 
   @Transient
@@ -74,8 +52,9 @@ public class DbDemographicSurvey {
     return DbStorageEnums.disabilityFromStorage(disability);
   }
 
-  public void setDisabilityEnum(Disability disability) {
+  public DbDemographicSurvey setDisabilityEnum(Disability disability) {
     this.disability = DbStorageEnums.disabilityToStorage(disability);
+    return this;
   }
 
   @Column(name = "education")
@@ -83,8 +62,9 @@ public class DbDemographicSurvey {
     return education;
   }
 
-  public void setEducation(Short education) {
+  public DbDemographicSurvey setEducation(Short education) {
     this.education = education;
+    return this;
   }
 
   @Transient
@@ -93,8 +73,9 @@ public class DbDemographicSurvey {
     return DbStorageEnums.educationFromStorage(education);
   }
 
-  public void setEducationEnum(Education education) {
+  public DbDemographicSurvey setEducationEnum(Education education) {
     this.education = DbStorageEnums.educationToStorage(education);
+    return this;
   }
 
   @Column(name = "ethnicity")
@@ -102,8 +83,9 @@ public class DbDemographicSurvey {
     return ethnicity;
   }
 
-  public void setEthnicity(Short ethnicity) {
+  public DbDemographicSurvey setEthnicity(Short ethnicity) {
     this.ethnicity = ethnicity;
+    return this;
   }
 
   @Transient
@@ -112,8 +94,9 @@ public class DbDemographicSurvey {
     return DbStorageEnums.ethnicityFromStorage(ethnicity);
   }
 
-  public void setEthnicityEnum(Ethnicity ethnicity) {
+  public DbDemographicSurvey setEthnicityEnum(Ethnicity ethnicity) {
     this.ethnicity = DbStorageEnums.ethnicityToStorage(ethnicity);
+    return this;
   }
 
   @Id
@@ -123,8 +106,9 @@ public class DbDemographicSurvey {
     return id;
   }
 
-  public void setId(long demographic_survey_id) {
+  public DbDemographicSurvey setId(long demographic_survey_id) {
     this.id = demographic_survey_id;
+    return this;
   }
 
   @Column(name = "identifies_as_lgbtq")
@@ -132,8 +116,9 @@ public class DbDemographicSurvey {
     return identifiesAsLgbtq;
   }
 
-  public void setIdentifiesAsLgbtq(Boolean identifiesAsLgbtq) {
+  public DbDemographicSurvey setIdentifiesAsLgbtq(Boolean identifiesAsLgbtq) {
     this.identifiesAsLgbtq = identifiesAsLgbtq;
+    return this;
   }
 
   @Column(name = "lgbtq_identity")
@@ -141,8 +126,9 @@ public class DbDemographicSurvey {
     return lgbtqIdentity;
   }
 
-  public void setLgbtqIdentity(String lgbtqIdentity) {
+  public DbDemographicSurvey setLgbtqIdentity(String lgbtqIdentity) {
     this.lgbtqIdentity = lgbtqIdentity;
+    return this;
   }
 
   @ManyToOne
@@ -151,8 +137,9 @@ public class DbDemographicSurvey {
     return user;
   }
 
-  public void setUser(DbUser user) {
+  public DbDemographicSurvey setUser(DbUser user) {
     this.user = user;
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -164,8 +151,9 @@ public class DbDemographicSurvey {
     return race;
   }
 
-  public void setRace(List<Short> race) {
+  public DbDemographicSurvey setRace(List<Short> race) {
     this.race = race;
+    return this;
   }
 
   @Transient
@@ -174,8 +162,9 @@ public class DbDemographicSurvey {
     return this.race.stream().map(DbStorageEnums::raceFromStorage).collect(Collectors.toList());
   }
 
-  public void setRaceEnum(List<Race> raceList) {
+  public DbDemographicSurvey setRaceEnum(List<Race> raceList) {
     this.race = raceList.stream().map(DbStorageEnums::raceToStorage).collect(Collectors.toList());
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -187,23 +176,25 @@ public class DbDemographicSurvey {
     return genderIdentityList;
   }
 
-  public void setGenderIdentityList(List<Short> genderIdentityList) {
+  public DbDemographicSurvey setGenderIdentityList(List<Short> genderIdentityList) {
     this.genderIdentityList = genderIdentityList;
+    return this;
   }
 
   @Transient
   public List<GenderIdentity> getGenderIdentityEnumList() {
-    if (genderIdentityList == null) return new ArrayList<GenderIdentity>();
+    if (genderIdentityList == null) return new ArrayList<>();
     return this.genderIdentityList.stream()
         .map(DbStorageEnums::genderIdentityFromStorage)
         .collect(Collectors.toList());
   }
 
-  public void setGenderIdentityEnumList(List<GenderIdentity> genderList) {
+  public DbDemographicSurvey setGenderIdentityEnumList(List<GenderIdentity> genderList) {
     this.genderIdentityList =
         genderList.stream()
             .map(DbStorageEnums::genderIdentityToStorage)
             .collect(Collectors.toList());
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -215,8 +206,9 @@ public class DbDemographicSurvey {
     return sexAtBirth;
   }
 
-  public void setSexAtBirth(List<Short> sexAtBirth) {
+  public DbDemographicSurvey setSexAtBirth(List<Short> sexAtBirth) {
     this.sexAtBirth = sexAtBirth;
+    return this;
   }
 
   @Transient
@@ -227,19 +219,21 @@ public class DbDemographicSurvey {
         .collect(Collectors.toList());
   }
 
-  public void setSexAtBirthEnum(List<SexAtBirth> sexAtBirthList) {
+  public DbDemographicSurvey setSexAtBirthEnum(List<SexAtBirth> sexAtBirthList) {
     this.sexAtBirth =
         sexAtBirthList.stream()
             .map(DbStorageEnums::sexAtBirthToStorage)
             .collect(Collectors.toList());
+    return this;
   }
 
   @Column(name = "year_of_birth")
-  public int getYear_of_birth() {
-    return year_of_birth;
+  public int getYearOfBirth() {
+    return yearOfBirth;
   }
 
-  public void setYear_of_birth(int year_of_birth) {
-    this.year_of_birth = year_of_birth;
+  public DbDemographicSurvey setYearOfBirth(int yearOfBirth) {
+    this.yearOfBirth = yearOfBirth;
+    return this;
   }
 }

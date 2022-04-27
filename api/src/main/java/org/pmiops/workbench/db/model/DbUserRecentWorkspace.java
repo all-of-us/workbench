@@ -23,8 +23,9 @@ public class DbUserRecentWorkspace {
     return id;
   }
 
-  public void setId(long id) {
+  public DbUserRecentWorkspace setId(long id) {
     this.id = id;
+    return this;
   }
 
   @Column(name = "user_id")
@@ -32,8 +33,9 @@ public class DbUserRecentWorkspace {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public DbUserRecentWorkspace setUserId(Long userId) {
     this.userId = userId;
+    return this;
   }
 
   @Column(name = "workspace_id")
@@ -41,8 +43,9 @@ public class DbUserRecentWorkspace {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbUserRecentWorkspace setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   @Column(name = "last_access_date")
@@ -50,8 +53,9 @@ public class DbUserRecentWorkspace {
     return lastAccessDate;
   }
 
-  public void setLastAccessDate(Timestamp lastAccessDate) {
+  public DbUserRecentWorkspace setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
+    return this;
   }
 
   @Override

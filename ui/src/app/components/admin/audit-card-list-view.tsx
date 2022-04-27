@@ -11,6 +11,7 @@ import {
   AuditTargetPropertyChange,
 } from 'generated/fetch';
 
+import { StyledRouterLink } from 'app/components/buttons';
 import { ActionAuditCardBase } from 'app/components/card';
 import { FlexRow } from 'app/components/flex';
 import { CheckBox } from 'app/components/inputs';
@@ -158,9 +159,11 @@ const AgentUsernameCell = (props: { agent: AuditAgent }) => {
   const { agentType, agentUsername } = props.agent;
   return agentType === 'USER' ? (
     <div>
-      <a href={`/admin/user-audit/${usernameWithoutDomain(agentUsername)}`}>
+      <StyledRouterLink
+        path={`/admin/user-audit/${usernameWithoutDomain(agentUsername)}`}
+      >
         {agentUsername}
-      </a>
+      </StyledRouterLink>
     </div>
   ) : (
     <div>agentUsername</div>

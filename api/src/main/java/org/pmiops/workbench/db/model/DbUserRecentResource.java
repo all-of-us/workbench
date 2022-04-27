@@ -29,8 +29,9 @@ public class DbUserRecentResource {
     return id;
   }
 
-  public void setId(int id) {
+  public DbUserRecentResource setId(int id) {
     this.id = id;
+    return this;
   }
 
   @Column(name = "user_id")
@@ -38,8 +39,9 @@ public class DbUserRecentResource {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public DbUserRecentResource setUserId(Long userId) {
     this.userId = userId;
+    return this;
   }
 
   @Column(name = "workspace_id")
@@ -47,8 +49,9 @@ public class DbUserRecentResource {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbUserRecentResource setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   /**
@@ -61,8 +64,9 @@ public class DbUserRecentResource {
     return this.notebookName;
   }
 
-  public void setNotebookName(String notebookName) {
+  public DbUserRecentResource setNotebookName(String notebookName) {
     this.notebookName = notebookName;
+    return this;
   }
 
   @Column(name = "lastAccessDate")
@@ -70,8 +74,9 @@ public class DbUserRecentResource {
     return lastAccessDate;
   }
 
-  public void setLastAccessDate(Timestamp lastAccessDate) {
+  public DbUserRecentResource setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
+    return this;
   }
 
   @ManyToOne
@@ -80,8 +85,9 @@ public class DbUserRecentResource {
     return cohort;
   }
 
-  public void setCohort(DbCohort cohort) {
+  public DbUserRecentResource setCohort(DbCohort cohort) {
     this.cohort = cohort;
+    return this;
   }
 
   @ManyToOne
@@ -90,8 +96,9 @@ public class DbUserRecentResource {
     return conceptSet;
   }
 
-  public void setConceptSet(DbConceptSet conceptSet) {
+  public DbUserRecentResource setConceptSet(DbConceptSet conceptSet) {
     this.conceptSet = conceptSet;
+    return this;
   }
 
   public DbUserRecentResource() {}

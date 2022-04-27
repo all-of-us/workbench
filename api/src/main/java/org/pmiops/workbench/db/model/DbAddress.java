@@ -30,8 +30,9 @@ public class DbAddress {
     return id;
   }
 
-  public void setId(long id) {
+  public DbAddress setId(long id) {
     this.id = id;
+    return this;
   }
 
   @Column(name = "street_address_1")
@@ -39,8 +40,9 @@ public class DbAddress {
     return streetAddress1;
   }
 
-  public void setStreetAddress1(String streetAddress1) {
+  public DbAddress setStreetAddress1(String streetAddress1) {
     this.streetAddress1 = streetAddress1;
+    return this;
   }
 
   @Column(name = "street_address_2")
@@ -48,10 +50,10 @@ public class DbAddress {
     return streetAddress2;
   }
 
-  public void setStreetAddress2(String streetAddress2) {
+  public DbAddress setStreetAddress2(String streetAddress2) {
     this.streetAddress2 = streetAddress2;
+    return this;
   }
-
   // Most @Column annotations in our codebase don't have a length specification. This is included
   // on the zip_code field to allow test cases (where an in-memory H2 database is used instead of
   // MySQL) to trigger an exception when a user attempts to save a DbUser row with too-large field
@@ -62,8 +64,9 @@ public class DbAddress {
     return zipCode;
   }
 
-  public void setZipCode(String zipCode) {
+  public DbAddress setZipCode(String zipCode) {
     this.zipCode = zipCode;
+    return this;
   }
 
   @Column(name = "city")
@@ -71,8 +74,9 @@ public class DbAddress {
     return city;
   }
 
-  public void setCity(String city) {
+  public DbAddress setCity(String city) {
     this.city = city;
+    return this;
   }
 
   @Column(name = "state")
@@ -80,8 +84,9 @@ public class DbAddress {
     return state;
   }
 
-  public void setState(String state) {
+  public DbAddress setState(String state) {
     this.state = state;
+    return this;
   }
 
   @Column(name = "country")
@@ -89,8 +94,9 @@ public class DbAddress {
     return country;
   }
 
-  public void setCountry(String country) {
+  public DbAddress setCountry(String country) {
     this.country = country;
+    return this;
   }
 
   @ManyToOne
@@ -99,7 +105,8 @@ public class DbAddress {
     return user;
   }
 
-  public void setUser(DbUser user) {
+  public DbAddress setUser(DbUser user) {
     this.user = user;
+    return this;
   }
 }

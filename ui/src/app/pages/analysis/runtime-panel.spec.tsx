@@ -166,6 +166,7 @@ describe('RuntimePanel', () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
       billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+      googleProject: runtimeApiStub.runtime.googleProject,
     });
 
     runtimeStoreStub = {

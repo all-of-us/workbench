@@ -585,8 +585,13 @@ export const cond = <T extends unknown>(
   }
 };
 
+// normalize username (email) to remove the domain if it exists
 export const usernameWithoutDomain = (username: string) => {
-  return username ? username.substring(0, username.indexOf('@')) : '';
+  if (!username) {
+    return '';
+  }
+  const atIdx = username.indexOf('@');
+  return atIdx === -1 ? username : username.substring(0, atIdx);
 };
 
 export const capStringWithEllipsis = (value: string, maxLength: number) =>

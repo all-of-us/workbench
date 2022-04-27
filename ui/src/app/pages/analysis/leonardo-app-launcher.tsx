@@ -7,7 +7,7 @@ import { Profile, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
-import { Button } from 'app/components/buttons';
+import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
@@ -787,7 +787,9 @@ export const LeonardoAppLauncher = fp.flow(
               </div>
               <div style={{ marginLeft: '2rem', ...styles.reminderText }}>
                 For more information, please see our{' '}
-                <a href={'/data-code-of-conduct'}>Data Use Policies.</a>
+                <StyledRouterLink path='/data-code-of-conduct'>
+                  Data Use Policies.
+                </StyledRouterLink>
               </div>
             </div>
           ) : (

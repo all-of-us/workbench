@@ -30,8 +30,9 @@ public class DbUserCodeOfConductAgreement {
     return userDuccAgreementId;
   }
 
-  public void setUserDuccAgreementId(long userDuccAgreementId) {
+  public DbUserCodeOfConductAgreement setUserDuccAgreementId(long userDuccAgreementId) {
     this.userDuccAgreementId = userDuccAgreementId;
+    return this;
   }
 
   @OneToOne
@@ -40,8 +41,9 @@ public class DbUserCodeOfConductAgreement {
     return user;
   }
 
-  public void setUser(DbUser dbUser) {
+  public DbUserCodeOfConductAgreement setUser(DbUser dbUser) {
     this.user = dbUser;
+    return this;
   }
 
   @Column(name = "user_given_name")
@@ -49,8 +51,9 @@ public class DbUserCodeOfConductAgreement {
     return userGivenName;
   }
 
-  public void setUserGivenName(String userGivenName) {
+  public DbUserCodeOfConductAgreement setUserGivenName(String userGivenName) {
     this.userGivenName = userGivenName;
+    return this;
   }
 
   @Column(name = "user_family_name")
@@ -58,8 +61,9 @@ public class DbUserCodeOfConductAgreement {
     return userFamilyName;
   }
 
-  public void setUserFamilyName(String userFamilyName) {
+  public DbUserCodeOfConductAgreement setUserFamilyName(String userFamilyName) {
     this.userFamilyName = userFamilyName;
+    return this;
   }
 
   @Column(name = "user_initials")
@@ -67,8 +71,9 @@ public class DbUserCodeOfConductAgreement {
     return userInitials;
   }
 
-  public void setUserInitials(String userInitials) {
+  public DbUserCodeOfConductAgreement setUserInitials(String userInitials) {
     this.userInitials = userInitials;
+    return this;
   }
 
   // This is set to 'true' whenever user_given_name or user_family_name are not the same as the
@@ -78,8 +83,9 @@ public class DbUserCodeOfConductAgreement {
     return userNameOutOfDate;
   }
 
-  public void setUserNameOutOfDate(boolean userNameOutOfDate) {
+  public DbUserCodeOfConductAgreement setUserNameOutOfDate(boolean userNameOutOfDate) {
     this.userNameOutOfDate = userNameOutOfDate;
+    return this;
   }
 
   @Column(name = "signed_version")
@@ -87,8 +93,9 @@ public class DbUserCodeOfConductAgreement {
     return signedVersion;
   }
 
-  public void setSignedVersion(int signedVersion) {
+  public DbUserCodeOfConductAgreement setSignedVersion(int signedVersion) {
     this.signedVersion = signedVersion;
+    return this;
   }
 
   @Column(name = "completion_time")
@@ -96,8 +103,9 @@ public class DbUserCodeOfConductAgreement {
     return completionTime;
   }
 
-  public void setCompletionTime(Timestamp completionTime) {
+  public DbUserCodeOfConductAgreement setCompletionTime(Timestamp completionTime) {
     this.completionTime = completionTime;
+    return this;
   }
 
   @Override

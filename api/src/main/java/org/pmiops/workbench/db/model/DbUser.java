@@ -86,8 +86,9 @@ public class DbUser {
     return userId;
   }
 
-  public void setUserId(long userId) {
+  public DbUser setUserId(long userId) {
     this.userId = userId;
+    return this;
   }
 
   @Version
@@ -96,8 +97,9 @@ public class DbUser {
     return version;
   }
 
-  public void setVersion(int version) {
+  public DbUser setVersion(int version) {
     this.version = version;
+    return this;
   }
 
   @Column(name = "creation_nonce")
@@ -105,10 +107,10 @@ public class DbUser {
     return creationNonce;
   }
 
-  public void setCreationNonce(Long creationNonce) {
+  public DbUser setCreationNonce(Long creationNonce) {
     this.creationNonce = creationNonce;
+    return this;
   }
-
   /**
    * Returns the user's full G Suite email address, e.g. "joe@researchallofus.org". This is named
    * "username" in this entity class to distinguish it from getContactEmail, which is the user's
@@ -121,10 +123,10 @@ public class DbUser {
     return username;
   }
 
-  public void setUsername(String userName) {
+  public DbUser setUsername(String userName) {
     this.username = userName;
+    return this;
   }
-
   /**
    * Returns the user's designated contact email address, e.g. "joe@gmail.com".
    *
@@ -135,8 +137,9 @@ public class DbUser {
     return contactEmail;
   }
 
-  public void setContactEmail(String contactEmail) {
+  public DbUser setContactEmail(String contactEmail) {
     this.contactEmail = contactEmail;
+    return this;
   }
 
   @Column(name = "given_name")
@@ -144,8 +147,9 @@ public class DbUser {
     return givenName;
   }
 
-  public void setGivenName(String givenName) {
+  public DbUser setGivenName(String givenName) {
     this.givenName = givenName;
+    return this;
   }
 
   @Column(name = "family_name")
@@ -153,8 +157,9 @@ public class DbUser {
     return familyName;
   }
 
-  public void setFamilyName(String familyName) {
+  public DbUser setFamilyName(String familyName) {
     this.familyName = familyName;
+    return this;
   }
 
   @Column(name = "free_tier_credits_limit_dollars_override")
@@ -162,8 +167,9 @@ public class DbUser {
     return freeTierCreditsLimitDollarsOverride;
   }
 
-  public void setFreeTierCreditsLimitDollarsOverride(Double freeTierCreditsLimitDollarsOverride) {
+  public DbUser setFreeTierCreditsLimitDollarsOverride(Double freeTierCreditsLimitDollarsOverride) {
     this.freeTierCreditsLimitDollarsOverride = freeTierCreditsLimitDollarsOverride;
+    return this;
   }
 
   @Column(name = "first_sign_in_time")
@@ -171,10 +177,10 @@ public class DbUser {
     return firstSignInTime;
   }
 
-  public void setFirstSignInTime(Timestamp firstSignInTime) {
+  public DbUser setFirstSignInTime(Timestamp firstSignInTime) {
     this.firstSignInTime = firstSignInTime;
+    return this;
   }
-
   // Authorities (special permissions) are granted using api/project.rb set-authority.
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
@@ -183,8 +189,9 @@ public class DbUser {
     return authorities;
   }
 
-  public void setAuthorities(Set<Short> newAuthorities) {
+  public DbUser setAuthorities(Set<Short> newAuthorities) {
     this.authorities = newAuthorities;
+    return this;
   }
 
   @Transient
@@ -196,11 +203,12 @@ public class DbUser {
     return from.stream().map(DbStorageEnums::authorityFromStorage).collect(Collectors.toSet());
   }
 
-  public void setAuthoritiesEnum(Set<Authority> newAuthorities) {
+  public DbUser setAuthoritiesEnum(Set<Authority> newAuthorities) {
     this.setAuthorities(
         newAuthorities.stream()
             .map(DbStorageEnums::authorityToStorage)
             .collect(Collectors.toSet()));
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -210,8 +218,9 @@ public class DbUser {
     return degrees;
   }
 
-  public void setDegrees(List<Short> degree) {
+  public DbUser setDegrees(List<Short> degree) {
     this.degrees = degree;
+    return this;
   }
 
   @Transient
@@ -224,9 +233,10 @@ public class DbUser {
         .collect(Collectors.toList());
   }
 
-  public void setDegreesEnum(List<Degree> degreeList) {
+  public DbUser setDegreesEnum(List<Degree> degreeList) {
     this.degrees =
         degreeList.stream().map(DbStorageEnums::degreeToStorage).collect(Collectors.toList());
+    return this;
   }
 
   @OneToMany(
@@ -239,8 +249,9 @@ public class DbUser {
     return pageVisits;
   }
 
-  public void setPageVisits(Set<DbPageVisit> newPageVisits) {
+  public DbUser setPageVisits(Set<DbPageVisit> newPageVisits) {
     this.pageVisits = newPageVisits;
+    return this;
   }
 
   @Column(name = "demographic_survey_completion_time")
@@ -248,8 +259,9 @@ public class DbUser {
     return demographicSurveyCompletionTime;
   }
 
-  public void setDemographicSurveyCompletionTime(Timestamp demographicSurveyCompletionTime) {
+  public DbUser setDemographicSurveyCompletionTime(Timestamp demographicSurveyCompletionTime) {
     this.demographicSurveyCompletionTime = demographicSurveyCompletionTime;
+    return this;
   }
 
   @Column(name = "disabled")
@@ -257,8 +269,9 @@ public class DbUser {
     return disabled;
   }
 
-  public void setDisabled(boolean disabled) {
+  public DbUser setDisabled(boolean disabled) {
     this.disabled = disabled;
+    return this;
   }
 
   @Column(name = "area_of_research")
@@ -266,8 +279,9 @@ public class DbUser {
     return areaOfResearch;
   }
 
-  public void setAreaOfResearch(String areaOfResearch) {
+  public DbUser setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
+    return this;
   }
 
   @Column(name = "era_commons_linked_nih_username")
@@ -275,8 +289,9 @@ public class DbUser {
     return eraCommonsLinkedNihUsername;
   }
 
-  public void setEraCommonsLinkedNihUsername(String eraCommonsLinkedNihUsername) {
+  public DbUser setEraCommonsLinkedNihUsername(String eraCommonsLinkedNihUsername) {
     this.eraCommonsLinkedNihUsername = eraCommonsLinkedNihUsername;
+    return this;
   }
 
   @Column(name = "era_commons_link_expire_time")
@@ -284,8 +299,9 @@ public class DbUser {
     return eraCommonsLinkExpireTime;
   }
 
-  public void setEraCommonsLinkExpireTime(Timestamp eraCommonsLinkExpireTime) {
+  public DbUser setEraCommonsLinkExpireTime(Timestamp eraCommonsLinkExpireTime) {
     this.eraCommonsLinkExpireTime = eraCommonsLinkExpireTime;
+    return this;
   }
 
   @Column(name = "ras_link_login_gov_username")
@@ -293,8 +309,9 @@ public class DbUser {
     return rasLinkLoginGovUsername;
   }
 
-  public void setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
+  public DbUser setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
     this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
+    return this;
   }
 
   @OneToOne(
@@ -306,8 +323,9 @@ public class DbUser {
     return duccAgreement;
   }
 
-  public void setDuccAgreement(DbUserCodeOfConductAgreement duccAgreement) {
+  public DbUser setDuccAgreement(DbUserCodeOfConductAgreement duccAgreement) {
     this.duccAgreement = duccAgreement;
+    return this;
   }
 
   @OneToOne(
@@ -319,8 +337,9 @@ public class DbUser {
     return demographicSurvey;
   }
 
-  public void setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
+  public DbUser setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
+    return this;
   }
 
   @LastModifiedDate
@@ -330,8 +349,9 @@ public class DbUser {
   }
 
   @VisibleForTesting
-  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+  public DbUser setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+    return this;
   }
 
   @CreatedDate
@@ -341,8 +361,9 @@ public class DbUser {
   }
 
   @VisibleForTesting
-  public void setCreationTime(Timestamp creationTime) {
+  public DbUser setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "professional_url")
@@ -350,8 +371,9 @@ public class DbUser {
     return professionalUrl;
   }
 
-  public void setProfessionalUrl(String professionalUrl) {
+  public DbUser setProfessionalUrl(String professionalUrl) {
     this.professionalUrl = professionalUrl;
+    return this;
   }
 
   @OneToOne(
@@ -363,8 +385,9 @@ public class DbUser {
     return address;
   }
 
-  public void setAddress(DbAddress address) {
+  public DbUser setAddress(DbAddress address) {
     this.address = address;
+    return this;
   }
 
   @Column(name = "compute_security_suspended_until")
@@ -372,10 +395,10 @@ public class DbUser {
     return computeSecuritySuspendedUntil;
   }
 
-  public void setComputeSecuritySuspendedUntil(Timestamp computeSecuritySuspendedUntil) {
+  public DbUser setComputeSecuritySuspendedUntil(Timestamp computeSecuritySuspendedUntil) {
     this.computeSecuritySuspendedUntil = computeSecuritySuspendedUntil;
+    return this;
   }
-
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
   // can be removed once we have a proper equals() / hashCode()
 

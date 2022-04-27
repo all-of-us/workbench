@@ -31,6 +31,7 @@ import {
   Clickable,
   LinkButton,
   StyledExternalLink,
+  StyledRouterLink,
 } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { CreateModal } from 'app/components/create-modal';
@@ -350,20 +351,12 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
           </div>
         </TooltipTrigger>
         <div style={{ marginLeft: 'auto', paddingRight: '1rem' }}>
-          <a
-            href={
-              '/workspaces/' +
-              namespace +
-              '/' +
-              wid +
-              '/data/cohorts/' +
-              cohortId +
-              '/review/cohort-description'
-            }
+          <StyledRouterLink
+            path={`/workspaces/${namespace}/${wid}/data/cohorts/${cohortId}/review/cohort-description`}
             target='_blank'
           >
             <ClrIcon size='20' shape='bar-chart' />
-          </a>
+          </StyledRouterLink>
         </div>
       </FlexRow>
     </div>

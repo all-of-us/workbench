@@ -5,6 +5,7 @@ import { DataTable } from 'primereact/datatable';
 
 import { AdminTableUser, Profile } from 'generated/fetch';
 
+import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
@@ -235,7 +236,9 @@ export const AdminUserTable = withUserProfile()(
           user,
           'ctComplianceTraining'
         ),
-        contactEmail: user.contactEmail,
+        contactEmail: (
+          <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
+        ),
         dataAccess: this.dataAccessContents(user),
         dataUseAgreement: this.accessModuleCellContents(
           user,
@@ -249,17 +252,19 @@ export const AdminUserTable = withUserProfile()(
         firstSignInTimestamp: user.firstSignInTime,
         institutionName: this.displayInstitutionName(user),
         name: (
-          <a
-            href={`/admin/users/${usernameWithoutDomain(user.username)}`}
-            target='_blank'
-          >
+          <AdminUserLink username={user.username} target='_blank'>
             {user.familyName + ', ' + user.givenName}
-          </a>
+          </AdminUserLink>
         ),
+        // used for filter and sorting
         nameText: user.familyName + ' ' + user.givenName,
         status: user.disabled ? 'Disabled' : 'Active',
         twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
-        username: user.username,
+        username: (
+          <AdminUserLink username={user.username} target='_blank'>
+            {usernameWithoutDomain(user.username)}
+          </AdminUserLink>
+        ),
         userLockout: (
           <LockoutButton
             disabled={false}

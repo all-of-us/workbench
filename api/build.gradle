@@ -171,7 +171,9 @@ swaggerSources {
     jira swagger3JavaClient("jira.yaml", "jira")
     mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
     moodle swagger2JavaClient("moodle.yaml", "moodle")
-    rdr swagger2JavaClient("rdr.yaml", "rdr")
+    rdr swagger2JavaClient("rdr.yaml", "rdr", [
+            '--model-name-prefix', 'Rdr'
+    ])
     captcha swagger2JavaClient("captcha.yaml", "captcha")
     shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
