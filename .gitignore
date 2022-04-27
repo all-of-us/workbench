@@ -54,6 +54,7 @@ gradle.properties
 **/*.iml
 **/*.ipr
 **/*.iws
+**/*.nix
 **/build
 **/gradlew.bat
 **/.gradle
