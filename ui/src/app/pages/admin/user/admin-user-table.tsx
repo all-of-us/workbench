@@ -16,7 +16,7 @@ import {
   authDomainApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
+import { reactStyles, withUserProfile } from 'app/utils';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
@@ -24,8 +24,6 @@ import {
 import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
-
-import { UserAuditLink } from './admin-user-common';
 
 const styles = reactStyles({
   colStyle: {
@@ -178,13 +176,6 @@ export const AdminUserTable = withUserProfile()(
 
     convertProfilesToFields(users: AdminTableUser[]) {
       return users.map((user) => ({
-        audit: (
-          <UserAuditLink
-            usernameWithoutDomain={usernameWithoutDomain(user.username)}
-          >
-            link
-          </UserAuditLink>
-        ),
         bypass: (
           <AdminUserBypass
             user={{ ...user }}
@@ -382,13 +373,6 @@ export const AdminUserTable = withUserProfile()(
                   excludeGlobalFilter={true}
                   header='Bypass'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  field='audit'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Audit'
-                  headerStyle={{ width: '60px' }}
                 />
               </DataTable>
             </div>
