@@ -6,9 +6,9 @@ import { DataTable } from 'primereact/datatable';
 import { AdminTableUser, Profile } from 'generated/fetch';
 
 import { AdminUserLink } from 'app/components/admin/admin-user-link';
-import { Button, StyledRouterLink } from 'app/components/buttons';
+import { StyledRouterLink } from 'app/components/buttons';
+import { Ban, Check } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
@@ -16,7 +16,7 @@ import {
   authDomainApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { reactStyles, withUserProfile } from 'app/utils';
+import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
@@ -217,15 +217,6 @@ export const AdminUserTable = withUserProfile()(
           <AdminUserLink username={user.username} target='_blank'>
             {usernameWithoutDomain(user.username)}
           </AdminUserLink>
-        ),
-        userLockout: (
-          <LockoutButton
-            disabled={false}
-            profileDisabled={user.disabled}
-            onClick={() =>
-              this.updateUserDisabledStatus(!user.disabled, user.username)
-            }
-          />
         ),
       }));
     }
