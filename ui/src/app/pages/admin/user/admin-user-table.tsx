@@ -231,7 +231,7 @@ export const AdminUserTable = withUserProfile()(
         twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
         username: (
           <AdminUserLink username={user.username} target='_blank'>
-            {user.username}
+            {usernameWithoutDomain(user.username)}
           </AdminUserLink>
         ),
         userLockout: (
