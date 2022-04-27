@@ -16,7 +16,12 @@ import {
   authDomainApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
+import {
+  cond,
+  reactStyles,
+  usernameWithoutDomain,
+  withUserProfile,
+} from 'app/utils';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
@@ -157,11 +162,22 @@ export const AdminUserTable = withUserProfile()(
     dataAccessContents(user: AdminTableUser): JSX.Element {
       return (
         <FlexRow style={{ justifyContent: 'space-evenly' }}>
-          {user.accessTierShortNames.length > 0
-            ? user.accessTierShortNames.map((accessTierShortName) => (
-                <TierBadge {...{ accessTierShortName }} />
-              ))
-            : 'N/A'}
+          {cond(
+            [user.disabled, () => <div>N/A</div>],
+            [
+              user.accessTierShortNames.length > 0,
+              () => (
+                <>
+                  {user.accessTierShortNames.map((accessTierShortName) => (
+                    <TierBadge {...{ accessTierShortName }} />
+                  ))}
+                </>
+              ),
+            ],
+            () => (
+              <div>No Access</div>
+            )
+          )}
         </FlexRow>
       );
     }
