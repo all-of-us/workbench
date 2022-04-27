@@ -111,13 +111,16 @@ const styles = reactStyles({
     lineHeight: '1.75rem',
     background: 'transparent',
     borderTop: '1px solid #cccccc',
-    color: colors.black,
     cursor: 'pointer',
-    fontSize: '12px',
-    margin: 0,
-    padding: '0 0.5rem 0 1.25rem',
     position: 'relative',
-    width: '100%',
+  },
+  dropdownLink: {
+    display: 'inline-block',
+    color: colors.black,
+    fontSize: '12px',
+    textDecoration: 'none',
+    padding: '0 0.5rem 0 1.25rem',
+    width: '90%',
   },
   subMenu: {
     position: 'absolute',
@@ -141,11 +144,15 @@ const styles = reactStyles({
     transform: 'rotate(-90deg)',
   },
   subMenuItem: {
+    color: colors.black,
+    display: 'block',
+    fontSize: '12px',
     height: '1.25rem',
     lineHeight: '1.25rem',
     cursor: 'pointer',
     margin: 0,
     padding: '0 1.25rem',
+    textDecoration: 'none',
     width: '100%',
   },
 });
@@ -335,9 +342,6 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                         )
                         .map((menuItem, m) => (
                           <li
-                            role='menuitem'
-                            aria-haspopup={menuItem.group}
-                            key={m}
                             style={{
                               ...styles.dropdownItem,
                               ...(hoverId === `${index}-${m}`
@@ -361,22 +365,29 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                 setSubMenuOpen(false);
                               }
                             }}
-                            onClick={() => {
-                              if (!menuItem.group) {
-                                onMenuItemClick(menuItem);
-                              }
-                            }}
                           >
-                            <span style={{ verticalAlign: 'middle' }}>
-                              {menuItem.name}
-                            </span>
-                            {domainCounts !== null && (
-                              <span style={styles.count}>
-                                {domainCounts
-                                  .find((dc) => dc.domain === menuItem.domain)
-                                  .count.toLocaleString()}
+                            <a
+                              role='menuitem'
+                              aria-haspopup={menuItem.group}
+                              key={m}
+                              style={styles.dropdownLink}
+                              onClick={() => {
+                                if (!menuItem.group) {
+                                  onMenuItemClick(menuItem);
+                                }
+                              }}
+                            >
+                              <span style={{ verticalAlign: 'middle' }}>
+                                {menuItem.name}
                               </span>
-                            )}
+                              {domainCounts !== null && (
+                                <span style={styles.count}>
+                                  {domainCounts
+                                    .find((dc) => dc.domain === menuItem.domain)
+                                    .count.toLocaleString()}
+                                </span>
+                              )}
+                            </a>
                             {menuItem.group && (
                               <React.Fragment>
                                 <i
@@ -388,7 +399,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                     {menuItem.children?.map(
                                       (subMenuItem, s) => (
                                         <li>
-                                          <div
+                                          <a
                                             role='menuitem'
                                             key={s}
                                             style={{
@@ -418,7 +429,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                             }}
                                           >
                                             {subMenuItem.name}
-                                          </div>
+                                          </a>
                                         </li>
                                       )
                                     )}

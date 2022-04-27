@@ -14,7 +14,7 @@ export default class TieredMenu extends BaseMenu {
   getMenuItemXpath(menuItemText: string): string {
     return (
       '//*[not(contains(concat(" ", normalize-space(@class), " "), " menuitem-header "))]' +
-      `/*[@role="menuitem" and contains(normalize-space(.),"${menuItemText}")]`
+      `/*[@role="menuitem" and normalize-space()="${menuItemText}"]`
     );
   }
 
