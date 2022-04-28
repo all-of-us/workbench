@@ -638,6 +638,22 @@ export const QueryReport = fp.flow(
                             {chartsLoading && <SpinnerOverlay />}
                           </div>
                         </div>
+                        {/* --------------------------------------------------- */}
+                        {/* Demo chart component for testing Highcharts options */}
+                        {/* --------------------------------------------------- */}
+                        <div
+                          style={{
+                            ...styles.col,
+                            flex: '0 0 75%',
+                            maxWidth: '75%',
+                          }}
+                        >
+                          <div style={demoTitle}>Highcharts Test</div>
+                          <div style={styles.graphBorder}>
+                            {data && <DemoChart mode={'stacked'} data={data} />}
+                            {chartsLoading && <SpinnerOverlay />}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
