@@ -7,16 +7,23 @@ import { AdminTableUser, Profile } from 'generated/fetch';
 
 import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { StyledRouterLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import { Ban, Check } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
 import {
   authDomainApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
+import {
+  cond,
+  reactStyles,
+  usernameWithoutDomain,
+  withUserProfile,
+} from 'app/utils';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
@@ -144,6 +151,29 @@ export const AdminUserTable = withUserProfile()(
       }
     }
 
+    dataAccessContents(user: AdminTableUser): JSX.Element {
+      return (
+        <FlexRow style={{ justifyContent: 'space-evenly' }}>
+          {cond(
+            [user.disabled, () => <div>N/A</div>],
+            [
+              user.accessTierShortNames.length > 0,
+              () => (
+                <>
+                  {user.accessTierShortNames.map((accessTierShortName) => (
+                    <TierBadge {...{ accessTierShortName }} />
+                  ))}
+                </>
+              ),
+            ],
+            () => (
+              <div>No Access</div>
+            )
+          )}
+        </FlexRow>
+      );
+    }
+
     displayInstitutionName(tableRow: AdminTableUser) {
       const shouldShowLink =
         tableRow.institutionShortName &&
@@ -193,6 +223,7 @@ export const AdminUserTable = withUserProfile()(
         contactEmail: (
           <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
         ),
+        dataAccess: this.dataAccessContents(user),
         dataUseAgreement: this.accessModuleCellContents(
           user,
           'dataUseAgreement'
@@ -307,6 +338,14 @@ export const AdminUserTable = withUserProfile()(
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
                   sortField={'firstSignInTimestamp'}
+                />
+                <Column
+                  field='dataAccess'
+                  bodyStyle={{ ...styles.colStyle }}
+                  excludeGlobalFilter={true}
+                  header='Data Access'
+                  headerStyle={{ ...styles.colStyle, width: '100px' }}
+                  sortable={false}
                 />
                 <Column
                   field='twoFactorAuth'
