@@ -60,8 +60,6 @@ public class MailServiceImpl implements MailService {
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
-  private static final String WELCOME_RESOURCE_DEPRECATED =
-      "emails/welcomeemail/content_deprecated.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
