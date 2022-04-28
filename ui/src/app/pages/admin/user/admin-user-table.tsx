@@ -59,6 +59,21 @@ const DisabledIcon = () => (
   </span>
 );
 
+interface DataTableFields {
+  name: JSX.Element;
+  nameText: string;
+  username: JSX.Element;
+  usernameText: string;
+  contactEmail: JSX.Element;
+  contactEmailText: string;
+  institutionName: JSX.Element | string;
+  institutionNameText: string;
+  enabled: JSX.Element;
+  dataAccess: JSX.Element;
+  bypass: JSX.Element;
+  firstSignInTime: string;
+}
+
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile;
@@ -159,44 +174,55 @@ export const AdminUserTable = withUserProfile()(
       }
     }
 
-    convertProfilesToFields(users: AdminTableUser[]) {
-      return users.map((user) => ({
-        // used for filter and sorting
-        nameText: user.familyName + ' ' + user.givenName,
-        firstSignInTimestamp: user.firstSignInTime,
+    convertProfilesToFields(users: AdminTableUser[]): DataTableFields[] {
+      return users
+        .map((user) => ({
+          // 'text' fields are used for sorting
 
-        name: (
-          <AdminUserLink username={user.username} target='_blank'>
-            {user.familyName + ', ' + user.givenName}
-          </AdminUserLink>
-        ),
-        username: (
-          <AdminUserLink username={user.username} target='_blank'>
-            {usernameWithoutDomain(user.username)}
-          </AdminUserLink>
-        ),
-        contactEmail: (
-          <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
-        ),
-        institutionName: this.displayInstitutionName(user),
-        enabled: user.disabled ? <DisabledIcon /> : <EnabledIcon />,
-        dataAccess: this.dataAccessContents(user),
-        bypass: (
-          <AdminUserBypass
-            user={{ ...user }}
-            onBypassModuleUpdate={() => this.loadProfiles()}
-          />
-        ),
-        firstSignInTime: this.formattedTimestampOrEmptyString(
-          user.firstSignInTime
-        ),
-      }));
+          name: (
+            <AdminUserLink username={user.username} target='_blank'>
+              {user.familyName + ', ' + user.givenName}
+            </AdminUserLink>
+          ),
+          nameText: user.familyName + ' ' + user.givenName,
+
+          username: (
+            <AdminUserLink username={user.username} target='_blank'>
+              {usernameWithoutDomain(user.username)}
+            </AdminUserLink>
+          ),
+          usernameText: usernameWithoutDomain(user.username),
+
+          contactEmail: (
+            <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
+          ),
+          contactEmailText: user.contactEmail,
+
+          institutionName: this.displayInstitutionName(user),
+          institutionNameText: user.institutionName,
+
+          enabled: user.disabled ? <DisabledIcon /> : <EnabledIcon />,
+          dataAccess: this.dataAccessContents(user),
+          bypass: (
+            <AdminUserBypass
+              user={{ ...user }}
+              onBypassModuleUpdate={() => this.loadProfiles()}
+            />
+          ),
+
+          firstSignInTime: this.formattedTimestampOrEmptyString(
+            user.firstSignInTime
+          ),
+        }))
+        .sort((f1: DataTableFields, f2: DataTableFields) =>
+          f1.nameText.localeCompare(f2.nameText)
+        );
     }
 
     render() {
       const { contentLoaded, filter, loading, users } = this.state;
       return (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', padding: '1em' }}>
           <h2>User Admin Table</h2>
           {loading && (
             <SpinnerOverlay
@@ -225,19 +251,18 @@ export const AdminUserTable = withUserProfile()(
                 rows={10}
                 rowsPerPageOptions={[5, 10, 50, 100]}
                 scrollable
-                sortField={'firstSignInTimestamp'}
                 style={styles.tableStyle}
               >
                 <Column
                   field='name'
                   bodyStyle={{ ...styles.colStyle }}
-                  filterField={'nameText'}
-                  filterMatchMode={'contains'}
+                  filterField='nameText'
+                  filterMatchMode='contains'
                   frozen={true}
                   header='Name'
                   headerStyle={{ ...styles.colStyle, width: '200px' }}
                   sortable={true}
-                  sortField={'nameText'}
+                  sortField='nameText'
                 />
                 <Column
                   field='username'
@@ -245,6 +270,7 @@ export const AdminUserTable = withUserProfile()(
                   header='Username'
                   headerStyle={{ ...styles.colStyle, width: '200px' }}
                   sortable={true}
+                  sortField='usernameText'
                 />
                 <Column
                   field='contactEmail'
@@ -252,6 +278,7 @@ export const AdminUserTable = withUserProfile()(
                   header='Contact Email'
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
+                  sortField='contactEmailText'
                 />
                 <Column
                   field='institutionName'
@@ -259,6 +286,7 @@ export const AdminUserTable = withUserProfile()(
                   header='Institution'
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
+                  sortField='institutionNameText'
                 />
                 <Column
                   field='enabled'
@@ -266,6 +294,7 @@ export const AdminUserTable = withUserProfile()(
                   excludeGlobalFilter={true}
                   header='Enabled'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
+                  sortable={false}
                 />
                 <Column
                   field='dataAccess'
@@ -281,6 +310,7 @@ export const AdminUserTable = withUserProfile()(
                   excludeGlobalFilter={true}
                   header='Access Module Bypass'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
+                  sortable={false}
                 />
                 <Column
                   field='firstSignInTime'
@@ -289,7 +319,7 @@ export const AdminUserTable = withUserProfile()(
                   header='First Sign-in'
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
-                  sortField={'firstSignInTimestamp'}
+                  sortField='firstSignInTime'
                 />
               </DataTable>
             </div>
