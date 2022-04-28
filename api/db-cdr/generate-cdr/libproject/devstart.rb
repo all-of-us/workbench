@@ -11,6 +11,11 @@ def prefixes_to_grep_filter(prefixes)
   return "^\\(#{prefixes.join("\\|")}\\)"
 end
 
+SHARED_TEST_CDR_PROJECTS = [
+  TEST_PROJECT,
+  "local"
+]
+
 WGS_TABLE_PREFIXES = [
   "alt_allele",
   "filter_set_",
@@ -181,15 +186,26 @@ def publish_cdr(cmd_name, args)
     bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
 
     bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
-      auth_domain_group_email = tier.fetch(:auth_domain_group_email)
-      if existing_groups.include?(auth_domain_group_email)
-        common.status "#{auth_domain_group_email} already in ACL, skipping..."
-      else
-        common.status "Adding #{auth_domain_group_email} as a READER..."
-        acl_json["access"].push({
-          "groupByEmail" => auth_domain_group_email,
-          "role" => "READER"
-        })
+      auth_domain_group_emails = [tier.fetch(:auth_domain_group_email)]
+      if SHARED_TEST_CDR_PROJECTS.include?(op.opts.project)
+        # While test/local do share GCP environments, we use separate auth domains
+        # to avoid cross-contamination of registration states across environments.
+        # As a special-case, add all auth domains to the shared test CDR.
+        auth_domain_group_emails = SHARED_TEST_CDR_PROJECTS.map do |p|
+          shared_tier = ENVIRONMENTS[p].fetch(:accessTiers)[op.opts.tier]
+          shared_tier.fetch(:auth_domain_group_email)
+        end
+      end
+      for group in auth_domain_group_emails do
+        if existing_groups.include?(group)
+          common.status "#{group} already in ACL, skipping..."
+        else
+          common.status "Adding #{group} as a READER..."
+          acl_json["access"].push({
+            "groupByEmail" => group,
+            "role" => "READER"
+          })
+        end
       end
 
       app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
