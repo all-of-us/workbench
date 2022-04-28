@@ -15,6 +15,7 @@ import {
 } from 'generated/fetch';
 
 import { ComboChart } from 'app/components/combo-chart.component';
+import { DemoChart } from 'app/components/highcharts-demo';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CohortDefinitionComponent } from 'app/pages/data/cohort-review/cohort-definition.component';
@@ -620,6 +621,22 @@ export const QueryReport = fp.flow(
                                 />
                               </div>
                             ))}
+                        </div>
+                        {/* --------------------------------------------------- */}
+                        {/* Demo chart component for testing Highcharts options */}
+                        {/* --------------------------------------------------- */}
+                        <div
+                          style={{
+                            ...styles.col,
+                            flex: '0 0 75%',
+                            maxWidth: '75%',
+                          }}
+                        >
+                          <div style={demoTitle}>Highcharts Test</div>
+                          <div style={styles.graphBorder}>
+                            {data && <DemoChart mode={'stacked'} data={data} />}
+                            {chartsLoading && <SpinnerOverlay />}
+                          </div>
                         </div>
                       </div>
                     </div>
