@@ -6,10 +6,11 @@ import { DataTable } from 'primereact/datatable';
 import { AdminTableUser, Profile } from 'generated/fetch';
 
 import { AdminUserLink } from 'app/components/admin/admin-user-link';
-import { Button, StyledRouterLink } from 'app/components/buttons';
+import { StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
+import { Ban, Check } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { Spinner, SpinnerOverlay } from 'app/components/spinners';
+import { SpinnerOverlay } from 'app/components/spinners';
 import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
@@ -31,8 +32,6 @@ import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
 
-import { UserAuditLink } from './admin-user-common';
-
 const styles = reactStyles({
   colStyle: {
     fontSize: 12,
@@ -47,31 +46,23 @@ const styles = reactStyles({
     fontSize: 12,
     minWidth: 1200,
   },
+  enabledIconStyle: {
+    fontSize: 16,
+    display: 'flex',
+    margin: 'auto',
+  },
 });
 
-const LockoutButton: React.FunctionComponent<{
-  disabled: boolean;
-  profileDisabled: boolean;
-  onClick: Function;
-}> = ({ disabled, profileDisabled, onClick }) => {
-  // We reduce the button height so it fits better within a table row.
-  return (
-    <Button
-      type='secondaryLight'
-      style={{ height: '40px' }}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {disabled ? (
-        <Spinner size={25} />
-      ) : profileDisabled ? (
-        'Enable'
-      ) : (
-        'Disable'
-      )}
-    </Button>
-  );
-};
+const EnabledIcon = () => (
+  <span>
+    <Check style={styles.enabledIconStyle} />
+  </span>
+);
+const DisabledIcon = () => (
+  <span>
+    <Ban style={styles.enabledIconStyle} />
+  </span>
+);
 
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
@@ -215,13 +206,6 @@ export const AdminUserTable = withUserProfile()(
 
     convertProfilesToFields(users: AdminTableUser[]) {
       return users.map((user) => ({
-        audit: (
-          <UserAuditLink
-            usernameWithoutDomain={usernameWithoutDomain(user.username)}
-          >
-            link
-          </UserAuditLink>
-        ),
         bypass: (
           <AdminUserBypass
             user={{ ...user }}
@@ -244,6 +228,7 @@ export const AdminUserTable = withUserProfile()(
           user,
           'dataUseAgreement'
         ),
+        enabled: user.disabled ? <DisabledIcon /> : <EnabledIcon />,
         eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
         rasLinkLoginGov: this.accessModuleCellContents(user, 'rasLinkLoginGov'),
         firstSignInTime: this.formattedTimestampOrEmptyString(
@@ -258,21 +243,11 @@ export const AdminUserTable = withUserProfile()(
         ),
         // used for filter and sorting
         nameText: user.familyName + ' ' + user.givenName,
-        status: user.disabled ? 'Disabled' : 'Active',
         twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
         username: (
           <AdminUserLink username={user.username} target='_blank'>
             {usernameWithoutDomain(user.username)}
           </AdminUserLink>
-        ),
-        userLockout: (
-          <LockoutButton
-            disabled={false}
-            profileDisabled={user.disabled}
-            onClick={() =>
-              this.updateUserDisabledStatus(!user.disabled, user.username)
-            }
-          />
         ),
       }));
     }
@@ -328,13 +303,6 @@ export const AdminUserTable = withUserProfile()(
                   sortField={'nameText'}
                 />
                 <Column
-                  field='status'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Status'
-                  headerStyle={{ ...styles.colStyle, width: '80px' }}
-                />
-                <Column
                   field='institutionName'
                   bodyStyle={{ ...styles.colStyle }}
                   header='Institution'
@@ -356,10 +324,10 @@ export const AdminUserTable = withUserProfile()(
                   sortable={true}
                 />
                 <Column
-                  field='userLockout'
+                  field='enabled'
                   bodyStyle={{ ...styles.colStyle }}
                   excludeGlobalFilter={true}
-                  header='User Lockout'
+                  header='Enabled'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
                 />
                 <Column
@@ -435,13 +403,6 @@ export const AdminUserTable = withUserProfile()(
                   excludeGlobalFilter={true}
                   header='Bypass'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  field='audit'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Audit'
-                  headerStyle={{ width: '60px' }}
                 />
               </DataTable>
             </div>
