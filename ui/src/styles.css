@@ -269,3 +269,18 @@ iframe#launcher {
   border-right: 1px solid #c8c8c8;
   border-top: 1px solid #c8c8c8;
 }
+
+.p-paginator {
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.p-paginator .p-dropdown.p-component.p-inputwrapper-filled {
+  height: 1.5rem;
+}
+
+body .p-paginator .p-paginator-pages {
+  height: auto;
+}
