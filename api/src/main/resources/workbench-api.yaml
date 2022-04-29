@@ -5845,36 +5845,46 @@ definitions:
         type: integer
         format: int64
       twoFactorAuthCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       eraCommonsBypassTime:
         type: integer
         format: int64
       eraCommonsCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       rasLinkLoginGovBypassTime:
         type: integer
         format: int64
       rasLinkLoginGovCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       complianceTrainingBypassTime:
         type: integer
         format: int64
       complianceTrainingCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       ctComplianceTrainingBypassTime:
         type: integer
         format: int64
       ctComplianceTrainingCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       dataUseAgreementBypassTime:
+        description: DEPRECATED - to be removed. use duccBypassTime.
+        type: integer
+        format: int64
+      duccBypassTime:
         type: integer
         format: int64
       dataUseAgreementCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
 

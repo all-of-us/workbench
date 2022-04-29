@@ -111,28 +111,37 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getCreationTime();
 
+    @Deprecated // to be removed - use getDuccBypassTime
     Timestamp getDataUseAgreementBypassTime();
 
+    Timestamp getDuccBypassTime();
+
+    @Deprecated // to be removed
     Timestamp getDataUseAgreementCompletionTime();
 
     Timestamp getComplianceTrainingBypassTime();
 
+    @Deprecated // to be removed
     Timestamp getComplianceTrainingCompletionTime();
 
     Timestamp getCtComplianceTrainingBypassTime();
 
+    @Deprecated // to be removed
     Timestamp getCtComplianceTrainingCompletionTime();
 
     Timestamp getEraCommonsBypassTime();
 
+    @Deprecated // to be removed
     Timestamp getEraCommonsCompletionTime();
 
     Timestamp getTwoFactorAuthBypassTime();
 
+    @Deprecated // to be removed
     Timestamp getTwoFactorAuthCompletionTime();
 
     Timestamp getRasLinkLoginGovBypassTime();
 
+    @Deprecated // to be removed
     Timestamp getRasLinkLoginGovCompletionTime();
 
     String getAccessTierShortNames();
@@ -158,6 +167,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
               + "uamd.data_use_agreement_bypass_time AS dataUseAgreementBypassTime, "
+              + "uamd.data_use_agreement_bypass_time AS duccBypassTime, "
               + "uamd.data_use_agreement_completion_time AS dataUseAgreementCompletionTime, "
               + "uamrt.compliance_training_bypass_time AS complianceTrainingBypassTime, "
               + "uamrt.compliance_training_completion_time AS complianceTrainingCompletionTime, "
