@@ -51,8 +51,7 @@ public final class QueryParameterValues {
     final Long epochMicros =
         Optional.ofNullable(instant)
             .map(Instant::toEpochMilli)
-            .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
-            ;
+            .map(milli -> milli * MICROSECONDS_IN_MILLISECOND);
     return QueryParameterValue.timestamp(epochMicros);
   }
 
@@ -121,8 +120,7 @@ public final class QueryParameterValues {
 
   @Nullable
   public static QueryParameterValue toTimestampQpv(@Nullable OffsetDateTime offsetDateTime) {
-    final String arg =
-        Optional.ofNullable(offsetDateTime).map(QPV_TIMESTAMP_FORMATTER::format);
+    final String arg = Optional.ofNullable(offsetDateTime).map(QPV_TIMESTAMP_FORMATTER::format);
     return QueryParameterValue.timestamp(arg);
   }
 
@@ -130,9 +128,7 @@ public final class QueryParameterValues {
   // the content map of an InsertAllRequest.RowToInsert.
   @Nullable
   public static String toInsertRowString(@Nullable OffsetDateTime offsetDateTime) {
-    return Optional.ofNullable(offsetDateTime)
-        .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::format)
-        ;
+    return Optional.ofNullable(offsetDateTime).map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::format);
   }
 
   // BigQuery TIMESTAMP types don't include a zone or offset, but are always UTC.

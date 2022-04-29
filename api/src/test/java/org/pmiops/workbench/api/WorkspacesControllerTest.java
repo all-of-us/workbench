@@ -22,7 +22,6 @@ import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -34,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -175,6 +173,7 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.MockFieldValueList;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -490,15 +489,6 @@ public class WorkspacesControllerTest {
 
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
-    Iterable testIterable =
-        new Iterable() {
-          @Override
-          public Iterator iterator() {
-            List<FieldValue> list = new ArrayList<>();
-            list.add(null);
-            return list.iterator();
-          }
-        };
     Map<String, Integer> rm =
         ImmutableMap.<String, Integer>builder()
             .put("person_id", 0)
@@ -514,7 +504,7 @@ public class WorkspacesControllerTest {
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
     when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
     when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
-    when(queryResult.iterateAll()).thenReturn(testIterable);
+    when(queryResult.iterateAll()).thenReturn(MockFieldValueList.TEST_ITERABLE);
     when(bigQueryService.getLong(null, 0)).thenReturn(0L);
     when(bigQueryService.getString(null, 1)).thenReturn("1");
     when(bigQueryService.getLong(null, 2)).thenReturn(0L);

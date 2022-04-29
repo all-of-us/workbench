@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -17,7 +16,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -128,6 +126,7 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.MockFieldValueList;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -2385,12 +2384,6 @@ public class CohortReviewControllerTest {
 
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
-    Iterable testIterable =
-        () -> {
-          List<FieldValue> list = new ArrayList<>();
-          list.add(null);
-          return list.iterator();
-        };
     Map<String, Integer> rm =
         ImmutableMap.<String, Integer>builder()
             .put("person_id", 0)
@@ -2423,8 +2416,8 @@ public class CohortReviewControllerTest {
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
     when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
     when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
-    when(queryResult.iterateAll()).thenReturn(testIterable);
-    when(queryResult.getValues()).thenReturn(testIterable);
+    when(queryResult.iterateAll()).thenReturn(MockFieldValueList.TEST_ITERABLE);
+    when(queryResult.getValues()).thenReturn(MockFieldValueList.TEST_ITERABLE);
     when(bigQueryService.getLong(null, 0)).thenReturn(0L);
     when(bigQueryService.getString(null, 1)).thenReturn("1");
     when(bigQueryService.getLong(null, 2)).thenReturn(0L);

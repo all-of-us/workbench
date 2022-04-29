@@ -123,8 +123,7 @@ public class ProfileService {
     final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         verifiedInstitutionalAffiliationDao
             .findFirstByUser(user)
-            .map(verifiedInstitutionalAffiliationMapper::dbToModel)
-            ;
+            .map(verifiedInstitutionalAffiliationMapper::dbToModel);
 
     final @Nullable DbUserTermsOfService latestTermsOfService =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());

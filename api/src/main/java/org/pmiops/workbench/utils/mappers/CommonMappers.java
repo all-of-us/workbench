@@ -33,15 +33,11 @@ public class CommonMappers {
   public static OffsetDateTime offsetDateTimeUtc(Timestamp timestamp) {
     return Optional.ofNullable(timestamp)
         .map(Timestamp::toInstant)
-        .map(instant -> OffsetDateTime.ofInstant(instant, ZoneOffset.UTC))
-        ;
+        .map(instant -> OffsetDateTime.ofInstant(instant, ZoneOffset.UTC));
   }
 
   public static Timestamp timestamp(OffsetDateTime offsetDateTime) {
-    return Optional.ofNullable(offsetDateTime)
-        .map(OffsetDateTime::toInstant)
-        .map(Timestamp::from)
-        ;
+    return Optional.ofNullable(offsetDateTime).map(OffsetDateTime::toInstant).map(Timestamp::from);
   }
 
   @Named("toTimestampCurrentIfNull")
@@ -98,8 +94,7 @@ public class CommonMappers {
   public String cdrVersionToId(DbCdrVersion cdrVersion) {
     return Optional.ofNullable(cdrVersion)
         .map(DbCdrVersion::getCdrVersionId)
-        .map(id -> Long.toString(id))
-        ;
+        .map(id -> Long.toString(id));
   }
 
   @Named("versionToEtag")

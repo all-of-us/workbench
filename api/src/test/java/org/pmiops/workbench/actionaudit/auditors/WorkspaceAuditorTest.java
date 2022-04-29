@@ -149,8 +149,7 @@ public class WorkspaceAuditorTest {
     assertThat(eventsSent).hasSize(WorkspaceTargetProperty.values().length);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.map(ActionAuditEvent::getActionType))
-        .isEqualTo(ActionType.CREATE);
+    assertThat(firstEvent.map(ActionAuditEvent::getActionType)).isEqualTo(ActionType.CREATE);
     assertThat(
             eventsSent.stream()
                 .map(ActionAuditEvent::getActionType)
