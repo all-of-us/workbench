@@ -1,6 +1,8 @@
 // this is a temporary file to assist with the migration from (class-based) AdminUser to (functional) AdminUserProfile
 // for RW-7536
 
+// TODO how many of these conditions can be removed now that AdminUser is gone?
+
 import * as React from 'react';
 import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
@@ -36,7 +38,6 @@ import { cond, formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,
-  hasRegisteredTierAccess,
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import {
@@ -44,12 +45,9 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
-  getAccessModuleStatusByNameOrEmpty,
-  rtAccessRenewalModules,
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
 import { getRoleOptions } from 'app/utils/institutions';
-import { serverConfigStore } from 'app/utils/stores';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -642,53 +640,5 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
     >
       {children}
     </TooltipTrigger>
-  );
-};
-
-interface ExpirationProps {
-  profile: Profile;
-}
-
-export const AccessModuleExpirations = ({ profile }: ExpirationProps) => {
-  // compliance training is feature-flagged in some environments
-  const { enableComplianceTraining } = serverConfigStore.get().config;
-  const moduleNames = enableComplianceTraining
-    ? rtAccessRenewalModules
-    : rtAccessRenewalModules.filter(
-        (moduleName) => moduleName !== AccessModule.COMPLIANCETRAINING
-      );
-
-  const accessStatus = hasRegisteredTierAccess(profile) ? (
-    <div style={{ color: colors.success }}>Enabled</div>
-  ) : (
-    <div style={{ color: colors.danger }}>Disabled</div>
-  );
-
-  const modules = profile?.accessModules?.modules;
-
-  return (
-    <FlexColumn style={{ marginTop: '1rem' }}>
-      <label style={commonStyles.semiBold}>
-        Data Access Status: {accessStatus}
-      </label>
-      {moduleNames.map((moduleName, zeroBasedStep) => {
-        const { lastConfirmedDate, nextReviewDate } =
-          computeRenewalDisplayDates(
-            getAccessModuleStatusByNameOrEmpty(modules, moduleName)
-          );
-        const { AARTitleComponent } = getAccessModuleConfig(moduleName);
-        return (
-          <FlexRow key={zeroBasedStep} style={{ marginTop: '0.5rem' }}>
-            <FlexColumn>
-              <label style={commonStyles.semiBold}>
-                Step {zeroBasedStep + 1}: <AARTitleComponent />
-              </label>
-              <div>Last Updated On: {lastConfirmedDate}</div>
-              <div>Next Review: {nextReviewDate}</div>
-            </FlexColumn>
-          </FlexRow>
-        );
-      })}
-    </FlexColumn>
   );
 };
