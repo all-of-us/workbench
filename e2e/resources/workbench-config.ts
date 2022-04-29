@@ -72,8 +72,8 @@ const staging: IEnvConfig = {
 
 // NOT WORKING: workbench stable environment
 const stable: IEnvConfig = {
-  LOGIN_URL_DOMAIN_NAME: process.env.STABLE_LOGIN_URL || 'https://all-of-us-rw-stable.appspot.com/login',
-  API_HOSTNAME: process.env.API_HOSTNAME || 'api-dot-all-of-us-rw-stable.appspot.com',
+  LOGIN_URL_DOMAIN_NAME: process.env.STABLE_LOGIN_URL || 'https://stable.fake-research-aou.org/login',
+  API_HOSTNAME: process.env.API_HOSTNAME || 'api.stable.fake-research-aou.org',
   EMAIL_DOMAIN_NAME: '@stable.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
