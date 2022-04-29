@@ -166,6 +166,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "i.short_name AS institutionShortName, "
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
+              // to be removed soon, replaced by duccBypassTime
               + "uamd.data_use_agreement_bypass_time AS dataUseAgreementBypassTime, "
               + "uamd.data_use_agreement_bypass_time AS duccBypassTime, "
               + "uamd.data_use_agreement_completion_time AS dataUseAgreementCompletionTime, "
