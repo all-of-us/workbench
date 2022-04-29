@@ -167,18 +167,23 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
               // to be removed soon, replaced by duccBypassTime
-              + "uamd.data_use_agreement_bypass_time AS dataUseAgreementBypassTime, "
-              + "uamd.data_use_agreement_bypass_time AS duccBypassTime, "
-              + "uamd.data_use_agreement_completion_time AS dataUseAgreementCompletionTime, "
+              + "uamd.ducc_bypass_time AS dataUseAgreementBypassTime, "
+              + "uamd.ducc_bypass_time AS duccBypassTime, "
+              // to be removed soon
+              + "uamd.ducc_completion_time AS dataUseAgreementCompletionTime, "
               + "uamrt.compliance_training_bypass_time AS complianceTrainingBypassTime, "
+              // to be removed soon
               + "uamrt.compliance_training_completion_time AS complianceTrainingCompletionTime, "
               + "uamct.ct_compliance_training_bypass_time AS ctComplianceTrainingBypassTime, "
+              // to be removed soon
               + "uamct.ct_compliance_training_completion_time AS ctComplianceTrainingCompletionTime, "
               + "uame.era_commons_bypass_time AS eraCommonsBypassTime, "
+              // to be removed soon
               + "uame.era_commons_completion_time AS eraCommonsCompletionTime, "
               + "uamt.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
               + "uamt.two_factor_auth_completion_time AS twoFactorAuthCompletionTime, "
               + "uamr.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "
+              // to be removed soon
               + "uamr.ras_link_login_gov_completion_time AS rasLinkLoginGovCompletionTime, "
               + "t.access_tier_short_names AS accessTierShortNames "
               + "FROM user u "
@@ -227,8 +232,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + ") as uamct ON u.user_id = uamct.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS data_use_agreement_bypass_time, "
-              + "    uam.completion_time AS data_use_agreement_completion_time "
+              + "    uam.bypass_time AS ducc_bypass_time, "
+              + "    uam.completion_time AS ducc_completion_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'DATA_USER_CODE_OF_CONDUCT' "
