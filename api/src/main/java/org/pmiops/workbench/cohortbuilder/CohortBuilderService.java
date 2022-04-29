@@ -2,8 +2,8 @@ package org.pmiops.workbench.cohortbuilder;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
@@ -92,7 +92,7 @@ public interface CohortBuilderService {
    * Build a map that contains all gender/race/ethnicity/sex_at_birth names with the concept id as
    * the key.
    */
-  Map<Long, String> findAllDemographicsMap();
+  MultiKeyMap findAllDemographicsMap();
 
   List<String> findSortedConceptIdsByDomainIdAndType(
       String domainId, String sortColumn, String sortName);
