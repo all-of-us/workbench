@@ -286,7 +286,8 @@ export const AdminUserTable = withUserProfile()(
                 frozenWidth='200px'
                 globalFilter={filter}
                 paginator={true}
-                rows={50}
+                rows={10}
+                rowsPerPageOptions={[5, 10, 50, 100]}
                 scrollable
                 sortField={'firstSignInTimestamp'}
                 style={styles.tableStyle}
