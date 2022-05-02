@@ -25,6 +25,7 @@ export class UserAdminApiStub extends UserAdminApi {
         {
           userId: 1,
           username: ProfileStubVariables.PROFILE_STUB.username,
+          accessTierShortNames: [],
         },
       ],
     });

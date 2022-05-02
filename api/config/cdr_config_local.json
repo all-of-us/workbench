@@ -5,8 +5,8 @@
       "shortName": "registered",
       "displayName": "Registered Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
-      "authDomainName": "all-of-us-registered-test",
-      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
+      "authDomainName": "all-of-us-registered-local",
+      "authDomainGroupEmail": "all-of-us-registered-local@dev.test.firecloud.org",
       "datasetsBucket": "gs://fc-aou-test-datasets-registered/",
       "enableUserWorkflows": false
     },
@@ -15,8 +15,8 @@
       "shortName": "controlled",
       "displayName": "Controlled Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
-      "authDomainName": "all-of-us-test-prototype-3",
-      "authDomainGroupEmail": "all-of-us-test-prototype-3@dev.test.firecloud.org",
+      "authDomainName": "all-of-us-controlled-local",
+      "authDomainGroupEmail": "all-of-us-controlled-local@dev.test.firecloud.org",
       "datasetsBucket": "gs://fc-aou-test-datasets-controlled/",
       "enableUserWorkflows": true
     }

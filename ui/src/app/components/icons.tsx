@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 import {
+  faBan,
   faCaretRight,
   faCheck,
   faCheckCircle,
@@ -175,6 +176,7 @@ export const AlarmExclamation = (props) => (
 export const ArrowRight = (props) => (
   <Icon shape={faLongArrowAltRight} {...props} />
 );
+export const Ban = (props) => <Icon shape={faBan} {...props} />;
 export const CaretRight = (props) => <Icon shape={faCaretRight} {...props} />;
 export const Check = (props) => <Icon shape={faCheck} {...props} />;
 export const CheckCircle = (props) => <Icon shape={faCheckCircle} {...props} />;

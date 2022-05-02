@@ -23,7 +23,6 @@ import { AdminWorkspaceSearch } from 'app/pages/admin/admin-workspace-search';
 import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
-import { DeprecatedAdminUser } from 'app/pages/admin/user/deprecated-admin-user';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
@@ -75,10 +74,6 @@ const DataUserCodeOfConductPage = fp.flow(
   withFullHeight,
   withRoutingSpinner
 )(DataUserCodeOfConduct);
-const DeprecatedUserAdminPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(DeprecatedAdminUser);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(
   withRouteData,
@@ -205,15 +200,6 @@ export const SignedInRoutes = () => {
       >
         <UserAdminTablePage
           routeData={{ title: 'User Admin Table', minimizeChrome: true }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path='/admin/users-deprecated/:usernameWithoutGsuiteDomain'
-        guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}
-      >
-        <DeprecatedUserAdminPage
-          routeData={{ title: 'User Admin', minimizeChrome: true }}
         />
       </AppRoute>
       <AppRoute

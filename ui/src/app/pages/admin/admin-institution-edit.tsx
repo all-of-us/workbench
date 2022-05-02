@@ -17,7 +17,6 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SemiBoldHeader } from 'app/components/headers';
-import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
 import { TextArea, TextInputWithLabel } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
 import {
@@ -27,6 +26,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { Scroll } from 'app/icons/scroll';
 import {
@@ -221,26 +221,6 @@ const DomainTextArea = (props: {
   );
 };
 
-const getTierBadge = (accessTierShortName: string): (() => JSX.Element) => {
-  const tierBadgeStyle: CSSProperties = {
-    marginTop: '0.6rem',
-    marginLeft: '0.6rem',
-  };
-
-  return () =>
-    switchCase(
-      accessTierShortName,
-      [
-        AccessTierShortNames.Registered,
-        () => <RegisteredTierBadge style={tierBadgeStyle} />,
-      ],
-      [
-        AccessTierShortNames.Controlled,
-        () => <ControlledTierBadge style={tierBadgeStyle} />,
-      ]
-    );
-};
-
 interface TierConfigProps {
   institution: Institution;
   accessTierShortName: string;
@@ -265,7 +245,10 @@ const TierConfig = (props: TierConfigProps) => {
     setTierDomains,
   } = props;
 
-  const TierBadge: () => JSX.Element = getTierBadge(accessTierShortName);
+  const tierBadgeStyle: CSSProperties = {
+    marginTop: '0.6rem',
+    marginLeft: '0.6rem',
+  };
 
   const tierConfig = getTierConfig(institution, accessTierShortName);
   const { emailAddresses, emailDomains } = tierConfig;
@@ -273,7 +256,7 @@ const TierConfig = (props: TierConfigProps) => {
   return (
     <FlexRow style={styles.tierConfigContainer}>
       <div>
-        <TierBadge />
+        <TierBadge {...{ accessTierShortName }} style={tierBadgeStyle} />
       </div>
       <FlexColumn style={{ marginLeft: '0.4rem' }}>
         <label style={styles.tierLabel}>

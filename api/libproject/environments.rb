@@ -24,7 +24,20 @@ ENVIRONMENTS = {
   "local" => env_with_defaults("local", {
     :api_endpoint_host => "localhost:8081",
     :cdr_sql_instance => "workbench",
-    :source_cdr_project => "all-of-us-ehr-dev"
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
+    :accessTiers => {
+      "registered" => {
+        :ingest_cdr_project => "fc-aou-vpc-ingest-test",
+        :dest_cdr_project => "fc-aou-cdr-synth-test",
+        :auth_domain_group_email => "all-of-us-registered-local@dev.test.firecloud.org",
+      },
+      "controlled" => {
+        :ingest_cdr_project => "fc-aou-cdr-ingest-test-2",
+        :dest_cdr_project => "fc-aou-cdr-synth-test-2",
+        :auth_domain_group_email => "all-of-us-controlled-local@dev.test.firecloud.org"
+      }
+    }
   }),
   "all-of-us-workbench-test" => env_with_defaults("test", {
     :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
