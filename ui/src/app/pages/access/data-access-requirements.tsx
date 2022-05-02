@@ -244,7 +244,7 @@ export const styles = reactStyles({
   },
 });
 
-export const RenewalRequirementsText = () => (
+const RenewalRequirementsText = () => (
   <span>
     Researchers are required to complete a number of steps as part of the annual
     renewal to maintain access to <AoU /> data. Renewal of access will occur on
