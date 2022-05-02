@@ -662,3 +662,20 @@ export const getStatusText = (status: AccessModuleStatus) => {
     ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };
+
+export const getExpiredModules = (
+  modules: AccessModule[],
+  profile: Profile
+): AccessModule[] =>
+  fp.flow(
+    fp.filter((module: AccessModule) => isEligibleModule(module, profile)),
+    fp.map((module: AccessModule) =>
+      getAccessModuleStatusByName(profile, module)
+    ),
+    fp.filter((accessModuleStatus: AccessModuleStatus) =>
+      hasExpired(accessModuleStatus.expirationEpochMillis)
+    ),
+    fp.map(
+      (accessModuleStatus: AccessModuleStatus) => accessModuleStatus.moduleName
+    )
+  )(modules);
