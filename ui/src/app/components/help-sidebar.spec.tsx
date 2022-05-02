@@ -27,11 +27,11 @@ import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
-  genomicExtractionStore,
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
+import { SWRConfig } from 'swr';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -104,9 +104,14 @@ describe('HelpSidebar', () => {
   let props: {};
 
   const component = async () => {
-    const c = mountWithRouter(<HelpSidebar {...props} />, {
-      attachTo: document.getElementById('root'),
-    });
+    const c = mountWithRouter(
+      <SWRConfig value={{ provider: () => new Map() }}>
+        <HelpSidebar {...props} />
+      </SWRConfig>,
+      {
+        attachTo: document.getElementById('root'),
+      }
+    );
     await waitForFakeTimersAndUpdate(c);
     return c;
   };
@@ -188,21 +193,6 @@ describe('HelpSidebar', () => {
   it('should render', async () => {
     const wrapper = await component();
     expect(wrapper.exists()).toBeTruthy();
-  });
-
-  it('should update content when pageKey prop changes', async () => {
-    props = { pageKey: 'data' };
-    const wrapper = await component();
-    await setActiveIcon(wrapper, 'help');
-    expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(
-      sidebarContent.data[0].title
-    );
-    wrapper.setProps({
-      children: <HelpSidebar {...props} pageKey='cohortBuilder' />,
-    });
-    expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(
-      sidebarContent.cohortBuilder[0].title
-    );
   });
 
   it('should show a different icon and title when pageKey is notebookStorage', async () => {
@@ -387,24 +377,22 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "running" icon when extract currently running', async () => {
-    genomicExtractionStore.set({
-      [workspaceDataStub.namespace]: [
-        {
-          status: TerraJobStatus.RUNNING,
-        },
-        {
-          status: TerraJobStatus.ABORTING,
-        },
-        {
-          status: TerraJobStatus.FAILED,
-          completionTime: Date.now(),
-        },
-        {
-          status: TerraJobStatus.SUCCEEDED,
-          completionTime: Date.now(),
-        },
-      ],
-    });
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.RUNNING,
+      },
+      {
+        status: TerraJobStatus.ABORTING,
+      },
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now(),
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now(),
+      },
+    ];
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -414,21 +402,19 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "aborting" icon when extract currently aborting and nothing running', async () => {
-    genomicExtractionStore.set({
-      [workspaceDataStub.namespace]: [
-        {
-          status: TerraJobStatus.ABORTING,
-        },
-        {
-          status: TerraJobStatus.FAILED,
-          completionTime: Date.now(),
-        },
-        {
-          status: TerraJobStatus.SUCCEEDED,
-          completionTime: Date.now(),
-        },
-      ],
-    });
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.ABORTING,
+      },
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now(),
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now(),
+      },
+    ];
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -438,14 +424,12 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "FAILED" icon with recent failed jobs', async () => {
-    genomicExtractionStore.set({
-      [workspaceDataStub.namespace]: [
-        {
-          status: TerraJobStatus.FAILED,
-          completionTime: Date.now(),
-        },
-      ],
-    });
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now(),
+      },
+    ];
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -459,18 +443,16 @@ describe('HelpSidebar', () => {
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
     const twoHoursAgo = new Date();
     twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
-    genomicExtractionStore.set({
-      [workspaceDataStub.namespace]: [
-        {
-          status: TerraJobStatus.SUCCEEDED,
-          completionTime: oneHourAgo.getTime(),
-        },
-        {
-          status: TerraJobStatus.FAILED,
-          completionTime: twoHoursAgo.getTime(),
-        },
-      ],
-    });
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: oneHourAgo.getTime(),
+      },
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: twoHoursAgo.getTime(),
+      },
+    ];
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -482,18 +464,16 @@ describe('HelpSidebar', () => {
   it('should display no extract icons with old failed/succeeded jobs', async () => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
-    genomicExtractionStore.set({
-      [workspaceDataStub.namespace]: [
-        {
-          status: TerraJobStatus.FAILED,
-          completionTime: date.getTime(),
-        },
-        {
-          status: TerraJobStatus.SUCCEEDED,
-          completionTime: date.getTime(),
-        },
-      ],
-    });
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: date.getTime(),
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: date.getTime(),
+      },
+    ];
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 

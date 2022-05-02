@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
@@ -19,15 +18,10 @@ import { GenomicsExtractionMenu } from 'app/components/genomics-extraction-menu'
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
-import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { DEFAULT, switchCase, withCurrentWorkspace } from 'app/utils';
 import { formatUsd } from 'app/utils/numbers';
-import {
-  genomicExtractionStore,
-  updateGenomicExtractionStore,
-  withStore,
-} from 'app/utils/stores';
+import { useGenomicExtractionJobs } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
 
@@ -106,7 +100,8 @@ const MissingCell = () => <span style={{ fontSize: '.4rem' }}>&mdash;</span>;
 
 const mapJobToTableRow = (
   job: GenomicExtractionJob,
-  workspace: WorkspaceData
+  workspace: WorkspaceData,
+  onMutate: () => void
 ) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment =
@@ -173,7 +168,7 @@ const mapJobToTableRow = (
       ) : (
         (job.vcfSizeMb / 1000).toFixed(1) + 'GB'
       ),
-    menuJsx: <GenomicsExtractionMenu job={job} workspace={workspace} />,
+    menuJsx: <GenomicsExtractionMenu {...{ job, workspace, onMutate }} />,
   };
 };
 
@@ -218,114 +213,102 @@ const FailedRequestMessage = () => (
   </div>
 );
 
-export const GenomicsExtractionTable = fp.flow(
-  withCurrentWorkspace(),
-  withStore(genomicExtractionStore, 'genomicExtraction')
-)(({ workspace, genomicExtraction }) => {
-  const [isLoading, setIsLoading] = useState(true);
+export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
+  ({ workspace }) => {
+    const {
+      data: jobs,
+      error,
+      mutate,
+    } = useGenomicExtractionJobs(workspace.namespace, workspace.id);
 
-  useEffect(() => {
-    dataSetApi()
-      .getGenomicExtractionJobs(workspace.namespace, workspace.id)
-      .then((resp) =>
-        updateGenomicExtractionStore(workspace.namespace, resp.jobs)
-      )
-      .finally(() => setIsLoading(false));
-  }, [workspace]);
-
-  const workspaceExtractionJobs = genomicExtraction[workspace.namespace];
-  const requestFailed = !isLoading && workspaceExtractionJobs === undefined;
-
-  return (
-    <div
-      id='extraction-data-table-container'
-      className='extraction-data-table-container'
-    >
-      <div className='slim-scroll-bar'>
-        <SwitchTransition>
-          <CSSTransition
-            key={isLoading}
-            classNames='switch-transition'
-            addEndListener={(node, done) => {
-              node.addEventListener(
-                'transitionend',
-                (e) => {
-                  if (node.isEqualNode(e.target)) {
-                    done(e);
-                  }
-                },
-                false
-              );
-            }}
-          >
-            {isLoading ? (
-              <Spinner style={{ display: 'block', margin: '3rem auto' }} />
-            ) : requestFailed ? (
-              <FailedRequestMessage />
-            ) : (
-              <DataTable
-                autoLayout
-                emptyMessage={<EmptyTableMessage />}
-                sortField={
-                  !workspaceExtractionJobs ||
-                  workspaceExtractionJobs.length !== 0
-                    ? 'dateStarted'
-                    : ''
-                }
-                sortOrder={-1}
-                value={workspaceExtractionJobs.map((job) =>
-                  mapJobToTableRow(job, workspace)
-                )}
-                style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
-              >
-                <Column
-                  header='Dataset Name'
-                  field='datasetNameDisplay'
-                  sortable
-                  sortField='datasetName'
-                  style={{
-                    maxWidth: '8rem',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                  }}
-                />
-                <Column
-                  header='Status'
-                  field='statusDisplay'
-                  sortable
-                  sortField='statusOrdinal'
-                />
-                <Column
-                  header='Date Started'
-                  field='dateStartedDisplay'
-                  sortable
-                  sortField='dateStarted'
-                />
-                <Column
-                  header='Cost'
-                  field='costDisplay'
-                  sortable
-                  sortField='cost'
-                />
-                <Column
-                  header='Size'
-                  field='sizeDisplay'
-                  sortable
-                  sortField='size'
-                />
-                <Column
-                  header='Duration'
-                  field='durationDisplay'
-                  sortable
-                  sortField='duration'
-                />
-                <Column header='' field='menuJsx' />
-              </DataTable>
-            )}
-          </CSSTransition>
-        </SwitchTransition>
+    return (
+      <div
+        id='extraction-data-table-container'
+        className='extraction-data-table-container'
+      >
+        <div className='slim-scroll-bar'>
+          <SwitchTransition>
+            <CSSTransition
+              key={!jobs}
+              classNames='switch-transition'
+              addEndListener={(node, done) => {
+                node.addEventListener(
+                  'transitionend',
+                  (e) => {
+                    if (node.isEqualNode(e.target)) {
+                      done(e);
+                    }
+                  },
+                  false
+                );
+              }}
+            >
+              {!jobs ? (
+                <Spinner style={{ display: 'block', margin: '3rem auto' }} />
+              ) : error ? (
+                <FailedRequestMessage />
+              ) : (
+                <DataTable
+                  autoLayout
+                  emptyMessage={<EmptyTableMessage />}
+                  sortField={!jobs || jobs.length > 0 ? 'dateStarted' : ''}
+                  sortOrder={-1}
+                  value={jobs.map((job) =>
+                    mapJobToTableRow(job, workspace, () => {
+                      mutate();
+                    })
+                  )}
+                  style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
+                >
+                  <Column
+                    header='Dataset Name'
+                    field='datasetNameDisplay'
+                    sortable
+                    sortField='datasetName'
+                    style={{
+                      maxWidth: '8rem',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                    }}
+                  />
+                  <Column
+                    header='Status'
+                    field='statusDisplay'
+                    sortable
+                    sortField='statusOrdinal'
+                  />
+                  <Column
+                    header='Date Started'
+                    field='dateStartedDisplay'
+                    sortable
+                    sortField='dateStarted'
+                  />
+                  <Column
+                    header='Cost'
+                    field='costDisplay'
+                    sortable
+                    sortField='cost'
+                  />
+                  <Column
+                    header='Size'
+                    field='sizeDisplay'
+                    sortable
+                    sortField='size'
+                  />
+                  <Column
+                    header='Duration'
+                    field='durationDisplay'
+                    sortable
+                    sortField='duration'
+                  />
+                  <Column header='' field='menuJsx' />
+                </DataTable>
+              )}
+            </CSSTransition>
+          </SwitchTransition>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
