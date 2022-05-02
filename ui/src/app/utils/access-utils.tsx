@@ -10,12 +10,12 @@ import {
   Profile,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -27,6 +27,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 
+import { AccessTierShortNames } from './access-tiers';
 import {
   displayDateWithoutHours,
   getWholeDaysFromNow,
@@ -126,10 +127,15 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 export const ACCESS_RENEWAL_PATH = '/access-renewal';
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
+interface DARTitleComponentConfig {
+  profile: Profile;
+  afterInitialClick: boolean;
+}
+
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   AARTitleComponent: () => JSX.Element;
-  DARTitleComponent: () => JSX.Element;
+  DARTitleComponent: (DARTitleComponentConfig) => JSX.Element;
   adminPageTitle: string;
   externalSyncAction?: Function;
   refreshAction?: Function;
@@ -185,18 +191,23 @@ export const getAccessModuleConfig = (
         requiredForRTAccess: enforceRasLoginGovLinking,
         requiredForCTAccess: enforceRasLoginGovLinking,
 
-        DARTitleComponent: () => (
-          <div>
-            Verify your identity with Login.gov{' '}
-            <TooltipTrigger
-              content={
-                'For additional security, we require you to verify your identity by uploading a photo of your ID.'
-              }
-            >
-              <InfoIcon style={{ margin: '0 0.3rem' }} />
-            </TooltipTrigger>
-          </div>
-        ),
+        DARTitleComponent: (props: DARTitleComponentConfig) => {
+          return (
+            <>
+              <div>
+                Verify your identity with Login.gov{' '}
+                <TooltipTrigger
+                  content={
+                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
+                  }
+                >
+                  <InfoIcon style={{ margin: '0 0.3rem' }} />
+                </TooltipTrigger>
+              </div>
+              <LoginGovHelpText {...props} />
+            </>
+          );
+        },
         adminPageTitle: 'Verify your identity with Login.gov',
         refreshAction: () => redirectToRas(false),
       }),
@@ -378,11 +389,7 @@ export const useNeedsToAcceptTOS = () => {
   const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] =
     useState<boolean>(false);
   useEffect(() => {
-    if (
-      !authLoaded ||
-      !isSignedIn ||
-      !environment.enableTOSRedirectForLoggedInUser
-    ) {
+    if (!authLoaded || !isSignedIn) {
       setUserRequiredToAcceptTOS(false);
     } else if (profile) {
       // wait for profile to load, to  ensure user initialization happens
@@ -623,4 +630,35 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
       }
     })
   );
+};
+
+export const isCompleted = (status: AccessModuleStatus): boolean =>
+  !!status?.completionEpochMillis;
+export const isBypassed = (status: AccessModuleStatus): boolean =>
+  !!status?.bypassEpochMillis;
+export const isCompliant = (status: AccessModuleStatus) =>
+  isCompleted(status) || isBypassed(status);
+
+export const isEligibleModule = (module: AccessModule, profile: Profile) => {
+  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+    // Currently a user can only be ineligible for CT modules.
+    // Note: eRA Commons is an edge case which is handled elsewhere. It is
+    // technically also possible for CT eRA commons to be ineligible.
+    return true;
+  }
+  const controlledTierEligibility = profile.tierEligibilities.find(
+    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
+  );
+  return !!controlledTierEligibility?.eligible;
+};
+
+export const getStatusText = (status: AccessModuleStatus) => {
+  console.assert(
+    isCompliant(status),
+    'Cannot provide status text for incomplete module'
+  );
+  const { completionEpochMillis, bypassEpochMillis } = status;
+  return isCompleted(status)
+    ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
+    : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };

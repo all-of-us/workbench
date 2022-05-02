@@ -83,7 +83,7 @@ export default class CreateAccountPage extends BasePage {
   async isLoaded(): Promise<boolean> {
     await Promise.all([
       waitForText(this.page, 'Please read through the entire agreement to continue'),
-      this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', { visible: true })
+      this.page.waitForXPath('//*[@data-test-id="terms-of-service"]', { visible: true })
     ]);
     await waitWhileLoading(this.page);
     return true;

@@ -22,8 +22,9 @@ public class DbStatusAlert {
     return statusAlertId;
   }
 
-  public void setStatusAlertId(long statusAlertId) {
+  public DbStatusAlert setStatusAlertId(long statusAlertId) {
     this.statusAlertId = statusAlertId;
+    return this;
   }
 
   @Column(name = "title")
@@ -31,8 +32,9 @@ public class DbStatusAlert {
     return title;
   }
 
-  public void setTitle(String title) {
+  public DbStatusAlert setTitle(String title) {
     this.title = title;
+    return this;
   }
 
   @Column(name = "message")
@@ -40,8 +42,9 @@ public class DbStatusAlert {
     return message;
   }
 
-  public void setMessage(String message) {
+  public DbStatusAlert setMessage(String message) {
     this.message = message;
+    return this;
   }
 
   @Column(name = "link")
@@ -49,7 +52,8 @@ public class DbStatusAlert {
     return link;
   }
 
-  public void setLink(String link) {
+  public DbStatusAlert setLink(String link) {
     this.link = link;
+    return this;
   }
 }

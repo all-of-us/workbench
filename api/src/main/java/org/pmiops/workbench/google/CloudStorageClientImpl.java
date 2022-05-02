@@ -41,8 +41,8 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
-  public String getImageUrl(String image_name) {
-    return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + image_name;
+  public String getImageUrl(String imageName) {
+    return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + imageName;
   }
 
   @Override

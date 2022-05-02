@@ -10,9 +10,9 @@ import { Configuration } from 'generated/fetch';
 import { environment } from 'environments/environment';
 import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
 import { NotificationModal } from 'app/components/modals';
+import { TermsOfService } from 'app/components/terms-of-service';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { CookiePolicy } from 'app/pages/cookie-policy';
-import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
 import { SignIn } from 'app/pages/login/sign-in';
 import { NotFound } from 'app/pages/not-found';
 import { SessionExpired } from 'app/pages/session-expired';
@@ -301,7 +301,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
               </AppRouter>
             )}
             {doesUserNeedToAcceptTOS && (
-              <AccountCreationTos
+              <TermsOfService
                 showReAcceptNotification={true}
                 onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
                 filePath={'/aou-tos.html'}

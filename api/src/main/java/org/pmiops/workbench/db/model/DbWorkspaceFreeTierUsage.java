@@ -35,8 +35,9 @@ public class DbWorkspaceFreeTierUsage {
     return id;
   }
 
-  public void setId(long id) {
+  public DbWorkspaceFreeTierUsage setId(long id) {
     this.id = id;
+    return this;
   }
 
   @ManyToOne
@@ -45,8 +46,9 @@ public class DbWorkspaceFreeTierUsage {
     return user;
   }
 
-  public void setUser(DbUser user) {
+  public DbWorkspaceFreeTierUsage setUser(DbUser user) {
     this.user = user;
+    return this;
   }
 
   @OneToOne
@@ -55,8 +57,9 @@ public class DbWorkspaceFreeTierUsage {
     return workspace;
   }
 
-  public void setWorkspace(DbWorkspace workspace) {
+  public DbWorkspaceFreeTierUsage setWorkspace(DbWorkspace workspace) {
     this.workspace = workspace;
+    return this;
   }
 
   @Column(name = "cost")
@@ -64,9 +67,10 @@ public class DbWorkspaceFreeTierUsage {
     return cost;
   }
 
-  public void setCost(double cost) {
+  public DbWorkspaceFreeTierUsage setCost(double cost) {
     this.cost = cost;
     setLastUpdateTime();
+    return this;
   }
 
   @Column(name = "last_update_time")
@@ -74,11 +78,13 @@ public class DbWorkspaceFreeTierUsage {
     return lastUpdateTime;
   }
 
-  private void setLastUpdateTime(Timestamp lastUpdateTime) {
+  public DbWorkspaceFreeTierUsage setLastUpdateTime(Timestamp lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
+    return this;
   }
 
-  private void setLastUpdateTime() {
+  private DbWorkspaceFreeTierUsage setLastUpdateTime() {
     this.lastUpdateTime = new Timestamp(Instant.now().toEpochMilli());
+    return this;
   }
 }

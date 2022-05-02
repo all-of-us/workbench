@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
@@ -25,6 +26,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { Scroll } from 'app/icons/scroll';
 import {
@@ -42,7 +44,6 @@ import {
 import { convertAPIError } from 'app/utils/errors';
 import {
   defaultTierConfig,
-  getTierBadge,
   getTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains,
@@ -244,7 +245,10 @@ const TierConfig = (props: TierConfigProps) => {
     setTierDomains,
   } = props;
 
-  const TierBadge: () => JSX.Element = getTierBadge(accessTierShortName);
+  const tierBadgeStyle: CSSProperties = {
+    marginTop: '0.6rem',
+    marginLeft: '0.6rem',
+  };
 
   const tierConfig = getTierConfig(institution, accessTierShortName);
   const { emailAddresses, emailDomains } = tierConfig;
@@ -252,7 +256,7 @@ const TierConfig = (props: TierConfigProps) => {
   return (
     <FlexRow style={styles.tierConfigContainer}>
       <div>
-        <TierBadge />
+        <TierBadge {...{ accessTierShortName }} style={tierBadgeStyle} />
       </div>
       <FlexColumn style={{ marginLeft: '0.4rem' }}>
         <label style={styles.tierLabel}>

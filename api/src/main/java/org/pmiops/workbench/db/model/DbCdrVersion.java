@@ -45,8 +45,9 @@ public class DbCdrVersion {
     return cdrVersionId;
   }
 
-  public void setCdrVersionId(long cdrVersionId) {
+  public DbCdrVersion setCdrVersionId(long cdrVersionId) {
     this.cdrVersionId = cdrVersionId;
+    return this;
   }
 
   // I changed the type to object Boolean because Hibernate started complaining about assigning
@@ -57,8 +58,9 @@ public class DbCdrVersion {
     return isDefault;
   }
 
-  public void setIsDefault(Boolean isDefault) {
+  public DbCdrVersion setIsDefault(Boolean isDefault) {
     this.isDefault = isDefault;
+    return this;
   }
 
   @Transient
@@ -72,8 +74,9 @@ public class DbCdrVersion {
     return name;
   }
 
-  public void setName(String name) {
+  public DbCdrVersion setName(String name) {
     this.name = name;
+    return this;
   }
 
   @ManyToOne
@@ -82,8 +85,9 @@ public class DbCdrVersion {
     return accessTier;
   }
 
-  public void setAccessTier(DbAccessTier accessTier) {
+  public DbCdrVersion setAccessTier(DbAccessTier accessTier) {
     this.accessTier = accessTier;
+    return this;
   }
 
   @Column(name = "archival_status")
@@ -91,8 +95,9 @@ public class DbCdrVersion {
     return archivalStatus;
   }
 
-  public void setArchivalStatus(Short archivalStatus) {
+  public DbCdrVersion setArchivalStatus(Short archivalStatus) {
     this.archivalStatus = archivalStatus;
+    return this;
   }
 
   @Transient
@@ -100,8 +105,9 @@ public class DbCdrVersion {
     return DbStorageEnums.archivalStatusFromStorage(getArchivalStatus());
   }
 
-  public void setArchivalStatusEnum(ArchivalStatus archivalStatus) {
+  public DbCdrVersion setArchivalStatusEnum(ArchivalStatus archivalStatus) {
     setArchivalStatus(DbStorageEnums.archivalStatusToStorage(archivalStatus));
+    return this;
   }
 
   @Column(name = "release_number")
@@ -109,8 +115,9 @@ public class DbCdrVersion {
     return releaseNumber;
   }
 
-  public void setReleaseNumber(short releaseNumber) {
+  public DbCdrVersion setReleaseNumber(short releaseNumber) {
     this.releaseNumber = releaseNumber;
+    return this;
   }
 
   @Column(name = "bigquery_project")
@@ -118,8 +125,9 @@ public class DbCdrVersion {
     return bigqueryProject;
   }
 
-  public void setBigqueryProject(String bigqueryProject) {
+  public DbCdrVersion setBigqueryProject(String bigqueryProject) {
     this.bigqueryProject = bigqueryProject;
+    return this;
   }
 
   @Column(name = "bigquery_dataset")
@@ -127,8 +135,9 @@ public class DbCdrVersion {
     return bigqueryDataset;
   }
 
-  public void setBigqueryDataset(String bigqueryDataset) {
+  public DbCdrVersion setBigqueryDataset(String bigqueryDataset) {
     this.bigqueryDataset = bigqueryDataset;
+    return this;
   }
 
   @Column(name = "creation_time")
@@ -136,8 +145,9 @@ public class DbCdrVersion {
     return creationTime;
   }
 
-  public void setCreationTime(Timestamp creationTime) {
+  public DbCdrVersion setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "num_participants")
@@ -145,8 +155,9 @@ public class DbCdrVersion {
     return numParticipants;
   }
 
-  public void setNumParticipants(int numParticipants) {
+  public DbCdrVersion setNumParticipants(int numParticipants) {
     this.numParticipants = numParticipants;
+    return this;
   }
 
   @Column(name = "cdr_db_name")
@@ -154,8 +165,9 @@ public class DbCdrVersion {
     return cdrDbName;
   }
 
-  public void setCdrDbName(String cdrDbName) {
+  public DbCdrVersion setCdrDbName(String cdrDbName) {
     this.cdrDbName = cdrDbName;
+    return this;
   }
 
   @Column(name = "wgs_bigquery_dataset")
@@ -163,8 +175,9 @@ public class DbCdrVersion {
     return wgsBigqueryDataset;
   }
 
-  public void setWgsBigqueryDataset(String wgsBigqueryDataset) {
+  public DbCdrVersion setWgsBigqueryDataset(String wgsBigqueryDataset) {
     this.wgsBigqueryDataset = wgsBigqueryDataset;
+    return this;
   }
 
   @Column(name = "has_fitbit_data")
@@ -172,8 +185,9 @@ public class DbCdrVersion {
     return hasFitbitData == null ? false : hasFitbitData;
   }
 
-  public void setHasFitbitData(Boolean hasFitbitData) {
+  public DbCdrVersion setHasFitbitData(Boolean hasFitbitData) {
     this.hasFitbitData = hasFitbitData;
+    return this;
   }
 
   @Column(name = "has_copesurvey_data")
@@ -181,8 +195,9 @@ public class DbCdrVersion {
     return hasCopeSurveyData == null ? false : hasCopeSurveyData;
   }
 
-  public void setHasCopeSurveyData(Boolean hasCopeSurveyData) {
+  public DbCdrVersion setHasCopeSurveyData(Boolean hasCopeSurveyData) {
     this.hasCopeSurveyData = hasCopeSurveyData;
+    return this;
   }
 
   @Column(name = "all_samples_wgs_data_bucket")
@@ -190,8 +205,9 @@ public class DbCdrVersion {
     return allSamplesWgsDataBucket;
   }
 
-  public void setAllSamplesWgsDataBucket(String allSamplesWgsDataBucket) {
+  public DbCdrVersion setAllSamplesWgsDataBucket(String allSamplesWgsDataBucket) {
     this.allSamplesWgsDataBucket = allSamplesWgsDataBucket;
+    return this;
   }
 
   @Column(name = "single_sample_array_data_bucket")
@@ -199,8 +215,9 @@ public class DbCdrVersion {
     return singleSampleArrayDataBucket;
   }
 
-  public void setSingleSampleArrayDataBucket(String singleSampleArrayDataBucket) {
+  public DbCdrVersion setSingleSampleArrayDataBucket(String singleSampleArrayDataBucket) {
     this.singleSampleArrayDataBucket = singleSampleArrayDataBucket;
+    return this;
   }
 
   @Column(name = "storage_base_path")
@@ -208,8 +225,9 @@ public class DbCdrVersion {
     return storageBasePath;
   }
 
-  public void setStorageBasePath(String storageBasePath) {
+  public DbCdrVersion setStorageBasePath(String storageBasePath) {
     this.storageBasePath = storageBasePath;
+    return this;
   }
 
   @Column(name = "wgs_vcf_merged_storage_path")
@@ -217,8 +235,9 @@ public class DbCdrVersion {
     return wgsVcfMergedStoragePath;
   }
 
-  public void setWgsVcfMergedStoragePath(String wgsVcfMergedStoragePath) {
+  public DbCdrVersion setWgsVcfMergedStoragePath(String wgsVcfMergedStoragePath) {
     this.wgsVcfMergedStoragePath = wgsVcfMergedStoragePath;
+    return this;
   }
 
   @Column(name = "wgs_hail_storage_path")
@@ -226,8 +245,9 @@ public class DbCdrVersion {
     return wgsHailStoragePath;
   }
 
-  public void setWgsHailStoragePath(String wgsHailStoragePath) {
+  public DbCdrVersion setWgsHailStoragePath(String wgsHailStoragePath) {
     this.wgsHailStoragePath = wgsHailStoragePath;
+    return this;
   }
 
   @Column(name = "microarray_hail_storage_path")
@@ -235,8 +255,9 @@ public class DbCdrVersion {
     return microarrayHailStoragePath;
   }
 
-  public void setMicroarrayHailStoragePath(String microarrayHailStoragePath) {
+  public DbCdrVersion setMicroarrayHailStoragePath(String microarrayHailStoragePath) {
     this.microarrayHailStoragePath = microarrayHailStoragePath;
+    return this;
   }
 
   @Column(name = "microarray_vcf_single_sample_storage_path")
@@ -244,8 +265,10 @@ public class DbCdrVersion {
     return microarrayVcfSingleSampleStoragePath;
   }
 
-  public void setMicroarrayVcfSingleSampleStoragePath(String microarrayVcfSingleSampleStoragePath) {
+  public DbCdrVersion setMicroarrayVcfSingleSampleStoragePath(
+      String microarrayVcfSingleSampleStoragePath) {
     this.microarrayVcfSingleSampleStoragePath = microarrayVcfSingleSampleStoragePath;
+    return this;
   }
 
   @Override

@@ -51,8 +51,9 @@ public class DbCohort {
     return cohortId;
   }
 
-  public void setCohortId(long cohortId) {
+  public DbCohort setCohortId(long cohortId) {
     this.cohortId = cohortId;
+    return this;
   }
 
   @Version
@@ -61,8 +62,9 @@ public class DbCohort {
     return version;
   }
 
-  public void setVersion(int version) {
+  public DbCohort setVersion(int version) {
     this.version = version;
+    return this;
   }
 
   @Column(name = "name")
@@ -70,8 +72,9 @@ public class DbCohort {
     return name;
   }
 
-  public void setName(String name) {
+  public DbCohort setName(String name) {
     this.name = name;
+    return this;
   }
 
   @Column(name = "type")
@@ -79,8 +82,9 @@ public class DbCohort {
     return type;
   }
 
-  public void setType(String type) {
+  public DbCohort setType(String type) {
     this.type = type;
+    return this;
   }
 
   @Column(name = "description")
@@ -88,8 +92,9 @@ public class DbCohort {
     return description;
   }
 
-  public void setDescription(String description) {
+  public DbCohort setDescription(String description) {
     this.description = description;
+    return this;
   }
 
   @Column(name = "workspace_id")
@@ -97,8 +102,9 @@ public class DbCohort {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbCohort setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   @Lob
@@ -107,8 +113,9 @@ public class DbCohort {
     return criteria;
   }
 
-  public void setCriteria(String criteria) {
+  public DbCohort setCriteria(String criteria) {
     this.criteria = criteria;
+    return this;
   }
 
   @ManyToOne
@@ -117,8 +124,9 @@ public class DbCohort {
     return creator;
   }
 
-  public void setCreator(DbUser creator) {
+  public DbCohort setCreator(DbUser creator) {
     this.creator = creator;
+    return this;
   }
 
   @Column(name = "creation_time")
@@ -126,8 +134,9 @@ public class DbCohort {
     return creationTime;
   }
 
-  public void setCreationTime(Timestamp creationTime) {
+  public DbCohort setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "last_modified_time")
@@ -135,8 +144,9 @@ public class DbCohort {
     return lastModifiedTime;
   }
 
-  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+  public DbCohort setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+    return this;
   }
 
   @OneToMany(mappedBy = "cohortId", orphanRemoval = true, cascade = CascadeType.ALL)
@@ -144,15 +154,17 @@ public class DbCohort {
     return cohortReviews;
   }
 
-  public void setCohortReviews(Set<DbCohortReview> cohortReviews) {
+  public DbCohort setCohortReviews(Set<DbCohortReview> cohortReviews) {
     if (this.cohortReviews == null) {
       this.cohortReviews = cohortReviews;
-      return;
+      return this;
     }
     this.cohortReviews.addAll(cohortReviews);
+    return this;
   }
 
-  public void addCohortReview(DbCohortReview cohortReview) {
+  public DbCohort addCohortReview(DbCohortReview cohortReview) {
     this.cohortReviews.add(cohortReview);
+    return this;
   }
 }

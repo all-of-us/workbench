@@ -244,7 +244,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     demographicSurvey.setRace(ImmutableList.of(DbStorageEnums.raceToStorage(USER__RACE)));
     demographicSurvey.setSexAtBirth(
         ImmutableList.of(DbStorageEnums.sexAtBirthToStorage(USER__SEX_AT_BIRTH)));
-    demographicSurvey.setYear_of_birth(USER__YEAR_OF_BIRTH.intValue());
+    demographicSurvey.setYearOfBirth(USER__YEAR_OF_BIRTH.intValue());
     demographicSurvey.setIdentifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
     demographicSurvey.setLgbtqIdentity(USER__LGBTQ_IDENTITY);
     return demographicSurvey;

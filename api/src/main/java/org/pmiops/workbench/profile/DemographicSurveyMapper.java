@@ -18,7 +18,6 @@ public interface DemographicSurveyMapper {
   @Mapping(target = "genderIdentityList", source = "genderIdentityEnumList")
   @Mapping(target = "race", source = "raceEnum")
   @Mapping(target = "sexAtBirth", source = "sexAtBirthEnum")
-  @Mapping(target = "yearOfBirth", source = "year_of_birth")
   DemographicSurvey dbDemographicSurveyToDemographicSurvey(DbDemographicSurvey dbDemographicSurvey);
 
   @Mapping(target = "disabilityEnum", source = "disability")
@@ -29,6 +28,5 @@ public interface DemographicSurveyMapper {
   @Mapping(target = "raceEnum", source = "race")
   @Mapping(target = "sexAtBirthEnum", source = "sexAtBirth")
   @Mapping(target = "user", ignore = true) // set by UserService.createUser
-  @Mapping(target = "year_of_birth", source = "yearOfBirth")
   DbDemographicSurvey demographicSurveyToDbDemographicSurvey(DemographicSurvey demographicSurvey);
 }

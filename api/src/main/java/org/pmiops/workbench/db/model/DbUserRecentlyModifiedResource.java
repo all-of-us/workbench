@@ -49,8 +49,9 @@ public class DbUserRecentlyModifiedResource {
     return id;
   }
 
-  public void setId(int id) {
+  public DbUserRecentlyModifiedResource setId(int id) {
     this.id = id;
+    return this;
   }
 
   @Column(name = "user_id")
@@ -58,8 +59,9 @@ public class DbUserRecentlyModifiedResource {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public DbUserRecentlyModifiedResource setUserId(Long userId) {
     this.userId = userId;
+    return this;
   }
 
   @Column(name = "workspace_id")
@@ -67,8 +69,9 @@ public class DbUserRecentlyModifiedResource {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbUserRecentlyModifiedResource setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   @Enumerated(EnumType.STRING)
@@ -77,8 +80,9 @@ public class DbUserRecentlyModifiedResource {
     return resourceTypeEnum;
   }
 
-  public void setResourceType(DbUserRecentlyModifiedResourceType s) {
+  public DbUserRecentlyModifiedResource setResourceType(DbUserRecentlyModifiedResourceType s) {
     this.resourceTypeEnum = s;
+    return this;
   }
 
   @Column(name = "resource_id")
@@ -86,8 +90,9 @@ public class DbUserRecentlyModifiedResource {
     return resourceId;
   }
 
-  public void setResourceId(String resourceId) {
+  public DbUserRecentlyModifiedResource setResourceId(String resourceId) {
     this.resourceId = resourceId;
+    return this;
   }
 
   @Column(name = "last_access_date")
@@ -95,7 +100,8 @@ public class DbUserRecentlyModifiedResource {
     return lastAccessDate;
   }
 
-  public void setLastAccessDate(Timestamp lastAccessDate) {
+  public DbUserRecentlyModifiedResource setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
+    return this;
   }
 }

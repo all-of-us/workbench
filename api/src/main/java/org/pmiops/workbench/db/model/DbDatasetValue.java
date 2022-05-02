@@ -31,8 +31,9 @@ public class DbDatasetValue {
     return domainId;
   }
 
-  public void setDomainId(String domainId) {
+  public DbDatasetValue setDomainId(String domainId) {
     this.domainId = domainId;
+    return this;
   }
 
   @Transient
@@ -45,8 +46,9 @@ public class DbDatasetValue {
     return value;
   }
 
-  public void setValue(String value) {
+  public DbDatasetValue setValue(String value) {
     this.value = value;
+    return this;
   }
 
   public boolean equals(DbDatasetValue dataSetValue) {

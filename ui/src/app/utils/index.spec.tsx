@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 
 import * as Utils from 'app/utils';
+import { usernameWithoutDomain } from 'app/utils';
 
 describe('Helper functions', () => {
   it('(cond) Should handle conditionals and defaults correctly', async () => {
@@ -27,5 +28,12 @@ describe('Helper functions', () => {
 
     const r3 = fp.flow(Utils.maybe(setFirstName), Utils.maybe(setLastName))({});
     expect(r3).toEqual({ firstName: 'first', lastName: 'last' });
+  });
+
+  it('(usernameWithoutDomain) Should normalize usernames appropriately', () => {
+    expect(usernameWithoutDomain('user@google.com')).toEqual('user');
+    expect(usernameWithoutDomain('user')).toEqual('user');
+    expect(usernameWithoutDomain(undefined)).toEqual('');
+    expect(usernameWithoutDomain(null)).toEqual('');
   });
 });

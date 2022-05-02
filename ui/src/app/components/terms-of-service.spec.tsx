@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 
-import {
-  AccountCreationTos,
-  AccountCreationTosProps,
-} from 'app/pages/login/account-creation/account-creation-tos';
+import { TermsOfService, TosProps } from 'app/components/terms-of-service';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 const getAgreementCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
@@ -14,7 +11,7 @@ const getNextButton = (wrapper: AnyWrapper): AnyWrapper => {
   return wrapper.find('[data-test-id="next-button"]');
 };
 
-let props: AccountCreationTosProps;
+let props: TosProps;
 const onCompleteSpy = jest.fn();
 
 beforeEach(() => {
@@ -23,16 +20,17 @@ beforeEach(() => {
     onComplete: onCompleteSpy,
     filePath: '/assets/documents/fake-document-path.html',
     afterPrev: false,
+    showReAcceptNotification: false,
   };
 });
 
 it('should render', async () => {
-  const wrapper = mount(<AccountCreationTos {...props} />);
+  const wrapper = mount(<TermsOfService {...props} />);
   expect(wrapper.exists()).toBeTruthy();
 });
 
 it('should enable checkbox and next button with user input', async () => {
-  const wrapper = mount(<AccountCreationTos {...props} />);
+  const wrapper = mount(<TermsOfService {...props} />);
 
   expect(getAgreementCheckbox(wrapper).prop('disabled')).toBeTruthy();
   expect(getNextButton(wrapper).prop('disabled')).toBeTruthy();
@@ -56,7 +54,7 @@ it('should enable checkbox and next button with user input', async () => {
 });
 
 it('should call onComplete when next button is pressed', async () => {
-  const wrapper = mount(<AccountCreationTos {...props} />);
+  const wrapper = mount(<TermsOfService {...props} />);
 
   wrapper.setState({ hasReadEntireAgreement: true });
   getAgreementCheckbox(wrapper).simulate('change', {
@@ -69,7 +67,7 @@ it('should call onComplete when next button is pressed', async () => {
 });
 
 it('should disable next button when next button is pressed', async () => {
-  const wrapper = mount(<AccountCreationTos {...props} />);
+  const wrapper = mount(<TermsOfService {...props} />);
 
   wrapper.setState({ hasReadEntireAgreement: true });
   getAgreementCheckbox(wrapper).simulate('change', {
@@ -87,7 +85,7 @@ it('should disable next button when next button is pressed', async () => {
 
 it('should enable NEXT button and checkbox should be selected if page is re-visited after Institution Page', async () => {
   props.afterPrev = true;
-  const wrapper = mount(<AccountCreationTos {...props} />);
+  const wrapper = mount(<TermsOfService {...props} />);
 
   expect(getAgreementCheckbox(wrapper).prop('checked')).toBeTruthy();
   expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();

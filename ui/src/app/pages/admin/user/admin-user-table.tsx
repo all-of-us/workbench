@@ -5,20 +5,32 @@ import { DataTable } from 'primereact/datatable';
 
 import { AdminTableUser, Profile } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { AdminUserLink } from 'app/components/admin/admin-user-link';
+import { StyledRouterLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
+import { Ban, Check } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { Spinner, SpinnerOverlay } from 'app/components/spinners';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { AdminUserBypass } from 'app/pages/admin/admin-user-bypass';
+import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
 import {
   authDomainApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
+import {
+  cond,
+  reactStyles,
+  usernameWithoutDomain,
+  withUserProfile,
+} from 'app/utils';
+import {
+  AuthorityGuardedAction,
+  hasAuthorityForAction,
+} from 'app/utils/authorities';
+import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
-
-import { UserAuditLink } from './admin-user-common';
 
 const styles = reactStyles({
   colStyle: {
@@ -34,31 +46,23 @@ const styles = reactStyles({
     fontSize: 12,
     minWidth: 1200,
   },
+  enabledIconStyle: {
+    fontSize: 16,
+    display: 'flex',
+    margin: 'auto',
+  },
 });
 
-const LockoutButton: React.FunctionComponent<{
-  disabled: boolean;
-  profileDisabled: boolean;
-  onClick: Function;
-}> = ({ disabled, profileDisabled, onClick }) => {
-  // We reduce the button height so it fits better within a table row.
-  return (
-    <Button
-      type='secondaryLight'
-      style={{ height: '40px' }}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {disabled ? (
-        <Spinner size={25} />
-      ) : profileDisabled ? (
-        'Enable'
-      ) : (
-        'Disable'
-      )}
-    </Button>
-  );
-};
+const EnabledIcon = () => (
+  <span>
+    <Check style={styles.enabledIconStyle} />
+  </span>
+);
+const DisabledIcon = () => (
+  <span>
+    <Ban style={styles.enabledIconStyle} />
+  </span>
+);
 
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
@@ -79,7 +83,7 @@ interface State {
  * Users with the ACCESS_MODULE_ADMIN permission use this
  * to manually set (approve/reject) access module bypasses.
  */
-export const AdminUsers = withUserProfile()(
+export const AdminUserTable = withUserProfile()(
   class extends React.Component<Props, State> {
     debounceUpdateFilter: Function;
     constructor(props) {
@@ -117,32 +121,6 @@ export const AdminUsers = withUserProfile()(
       this.setState({ loading: false });
     }
 
-    sortProfileList(profileList: Array<Profile>): Array<Profile> {
-      return profileList.sort((a, b) => {
-        // put disabled accounts at the bottom
-        if (a.disabled && b.disabled) {
-          return this.nameCompare(a, b);
-        }
-        if (a.disabled) {
-          return 1;
-        }
-        return 1;
-      });
-    }
-
-    private nameCompare(a: Profile, b: Profile): number {
-      if (a.familyName === null) {
-        return 1;
-      }
-      if (a.familyName.localeCompare(b.familyName) === 0) {
-        if (a.givenName === null) {
-          return 1;
-        }
-        return a.givenName.localeCompare(b.givenName);
-      }
-      return a.familyName.localeCompare(b.familyName);
-    }
-
     /**
      * Returns the appropriate cell contents (icon plus tooltip) for an access module cell
      * in the table.
@@ -173,6 +151,48 @@ export const AdminUsers = withUserProfile()(
       }
     }
 
+    dataAccessContents(user: AdminTableUser): JSX.Element {
+      return (
+        <FlexRow style={{ justifyContent: 'space-evenly' }}>
+          {cond(
+            [user.disabled, () => <div>N/A</div>],
+            [
+              user.accessTierShortNames.length > 0,
+              () => (
+                <>
+                  {user.accessTierShortNames.map((accessTierShortName) => (
+                    <TierBadge {...{ accessTierShortName }} />
+                  ))}
+                </>
+              ),
+            ],
+            () => (
+              <div>No Access</div>
+            )
+          )}
+        </FlexRow>
+      );
+    }
+
+    displayInstitutionName(tableRow: AdminTableUser) {
+      const shouldShowLink =
+        tableRow.institutionShortName &&
+        hasAuthorityForAction(
+          this.props.profileState.profile,
+          AuthorityGuardedAction.INSTITUTION_ADMIN
+        );
+      return shouldShowLink ? (
+        <StyledRouterLink
+          path={getAdminUrl(tableRow.institutionShortName)}
+          target='_blank'
+        >
+          {tableRow.institutionName}
+        </StyledRouterLink>
+      ) : (
+        tableRow.institutionName
+      );
+    }
+
     /**
      * Returns a formatted timestamp, or an empty string if the timestamp is zero or null.
      */
@@ -186,13 +206,6 @@ export const AdminUsers = withUserProfile()(
 
     convertProfilesToFields(users: AdminTableUser[]) {
       return users.map((user) => ({
-        audit: (
-          <UserAuditLink
-            usernameWithoutDomain={usernameWithoutDomain(user.username)}
-          >
-            link
-          </UserAuditLink>
-        ),
         bypass: (
           <AdminUserBypass
             user={{ ...user }}
@@ -207,38 +220,34 @@ export const AdminUsers = withUserProfile()(
           user,
           'ctComplianceTraining'
         ),
-        contactEmail: user.contactEmail,
+        contactEmail: (
+          <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
+        ),
+        dataAccess: this.dataAccessContents(user),
         dataUseAgreement: this.accessModuleCellContents(
           user,
           'dataUseAgreement'
         ),
+        enabled: user.disabled ? <DisabledIcon /> : <EnabledIcon />,
         eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
         rasLinkLoginGov: this.accessModuleCellContents(user, 'rasLinkLoginGov'),
         firstSignInTime: this.formattedTimestampOrEmptyString(
           user.firstSignInTime
         ),
         firstSignInTimestamp: user.firstSignInTime,
-        institutionName: user.institutionName,
+        institutionName: this.displayInstitutionName(user),
         name: (
-          <a
-            href={`/admin/users/${usernameWithoutDomain(user.username)}`}
-            target='_blank'
-          >
+          <AdminUserLink username={user.username} target='_blank'>
             {user.familyName + ', ' + user.givenName}
-          </a>
+          </AdminUserLink>
         ),
+        // used for filter and sorting
         nameText: user.familyName + ' ' + user.givenName,
-        status: user.disabled ? 'Disabled' : 'Active',
         twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
-        username: user.username,
-        userLockout: (
-          <LockoutButton
-            disabled={false}
-            profileDisabled={user.disabled}
-            onClick={() =>
-              this.updateUserDisabledStatus(!user.disabled, user.username)
-            }
-          />
+        username: (
+          <AdminUserLink username={user.username} target='_blank'>
+            {usernameWithoutDomain(user.username)}
+          </AdminUserLink>
         ),
       }));
     }
@@ -294,13 +303,6 @@ export const AdminUsers = withUserProfile()(
                   sortField={'nameText'}
                 />
                 <Column
-                  field='status'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Status'
-                  headerStyle={{ ...styles.colStyle, width: '80px' }}
-                />
-                <Column
                   field='institutionName'
                   bodyStyle={{ ...styles.colStyle }}
                   header='Institution'
@@ -322,10 +324,10 @@ export const AdminUsers = withUserProfile()(
                   sortable={true}
                 />
                 <Column
-                  field='userLockout'
+                  field='enabled'
                   bodyStyle={{ ...styles.colStyle }}
                   excludeGlobalFilter={true}
-                  header='User Lockout'
+                  header='Enabled'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
                 />
                 <Column
@@ -336,6 +338,14 @@ export const AdminUsers = withUserProfile()(
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
                   sortField={'firstSignInTimestamp'}
+                />
+                <Column
+                  field='dataAccess'
+                  bodyStyle={{ ...styles.colStyle }}
+                  excludeGlobalFilter={true}
+                  header='Data Access'
+                  headerStyle={{ ...styles.colStyle, width: '100px' }}
+                  sortable={false}
                 />
                 <Column
                   field='twoFactorAuth'
@@ -393,13 +403,6 @@ export const AdminUsers = withUserProfile()(
                   excludeGlobalFilter={true}
                   header='Bypass'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  field='audit'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Audit'
-                  headerStyle={{ width: '60px' }}
                 />
               </DataTable>
             </div>

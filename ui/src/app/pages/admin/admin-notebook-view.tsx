@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { useQuery } from 'app/components/app-router';
+import { StyledRouterLink } from 'app/components/buttons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
@@ -59,9 +60,9 @@ const AdminNotebookViewComponent = (props: Props) => {
       ? `Workspace ${workspaceName}`
       : 'Workspace';
     const link = (
-      <a href={`/admin/workspaces/${workspaceNamespace}`}>
+      <StyledRouterLink path={`/admin/workspaces/${workspaceNamespace}`}>
         {workspace} with namespace {workspaceNamespace}
-      </a>
+      </StyledRouterLink>
     );
     return (
       <div style={styles.heading}>

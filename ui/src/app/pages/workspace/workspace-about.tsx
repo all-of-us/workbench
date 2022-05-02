@@ -5,7 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
 
-import { Button, StyledExternalLink } from 'app/components/buttons';
+import {
+  Button,
+  StyledExternalLink,
+  StyledRouterLink,
+} from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -292,10 +296,10 @@ export const WorkspaceAbout = fp.flow(
                     <b>
                       This workspace has been locked due to a compliance
                       violation of the
-                      <a href={'/data-code-of-conduct'}>
+                      <StyledRouterLink path='/data-code-of-conduct'>
                         {' '}
                         <AoU /> Researcher Workbench Data User Code of Conduct.
-                      </a>
+                      </StyledRouterLink>
                     </b>
                     <p></p>
                     {/* This is a temp solution in case admin have locked some workspaces already before workbench introduced the ability to save locking reason */}

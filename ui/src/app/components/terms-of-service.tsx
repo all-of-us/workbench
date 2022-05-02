@@ -37,7 +37,7 @@ const styles = reactStyles({
   },
 });
 
-export interface AccountCreationTosProps {
+export interface TosProps {
   showReAcceptNotification: boolean;
   // Callback which will be called by this component when the user clicks "Next".
   onComplete: (tosVersion) => void;
@@ -48,18 +48,14 @@ export interface AccountCreationTosProps {
   style?: React.CSSProperties;
 }
 
-interface AccountCreationTosState {
+interface TosState {
   hasReadEntireAgreement: boolean;
   hasAckedAgreement: boolean;
   hasClickedNext: boolean;
 }
 
-// TODO: Rename this to TermsOfService
-export class AccountCreationTos extends React.Component<
-  AccountCreationTosProps,
-  AccountCreationTosState
-> {
-  constructor(props: AccountCreationTosProps) {
+export class TermsOfService extends React.Component<TosProps, TosState> {
+  constructor(props: TosProps) {
     super(props);
     this.state = {
       hasReadEntireAgreement: props.afterPrev,
@@ -74,7 +70,7 @@ export class AccountCreationTos extends React.Component<
 
     return (
       <FlexColumn
-        data-test-id='account-creation-tos'
+        data-test-id='terms-of-service'
         style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
       >
         {this.props.showReAcceptNotification && (

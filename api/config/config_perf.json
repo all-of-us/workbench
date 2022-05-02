@@ -9,7 +9,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.13",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.14",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
@@ -17,7 +17,7 @@
       "gce": [],
       "dataproc": []
     },
-    "gceVmZone": "us-central1-f"
+    "gceVmZone": "us-central1-c"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",

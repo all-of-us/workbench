@@ -17,13 +17,14 @@ import {
 } from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
-import { Button } from 'app/components/buttons';
+import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
@@ -34,6 +35,7 @@ import {
 } from 'app/utils/authorities';
 import {
   checkInstitutionalEmail,
+  getAdminUrl,
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import {
@@ -65,7 +67,6 @@ import {
   UserAdminTableLink,
   UserAuditLink,
 } from './admin-user-common';
-import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -243,9 +244,12 @@ const EditableFields = ({
             onChange={(event) => onChangeInstitution(event.value)}
           />
           {showGoToInstitutionLink && (
-            <a
+            <StyledRouterLink
               style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
-              href={`admin/institution/edit/${updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}`}
+              path={getAdminUrl(
+                updatedProfile.verifiedInstitutionalAffiliation
+                  ?.institutionShortName
+              )}
               target='_blank'
             >
               <TooltipTrigger
@@ -254,7 +258,7 @@ const EditableFields = ({
               >
                 <FontAwesomeIcon icon={faLink} />
               </TooltipTrigger>
-            </a>
+            </StyledRouterLink>
           )}
         </FlexRow>
         {emailValidationStatus === EmailValidationStatus.INVALID && (
