@@ -663,19 +663,14 @@ export const getStatusText = (status: AccessModuleStatus) => {
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };
 
-export const getExpiredModules = (
-  modules: AccessModule[],
-  profile: Profile
-): AccessModule[] =>
-  fp.flow(
-    fp.filter((module: AccessModule) => isEligibleModule(module, profile)),
-    fp.map((module: AccessModule) =>
-      getAccessModuleStatusByName(profile, module)
-    ),
-    fp.filter((accessModuleStatus: AccessModuleStatus) =>
-      hasExpired(accessModuleStatus.expirationEpochMillis)
-    ),
-    fp.map(
-      (accessModuleStatus: AccessModuleStatus) => accessModuleStatus.moduleName
+export const hasRtExpired = (profile: Profile): boolean => {
+  return rtAccessRenewalModules
+    .filter(
+      (moduleName) => getAccessModuleConfig(moduleName).isEnabledInEnvironment
     )
-  )(modules);
+    .map((module: AccessModule) => getAccessModuleStatusByName(profile, module))
+    .some(
+      (status: AccessModuleStatus) =>
+        hasExpired(status.expirationEpochMillis) && !status?.bypassEpochMillis
+    );
+};
