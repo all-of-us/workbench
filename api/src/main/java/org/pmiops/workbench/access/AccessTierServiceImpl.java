@@ -47,29 +47,13 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * Return all access tiers in the database, in alphabetical order by shortName. To return only the
-   * tiers which are visible to users, use getAllTiersVisibleToUsers().
+   * Return all access tiers in the database, in alphabetical order by shortName.
    *
    * @return the List of all DbAccessTiers in the database
    */
   @Override
   public List<DbAccessTier> getAllTiers() {
     return accessTierDao.findAll().stream()
-        .sorted(Comparator.comparing(DbAccessTier::getShortName))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Return all access tiers in the database which are visible to users, in alphabetical order by
-   * shortName. To return all tiers, use getAllTiers().
-   *
-   * @return the List of all DbAccessTiers in the database which are visible to users
-   */
-  @Override
-  public List<DbAccessTier> getAllTiersVisibleToUsers() {
-    return accessTierDao.findAll().stream()
-        .filter(
-            tier -> configProvider.get().access.tiersVisibleToUsers.contains(tier.getShortName()))
         .sorted(Comparator.comparing(DbAccessTier::getShortName))
         .collect(Collectors.toList());
   }

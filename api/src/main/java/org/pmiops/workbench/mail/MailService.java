@@ -11,10 +11,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
-  @Deprecated
-  void sendWelcomeEmail_deprecated(
-      final String contactEmail, final String password, final String username)
-      throws MessagingException;
 
   void sendWelcomeEmail(
       final String contactEmail,
