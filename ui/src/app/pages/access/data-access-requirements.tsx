@@ -520,7 +520,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const {
       config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
-    // handle the different page modes of Data Access Requirements
     const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
 
     useEffect(() => {
