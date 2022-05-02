@@ -29,6 +29,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.collections4.map.LRUMap;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -215,21 +217,24 @@ public class CohortReviewControllerTest {
   @Autowired CohortReviewController cohortReviewController;
 
   private enum TestConcepts {
-    ASIAN("Asian", 8515),
-    WHITE("White", 8527),
-    MALE("MALE", 8507),
-    FEMALE("FEMALE", 8532),
-    NOT_HISPANIC("Not Hispanic or Latino", 38003564),
-    PREFER_NOT_TO_ANSWER_RACE("I Prefer not to answer", 1177221),
-    PREFER_NOT_TO_ANSWER_ETH("I Prefer not to answer", 1177221),
-    SEX_AT_BIRTH("MALE", 45880669);
+    RACE_ASIAN("Asian", 8515, CriteriaType.RACE),
+    RACE_WHITE("White", 8527, CriteriaType.RACE),
+    GENDER_MAN("Man", 45880669, CriteriaType.GENDER),
+    GENDER_WOMAN("Woman", 45878463, CriteriaType.GENDER),
+    ETHNICITY_NOT_HISPANIC("Not Hispanic or Latino", 38003564, CriteriaType.ETHNICITY),
+    RACE_PREFER_NOT_TO_ANSWER("I Prefer not to answer", 1177221, CriteriaType.RACE),
+    ETHNICITY_PREFER_NOT_TO_ANSWER("I Prefer not to answer", 1177221, CriteriaType.ETHNICITY),
+    SEX_AT_BIRTH_MALE("Male", 45880669, CriteriaType.SEX),
+    SEX_AT_BIRTH_FEMALE("Female", 45878463, CriteriaType.SEX);
 
     private final String name;
     private final long conceptId;
+    private final CriteriaType criteriaType;
 
-    TestConcepts(String name, long conceptId) {
+    TestConcepts(String name, long conceptId, CriteriaType criteriaType) {
       this.name = name;
       this.conceptId = conceptId;
+      this.criteriaType = criteriaType;
     }
 
     public String getName() {
@@ -240,13 +245,16 @@ public class CohortReviewControllerTest {
       return conceptId;
     }
 
-    public static Map<Long, String> asMap() {
-      return Arrays.stream(TestConcepts.values())
-          .collect(
-              Collectors.toMap(
-                  TestConcepts::getConceptId,
-                  TestConcepts::getName,
-                  (oldValue, newValue) -> oldValue));
+    public CriteriaType getType() {
+      return criteriaType;
+    }
+
+    public static MultiKeyMap asMap() {
+      MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+      for (TestConcepts testConcepts : TestConcepts.values()) {
+        demoMap.put(testConcepts.getConceptId(), testConcepts.getType(), testConcepts.getName());
+      }
+      return demoMap;
     }
   }
 
@@ -360,64 +368,72 @@ public class CohortReviewControllerTest {
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.ASIAN.conceptId))
-            .addName(TestConcepts.ASIAN.name)
+            .addConceptId(String.valueOf(TestConcepts.RACE_ASIAN.conceptId))
+            .addName(TestConcepts.RACE_ASIAN.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.GENDER.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.FEMALE.conceptId))
-            .addName(TestConcepts.FEMALE.name)
+            .addConceptId(String.valueOf(TestConcepts.GENDER_WOMAN.conceptId))
+            .addName(TestConcepts.GENDER_WOMAN.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.GENDER.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.MALE.conceptId))
-            .addName(TestConcepts.MALE.name)
+            .addConceptId(String.valueOf(TestConcepts.GENDER_MAN.conceptId))
+            .addName(TestConcepts.GENDER_MAN.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.ETHNICITY.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.NOT_HISPANIC.conceptId))
-            .addName(TestConcepts.NOT_HISPANIC.name)
+            .addConceptId(String.valueOf(TestConcepts.ETHNICITY_NOT_HISPANIC.conceptId))
+            .addName(TestConcepts.ETHNICITY_NOT_HISPANIC.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.WHITE.conceptId))
-            .addName(TestConcepts.WHITE.name)
+            .addConceptId(String.valueOf(TestConcepts.RACE_WHITE.conceptId))
+            .addName(TestConcepts.RACE_WHITE.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.conceptId))
-            .addName(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.name)
+            .addConceptId(String.valueOf(TestConcepts.RACE_PREFER_NOT_TO_ANSWER.conceptId))
+            .addName(TestConcepts.RACE_PREFER_NOT_TO_ANSWER.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
-            .addName(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.name)
+            .addConceptId(String.valueOf(TestConcepts.ETHNICITY_PREFER_NOT_TO_ANSWER.conceptId))
+            .addName(TestConcepts.ETHNICITY_PREFER_NOT_TO_ANSWER.name)
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.SEX.toString())
             .addParentId(1L)
-            .addConceptId(String.valueOf(TestConcepts.SEX_AT_BIRTH.conceptId))
-            .addName(TestConcepts.SEX_AT_BIRTH.name)
+            .addConceptId(String.valueOf(TestConcepts.SEX_AT_BIRTH_MALE.conceptId))
+            .addName(TestConcepts.SEX_AT_BIRTH_MALE.name)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.PERSON.toString())
+            .addType(CriteriaType.SEX.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.SEX_AT_BIRTH_FEMALE.conceptId))
+            .addName(TestConcepts.SEX_AT_BIRTH_FEMALE.name)
             .build());
 
     cohort = new DbCohort();
@@ -475,10 +491,10 @@ public class CohortReviewControllerTest {
             new DbParticipantCohortStatus()
                 .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NOT_REVIEWED))
                 .participantKey(key1)
-                .genderConceptId(TestConcepts.MALE.getConceptId())
-                .raceConceptId(TestConcepts.ASIAN.getConceptId())
-                .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
-                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH.getConceptId())
+                .genderConceptId(TestConcepts.GENDER_MAN.getConceptId())
+                .raceConceptId(TestConcepts.RACE_ASIAN.getConceptId())
+                .ethnicityConceptId(TestConcepts.ETHNICITY_NOT_HISPANIC.getConceptId())
+                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH_MALE.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -487,10 +503,10 @@ public class CohortReviewControllerTest {
             new DbParticipantCohortStatus()
                 .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NEEDS_FURTHER_REVIEW))
                 .participantKey(key2)
-                .genderConceptId(TestConcepts.FEMALE.getConceptId())
-                .raceConceptId(TestConcepts.WHITE.getConceptId())
-                .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
-                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH.getConceptId())
+                .genderConceptId(TestConcepts.GENDER_WOMAN.getConceptId())
+                .raceConceptId(TestConcepts.RACE_WHITE.getConceptId())
+                .ethnicityConceptId(TestConcepts.ETHNICITY_NOT_HISPANIC.getConceptId())
+                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH_FEMALE.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -2267,6 +2283,7 @@ public class CohortReviewControllerTest {
           .getParticipantCohortStatuses()
           .sort(Comparator.comparing(ParticipantCohortStatus::getStatus));
     }
+
     assertThat(actual).isEqualTo(expected);
   }
 
@@ -2484,18 +2501,20 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
-    Map<Long, String> demographicsMap = TestConcepts.asMap();
+    MultiKeyMap demographicsMap = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
-        .ethnicity(demographicsMap.get(dbStatus.getEthnicityConceptId()))
+        .ethnicity(
+            (String) demographicsMap.get(dbStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY))
         .genderConceptId(dbStatus.getGenderConceptId())
-        .gender(demographicsMap.get(dbStatus.getGenderConceptId()))
+        .gender((String) demographicsMap.get(dbStatus.getGenderConceptId(), CriteriaType.GENDER))
         .participantId(dbStatus.getParticipantKey().getParticipantId())
         .raceConceptId(dbStatus.getRaceConceptId())
-        .race(demographicsMap.get(dbStatus.getRaceConceptId()))
+        .race((String) demographicsMap.get(dbStatus.getRaceConceptId(), CriteriaType.RACE))
         .sexAtBirthConceptId(dbStatus.getSexAtBirthConceptId())
-        .sexAtBirth(demographicsMap.get(dbStatus.getSexAtBirthConceptId()))
+        .sexAtBirth(
+            (String) demographicsMap.get(dbStatus.getSexAtBirthConceptId(), CriteriaType.SEX))
         .status(DbStorageEnums.cohortStatusFromStorage(dbStatus.getStatus()))
         .deceased(dbStatus.getDeceased());
   }

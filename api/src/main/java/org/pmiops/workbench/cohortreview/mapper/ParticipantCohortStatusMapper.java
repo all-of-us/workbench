@@ -34,20 +34,18 @@ public interface ParticipantCohortStatusMapper {
       @MappingTarget ParticipantCohortStatus participantCohortStatus,
       @Context MultiKeyMap demographicsMap) {
     participantCohortStatus.setGender(
-        demographicsMap
-            .get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER)
-            .toString());
+        (String)
+            demographicsMap.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
     participantCohortStatus.setRace(
-        demographicsMap
-            .get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE)
-            .toString());
+        (String)
+            demographicsMap.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
     participantCohortStatus.setEthnicity(
-        demographicsMap
-            .get(participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY)
-            .toString());
+        (String)
+            demographicsMap.get(
+                participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
     participantCohortStatus.setSexAtBirth(
-        demographicsMap
-            .get(participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX)
-            .toString());
+        (String)
+            demographicsMap.get(
+                participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
   }
 }
