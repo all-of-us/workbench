@@ -23,6 +23,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
+import org.apache.commons.collections4.map.LRUMap;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
@@ -46,6 +48,7 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
@@ -489,13 +492,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public Map<Long, String> findAllDemographicsMap() {
-    return cbCriteriaDao.findAllDemographics().stream()
-        .collect(
-            Collectors.toMap(
-                DbCriteria::getLongConceptId,
-                DbCriteria::getName,
-                (oldValue, newValue) -> oldValue));
+  public synchronized MultiKeyMap findAllDemographicsMap() {
+    MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+    for (DbCriteria dbCriteria : cbCriteriaDao.findAllDemographics()) {
+      demoMap.put(
+          dbCriteria.getLongConceptId(),
+          CriteriaType.valueOf(dbCriteria.getType()),
+          dbCriteria.getName());
+    }
+    return demoMap;
   }
 
   @Override

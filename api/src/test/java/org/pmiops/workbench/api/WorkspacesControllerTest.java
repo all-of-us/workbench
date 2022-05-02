@@ -41,6 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -279,6 +280,7 @@ public class WorkspacesControllerTest {
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
+  @MockBean CohortBuilderService cohortBuilderService;
   @MockBean AccessTierService accessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
@@ -379,6 +381,8 @@ public class WorkspacesControllerTest {
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap());
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
