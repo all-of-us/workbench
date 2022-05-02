@@ -15,7 +15,6 @@ import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, switchCase } from 'app/utils';
@@ -244,6 +243,15 @@ export const styles = reactStyles({
     lineHeight: '22px',
   },
 });
+
+export const RenewalRequirementsText = () => (
+  <span>
+    Researchers are required to complete a number of steps as part of the annual
+    renewal to maintain access to <AoU /> data. Renewal of access will occur on
+    a rolling basis annually (i.e. for each user, access renewal will be due 365
+    days after the date of authorization to access <AoU /> data).
+  </span>
+);
 
 // in display order
 export const initialRtModules = [
