@@ -17,7 +17,10 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
-import { wasReferredFromRenewal } from 'app/utils/access-utils';
+import {
+  ACCESS_RENEWAL_PATH,
+  wasReferredFromRenewal,
+} from 'app/utils/access-utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getLiveDUCCVersion } from 'app/utils/code-of-conduct';
 import { NavigationProps } from 'app/utils/navigation';
@@ -136,7 +139,7 @@ export const DataUserCodeOfConduct = fp.flow(
         title: 'Your agreement has been updated',
         message:
           'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal']),
+        onDismiss: () => this.props.navigate([ACCESS_RENEWAL_PATH]),
       }),
       withErrorModal({
         title: 'Your agreement failed to update',
