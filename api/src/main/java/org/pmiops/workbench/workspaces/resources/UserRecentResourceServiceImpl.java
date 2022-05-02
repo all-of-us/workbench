@@ -132,17 +132,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Deleting Cohort resource in workbench, deletes all the cohort reviews that is using the cohort
-   * as well mark the DataSet using the deleted cohort as INVALID. As part of deleteCohortEntry
-   * method : 1) Delete Cohort entry from user_recently_modified_resource, 2) Also all the cohort
-   * review/dataSet that references the deleted cohort
+   * When a Cohort recent-resource is deleted, we also delete those of all Cohort Reviews and
+   * Datasets which reference the Cohort
    */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
-    // The logic to delete Cohort Review/DataSet used by deleted conceptSet is to be done
-    // for the new table (user_recently_modified_resource) only, hence execute it only if the
-    // feature flag enableDSCREntryInRecentModified is set to TRUE
-
+    // The logic to delete dependent recent-resources only applies to the new table
+    // (user_recently_modified_resource), so it's gated on the feature flag
+    // enableDSCREntryInRecentModified
     if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       List<Long> cohortReviewIds =
           cohortReviewDao.findAllByCohortId(cohortId).stream()
@@ -150,7 +147,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
               .collect(Collectors.toList());
 
       if (cohortReviewIds.size() > 0) {
-        cohortReviewIds.stream().forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
+        cohortReviewIds.forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
       }
 
       List<Long> datasetIds =
@@ -159,7 +156,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
               .collect(Collectors.toList());
 
       if (datasetIds.size() > 0) {
-        datasetIds.stream().forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
+        datasetIds.forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
       }
     }
     deleteUserRecentlyModifiedResourceEntry(
@@ -170,17 +167,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Deleting ConceptSet from database will mark the dataSet, using the concept Set, as invalid
-   * which removes the dataset from the user resources list. For deleteConceptSetEntry: 1) Deleting
-   * the concept set entry from userRecentResource table 2) Delete all the dataSet using the concept
-   * Set from userRecentResource table as well so they do not appear in user recent resource list in
-   * UI
+   * When a Concept Set recent-resource is deleted, we also delete those of all Datasets which
+   * reference the Cohort
    */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
-    // The logic to delete dataSet used by deleted conceptSet is to be done for the new table
-    // (user_recently_modified_resource)
-    // execute it only if the feature flag enableDSCREntryInRecentModified is set to TRUE
+    // The logic to delete dependent recent-resources only applies to the new table
+    // (user_recently_modified_resource), so it's gated on the feature flag
+    // enableDSCREntryInRecentModified
     if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       List<Long> datasetIds =
           datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
@@ -188,7 +182,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
               .collect(Collectors.toList());
 
       if (datasetIds.size() > 0) {
-        datasetIds.stream().forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
+        datasetIds.forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
       }
     }
     deleteUserRecentlyModifiedResourceEntry(
