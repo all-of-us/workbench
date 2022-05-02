@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -169,6 +170,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
+  @Autowired private CohortBuilderService cohortBuilderService;
+
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private UserDao userDao;
@@ -198,6 +201,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser.setDisabled(false);
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
+
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap());
 
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
