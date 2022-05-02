@@ -25,9 +25,11 @@ import {
   bypassAll,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
+  getAccessModuleStatusByNameOrEmpty,
   GetStartedButton,
   isCompliant,
   isEligibleModule,
+  isRenewalCompleteForModule,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
@@ -375,18 +377,27 @@ export const getEligibleModules = (
 
 const incompleteModules = (
   modules: AccessModule[],
-  profile: Profile
+  profile: Profile,
+  pageMode: DARPageMode
 ): AccessModule[] =>
   modules.filter(
     (moduleName) =>
-      !isCompliant(getAccessModuleStatusByName(profile, moduleName))
+      !isCompliant(getAccessModuleStatusByName(profile, moduleName)) ||
+      (pageMode === DARPageMode.ANNUAL_RENEWAL &&
+        !isRenewalCompleteForModule(
+          getAccessModuleStatusByNameOrEmpty(
+            profile.accessModules.modules,
+            moduleName
+          )
+        ))
   );
 
 // exported for test
 export const getActiveModule = (
   modules: AccessModule[],
-  profile: Profile
-): AccessModule => incompleteModules(modules, profile)[0];
+  profile: Profile,
+  pageMode: DARPageMode
+): AccessModule => incompleteModules(modules, profile, pageMode)[0];
 
 // the header(s) outside the Fadebox
 
@@ -501,13 +512,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const {
       config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
+    // handle the different page modes of Data Access Requirements
+    const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
 
     useEffect(() => {
       const onMount = async () => {
         await syncModulesExternal(
           incompleteModules(
             getEligibleModules(allInitialModules, profile),
-            profile
+            profile,
+            pageMode
           )
         );
         await reload();
@@ -535,8 +549,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       }
     }, [code]);
 
-    // handle the different page modes of Data Access Requirements
-    const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
     const pageModeParam = query.get('pageMode');
     useEffect(() => {
       if (
@@ -556,7 +568,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const [clickableModules, setClickableModules] = useState([]);
 
     const getNextActive = (modules: AccessModule[]) =>
-      getActiveModule(getEligibleModules(modules, profile), profile);
+      getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
     const nextActive = getNextActive(allInitialModules);
     const nextRequired = getNextActive(initialRequiredModules);
 
@@ -600,10 +612,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const cards = [rtCard, ctCard, dCard];
 
+    const isComplete = profile && !nextRequired;
+
     return (
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
-        {profile && !nextRequired && <Completed />}
+        {isComplete && <Completed />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
