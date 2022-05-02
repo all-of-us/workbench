@@ -21,17 +21,18 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Method to be implemented by children classes.
    * Check whether current page has specified web elements.
    */
-  abstract isLoaded(): Promise<boolean>;
+  abstract isLoaded(opts?: { timeout?: number }): Promise<boolean>;
 
   /**
    * Wait until current page is loaded and without spinners spinning.
    */
-  async waitForLoad(): Promise<this> {
+  async waitForLoad(opts: { timeout?: number } = {}): Promise<this> {
+    const { timeout } = opts;
     const signedIn = await this.isSignedIn();
     if (!signedIn) {
       throw new Error(`Failed to find signed-in web-element. xpath="${process.env.AUTHENTICATED_TEST_ID_XPATH}"`);
     }
-    await this.isLoaded();
+    await this.isLoaded({ timeout });
     await this.closeHelpSidebarIfOpen();
     const pageTitle = await this.page.title();
     logger.info(`"${pageTitle}" page loaded.`);
