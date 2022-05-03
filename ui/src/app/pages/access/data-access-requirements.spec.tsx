@@ -28,7 +28,6 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   findNodesByExactText,
-  findNodesContainingText,
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -237,14 +236,6 @@ describe('DataAccessRequirements', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   };
 
-  const expectExpired = (wrapper: ReactWrapper) =>
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(
-      1
-    );
-  const expectNotExpired = (wrapper: ReactWrapper) =>
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(
-      0
-    );
   const expectComplete = (wrapper: ReactWrapper) =>
     expect(
       findNodesByExactText(
@@ -1647,7 +1638,6 @@ describe('DataAccessRequirements', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expectComplete(wrapper);
-    expectNotExpired(wrapper);
     expect(true).toEqual(true);
   });
 
@@ -1663,7 +1653,6 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
-    expectExpired(wrapper);
     expectIncomplete(wrapper);
     expect(true).toEqual(true);
   });
