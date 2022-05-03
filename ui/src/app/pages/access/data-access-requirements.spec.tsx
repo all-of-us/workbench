@@ -1691,9 +1691,32 @@ describe('DataAccessRequirements', () => {
 
     expectIncomplete(wrapper);
   });
-  // it('should show the correct state when profile and publication confirmations are complete', async () => {
-  //   expect(true).toEqual(true);
-  // });
+
+  it('should show the correct state when profile and publication confirmations are complete', async () => {
+    expireAllModules();
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
+
   // it('should show the correct state when all items except DUCC are complete', async () => {
   //   expect(true).toEqual(true);
   // });
