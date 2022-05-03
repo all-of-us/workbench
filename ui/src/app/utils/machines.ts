@@ -385,7 +385,7 @@ export const findMachineByName = (machineToFind: string) =>
 export const DEFAULT_MACHINE_NAME = 'n1-standard-4';
 export const DEFAULT_MACHINE_TYPE: Machine =
   findMachineByName(DEFAULT_MACHINE_NAME);
-export const DEFAULT_DISK_SIZE = 100;
+export const DEFAULT_DISK_SIZE = MIN_DISK_SIZE_GB;
 
 const approxHoursPerMonth = 730;
 export const diskPricePerMonth = 0.04; // per GB month

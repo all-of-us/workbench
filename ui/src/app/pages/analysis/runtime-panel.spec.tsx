@@ -356,9 +356,9 @@ describe('RuntimePanel', () => {
     // TODO(RW-7152): This test is incorrectly depending on "default" values in runtime-panel, and
     // not general analysis. Ensure this test passes for the right reasons when fixing.
     const computeDefaults = wrapper.find('#compute-resources').first();
-    // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 100GB disk
+    // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 120GB disk
     expect(computeDefaults.text()).toEqual(
-      '- Compute size of 4 CPUs, 15 GB memory, and a 100 GB disk'
+      '- Compute size of 4 CPUs, 15 GB memory, and a 120 GB disk'
     );
   });
 
@@ -457,7 +457,7 @@ describe('RuntimePanel', () => {
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
-        diskSize: 100,
+        diskSize: MIN_DISK_SIZE_GB,
       },
       dataprocConfig: null,
     });
@@ -479,7 +479,7 @@ describe('RuntimePanel', () => {
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
-        diskSize: 100,
+        diskSize: MIN_DISK_SIZE_GB,
       },
       dataprocConfig: null,
     });
@@ -735,7 +735,7 @@ describe('RuntimePanel', () => {
     // the Hail preset selection.
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    await pickMainDiskSize(wrapper, 100);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await pickWorkerCpu(wrapper, 8);
@@ -1122,7 +1122,7 @@ describe('RuntimePanel', () => {
 
     // After selecting Dataproc, the Dataproc defaults should make the running cost 72 cents an hour. The storage cost increases due to worker disk.
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    expect(runningCost().text()).toEqual('$0.72/hour');
+    expect(runningCost().text()).toEqual('$0.73/hour');
     expect(storageCost().text()).toEqual('$0.02/hour');
 
     // Bump up all the worker values to increase the price on everything.
@@ -1131,7 +1131,7 @@ describe('RuntimePanel', () => {
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
-    expect(runningCost().text()).toEqual('$2.87/hour');
+    expect(runningCost().text()).toEqual('$2.88/hour');
     expect(storageCost().text()).toEqual('$0.14/hour');
   });
 
