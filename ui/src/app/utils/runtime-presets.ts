@@ -5,6 +5,7 @@ import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 import {
   DATAPROC_WORKER_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+  DEFAULT_MACHINE_NAME,
   MIN_DISK_SIZE_GB,
 } from './machines';
 
@@ -21,7 +22,7 @@ export const runtimePresets: {
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
-        machineType: 'n1-standard-4',
+        machineType: DEFAULT_MACHINE_NAME,
         diskSize: MIN_DISK_SIZE_GB,
         gpuConfig: null,
       },
@@ -33,9 +34,9 @@ export const runtimePresets: {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
-        masterMachineType: 'n1-standard-4',
+        masterMachineType: DEFAULT_MACHINE_NAME,
         masterDiskSize: MIN_DISK_SIZE_GB,
-        workerMachineType: 'n1-standard-4',
+        workerMachineType: DEFAULT_MACHINE_NAME,
         workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,

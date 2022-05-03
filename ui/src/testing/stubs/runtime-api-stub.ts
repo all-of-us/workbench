@@ -19,6 +19,8 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 import { DiskApiStub, stubDisk } from './disk-api-stub';
 
 export const defaultGceConfig = (): GceConfig => ({
+  // Set the default disk size a bit over the minimum for ease of testing
+  // decreases in the disk size.
   diskSize: MIN_DISK_SIZE_GB + 30,
   machineType: 'n1-standard-4',
 });

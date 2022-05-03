@@ -356,7 +356,6 @@ describe('RuntimePanel', () => {
     // TODO(RW-7152): This test is incorrectly depending on "default" values in runtime-panel, and
     // not general analysis. Ensure this test passes for the right reasons when fixing.
     const computeDefaults = wrapper.find('#compute-resources').first();
-    // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 120GB disk
     expect(computeDefaults.text()).toEqual(
       '- Compute size of 4 CPUs, 15 GB memory, and a 120 GB disk'
     );
@@ -1108,19 +1107,17 @@ describe('RuntimePanel', () => {
     expect(runningCost().text()).toEqual('$0.20/hour');
     expect(storageCost().text()).toEqual('< $0.01/hour');
 
-    // Change the machine to n1-standard-8 and bump the storage to 300GB. This should make the running cost 40 cents an hour and the storage cost 2 cents an hour.
+    // Change the machine to n1-standard-8 and bump the storage to 300GB.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickMainDiskSize(wrapper, 300);
     expect(runningCost().text()).toEqual('$0.40/hour');
     expect(storageCost().text()).toEqual('$0.02/hour');
 
-    // Selecting the General Analysis preset should bring the machine back to n1-standard-4 with 100GB storage.
     await pickPreset(wrapper, { displayName: 'General Analysis' });
     expect(runningCost().text()).toEqual('$0.20/hour');
     expect(storageCost().text()).toEqual('< $0.01/hour');
 
-    // After selecting Dataproc, the Dataproc defaults should make the running cost 72 cents an hour. The storage cost increases due to worker disk.
     await pickComputeType(wrapper, ComputeType.Dataproc);
     expect(runningCost().text()).toEqual('$0.73/hour');
     expect(storageCost().text()).toEqual('$0.02/hour');
