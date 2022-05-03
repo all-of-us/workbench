@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DomainCard;
@@ -92,7 +93,7 @@ public interface CohortBuilderService {
    * Build a map that contains all gender/race/ethnicity/sex_at_birth names with the concept id as
    * the key.
    */
-  Table<Long, String, String> findAllDemographicsMap();
+  Table<Long, CriteriaType, String> findAllDemographicsMap();
 
   List<String> findSortedConceptIdsByDomainIdAndType(
       String domainId, String sortColumn, String sortName);

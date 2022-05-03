@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
@@ -493,10 +494,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public synchronized Table<Long, String, String> findAllDemographicsMap() {
-    Table<Long, String, String> demoTable = HashBasedTable.create();
+  public synchronized Table<Long, CriteriaType, String> findAllDemographicsMap() {
+    Table<Long, CriteriaType, String> demoTable = HashBasedTable.create();
     for (DbCriteria dbCriteria : cbCriteriaDao.findAllDemographics()) {
-      demoTable.put(dbCriteria.getLongConceptId(), dbCriteria.getType(), dbCriteria.getName());
+      demoTable.put(
+          dbCriteria.getLongConceptId(),
+          CriteriaType.valueOf(dbCriteria.getType()),
+          dbCriteria.getName());
     }
     return demoTable;
   }

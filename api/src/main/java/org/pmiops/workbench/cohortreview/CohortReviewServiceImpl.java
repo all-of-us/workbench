@@ -77,6 +77,7 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
@@ -290,7 +291,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
-    Table<Long, String, String> demoMap = cohortBuilderService.findAllDemographicsMap();
+    Table<Long, CriteriaType, String> demoMap = cohortBuilderService.findAllDemographicsMap();
     return participantCohortStatusDao.findAll(cohortReviewId, pageRequest).stream()
         .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, demoMap))
         .collect(Collectors.toList());
