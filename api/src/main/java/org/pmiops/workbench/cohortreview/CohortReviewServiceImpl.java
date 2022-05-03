@@ -290,7 +290,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
-    MultiKeyMap demoMap = cohortBuilderService.findAllDemographicsMap();
+    MultiKeyMap<Object, String> demoMap = cohortBuilderService.findAllDemographicsMap();
     List<ParticipantCohortStatus> returnList =
         participantCohortStatusDao.findAll(cohortReviewId, pageRequest).stream()
             .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, demoMap))

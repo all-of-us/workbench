@@ -492,8 +492,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public synchronized MultiKeyMap findAllDemographicsMap() {
-    MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+  public synchronized MultiKeyMap<Object, String> findAllDemographicsMap() {
+    MultiKeyMap<Object, String> demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
     for (DbCriteria dbCriteria : cbCriteriaDao.findAllDemographics()) {
       demoMap.put(
           dbCriteria.getLongConceptId(),

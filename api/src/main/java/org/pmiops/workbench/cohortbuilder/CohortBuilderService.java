@@ -92,7 +92,7 @@ public interface CohortBuilderService {
    * Build a map that contains all gender/race/ethnicity/sex_at_birth names with the concept id as
    * the key.
    */
-  MultiKeyMap findAllDemographicsMap();
+  MultiKeyMap<Object, String> findAllDemographicsMap();
 
   List<String> findSortedConceptIdsByDomainIdAndType(
       String domainId, String sortColumn, String sortName);

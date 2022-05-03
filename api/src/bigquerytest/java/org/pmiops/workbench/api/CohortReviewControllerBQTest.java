@@ -202,7 +202,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
 
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap());
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap<>());
 
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(

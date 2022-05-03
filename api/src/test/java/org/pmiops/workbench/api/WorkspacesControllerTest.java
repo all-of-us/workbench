@@ -382,7 +382,7 @@ public class WorkspacesControllerTest {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap());
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap<>());
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
