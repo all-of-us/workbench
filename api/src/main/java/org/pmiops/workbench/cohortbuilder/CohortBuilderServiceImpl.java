@@ -8,8 +8,10 @@ import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,8 +25,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
@@ -48,7 +48,6 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
-import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
@@ -185,14 +184,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -492,15 +493,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public synchronized MultiKeyMap findAllDemographicsMap() {
-    MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+  public synchronized Table<Long, String, String> findAllDemographicsMap() {
+    Table<Long, String, String> demoTable = HashBasedTable.create();
     for (DbCriteria dbCriteria : cbCriteriaDao.findAllDemographics()) {
-      demoMap.put(
-          dbCriteria.getLongConceptId(),
-          CriteriaType.valueOf(dbCriteria.getType()),
-          dbCriteria.getName());
+      demoTable.put(dbCriteria.getLongConceptId(), dbCriteria.getType(), dbCriteria.getName());
     }
-    return demoMap;
+    return demoTable;
   }
 
   @Override

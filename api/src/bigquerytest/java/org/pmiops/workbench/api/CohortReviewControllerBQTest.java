@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -15,7 +16,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -202,7 +202,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
 
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap());
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
