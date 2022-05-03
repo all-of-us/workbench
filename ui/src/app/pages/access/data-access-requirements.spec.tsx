@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AccessModule,
+  AccessModuleStatus,
   InstitutionApi,
   Profile,
   ProfileApi,
@@ -16,11 +18,17 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
+import {
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  rtAccessRenewalModules,
+} from 'app/utils/access-utils';
+import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  findNodesByExactText,
+  findNodesContainingText,
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -43,6 +51,11 @@ const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
 const reload = jest.fn();
 const updateCache = jest.fn();
+
+const EXPIRY_DAYS = 365;
+const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
+const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
+const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('DataAccessRequirements', () => {
   const component = (pageMode?: string) => {
@@ -126,6 +139,102 @@ describe('DataAccessRequirements', () => {
       ]
     );
 
+  const expireAllModules = () => {
+    const expiredTime = oneHourAgo();
+    const { profile } = profileStore.get();
+
+    const newProfile = fp.set(
+      'accessModules',
+      {
+        modules: rtAccessRenewalModules.map(
+          (m) =>
+            ({
+              moduleName: m,
+              completionEpochMillis: expiredTime - 1,
+              expirationEpochMillis: expiredTime,
+            } as AccessModuleStatus)
+        ),
+      },
+      profile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const removeOneModule = (toBeRemoved: AccessModule) => {
+    const oldProfile = profileStore.get().profile;
+    const newModules = oldProfile.accessModules.modules.filter(
+      (m) => m.moduleName !== toBeRemoved
+    );
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const setCompletionTimes = (completionFn) => {
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(
+      (moduleStatus) => ({
+        ...moduleStatus,
+        completionEpochMillis: completionFn(),
+      }),
+      oldProfile.accessModules.modules
+    );
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const setBypassTimes = (bypassFn) => {
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(
+      (moduleStatus) => ({
+        ...moduleStatus,
+        bypassEpochMillis:
+          // profile and publication are not bypassable.
+          moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION ||
+          moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+            ? null
+            : bypassFn(),
+      }),
+      oldProfile.accessModules.modules
+    );
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const expectExpired = (wrapper: ReactWrapper) =>
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(
+      1
+    );
+  const expectNotExpired = (wrapper: ReactWrapper) =>
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(
+      0
+    );
+  const expectComplete = (wrapper: ReactWrapper) =>
+    expect(
+      findNodesByExactText(
+        wrapper,
+        'Thank you for completing all the necessary steps'
+      ).length
+    ).toBe(1);
+  const expectIncomplete = (wrapper: ReactWrapper) =>
+    expect(
+      findNodesByExactText(
+        wrapper,
+        'Thank you for completing all the necessary steps'
+      ).length
+    ).toBe(0);
+
   beforeEach(async () => {
     registerApiClient(InstitutionApi, new InstitutionApiStub());
     registerApiClient(ProfileApi, new ProfileApiStub());
@@ -198,7 +307,11 @@ describe('DataAccessRequirements', () => {
 
   it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
     const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, profile);
+    const activeModule = getActiveModule(
+      enabledModules,
+      profile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[0]);
     expect(activeModule).toEqual(enabledModules[0]);
@@ -218,7 +331,11 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
@@ -238,7 +355,11 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
@@ -275,7 +396,11 @@ describe('DataAccessRequirements', () => {
         initialRequiredModules,
         profile
       );
-      const activeModule = getActiveModule(enabledModules, testProfile);
+      const activeModule = getActiveModule(
+        enabledModules,
+        testProfile,
+        DARPageMode.INITIAL_REGISTRATION
+      );
 
       // update this if the order changes
       expect(activeModule).toEqual(AccessModule.ERACOMMONS);
@@ -304,7 +429,11 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[3]);
     expect(activeModule).toEqual(enabledModules[3]);
@@ -325,7 +454,11 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toBeUndefined();
   });
@@ -352,7 +485,11 @@ describe('DataAccessRequirements', () => {
 
     const enabledModules = getEligibleModules(initialRequiredModules, profile);
 
-    let activeModule = getActiveModule(enabledModules, testProfile);
+    let activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
     expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
 
     // simulate handleRasCallback() by updating the profile
@@ -370,7 +507,11 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    activeModule = getActiveModule(enabledModules, updatedProfile);
+    activeModule = getActiveModule(
+      enabledModules,
+      updatedProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
     expect(activeModule).toBeUndefined();
   });
 
@@ -1452,4 +1593,42 @@ describe('DataAccessRequirements', () => {
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
   });
+
+  // ACCESS_RENEWAL specific tests
+  // it('should show the correct state when all items are complete', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when all modules are expired', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when all modules are incomplete', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when profile confirmation is complete', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when profile and publication confirmations are complete', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when all items except DUCC are complete', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should ignore modules which are not expirable', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when items are bypassed', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when all items are complete or bypassed', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should show the correct state when modules are disabled', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('should allow completion of profile and publication confirmations when incomplete', async () => {
+  //   expect(true).toEqual(true);
+  // });
+  // it('Multiple test cases', async () => {
+  //   expect(true).toEqual(true);
+  // });
 });
