@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortreview.mapper;
 
-import org.apache.commons.collections4.map.MultiKeyMap;
+import com.google.common.collect.Table;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -27,25 +27,20 @@ public interface ParticipantCohortStatusMapper {
   @Mapping(target = "sexAtBirth", ignore = true)
   @Mapping(target = "birthDate", source = "birthDate", qualifiedByName = "dateToString")
   ParticipantCohortStatus dbModelToClient(
-      DbParticipantCohortStatus dbParticipantCohortStatus, @Context MultiKeyMap demographicsMap);
+      DbParticipantCohortStatus dbParticipantCohortStatus,
+      @Context Table<Long, CriteriaType, String> demoTable);
 
   @AfterMapping
   default void populateAfterMapping(
       @MappingTarget ParticipantCohortStatus participantCohortStatus,
-      @Context MultiKeyMap demographicsMap) {
+      @Context Table<Long, CriteriaType, String> demoTable) {
     participantCohortStatus.setGender(
-        (String)
-            demographicsMap.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
+        demoTable.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
     participantCohortStatus.setRace(
-        (String)
-            demographicsMap.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
+        demoTable.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
     participantCohortStatus.setEthnicity(
-        (String)
-            demographicsMap.get(
-                participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
+        demoTable.get(participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
     participantCohortStatus.setSexAtBirth(
-        (String)
-            demographicsMap.get(
-                participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
+        demoTable.get(participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
   }
 }
