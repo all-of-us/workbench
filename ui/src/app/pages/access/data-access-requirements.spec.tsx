@@ -1656,6 +1656,7 @@ describe('DataAccessRequirements', () => {
     expectIncomplete(wrapper);
     expect(true).toEqual(true);
   });
+
   it('should show the correct state when all modules are incomplete', async () => {
     const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
 
@@ -1668,9 +1669,28 @@ describe('DataAccessRequirements', () => {
 
     expectIncomplete(wrapper);
   });
-  // it('should show the correct state when profile confirmation is complete', async () => {
-  //   expect(true).toEqual(true);
-  // });
+
+  it('should show the correct state when profile confirmation is complete', async () => {
+    expireAllModules();
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
   // it('should show the correct state when profile and publication confirmations are complete', async () => {
   //   expect(true).toEqual(true);
   // });
