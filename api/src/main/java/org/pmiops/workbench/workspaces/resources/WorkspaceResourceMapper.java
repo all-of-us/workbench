@@ -51,46 +51,46 @@ public interface WorkspaceResourceMapper {
 
   // a WorkspaceResource has one resource object.  Assign it and ignore all others (keep as NULL).
 
+  @Mapping(target = "cohort", source = "dbCohort")
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  @Mapping(target = "cohort", source = "dbCohort")
-  @Mapping(target = "lastModifiedEpochMillis", source = "dbCohort.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
   ResourceFields fromDbCohort(DbCohort dbCohort);
 
   @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "cohortReview")
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  @Mapping(target = "cohortReview", source = "cohortReview")
-  @Mapping(target = "lastModifiedEpochMillis", source = "cohortReview.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
   ResourceFields fromCohortReview(CohortReview cohortReview);
 
   // TODO combine fromConceptSet/fromDbConceptSet
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "conceptSet")
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  @Mapping(target = "conceptSet", source = "conceptSet")
-  @Mapping(target = "lastModifiedEpochMillis", source = "conceptSet.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
   ResourceFields fromConceptSet(ConceptSet conceptSet);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "conceptSet", source = "dbConceptSet")
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  @Mapping(target = "conceptSet", source = "dbConceptSet")
   @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
   ResourceFields fromDbConceptSet(DbConceptSet dbConceptSet);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
-  @Mapping(target = "lastModifiedEpochMillis", source = "dbDataset.lastModifiedTime")
+  @Mapping(target = "notebook", ignore = true)
+  @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
   ResourceFields fromDbDataset(DbDataset dbDataset);
 
   @Mapping(target = "cohort", ignore = true)
@@ -103,7 +103,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", source = "notebookName")
-  @Mapping(target = "lastModifiedEpochMillis", source = "dbUserRecentResource.lastAccessDate")
+  @Mapping(target = "lastModifiedEpochMillis", source = "lastAccessDate")
   ResourceFields fromDbUserRecentResource(DbUserRecentResource dbUserRecentResource);
 
   @Mapping(target = "permission", source = "accessLevel")
