@@ -281,6 +281,11 @@ export const allInitialModules: AccessModule[] = [
   duccModule,
 ];
 
+export const renewalRequiredModules: AccessModule[] = [
+  ...renewalRtModules,
+  duccModule,
+];
+
 export enum DARPageMode {
   INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
   ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
@@ -577,7 +582,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const getNextActive = (modules: AccessModule[]) =>
       getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
     const nextActive = getNextActive(allInitialModules);
-    const nextRequired = getNextActive(initialRequiredModules);
+    const nextRequired = getNextActive(
+      pageMode === DARPageMode.INITIAL_REGISTRATION
+        ? initialRequiredModules
+        : renewalRequiredModules
+    );
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
