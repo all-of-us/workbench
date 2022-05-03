@@ -96,7 +96,7 @@ interface ContentProps {
   onLastPage: () => void;
   onClick: () => void;
 }
-const DuccContent = (props: ContentProps) => (
+const DuccContentPage = (props: ContentProps) => (
   <>
     <HtmlViewer
       ariaLabel='data user code of conduct agreement'
@@ -136,7 +136,7 @@ interface SignatureProps {
   onBack: () => void;
   onAccept: () => void;
 }
-const DuccSignatureX = (props: SignatureProps) => (
+const DuccSignaturePage = (props: SignatureProps) => (
   <>
     <FlexColumn>
       {props.submitting && <SpinnerOverlay />}
@@ -357,7 +357,7 @@ export const DataUserCodeOfConduct = fp.flow(
       return (
         <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {page === DataUserCodeOfConductPage.CONTENT && (
-            <DuccContent
+            <DuccContentPage
               buttonDisabled={proceedDisabled}
               onLastPage={() => this.setState({ proceedDisabled: false })}
               onClick={() =>
@@ -366,7 +366,7 @@ export const DataUserCodeOfConduct = fp.flow(
             />
           )}
           {page === DataUserCodeOfConductPage.SIGNATURE && (
-            <DuccSignatureX
+            <DuccSignaturePage
               {...{ errors, submitting }}
               fullName={profile.givenName + ' ' + profile.familyName}
               username={profile.username}
