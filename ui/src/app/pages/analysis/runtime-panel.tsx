@@ -47,6 +47,7 @@ import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
+  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_MACHINE_NAME,
   DEFAULT_MACHINE_TYPE,
@@ -56,6 +57,7 @@ import {
   gpuTypeToDisplayName,
   Machine,
   machineRunningCost,
+  MIN_DISK_SIZE_GB,
   validLeoDataprocMasterMachineTypes,
   validLeoDataprocWorkerMachineTypes,
   validLeoGceMachineTypes,
@@ -244,10 +246,6 @@ const styles = reactStyles({
     fontWeight: 500,
   },
 });
-
-// exported for testing
-export const MIN_DISK_SIZE_GB = 100;
-export const DATAPROC_WORKER_MIN_DISK_SIZE_GB = 150;
 
 enum PanelContent {
   Create = 'Create',
