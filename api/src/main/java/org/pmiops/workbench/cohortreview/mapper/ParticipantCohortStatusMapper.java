@@ -28,20 +28,19 @@ public interface ParticipantCohortStatusMapper {
   @Mapping(target = "birthDate", source = "birthDate", qualifiedByName = "dateToString")
   ParticipantCohortStatus dbModelToClient(
       DbParticipantCohortStatus dbParticipantCohortStatus,
-      @Context Table<Long, CriteriaType, String> demographicsMap);
+      @Context Table<Long, CriteriaType, String> demoTable);
 
   @AfterMapping
   default void populateAfterMapping(
       @MappingTarget ParticipantCohortStatus participantCohortStatus,
-      @Context Table<Long, CriteriaType, String> demographicsMap) {
+      @Context Table<Long, CriteriaType, String> demoTable) {
     participantCohortStatus.setGender(
-        demographicsMap.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
+        demoTable.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
     participantCohortStatus.setRace(
-        demographicsMap.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
+        demoTable.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
     participantCohortStatus.setEthnicity(
-        demographicsMap.get(
-            participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
+        demoTable.get(participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
     participantCohortStatus.setSexAtBirth(
-        demographicsMap.get(participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
+        demoTable.get(participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
   }
 }

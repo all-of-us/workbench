@@ -291,9 +291,9 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
-    Table<Long, CriteriaType, String> demoMap = cohortBuilderService.findAllDemographicsMap();
+    Table<Long, CriteriaType, String> demoTable = cohortBuilderService.findAllDemographicsMap();
     return participantCohortStatusDao.findAll(cohortReviewId, pageRequest).stream()
-        .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, demoMap))
+        .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, demoTable))
         .collect(Collectors.toList());
   }
 
@@ -376,7 +376,8 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
     return participantCohortAnnotationDao
-        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId).stream()
+        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId)
+        .stream()
         .map(participantCohortAnnotationMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
