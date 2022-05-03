@@ -14,6 +14,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
@@ -66,6 +67,8 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "lastModifiedEpochMillis", source = "cohortReview.lastModifiedTime")
   ResourceFields fromCohortReview(CohortReview cohortReview);
 
+  // TODO combine fromConceptSet/fromDbConceptSet
+
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
@@ -73,6 +76,14 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "conceptSet", source = "conceptSet")
   @Mapping(target = "lastModifiedEpochMillis", source = "conceptSet.lastModifiedTime")
   ResourceFields fromConceptSet(ConceptSet conceptSet);
+
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  @Mapping(target = "conceptSet", source = "dbConceptSet")
+  @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
+  ResourceFields fromDbConceptSet(DbConceptSet dbConceptSet);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
@@ -167,7 +178,8 @@ public interface WorkspaceResourceMapper {
                 cohortReviewService.findCohortReviewForWorkspace(workspaceId, resourceId));
         break;
       case CONCEPT_SET:
-        resourceFields = fromConceptSet(conceptSetService.getConceptSet(workspaceId, resourceId));
+        resourceFields =
+            fromDbConceptSet(conceptSetService.getDbConceptSet(workspaceId, resourceId));
         break;
       case DATA_SET:
         resourceFields = fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
