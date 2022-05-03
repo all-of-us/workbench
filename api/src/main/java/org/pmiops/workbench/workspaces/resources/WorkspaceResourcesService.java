@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cdrselector;
+package org.pmiops.workbench.workspaces.resources;
 
 import java.util.List;
 import org.pmiops.workbench.db.model.DbWorkspace;
