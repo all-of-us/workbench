@@ -1651,9 +1651,22 @@ describe('DataAccessRequirements', () => {
     expect(true).toEqual(true);
   });
 
-  // it('should show the correct state when all modules are expired', async () => {
-  //   expect(true).toEqual(true);
-  // });
+  it('should show the correct state when all modules are expired', async () => {
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    setCompletionTimes(oneYearAgo);
+    expireAllModules();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectExpired(wrapper);
+    expectIncomplete(wrapper);
+    expect(true).toEqual(true);
+  });
   // it('should show the correct state when all modules are incomplete', async () => {
   //   expect(true).toEqual(true);
   // });
