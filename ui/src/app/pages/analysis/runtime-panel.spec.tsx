@@ -25,8 +25,6 @@ import { WarningMessage } from 'app/components/messages';
 import { Spinner } from 'app/components/spinners';
 import {
   ConfirmDelete,
-  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
-  MIN_DISK_SIZE_GB,
   Props,
   RuntimePanelWrapper,
 } from 'app/pages/analysis/runtime-panel';
@@ -36,7 +34,12 @@ import {
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
-import { ComputeType, findMachineByName } from 'app/utils/machines';
+import {
+  ComputeType,
+  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  findMachineByName,
+  MIN_DISK_SIZE_GB,
+} from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { diskTypeLabels } from 'app/utils/runtime-utils';

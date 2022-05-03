@@ -8,11 +8,11 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
+import { diskApi } from 'app/services/swagger-fetch-clients';
 import {
   DATAPROC_WORKER_MIN_DISK_SIZE_GB,
   MIN_DISK_SIZE_GB,
-} from 'app/pages/analysis/runtime-panel';
-import { diskApi } from 'app/services/swagger-fetch-clients';
+} from 'app/utils/machines';
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
