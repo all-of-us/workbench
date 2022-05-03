@@ -11,8 +11,10 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Table;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -29,8 +31,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -249,12 +249,12 @@ public class CohortReviewControllerTest {
       return criteriaType;
     }
 
-    public static MultiKeyMap asMap() {
-      MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+    public static Table<Long, CriteriaType, String> asMap() {
+      Table<Long, CriteriaType, String> demoTable = HashBasedTable.create();
       for (TestConcepts testConcepts : TestConcepts.values()) {
-        demoMap.put(testConcepts.getConceptId(), testConcepts.getType(), testConcepts.getName());
+        demoTable.put(testConcepts.getConceptId(), testConcepts.getType(), testConcepts.getName());
       }
-      return demoMap;
+      return demoTable;
     }
   }
 
@@ -2501,20 +2501,18 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
-    MultiKeyMap demographicsMap = TestConcepts.asMap();
+    Table<Long, CriteriaType, String> demoTable = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
-        .ethnicity(
-            (String) demographicsMap.get(dbStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY))
+        .ethnicity(demoTable.get(dbStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY))
         .genderConceptId(dbStatus.getGenderConceptId())
-        .gender((String) demographicsMap.get(dbStatus.getGenderConceptId(), CriteriaType.GENDER))
+        .gender(demoTable.get(dbStatus.getGenderConceptId(), CriteriaType.GENDER))
         .participantId(dbStatus.getParticipantKey().getParticipantId())
         .raceConceptId(dbStatus.getRaceConceptId())
-        .race((String) demographicsMap.get(dbStatus.getRaceConceptId(), CriteriaType.RACE))
+        .race(demoTable.get(dbStatus.getRaceConceptId(), CriteriaType.RACE))
         .sexAtBirthConceptId(dbStatus.getSexAtBirthConceptId())
-        .sexAtBirth(
-            (String) demographicsMap.get(dbStatus.getSexAtBirthConceptId(), CriteriaType.SEX))
+        .sexAtBirth(demoTable.get(dbStatus.getSexAtBirthConceptId(), CriteriaType.SEX))
         .status(DbStorageEnums.cohortStatusFromStorage(dbStatus.getStatus()))
         .deceased(dbStatus.getDeceased());
   }
