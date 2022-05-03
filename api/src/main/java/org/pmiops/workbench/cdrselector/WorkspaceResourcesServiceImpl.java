@@ -9,12 +9,12 @@ import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -81,14 +81,13 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.CONCEPT_SET)) {
-      List<ConceptSet> conceptSets =
-          conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId());
+      List<DbConceptSet> conceptSets = conceptSetService.getConceptSets(dbWorkspace);
       workspaceResources.addAll(
           conceptSets.stream()
               .map(
-                  conceptSet ->
-                      workspaceResourceMapper.fromConceptSet(
-                          dbWorkspace, workspaceAccessLevel, conceptSet))
+                  dbConceptSet ->
+                      workspaceResourceMapper.fromDbConceptSet(
+                          dbWorkspace, workspaceAccessLevel, dbConceptSet))
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.DATASET)) {
@@ -102,11 +101,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
                           dbWorkspace, workspaceAccessLevel, dbDataset))
               .collect(Collectors.toList()));
     }
-    if (resourceTypes.stream()
-            .filter(resourceType -> !supportedTypes.contains(resourceType))
-            .collect(Collectors.toList())
-            .size()
-        > 0) {
+    if (resourceTypes.stream().anyMatch(resourceType -> !supportedTypes.contains(resourceType))) {
       throw new ServerErrorException(
           "Only supported resource types are Cohorts, Cohort Reviews, Concept Sets, and Datasets");
     }

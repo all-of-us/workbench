@@ -22,7 +22,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -66,16 +65,6 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
   ResourceFields fromCohortReview(CohortReview cohortReview);
-
-  // TODO combine fromConceptSet/fromDbConceptSet
-
-  @Mapping(target = "cohort", ignore = true)
-  @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "conceptSet")
-  @Mapping(target = "dataSet", ignore = true)
-  @Mapping(target = "notebook", ignore = true)
-  @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
-  ResourceFields fromConceptSet(ConceptSet conceptSet);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
@@ -133,10 +122,10 @@ public interface WorkspaceResourceMapper {
         fromWorkspace(dbWorkspace), accessLevel, fromCohortReview(cohortReview));
   }
 
-  default WorkspaceResource fromConceptSet(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet) {
+  default WorkspaceResource fromDbConceptSet(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbConceptSet dbConceptSet) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), accessLevel, fromConceptSet(conceptSet));
+        fromWorkspace(dbWorkspace), accessLevel, fromDbConceptSet(dbConceptSet));
   }
 
   default WorkspaceResource fromDbDataset(
