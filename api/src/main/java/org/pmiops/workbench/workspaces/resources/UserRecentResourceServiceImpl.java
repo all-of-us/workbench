@@ -238,6 +238,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       userRecentlyModifiedResourceDao.delete(resourceById);
     }
   }
+
   /**
    * Retrieves the list of all resources recently accessed by user in descending order of last
    * access date. This list is not filtered by visibility of these resources (for example, it may
@@ -245,20 +246,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    *
    * @param userId : User id for whom the resources are returned
    */
-  @Override
-  public List<DbUserRecentResource> findAllResourcesByUser(long userId) {
-    try {
-      return DbRetryUtils.executeAndRetry(
-          () ->
-              userRecentResourceDao.findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(
-                  userId),
-          Duration.ofSeconds(1),
-          5);
-    } catch (InterruptedException e) {
-      throw new ServerErrorException("Unable to find Resources for user" + userId);
-    }
-  }
-
   @Override
   public List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId) {
     try {

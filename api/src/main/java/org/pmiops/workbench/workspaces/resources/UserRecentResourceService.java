@@ -31,8 +31,5 @@ public interface UserRecentResourceService {
 
   void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
 
-  @Deprecated
-  List<DbUserRecentResource> findAllResourcesByUser(long userId);
-
   List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId);
 }
