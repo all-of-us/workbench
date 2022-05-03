@@ -2,9 +2,8 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.HashBasedTable;
 import java.sql.Date;
-import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
@@ -50,7 +49,7 @@ public class ParticipantCohortStatusMapperTest {
             .sexAtBirth("Male")
             .genderConceptId(4L)
             .gender("Man");
-    MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+    HashBasedTable<Long, CriteriaType, String> demoMap = HashBasedTable.create();
     demoMap.put(1L, CriteriaType.ETHNICITY, "Latino");
     demoMap.put(2L, CriteriaType.RACE, "White");
     demoMap.put(3L, CriteriaType.SEX, "Male");

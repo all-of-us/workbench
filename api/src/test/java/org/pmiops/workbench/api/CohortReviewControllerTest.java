@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -29,8 +30,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -249,8 +248,8 @@ public class CohortReviewControllerTest {
       return criteriaType;
     }
 
-    public static MultiKeyMap asMap() {
-      MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+    public static HashBasedTable<Long, CriteriaType, String> asMap() {
+      HashBasedTable<Long, CriteriaType, String> demoMap = HashBasedTable.create();
       for (TestConcepts testConcepts : TestConcepts.values()) {
         demoMap.put(testConcepts.getConceptId(), testConcepts.getType(), testConcepts.getName());
       }
@@ -2501,7 +2500,7 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
-    MultiKeyMap demographicsMap = TestConcepts.asMap();
+    HashBasedTable<Long, CriteriaType, String> demographicsMap = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())

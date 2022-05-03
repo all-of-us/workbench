@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortreview.mapper;
 
-import org.apache.commons.collections4.map.MultiKeyMap;
+import com.google.common.collect.HashBasedTable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -27,25 +27,21 @@ public interface ParticipantCohortStatusMapper {
   @Mapping(target = "sexAtBirth", ignore = true)
   @Mapping(target = "birthDate", source = "birthDate", qualifiedByName = "dateToString")
   ParticipantCohortStatus dbModelToClient(
-      DbParticipantCohortStatus dbParticipantCohortStatus, @Context MultiKeyMap demographicsMap);
+      DbParticipantCohortStatus dbParticipantCohortStatus,
+      @Context HashBasedTable<Long, CriteriaType, String> demographicsMap);
 
   @AfterMapping
   default void populateAfterMapping(
       @MappingTarget ParticipantCohortStatus participantCohortStatus,
-      @Context MultiKeyMap demographicsMap) {
+      @Context HashBasedTable<Long, CriteriaType, String> demographicsMap) {
     participantCohortStatus.setGender(
-        (String)
-            demographicsMap.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
+        demographicsMap.get(participantCohortStatus.getGenderConceptId(), CriteriaType.GENDER));
     participantCohortStatus.setRace(
-        (String)
-            demographicsMap.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
+        demographicsMap.get(participantCohortStatus.getRaceConceptId(), CriteriaType.RACE));
     participantCohortStatus.setEthnicity(
-        (String)
-            demographicsMap.get(
-                participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
+        demographicsMap.get(
+            participantCohortStatus.getEthnicityConceptId(), CriteriaType.ETHNICITY));
     participantCohortStatus.setSexAtBirth(
-        (String)
-            demographicsMap.get(
-                participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
+        demographicsMap.get(participantCohortStatus.getSexAtBirthConceptId(), CriteriaType.SEX));
   }
 }

@@ -24,6 +24,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,7 +42,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -382,7 +382,7 @@ public class WorkspacesControllerTest {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(new MultiKeyMap());
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));

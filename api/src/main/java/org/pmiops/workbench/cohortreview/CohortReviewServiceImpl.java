@@ -29,6 +29,7 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Date;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
@@ -77,6 +77,7 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
@@ -290,12 +291,12 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
-    MultiKeyMap demoMap = cohortBuilderService.findAllDemographicsMap();
-    List<ParticipantCohortStatus> returnList =
+    HashBasedTable<Long, CriteriaType, String> demoMap =
+        cohortBuilderService.findAllDemographicsMap();
+    return
         participantCohortStatusDao.findAll(cohortReviewId, pageRequest).stream()
             .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, demoMap))
             .collect(Collectors.toList());
-    return returnList;
   }
 
   @Override
@@ -512,8 +513,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
                 cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     List<FieldValue> row = result.iterateAll().iterator().next();
-    long cohortCount = bigQueryService.getLong(row, rm.get("count"));
-    return cohortCount;
+    return bigQueryService.getLong(row, rm.get("count"));
   }
 
   private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(

@@ -8,6 +8,7 @@ import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import java.util.ArrayList;
@@ -23,8 +24,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
@@ -492,15 +491,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public synchronized MultiKeyMap findAllDemographicsMap() {
-    MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+  public HashBasedTable<Long, CriteriaType, String> findAllDemographicsMap() {
+    HashBasedTable<Long, CriteriaType, String> demoTable = HashBasedTable.create();
     for (DbCriteria dbCriteria : cbCriteriaDao.findAllDemographics()) {
-      demoMap.put(
+      demoTable.put(
           dbCriteria.getLongConceptId(),
           CriteriaType.valueOf(dbCriteria.getType()),
           dbCriteria.getName());
     }
-    return demoMap;
+    return demoTable;
   }
 
   @Override
