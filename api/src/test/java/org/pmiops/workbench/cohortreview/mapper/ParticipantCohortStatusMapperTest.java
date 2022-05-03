@@ -50,7 +50,7 @@ public class ParticipantCohortStatusMapperTest {
             .sexAtBirth("Male")
             .genderConceptId(4L)
             .gender("Man");
-    MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+    MultiKeyMap<Object, String> demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
     demoMap.put(1L, CriteriaType.ETHNICITY, "Latino");
     demoMap.put(2L, CriteriaType.RACE, "White");
     demoMap.put(3L, CriteriaType.SEX, "Male");

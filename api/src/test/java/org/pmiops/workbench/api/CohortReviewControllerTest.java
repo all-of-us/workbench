@@ -249,8 +249,8 @@ public class CohortReviewControllerTest {
       return criteriaType;
     }
 
-    public static MultiKeyMap asMap() {
-      MultiKeyMap demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
+    public static MultiKeyMap<Object, String> asMap() {
+      MultiKeyMap<Object, String> demoMap = MultiKeyMap.multiKeyMap(new LRUMap<>());
       for (TestConcepts testConcepts : TestConcepts.values()) {
         demoMap.put(testConcepts.getConceptId(), testConcepts.getType(), testConcepts.getName());
       }
@@ -2501,7 +2501,7 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
-    MultiKeyMap demographicsMap = TestConcepts.asMap();
+    MultiKeyMap<Object, String> demographicsMap = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
