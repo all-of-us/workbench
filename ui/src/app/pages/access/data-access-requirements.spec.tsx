@@ -160,6 +160,31 @@ describe('DataAccessRequirements', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   };
 
+  function updateOneModuleExpirationTime(
+    updateModuleName: AccessModule,
+    time: number
+  ) {
+    const oldProfile = profileStore.get().profile;
+    const newModules = [
+      ...oldProfile.accessModules.modules.filter(
+        (m) => m.moduleName !== updateModuleName
+      ),
+      {
+        ...oldProfile.accessModules.modules.find(
+          (m) => m.moduleName === updateModuleName
+        ),
+        completionEpochMillis: time - 1,
+        expirationEpochMillis: time,
+      } as AccessModuleStatus,
+    ];
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  }
+
   const removeOneModule = (toBeRemoved: AccessModule) => {
     const oldProfile = profileStore.get().profile;
     const newModules = oldProfile.accessModules.modules.filter(
@@ -1595,9 +1620,37 @@ describe('DataAccessRequirements', () => {
   });
 
   // ACCESS_RENEWAL specific tests
-  // it('should show the correct state when all items are complete', async () => {
-  //   expect(true).toEqual(true);
-  // });
+  it('should show the correct state when all items are complete', async () => {
+    expireAllModules();
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expectComplete(wrapper);
+    expectNotExpired(wrapper);
+    expect(true).toEqual(true);
+  });
+
   // it('should show the correct state when all modules are expired', async () => {
   //   expect(true).toEqual(true);
   // });
