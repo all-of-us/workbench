@@ -91,6 +91,40 @@ const InitialsAgreement = (props) => {
   );
 };
 
+interface ContentProps {
+  buttonDisabled: boolean;
+  onLastPage: () => void;
+  onClick: () => void;
+}
+const DuccContent = (props: ContentProps) => (
+  <>
+    <HtmlViewer
+      ariaLabel='data user code of conduct agreement'
+      containerStyles={{ margin: '2rem 0 1rem' }}
+      filePath={'/data-user-code-of-conduct-v4.html'}
+      onLastPage={() => props.onLastPage()}
+    />
+    <FlexRow style={styles.dataUserCodeOfConductFooter}>
+      Please read the above document in its entirety before proceeding to sign
+      the Data User Code of Conduct.
+      <Button
+        type={'link'}
+        style={{ marginLeft: 'auto' }}
+        onClick={() => history.back()}
+      >
+        Back
+      </Button>
+      <Button
+        data-test-id={'ducc-next-button'}
+        disabled={props.buttonDisabled}
+        onClick={() => props.onClick()}
+      >
+        Proceed
+      </Button>
+    </FlexRow>
+  </>
+);
+
 interface Props
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -192,38 +226,7 @@ export const DataUserCodeOfConduct = fp.flow(
         }
       );
 
-      const content = (
-        <>
-          <HtmlViewer
-            ariaLabel='data user code of conduct agreement'
-            containerStyles={{ margin: '2rem 0 1rem' }}
-            filePath={'/data-user-code-of-conduct-v4.html'}
-            onLastPage={() => this.setState({ proceedDisabled: false })}
-          />
-          <FlexRow style={styles.dataUserCodeOfConductFooter}>
-            Please read the above document in its entirety before proceeding to
-            sign the Data User Code of Conduct.
-            <Button
-              type={'link'}
-              style={{ marginLeft: 'auto' }}
-              onClick={() => history.back()}
-            >
-              Back
-            </Button>
-            <Button
-              data-test-id={'ducc-next-button'}
-              disabled={proceedDisabled}
-              onClick={() =>
-                this.setState({ page: DataUserCodeOfConductPage.SIGNATURE })
-              }
-            >
-              Proceed
-            </Button>
-          </FlexRow>
-        </>
-      );
-
-      const signature = (
+      const DuccSignature = () => (
         <>
           <FlexColumn>
             {submitting && <SpinnerOverlay />}
@@ -362,8 +365,16 @@ export const DataUserCodeOfConduct = fp.flow(
 
       return (
         <FlexColumn style={styles.dataUserCodeOfConductPage}>
-          {page === DataUserCodeOfConductPage.CONTENT && content}
-          {page === DataUserCodeOfConductPage.SIGNATURE && signature}
+          {page === DataUserCodeOfConductPage.CONTENT && (
+            <DuccContent
+              buttonDisabled={proceedDisabled}
+              onLastPage={() => this.setState({ proceedDisabled: false })}
+              onClick={() =>
+                this.setState({ page: DataUserCodeOfConductPage.SIGNATURE })
+              }
+            />
+          )}
+          {page === DataUserCodeOfConductPage.SIGNATURE && <DuccSignature />}
         </FlexColumn>
       );
     }
