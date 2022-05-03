@@ -151,38 +151,45 @@ public interface WorkspaceResourceMapper {
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace),
+        fcWorkspace,
+        fromDbUserRecentlyModifiedResource(
+            dbUserRecentlyModifiedResource,
+            cohortService,
+            cohortReviewService,
+            conceptSetService,
+            dataSetService));
+  }
+
+  default ResourceFields fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
+      CohortService cohortService,
+      CohortReviewService cohortReviewService,
+      ConceptSetService conceptSetService,
+      DataSetService dataSetService) {
 
     // null if Notebook, Long id otherwise
     final Long resourceId = Longs.tryParse(dbUserRecentlyModifiedResource.getResourceId());
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
 
-    final ResourceFields resourceFields;
     switch (dbUserRecentlyModifiedResource.getResourceType()) {
       case COHORT:
-        resourceFields = fromDbCohort(cohortService.findDbCohortByCohortId(resourceId));
-        break;
+        return fromDbCohort(cohortService.findDbCohortByCohortId(resourceId));
       case COHORT_REVIEW:
-        resourceFields =
-            fromCohortReview(
-                cohortReviewService.findCohortReviewForWorkspace(workspaceId, resourceId));
-        break;
+        return fromCohortReview(
+            cohortReviewService.findCohortReviewForWorkspace(workspaceId, resourceId));
       case CONCEPT_SET:
-        resourceFields =
-            fromDbConceptSet(conceptSetService.getDbConceptSet(workspaceId, resourceId));
-        break;
+        return fromDbConceptSet(conceptSetService.getDbConceptSet(workspaceId, resourceId));
       case DATA_SET:
-        resourceFields = fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
-        break;
+        return fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
       case NOTEBOOK:
-        resourceFields =
-            fromNotebookNameAndLastModified(
-                dbUserRecentlyModifiedResource.getResourceId(),
-                dbUserRecentlyModifiedResource.getLastAccessDate());
-        break;
+        return fromNotebookNameAndLastModified(
+            dbUserRecentlyModifiedResource.getResourceId(),
+            dbUserRecentlyModifiedResource.getLastAccessDate());
       default:
         throw new ServerErrorException("Recent resource: bad resource type ");
     }
-    return mergeWorkspaceAndResourceFields(fromWorkspace(dbWorkspace), fcWorkspace, resourceFields);
   }
 
   default FileDetail convertStringToFileDetail(String str) {
