@@ -95,6 +95,17 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
     // Run the most basic API call against the /me/ endpoint.  It will fail because the user is not
     // ToS-compliant.
     ProfileApi profileApi = new ProfileApi(apiClient);
-    assertThrows(ApiException.class, profileApi::me);
+
+    // as of 3 May 2022, ToS enforcement has been turned OFF in Terra-Dev.
+    // This test no longer fails, but let's keep it active with the opposite behavior.
+    // When enforcement resumes, this will fail again, and we will be reminded to switch it back.
+
+    final boolean isToSEnforcedInTerraDev = false;
+    if (isToSEnforcedInTerraDev) {
+      assertThrows(ApiException.class, profileApi::me);
+    } else {
+      // no exception
+      profileApi.me();
+    }
   }
 }
