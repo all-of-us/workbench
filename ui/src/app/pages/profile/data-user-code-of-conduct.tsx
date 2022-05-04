@@ -128,7 +128,7 @@ interface InitialsProps {
 const InitialsAgreement = (props: InitialsProps) => (
   <div style={{ display: 'flex', marginTop: '0.5rem' }}>
     {props.signatureState === DuccSignatureState.SIGNED && (
-      <SignedText text={props.signedValue} />
+      <SignedText text={props.signedValue?.toLocaleUpperCase()} />
     )}
     {props.signatureState === DuccSignatureState.UNSIGNED && (
       <DuccTextInput
