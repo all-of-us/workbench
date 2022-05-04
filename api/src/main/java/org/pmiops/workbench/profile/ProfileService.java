@@ -137,14 +137,7 @@ public class ProfileService {
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getAccessModuleStatus(userLite);
     final ProfileAccessModules accessModules =
-        new ProfileAccessModules()
-            .modules(accessModuleStatuses)
-            .anyModuleHasExpired(
-                accessModuleStatuses.stream()
-                    .anyMatch(
-                        a ->
-                            (a.getExpirationEpochMillis() != null
-                                && clock.instant().toEpochMilli() > a.getExpirationEpochMillis())));
+        new ProfileAccessModules().modules(accessModuleStatuses);
 
     return profileMapper.toModel(
         user,
