@@ -6,7 +6,7 @@ const { useEffect, useState } = React;
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { SpinnerOverlay } from 'app/components/spinners';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { visitsFilterOptions } from 'app/services/review-state.service';
 import {
   cohortBuilderApi,
@@ -91,41 +91,52 @@ export const CohortReviewPage = (spinnerProps: WithSpinnerOverlayProps) => {
       {loading ? (
         <SpinnerOverlay />
       ) : (
-        <div>
-          <button
-            style={styles.backBtn}
-            type='button'
-            onClick={() =>
-              navigateByUrl(`workspaces/${ns}/${wsid}/data/cohorts/build`, {
-                queryParams: { cohortId: cid },
-              })
-            }
-          >
-            Back to cohort
-          </button>
-          <h4 style={styles.title}>
-            Review Sets for {cohort.name}
-            <Button
-              style={{ float: 'right', height: '1.3rem' }}
-              disabled={loading}
+        <React.Fragment>
+          <div>
+            <button
+              style={styles.backBtn}
+              type='button'
               onClick={() =>
-                navigate([
-                  'workspaces',
-                  ns,
-                  wsid,
-                  'data',
-                  'cohorts',
-                  cid,
-                  'review',
-                  'cohort-description',
-                ])
+                navigateByUrl(`workspaces/${ns}/${wsid}/data/cohorts/build`, {
+                  queryParams: { cohortId: cid },
+                })
               }
             >
-              Cohort Description
-            </Button>
-          </h4>
-          <div style={styles.description}>{cohort.description}</div>
-        </div>
+              Back to cohort
+            </button>
+            <h4 style={styles.title}>
+              Review Sets for {cohort.name}
+              <Button
+                style={{ float: 'right', height: '1.3rem' }}
+                disabled={loading}
+                onClick={() =>
+                  navigate([
+                    'workspaces',
+                    ns,
+                    wsid,
+                    'data',
+                    'cohorts',
+                    cid,
+                    'review',
+                    'cohort-description',
+                  ])
+                }
+              >
+                Cohort Description
+              </Button>
+            </h4>
+            <div style={styles.description}>{cohort.description}</div>
+          </div>
+          <div style={{display: 'flex'}}>
+            <div style={{flex: '0 0 20%'}}>
+              <div>Review Sets</div>
+              {cohortReviews.map((cohortReview, cr) => <div key={cr}>
+                {cohortReview.name}
+              </div>)}
+            </div>
+            <div style={{flex: '0 0 80%'}}>Table</div>
+          </div>
+        </React.Fragment>
       )}
     </FadeBox>
   );
