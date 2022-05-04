@@ -194,7 +194,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
         <h1>Accept Data User Code of Conduct</h1>
       )}
       <div style={{ ...styles.bold, ...styles.smallTopMargin }}>
-        I,{' '}
+        I,
         <ReadOnlyTextField
           signatureState={props.signatureState}
           style={{ margin: '0 1ex' }}
@@ -287,7 +287,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
     {props.signatureState === DuccSignatureState.UNSIGNED && (
       <FlexRow style={styles.dataUserCodeOfConductFooter}>
         <Button
-          type={'link'}
+          type='link'
           style={{ marginLeft: 'auto' }}
           onClick={() => props.onBack()}
         >
@@ -305,7 +305,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
           }
         >
           <Button
-            data-test-id={'submit-ducc-button'}
+            data-test-id='submit-ducc-button'
             disabled={props.errors || props.submitting}
             onClick={() => props.onAccept()}
           >
