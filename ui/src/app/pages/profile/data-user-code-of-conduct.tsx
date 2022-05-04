@@ -109,7 +109,7 @@ interface ReadOnlyProps extends DuccTextInputProps {
 }
 const ReadOnlyTextField = (props: ReadOnlyProps) =>
   props.signatureState === DuccSignatureState.UNSIGNED ? (
-    <DuccTextInput {...{ ...props, disabled: true }} />
+    <DuccTextInput {...props} disabled={true} />
   ) : (
     <SignedText text={props.value} />
   );
