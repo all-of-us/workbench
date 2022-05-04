@@ -48,8 +48,6 @@ public interface ProfileMapper {
       List<UserTierEligibility> tierEligibilities,
       ProfileAccessModules accessModules);
 
-  // temporary for deployment safety - will be removed after one release cycle.
-  @Mapping(source = "duccBypassTime", target = "dataUseAgreementBypassTime")
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
   // used by the generated impl of adminViewToModel()

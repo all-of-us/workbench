@@ -111,38 +111,17 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getCreationTime();
 
-    @Deprecated // to be removed - use getDuccBypassTime
-    Timestamp getDataUseAgreementBypassTime();
-
     Timestamp getDuccBypassTime();
-
-    @Deprecated // to be removed
-    Timestamp getDataUseAgreementCompletionTime();
 
     Timestamp getComplianceTrainingBypassTime();
 
-    @Deprecated // to be removed
-    Timestamp getComplianceTrainingCompletionTime();
-
     Timestamp getCtComplianceTrainingBypassTime();
-
-    @Deprecated // to be removed
-    Timestamp getCtComplianceTrainingCompletionTime();
 
     Timestamp getEraCommonsBypassTime();
 
-    @Deprecated // to be removed
-    Timestamp getEraCommonsCompletionTime();
-
     Timestamp getTwoFactorAuthBypassTime();
 
-    @Deprecated // to be removed
-    Timestamp getTwoFactorAuthCompletionTime();
-
     Timestamp getRasLinkLoginGovBypassTime();
-
-    @Deprecated // to be removed
-    Timestamp getRasLinkLoginGovCompletionTime();
 
     String getAccessTierShortNames();
   }
@@ -166,25 +145,12 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "i.short_name AS institutionShortName, "
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
-              // to be removed soon, replaced by duccBypassTime
-              + "uamd.ducc_bypass_time AS dataUseAgreementBypassTime, "
               + "uamd.ducc_bypass_time AS duccBypassTime, "
-              // to be removed soon
-              + "uamd.ducc_completion_time AS dataUseAgreementCompletionTime, "
               + "uamrt.compliance_training_bypass_time AS complianceTrainingBypassTime, "
-              // to be removed soon
-              + "uamrt.compliance_training_completion_time AS complianceTrainingCompletionTime, "
               + "uamct.ct_compliance_training_bypass_time AS ctComplianceTrainingBypassTime, "
-              // to be removed soon
-              + "uamct.ct_compliance_training_completion_time AS ctComplianceTrainingCompletionTime, "
               + "uame.era_commons_bypass_time AS eraCommonsBypassTime, "
-              // to be removed soon
-              + "uame.era_commons_completion_time AS eraCommonsCompletionTime, "
               + "uamt.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
-              + "uamt.two_factor_auth_completion_time AS twoFactorAuthCompletionTime, "
               + "uamr.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "
-              // to be removed soon
-              + "uamr.ras_link_login_gov_completion_time AS rasLinkLoginGovCompletionTime, "
               + "t.access_tier_short_names AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN user_verified_institutional_affiliation AS uvia ON u.user_id = uvia.user_id "
@@ -200,48 +166,42 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + ") as t ON t.user_id = u.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS era_commons_bypass_time, "
-              + "    uam.completion_time AS era_commons_completion_time "
+              + "    uam.bypass_time AS era_commons_bypass_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'ERA_COMMONS' "
               + ") as uame ON u.user_id = uame.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS two_factor_auth_bypass_time, "
-              + "    uam.completion_time AS two_factor_auth_completion_time "
+              + "    uam.bypass_time AS two_factor_auth_bypass_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'TWO_FACTOR_AUTH' "
               + ") as uamt ON u.user_id = uamt.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS compliance_training_bypass_time, "
-              + "    uam.completion_time AS compliance_training_completion_time "
+              + "    uam.bypass_time AS compliance_training_bypass_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'RT_COMPLIANCE_TRAINING' "
               + ") as uamrt ON u.user_id = uamrt.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS ct_compliance_training_bypass_time, "
-              + "    uam.completion_time AS ct_compliance_training_completion_time "
+              + "    uam.bypass_time AS ct_compliance_training_bypass_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'CT_COMPLIANCE_TRAINING' "
               + ") as uamct ON u.user_id = uamct.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS ducc_bypass_time, "
-              + "    uam.completion_time AS ducc_completion_time "
+              + "    uam.bypass_time AS ducc_bypass_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'DATA_USER_CODE_OF_CONDUCT' "
               + ") as uamd ON u.user_id = uamd.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS ras_link_login_gov_bypass_time, "
-              + "    uam.completion_time AS ras_link_login_gov_completion_time "
+              + "    uam.bypass_time AS ras_link_login_gov_bypass_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'RAS_LOGIN_GOV' "
