@@ -68,7 +68,7 @@ const styles = reactStyles({
 
 // TODO parameterize these
 const V4_PATH = '/data-user-code-of-conduct-v4.html';
-const V4_HEIGHT = '83rem';
+const V4_HEIGHT = '85rem';
 
 export enum DataUserCodeOfConductPage {
   CONTENT,
