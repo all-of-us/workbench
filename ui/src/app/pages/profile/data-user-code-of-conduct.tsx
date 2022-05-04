@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
@@ -420,15 +421,14 @@ export const DataUserCodeOfConduct = fp.flow(
         }
       );
 
+      const containerStyle: CSSProperties = {
+        ...styles.dataUserCodeOfConductPage,
+        ...(signatureState === DuccSignatureState.UNSIGNED &&
+          // FlexColumn is appropriate styling only for the UNSIGNED case, due to iframe height styling conflicts
+          flexStyle.column),
+      };
       return (
-        <div
-          style={{
-            ...styles.dataUserCodeOfConductPage,
-            ...(signatureState === DuccSignatureState.UNSIGNED &&
-              // FlexColumn is appropriate styling for the UNSIGNED case only due to iframe behavior
-              flexStyle.column),
-          }}
-        >
+        <div style={containerStyle}>
           {(signatureState === DuccSignatureState.SIGNED ||
             page === DataUserCodeOfConductPage.CONTENT) && (
             <DuccContentPage
