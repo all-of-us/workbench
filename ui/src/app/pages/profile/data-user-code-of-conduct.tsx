@@ -6,6 +6,7 @@ import { validate } from 'validate.js';
 
 import { Profile } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { flexStyle } from 'app/components/flex';
@@ -443,6 +444,13 @@ export const DataUserCodeOfConduct = fp.flow(
           // FlexColumn is appropriate styling only for the UNSIGNED case, due to iframe height styling conflicts
           flexStyle.column),
       };
+
+      // a terrible hack for RW-8296:
+      // don't display the Local->Test tag in the header
+      if (signatureState === DuccSignatureState.SIGNED) {
+        environment.displayTag = '';
+      }
+
       return (
         <div style={containerStyle}>
           {(signatureState === DuccSignatureState.SIGNED ||
