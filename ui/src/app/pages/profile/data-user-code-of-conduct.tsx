@@ -189,6 +189,7 @@ interface SignatureProps {
 const DuccSignaturePage = (props: SignatureProps) => (
   <>
     <FlexColumn>
+      {props.submitting && <SpinnerOverlay />}
       {props.signatureState === DuccSignatureState.UNSIGNED && (
         <h1>Accept Data User Code of Conduct</h1>
       )}
@@ -285,7 +286,6 @@ const DuccSignaturePage = (props: SignatureProps) => (
     </FlexColumn>
     {props.signatureState === DuccSignatureState.UNSIGNED && (
       <FlexRow style={styles.dataUserCodeOfConductFooter}>
-        {props.submitting && <SpinnerOverlay />}
         <Button
           type={'link'}
           style={{ marginLeft: 'auto' }}
