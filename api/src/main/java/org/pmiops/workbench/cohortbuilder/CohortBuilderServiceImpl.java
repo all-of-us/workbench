@@ -8,8 +8,10 @@ import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,6 +48,7 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
@@ -489,13 +492,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public Map<Long, String> findAllDemographicsMap() {
-    return cbCriteriaDao.findAllDemographics().stream()
-        .collect(
-            Collectors.toMap(
-                DbCriteria::getLongConceptId,
-                DbCriteria::getName,
-                (oldValue, newValue) -> oldValue));
+  public synchronized Table<Long, CriteriaType, String> findAllDemographicsMap() {
+    Table<Long, CriteriaType, String> demoTable = HashBasedTable.create();
+    for (DbCriteria dbCriteria : cbCriteriaDao.findAllDemographics()) {
+      demoTable.put(
+          dbCriteria.getLongConceptId(),
+          CriteriaType.valueOf(dbCriteria.getType()),
+          dbCriteria.getName());
+    }
+    return demoTable;
   }
 
   @Override

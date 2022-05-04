@@ -7,7 +7,8 @@ import matplotlib.pyplot
 import numpy
 import os
 import pandas
-import pandas_profiling
+# TODO(RW-8293): Currently breaks plotting, import again once fixed.
+# import pandas_profiling
 import plotnine
 import scipy
 import seaborn

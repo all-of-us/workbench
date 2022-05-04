@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -169,6 +170,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
+  @Autowired private CohortBuilderService cohortBuilderService;
+
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private UserDao userDao;
@@ -198,6 +201,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser.setDisabled(false);
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
+
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(

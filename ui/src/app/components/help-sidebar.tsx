@@ -45,7 +45,6 @@ import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { participantStore } from 'app/services/review-state.service';
-import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
@@ -73,13 +72,11 @@ import {
 import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore,
-  GenomicExtractionStore,
-  genomicExtractionStore,
   routeDataStore,
   RuntimeStore,
   runtimeStore,
   serverConfigStore,
-  updateGenomicExtractionStore,
+  withGenomicExtractionJobs,
   withStore,
 } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -256,7 +253,7 @@ interface Props extends NavigationProps {
   runtimeStore: RuntimeStore;
   compoundRuntimeOps: CompoundRuntimeOpStore;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
-  genomicExtraction: GenomicExtractionStore;
+  genomicExtractionJobs: GenomicExtractionJob[];
   cohortContext: any;
 }
 
@@ -282,10 +279,10 @@ export const HelpSidebar = fp.flow(
   withCurrentCohortCriteria(),
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
+  withGenomicExtractionJobs,
   withCurrentWorkspace(),
   withRuntimeStore(),
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
-  withStore(genomicExtractionStore, 'genomicExtraction'),
   withUserProfile(),
   withCdrVersions(),
   withNavigation
@@ -502,23 +499,6 @@ export const HelpSidebar = fp.flow(
           }
         })
       );
-
-      if (
-        serverConfigStore.get().config.enableGenomicExtraction &&
-        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse)
-          .hasWgsData &&
-        !genomicExtractionStore.get()[this.props.workspace.namespace]
-      ) {
-        const genomicExtractionList =
-          await dataSetApi().getGenomicExtractionJobs(
-            this.props.workspace.namespace,
-            this.props.workspace.id
-          );
-        updateGenomicExtractionStore(
-          this.props.workspace.namespace,
-          genomicExtractionList.jobs
-        );
-      }
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -722,10 +702,8 @@ export const HelpSidebar = fp.flow(
     }
 
     displayExtractionIcon(icon: IconConfig) {
-      const extractionsByWorkspace = this.props.genomicExtraction;
-      const extractionJobs =
-        extractionsByWorkspace[this.props.workspace.namespace];
-      const jobsByStatus = fp.groupBy('status', extractionJobs);
+      const { genomicExtractionJobs } = this.props;
+      const jobsByStatus = fp.groupBy('status', genomicExtractionJobs);
       let status;
       // If any jobs are currently active, show the 'sync' icon corresponding to their status.
       if (jobsByStatus[TerraJobStatus.RUNNING]) {
