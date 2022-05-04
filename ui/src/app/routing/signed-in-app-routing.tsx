@@ -297,8 +297,16 @@ export const SignedInRoutes = () => {
             title: 'Data User Code of Conduct',
             minimizeChrome: true,
           }}
-          // see RW-8126 and RW-8296
           signatureState={DuccSignatureState.UNSIGNED}
+        />
+      </AppRoute>
+      <AppRoute exact path='/signed-ducc'>
+        <DataUserCodeOfConductPage
+          routeData={{
+            title: 'Data User Code of Conduct (Signed)',
+            minimizeChrome: true,
+          }}
+          signatureState={DuccSignatureState.SIGNED}
         />
       </AppRoute>
       <AppRoute exact path='/profile'>
