@@ -180,7 +180,15 @@ const DuccContentPage = (props: ContentProps) => (
   </>
 );
 
+interface SignatureHackForRw8296 {
+  fullName: string;
+  initials: string;
+  username: string;
+  date: string;
+}
+
 interface SignatureProps {
+  signatureHack?: SignatureHackForRw8296;
   signatureState: DuccSignatureState;
   errors;
   submitting: boolean;
@@ -204,7 +212,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
         <ReadOnlyTextField
           signatureState={props.signatureState}
           style={{ margin: '0 1ex' }}
-          value={props.fullName}
+          value={props.signatureHack.fullName ?? props.fullName}
           dataTestId='ducc-name-input'
         />
         ("Authorized Data User"), have personally reviewed this Data User Code
@@ -218,6 +226,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <InitialsAgreement
         onChange={(v) => props.onChangeMonitoring(v)}
         signatureState={props.signatureState}
+        signedValue={props.signatureHack.initials}
       >
         My work, including any external data, files, or software I upload into
         the Researcher Workbench, will be logged and monitored by the <AoU />{' '}
@@ -226,6 +235,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <InitialsAgreement
         onChange={(v) => props.onChangePublic(v)}
         signatureState={props.signatureState}
+        signedValue={props.signatureHack.initials}
       >
         My name, affiliation, profile information and research description will
         be made public. My research description will be used by the <AoU />{' '}
@@ -235,6 +245,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <InitialsAgreement
         onChange={(v) => props.onChangeAccess(v)}
         signatureState={props.signatureState}
+        signedValue={props.signatureHack.initials}
       >
         <AoU /> retains the discretion to make decisions about my access,
         including the provision or revocation thereof, at any time that take
@@ -273,7 +284,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
         signatureState={props.signatureState}
         disabled
         dataTestId='ducc-username-input'
-        value={props.fullName}
+        value={props.signatureHack.fullName ?? props.fullName}
       />
       <label style={{ ...styles.bold, ...styles.largeTopMargin }}>
         User ID
@@ -281,13 +292,13 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <ReadOnlyTextField
         signatureState={props.signatureState}
         dataTestId='ducc-user-id-input'
-        value={props.username}
+        value={props.signatureHack.username ?? props.username}
       />
       <label style={{ ...styles.bold, ...styles.largeTopMargin }}>Date</label>
       <ReadOnlyTextField
         signatureState={props.signatureState}
         type='text'
-        value={new Date().toLocaleDateString()}
+        value={props.signatureHack.date ?? new Date().toLocaleDateString()}
       />
     </FlexColumn>
     {props.signatureState === DuccSignatureState.UNSIGNED && (
@@ -449,6 +460,7 @@ export const DataUserCodeOfConduct = fp.flow(
             page === DataUserCodeOfConductPage.SIGNATURE) && (
             <DuccSignaturePage
               {...{ errors, submitting, signatureState }}
+              signatureHack={require('assets/json/ducc-signature-hack.json')}
               fullName={profile.givenName + ' ' + profile.familyName}
               username={profile.username}
               onChangeMonitoring={(v) =>
