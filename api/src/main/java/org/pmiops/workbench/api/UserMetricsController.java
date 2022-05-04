@@ -31,7 +31,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -286,19 +285,5 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     }
     final String name = Joiner.on('/').join(Arrays.copyOfRange(parts, 1, parts.length));
     return Optional.of(BlobId.of(parts[0], name));
-  }
-
-  private FileDetail convertStringToFileDetail(String str) {
-    if (str == null) {
-      return null;
-    }
-    if (!str.startsWith("gs://")) {
-      log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
-      return null;
-    }
-    int filenameStart = str.lastIndexOf('/') + 1;
-    return new FileDetail()
-        .name(str.substring(filenameStart))
-        .path(str.substring(0, filenameStart));
   }
 }
