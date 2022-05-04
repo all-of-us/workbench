@@ -9,7 +9,7 @@ interface Props {
   signedDate: number;
 }
 export const SignedDuccPanel = (props: Props) => (
-  <div style={styles.panel}>
+  <div style={styles.panel} data-test-id='signed-ducc-panel'>
     <div style={styles.title}>Data User Code of Conduct</div>
     <hr style={{ ...styles.verticalLine }} />
     <div style={styles.panelBody}>

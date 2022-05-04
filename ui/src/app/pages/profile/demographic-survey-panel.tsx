@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
-import colors from 'app/styles/colors';
 import { displayDateWithoutHours } from 'app/utils/dates';
 
 import { styles } from './profile-styles';
