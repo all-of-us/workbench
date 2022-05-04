@@ -68,7 +68,8 @@ const styles = reactStyles({
 
 // TODO parameterize these
 const V4_PATH = '/data-user-code-of-conduct-v4.html';
-const V4_HEIGHT = '85rem';
+// via trial and error
+const V4_HEIGHT = '90rem';
 
 export enum DataUserCodeOfConductPage {
   CONTENT,
@@ -152,7 +153,7 @@ const DuccContentPage = (props: ContentProps) => (
   <>
     <HtmlViewer
       ariaLabel='data user code of conduct agreement'
-      containerStyles={{ margin: '2rem 0 1rem', height: V4_HEIGHT }}
+      containerStyles={{ margin: '1rem 0 1rem', height: V4_HEIGHT }}
       filePath={V4_PATH}
       onLastPage={() => props.onLastPage()}
     />
