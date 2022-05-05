@@ -117,7 +117,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         userRecentResourceService.updateNotebookEntry(
             dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebookPath);
 
-    return ResponseEntity.ok(buildRecentResource(recentResource, fcWorkspace, dbWorkspace));
+    return ResponseEntity.ok(toWorkspaceResource(recentResource, fcWorkspace, dbWorkspace));
   }
 
   @Override
@@ -205,7 +205,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
             .filter(urr -> foundBlobIdsContainsUserRecentlyModifiedResource(foundBlobIds, urr))
-            .map(urr -> buildRecentResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
+            .map(urr -> toWorkspaceResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
     recentResponse.addAll(userVisibleRecentResources);
@@ -237,27 +237,20 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return true;
   }
 
-  /**
-   * Build recent resource object by grabbing the DB object (cohort/conceptSet or dataSet) depending
-   * upon the DbUserRecentlyModifiedResource.ResourceType
-   *
-   * @param idToDbWorkspace
-   * @param idToFcWorkspaceResponse
-   * @param dbUserRecentlyModifiedResource
-   * @return WorkspaceResource
-   */
-  private WorkspaceResource buildRecentResource(
+  // TODO: move these to WorkspaceResourceMapper or UserRecentResourceService ?
+
+  private WorkspaceResource toWorkspaceResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
-    return buildRecentResource(
+    return toWorkspaceResource(
         dbUserRecentlyModifiedResource,
         idToFcWorkspaceResponse.get(workspaceId),
         idToDbWorkspace.get(workspaceId));
   }
 
-  private WorkspaceResource buildRecentResource(
+  private WorkspaceResource toWorkspaceResource(
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
       FirecloudWorkspaceResponse fcWorkspaceResponse,
       DbWorkspace dbWorkspace) {
