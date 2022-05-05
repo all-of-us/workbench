@@ -7,7 +7,7 @@ import matplotlib.pyplot
 import numpy
 import os
 import pandas
-# TODO(RW-8293): Currently breaks plotting, import again once fixed.
+# TODO(RW-8293): Breaks plotting on 2.0.14, import again once fixed.
 # import pandas_profiling
 import plotnine
 import scipy
