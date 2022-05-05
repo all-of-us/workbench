@@ -126,7 +126,9 @@ public class UserMetricsControllerTest {
     dbCohort.setDescription("Cohort description");
     dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
     dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
-    when(mockCohortService.findByCohortIdOrThrow(1l)).thenReturn(dbCohort);
+    when(mockCohortService.findByCohortId(dbCohort.getCohortId()))
+        .thenReturn(Optional.of(dbCohort));
+    when(mockCohortService.findByCohortIdOrThrow(dbCohort.getCohortId())).thenReturn(dbCohort);
 
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setName("Concept Set");
@@ -135,7 +137,8 @@ public class UserMetricsControllerTest {
     dbConceptSet.setDomainEnum(Domain.CONDITION);
     dbConceptSet.setLastModifiedTime(new Timestamp(fakeClock.millis()));
     dbConceptSet.setCreationTime(new Timestamp(fakeClock.millis()));
-    when(mockConceptSetService.getDbConceptSet(2l, 1l)).thenReturn(dbConceptSet);
+    when(mockConceptSetService.getDbConceptSet(2L, dbConceptSet.getConceptSetId()))
+        .thenReturn(dbConceptSet);
 
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(1L);

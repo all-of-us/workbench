@@ -5,6 +5,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import java.util.AbstractMap;
@@ -147,9 +148,17 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .limit(distinctWorkspaceLimit)
             .collect(Collectors.toSet());
 
+    final Map<Long, DbWorkspace> idToDbWorkspace = getDbWorkspaceMap(workspaceIds);
+    final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
+        getFcWorkspaceMap(idToDbWorkspace);
+
+    // these IDs have been confirmed to match both a DbWorkspace and a FirecloudWorkspaceResponse
+    Set<Long> validWorkspaceIds =
+        Sets.intersection(idToDbWorkspace.keySet(), idToFirecloudWorkspace.keySet());
+
     final List<DbUserRecentlyModifiedResource> workspaceFilteredResources =
         userRecentlyModifiedResourceList.stream()
-            .filter(r -> workspaceIds.contains(r.getWorkspaceId()))
+            .filter(r -> validWorkspaceIds.contains(r.getWorkspaceId()))
             .filter(this::isValidResource)
             .collect(ImmutableList.toImmutableList());
 
@@ -161,10 +170,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // personally like GET endpoints to have side effects, and besides, we're not touching enough
     // of the notebooks to keep the cache up-to-date from here.
     final Set<BlobId> foundBlobIds = getBlobIds(workspaceFilteredResources);
-
-    final Map<Long, DbWorkspace> idToDbWorkspace = getDbWorkspaceMap(workspaceIds);
-    final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
-        getFcWorkspaceMap(idToDbWorkspace);
 
     final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
@@ -239,11 +244,13 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   @VisibleForTesting
   public boolean isValidResource(DbUserRecentlyModifiedResource resource) {
-    // null if Notebook, Long id otherwise
-    final Long resourceId = Longs.tryParse(resource.getResourceId());
+    // handle null and unparseable resourceIds
+    final Optional<Long> resourceId =
+        Optional.ofNullable(resource.getResourceId())
+            .flatMap(str -> Optional.ofNullable(Longs.tryParse(str)));
     switch (resource.getResourceType()) {
       case COHORT:
-        return cohortService.findByCohortId(resourceId).isPresent();
+        return resourceId.flatMap(cohortService::findByCohortId).isPresent();
       case NOTEBOOK:
         return Optional.ofNullable(resource.getResourceId())
             .map(name -> uriToBlobId(name).isPresent())
