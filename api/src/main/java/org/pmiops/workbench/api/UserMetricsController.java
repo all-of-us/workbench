@@ -6,6 +6,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
+import com.google.common.primitives.Longs;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
@@ -180,7 +181,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final ImmutableList<DbUserRecentlyModifiedResource> workspaceFilteredResources =
         userRecentlyModifiedResourceList.stream()
             .filter(r -> idToFirecloudWorkspace.containsKey(r.getWorkspaceId()))
-            .filter(this::hasValidBlobIdIfNotebookNamePresent)
+            .filter(this::isValidResource)
             .collect(ImmutableList.toImmutableList());
 
     // Check for existence of recent notebooks. Notebooks reside in GCS so they may be arbitrarily
@@ -207,7 +208,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
             .filter(urr -> foundBlobIdsContainsUserRecentlyModifiedResource(foundBlobIds, urr))
-            .map(urr -> buildRecentResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
+            .map(urr -> toWorkspaceResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
     recentResponse.addAll(userVisibleRecentResources);
@@ -228,27 +229,35 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   @VisibleForTesting
-  public boolean hasValidBlobIdIfNotebookNamePresent(
-      DbUserRecentlyModifiedResource dbUserRecentResource) {
-    if (dbUserRecentResource.getResourceType()
-        == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
-      return Optional.ofNullable(dbUserRecentResource.getResourceId())
-          .map(name -> uriToBlobId(name).isPresent())
-          .orElse(true);
+  public boolean isValidResource(DbUserRecentlyModifiedResource resource) {
+    // handle null and unparseable resourceIds
+    final Optional<Long> resourceId =
+        Optional.ofNullable(resource.getResourceId())
+            .flatMap(str -> Optional.ofNullable(Longs.tryParse(str)));
+    switch (resource.getResourceType()) {
+      case COHORT:
+        return resourceId.flatMap(cohortService::findByCohortId).isPresent();
+      case COHORT_REVIEW:
+        return resourceId.flatMap(cohortReviewService::maybeFindDbCohortReview).isPresent();
+      case CONCEPT_SET:
+        return resourceId
+            .flatMap(id -> conceptSetService.maybeGetDbConceptSet(resource.getWorkspaceId(), id))
+            .isPresent();
+      case DATA_SET:
+        return resourceId
+            .flatMap(id -> dataSetService.getDbDataSet(resource.getWorkspaceId(), id))
+            .isPresent();
+      case NOTEBOOK:
+        // if the resource ID string exists, validate it
+        // but null is also OK
+        return (resource.getResourceId() == null)
+            || uriToBlobId(resource.getResourceId()).isPresent();
+      default:
+        return true;
     }
-    return true;
   }
 
-  /**
-   * Build recent resource object by grabbing the DB object (cohort/conceptSet or dataSet) depending
-   * upon the DbUserRecentlyModifiedResource.ResourceType
-   *
-   * @param idToDbWorkspace
-   * @param idToFcWorkspaceResponse
-   * @param dbUserRecentlyModifiedResource
-   * @return WorkspaceResource
-   */
-  private WorkspaceResource buildRecentResource(
+  private WorkspaceResource toWorkspaceResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
