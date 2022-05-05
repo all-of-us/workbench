@@ -126,7 +126,7 @@ public class UserMetricsControllerTest {
     dbCohort.setDescription("Cohort description");
     dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
     dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
-    when(mockCohortService.findDbCohortByCohortId(1l)).thenReturn(dbCohort);
+    when(mockCohortService.findByCohortIdOrThrow(1l)).thenReturn(dbCohort);
 
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setName("Concept Set");
@@ -436,29 +436,20 @@ public class UserMetricsControllerTest {
   }
 
   @Test
-  public void testHasValidBlobIdIfNotebookNamePresent_nullNotebookName_passes() {
+  public void test_isValidResource_IfNotebookNamePresent_nullNotebookName_passes() {
     dbUserRecentlyModifiedResource1.setResourceId(null);
-    assertThat(
-            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
-                dbUserRecentlyModifiedResource1))
-        .isTrue();
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource1)).isTrue();
   }
 
   @Test
-  public void testHasValidBlobIdIfNotebookNamePresent_validNotebookName_passes() {
-    assertThat(
-            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
-                dbUserRecentlyModifiedResource1))
-        .isTrue();
+  public void test_isValidResource_IfNotebookNamePresent_validNotebookName_passes() {
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource1)).isTrue();
   }
 
   @Test
-  public void testHasValidBlobIdIfNotebookNamePresent_invalidNotebookName_fails() {
+  public void test_isValidResource_IfNotebookNamePresent_invalidNotebookName_fails() {
     dbUserRecentlyModifiedResource1.setResourceId("invalid-notebook@name");
-    assertThat(
-            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
-                dbUserRecentlyModifiedResource1))
-        .isFalse();
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource1)).isFalse();
   }
 
   @Test

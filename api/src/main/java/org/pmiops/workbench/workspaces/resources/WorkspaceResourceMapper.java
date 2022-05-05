@@ -159,7 +159,7 @@ public interface WorkspaceResourceMapper {
 
     switch (dbUserRecentlyModifiedResource.getResourceType()) {
       case COHORT:
-        return fromDbCohort(cohortService.findDbCohortByCohortId(resourceId));
+        return fromDbCohort(cohortService.findByCohortIdOrThrow(resourceId));
       case COHORT_REVIEW:
         return fromCohortReview(
             cohortReviewService.findCohortReviewForWorkspace(workspaceId, resourceId));

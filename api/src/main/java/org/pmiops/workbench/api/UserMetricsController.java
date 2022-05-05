@@ -6,6 +6,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
+import com.google.common.primitives.Longs;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
@@ -149,7 +150,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final List<DbUserRecentlyModifiedResource> workspaceFilteredResources =
         userRecentlyModifiedResourceList.stream()
             .filter(r -> workspaceIds.contains(r.getWorkspaceId()))
-            .filter(this::hasValidBlobIdIfNotebookNamePresent)
+            .filter(this::isValidResource)
             .collect(ImmutableList.toImmutableList());
 
     // Check for existence of recent notebooks. Notebooks reside in GCS so they may be arbitrarily
@@ -162,7 +163,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final Set<BlobId> foundBlobIds = getBlobIds(workspaceFilteredResources);
 
     final Map<Long, DbWorkspace> idToDbWorkspace = getDbWorkspaceMap(workspaceIds);
-    final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace = getFcWorkspaceMap(idToDbWorkspace);
+    final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
+        getFcWorkspaceMap(idToDbWorkspace);
 
     final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
@@ -182,7 +184,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 recentResource ->
                     recentResource.getResourceType()
                         == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType
-                        .NOTEBOOK)
+                            .NOTEBOOK)
             .map(DbUserRecentlyModifiedResource::getResourceId)
             .map(this::uriToBlobId)
             .flatMap(Streams::stream)
@@ -204,24 +206,23 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .collect(
             ImmutableMap.toImmutableMap(
                 SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
-
   }
 
-  private Map<Long, FirecloudWorkspaceResponse> getFcWorkspaceMap(Map<Long, DbWorkspace> idToDbWorkspace) {
+  private Map<Long, FirecloudWorkspaceResponse> getFcWorkspaceMap(
+      Map<Long, DbWorkspace> idToDbWorkspace) {
     return idToDbWorkspace.entrySet().stream()
-                .map(
-                    entry ->
-                        fireCloudService
-                            .getWorkspace(entry.getValue())
-                            .map(
-                                workspaceResponse ->
-                                    new AbstractMap.SimpleImmutableEntry<>(
-                                        entry.getKey(), workspaceResponse)))
-                .flatMap(Streams::stream)
-                .collect(
-                    ImmutableMap.toImmutableMap(
-                        SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
-
+        .map(
+            entry ->
+                fireCloudService
+                    .getWorkspace(entry.getValue())
+                    .map(
+                        workspaceResponse ->
+                            new AbstractMap.SimpleImmutableEntry<>(
+                                entry.getKey(), workspaceResponse)))
+        .flatMap(Streams::stream)
+        .collect(
+            ImmutableMap.toImmutableMap(
+                SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
   }
 
   private boolean foundBlobIdsContainsUserRecentlyModifiedResource(
@@ -237,14 +238,19 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   @VisibleForTesting
-  public boolean hasValidBlobIdIfNotebookNamePresent(DbUserRecentlyModifiedResource resource) {
-    if (resource.getResourceType()
-        == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
-      return Optional.ofNullable(resource.getResourceId())
-          .map(name -> uriToBlobId(name).isPresent())
-          .orElse(true);
+  public boolean isValidResource(DbUserRecentlyModifiedResource resource) {
+    // null if Notebook, Long id otherwise
+    final Long resourceId = Longs.tryParse(resource.getResourceId());
+    switch (resource.getResourceType()) {
+      case COHORT:
+        return cohortService.findByCohortId(resourceId).isPresent();
+      case NOTEBOOK:
+        return Optional.ofNullable(resource.getResourceId())
+            .map(name -> uriToBlobId(name).isPresent())
+            .orElse(true);
+      default:
+        return true;
     }
-    return true;
   }
 
   // TODO: move these to WorkspaceResourceMapper or UserRecentResourceService ?
