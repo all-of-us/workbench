@@ -34,8 +34,8 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -406,11 +406,11 @@ public class UserMetricsControllerTest {
   @Test
   public void testUpdateRecentResource() {
     Timestamp now = new Timestamp(fakeClock.instant().toEpochMilli());
-    DbUserRecentResource mockUserRecentResource = new DbUserRecentResource();
-    mockUserRecentResource.setCohort(null);
+    DbUserRecentlyModifiedResource mockUserRecentResource = new DbUserRecentlyModifiedResource();
     mockUserRecentResource.setWorkspaceId(dbWorkspace2.getWorkspaceId());
     mockUserRecentResource.setUserId(dbUser.getUserId());
-    mockUserRecentResource.setNotebookName("gs://newBucket/notebooks/notebook.ipynb");
+    mockUserRecentResource.setResourceId("gs://newBucket/notebooks/notebook.ipynb");
+    mockUserRecentResource.setResourceType(DbUserRecentlyModifiedResourceType.NOTEBOOK);
     mockUserRecentResource.setLastAccessDate(now);
     when(mockUserRecentResourceService.updateNotebookEntry(
             dbWorkspace2.getWorkspaceId(),
