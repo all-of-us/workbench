@@ -260,11 +260,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Check number of entries in user_recent_resource for user, If it exceeds USER_ENTRY_COUNT,
-   * delete the one with earliest lastAccessTime
+   * Check number of entries in user_recently_modified_resource for user, If it exceeds
+   * USER_ENTRY_COUNT, delete the one with earliest lastAccessTime
    */
   private void handleUserLimit(long userId) {
-    long count = userRecentResourceDao.countUserRecentResourceByUserId(userId);
+    long count = userRecentlyModifiedResourceDao.countByUserId(userId);
     while (count-- >= USER_ENTRY_COUNT) {
       DbUserRecentResource resource =
           userRecentResourceDao.findTopByUserIdOrderByLastAccessDate(userId);

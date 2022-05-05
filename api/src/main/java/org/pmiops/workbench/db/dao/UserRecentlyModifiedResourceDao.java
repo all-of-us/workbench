@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface UserRecentlyModifiedResourceDao
     extends CrudRepository<DbUserRecentlyModifiedResource, Long> {
 
-  long countDbUserRecentResourcesIdsByUserId(long userId);
+  long countByUserId(long userId);
 
   DbUserRecentlyModifiedResource findTopByUserIdOrderByLastAccessDate(long userId);
 
