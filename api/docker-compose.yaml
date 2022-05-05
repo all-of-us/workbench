@@ -4,7 +4,7 @@ services:
   db:
     image: mariadb:10.2
     env_file:
-      - db/vars.env
+      - db/local-vars.env
     volumes:
       - db:/var/lib/mysql
     ports:
