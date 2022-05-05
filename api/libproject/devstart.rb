@@ -80,7 +80,7 @@ def start_local_db_service()
   bm = Benchmark.measure {
     common.run_inline %W{docker-compose up -d db}
 
-    root_pass = Workbench.read_vars_file("db/vars.env")["MYSQL_ROOT_PASSWORD"]
+    root_pass = Workbench.read_vars_file("db/local-vars.env")["MYSQL_ROOT_PASSWORD"]
 
     common.status "waiting up to #{deadlineSec}s for mysql service to start..."
     start = Time.now
@@ -148,7 +148,7 @@ Common.register_command({
 })
 
 def setup_local_environment()
-  ENV.update(Workbench.read_vars_file("db/vars.env"))
+  ENV.update(Workbench.read_vars_file("db/local-vars.env"))
   ENV.update(must_get_env_value("local", :gae_vars))
   ENV.update({"WORKBENCH_ENV" => "local"})
   ENV["DB_HOST"] = "127.0.0.1"
