@@ -157,8 +157,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       String resourceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbUserRecentlyModifiedResource recentResource =
-        userRecentlyModifiedResourceDao.findDbUserRecentResource(
-            userId, workspaceId, resourceType, resourceId);
+        userRecentlyModifiedResourceDao.getResource(userId, workspaceId, resourceType, resourceId);
     if (recentResource == null) {
       recentResource =
           new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
@@ -232,8 +231,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
       String resourceId) {
     DbUserRecentlyModifiedResource resourceById =
-        userRecentlyModifiedResourceDao.findDbUserRecentResource(
-            userId, workspaceId, resourceType, resourceId);
+        userRecentlyModifiedResourceDao.getResource(userId, workspaceId, resourceType, resourceId);
     if (resourceById != null) {
       userRecentlyModifiedResourceDao.delete(resourceById);
     }
@@ -250,9 +248,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId) {
     try {
       return DbRetryUtils.executeAndRetry(
-          () -> userRecentlyModifiedResourceDao.findDbUserRecentResourcesByUserId(userId),
-          Duration.ofSeconds(1),
-          5);
+          () -> userRecentlyModifiedResourceDao.getAllForUser(userId), Duration.ofSeconds(1), 5);
     } catch (InterruptedException e) {
       throw new ServerErrorException(
           "Unable to find Recently Modified Resources for user" + userId);

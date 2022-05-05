@@ -11,7 +11,7 @@ public interface UserRecentlyModifiedResourceDao
 
   DbUserRecentlyModifiedResource findTopByUserIdOrderByLastAccessDate(long userId);
 
-  // Use findDbUserRecentResources() as a shorter equivalent to this magic-JPA-named method
+  // Use getResource() as a shorter equivalent to this magic-JPA-named method
   DbUserRecentlyModifiedResource
       findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
           long userId,
@@ -20,8 +20,8 @@ public interface UserRecentlyModifiedResourceDao
           String resourceId);
 
   // convenience method with a shorter name, for
-  // findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId
-  default DbUserRecentlyModifiedResource findDbUserRecentResource(
+  // findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId()
+  default DbUserRecentlyModifiedResource getResource(
       long userId,
       long workspaceId,
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
@@ -30,13 +30,13 @@ public interface UserRecentlyModifiedResourceDao
         userId, workspaceId, resourceType, resourceId);
   }
 
-  // Use findDbUserRecentResourcesByUserId() as a shorter equivalent to this magic-JPA-named method
+  // Use getAllForUser() as a shorter equivalent to this magic-JPA-named method
   List<DbUserRecentlyModifiedResource>
       findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc(long userId);
 
   // convenience method with a shorter name, for
-  // findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc
-  default List<DbUserRecentlyModifiedResource> findDbUserRecentResourcesByUserId(long userId) {
+  // findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc()
+  default List<DbUserRecentlyModifiedResource> getAllForUser(long userId) {
     return this.findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc(userId);
   }
 }
