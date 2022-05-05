@@ -118,7 +118,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         userRecentResourceService.updateNotebookEntry(
             dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebookPath);
 
-    return ResponseEntity.ok(buildRecentResource(recentResource, fcWorkspace, dbWorkspace));
+    return ResponseEntity.ok(toWorkspaceResource(recentResource, fcWorkspace, dbWorkspace));
   }
 
   @Override
@@ -255,18 +255,20 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     }
   }
 
+  // TODO: move these to WorkspaceResourceMapper or UserRecentResourceService ?
+
   private WorkspaceResource toWorkspaceResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
-    return buildRecentResource(
+    return toWorkspaceResource(
         dbUserRecentlyModifiedResource,
         idToFcWorkspaceResponse.get(workspaceId),
         idToDbWorkspace.get(workspaceId));
   }
 
-  private WorkspaceResource buildRecentResource(
+  private WorkspaceResource toWorkspaceResource(
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
       FirecloudWorkspaceResponse fcWorkspaceResponse,
       DbWorkspace dbWorkspace) {
