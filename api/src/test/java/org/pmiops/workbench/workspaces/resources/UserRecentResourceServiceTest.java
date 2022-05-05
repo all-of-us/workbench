@@ -9,41 +9,52 @@ import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserRecentResourceServiceTest {
 
-  @Autowired UserDao userDao;
-  @Autowired WorkspaceDao workspaceDao;
   @Autowired CohortDao cohortDao;
-  @Autowired UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
+  @Autowired CohortReviewDao cohortReviewDao;
   @Autowired ConceptSetDao conceptSetDao;
+  @Autowired DataSetDao datasetDao;
+  @Autowired UserDao userDao;
+  @Autowired UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
+  @Autowired WorkspaceDao workspaceDao;
   @Autowired UserRecentResourceService userRecentResourceService;
 
   private DbUser user;
   private DbWorkspace workspace;
   private DbCohort cohort;
+  private DbCohortReview cohortReview;
   private DbConceptSet conceptSet;
+  private DbDataset dataset;
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -54,6 +65,14 @@ public class UserRecentResourceServiceTest {
     @Bean
     public Clock clock() {
       return CLOCK;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig getWorkbenchConfig() {
+      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+      config.featureFlags.enableDSCREntryInRecentModified = true;
+      return config;
     }
   }
 
@@ -67,12 +86,20 @@ public class UserRecentResourceServiceTest {
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort = cohortDao.save(cohort);
 
+    cohortReview = new DbCohortReview();
+    cohortReview.setCohortId(cohort.getCohortId());
+    cohortReview = cohortReviewDao.save(cohortReview);
+
     DbConceptSetConceptId dbConceptSetConceptId =
         DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
     conceptSet = new DbConceptSet();
     conceptSet.setWorkspaceId(workspace.getWorkspaceId());
     conceptSet.setConceptSetConceptIds(ImmutableSet.of(dbConceptSetConceptId));
     conceptSet = conceptSetDao.save(conceptSet);
+
+    dataset = new DbDataset();
+    dataset.setWorkspaceId(workspace.getWorkspaceId());
+    dataset = datasetDao.save(dataset);
   }
 
   @Test
@@ -93,6 +120,23 @@ public class UserRecentResourceServiceTest {
   }
 
   @Test
+  public void testInsertCohortReviewEntry() {
+    userRecentResourceService.updateCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+
+    DbCohortReview newCohortReview = new DbCohortReview();
+    newCohortReview.setCohortId(cohortReview.getCohortId());
+    newCohortReview = cohortReviewDao.save(newCohortReview);
+
+    userRecentResourceService.updateCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), newCohortReview.getCohortReviewId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(2);
+  }
+
+  @Test
   public void testInsertConceptSetEntry() {
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
@@ -103,6 +147,21 @@ public class UserRecentResourceServiceTest {
     newConceptSet = conceptSetDao.save(newConceptSet);
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), newConceptSet.getConceptSetId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(2);
+  }
+
+  @Test
+  public void testInsertDatasetEntry() {
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    DbDataset newDataset = new DbDataset();
+    newDataset.setWorkspaceId(workspace.getWorkspaceId());
+    newDataset = datasetDao.save(newDataset);
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), newDataset.getDataSetId());
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(2);
   }
@@ -133,6 +192,19 @@ public class UserRecentResourceServiceTest {
   }
 
   @Test
+  public void testUpdateCohortReviewAccessTime() {
+    userRecentResourceService.updateCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    CLOCK.increment(20000);
+    userRecentResourceService.updateCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+  }
+
+  @Test
   public void testUpdateConceptSetAccessTime() {
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
@@ -141,6 +213,19 @@ public class UserRecentResourceServiceTest {
     CLOCK.increment(20000);
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+  }
+
+  @Test
+  public void testUpdateDatasetAccessTime() {
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    CLOCK.increment(20000);
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(1);
   }
@@ -199,9 +284,6 @@ public class UserRecentResourceServiceTest {
     assertThat(cache).isNull();
   }
 
-  //  We do test notebook deletion because it is a path reference
-  //  We do not test cohort or concept deletion because these are fk refs with
-  //  on delete cascade rule in place (no need to test db functionality)
   @Test
   public void testDeleteNotebookEntry() {
     userRecentResourceService.updateNotebookEntry(
@@ -220,6 +302,94 @@ public class UserRecentResourceServiceTest {
     assertThat(rowsCount).isEqualTo(0);
     userRecentResourceService.deleteNotebookEntry(
         workspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory1/notebooks/notebook");
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteCohortEntry() {
+    userRecentResourceService.updateCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    userRecentResourceService.deleteCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteNonExistentCohortEntry() {
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+    userRecentResourceService.deleteCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteCohortReviewEntry() {
+    userRecentResourceService.updateCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    userRecentResourceService.deleteCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteNonExistentCohortReviewEntry() {
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+    userRecentResourceService.deleteCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteConceptSetEntry() {
+    userRecentResourceService.updateConceptSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    userRecentResourceService.deleteConceptSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteNonExistentConceptSetEntry() {
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+    userRecentResourceService.deleteConceptSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteDatasetEntry() {
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
+    userRecentResourceService.deleteDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
+    rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteNonExistentDatasetEntry() {
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+    userRecentResourceService.deleteDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(0);
   }
