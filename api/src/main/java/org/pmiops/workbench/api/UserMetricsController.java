@@ -4,18 +4,18 @@ import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -141,14 +141,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     List<DbUserRecentlyModifiedResource> userRecentlyModifiedResourceList =
         userRecentResourceService.findAllRecentlyModifiedResourcesByUser(userId);
 
-    Set<Long> workspaceIds =
-        userRecentlyModifiedResourceList.stream()
-            .map(DbUserRecentlyModifiedResource::getWorkspaceId)
-            .distinct()
-            .limit(distinctWorkspaceLimit)
-            .collect(Collectors.toSet());
-
-    final Map<Long, DbWorkspace> idToDbWorkspace = getDbWorkspaceMap(workspaceIds);
+    final Map<Long, DbWorkspace> idToDbWorkspace =
+        getDbWorkspaceMap(userRecentlyModifiedResourceList);
     final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
         getFcWorkspaceMap(idToDbWorkspace);
 
@@ -171,14 +165,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // of the notebooks to keep the cache up-to-date from here.
     final Set<BlobId> foundBlobIds = getBlobIds(workspaceFilteredResources);
 
-    final ImmutableList<WorkspaceResource> userVisibleRecentResources =
+    final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
+    recentResponse.addAll(
         workspaceFilteredResources.stream()
             .filter(urr -> foundBlobIdsContainsUserRecentlyModifiedResource(foundBlobIds, urr))
             .map(urr -> toWorkspaceResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
-            .collect(ImmutableList.toImmutableList());
-
-    final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
-    recentResponse.addAll(userVisibleRecentResources);
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(recentResponse);
   }
 
@@ -197,20 +189,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .collect(Collectors.toList()));
   }
 
-  private Map<Long, DbWorkspace> getDbWorkspaceMap(Collection<Long> workspaceIdList) {
-    return workspaceIdList.stream()
-        .map(
-            id ->
-                workspaceDao
-                    .findActiveByWorkspaceId(id)
-                    .map(
-                        dbWorkspace ->
-                            new AbstractMap.SimpleImmutableEntry<>(
-                                dbWorkspace.getWorkspaceId(), dbWorkspace)))
+  private Map<Long, DbWorkspace> getDbWorkspaceMap(
+      Collection<DbUserRecentlyModifiedResource> recentResources) {
+    return recentResources.stream()
+        .map(DbUserRecentlyModifiedResource::getWorkspaceId)
+        .distinct()
+        .limit(distinctWorkspaceLimit)
+        .map(workspaceDao::findActiveByWorkspaceId)
         .flatMap(Streams::stream)
-        .collect(
-            ImmutableMap.toImmutableMap(
-                SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+        .collect(Collectors.toMap(DbWorkspace::getWorkspaceId, Function.identity()));
   }
 
   private Map<Long, FirecloudWorkspaceResponse> getFcWorkspaceMap(
@@ -225,9 +212,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                             new AbstractMap.SimpleImmutableEntry<>(
                                 entry.getKey(), workspaceResponse)))
         .flatMap(Streams::stream)
-        .collect(
-            ImmutableMap.toImmutableMap(
-                SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
   }
 
   private boolean foundBlobIdsContainsUserRecentlyModifiedResource(
