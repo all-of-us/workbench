@@ -246,9 +246,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .flatMap(id -> dataSetService.getDbDataSet(resource.getWorkspaceId(), id))
             .isPresent();
       case NOTEBOOK:
-        return Optional.ofNullable(resource.getResourceId())
-            .map(name -> uriToBlobId(name).isPresent())
-            .orElse(true);
+        // if the resource ID string exists, validate it
+        // but null is also OK
+        return (resource.getResourceId() == null)
+            || uriToBlobId(resource.getResourceId()).isPresent();
       default:
         return true;
     }
