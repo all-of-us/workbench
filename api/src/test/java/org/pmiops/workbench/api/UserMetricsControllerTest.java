@@ -139,6 +139,8 @@ public class UserMetricsControllerTest {
     dbConceptSet.setCreationTime(new Timestamp(fakeClock.millis()));
     when(mockConceptSetService.getDbConceptSet(2L, dbConceptSet.getConceptSetId()))
         .thenReturn(dbConceptSet);
+    when(mockConceptSetService.maybeGetDbConceptSet(2L, dbConceptSet.getConceptSetId()))
+        .thenReturn(Optional.of(dbConceptSet));
 
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(1L);

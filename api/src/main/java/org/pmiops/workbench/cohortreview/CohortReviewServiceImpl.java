@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
@@ -513,6 +514,11 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     List<FieldValue> row = result.iterateAll().iterator().next();
     long cohortCount = bigQueryService.getLong(row, rm.get("count"));
     return cohortCount;
+  }
+
+  @Override
+  public Optional<DbCohortReview> maybeFindDbCohortReview(Long cohortReviewId) {
+    return Optional.ofNullable(cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId));
   }
 
   private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(

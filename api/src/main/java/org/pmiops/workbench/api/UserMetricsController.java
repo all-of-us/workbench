@@ -236,6 +236,16 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     switch (resource.getResourceType()) {
       case COHORT:
         return resourceId.flatMap(cohortService::findByCohortId).isPresent();
+      case COHORT_REVIEW:
+        return resourceId.flatMap(cohortReviewService::maybeFindDbCohortReview).isPresent();
+      case CONCEPT_SET:
+        return resourceId
+            .flatMap(id -> conceptSetService.maybeGetDbConceptSet(resource.getWorkspaceId(), id))
+            .isPresent();
+      case DATA_SET:
+        return resourceId
+            .flatMap(id -> dataSetService.getDbDataSet(resource.getWorkspaceId(), id))
+            .isPresent();
       case NOTEBOOK:
         return Optional.ofNullable(resource.getResourceId())
             .map(name -> uriToBlobId(name).isPresent())

@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -126,4 +127,6 @@ public interface CohortReviewService {
   List<Vocabulary> findVocabularies();
 
   Long participationCount(DbCohort dbCohort);
+
+  Optional<DbCohortReview> maybeFindDbCohortReview(Long cohortReviewId);
 }
