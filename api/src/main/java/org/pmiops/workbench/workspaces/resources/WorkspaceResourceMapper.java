@@ -16,7 +16,6 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -89,12 +88,6 @@ public interface WorkspaceResourceMapper {
   ResourceFields fromNotebookNameAndLastModified(
       String notebook, Timestamp lastModifiedEpochMillis);
 
-  @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
-  @Mapping(target = "notebook", source = "notebookName")
-  @Mapping(target = "lastModifiedEpochMillis", source = "lastAccessDate")
-  ResourceFields fromDbUserRecentResource(DbUserRecentResource dbUserRecentResource);
-
   @Mapping(target = "permission", source = "accessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
       WorkspaceFields workspaceFields,
@@ -132,15 +125,6 @@ public interface WorkspaceResourceMapper {
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset) {
     return mergeWorkspaceAndResourceFields(
         fromWorkspace(dbWorkspace), accessLevel, fromDbDataset(dbDataset));
-  }
-
-  @Deprecated
-  default WorkspaceResource fromDbUserRecentResource(
-      DbUserRecentResource dbUserRecentResource,
-      FirecloudWorkspaceResponse fcWorkspace,
-      DbWorkspace dbWorkspace) {
-    return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), fcWorkspace, fromDbUserRecentResource(dbUserRecentResource));
   }
 
   default WorkspaceResource fromDbUserRecentlyModifiedResource(
