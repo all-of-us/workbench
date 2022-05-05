@@ -142,12 +142,6 @@ describe('Genomics Extraction Test', () => {
     const historyTable = genomicExtractionsHistorySidebar.getHistoryTable();
     await historyTable.waitUntilVisible();
 
-    // Verify table column names.
-    const columnNames = await historyTable.getColumnNames();
-    expect(columnNames).toEqual(
-      expect.arrayContaining(['DATASET NAME', 'STATUS', 'DATE STARTED', 'COST', 'SIZE', 'DURATION'])
-    );
-
     // Verify row count is 1.
     const rowCount = await historyTable.getRowCount();
     expect(rowCount).toBeGreaterThanOrEqual(1);
