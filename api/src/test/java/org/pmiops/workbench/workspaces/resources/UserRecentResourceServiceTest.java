@@ -190,7 +190,7 @@ public class UserRecentResourceServiceTest {
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
     DbUserRecentlyModifiedResource cache =
-        userRecentlyModifiedResourceDao.findDbUserRecentResources(
+        userRecentlyModifiedResourceDao.findDbUserRecentResource(
             newWorkspace.getWorkspaceId(),
             user.getUserId(),
             DbUserRecentlyModifiedResourceType.NOTEBOOK,

@@ -53,7 +53,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * a new entry
    */
   @Override
-  public DbUserRecentResource updateNotebookEntry(
+  public DbUserRecentlyModifiedResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
@@ -64,13 +64,13 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       handleUserLimit(userId);
       recentResource = new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, now);
     }
-    recentResource.setLastAccessDate(now);
-    updateUserRecentlyModifiedResourceEntry(
+    userRecentResourceDao.save(recentResource.setLastAccessDate(now));
+
+    return updateUserRecentlyModifiedResourceEntry(
         workspaceId,
         userId,
         DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK,
         notebookNameWithPath);
-    return userRecentResourceDao.save(recentResource);
   }
 
   /**
@@ -150,22 +150,22 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     return resource;
   }
 
-  private void updateUserRecentlyModifiedResourceEntry(
+  private DbUserRecentlyModifiedResource updateUserRecentlyModifiedResourceEntry(
       long workspaceId,
       long userId,
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
       String resourceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbUserRecentlyModifiedResource recentResourcesId =
-        userRecentlyModifiedResourceDao.findDbUserRecentResources(
+    DbUserRecentlyModifiedResource recentResource =
+        userRecentlyModifiedResourceDao.findDbUserRecentResource(
             userId, workspaceId, resourceType, resourceId);
-    if (recentResourcesId == null) {
-      recentResourcesId =
+    if (recentResource == null) {
+      recentResource =
           new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
     } else {
-      recentResourcesId.setLastAccessDate(now);
+      recentResource.setLastAccessDate(now);
     }
-    userRecentlyModifiedResourceDao.save(recentResourcesId);
+    return userRecentlyModifiedResourceDao.save(recentResource);
   }
 
   /** Deletes notebook entry from user_recent_resource and user_recently_modified_resource */
@@ -232,7 +232,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
       String resourceId) {
     DbUserRecentlyModifiedResource resourceById =
-        userRecentlyModifiedResourceDao.findDbUserRecentResources(
+        userRecentlyModifiedResourceDao.findDbUserRecentResource(
             userId, workspaceId, resourceType, resourceId);
     if (resourceById != null) {
       userRecentlyModifiedResourceDao.delete(resourceById);
