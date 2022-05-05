@@ -190,12 +190,11 @@ public class UserRecentResourceServiceTest {
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
     DbUserRecentlyModifiedResource cache =
-        userRecentlyModifiedResourceDao
-            .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                newWorkspace.getWorkspaceId(),
-                user.getUserId(),
-                DbUserRecentlyModifiedResourceType.NOTEBOOK,
-                "gs://someDirectory1/notebooks/notebook");
+        userRecentlyModifiedResourceDao.findDbUserRecentResources(
+            newWorkspace.getWorkspaceId(),
+            user.getUserId(),
+            DbUserRecentlyModifiedResourceType.NOTEBOOK,
+            "gs://someDirectory1/notebooks/notebook");
 
     assertThat(cache).isNull();
   }
