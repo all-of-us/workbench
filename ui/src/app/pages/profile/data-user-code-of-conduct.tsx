@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
@@ -7,6 +8,7 @@ import { Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { flexStyle } from 'app/components/flex';
 import { HtmlViewer } from 'app/components/html-viewer';
 import { TextInput } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
@@ -56,18 +58,43 @@ const styles = reactStyles({
     fontSize: 10,
     borderRadius: 6,
   },
+  signedText: {
+    margin: '0 1ex',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    textDecoration: 'underline',
+  },
 });
+
+// TODO parameterize these
+const V4_PATH = '/data-user-code-of-conduct-v4.html';
+const V4_HEIGHT = '85rem';
 
 export enum DataUserCodeOfConductPage {
   CONTENT,
   SIGNATURE,
 }
 
-const DuccTextInput = (props) => {
+export const enum DuccSignatureState {
+  UNSIGNED,
+  SIGNED,
+}
+
+interface DuccTextInputProps {
+  value?: string;
+  placeholder?: string;
+  onChange?: (v: string) => void;
+  dataTestId?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  type?: string;
+}
+const DuccTextInput = (props: DuccTextInputProps) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   return (
     <TextInput
-      {...fp.omit(['data-test-id'], props)}
+      {...fp.omit(['data-test-id', 'dataTestId'], props)}
+      data-test-id={props.dataTestId}
       style={{
         ...styles.textInput,
         ...props.style,
@@ -76,22 +103,47 @@ const DuccTextInput = (props) => {
   );
 };
 
-const InitialsAgreement = (props) => {
-  return (
-    <div style={{ display: 'flex', marginTop: '0.5rem' }}>
+const SignedText = (props: { text: string }) => (
+  // add 2 spaces before and after to simulate a signature line
+  <span style={styles.signedText}>&nbsp;&nbsp;{props.text}&nbsp;&nbsp;</span>
+);
+
+interface ReadOnlyProps extends DuccTextInputProps {
+  signatureState: DuccSignatureState;
+}
+const ReadOnlyTextField = (props: ReadOnlyProps) =>
+  props.signatureState === DuccSignatureState.UNSIGNED ? (
+    <DuccTextInput {...fp.omit(['signatureState'], props)} disabled={true} />
+  ) : (
+    <SignedText text={props.value} />
+  );
+
+interface InitialsProps {
+  signatureState: DuccSignatureState;
+  onChange: (v: string) => void;
+  signedValue?: string;
+  children;
+}
+
+const InitialsAgreement = (props: InitialsProps) => (
+  <div style={{ display: 'flex', marginTop: '0.5rem' }}>
+    {props.signatureState === DuccSignatureState.SIGNED && (
+      <SignedText text={props.signedValue?.toLocaleUpperCase()} />
+    )}
+    {props.signatureState === DuccSignatureState.UNSIGNED && (
       <DuccTextInput
         onChange={props.onChange}
-        value={props.value}
         placeholder='INITIALS'
-        data-test-id='ducc-initials-input'
+        dataTestId='ducc-initials-input'
         style={{ width: '4ex', textAlign: 'center', padding: 0 }}
       />
-      <div style={{ marginLeft: '0.5rem' }}>{props.children}</div>
-    </div>
-  );
-};
+    )}
+    <div style={{ marginLeft: '0.5rem' }}>{props.children}</div>
+  </div>
+);
 
 interface ContentProps {
+  signatureState: DuccSignatureState;
   buttonDisabled: boolean;
   onLastPage: () => void;
   onClick: () => void;
@@ -100,32 +152,35 @@ const DuccContentPage = (props: ContentProps) => (
   <>
     <HtmlViewer
       ariaLabel='data user code of conduct agreement'
-      containerStyles={{ margin: '2rem 0 1rem' }}
-      filePath={'/data-user-code-of-conduct-v4.html'}
+      containerStyles={{ margin: '2rem 0 1rem', height: V4_HEIGHT }}
+      filePath={V4_PATH}
       onLastPage={() => props.onLastPage()}
     />
-    <FlexRow style={styles.dataUserCodeOfConductFooter}>
-      Please read the above document in its entirety before proceeding to sign
-      the Data User Code of Conduct.
-      <Button
-        type={'link'}
-        style={{ marginLeft: 'auto' }}
-        onClick={() => history.back()}
-      >
-        Back
-      </Button>
-      <Button
-        data-test-id={'ducc-next-button'}
-        disabled={props.buttonDisabled}
-        onClick={() => props.onClick()}
-      >
-        Proceed
-      </Button>
-    </FlexRow>
+    {props.signatureState === DuccSignatureState.UNSIGNED && (
+      <FlexRow style={styles.dataUserCodeOfConductFooter}>
+        Please read the above document in its entirety before proceeding to sign
+        the Data User Code of Conduct.
+        <Button
+          type={'link'}
+          style={{ marginLeft: 'auto' }}
+          onClick={() => history.back()}
+        >
+          Back
+        </Button>
+        <Button
+          data-test-id={'ducc-next-button'}
+          disabled={props.buttonDisabled}
+          onClick={() => props.onClick()}
+        >
+          Proceed
+        </Button>
+      </FlexRow>
+    )}
   </>
 );
 
 interface SignatureProps {
+  signatureState: DuccSignatureState;
   errors;
   submitting: boolean;
   fullName: string;
@@ -140,35 +195,46 @@ const DuccSignaturePage = (props: SignatureProps) => (
   <>
     <FlexColumn>
       {props.submitting && <SpinnerOverlay />}
-      <h1>Accept Data User Code of Conduct</h1>
+      {props.signatureState === DuccSignatureState.UNSIGNED && (
+        <h1>Accept Data User Code of Conduct</h1>
+      )}
       <div style={{ ...styles.bold, ...styles.smallTopMargin }}>
-        I
-        <DuccTextInput
+        I,
+        <ReadOnlyTextField
+          signatureState={props.signatureState}
           style={{ margin: '0 1ex' }}
-          disabled
           value={props.fullName}
-          data-test-id='ducc-name-input'
+          dataTestId='ducc-name-input'
         />
-        ("Authorized Data User") have personally reviewed this Data User Code of
-        Conduct. I agree to follow each of the policies and procedures it
+        ("Authorized Data User"), have personally reviewed this Data User Code
+        of Conduct. I agree to follow each of the policies and procedures it
         describes.
       </div>
       <div style={styles.smallTopMargin}>
         By entering my initials next to each statement below, I acknowledge
         that:
       </div>
-      <InitialsAgreement onChange={(v) => props.onChangeMonitoring(v)}>
+      <InitialsAgreement
+        onChange={(v) => props.onChangeMonitoring(v)}
+        signatureState={props.signatureState}
+      >
         My work, including any external data, files, or software I upload into
         the Researcher Workbench, will be logged and monitored by the <AoU />{' '}
         Research Program to ensure compliance with policies and procedures.
       </InitialsAgreement>
-      <InitialsAgreement onChange={(v) => props.onChangePublic(v)}>
+      <InitialsAgreement
+        onChange={(v) => props.onChangePublic(v)}
+        signatureState={props.signatureState}
+      >
         My name, affiliation, profile information and research description will
         be made public. My research description will be used by the <AoU />{' '}
         Research Program to provide participants with meaningful information
         about the research being conducted.
       </InitialsAgreement>
-      <InitialsAgreement onChange={(v) => props.onChangeAccess(v)}>
+      <InitialsAgreement
+        onChange={(v) => props.onChangeAccess(v)}
+        signatureState={props.signatureState}
+      >
         <AoU /> retains the discretion to make decisions about my access,
         including the provision or revocation thereof, at any time that take
         into account any data use violations, data management incidents,
@@ -202,54 +268,57 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <label style={{ ...styles.bold, ...styles.largeTopMargin }}>
         Authorized Data User Name
       </label>
-      <DuccTextInput
+      <ReadOnlyTextField
+        signatureState={props.signatureState}
         disabled
-        data-test-id='ducc-username-input'
+        dataTestId='ducc-username-input'
         value={props.fullName}
       />
       <label style={{ ...styles.bold, ...styles.largeTopMargin }}>
         User ID
       </label>
-      <DuccTextInput
-        disabled
-        data-test-id='ducc-user-id-input'
+      <ReadOnlyTextField
+        signatureState={props.signatureState}
+        dataTestId='ducc-user-id-input'
         value={props.username}
       />
       <label style={{ ...styles.bold, ...styles.largeTopMargin }}>Date</label>
-      <DuccTextInput
+      <ReadOnlyTextField
+        signatureState={props.signatureState}
         type='text'
-        disabled
         value={new Date().toLocaleDateString()}
       />
     </FlexColumn>
-    <FlexRow style={styles.dataUserCodeOfConductFooter}>
-      <Button
-        type={'link'}
-        style={{ marginLeft: 'auto' }}
-        onClick={() => props.onBack()}
-      >
-        Back
-      </Button>
-      <TooltipTrigger
-        content={
-          props.errors && (
-            <div>
-              <div>All fields must be initialed</div>
-              <div>All initials must match</div>
-              <div>Initials must be six letters or fewer</div>
-            </div>
-          )
-        }
-      >
+    {props.signatureState === DuccSignatureState.UNSIGNED && (
+      <FlexRow style={styles.dataUserCodeOfConductFooter}>
         <Button
-          data-test-id={'submit-ducc-button'}
-          disabled={props.errors || props.submitting}
-          onClick={() => props.onAccept()}
+          type='link'
+          style={{ marginLeft: 'auto' }}
+          onClick={() => props.onBack()}
         >
-          Accept
+          Back
         </Button>
-      </TooltipTrigger>
-    </FlexRow>
+        <TooltipTrigger
+          content={
+            props.errors && (
+              <div>
+                <div>All fields must be initialed</div>
+                <div>All initials must match</div>
+                <div>Initials must be six letters or fewer</div>
+              </div>
+            )
+          }
+        >
+          <Button
+            data-test-id='submit-ducc-button'
+            disabled={props.errors || props.submitting}
+            onClick={() => props.onAccept()}
+          >
+            Accept
+          </Button>
+        </TooltipTrigger>
+      </FlexRow>
+    )}
   </>
 );
 
@@ -262,6 +331,7 @@ interface Props
     reload: Function;
     updateCache: Function;
   };
+  signatureState: DuccSignatureState;
 }
 
 interface State {
@@ -327,6 +397,7 @@ export const DataUserCodeOfConduct = fp.flow(
     render() {
       const {
         profileState: { profile },
+        signatureState,
       } = this.props;
       const {
         proceedDisabled,
@@ -354,10 +425,18 @@ export const DataUserCodeOfConduct = fp.flow(
         }
       );
 
+      const containerStyle: CSSProperties = {
+        ...styles.dataUserCodeOfConductPage,
+        ...(signatureState === DuccSignatureState.UNSIGNED &&
+          // FlexColumn is appropriate styling only for the UNSIGNED case, due to iframe height styling conflicts
+          flexStyle.column),
+      };
       return (
-        <FlexColumn style={styles.dataUserCodeOfConductPage}>
-          {page === DataUserCodeOfConductPage.CONTENT && (
+        <div style={containerStyle}>
+          {(signatureState === DuccSignatureState.SIGNED ||
+            page === DataUserCodeOfConductPage.CONTENT) && (
             <DuccContentPage
+              {...{ signatureState }}
               buttonDisabled={proceedDisabled}
               onLastPage={() => this.setState({ proceedDisabled: false })}
               onClick={() =>
@@ -365,9 +444,10 @@ export const DataUserCodeOfConduct = fp.flow(
               }
             />
           )}
-          {page === DataUserCodeOfConductPage.SIGNATURE && (
+          {(signatureState === DuccSignatureState.SIGNED ||
+            page === DataUserCodeOfConductPage.SIGNATURE) && (
             <DuccSignaturePage
-              {...{ errors, submitting }}
+              {...{ errors, submitting, signatureState }}
               fullName={profile.givenName + ' ' + profile.familyName}
               username={profile.username}
               onChangeMonitoring={(v) =>
@@ -390,7 +470,7 @@ export const DataUserCodeOfConduct = fp.flow(
               }}
             />
           )}
-        </FlexColumn>
+        </div>
       );
     }
   }

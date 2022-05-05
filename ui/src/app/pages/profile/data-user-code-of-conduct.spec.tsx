@@ -4,7 +4,10 @@ import { mount } from 'enzyme';
 
 import { ProfileApi } from 'generated/fetch';
 
-import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
+import {
+  DataUserCodeOfConduct,
+  DuccSignatureState,
+} from 'app/pages/profile/data-user-code-of-conduct';
 import {
   profileApi,
   registerApiClient,
@@ -27,7 +30,11 @@ describe('DataUserCodeOfConduct', () => {
   const component = () =>
     mount(
       <MemoryRouter>
-        <DataUserCodeOfConduct hideSpinner={() => {}} showSpinner={() => {}} />
+        <DataUserCodeOfConduct
+          signatureState={DuccSignatureState.UNSIGNED}
+          hideSpinner={() => {}}
+          showSpinner={() => {}}
+        />
       </MemoryRouter>
     );
 
@@ -84,10 +91,6 @@ describe('DataUserCodeOfConduct', () => {
       wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')
     ).toBeTruthy();
 
-    // fill required fields
-    wrapper
-      .find('[data-test-id="ducc-name-input"]')
-      .simulate('change', { target: { value: 'Fake Name' } });
     // add initials to just one initials input field.
     wrapper
       .find('[data-test-id="ducc-initials-input"]')
@@ -108,13 +111,15 @@ describe('DataUserCodeOfConduct', () => {
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find('[data-test-id="ducc-name-input"]').props().value).toBe(
+    expect(
+      wrapper.find('[data-test-id="ducc-name-input"]').first().props().value
+    ).toBe(
       ProfileStubVariables.PROFILE_STUB.givenName +
         ' ' +
         ProfileStubVariables.PROFILE_STUB.familyName
     );
     expect(
-      wrapper.find('[data-test-id="ducc-user-id-input"]').props().value
+      wrapper.find('[data-test-id="ducc-user-id-input"]').first().props().value
     ).toBe(ProfileStubVariables.PROFILE_STUB.username);
   });
 
@@ -131,10 +136,6 @@ describe('DataUserCodeOfConduct', () => {
       wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')
     ).toBeTruthy();
 
-    // fill required fields
-    wrapper
-      .find('[data-test-id="ducc-name-input"]')
-      .simulate('change', { target: { value: 'Fake Name' } });
     // add initials to each initials input field.
     wrapper.find('[data-test-id="ducc-initials-input"]').forEach((node) => {
       node.simulate('change', { target: { value: 'XX' } });

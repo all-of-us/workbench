@@ -25,7 +25,10 @@ import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { Homepage } from 'app/pages/homepage/homepage';
-import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
+import {
+  DataUserCodeOfConduct,
+  DuccSignatureState,
+} from 'app/pages/profile/data-user-code-of-conduct';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import {
   WorkspaceEdit,
@@ -294,6 +297,8 @@ export const SignedInRoutes = () => {
             title: 'Data User Code of Conduct',
             minimizeChrome: true,
           }}
+          // see RW-8126 and RW-8296
+          signatureState={DuccSignatureState.UNSIGNED}
         />
       </AppRoute>
       <AppRoute exact path='/profile'>
