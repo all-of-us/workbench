@@ -21,7 +21,7 @@ public interface UserRecentlyModifiedResourceDao
 
   // convenience method with a shorter name, for
   // findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId
-  default DbUserRecentlyModifiedResource findDbUserRecentResources(
+  default DbUserRecentlyModifiedResource findDbUserRecentResource(
       long userId,
       long workspaceId,
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
