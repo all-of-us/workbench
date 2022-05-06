@@ -181,6 +181,8 @@ const DuccContentPage = (props: ContentProps) => (
 
 interface SignatureProps {
   signatureState: DuccSignatureState;
+  signedInitials?: string;
+  signedDate?: number;
   errors;
   submitting: boolean;
   fullName: string;
@@ -217,6 +219,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <InitialsAgreement
         onChange={(v) => props.onChangeMonitoring(v)}
         signatureState={props.signatureState}
+        signedValue={props.signedInitials}
       >
         My work, including any external data, files, or software I upload into
         the Researcher Workbench, will be logged and monitored by the <AoU />{' '}
@@ -225,6 +228,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <InitialsAgreement
         onChange={(v) => props.onChangePublic(v)}
         signatureState={props.signatureState}
+        signedValue={props.signedInitials}
       >
         My name, affiliation, profile information and research description will
         be made public. My research description will be used by the <AoU />{' '}
@@ -234,6 +238,7 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <InitialsAgreement
         onChange={(v) => props.onChangeAccess(v)}
         signatureState={props.signatureState}
+        signedValue={props.signedInitials}
       >
         <AoU /> retains the discretion to make decisions about my access,
         including the provision or revocation thereof, at any time that take
@@ -286,7 +291,11 @@ const DuccSignaturePage = (props: SignatureProps) => (
       <ReadOnlyTextField
         signatureState={props.signatureState}
         type='text'
-        value={new Date().toLocaleDateString()}
+        value={
+          props.signedDate
+            ? new Date(props.signedDate).toLocaleDateString()
+            : new Date().toLocaleDateString()
+        }
       />
     </FlexColumn>
     {props.signatureState === DuccSignatureState.UNSIGNED && (
@@ -396,7 +405,15 @@ export const DataUserCodeOfConduct = fp.flow(
 
     render() {
       const {
-        profileState: { profile },
+        profileState: {
+          profile: {
+            username,
+            givenName,
+            familyName,
+            duccSignedInitials,
+            duccCompletionTimeEpochMillis,
+          },
+        },
         signatureState,
       } = this.props;
       const {
@@ -447,9 +464,10 @@ export const DataUserCodeOfConduct = fp.flow(
           {(signatureState === DuccSignatureState.SIGNED ||
             page === DataUserCodeOfConductPage.SIGNATURE) && (
             <DuccSignaturePage
-              {...{ errors, submitting, signatureState }}
-              fullName={profile.givenName + ' ' + profile.familyName}
-              username={profile.username}
+              {...{ errors, submitting, signatureState, username }}
+              fullName={givenName + ' ' + familyName}
+              signedInitials={duccSignedInitials}
+              signedDate={duccCompletionTimeEpochMillis}
               onChangeMonitoring={(v) =>
                 this.setState({ initialMonitoring: v })
               }

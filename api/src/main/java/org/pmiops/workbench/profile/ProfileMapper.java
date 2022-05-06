@@ -36,6 +36,8 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.aouAgreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
   @Mapping(source = "dbUser.duccAgreement.signedVersion", target = "duccSignedVersion")
+  @Mapping(source = "dbUser.duccAgreement.userInitials", target = "duccSignedInitials")
+  @Mapping(source = "dbUser.duccAgreement.completionTime", target = "duccCompletionTimeEpochMillis")
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
