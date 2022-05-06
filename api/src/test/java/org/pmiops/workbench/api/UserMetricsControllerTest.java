@@ -467,6 +467,8 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResource_deleted_cohort() {
+    // input resources: Notebook, Cohort, Concept Set
+
     // simulate a deleted cohort
     when(mockCohortService.findByCohortId(dbCohort.getCohortId())).thenReturn(Optional.empty());
     // and confirm that the recent-resource DB entry is not empty
@@ -476,6 +478,9 @@ public class UserMetricsControllerTest {
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
     assertThat(recentResources).isNotNull();
+
+    // expected resources: Notebook and Concept Set (Cohort was deleted)
+
     assertThat(recentResources.size()).isEqualTo(2);
     assertThat(recentResources.get(0).getNotebook()).isNotNull();
     assertThat(recentResources.get(1).getConceptSet()).isNotNull();
@@ -483,6 +488,8 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResource_deleted_conceptSet() {
+    // input resources: Notebook, Cohort, Concept Set
+
     // simulate a deleted concept set
     when(mockConceptSetService.maybeGetDbConceptSet(any(), any())).thenReturn(Optional.empty());
     // and confirm that the recent-resource DB entry is not empty
@@ -492,6 +499,9 @@ public class UserMetricsControllerTest {
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
     assertThat(recentResources).isNotNull();
+
+    // expected resources: Notebook and Cohort (Concept Set was deleted)
+
     assertThat(recentResources.size()).isEqualTo(2);
     assertThat(recentResources.get(0).getNotebook()).isNotNull();
     assertThat(recentResources.get(1).getCohort()).isNotNull();
