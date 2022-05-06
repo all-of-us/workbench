@@ -120,68 +120,73 @@ public class UserMetricsControllerTest {
     final DbCdrVersion dbCdrVersion =
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
-    dbUser = new DbUser();
-    dbUser.setUserId(123L);
+    dbUser = new DbUser().setUserId(123L);
 
-    dbWorkspace1 = new DbWorkspace();
-    dbWorkspace1.setWorkspaceId(1L);
-    dbWorkspace1.setWorkspaceNamespace("workspaceNamespace1");
-    dbWorkspace1.setFirecloudName("firecloudname1");
-    dbWorkspace1.setCdrVersion(dbCdrVersion);
+    dbWorkspace1 =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceId(1L)
+                .setWorkspaceNamespace("workspaceNamespace1")
+                .setFirecloudName("firecloudname1")
+                .setCdrVersion(dbCdrVersion));
 
-    dbWorkspace2 = new DbWorkspace();
-    dbWorkspace2.setWorkspaceId(2L);
-    dbWorkspace2.setWorkspaceNamespace("workspaceNamespace2");
-    dbWorkspace2.setFirecloudName("firecloudName2");
-    dbWorkspace2.setCdrVersion(dbCdrVersion);
+    dbWorkspace2 =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceId(2L)
+                .setWorkspaceNamespace("workspaceNamespace2")
+                .setFirecloudName("firecloudName2")
+                .setCdrVersion(dbCdrVersion));
 
-    dbCohort = new DbCohort();
-    dbCohort.setName("Cohort Name");
-    dbCohort.setCreator(dbUser);
-    dbCohort.setCohortId(1L);
-    dbCohort.setDescription("Cohort description");
-    dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
-    dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
+    dbCohort =
+        new DbCohort()
+            .setName("Cohort Name")
+            .setCreator(dbUser)
+            .setCohortId(1L)
+            .setDescription("Cohort description")
+            .setLastModifiedTime(new Timestamp(fakeClock.millis()))
+            .setCreationTime(new Timestamp(fakeClock.millis()));
     stubCohort(dbCohort);
 
-    dbConceptSet = new DbConceptSet();
-    dbConceptSet.setName("Concept Set");
-    dbConceptSet.setDescription("This is a Condition Concept Set");
-    dbConceptSet.setConceptSetId(1L);
-    dbConceptSet.setDomainEnum(Domain.CONDITION);
-    dbConceptSet.setLastModifiedTime(new Timestamp(fakeClock.millis()));
-    dbConceptSet.setCreationTime(new Timestamp(fakeClock.millis()));
+    dbConceptSet =
+        new DbConceptSet()
+            .setName("Concept Set")
+            .setDescription("This is a Condition Concept Set")
+            .setConceptSetId(1L)
+            .setDomainEnum(Domain.CONDITION)
+            .setLastModifiedTime(new Timestamp(fakeClock.millis()))
+            .setCreationTime(new Timestamp(fakeClock.millis()));
     stubConceptSet(dbConceptSet, dbWorkspace2.getWorkspaceId());
 
-    dbUserRecentlyModifiedResource1 = new DbUserRecentlyModifiedResource();
-    dbUserRecentlyModifiedResource1.setResourceType(
-        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK);
-    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/notebooks/notebook1.ipynb");
-    dbUserRecentlyModifiedResource1.setLastAccessDate(new Timestamp(fakeClock.millis()));
-    dbUserRecentlyModifiedResource1.setUserId(dbUser.getUserId());
-    dbUserRecentlyModifiedResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
     dbUserRecentlyModifiedResource1 =
-        userRecentlyModifiedResourceDao.save(dbUserRecentlyModifiedResource1);
+        userRecentlyModifiedResourceDao.save(
+            new DbUserRecentlyModifiedResource()
+                .setResourceType(
+                    DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK)
+                .setResourceId("gs://bucketFile/notebooks/notebook1.ipynb")
+                .setLastAccessDate(new Timestamp(fakeClock.millis()))
+                .setUserId(dbUser.getUserId())
+                .setWorkspaceId(dbWorkspace1.getWorkspaceId()));
 
-    dbUserRecentlyModifiedResource2 = new DbUserRecentlyModifiedResource();
-    dbUserRecentlyModifiedResource2.setResourceType(
-        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT);
-    dbUserRecentlyModifiedResource2.setResourceId(dbCohort.getCohortId() + "");
-    dbUserRecentlyModifiedResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
-    dbUserRecentlyModifiedResource2.setUserId(dbUser.getUserId());
-    dbUserRecentlyModifiedResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
     dbUserRecentlyModifiedResource2 =
-        userRecentlyModifiedResourceDao.save(dbUserRecentlyModifiedResource2);
+        userRecentlyModifiedResourceDao.save(
+            new DbUserRecentlyModifiedResource()
+                .setResourceType(
+                    DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT)
+                .setResourceId(dbCohort.getCohortId() + "")
+                .setLastAccessDate(new Timestamp(fakeClock.millis() - 10000))
+                .setUserId(dbUser.getUserId())
+                .setWorkspaceId(dbWorkspace2.getWorkspaceId()));
 
-    dbUserRecentlyModifiedResource3 = new DbUserRecentlyModifiedResource();
-    dbUserRecentlyModifiedResource3.setResourceType(
-        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET);
-    dbUserRecentlyModifiedResource3.setResourceId(dbConceptSet.getConceptSetId() + "");
-    dbUserRecentlyModifiedResource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
-    dbUserRecentlyModifiedResource3.setUserId(dbUser.getUserId());
-    dbUserRecentlyModifiedResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
     dbUserRecentlyModifiedResource3 =
-        userRecentlyModifiedResourceDao.save(dbUserRecentlyModifiedResource3);
+        userRecentlyModifiedResourceDao.save(
+            new DbUserRecentlyModifiedResource()
+                .setResourceType(
+                    DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET)
+                .setResourceId(dbConceptSet.getConceptSetId() + "")
+                .setLastAccessDate(new Timestamp(fakeClock.millis() - 10000))
+                .setUserId(dbUser.getUserId())
+                .setWorkspaceId(dbWorkspace2.getWorkspaceId()));
 
     final FirecloudWorkspaceDetails fcWorkspace1 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
