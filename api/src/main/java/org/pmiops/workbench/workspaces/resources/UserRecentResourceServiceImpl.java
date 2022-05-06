@@ -1,4 +1,4 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.workspaces.resources;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -8,6 +8,10 @@ import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceDao;
+import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUserRecentResource;

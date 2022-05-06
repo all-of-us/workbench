@@ -16,7 +16,6 @@ import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
@@ -32,6 +31,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

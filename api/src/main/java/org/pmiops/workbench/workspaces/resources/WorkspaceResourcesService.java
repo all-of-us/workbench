@@ -9,6 +9,6 @@ import org.pmiops.workbench.model.WorkspaceResource;
 // This is a service for accessing objects that describe selections of CDR information. For
 // example, datasets and cohorts, both of which define subsets of the CDR.
 public interface WorkspaceResourcesService {
-  public List<WorkspaceResource> getWorkspaceResources(
+  List<WorkspaceResource> getWorkspaceResources(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, List<ResourceType> resourceTypes);
 }
