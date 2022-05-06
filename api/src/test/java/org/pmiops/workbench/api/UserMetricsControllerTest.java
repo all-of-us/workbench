@@ -75,13 +75,13 @@ public class UserMetricsControllerTest {
   @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
-  @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private FakeClock fakeClock;
   @Autowired private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
+  @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceResourceMapper workspaceResourceMapper;
 
   private UserMetricsController userMetricsController;
@@ -255,13 +255,6 @@ public class UserMetricsControllerTest {
 
   private void mockResponsesForWorkspace(
       DbWorkspace dbWorkspace, FirecloudWorkspaceResponse response) {
-
-    when(workspaceDao.findActiveByWorkspaceId(dbWorkspace.getWorkspaceId()))
-        .thenReturn(Optional.of(dbWorkspace));
-
-    when(workspaceDao.getRequired(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
-        .thenReturn(dbWorkspace);
 
     when(mockFireCloudService.getWorkspace(dbWorkspace)).thenReturn(Optional.of(response));
 
