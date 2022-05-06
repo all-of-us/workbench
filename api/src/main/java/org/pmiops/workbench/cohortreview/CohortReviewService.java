@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -24,10 +25,10 @@ public interface CohortReviewService {
   /** Find the {@link DbCohort} for the specified cohortId. */
   DbCohort findCohort(long workspaceId, long cohortId);
 
-  /** Find the {@link DbCohortReview} for the specified cohortId and cdrVersionId. */
+  /** Find the {@link CohortReview} for the specified cohortId and cdrVersionId. */
   CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
 
-  /** Find the {@link DbCohortReview} for the specified cohortReviewId. */
+  /** Find the {@link CohortReview} for the specified cohortReviewId. */
   CohortReview findCohortReview(Long cohortReviewId);
 
   /** Find the {@link CohortReview} for the specified workspaceId and cohortReviewId. */
@@ -36,7 +37,7 @@ public interface CohortReviewService {
   /** Delete the specified cohort review. */
   void deleteCohortReview(Long cohortReviewId);
 
-  /** Find the {@link DbCohortReview} for the specified ns and firecloudName. */
+  /** Find the {@link CohortReview} for the specified ns and firecloudName. */
   List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName);
 
   List<CohortReview> getCohortReviewsByCohortId(Long cohortId);
@@ -126,4 +127,6 @@ public interface CohortReviewService {
   List<Vocabulary> findVocabularies();
 
   Long participationCount(DbCohort dbCohort);
+
+  Optional<DbCohortReview> maybeFindDbCohortReview(Long cohortReviewId);
 }

@@ -21,7 +21,7 @@ public class DbUserRecentlyModifiedResource {
     COHORT_REVIEW
   }
 
-  private int id;
+  private Long id;
   private Long userId;
   private Long workspaceId;
   private DbUserRecentlyModifiedResourceType resourceTypeEnum;
@@ -45,11 +45,11 @@ public class DbUserRecentlyModifiedResource {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  public int getId() {
+  public Long getId() {
     return id;
   }
 
-  public DbUserRecentlyModifiedResource setId(int id) {
+  public DbUserRecentlyModifiedResource setId(Long id) {
     this.id = id;
     return this;
   }
