@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.oauth2.model.Userinfo;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class DevUserRegistrationServiceTest {
   @MockBean private InstitutionService institutionService;
   @MockBean private UserService userService;
 
-  private Userinfoplus userInfo;
+  private Userinfo userInfo;
   private ArgumentCaptor<DbVerifiedInstitutionalAffiliation> dbAffiliationCaptor =
       ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
 
@@ -49,7 +49,7 @@ public class DevUserRegistrationServiceTest {
 
   @BeforeEach
   public void setUp() {
-    userInfo = new Userinfoplus().setEmail("gjordan@fake-research-aou.org");
+    userInfo = new Userinfo().setEmail("gjordan@fake-research-aou.org");
   }
 
   @Test

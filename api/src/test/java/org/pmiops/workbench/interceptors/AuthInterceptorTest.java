@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpMethods;
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.oauth2.model.Userinfo;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
@@ -158,7 +158,7 @@ public class AuthInterceptorTest {
   public void preHandleGet_firecloudLookupFails() throws Exception {
     mockGetCallWithBearerToken();
 
-    Userinfoplus userInfo = new Userinfoplus();
+    Userinfo userInfo = new Userinfo();
     userInfo.setEmail("bob@bad-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(fireCloudService.getMe()).thenThrow(new NotFoundException());
@@ -171,7 +171,7 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_firecloudLookupSucceeds() throws Exception {
     mockGetCallWithBearerToken();
-    Userinfoplus userInfo = new Userinfoplus();
+    Userinfo userInfo = new Userinfo();
     userInfo.setEmail("bob@bad-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     FirecloudUserInfo fcUserInfo = new FirecloudUserInfo();
@@ -187,7 +187,7 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_firecloudLookupSucceedsNoUserRecordWrongDomain() throws Exception {
     mockGetCallWithBearerToken();
-    Userinfoplus userInfo = new Userinfoplus();
+    Userinfo userInfo = new Userinfo();
     userInfo.setEmail("bob@bad-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     FirecloudUserInfo fcUserInfo = new FirecloudUserInfo();
@@ -202,7 +202,7 @@ public class AuthInterceptorTest {
   }
 
   private void mockUserInfoSuccess() {
-    Userinfoplus userInfo = new Userinfoplus();
+    Userinfo userInfo = new Userinfo();
     userInfo.setEmail("bob@fake-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(user);
