@@ -21,7 +21,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { wasReferredFromRenewal } from 'app/utils/access-utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getLiveDUCCVersion } from 'app/utils/code-of-conduct';
+import { getLiveDUCCVersion, getVersionInfo } from 'app/utils/code-of-conduct';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
@@ -65,10 +65,6 @@ const styles = reactStyles({
     textDecoration: 'underline',
   },
 });
-
-// TODO parameterize these
-const V4_PATH = '/data-user-code-of-conduct-v4.html';
-const V4_HEIGHT = '85rem';
 
 export enum DataUserCodeOfConductPage {
   CONTENT,
@@ -144,40 +140,50 @@ const InitialsAgreement = (props: InitialsProps) => (
 
 interface ContentProps {
   signatureState: DuccSignatureState;
+  versionToRender: number;
   buttonDisabled: boolean;
   onLastPage: () => void;
   onClick: () => void;
 }
-const DuccContentPage = (props: ContentProps) => (
-  <>
-    <HtmlViewer
-      ariaLabel='data user code of conduct agreement'
-      containerStyles={{ margin: '2rem 0 1rem', height: V4_HEIGHT }}
-      filePath={V4_PATH}
-      onLastPage={() => props.onLastPage()}
-    />
-    {props.signatureState === DuccSignatureState.UNSIGNED && (
-      <FlexRow style={styles.dataUserCodeOfConductFooter}>
-        Please read the above document in its entirety before proceeding to sign
-        the Data User Code of Conduct.
-        <Button
-          type={'link'}
-          style={{ marginLeft: 'auto' }}
-          onClick={() => history.back()}
-        >
-          Back
-        </Button>
-        <Button
-          data-test-id={'ducc-next-button'}
-          disabled={props.buttonDisabled}
-          onClick={() => props.onClick()}
-        >
-          Proceed
-        </Button>
-      </FlexRow>
-    )}
-  </>
-);
+const DuccContentPage = (props: ContentProps) => {
+  const versionInfo = getVersionInfo(props.versionToRender);
+
+  return versionInfo ? (
+    <>
+      <HtmlViewer
+        ariaLabel='data user code of conduct agreement'
+        containerStyles={{ margin: '1rem 0 1rem', height: versionInfo.height }}
+        filePath={versionInfo.path}
+        onLastPage={() => props.onLastPage()}
+      />
+      {props.signatureState === DuccSignatureState.UNSIGNED && (
+        <FlexRow style={styles.dataUserCodeOfConductFooter}>
+          Please read the above document in its entirety before proceeding to
+          sign the Data User Code of Conduct.
+          <Button
+            type={'link'}
+            style={{ marginLeft: 'auto' }}
+            onClick={() => history.back()}
+          >
+            Back
+          </Button>
+          <Button
+            data-test-id={'ducc-next-button'}
+            disabled={props.buttonDisabled}
+            onClick={() => props.onClick()}
+          >
+            Proceed
+          </Button>
+        </FlexRow>
+      )}
+    </>
+  ) : (
+    <div>
+      Error: cannot render Data User Code of Conduct version '
+      {props.versionToRender}'
+    </div>
+  );
+};
 
 interface SignatureProps {
   signatureState: DuccSignatureState;
@@ -411,6 +417,7 @@ export const DataUserCodeOfConduct = fp.flow(
             givenName,
             familyName,
             duccSignedInitials,
+            duccSignedVersion,
             duccCompletionTimeEpochMillis,
           },
         },
@@ -454,6 +461,8 @@ export const DataUserCodeOfConduct = fp.flow(
             page === DataUserCodeOfConductPage.CONTENT) && (
             <DuccContentPage
               {...{ signatureState }}
+              versionToRender={3}
+              //              versionToRender={duccSignedVersion ?? getLiveDUCCVersion()}
               buttonDisabled={proceedDisabled}
               onLastPage={() => this.setState({ proceedDisabled: false })}
               onClick={() =>

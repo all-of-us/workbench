@@ -7,6 +7,22 @@
  * could likely eliminate this helper function. This needs further design
  * thinking though. For now just consolidate DUCC logic through this package.
  */
-export function getLiveDUCCVersion(): number {
-  return 4;
+export const getLiveDUCCVersion = () => 4;
+
+interface VersionInfo {
+  version: number;
+  path: string;
+  height: string;
 }
+
+const versions: VersionInfo[] = [
+  {
+    version: 4,
+    path: '/data-user-code-of-conduct-v4.html',
+    height: '90rem',
+  },
+];
+
+export const getVersionInfo = (versionToFind: number): VersionInfo => {
+  return versions.find(({ version }) => version === versionToFind);
+};
