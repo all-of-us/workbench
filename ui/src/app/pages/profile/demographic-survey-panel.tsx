@@ -14,10 +14,10 @@ interface Props {
 export const DemographicSurveyPanel = (props: Props) => {
   const { demographicSurveyCompletionTime, firstSignInTime, onClick } = props;
   return (
-    <div style={{ marginTop: '1rem', marginLeft: '1rem' }}>
+    <div style={styles.panel}>
       <div style={styles.title}>Optional Demographics Survey</div>
       <hr style={{ ...styles.verticalLine }} />
-      <div style={{ color: colors.primary, fontSize: '14px' }}>
+      <div style={styles.panelBody}>
         <div>Survey Completed</div>
         {/* If a user has created an account, they have, by definition, completed the demographic survey*/}
         <div>

@@ -89,4 +89,6 @@ export const styles = reactStyles({
     marginRight: '0.75rem',
     border: `1px solid ${colors.warning}`,
   },
+  panel: { marginTop: '1rem', marginLeft: '1rem' },
+  panelBody: { color: colors.primary, fontSize: '14px' },
 });
