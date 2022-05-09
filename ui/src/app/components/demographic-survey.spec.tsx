@@ -10,7 +10,10 @@ import {
   SexAtBirth,
 } from 'generated/fetch';
 
-import { DemographicSurvey, Props } from 'app/components/demographic-survey';
+import {
+  DemographicSurvey,
+  DemoSurveyProps,
+} from 'app/components/demographic-survey';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -19,7 +22,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
-let props: Props;
+let props: DemoSurveyProps;
 const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
 
 beforeEach(() => {
