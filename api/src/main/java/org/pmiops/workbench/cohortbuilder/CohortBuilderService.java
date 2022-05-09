@@ -100,9 +100,8 @@ public interface CohortBuilderService {
 
   List<SurveyModule> findSurveyModules();
 
-  List<SurveyVersion> findSurveyVersionByQuestionConceptId(
-      Long surveyConceptId, Long questionConceptId);
+  List<SurveyVersion> findSurveyVersionByQuestionConceptId(Long questionConceptId);
 
   List<SurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-      Long surveyConceptId, Long questionConceptId, Long answerConceptId);
+      Long questionConceptId, Long answerConceptId);
 }

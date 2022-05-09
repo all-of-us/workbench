@@ -390,7 +390,6 @@ export const AttributesPage = fp.flow(
             cohortBuilderApi().findSurveyVersionByQuestionConceptId(
               namespace,
               id,
-              surveyNode.conceptId,
               conceptId
             )
           );
@@ -399,7 +398,6 @@ export const AttributesPage = fp.flow(
             cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
               namespace,
               id,
-              surveyNode.conceptId,
               ppiQuestions.getValue()[parentId].conceptId,
               +value
             )

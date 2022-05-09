@@ -290,14 +290,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<SurveyVersionListResponse> findSurveyVersionByQuestionConceptId(
-      String workspaceNamespace, String workspaceId, Long surveyConceptId, Long questionConceptId) {
+      String workspaceNamespace, String workspaceId, Long questionConceptId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new SurveyVersionListResponse()
-            .items(
-                cohortBuilderService.findSurveyVersionByQuestionConceptId(
-                    surveyConceptId, questionConceptId)));
+            .items(cohortBuilderService.findSurveyVersionByQuestionConceptId(questionConceptId)));
   }
 
   @Override
@@ -305,7 +303,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
           String workspaceNamespace,
           String workspaceId,
-          Long surveyConceptId,
           Long questionConceptId,
           Long answerConceptId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -314,7 +311,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         new SurveyVersionListResponse()
             .items(
                 cohortBuilderService.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-                    surveyConceptId, questionConceptId, answerConceptId)));
+                    questionConceptId, answerConceptId)));
   }
 
   protected void validateDomain(String domain) {
