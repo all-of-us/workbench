@@ -105,7 +105,7 @@ export interface CreateBillingAccountState {
   userPhoneNumber: string;
 }
 
-export interface Props {
+interface Props {
   onClose: Function;
 }
 

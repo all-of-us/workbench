@@ -3,6 +3,7 @@ import { shallow } from 'enzyme';
 
 import {
   HtmlViewer,
+  HtmlViewerProps,
   MS_WORD_PARAGRAPH_CLASS,
 } from 'app/components/html-viewer';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -11,9 +12,12 @@ import { readFileSync } from 'fs';
 it('should load html pages', async () => {
   let reachedLastPage = false;
 
-  const props = {
+  const props: HtmlViewerProps = {
     filePath: '/assets/documents/fake-html-page.html',
     onLastPage: () => (reachedLastPage = true),
+    lastElementQuerySelector: '',
+    ariaLabel: '',
+    windowSize: { height: 100, width: 100 },
   };
 
   const wrapper = shallow(<HtmlViewer {...props} />).shallow();

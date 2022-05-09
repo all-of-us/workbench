@@ -294,11 +294,6 @@ const sparkLinkConfigs: {
   },
 ];
 
-// this is only used in the test.
-export interface Props {
-  onClose: () => void;
-}
-
 // Exported for testing only.
 export const ConfirmDelete = ({ onCancel, onConfirm }) => {
   const [deleting, setDeleting] = useState(false);

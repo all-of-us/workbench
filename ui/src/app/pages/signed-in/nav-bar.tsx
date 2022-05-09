@@ -64,24 +64,6 @@ const styles = reactStyles({
   },
 });
 
-export interface Props {
-  profileState: ProfileStore;
-}
-
-export interface State {
-  sideNavVisible: boolean;
-  statusAlertVisible: boolean;
-  statusAlertDetails: {
-    statusAlertId: number;
-    title: string;
-    message: string;
-    link: string;
-  };
-  barsTransform: string;
-  hovering: boolean;
-  wrapperRef: React.RefObject<HTMLDivElement>;
-}
-
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 

@@ -11,7 +11,7 @@ import {
 import colors from 'app/styles/colors';
 import * as Cookies from 'js-cookie';
 
-export interface Props {
+interface Props {
   onCancel: Function;
   onContinue: Function;
 }

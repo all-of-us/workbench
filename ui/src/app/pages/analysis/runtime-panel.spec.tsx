@@ -25,7 +25,6 @@ import { WarningMessage } from 'app/components/messages';
 import { Spinner } from 'app/components/spinners';
 import {
   ConfirmDelete,
-  Props,
   RuntimePanelWrapper,
 } from 'app/pages/analysis/runtime-panel';
 import {
@@ -71,6 +70,10 @@ import {
 } from 'testing/stubs/runtime-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
+interface Props {
+  onClose: () => void;
+}
 
 describe('RuntimePanel', () => {
   let props: Props;
