@@ -374,22 +374,22 @@ dependencies {
     compile "com.github.rholder:guava-retrying:2.0.0"
     compile 'org.javers:javers-core:5.15.0'
     compile 'com.google.api-client:google-api-client-appengine:1.34.0'
-    compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20211109-1.32.1"
-    compile "com.google.apis:google-api-services-cloudbilling:v1-rev20211106-1.32.1"
+    compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20220325-1.32.1'
+    compile 'com.google.apis:google-api-services-cloudbilling:v1-rev20220402-1.32.1'
     compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev572-1.25.0"
     compile "com.google.apis:google-api-services-oauth2:v2-rev156-1.25.0"
-    compile "com.google.apis:google-api-services-iam:v1-rev20211104-1.32.1"
+    compile 'com.google.apis:google-api-services-iam:v1-rev20220421-1.32.1'
     compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
     compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
-    compile "com.google.auth:google-auth-library-appengine:1.2.2"
-    compile "com.google.auth:google-auth-library-oauth2-http:1.2.2"
-    compile 'com.google.cloud.sql:mysql-socket-factory:1.4.2'
+    compile 'com.google.auth:google-auth-library-appengine:1.6.0'
+    compile 'com.google.auth:google-auth-library-oauth2-http:1.6.0'
+    compile 'com.google.cloud.sql:mysql-socket-factory:1.6.0'
     compile 'com.google.cloud:google-cloud-bigquery:2.10.10'
-    compile 'com.google.cloud:google-cloud-iamcredentials:2.0.8'
-    compile 'com.google.cloud:google-cloud-logging:3.5.3'
-    compile 'com.google.cloud:google-cloud-monitoring:3.2.1'
+    compile 'com.google.cloud:google-cloud-iamcredentials:2.1.0'
+    compile 'com.google.cloud:google-cloud-logging:3.7.6'
+    compile 'com.google.cloud:google-cloud-monitoring:3.2.9'
     compile 'com.google.cloud:google-cloud-storage:2.6.1'
-    compile 'com.google.cloud:google-cloud-tasks:2.1.1'
+    compile 'com.google.cloud:google-cloud-tasks:2.1.11'
     compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     compile 'com.google.guava:guava:31.1-jre'
     compile "com.google.http-client:google-http-client-apache:2.1.2"
