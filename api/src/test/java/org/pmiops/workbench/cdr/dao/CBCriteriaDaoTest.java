@@ -349,7 +349,7 @@ public class CBCriteriaDaoTest {
     jdbcTemplate.execute(
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 715713, 1, 100, 491)");
     List<DbSurveyVersion> dbSurveyVersions =
-        cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(1333342L, 715713L, 0L);
+        cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(715713L, 0L);
     assertThat(dbSurveyVersions).hasSize(3);
     assertThat(dbSurveyVersions.get(0).getSurveyVersionConceptId()).isEqualTo(100);
     assertThat(dbSurveyVersions.get(0).getDisplayName()).isEqualTo("May 2020");
@@ -389,7 +389,7 @@ public class CBCriteriaDaoTest {
     jdbcTemplate.execute(
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (6, 715713, 903096, 102, 31)");
     List<DbSurveyVersion> dbSurveyVersions =
-        cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(1333342L, 715713L, 0L);
+        cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(715713L, 0L);
     assertThat(dbSurveyVersions).hasSize(3);
     assertThat(dbSurveyVersions.get(0).getSurveyVersionConceptId()).isEqualTo(100);
     assertThat(dbSurveyVersions.get(0).getDisplayName()).isEqualTo("May 2020");

@@ -311,7 +311,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "order by csv.display_order) innerSql",
       nativeQuery = true)
   List<DbSurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-      @Param("surveyConceptId") Long surveyConceptId,
       @Param("questionConceptId") Long questionConceptId,
       @Param("answerConceptId") Long answerConceptId);
 

@@ -3829,7 +3829,7 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaAttributeListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{questionConceptId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3839,12 +3839,6 @@ paths:
       description: Returns SurveyVersion with counts
       operationId: findSurveyVersionByQuestionConceptId
       parameters:
-      - in: path
-        name: surveyConceptId
-        type: integer
-        format: int64
-        required: true
-        description: surveyConceptId of the survey
       - in: path
         name: questionConceptId
         type: integer
@@ -3856,7 +3850,7 @@ paths:
           description: A collection of SurveyVersion
           schema:
             "$ref": "#/definitions/SurveyVersionListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}/{answerConceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{questionConceptId}/{answerConceptId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3866,12 +3860,6 @@ paths:
       description: Returns SurveyVersion with counts
       operationId: findSurveyVersionByQuestionConceptIdAndAnswerConceptId
       parameters:
-      - in: path
-        name: surveyConceptId
-        type: integer
-        format: int64
-        required: true
-        description: surveyConceptId of the survey
       - in: path
         name: questionConceptId
         type: integer
