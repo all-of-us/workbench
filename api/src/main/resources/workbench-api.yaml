@@ -4459,6 +4459,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AccessModuleConfig"
+      currentDuccVersions:
+        type: array
+        items:
+          type: integer
+
   RuntimeImage:
     type: object
     properties:

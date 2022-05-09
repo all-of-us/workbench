@@ -1,13 +1,18 @@
+import { serverConfigStore } from './stores';
+
 /**
- * Returns the currently live DUCC version. This version should be displayed when
- * completing the DUCC and this exact version must be signed in order to receive
+ * Returns the list of current-for-compliance DUCC version.  One of these versions must be signed in order to receive
  * registered data access.
- *
- * Note: If we instead returned a live DUCC version in the server config, we
- * could likely eliminate this helper function. This needs further design
- * thinking though. For now just consolidate DUCC logic through this package.
  */
-export const getLiveDUCCVersion = () => 4;
+export const getCurrentDUCCVersions = (): number[] =>
+  serverConfigStore.get().config.currentDuccVersions;
+
+/**
+ * Returns the latest version of the DUCC, to be displayed when the user requests to sign it.  This may not be the only
+ * "current" DUCC version; use getCurrentDUCCVersions() to retrieve the full list.
+ */
+export const getLiveDUCCVersion = (): number =>
+  Math.max(...getCurrentDUCCVersions());
 
 interface VersionInfo {
   version: number;
