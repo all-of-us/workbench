@@ -69,7 +69,7 @@ const SelectAllText = () => {
   );
 };
 
-export interface Props extends WithProfileErrorModalProps {
+export interface DemoSurveyProps extends WithProfileErrorModalProps {
   profile: Profile;
   // Required if enablePrevious is true.
   onPreviousClick?: (profile: Profile) => void;
@@ -91,7 +91,10 @@ const isChecked = (demographicSurvey, optionKey, value) =>
   demographicSurvey?.[optionKey]?.includes(value);
 
 export const DemographicSurvey = withProfileErrorModal(
-  class DemographicSurveyComponent extends React.Component<Props, State> {
+  class DemographicSurveyComponent extends React.Component<
+    DemoSurveyProps,
+    State
+  > {
     private captchaRef = React.createRef<ReCAPTCHA>();
     constructor(props: any) {
       super(props);
