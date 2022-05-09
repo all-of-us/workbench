@@ -1,6 +1,6 @@
 package org.pmiops.workbench.auth;
 
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.oauth2.model.Userinfo;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import org.pmiops.workbench.db.model.DbUser;
@@ -17,12 +17,11 @@ public class UserAuthentication implements Authentication {
   }
 
   private final DbUser user;
-  private final Userinfoplus userInfo;
+  private final Userinfo userInfo;
   private final String bearerToken;
   private final UserType userType;
 
-  public UserAuthentication(
-      DbUser user, Userinfoplus userInfo, String bearerToken, UserType userType) {
+  public UserAuthentication(DbUser user, Userinfo userInfo, String bearerToken, UserType userType) {
     this.user = user;
     this.userInfo = userInfo;
     this.bearerToken = bearerToken;
@@ -50,7 +49,7 @@ public class UserAuthentication implements Authentication {
   }
 
   @Override
-  public Userinfoplus getPrincipal() {
+  public Userinfo getPrincipal() {
     return userInfo;
   }
 
