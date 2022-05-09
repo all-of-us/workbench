@@ -34,7 +34,6 @@ import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { formatInitialCreditsUSD, withUserProfile } from 'app/utils';
 import { wasReferredFromRenewal } from 'app/utils/access-utils';
-import { displayDateWithoutHours } from 'app/utils/dates';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -42,6 +41,7 @@ import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { DataAccessPanel } from './data-access-panel';
+import { DemographicSurveyPanel } from './demo-survey-panel';
 
 const validators = {
   givenName: { ...required, ...notTooLong(80) },
@@ -553,31 +553,15 @@ export const ProfileComponent = fp.flow(
                 <DataAccessPanel
                   userAccessTiers={profile.accessTierShortNames}
                 />
-                <div style={{ marginTop: '1rem', marginLeft: '1rem' }}>
-                  <div style={styles.title}>Optional Demographics Survey</div>
-                  <hr style={{ ...styles.verticalLine }} />
-                  <div style={{ color: colors.primary, fontSize: '14px' }}>
-                    <div>Survey Completed</div>
-                    {/* If a user has created an account, they have, by definition, completed the demographic survey*/}
-                    <div>
-                      {displayDateWithoutHours(
-                        profile.demographicSurveyCompletionTime !== null
-                          ? profile.demographicSurveyCompletionTime
-                          : profile.firstSignInTime
-                      )}
-                    </div>
-                    <Button
-                      type={'link'}
-                      style={styles.updateSurveyButton}
-                      onClick={() => {
-                        this.setState({ showDemographicSurveyModal: true });
-                      }}
-                      data-test-id={'demographics-survey-button'}
-                    >
-                      Update Survey
-                    </Button>
-                  </div>
-                </div>
+                <DemographicSurveyPanel
+                  demographicSurveyCompletionTime={
+                    profile.demographicSurveyCompletionTime
+                  }
+                  firstSignInTime={profile.firstSignInTime}
+                  onClick={() =>
+                    this.setState({ showDemographicSurveyModal: true })
+                  }
+                />
               </div>
             </FlexRow>
             <div style={{ display: 'flex' }}>
