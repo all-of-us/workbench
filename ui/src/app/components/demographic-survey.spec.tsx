@@ -10,9 +10,9 @@ import {
   SexAtBirth,
 } from 'generated/fetch';
 
+import { DemographicSurvey, Props } from 'app/components/demographic-survey';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
-import { DemographicSurvey, Props } from 'app/pages/profile/demographic-survey';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 

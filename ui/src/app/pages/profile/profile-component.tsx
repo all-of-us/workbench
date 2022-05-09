@@ -9,6 +9,7 @@ import { PublicInstitutionDetails } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
+import { DemographicSurvey } from 'app/components/demographic-survey';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ExclamationTriangle } from 'app/components/icons';
 import {
@@ -27,7 +28,6 @@ import {
 } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
-import { DemographicSurvey } from 'app/pages/profile/demographic-survey';
 import { styles } from 'app/pages/profile/profile-styles';
 import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -40,7 +40,7 @@ import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { DataAccessPanel } from './data-access-panel';
-import { DemographicSurveyPanel } from './demo-survey-panel';
+import { DemographicSurveyPanel } from './demographic-survey-panel';
 import { InitialCreditsPanel } from './initial-credits-panel';
 
 const validators = {
