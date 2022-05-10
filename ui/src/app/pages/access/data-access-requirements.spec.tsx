@@ -27,7 +27,10 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonDisabled,
+  expectButtonEnabled,
   findNodesByExactText,
+  findNodesContainingText,
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -1716,25 +1719,199 @@ describe('DataAccessRequirements', () => {
     expectIncomplete(wrapper);
   });
 
-  // it('should show the correct state when all items except DUCC are complete', async () => {
-  //   expect(true).toEqual(true);
-  // });
-  // it('should ignore modules which are not expirable', async () => {
-  //   expect(true).toEqual(true);
-  // });
-  // it('should show the correct state when items are bypassed', async () => {
-  //   expect(true).toEqual(true);
-  // });
-  // it('should show the correct state when all items are complete or bypassed', async () => {
-  //   expect(true).toEqual(true);
-  // });
+  it('should show the correct state when all items except DUCC are complete', async () => {
+    expireAllModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should ignore modules which are not expirable', async () => {
+    expireAllModules();
+
+    const newModules = [
+      ...profileStore.get().profile.accessModules.modules,
+      {
+        moduleName: AccessModule.TWOFACTORAUTH, // not expirable
+        completionEpochMillis: null,
+        bypassEpochMillis: null,
+        expirationEpochMillis: oneYearAgo(),
+      },
+    ];
+
+    const newProfile: Profile = {
+      ...profileStore.get().profile,
+      accessModules: { modules: newModules },
+    };
+
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // All Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
+
+    expectComplete(wrapper);
+  });
+
+  it('should show the correct state when items are bypassed', async () => {
+    expireAllModules();
+
+    // won't bypass Profile and Publication confirmation because those are unbypassable
+    setBypassTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+
+    // Bypassed
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(2);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when all items are complete or bypassed', async () => {
+    expireAllModules();
+
+    setCompletionTimes(() => Date.now());
+
+    // won't bypass Profile and Publication confirmation because those are unbypassable
+    setBypassTimes(() => Date.now());
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    // Training and DUCC are bypassed
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
+
+    // Publications and Profile are complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(
+      findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
+    ).toBe(2);
+
+    expectComplete(wrapper);
+  });
+
   // it('should show the correct state when modules are disabled', async () => {
-  //   expect(true).toEqual(true);
+  //   serverConfigStore.set({
+  //     config: {
+  //       ...defaultServerConfig,
+  //       enableComplianceTraining: false,
+  //     },
+  //   });
+  //
+  //   setCompletionTimes(() => Date.now());
+  //
+  //   updateOneModuleExpirationTime(
+  //     AccessModule.PROFILECONFIRMATION,
+  //     oneYearFromNow()
+  //   );
+  //   updateOneModuleExpirationTime(
+  //     AccessModule.PUBLICATIONCONFIRMATION,
+  //     oneYearFromNow()
+  //   );
+  //   updateOneModuleExpirationTime(
+  //     AccessModule.DATAUSERCODEOFCONDUCT,
+  //     oneYearFromNow()
+  //   );
+  //
+  //   // this module will not be returned in AccessModules because it is disabled
+  //   removeOneModule(AccessModule.COMPLIANCETRAINING);
+  //
+  //   const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+  //
+  //   await waitOneTickAndUpdate(wrapper);
+  //
+  //   // profileConfirmation, publicationConfirmation, and DUCC are complete
+  //   expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+  //   expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+  //   expect(
+  //     findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
+  //   ).toBe(3);
+  //
+  //   // complianceTraining is not shown because it is disabled
+  //   expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
+  //
+  //   // all of the necessary steps = 3 rather than the usual 4
+  //   expectComplete(wrapper);
   // });
-  // it('should allow completion of profile and publication confirmations when incomplete', async () => {
-  //   expect(true).toEqual(true);
-  // });
-  // it('Multiple test cases', async () => {
-  //   expect(true).toEqual(true);
-  // });
+
+  it('should allow completion of profile and publication confirmations when incomplete', async () => {
+    removeOneModule(AccessModule.PROFILECONFIRMATION);
+    removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    // all are Incomplete
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+
+    expectButtonEnabled(findNodesByExactText(wrapper, 'Review').parent());
+
+    // not yet - need to click a radio button
+    expectButtonDisabled(findNodesByExactText(wrapper, 'Confirm').parent());
+
+    wrapper.find('[data-test-id="report-submitted"]').first().simulate('click');
+
+    expectButtonEnabled(findNodesByExactText(wrapper, 'Confirm').parent());
+  });
 });
