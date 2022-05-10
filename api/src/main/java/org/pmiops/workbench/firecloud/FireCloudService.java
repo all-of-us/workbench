@@ -78,7 +78,7 @@ public interface FireCloudService {
 
   /** Creates a new FC workspace. */
   FirecloudWorkspaceDetails createWorkspace(
-      String workspaceNamespace, String workspaceName, String authDomainName);
+      String workspaceNamespace, String firecloudName, String authDomainName);
 
   FirecloudWorkspaceDetails cloneWorkspace(
       String fromWorkspaceNamespace,

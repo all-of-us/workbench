@@ -21,7 +21,7 @@ public interface WorkspaceAdminService {
   AdminWorkspaceObjectsCounts getAdminWorkspaceObjects(long workspaceId);
 
   AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceName);
+      String workspaceNamespace, String firecloudName);
 
   CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace);
 
