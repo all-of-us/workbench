@@ -62,6 +62,9 @@ const styles = reactStyles({
     fontSize: 10,
     borderRadius: 6,
   },
+  signature: {
+    margin: '0 3.5rem',
+  },
   signedText: {
     margin: '0 1ex',
     fontWeight: 'bold',
@@ -235,7 +238,7 @@ const DuccSignaturePage = (props: SignatureProps) => {
     onAccept,
   } = props;
   return (
-    <div data-test-id='ducc-signature-page'>
+    <div data-test-id='ducc-signature-page' style={styles.signature}>
       <FlexColumn>
         {submitting && <SpinnerOverlay />}
         {signatureState === DuccSignatureState.UNSIGNED && (

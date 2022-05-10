@@ -25,7 +25,7 @@ const VERSIONS: VersionInfo[] = [
   {
     version: 4,
     path: '/data-user-code-of-conduct-v4.html',
-    height: '90rem',
+    height: '80rem',
   },
 ];
 
