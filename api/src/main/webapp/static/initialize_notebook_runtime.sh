@@ -52,8 +52,9 @@ sudo -E -u jupyter /usr/bin/git config --global core.excludesfile ${ignore_file}
 
 # Initialize a default nextflow config. Don't overwrite in case the user has
 # customized their nextflow config file on their PD.
-nextflow_config=/home/jupyter/nextflow.config
+nextflow_config=/home/jupyter/.nextflow/config
 if [ ! -f "${nextflow_config}" ]; then
+  sudo -E -u jupyter mkdir /home/jupyter/.nextflow
   cat <<EOF | sudo -E -u jupyter tee "${nextflow_config}"
 profiles {
   gls {
@@ -76,7 +77,7 @@ EOF
 fi
 
 # Initialize a default Cromwell config. Don't overwrite in case the user has
-# customized their nextflow config file on their PD.
+# customized their Cromwell config file on their PD.
 cromwell_config=/home/jupyter/cromwell.conf
 if [ ! -f "${cromwell_config}" ]; then
   cat <<EOF | sudo -E -u jupyter tee "${cromwell_config}"
