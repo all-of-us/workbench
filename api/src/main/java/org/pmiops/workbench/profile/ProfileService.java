@@ -136,8 +136,16 @@ public class ProfileService {
 
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getAccessModuleStatus(userLite);
+    // TODO RW-8236 Remove anyModuleHasExpired after release.
     final ProfileAccessModules accessModules =
-        new ProfileAccessModules().modules(accessModuleStatuses);
+        new ProfileAccessModules()
+            .modules(accessModuleStatuses)
+            .anyModuleHasExpired(
+                accessModuleStatuses.stream()
+                    .anyMatch(
+                        a ->
+                            (a.getExpirationEpochMillis() != null
+                                && clock.instant().toEpochMilli() > a.getExpirationEpochMillis())));
 
     return profileMapper.toModel(
         user,
