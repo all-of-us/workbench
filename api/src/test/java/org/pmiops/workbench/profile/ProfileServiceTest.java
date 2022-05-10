@@ -439,6 +439,92 @@ public class ProfileServiceTest {
   }
 
   @Test
+  public void updateProfile_cannot_disable_asUser() {
+    Profile previousProfile = createValidProfile().disabled(false);
+    Profile updatedProfile = createValidProfile().disabled(true);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    // pretend to be an Admin for the purpose of this call,
+    // to demonstrate that this is NOT how Admin access is obtained
+    final Agent sneakyUser = Agent.asAdmin(loggedInUser);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            profileService.updateProfile(targetUser, sneakyUser, updatedProfile, previousProfile));
+  }
+
+  @Test
+  public void updateProfile_cannot_enable_asUser() {
+    Profile previousProfile = createValidProfile().disabled(true);
+    Profile updatedProfile = createValidProfile().disabled(false);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    // pretend to be an Admin for the purpose of this call,
+    // to demonstrate that this is NOT how Admin access is obtained
+    final Agent sneakyUser = Agent.asAdmin(loggedInUser);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            profileService.updateProfile(targetUser, sneakyUser, updatedProfile, previousProfile));
+  }
+
+  @Test
+  public void updateProfile_disable_user_asAdmin() {
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
+    Profile previousProfile = createValidProfile().disabled(false);
+    Profile updatedProfile = createValidProfile().disabled(true);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
+
+    assertThat(profileService.getProfile(targetUser).getDisabled()).isTrue();
+  }
+
+  @Test
+  public void updateProfile_enable_user_asAdmin() {
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
+    Profile previousProfile = createValidProfile().disabled(true);
+    Profile updatedProfile = createValidProfile().disabled(false);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
+
+    assertThat(profileService.getProfile(targetUser).getDisabled()).isFalse();
+  }
+
+  @Test
   public void validateProfile_noChangesOnEmptyProfile() {
     // This is a synthetic test case: we never expect to be updating an empty Profile object, but
     // technically this passes validation since no fields have changed.
