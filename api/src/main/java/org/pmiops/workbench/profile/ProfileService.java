@@ -136,6 +136,7 @@ public class ProfileService {
 
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getAccessModuleStatus(userLite);
+    // TODO RW-8236 Remove anyModuleHasExpired after release.
     final ProfileAccessModules accessModules =
         new ProfileAccessModules()
             .modules(accessModuleStatuses)

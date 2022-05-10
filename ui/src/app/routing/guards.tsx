@@ -11,6 +11,7 @@ import {
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
   getAccessModuleStatusByNameOrEmpty,
+  hasRtExpired,
 } from 'app/utils/access-utils';
 import {
   AuthorityGuardedAction,
@@ -58,7 +59,7 @@ const allCompleteOrBypassed = (
 // use this for all access-module routing decisions, to ensure only one routing is chosen
 export const shouldRedirectToMaybe = (profile: Profile): string | undefined => {
   return cond(
-    [profile?.accessModules?.anyModuleHasExpired, () => ACCESS_RENEWAL_PATH],
+    [hasRtExpired(profile), () => ACCESS_RENEWAL_PATH],
     // not a common scenario (mainly test users) but AAR is the only way to recover if these modules are missing
     [
       !allCompleteOrBypassed(profile, [

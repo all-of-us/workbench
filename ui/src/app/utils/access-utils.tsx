@@ -662,3 +662,15 @@ export const getStatusText = (status: AccessModuleStatus) => {
     ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };
+
+export const hasRtExpired = (profile: Profile): boolean => {
+  return rtAccessRenewalModules
+    .filter(
+      (moduleName) => getAccessModuleConfig(moduleName).isEnabledInEnvironment
+    )
+    .map((module: AccessModule) => getAccessModuleStatusByName(profile, module))
+    .some(
+      (status: AccessModuleStatus) =>
+        hasExpired(status.expirationEpochMillis) && !status?.bypassEpochMillis
+    );
+};
