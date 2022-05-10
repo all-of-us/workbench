@@ -62,7 +62,6 @@ export class ProfileStubVariables {
           expirationEpochMillis: undefined,
         },
       ],
-      anyModuleHasExpired: false,
     },
     tierEligibilities: [
       {
