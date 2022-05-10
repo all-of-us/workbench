@@ -1614,8 +1614,6 @@ describe('DataAccessRequirements', () => {
   it('should show the correct state when all items are complete', async () => {
     expireAllModules();
 
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
       oneYearFromNow()
@@ -1635,6 +1633,8 @@ describe('DataAccessRequirements', () => {
 
     setCompletionTimes(() => Date.now());
 
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
     await waitOneTickAndUpdate(wrapper);
 
     expectComplete(wrapper);
@@ -1642,10 +1642,9 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should show the correct state when all modules are expired', async () => {
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-
     setCompletionTimes(oneYearAgo);
     expireAllModules();
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
     await waitOneTickAndUpdate(wrapper);
 
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
@@ -1673,12 +1672,11 @@ describe('DataAccessRequirements', () => {
   it('should show the correct state when profile confirmation is complete', async () => {
     expireAllModules();
 
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
       oneYearFromNow()
     );
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -1695,8 +1693,6 @@ describe('DataAccessRequirements', () => {
   it('should show the correct state when profile and publication confirmations are complete', async () => {
     expireAllModules();
 
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
       oneYearFromNow()
@@ -1705,6 +1701,9 @@ describe('DataAccessRequirements', () => {
       AccessModule.PUBLICATIONCONFIRMATION,
       oneYearFromNow()
     );
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
