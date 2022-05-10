@@ -169,21 +169,29 @@ interface ContentProps {
   onClick: () => void;
 }
 const DuccContentPage = (props: ContentProps) => {
-  const versionInfo = getDuccRenderingInfo(props.versionToRender);
+  const {
+    signatureState,
+    versionToRender,
+    buttonDisabled,
+    onLastPage,
+    onClick,
+  } = props;
+  const versionInfo = getDuccRenderingInfo(versionToRender);
+  const htmlViewerStyle: CSSProperties = {
+    margin: '1rem 0 1rem',
+    height: versionInfo.height,
+  };
 
   return (
     versionInfo && (
       <div data-test-id='ducc-content-page'>
         <HtmlViewer
           ariaLabel='data user code of conduct agreement'
-          containerStyles={{
-            margin: '1rem 0 1rem',
-            height: versionInfo.height,
-          }}
+          containerStyles={htmlViewerStyle}
           filePath={versionInfo.path}
-          onLastPage={() => props.onLastPage()}
+          onLastPage={() => onLastPage()}
         />
-        {props.signatureState === DuccSignatureState.UNSIGNED && (
+        {signatureState === DuccSignatureState.UNSIGNED && (
           <FlexRow style={styles.dataUserCodeOfConductFooter}>
             Please read the above document in its entirety before proceeding to
             sign the Data User Code of Conduct.
@@ -196,8 +204,8 @@ const DuccContentPage = (props: ContentProps) => {
             </Button>
             <Button
               data-test-id={'ducc-next-button'}
-              disabled={props.buttonDisabled}
-              onClick={() => props.onClick()}
+              disabled={buttonDisabled}
+              onClick={() => onClick()}
             >
               Proceed
             </Button>
