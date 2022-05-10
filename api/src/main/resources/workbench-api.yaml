@@ -4459,6 +4459,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AccessModuleConfig"
+      currentDuccVersions:
+        type: array
+        items:
+          type: integer
+
   RuntimeImage:
     type: object
     properties:
@@ -5963,6 +5968,13 @@ definitions:
         type: integer
         format: int32
         description: Version of the data user code of conduct agreement that the user last signed.
+      duccSignedInitials:
+        type: string
+        description: The initials used for the user's most recent signing of the DUCC
+      duccCompletionTimeEpochMillis:
+        type: integer
+        format: int64
+        description: The date of the user's most recent signature of the DUCC
       address:
         "$ref": "#/definitions/Address"
       freeTierUsage:

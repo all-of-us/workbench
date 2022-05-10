@@ -33,6 +33,7 @@ import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { withUserProfile } from 'app/utils';
 import { wasReferredFromRenewal } from 'app/utils/access-utils';
+import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -42,6 +43,7 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { DataAccessPanel } from './data-access-panel';
 import { DemographicSurveyPanel } from './demographic-survey-panel';
 import { InitialCreditsPanel } from './initial-credits-panel';
+import { SignedDuccPanel } from './signed-ducc-panel';
 
 const validators = {
   givenName: { ...required, ...notTooLong(80) },
@@ -544,6 +546,11 @@ export const ProfileComponent = fp.flow(
                     this.setState({ showDemographicSurveyModal: true })
                   }
                 />
+                {canRenderSignedDucc(profile.duccSignedVersion) && (
+                  <SignedDuccPanel
+                    signedDate={profile.duccCompletionTimeEpochMillis}
+                  />
+                )}
               </div>
             </FlexRow>
             <div style={{ display: 'flex' }}>
