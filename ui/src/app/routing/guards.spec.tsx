@@ -136,7 +136,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteNotExpiring,
         },
       },
@@ -148,7 +147,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteExpiringSoon,
         },
       },
@@ -161,7 +159,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allBypassedMissingPP,
         },
       },
@@ -173,7 +170,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allBypassedPPComplete,
         },
       },
@@ -185,7 +181,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: newUserModuleState,
         },
       },
@@ -197,7 +192,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: true,
           modules: allCompleteOneExpired,
         },
       },
@@ -209,7 +203,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteCtTrainingExpired,
         },
       },
@@ -221,7 +214,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteMissingOneInitial,
         },
       },
@@ -235,7 +227,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteMissingOneRenewable,
         },
       },
@@ -249,7 +240,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteMissingOneEach,
         },
       },
@@ -263,7 +253,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: allCompleteMissingPP,
         },
       },
@@ -279,7 +268,6 @@ describe('redirectTo', () => {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [],
         accessModules: {
-          anyModuleHasExpired: false,
           modules: [],
         },
       },
