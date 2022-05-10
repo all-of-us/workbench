@@ -300,7 +300,7 @@ export const SignedInRoutes = () => {
           signatureState={DuccSignatureState.UNSIGNED}
         />
       </AppRoute>
-      <AppRoute exact path='/signed-ducc'>
+      <AppRoute exact path='/signed-ducc' guards={[getAccessModuleGuard()]}>
         <DataUserCodeOfConductPage
           routeData={{
             title: 'Data User Code of Conduct (Signed)',
