@@ -62,7 +62,7 @@ profiles {
       process.container = "gcr.io/google-containers/ubuntu-slim:0.14"
       workDir = "${WORKSPACE_BUCKET}/workflows/nextflow-scratch"
       google.location = "us-central1"
-      google.zone  = "us-central1-a"
+      google.zone = "us-central1-a"
       google.project = "${GOOGLE_PROJECT}"
       google.enableRequesterPaysBuckets = true
       google.lifeSciences.debug = true
