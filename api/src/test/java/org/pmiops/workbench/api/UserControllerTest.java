@@ -155,7 +155,6 @@ public class UserControllerTest {
   @Test
   public void testUserPartialStringSearch() {
     when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
-    List<DbUser> allUsers = Lists.newArrayList(userDao.findAll());
 
     UserResponse response =
         userController
