@@ -20,7 +20,7 @@ buildscript {
         SPRINGFOX_VERSION = '2.6.1'
         SPRING_BOOT_VERSION = '2.3.12.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
-        SWAGGER_3_CODEGEN_VERSION = '3.0.33'
+        SWAGGER_3_CODEGEN_VERSION = '3.0.34'
     }
 
     project.ext['hibernate.version'] = '5.4.31.Final'
