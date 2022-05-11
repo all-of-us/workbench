@@ -488,7 +488,7 @@ dependencies {
     testCompile "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile 'com.h2database:h2:1.4.194'
-    testCompile 'org.liquibase:liquibase-core:4.9.0'
+    testCompile 'org.liquibase:liquibase-core:4.9.1'
     testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
     testCompile "org.jetbrains.kotlin:kotlin-test:$project.ext.KOTLIN_VERSION"
 
