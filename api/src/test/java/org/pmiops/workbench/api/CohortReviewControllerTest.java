@@ -1511,7 +1511,7 @@ public class CohortReviewControllerTest {
             participantCohortAnnotationMapper.dbModelToClient(participantAnnotation),
             participantCohortAnnotationMapper.dbModelToClient(participantAnnotationDate));
 
-    assertThat(response.getItems()).containsAllIn(expected);
+    assertThat(response.getItems()).containsExactlyElementsIn(expected);
   }
 
   @ParameterizedTest(

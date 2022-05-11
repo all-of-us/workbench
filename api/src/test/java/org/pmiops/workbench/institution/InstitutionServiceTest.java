@@ -96,7 +96,7 @@ public class InstitutionServiceTest {
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
     Comparator<Institution> comparator = Comparator.comparing(Institution::getDisplayName);
-    assertThat(service.getInstitutions()).isStrictlyOrdered(comparator);
+    assertThat(service.getInstitutions()).isInStrictOrder(comparator);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class InstitutionServiceTest {
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
     Comparator<Institution> comparator = Comparator.comparing(Institution::getDisplayName);
-    assertThat(service.getInstitutions()).isStrictlyOrdered(comparator);
+    assertThat(service.getInstitutions()).isInStrictOrder(comparator);
   }
 
   @Test

@@ -217,8 +217,8 @@ public class WorkspaceMapperTest {
         .isEqualTo(sourceDbWorkspace.getTimeRequested().toInstant().toEpochMilli());
     assertThat(rp.getTimeReviewed()).isNull();
 
-    assertThat(rp.getPopulationDetails()).containsAllIn(SPECIFIC_POPULATIONS);
-    assertThat(rp.getResearchOutcomeList()).containsAllIn(RESEARCH_OUTCOMES);
+    assertThat(rp.getPopulationDetails()).containsExactlyElementsIn(SPECIFIC_POPULATIONS);
+    assertThat(rp.getResearchOutcomeList()).containsExactlyElementsIn(RESEARCH_OUTCOMES);
     assertThat(rp.getDisseminateResearchFindingList()).isEmpty();
     assertThat(rp.getOtherDisseminateResearchFindings()).isEqualTo(DISSEMINATE_FINDINGS_OTHER);
   }

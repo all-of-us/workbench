@@ -42,7 +42,7 @@ public class CohortFactoryTest {
     assertThat(dbCohort.getName()).isEqualTo(apiCohort.getName());
     assertThat(dbCohort.getType()).isEqualTo(apiCohort.getType());
     assertThat(dbCohort.getCriteria()).isEqualTo(apiCohort.getCriteria());
-    assertThat(dbCohort.getCreator()).isSameAs(user);
+    assertThat(dbCohort.getCreator()).isSameInstanceAs(user);
     assertThat(dbCohort.getWorkspaceId()).isEqualTo(workspaceId);
   }
 
@@ -65,7 +65,7 @@ public class CohortFactoryTest {
     assertThat(dbCohort.getName()).isEqualTo("new name");
     assertThat(dbCohort.getType()).isEqualTo(originalCohort.getType());
     assertThat(dbCohort.getCriteria()).isEqualTo(originalCohort.getCriteria());
-    assertThat(dbCohort.getCreator()).isSameAs(user);
+    assertThat(dbCohort.getCreator()).isSameInstanceAs(user);
     assertThat(dbCohort.getWorkspaceId()).isEqualTo(originalCohort.getWorkspaceId());
     assertThat(dbCohort.getCohortReviews()).isNull();
   }

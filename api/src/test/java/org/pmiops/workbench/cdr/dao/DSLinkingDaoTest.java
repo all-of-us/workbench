@@ -49,6 +49,6 @@ public class DSLinkingDaoTest {
         dsLinkingDao.findByDomainAndDenormalizedNameInOrderById(
             "Condition", ImmutableList.of("CONDITION_CONCEPT_ID", "CONDITION_STATUS_CONCEPT_NAME"));
     assertThat(sqlParts).hasSize(2);
-    assertThat(sqlParts).containsAllOf(dbDSLinking1, dbDSLinking2);
+    assertThat(sqlParts).containsExactly(dbDSLinking1, dbDSLinking2);
   }
 }

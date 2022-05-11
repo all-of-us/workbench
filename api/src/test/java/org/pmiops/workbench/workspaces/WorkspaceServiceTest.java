@@ -324,7 +324,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAllIn(expectedIds);
+    assertThat(actualIds).containsExactlyElementsIn(expectedIds);
   }
 
   @Test
@@ -363,7 +363,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAllIn(expectedIds);
+    assertThat(actualIds).containsExactlyElementsIn(expectedIds);
 
     currentUser.setUsername(DEFAULT_USERNAME);
     currentUser.setUserId(OTHER_USER_ID);
@@ -398,7 +398,7 @@ public class WorkspaceServiceTest {
         recentWorkspaces.stream()
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAllOf(1L, 2L);
+    assertThat(actualIds).containsExactly(1L, 2L);
   }
 
   @Test
