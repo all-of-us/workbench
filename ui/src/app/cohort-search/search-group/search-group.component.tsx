@@ -748,6 +748,7 @@ export const SearchGroup = withCurrentWorkspace()(
                 }
                 menuOptions={criteriaMenuOptions}
                 temporalGroup={0}
+                isTemporal={temporal}
               />
             ) : (
               <div style={styles.cardBlock}>
@@ -819,21 +820,33 @@ export const SearchGroup = withCurrentWorkspace()(
                   </div>
                 ))}
                 {/* Criteria menu for temporal group 1 items */}
-                <div style={styles.cardBlock}>
-                  <Menu
-                    style={styles.menu}
-                    appendTo={document.body}
-                    model={this.criteriaMenuItems(1)}
-                    popup
-                    ref={(el) => (this.temporalCriteriaMenu = el)}
+                {/* if feature flag is enabled - render the new component CohortCriteriaMenu */}
+                {serverConfigStore.get().config.enableUniversalSearch ? (
+                  <CohortCriteriaMenu
+                    launchSearch={(criteria, temporalGroup, searchTerms) =>
+                      this.launchSearch(criteria, temporalGroup, searchTerms)
+                    }
+                    menuOptions={criteriaMenuOptions}
+                    temporalGroup={0}
+                    isTemporal={temporal}
                   />
-                  <button
-                    style={styles.menuButton}
-                    onClick={(e) => this.temporalCriteriaMenu.toggle(e)}
-                  >
-                    Add Criteria <ClrIcon shape='caret down' size={12} />
-                  </button>
-                </div>
+                ) : (
+                  <div style={styles.cardBlock}>
+                    <Menu
+                      style={styles.menu}
+                      appendTo={document.body}
+                      model={this.criteriaMenuItems(1)}
+                      popup
+                      ref={(el) => (this.temporalCriteriaMenu = el)}
+                    />
+                    <button
+                      style={styles.menuButton}
+                      onClick={(e) => this.temporalCriteriaMenu.toggle(e)}
+                    >
+                      Add Criteria <ClrIcon shape='caret down' size={12} />
+                    </button>
+                  </div>
+                )}
               </React.Fragment>
             )}
             {/* Group footer */}
