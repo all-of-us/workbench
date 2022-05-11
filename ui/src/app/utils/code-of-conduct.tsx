@@ -25,7 +25,7 @@ const VERSIONS: VersionInfo[] = [
   {
     version: 4,
     path: '/data-user-code-of-conduct-v4.html',
-    height: '80rem',
+    height: '90rem', // no inner vertical scrollbars at min width, via trial and error
   },
 ];
 

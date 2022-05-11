@@ -8,6 +8,10 @@ import {
   withRouteData,
 } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
+import {
+  DataUserCodeOfConduct,
+  DuccSignatureState,
+} from 'app/components/data-user-code-of-conduct';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { AccessRenewal } from 'app/pages/access/access-renewal';
 import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
@@ -25,10 +29,6 @@ import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { Homepage } from 'app/pages/homepage/homepage';
-import {
-  DataUserCodeOfConduct,
-  DuccSignatureState,
-} from 'app/pages/profile/data-user-code-of-conduct';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import {
   WorkspaceEdit,
