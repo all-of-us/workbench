@@ -133,6 +133,8 @@ ENVIRONMENTS = {
       "controlled" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-preprod-ct",
         :dest_cdr_project => "fc-aou-cdr-preprod-ct",
+        :ingest_cdr_bucket => "gs://fc-aou-preprod-datasets-controlled-ingest",
+        :dest_cdr_bucket => "gs://fc-aou-preprod-datasets-controlled",
         :auth_domain_group_email => "all-of-us-controlled-preprod@firecloud.org",
       }
     }
@@ -153,6 +155,8 @@ ENVIRONMENTS = {
       "controlled" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-prod-ct",
         :dest_cdr_project => "fc-aou-cdr-prod-ct",
+        :ingest_cdr_bucket => "gs://fc-aou-datasets-controlled-ingest",
+        :dest_cdr_bucket => "gs://fc-aou-datasets-controlled",
         :auth_domain_group_email => "all-of-us-controlled-prod@firecloud.org",
       }
     }

@@ -1,8 +1,10 @@
+require_relative "genomic_manifests"
 require_relative "../../../../aou-utils/serviceaccounts"
 require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/gcloudcontext"
 require_relative "../../../libproject/environments"
 require_relative "../../../libproject/wboptionsparser"
+require "csv"
 require "json"
 require "set"
 require "tempfile"
@@ -309,6 +311,72 @@ Common.register_command({
   :invocation => "publish-cdr-wgs",
   :description => "Publishes a WGS CDR dataset by copying it into a Firecloud CDR project and making it readable by AoU service accounts",
   :fn => ->(*args) { publish_cdr_wgs("publish-cdr-wgs", args) }
+})
+
+def publish_cdr_files(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project associated with this workbench environment, " +
+    "e.g. all-of-us-rw-staging. Required."
+  )
+  op.add_option(
+    "--wgs-rids-file [file]",
+    ->(opts, v) { opts.wgs_rids_file = v},
+    "x"
+  )
+  op.add_option(
+    "--display-version-id [version]",
+    ->(opts, v) { opts.display_version_id = v},
+    "x"
+  )
+  # Implicit: file types: CRAM
+  # Implicit: operation: CREATE_MANIFEST
+  op.opts.tier = "controlled"
+  op.add_option(
+     "--tier [tier]",
+     ->(opts, v) { opts.tier = v},
+     "The access tier associated with this CDR, e.g. controlled." +
+     "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.tier and opts.wgs_rids_file }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
+  op.parse.validate
+
+  env = ENVIRONMENTS[op.opts.project]
+  tier = env.fetch(:accessTiers)[op.opts.tier]
+
+  common = Common.new
+
+  wgs_rids = IO.readlines(op.opts.wgs_rids_file, chomp: true).filter do |line|
+    if line.to_i() == 0
+      common.warning "skipping non-numeric research ID line: #{line}"
+      false
+    else
+      true
+    end
+  end
+
+  cram_manifest = build_cram_manifest(
+    op.opts.project,
+    tier[:ingest_cdr_bucket],
+    tier[:dest_cdr_bucket],
+    op.opts.display_version_id,
+    wgs_rids.to_set
+  )
+  CSV.open('cram_manifest.csv', 'wb') do |f|
+    f << cram_manifest.first.keys
+    cram_manifest.each { |c| f << c.values }
+  end
+end
+
+Common.register_command({
+  :invocation => "publish-cdr-files",
+  :description => "Copies and/or publishes CDR files to the resaercher-accessible CDR bucket",
+  :fn => ->(*args) { publish_cdr_files("publish-cdr-files", args) }
 })
 
 def create_wgs_extraction_datasets(cmd_name, args)
