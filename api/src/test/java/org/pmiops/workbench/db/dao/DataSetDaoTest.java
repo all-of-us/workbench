@@ -166,7 +166,7 @@ public class DataSetDaoTest {
         dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
             dbCohort.getCohortId(), workspace.getWorkspaceId(), false);
     assertThat(actual.size()).isEqualTo(2);
-    assertThat(actual).containsAtLeast(dbDataset1, dbDataset2);
+    assertThat(actual).containsExactly(dbDataset1, dbDataset2);
   }
 
   @Test

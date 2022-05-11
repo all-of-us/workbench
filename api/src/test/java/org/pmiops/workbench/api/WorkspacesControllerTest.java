@@ -1692,8 +1692,8 @@ public class WorkspacesControllerTest {
             .getBody()
             .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
-    assertThat(cohortsByName.keySet()).containsAtLeast("c1", "c2");
     assertThat(cohortsByName.keySet().size()).isEqualTo(2);
+    assertThat(cohortsByName.keySet()).containsExactly("c1", "c2");
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
         .containsNoneOf(c1.getId(), c2.getId());
 

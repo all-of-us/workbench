@@ -705,7 +705,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(4);
-    assertThat(response).containsAtLeast(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4);
+    assertThat(response).containsExactly(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4);
   }
 
   @Test
@@ -1481,7 +1481,7 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getLastModifiedTime()).isGreaterThan(initial.getLastModifiedTime());
     assertThat(updated.getEtag()).isNotEqualTo(initial.getEtag());
     assertThat(updated.getCriteriums().size()).isEqualTo(expectedCriteria.size());
-    assertThat(updated.getCriteriums()).containsAtLeastElementsIn(expectedCriteria);
+    assertThat(updated.getCriteriums()).containsExactlyElementsIn(expectedCriteria);
   }
 
   private void assertConceptSetAndCriteria(ConceptSet conceptSet, List<Criteria> expectedCriteria) {
@@ -1492,7 +1492,7 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo(CONCEPT_SET_NAME_1);
     assertThat(conceptSet.getCriteriums().size()).isEqualTo(expectedCriteria.size());
-    assertThat(conceptSet.getCriteriums()).containsAtLeastElementsIn(expectedCriteria);
+    assertThat(conceptSet.getCriteriums()).containsExactlyElementsIn(expectedCriteria);
   }
 
   //////////// other helpers for setup and intermediate objects ////////////

@@ -333,16 +333,16 @@ public class UserControllerTest {
             .getBody();
 
     // Assert we have the same elements in both responses
-    assertThat(robinsonsAsc.getUsers()).containsAtLeastElementsIn(robinsonsDesc.getUsers());
+    assertThat(robinsonsAsc.getUsers()).containsExactlyElementsIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
     List<User> descendingReversed = Lists.reverse(robinsonsDesc.getUsers());
-    assertThat(robinsonsAsc.getUsers()).containsAtLeastElementsIn(descendingReversed).inOrder();
+    assertThat(robinsonsAsc.getUsers()).containsExactlyElementsIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
     List<User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
     newAscending.sort(Comparator.comparing(User::getUserName));
-    assertThat(robinsonsAsc.getUsers()).containsAtLeastElementsIn(newAscending).inOrder();
+    assertThat(robinsonsAsc.getUsers()).containsExactlyElementsIn(newAscending).inOrder();
   }
 
   // Combinatorial tests for listBillingAccounts:
