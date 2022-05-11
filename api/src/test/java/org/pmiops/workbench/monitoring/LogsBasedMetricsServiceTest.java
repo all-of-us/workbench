@@ -144,9 +144,8 @@ public class LogsBasedMetricsServiceTest {
             .filter(Objects::nonNull)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(metricNames)
-        .containsAtLeastElementsIn(
-            ImmutableSet.of(
-                EventMetric.NOTEBOOK_CLONE.getName(), EventMetric.NOTEBOOK_DELETE.getName()));
+        .containsAtLeast(
+            EventMetric.NOTEBOOK_CLONE.getName(), EventMetric.NOTEBOOK_DELETE.getName());
   }
 
   @Test
@@ -260,7 +259,7 @@ public class LogsBasedMetricsServiceTest {
           doReturn(mockStopwatch).when(mockStopwatch).start();
           doReturn(mockStopwatch).when(mockStopwatch).stop();
         });
-    assertThat(someSet).containsAtLeastElementsIn(ImmutableSet.of(1, 2));
+    assertThat(someSet).containsAtLeast(1, 2);
     final List<LogEntry> logEntries = getWrittenLogEntries();
     assertThat(logEntries).hasSize(1);
 

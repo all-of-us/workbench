@@ -667,7 +667,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).contains(defaultConceptSet);
   }
 
   @Test
@@ -705,9 +705,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(4);
-    assertThat(response)
-        .containsAtLeastElementsIn(
-            ImmutableList.of(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4));
+    assertThat(response).containsAtLeast(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4);
   }
 
   @Test
@@ -735,7 +733,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).contains(defaultConceptSet);
   }
 
   @Test
@@ -751,7 +749,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).contains(defaultConceptSet);
   }
 
   @Test
@@ -767,7 +765,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).contains(defaultConceptSet);
   }
 
   @Test
