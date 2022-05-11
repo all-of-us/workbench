@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, Profile } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -564,13 +563,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const pageModeParam = query.get('pageMode');
     useEffect(() => {
       if (
-        environment.mergedAccessRenewal &&
         pageModeParam &&
         Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
       ) {
         setPageMode(DARPageMode[pageModeParam]);
       }
-    }, [environment.mergedAccessRenewal, pageModeParam]);
+    }, [pageModeParam]);
 
     // At any given time, at most two modules will be clickable:
     //  1. The active module, which we visually direct the user to with a CTA

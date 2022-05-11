@@ -11,7 +11,6 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import {
   profileApi,
   registerApiClient,
@@ -1578,36 +1577,19 @@ describe('DataAccessRequirements', () => {
     ).toBeFalsy();
   });
 
-  it('Should render in INITIAL_REGISTRATION mode by default (mergedAccessRenewal is true)', async () => {
-    environment.mergedAccessRenewal = true;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
-  });
-
-  it('Should render in INITIAL_REGISTRATION mode by default (mergedAccessRenewal is false)', async () => {
-    environment.mergedAccessRenewal = false;
+  it('Should render in INITIAL_REGISTRATION mode by default', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
   });
 
   it('Should render in ANNUAL_RENEWAL mode when specified by query param', async () => {
-    environment.mergedAccessRenewal = true;
     const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.ANNUAL_RENEWAL);
   });
 
-  it('Should not render in ANNUAL_RENEWAL mode if mergedAccessRenewal is false', async () => {
-    environment.mergedAccessRenewal = false;
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-    await waitOneTickAndUpdate(wrapper);
-    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
-  });
-
   it('Should render in INITIAL_REGISTRATION mode if the queryParam is invalid', async () => {
-    environment.mergedAccessRenewal = true;
     const wrapper = component('some-garbage');
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
@@ -1847,49 +1829,49 @@ describe('DataAccessRequirements', () => {
     expectComplete(wrapper);
   });
 
-  // it('should show the correct state when modules are disabled', async () => {
-  //   serverConfigStore.set({
-  //     config: {
-  //       ...defaultServerConfig,
-  //       enableComplianceTraining: false,
-  //     },
-  //   });
-  //
-  //   setCompletionTimes(() => Date.now());
-  //
-  //   updateOneModuleExpirationTime(
-  //     AccessModule.PROFILECONFIRMATION,
-  //     oneYearFromNow()
-  //   );
-  //   updateOneModuleExpirationTime(
-  //     AccessModule.PUBLICATIONCONFIRMATION,
-  //     oneYearFromNow()
-  //   );
-  //   updateOneModuleExpirationTime(
-  //     AccessModule.DATAUSERCODEOFCONDUCT,
-  //     oneYearFromNow()
-  //   );
-  //
-  //   // this module will not be returned in AccessModules because it is disabled
-  //   removeOneModule(AccessModule.COMPLIANCETRAINING);
-  //
-  //   const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-  //
-  //   await waitOneTickAndUpdate(wrapper);
-  //
-  //   // profileConfirmation, publicationConfirmation, and DUCC are complete
-  //   expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-  //   expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
-  //   expect(
-  //     findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
-  //   ).toBe(3);
-  //
-  //   // complianceTraining is not shown because it is disabled
-  //   expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
-  //
-  //   // all of the necessary steps = 3 rather than the usual 4
-  //   expectComplete(wrapper);
-  // });
+  it('should show the correct state when modules are disabled', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableComplianceTraining: false,
+      },
+    });
+
+    setCompletionTimes(() => Date.now());
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    // this module will not be returned in AccessModules because it is disabled
+    removeOneModule(AccessModule.COMPLIANCETRAINING);
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // profileConfirmation, publicationConfirmation, and DUCC are complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    expect(
+      findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
+    ).toBe(3);
+
+    // complianceTraining is not shown because it is disabled
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
+
+    // all of the necessary steps = 3 rather than the usual 4
+    expectComplete(wrapper);
+  });
 
   it('should allow completion of profile and publication confirmations when incomplete', async () => {
     removeOneModule(AccessModule.PROFILECONFIRMATION);
