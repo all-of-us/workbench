@@ -7,7 +7,7 @@ buildscript {
     // External properties on the default project. Values declared in ext blocks
     // outside of the buildscript block aren't usable here.
     ext {
-        GAE_VERSION = '1.9.93'
+        GAE_VERSION = '2.0.4'
         GSON_VERSION = '2.9.0'
         GOOGLE_TRUTH_VERSION = '1.1.3'
         JACKSON_VERSION = '2.13.2'
@@ -382,7 +382,6 @@ dependencies {
     compile 'com.google.apis:google-api-services-oauth2:v2-rev20200213-1.32.1'
     compile 'com.google.apis:google-api-services-iam:v1-rev20220421-1.32.1'
     compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
-    compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
     compile 'com.google.auth:google-auth-library-appengine:1.6.0'
     compile 'com.google.auth:google-auth-library-oauth2-http:1.6.0'
     compile 'com.google.cloud.sql:mysql-socket-factory:1.6.0'
@@ -483,8 +482,6 @@ dependencies {
     __tools__Compile 'com.opencsv:opencsv:5.6'
 
     testCompile 'org.mockito:mockito-core:2.18.3'
-    testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
-    testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
     testCompile "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile 'com.h2database:h2:1.4.194'
