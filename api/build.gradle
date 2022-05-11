@@ -424,7 +424,7 @@ dependencies {
 
     compile 'org.json:json:20220320'
 
-    compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
+    compile('org.apache.tomcat:tomcat-jdbc:10.0.20')
     compile("org.springframework.boot:spring-boot-starter-tomcat")
     compile("org.springframework.boot:spring-boot-starter-jdbc") {
         exclude group: 'com.zaxxer', module: 'HikariCP'
