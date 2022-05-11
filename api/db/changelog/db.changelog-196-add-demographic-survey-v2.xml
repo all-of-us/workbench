@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-196-add-demographic-survey-v2">
+
+    <createTable tableName="demographic_survey_v2">
+      <column name="demographic_survey_v2_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="demographic_survey_v2_user_id" references="user(user_id)"/>
+      </column>
+      <column name="completion_time" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ethnicity_ai_an_other_text" type="VARCHAR(200)"/>
+      <column name="ethnicity_asian_other_text" type="VARCHAR(200)"/>
+      <column name="ethnicity_other_text" type="VARCHAR(200)"/>
+      <column name="gender_other_text" type="VARCHAR(200)"/>
+      <column name="orientation_other_text" type="VARCHAR(200)"/>
+      <column name="sex_at_birth" type="ENUM('FEMALE','INTERSEX','MALE','OTHER','PREFER_NOT_TO_ANSWER')"/>
+      <column name="sex_at_birth_other_text" type="VARCHAR(200)"/>
+      <column name="year_of_birth" type="smallint"/>
+      <column name="year_of_birth_prefer_not" type="boolean"/>
+      <column name="disability_hearing" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_seeing" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_concentrating" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_walking" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_dressing" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_errands" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_other_text" type="VARCHAR(200)"/>
+      <column name="education" type="ENUM('NO_EDUCATION','GRADES_1_12','UNDERGRADUATE','COLLEGE_GRADUATE','MASTER','DOCTORATE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disadvantaged" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+    </createTable>
+
+    <createTable tableName="demographic_survey_v2_ethnic_category">
+      <column name="demographic_survey_v2_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="demographic_survey_v2_ethnic_category" references="demographic_survey_v2(demographic_survey_v2_id)"/>
+      </column>
+      <column name="ethnic_category" type="ENUM('AI_AN','AI_AN_CENTRAL_SOUTH','AI_AN_OTHER','ASIAN','ASIAN_INDIAN','ASIAN_CAMBODIAN','ASIAN_CHINESE','ASIAN_FILIPINO','ASIAN_HMONG','ASIAN_JAPANESE','ASIAN_KOREAN','ASIAN_LAO','ASIAN_PAKISTANI','ASIAN_VIETNAMESE','ASIAN_OTHER','BLACK','HISPANIC','MENA','NHPI','WHITE','OTHER','PREFER_NOT_TO_ANSWER')">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="demographic_survey_v2_gender_identity">
+      <column name="demographic_survey_v2_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="demographic_survey_v2_gender_identity" references="demographic_survey_v2(demographic_survey_v2_id)"/>
+      </column>
+      <column name="gender_identity" type="ENUM('GENDERQUEER','MAN','NON_BINARY','QUESTIONING','TRANS_MAN','TRANS_WOMAN','TWO_SPIRIT','WOMAN','OTHER','PREFER_NOT_TO_ANSWER')">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="demographic_survey_v2_sexual_orientation">
+      <column name="demographic_survey_v2_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="demographic_survey_v2_sexual_orientation" references="demographic_survey_v2(demographic_survey_v2_id)"/>
+      </column>
+      <column name="sexual_orientation" type="ENUM('ASEXUAL','BISEXUAL','GAY','LESBIAN','POLYSEXUAL','QUEER','QUESTIONING','SAME_GENDER','STRAIGHT','TWO_SPIRIT','OTHER','PREFER_NOT_TO_ANSWER')">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <rollback>
+      <dropTable tableName="demographic_survey_v2_sexual_orientation"/>
+      <dropTable tableName="demographic_survey_v2_gender_identity"/>
+      <dropTable tableName="demographic_survey_v2_ethnic_category"/>
+      <dropTable tableName="demographic_survey_v2"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

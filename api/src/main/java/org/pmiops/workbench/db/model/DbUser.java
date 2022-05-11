@@ -78,6 +78,7 @@ public class DbUser {
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkLoginGovUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
+  private DbDemographicSurveyV2 demographicSurveyV2;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -399,6 +400,21 @@ public class DbUser {
     this.computeSecuritySuspendedUntil = computeSecuritySuspendedUntil;
     return this;
   }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbDemographicSurveyV2 getDemographicSurveyV2() {
+    return demographicSurveyV2;
+  }
+
+  public DbUser setDemographicSurveyV2(DbDemographicSurveyV2 demographicSurveyV2) {
+    this.demographicSurveyV2 = demographicSurveyV2;
+    return this;
+  }
+
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
   // can be removed once we have a proper equals() / hashCode()
 

@@ -16,6 +16,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,9 +46,16 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperIm
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DemographicSurveyV2;
+import org.pmiops.workbench.model.Education;
+import org.pmiops.workbench.model.EthnicCategory;
+import org.pmiops.workbench.model.GenderIdentityV2;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.SexAtBirthV2;
+import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.model.YesNoPreferNot;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -525,6 +533,82 @@ public class ProfileServiceTest {
   }
 
   @Test
+  public void updateProfile_demo_survey_add_v2() {
+    DemographicSurveyV2 v2Survey =
+        new DemographicSurveyV2()
+            .ethnicCategories(
+                ImmutableList.of(
+                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
+            .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
+            .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
+            .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
+            .yearOfBirthPreferNot(true)
+            .disabilityHearing(YesNoPreferNot.FALSE)
+            .disabilitySeeing(YesNoPreferNot.TRUE)
+            .education(Education.DOCTORATE)
+            .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
+
+    Profile previousProfile = createValidProfile();
+    Profile updatedProfile = createValidProfile().demographicSurveyV2(v2Survey);
+
+    DbUser targetUser =
+        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+
+    assertEqualDemographicSurveys(
+        profileService.getProfile(targetUser).getDemographicSurveyV2(),
+        updatedProfile.getDemographicSurveyV2());
+  }
+
+  @Test
+  public void updateProfile_demo_survey_update_v2() {
+    DemographicSurveyV2 v2Survey =
+        new DemographicSurveyV2()
+            .ethnicCategories(
+                ImmutableList.of(
+                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
+            .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
+            .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
+            .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
+            .yearOfBirthPreferNot(true)
+            .disabilityHearing(YesNoPreferNot.FALSE)
+            .disabilitySeeing(YesNoPreferNot.TRUE)
+            .education(Education.DOCTORATE)
+            .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
+
+    DemographicSurveyV2 updatedV2Survey =
+        new DemographicSurveyV2()
+            .ethnicCategories(ImmutableList.of(EthnicCategory.BLACK))
+            .genderIdentities(ImmutableList.of(GenderIdentityV2.PREFER_NOT_TO_ANSWER))
+            .sexualOrientations(ImmutableList.of(SexualOrientationV2.PREFER_NOT_TO_ANSWER))
+            .sexAtBirth(SexAtBirthV2.FEMALE)
+            .yearOfBirth(1995)
+            .disabilityHearing(YesNoPreferNot.FALSE)
+            .disabilitySeeing(YesNoPreferNot.FALSE)
+            .education(Education.PREFER_NO_ANSWER)
+            .disadvantaged(YesNoPreferNot.FALSE);
+
+    Profile previousProfile = createValidProfile().demographicSurveyV2(v2Survey);
+    Profile updatedProfile = createValidProfile().demographicSurveyV2(updatedV2Survey);
+
+    DbUser targetUser =
+        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+
+    assertEqualDemographicSurveys(
+        profileService.getProfile(targetUser).getDemographicSurveyV2(),
+        updatedProfile.getDemographicSurveyV2());
+  }
+
+  @Test
   public void validateProfile_noChangesOnEmptyProfile() {
     // This is a synthetic test case: we never expect to be updating an empty Profile object, but
     // technically this passes validation since no fields have changed.
@@ -748,5 +832,22 @@ public class ProfileServiceTest {
     assertThat(adminTableUsers.get(0).getDisabled()).isEqualTo(false);
     assertThat(adminTableUsers.get(1).getUserId()).isEqualTo(user2.getUserId());
     assertThat(adminTableUsers.get(2).getUserId()).isEqualTo(user3.getUserId());
+  }
+
+  private void assertEqualDemographicSurveys(
+      DemographicSurveyV2 survey1, DemographicSurveyV2 survey2) {
+    assertThat(normalizeLists(survey1)).isEqualTo(normalizeLists(survey2));
+  }
+
+  // we make no guarantees about the order of the lists in DemographicSurveyV2
+  // so let's normalize them for comparison
+  private DemographicSurveyV2 normalizeLists(DemographicSurveyV2 rawSurvey) {
+    return rawSurvey
+        .ethnicCategories(
+            rawSurvey.getEthnicCategories().stream().sorted().collect(Collectors.toList()))
+        .genderIdentities(
+            rawSurvey.getGenderIdentities().stream().sorted().collect(Collectors.toList()))
+        .sexualOrientations(
+            rawSurvey.getSexualOrientations().stream().sorted().collect(Collectors.toList()));
   }
 }

@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
@@ -246,16 +247,8 @@ public class ProfileService {
     // RW-5139.
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
 
-    DbDemographicSurvey dbDemographicSurvey =
-        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
-            updatedProfile.getDemographicSurvey());
-    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
-      user.setDemographicSurveyCompletionTime(now);
-    }
-    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
-      dbDemographicSurvey.setUser(user);
-    }
-    user.setDemographicSurvey(dbDemographicSurvey);
+    populateDemographicSurvey(user, updatedProfile, now);
+    populateDemographicSurveyV2(user, updatedProfile);
 
     // save user, update institution, and synchronize access tiers
     DbUser updatedUser =
@@ -267,6 +260,29 @@ public class ProfileService {
     final Profile appliedUpdatedProfile = getProfile(updatedUser);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile, agent);
     return updatedUser;
+  }
+
+  private void populateDemographicSurvey(
+      DbUser user, Profile updatedProfile, Timestamp completionTime) {
+    DbDemographicSurvey dbDemographicSurvey =
+        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+            updatedProfile.getDemographicSurvey());
+    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
+      user.setDemographicSurveyCompletionTime(completionTime);
+    }
+    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
+      dbDemographicSurvey.setUser(user);
+    }
+    user.setDemographicSurvey(dbDemographicSurvey);
+  }
+
+  private void populateDemographicSurveyV2(DbUser dbUser, Profile updatedProfile) {
+    DbDemographicSurveyV2 dbDemoSurvey =
+        demographicSurveyMapper.toDbDemographicSurveyV2(updatedProfile.getDemographicSurveyV2());
+    if (dbDemoSurvey != null && dbDemoSurvey.getUser() == null) {
+      dbDemoSurvey.setUser(dbUser);
+    }
+    dbUser.setDemographicSurveyV2(dbDemoSurvey);
   }
 
   // Save the verified institutional affiliation in the DB. The affiliation has already been
