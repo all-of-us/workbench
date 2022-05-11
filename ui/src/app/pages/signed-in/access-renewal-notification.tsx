@@ -17,6 +17,11 @@ export const AccessRenewalNotificationMaybe = () => {
         ? daysRemaining + ' days remaining.'
         : 'Your access has expired.'
     }`;
+
+  // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
+  const { pathname, search } = window.location;
+  const fullPagePath = pathname + search;
+
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
   return daysRemaining !== undefined ? (
     <NotificationBanner
@@ -24,7 +29,7 @@ export const AccessRenewalNotificationMaybe = () => {
       text={notificationText}
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
-      buttonDisabled={window.location.pathname === ACCESS_RENEWAL_PATH}
+      buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}
     />
   ) : null;
 };
