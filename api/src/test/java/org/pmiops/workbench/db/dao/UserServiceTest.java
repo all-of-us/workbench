@@ -8,7 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
@@ -303,7 +303,7 @@ public class UserServiceTest {
   public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     userService.syncComplianceTrainingStatusV2();
-    verifyZeroInteractions(mockComplianceService);
+    verifyNoMoreInteractions(mockComplianceService);
   }
 
   @Test

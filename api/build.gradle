@@ -481,7 +481,14 @@ dependencies {
     __tools__Compile 'commons-cli:commons-cli:1.5.0'
     __tools__Compile 'com.opencsv:opencsv:5.6'
 
-    testCompile 'org.mockito:mockito-core:2.18.3'
+    testCompile 'org.mockito:mockito-core:4.5.1'
+    // Mockito deps
+    testCompile 'net.bytebuddy:byte-buddy:1.12.10'
+    testCompile 'net.bytebuddy:byte-buddy-agent:1.12.10'
+    testImplementation 'org.objenesis:objenesis:3.2'
+
+    testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
+    testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
     testCompile "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile 'com.h2database:h2:1.4.194'

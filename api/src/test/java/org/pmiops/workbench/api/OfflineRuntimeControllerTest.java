@@ -9,7 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
@@ -281,7 +281,7 @@ public class OfflineRuntimeControllerTest {
     stubDisks(ImmutableList.of());
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verifyZeroInteractions(mockMailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test
@@ -295,7 +295,7 @@ public class OfflineRuntimeControllerTest {
             idleDisk(Duration.ofDays(119L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verifyZeroInteractions(mockMailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test
@@ -303,7 +303,7 @@ public class OfflineRuntimeControllerTest {
     stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L)).status(LeonardoDiskStatus.FAILED)));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verifyZeroInteractions(mockMailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test

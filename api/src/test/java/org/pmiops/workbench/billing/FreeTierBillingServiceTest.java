@@ -10,7 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
@@ -123,7 +122,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costUnderThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 50% threshold
 
@@ -137,7 +136,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 75% threshold
 
@@ -155,7 +154,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
@@ -173,7 +172,7 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -199,7 +198,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costUnderThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 30% threshold
 
@@ -213,7 +212,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 65% threshold
 
@@ -231,7 +230,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
@@ -249,7 +248,7 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -294,7 +293,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 49.99);
   }
@@ -310,7 +309,7 @@ public class FreeTierBillingServiceTest {
     createWorkspace(null, "rumney");
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 49.99);
   }
@@ -373,7 +372,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
   }
 
@@ -402,7 +401,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
     verify(mockUserServiceAuditor)

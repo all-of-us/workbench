@@ -10,7 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
@@ -491,8 +491,8 @@ public class NotebooksControllerTest {
                 workspace.getFirecloudName(),
                 NotebooksService.withNotebookExtension("nb1")));
 
-    verifyZeroInteractions(mockCloudStorageClient);
-    verifyZeroInteractions(mockUserRecentResourceService);
+    verifyNoMoreInteractions(mockCloudStorageClient);
+    verifyNoMoreInteractions(mockUserRecentResourceService);
   }
 
   private static Stream<Arguments> notebookLockingCases() {

@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -451,7 +451,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   // bypassed modules do not expire: so no email
@@ -472,7 +472,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -525,7 +525,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   // one or more bypassed modules will not affect whether emails are sent.
@@ -607,7 +607,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -654,7 +654,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   // 15 days is sooner, so that's the email we send rather than 30
@@ -713,7 +713,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -767,7 +767,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
