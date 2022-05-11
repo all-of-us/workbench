@@ -21,6 +21,7 @@ import {
   isCompliant,
   redirectToNiH,
 } from 'app/utils/access-utils';
+import { serverConfigStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { DARPageMode, DataDetail, styles } from './data-access-requirements';
@@ -120,6 +121,8 @@ export const ControlledTierCard = (props: {
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
 
+  const { enableComplianceTraining } = serverConfigStore.get().config;
+
   return (
     <FlexRow data-test-id='controlled-card' style={styles.card}>
       <FlexColumn>
@@ -173,15 +176,19 @@ export const ControlledTierCard = (props: {
             eligible={isEligible}
           />
         )}
-        {pageMode === DARPageMode.INITIAL_REGISTRATION && (
-          <ModulesForInitialRegistration
-            {...{ profile, activeModule, clickableModules, spinnerProps }}
-            modules={[ctModule]}
-          />
-        )}
-        {pageMode === DARPageMode.ANNUAL_RENEWAL && isEligible && (
-          <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
-        )}
+
+        {enableComplianceTraining &&
+          pageMode === DARPageMode.INITIAL_REGISTRATION && (
+            <ModulesForInitialRegistration
+              {...{ profile, activeModule, clickableModules, spinnerProps }}
+              modules={[ctModule]}
+            />
+          )}
+        {enableComplianceTraining &&
+          pageMode === DARPageMode.ANNUAL_RENEWAL &&
+          isEligible && (
+            <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
+          )}
       </FlexColumn>
     </FlexRow>
   );

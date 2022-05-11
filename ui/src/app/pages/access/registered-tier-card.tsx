@@ -111,7 +111,10 @@ export const RegisteredTierCard = (props: {
           {!enableRasLoginGovLinking && <TemporaryRASModule {...{ profile }} />}
         </ModulesForInitialRegistration>
       ) : (
-        <ModulesForAnnualRenewal {...{ profile }} modules={renewalRtModules} />
+        <ModulesForAnnualRenewal
+          {...{ profile }}
+          modules={getEligibleModules(renewalRtModules, profile)}
+        />
       )}
     </FlexRow>
   );
