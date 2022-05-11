@@ -9,6 +9,7 @@ import { PublicInstitutionDetails } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
+import { DemographicSurvey } from 'app/components/demographic-survey';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ExclamationTriangle } from 'app/components/icons';
 import {
@@ -21,20 +22,18 @@ import { Modal } from 'app/components/modals';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { AoU } from 'app/components/text-wrappers';
 import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
 } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
-import { DemographicSurvey } from 'app/pages/profile/demographic-survey';
 import { styles } from 'app/pages/profile/profile-styles';
 import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { formatInitialCreditsUSD, withUserProfile } from 'app/utils';
+import { withUserProfile } from 'app/utils';
 import { wasReferredFromRenewal } from 'app/utils/access-utils';
-import { displayDateWithoutHours } from 'app/utils/dates';
+import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -42,6 +41,9 @@ import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { DataAccessPanel } from './data-access-panel';
+import { DemographicSurveyPanel } from './demographic-survey-panel';
+import { InitialCreditsPanel } from './initial-credits-panel';
+import { SignedDuccPanel } from './signed-ducc-panel';
 
 const validators = {
   givenName: { ...required, ...notTooLong(80) },
@@ -526,58 +528,29 @@ export const ProfileComponent = fp.flow(
                   <div style={styles.title}>Initial credits balance</div>
                   <hr style={{ ...styles.verticalLine }} />
                   {profile && (
-                    <FlexRow style={styles.initialCreditsBox}>
-                      <FlexColumn style={{ marginLeft: '0.8rem' }}>
-                        <div style={{ marginTop: '0.4rem' }}>
-                          <AoU /> initial credits used:
-                        </div>
-                        <div>
-                          Remaining <AoU /> initial credits:
-                        </div>
-                      </FlexColumn>
-                      <FlexColumn
-                        style={{ alignItems: 'flex-end', marginLeft: '1.0rem' }}
-                      >
-                        <div style={{ marginTop: '0.4rem', fontWeight: 600 }}>
-                          {formatInitialCreditsUSD(profile.freeTierUsage)}
-                        </div>
-                        <div style={{ fontWeight: 600 }}>
-                          {formatInitialCreditsUSD(
-                            profile.freeTierDollarQuota - profile.freeTierUsage
-                          )}
-                        </div>
-                      </FlexColumn>
-                    </FlexRow>
+                    <InitialCreditsPanel
+                      freeTierUsage={profile.freeTierUsage}
+                      freeTierDollarQuota={profile.freeTierDollarQuota}
+                    />
                   )}
                 </div>
                 <DataAccessPanel
                   userAccessTiers={profile.accessTierShortNames}
                 />
-                <div style={{ marginTop: '1rem', marginLeft: '1rem' }}>
-                  <div style={styles.title}>Optional Demographics Survey</div>
-                  <hr style={{ ...styles.verticalLine }} />
-                  <div style={{ color: colors.primary, fontSize: '14px' }}>
-                    <div>Survey Completed</div>
-                    {/* If a user has created an account, they have, by definition, completed the demographic survey*/}
-                    <div>
-                      {displayDateWithoutHours(
-                        profile.demographicSurveyCompletionTime !== null
-                          ? profile.demographicSurveyCompletionTime
-                          : profile.firstSignInTime
-                      )}
-                    </div>
-                    <Button
-                      type={'link'}
-                      style={styles.updateSurveyButton}
-                      onClick={() => {
-                        this.setState({ showDemographicSurveyModal: true });
-                      }}
-                      data-test-id={'demographics-survey-button'}
-                    >
-                      Update Survey
-                    </Button>
-                  </div>
-                </div>
+                <DemographicSurveyPanel
+                  demographicSurveyCompletionTime={
+                    profile.demographicSurveyCompletionTime
+                  }
+                  firstSignInTime={profile.firstSignInTime}
+                  onClick={() =>
+                    this.setState({ showDemographicSurveyModal: true })
+                  }
+                />
+                {canRenderSignedDucc(profile.duccSignedVersion) && (
+                  <SignedDuccPanel
+                    signedDate={profile.duccCompletionTimeEpochMillis}
+                  />
+                )}
               </div>
             </FlexRow>
             <div style={{ display: 'flex' }}>

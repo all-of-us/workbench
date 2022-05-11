@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohorts;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -38,9 +39,12 @@ public class CohortService {
         .collect(Collectors.toList());
   }
 
-  public DbCohort findDbCohortByCohortId(Long cohortId) {
-    return cohortDao
-        .findById(cohortId)
+  public Optional<DbCohort> findByCohortId(Long cohortId) {
+    return cohortDao.findById(cohortId);
+  }
+
+  public DbCohort findByCohortIdOrThrow(Long cohortId) {
+    return findByCohortId(cohortId)
         .orElseThrow(
             () ->
                 new NotFoundException(

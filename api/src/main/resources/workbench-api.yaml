@@ -3829,7 +3829,7 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaAttributeListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{questionConceptId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3839,12 +3839,6 @@ paths:
       description: Returns SurveyVersion with counts
       operationId: findSurveyVersionByQuestionConceptId
       parameters:
-      - in: path
-        name: surveyConceptId
-        type: integer
-        format: int64
-        required: true
-        description: surveyConceptId of the survey
       - in: path
         name: questionConceptId
         type: integer
@@ -3856,7 +3850,7 @@ paths:
           description: A collection of SurveyVersion
           schema:
             "$ref": "#/definitions/SurveyVersionListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}/{answerConceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{questionConceptId}/{answerConceptId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3866,12 +3860,6 @@ paths:
       description: Returns SurveyVersion with counts
       operationId: findSurveyVersionByQuestionConceptIdAndAnswerConceptId
       parameters:
-      - in: path
-        name: surveyConceptId
-        type: integer
-        format: int64
-        required: true
-        description: surveyConceptId of the survey
       - in: path
         name: questionConceptId
         type: integer
@@ -4471,11 +4459,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AccessModuleConfig"
-      accessTiersVisibleToUsers:
+      currentDuccVersions:
         type: array
-        description: The shortnames of the access tiers which are visible to users in this environment.
         items:
-          type: string
+          type: integer
+
   RuntimeImage:
     type: object
     properties:
@@ -5850,36 +5838,46 @@ definitions:
         type: integer
         format: int64
       twoFactorAuthCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       eraCommonsBypassTime:
         type: integer
         format: int64
       eraCommonsCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       rasLinkLoginGovBypassTime:
         type: integer
         format: int64
       rasLinkLoginGovCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       complianceTrainingBypassTime:
         type: integer
         format: int64
       complianceTrainingCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       ctComplianceTrainingBypassTime:
         type: integer
         format: int64
       ctComplianceTrainingCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
       dataUseAgreementBypassTime:
+        description: DEPRECATED - to be removed. use duccBypassTime.
+        type: integer
+        format: int64
+      duccBypassTime:
         type: integer
         format: int64
       dataUseAgreementCompletionTime:
+        description: DEPRECATED - to be removed.
         type: integer
         format: int64
 
@@ -5970,6 +5968,13 @@ definitions:
         type: integer
         format: int32
         description: Version of the data user code of conduct agreement that the user last signed.
+      duccSignedInitials:
+        type: string
+        description: The initials used for the user's most recent signing of the DUCC
+      duccCompletionTimeEpochMillis:
+        type: integer
+        format: int64
+        description: The date of the user's most recent signature of the DUCC
       address:
         "$ref": "#/definitions/Address"
       freeTierUsage:
@@ -6001,7 +6006,7 @@ definitions:
           anyModuleHasExpired:
             type: boolean
             description: >
-              Whether any modules have expired. Expiration information is also included with each
+              DEPRECATED - RW-8236. Remove after one cycle. Whether any modules have expired. Expiration information is also included with each
               module in the array; this field is provided for convenience.
 
   AccessModuleStatus:

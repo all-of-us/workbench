@@ -102,21 +102,12 @@ describe('Genomics Extraction Test', () => {
       await runtimePanel.clickButton(LinkText.Customize);
     }
 
-    expect(await runtimePanel.getCpus()).toBe('4');
-    expect(await runtimePanel.getRamGbs()).toBe('15');
-
     // Change Compute Type to Dataproc Cluster.
     await runtimePanel.pickComputeType(ComputeType.Dataproc);
 
     // Increase runtime auto-pause time because runtime will auto. pause after 30 min (default value) of idle
     // while export to vcf file still in progress.
     await runtimePanel.pickAutoPauseTime(AutoPauseIdleTime.EightHours);
-
-    // Disk (GB) is visible after select Dataproc Cluster.
-    expect(await runtimePanel.getStandardDiskGbs()).toBe(100);
-    // Make sure CPU and RAM remains unchanged after change Compute Type.
-    expect(await runtimePanel.getCpus()).toBe('4');
-    expect(await runtimePanel.getRamGbs()).toBe('15');
 
     // Start creating runtime but NOT wait until finish.
     await runtimePanel.createRuntime({ waitForComplete: false });
@@ -150,12 +141,6 @@ describe('Genomics Extraction Test', () => {
 
     const historyTable = genomicExtractionsHistorySidebar.getHistoryTable();
     await historyTable.waitUntilVisible();
-
-    // Verify table column names.
-    const columnNames = await historyTable.getColumnNames();
-    expect(columnNames).toEqual(
-      expect.arrayContaining(['DATASET NAME', 'STATUS', 'DATE STARTED', 'COST', 'SIZE', 'DURATION'])
-    );
 
     // Verify row count is 1.
     const rowCount = await historyTable.getRowCount();

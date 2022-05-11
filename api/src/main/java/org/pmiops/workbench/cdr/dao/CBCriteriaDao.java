@@ -128,7 +128,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria c1 "
               + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
-              + "and c1.fullText like '%[survey_rank1]%'"
+              + "and c1.fullText like '%[survey_rank1]%' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
               + "                     where c.domainId = 'SURVEY' "
@@ -293,7 +293,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "and concept_id in ( select concept_id "
               + "from cb_criteria "
               + "where domain_id = 'SURVEY' "
-              + "and match(full_text) against(:term in boolean mode)) "
+              + "and match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
               + "group by survey_version_concept_id"
               + ") a on c.id = a.survey_version_concept_id "
               + "order by count desc",
@@ -306,13 +306,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "select distinct csv.survey_version_concept_id as surveyVersionConceptId, csv.display_name as displayName, csa.item_count as itemCount, csv.display_order "
               + "from cb_survey_version csv "
               + "join cb_survey_attribute csa on csv.survey_version_concept_id = csa.survey_version_concept_id "
-              + "where csv.survey_concept_id = :surveyConceptId "
-              + "and csa.question_concept_id = :questionConceptId "
+              + "where csa.question_concept_id = :questionConceptId "
               + "and csa.answer_concept_id = :answerConceptId "
               + "order by csv.display_order) innerSql",
       nativeQuery = true)
   List<DbSurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-      @Param("surveyConceptId") Long surveyConceptId,
       @Param("questionConceptId") Long questionConceptId,
       @Param("answerConceptId") Long answerConceptId);
 

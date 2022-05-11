@@ -266,7 +266,7 @@ interface AttributeForm {
   cat: Array<any>; // Categorical attributes (Measurements only)
 }
 
-export interface Props {
+export interface AttributesPageProps {
   back: Function;
   close: Function;
   criteria: Array<Selection>;
@@ -290,8 +290,8 @@ export const AttributesPage = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohortCriteria()
 )(
-  class extends React.Component<Props, State> {
-    constructor(props: Props) {
+  class extends React.Component<AttributesPageProps, State> {
+    constructor(props: AttributesPageProps) {
       super(props);
       this.state = {
         calculating: false,
@@ -319,7 +319,7 @@ export const AttributesPage = fp.flow(
       this.initAttributeForm();
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
+    componentDidUpdate(prevProps: Readonly<AttributesPageProps>): void {
       if (this.props.node !== prevProps.node) {
         // A different node has been selected, so we reset the form and load the new attributes
         this.setState(
@@ -390,7 +390,6 @@ export const AttributesPage = fp.flow(
             cohortBuilderApi().findSurveyVersionByQuestionConceptId(
               namespace,
               id,
-              surveyNode.conceptId,
               conceptId
             )
           );
@@ -399,7 +398,6 @@ export const AttributesPage = fp.flow(
             cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
               namespace,
               id,
-              surveyNode.conceptId,
               ppiQuestions.getValue()[parentId].conceptId,
               +value
             )

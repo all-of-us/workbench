@@ -10,7 +10,7 @@ import {
 import { Spinner } from 'app/components/spinners';
 import colors from 'app/styles/colors';
 
-export interface Props {
+interface Props {
   email: string;
   onCancel: Function;
   onCopy: Function;

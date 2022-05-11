@@ -24,10 +24,10 @@ import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { Props, WorkspaceShare } from './workspace-share';
+import { WorkspaceShare, WorkspaceShareProps } from './workspace-share';
 
 describe('WorkspaceShare', () => {
-  let props: Props;
+  let props: WorkspaceShareProps;
 
   const component = () => {
     return mount(<WorkspaceShare {...props} />);

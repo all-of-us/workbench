@@ -9,7 +9,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.14",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.13",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
@@ -100,8 +100,7 @@
       "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    },
-    "tiersVisibleToUsers": ["registered", "controlled"]
+    }
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

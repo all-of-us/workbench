@@ -78,7 +78,7 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   }
 };
 
-export interface Props {
+interface Props {
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;

@@ -36,6 +36,8 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.aouAgreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
   @Mapping(source = "dbUser.duccAgreement.signedVersion", target = "duccSignedVersion")
+  @Mapping(source = "dbUser.duccAgreement.userInitials", target = "duccSignedInitials")
+  @Mapping(source = "dbUser.duccAgreement.completionTime", target = "duccCompletionTimeEpochMillis")
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
@@ -46,6 +48,8 @@ public interface ProfileMapper {
       List<UserTierEligibility> tierEligibilities,
       ProfileAccessModules accessModules);
 
+  // temporary for deployment safety - will be removed after one release cycle.
+  @Mapping(source = "duccBypassTime", target = "dataUseAgreementBypassTime")
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
   // used by the generated impl of adminViewToModel()

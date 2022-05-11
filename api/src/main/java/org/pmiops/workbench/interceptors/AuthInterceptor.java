@@ -1,7 +1,7 @@
 package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.oauth2.model.Userinfo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import java.lang.reflect.Method;
@@ -114,7 +114,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     final String token = authorizationHeader.substring("Bearer".length()).trim();
-    final Userinfoplus userInfo = userInfoService.getUserInfo(token);
+    final Userinfo userInfo = userInfoService.getUserInfo(token);
 
     // The Workbench considers the user's generated GSuite email to be their userName
     // Don't confuse this with the user's Contact Email, which is unrelated

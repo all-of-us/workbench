@@ -2,7 +2,8 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import java.sql.Date;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -10,6 +11,7 @@ import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +49,13 @@ public class ParticipantCohortStatusMapperTest {
             .sexAtBirthConceptId(3L)
             .sexAtBirth("Male")
             .genderConceptId(4L)
-            .gender("Male");
+            .gender("Man");
+    Table<Long, CriteriaType, String> demoTable = HashBasedTable.create();
+    demoTable.put(1L, CriteriaType.ETHNICITY, "Latino");
+    demoTable.put(2L, CriteriaType.RACE, "White");
+    demoTable.put(3L, CriteriaType.SEX, "Male");
+    demoTable.put(4L, CriteriaType.GENDER, "Man");
+
     assertThat(
             participantCohortStatusMapper.dbModelToClient(
                 new DbParticipantCohortStatus()
@@ -60,11 +68,7 @@ public class ParticipantCohortStatusMapperTest {
                     .raceConceptId(2L)
                     .sexAtBirthConceptId(3L)
                     .genderConceptId(4L),
-                ImmutableMap.of(
-                    1L, "Latino",
-                    2L, "White",
-                    3L, "Male",
-                    4L, "Male")))
+                demoTable))
         .isEqualTo(expectedParticipantCohortStatus);
   }
 }

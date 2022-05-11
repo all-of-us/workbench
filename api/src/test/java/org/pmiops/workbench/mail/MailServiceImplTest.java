@@ -86,40 +86,6 @@ public class MailServiceImplTest {
   }
 
   @Test
-  public void testSendWelcomeEmail_throwsMessagingException_deprecated() throws ApiException {
-    MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
-    msgStatuses.add(new MandrillMessageStatus().rejectReason("bad email"));
-    when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
-    assertThrows(
-        MessagingException.class,
-        () -> mailService.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
-    verify(mockMandrillApi, times(1)).send(any());
-  }
-
-  @Test
-  public void testSendWelcomeEmail_throwsApiException_deprecated() throws ApiException {
-    doThrow(ApiException.class).when(mockMandrillApi).send(any());
-    assertThrows(
-        MessagingException.class,
-        () -> mailService.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
-    verify(mockMandrillApi, times(3)).send(any());
-  }
-
-  @Test
-  public void testSendWelcomeEmail_invalidEmail_deprecated() {
-    assertThrows(
-        ServerErrorException.class,
-        () ->
-            mailService.sendWelcomeEmail_deprecated("Nota valid email", PASSWORD, FULL_USER_NAME));
-  }
-
-  @Test
-  public void testSendWelcomeEmail() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail_deprecated(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME);
-    verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
-  }
-
-  @Test
   public void testSendWelcomeEmail_throwsMessagingException() throws ApiException {
     MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
     msgStatuses.add(new MandrillMessageStatus().rejectReason("this was rejected"));

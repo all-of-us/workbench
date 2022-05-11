@@ -5,7 +5,7 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
 import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
 
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.oauth2.model.Userinfo;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -331,7 +331,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public DbUser createUser(
-      final Userinfoplus userInfo,
+      final Userinfo userInfo,
       final String contactEmail,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     return createUser(

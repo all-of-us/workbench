@@ -8,6 +8,10 @@ import {
   withRouteData,
 } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
+import {
+  DataUserCodeOfConduct,
+  DuccSignatureState,
+} from 'app/components/data-user-code-of-conduct';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import {
   DARPageMode,
@@ -27,7 +31,6 @@ import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
 import { Homepage } from 'app/pages/homepage/homepage';
-import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import {
   WorkspaceEdit,
@@ -295,6 +298,16 @@ export const SignedInRoutes = () => {
             title: 'Data User Code of Conduct',
             minimizeChrome: true,
           }}
+          signatureState={DuccSignatureState.UNSIGNED}
+        />
+      </AppRoute>
+      <AppRoute exact path='/signed-ducc' guards={[getAccessModuleGuard()]}>
+        <DataUserCodeOfConductPage
+          routeData={{
+            title: 'Data User Code of Conduct (Signed)',
+            minimizeChrome: true,
+          }}
+          signatureState={DuccSignatureState.SIGNED}
         />
       </AppRoute>
       <AppRoute exact path='/profile'>

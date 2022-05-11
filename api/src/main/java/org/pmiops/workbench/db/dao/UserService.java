@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.oauth2.model.Userinfo;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -36,7 +36,7 @@ public interface UserService {
 
   // version used by DevUserRegistrationService
   DbUser createUser(
-      Userinfoplus oAuth2Userinfo,
+      Userinfo oAuth2Userinfo,
       String contactEmail,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 

@@ -14,4 +14,5 @@
   <include file="changelog-schema/db.changelog-v2-4-drop_cb_menu.xml"/>
   <include file="changelog-schema/db.changelog-v2-5-modify_description.xml"/>
   <include file="changelog-schema/db.changelog-v2-6-drop_domain_info.xml"/>
+  <include file="changelog-schema/db.changelog-v2-7-maria_db_index.xml"/>
 </databaseChangeLog>

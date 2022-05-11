@@ -11,7 +11,7 @@ export interface EnvironmentBase {
   //
   // The URL to use when making API requests against the AoU API. This is used
   // by the core API / fetch modules and shouldn't be needed by most other components.
-  // Example value: 'https://api-dot-all-of-us-rw-stable.appspot.com'
+  // Example value: 'https://api.stable.fake-research-aou.org'
   allOfUsApiUrl: string;
   // The OAuth2 client ID. Used by the sign-in module to authenticate the user.
   // Example value: '56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com'

@@ -3,12 +3,10 @@ package org.pmiops.workbench.access;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,39 +91,6 @@ public class AccessTierServiceTest {
     assertThat(accessTierService.getAllTiers())
         .containsExactly(controlledTier, registeredTier)
         .inOrder(); // enforce a consistent ordering: alphabetical by shortName
-  }
-
-  @Test
-  public void test_getAllTiersVisibleToUsers_empty() {
-    assertThat(accessTierService.getAllTiersVisibleToUsers()).isEmpty();
-  }
-
-  @Test
-  public void test_getAllTiersVisibleToUsers_RTnotCT() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    config.access.tiersVisibleToUsers = Collections.singletonList(registeredTier.getShortName());
-
-    assertThat(accessTierService.getAllTiersVisibleToUsers()).containsExactly(registeredTier);
-  }
-
-  @Test
-  public void test_getAllTiersVisibleToUsers_RTandCT() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    config.access.tiersVisibleToUsers =
-        ImmutableList.of(registeredTier.getShortName(), controlledTier.getShortName());
-
-    assertThat(accessTierService.getAllTiersVisibleToUsers())
-        .containsExactly(controlledTier, registeredTier)
-        .inOrder(); // enforce a consistent ordering: alphabetical by shortName
-  }
-
-  @Test
-  public void test_getAccessTiersForUser_empty() {
-    assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
   @Test

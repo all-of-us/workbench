@@ -82,6 +82,7 @@ const defaultServerConfig: ConfigResponse = {
   complianceTrainingRenewalLookback: 30,
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
+  currentDuccVersions: [3, 4],
 };
 
 export default defaultServerConfig;

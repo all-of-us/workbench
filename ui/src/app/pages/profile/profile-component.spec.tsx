@@ -2,7 +2,7 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { InstitutionApi, ProfileApi } from 'generated/fetch';
+import { InstitutionApi, Profile, ProfileApi } from 'generated/fetch';
 
 import { TextInput } from 'app/components/inputs';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
@@ -26,8 +26,6 @@ describe('ProfilePageComponent', () => {
     return;
   }
 
-  const profile = ProfileStubVariables.PROFILE_STUB;
-
   const component = (controlledTierProfile = {}) => {
     return mount(
       <MemoryRouter>
@@ -43,6 +41,15 @@ describe('ProfilePageComponent', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
+  const updateProfile = (newUpdates: Partial<Profile>) => {
+    profileStore.set({
+      profile: { ...ProfileStubVariables.PROFILE_STUB, ...newUpdates },
+      load,
+      reload,
+      updateCache,
+    });
+  };
+
   beforeEach(() => {
     const profileApi = new ProfileApiStub();
 
@@ -50,11 +57,15 @@ describe('ProfilePageComponent', () => {
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
-      const newProfile = await profileApi.getMe();
-      profileStore.set({ profile: newProfile, load, reload, updateCache });
+      updateProfile(await profileApi.getMe());
     });
 
-    profileStore.set({ profile, load, reload, updateCache });
+    profileStore.set({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load,
+      reload,
+      updateCache,
+    });
 
     serverConfigStore.set({
       config: {
@@ -74,13 +85,15 @@ describe('ProfilePageComponent', () => {
   it('should render the profile', () => {
     const wrapper = component();
     expect(wrapper.find(TextInput).first().prop('value')).toMatch(
-      profile.givenName
+      ProfileStubVariables.PROFILE_STUB.givenName
     );
   });
 
   it('should save correctly', async () => {
     const wrapper = component();
-    expect(profileStore.get().profile.givenName).toEqual(profile.givenName);
+    expect(profileStore.get().profile.givenName).toEqual(
+      ProfileStubVariables.PROFILE_STUB.givenName
+    );
 
     wrapper
       .find(TextInput)
@@ -130,5 +143,30 @@ describe('ProfilePageComponent', () => {
     streetAddress1.simulate('change', { target: { value: '' } });
 
     expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
+  });
+
+  it('should display a link to the signed DUCC if the user is up to date', async () => {
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
+    ).toBeTruthy();
+  });
+
+  it('should not display a link to the signed DUCC if the user has not signed a DUCC', async () => {
+    updateProfile({ duccSignedVersion: undefined });
+
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
+    ).toBeFalsy();
+  });
+
+  it('should not display a link to the signed DUCC if the user has signed an older DUCC', async () => {
+    updateProfile({ duccSignedVersion: 3 });
+
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
+    ).toBeFalsy();
   });
 });

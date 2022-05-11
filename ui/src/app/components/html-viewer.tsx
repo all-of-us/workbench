@@ -7,7 +7,7 @@ import { WindowSizeProps } from 'app/utils';
 // for query selection of the last document element
 export const MS_WORD_PARAGRAPH_CLASS = '.MsoNormal';
 
-export interface Props extends WindowSizeProps {
+export interface HtmlViewerProps extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
   onLastPage: () => void;
   lastElementQuerySelector: string;
@@ -22,7 +22,7 @@ interface State {
 }
 
 export const HtmlViewer = withWindowSize()(
-  class extends React.Component<Props, State> {
+  class extends React.Component<HtmlViewerProps, State> {
     iframeRef: React.RefObject<any>;
 
     constructor(props) {

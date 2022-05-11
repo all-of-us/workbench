@@ -1062,8 +1062,7 @@ public class CohortBuilderControllerTest {
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (6, 715713, 903096, 102, 31)");
     SurveyVersionListResponse response =
         controller
-            .findSurveyVersionByQuestionConceptId(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, 1333342L, 715713L)
+            .findSurveyVersionByQuestionConceptId(WORKSPACE_NAMESPACE, WORKSPACE_ID, 715713L)
             .getBody();
     assert response != null;
     assertThat(response.getItems().get(0).getSurveyVersionConceptId()).isEqualTo(new Long("100"));
@@ -1103,7 +1102,7 @@ public class CohortBuilderControllerTest {
     List<SurveyVersion> response =
         controller
             .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, 111L, 222L, 333L)
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, 222L, 333L)
             .getBody()
             .getItems();
     assertThat(response.get(0).getSurveyVersionConceptId()).isEqualTo(999);

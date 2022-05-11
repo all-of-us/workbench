@@ -100,7 +100,7 @@ ENVIRONMENTS = {
     }
   }),
   "all-of-us-rw-stable" => env_with_defaults("stable", {
-    :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
+    :api_endpoint_host => "api.stable.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",

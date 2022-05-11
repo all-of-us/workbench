@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,7 +22,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -30,6 +31,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -37,6 +39,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -51,7 +54,6 @@ import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
@@ -73,19 +75,21 @@ public class UserMetricsControllerTest {
   @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
-  @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private CohortMapper cohortMapper;
   @Autowired private FakeClock fakeClock;
-  @Autowired private FirecloudMapper firecloudMapper;
+  @Autowired private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
+  @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceResourceMapper workspaceResourceMapper;
 
   private UserMetricsController userMetricsController;
 
   private DbUser dbUser;
+
+  private DbCohort dbCohort;
+  private DbConceptSet dbConceptSet;
 
   private DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource1;
   private DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource2;
@@ -116,62 +120,73 @@ public class UserMetricsControllerTest {
     final DbCdrVersion dbCdrVersion =
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
-    dbUser = new DbUser();
-    dbUser.setUserId(123L);
+    dbUser = new DbUser().setUserId(123L);
 
-    DbCohort dbCohort = new DbCohort();
-    dbCohort.setName("Cohort Name");
-    dbCohort.setCreator(dbUser);
-    dbCohort.setCohortId(1L);
-    dbCohort.setDescription("Cohort description");
-    dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
-    dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
-    when(mockCohortService.findDbCohortByCohortId(1l)).thenReturn(dbCohort);
+    dbWorkspace1 =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceId(1L)
+                .setWorkspaceNamespace("workspaceNamespace1")
+                .setFirecloudName("firecloudname1")
+                .setCdrVersion(dbCdrVersion));
 
-    DbConceptSet dbConceptSet = new DbConceptSet();
-    dbConceptSet.setName("Concept Set");
-    dbConceptSet.setDescription("This is a Condition Concept Set");
-    dbConceptSet.setConceptSetId(1L);
-    dbConceptSet.setDomainEnum(Domain.CONDITION);
-    dbConceptSet.setLastModifiedTime(new Timestamp(fakeClock.millis()));
-    dbConceptSet.setCreationTime(new Timestamp(fakeClock.millis()));
-    when(mockConceptSetService.getDbConceptSet(2l, 1l)).thenReturn(dbConceptSet);
+    dbWorkspace2 =
+        workspaceDao.save(
+            new DbWorkspace()
+                .setWorkspaceId(2L)
+                .setWorkspaceNamespace("workspaceNamespace2")
+                .setFirecloudName("firecloudName2")
+                .setCdrVersion(dbCdrVersion));
 
-    dbWorkspace1 = new DbWorkspace();
-    dbWorkspace1.setWorkspaceId(1L);
-    dbWorkspace1.setWorkspaceNamespace("workspaceNamespace1");
-    dbWorkspace1.setFirecloudName("firecloudname1");
-    dbWorkspace1.setCdrVersion(dbCdrVersion);
+    dbCohort =
+        new DbCohort()
+            .setName("Cohort Name")
+            .setCreator(dbUser)
+            .setCohortId(1L)
+            .setDescription("Cohort description")
+            .setLastModifiedTime(new Timestamp(fakeClock.millis()))
+            .setCreationTime(new Timestamp(fakeClock.millis()));
+    stubCohort(dbCohort);
 
-    dbWorkspace2 = new DbWorkspace();
-    dbWorkspace2.setWorkspaceId(2L);
-    dbWorkspace2.setWorkspaceNamespace("workspaceNamespace2");
-    dbWorkspace2.setFirecloudName("firecloudName2");
-    dbWorkspace2.setCdrVersion(dbCdrVersion);
+    dbConceptSet =
+        new DbConceptSet()
+            .setName("Concept Set")
+            .setDescription("This is a Condition Concept Set")
+            .setConceptSetId(1L)
+            .setDomainEnum(Domain.CONDITION)
+            .setLastModifiedTime(new Timestamp(fakeClock.millis()))
+            .setCreationTime(new Timestamp(fakeClock.millis()));
+    stubConceptSet(dbConceptSet, dbWorkspace2.getWorkspaceId());
 
-    dbUserRecentlyModifiedResource1 = new DbUserRecentlyModifiedResource();
-    dbUserRecentlyModifiedResource1.setResourceType(
-        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK);
-    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/notebooks/notebook1.ipynb");
-    dbUserRecentlyModifiedResource1.setLastAccessDate(new Timestamp(fakeClock.millis()));
-    dbUserRecentlyModifiedResource1.setUserId(dbUser.getUserId());
-    dbUserRecentlyModifiedResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
+    dbUserRecentlyModifiedResource1 =
+        userRecentlyModifiedResourceDao.save(
+            new DbUserRecentlyModifiedResource()
+                .setResourceType(
+                    DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK)
+                .setResourceId("gs://bucketFile/notebooks/notebook1.ipynb")
+                .setLastAccessDate(new Timestamp(fakeClock.millis()))
+                .setUserId(dbUser.getUserId())
+                .setWorkspaceId(dbWorkspace1.getWorkspaceId()));
 
-    dbUserRecentlyModifiedResource2 = new DbUserRecentlyModifiedResource();
-    dbUserRecentlyModifiedResource2.setResourceType(
-        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT);
-    dbUserRecentlyModifiedResource2.setResourceId(dbCohort.getCohortId() + "");
-    dbUserRecentlyModifiedResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
-    dbUserRecentlyModifiedResource2.setUserId(dbUser.getUserId());
-    dbUserRecentlyModifiedResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
+    dbUserRecentlyModifiedResource2 =
+        userRecentlyModifiedResourceDao.save(
+            new DbUserRecentlyModifiedResource()
+                .setResourceType(
+                    DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT)
+                .setResourceId(dbCohort.getCohortId() + "")
+                .setLastAccessDate(new Timestamp(fakeClock.millis() - 10000))
+                .setUserId(dbUser.getUserId())
+                .setWorkspaceId(dbWorkspace2.getWorkspaceId()));
 
-    dbUserRecentlyModifiedResource3 = new DbUserRecentlyModifiedResource();
-    dbUserRecentlyModifiedResource3.setResourceType(
-        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET);
-    dbUserRecentlyModifiedResource3.setResourceId(dbConceptSet.getConceptSetId() + "");
-    dbUserRecentlyModifiedResource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
-    dbUserRecentlyModifiedResource3.setUserId(dbUser.getUserId());
-    dbUserRecentlyModifiedResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
+    dbUserRecentlyModifiedResource3 =
+        userRecentlyModifiedResourceDao.save(
+            new DbUserRecentlyModifiedResource()
+                .setResourceType(
+                    DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET)
+                .setResourceId(dbConceptSet.getConceptSetId() + "")
+                .setLastAccessDate(new Timestamp(fakeClock.millis() - 10000))
+                .setUserId(dbUser.getUserId())
+                .setWorkspaceId(dbWorkspace2.getWorkspaceId()));
 
     final FirecloudWorkspaceDetails fcWorkspace1 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
@@ -225,15 +240,21 @@ public class UserMetricsControllerTest {
     userMetricsController.setDistinctWorkspaceLimit(5);
   }
 
+  private void stubCohort(DbCohort dbCohort) {
+    when(mockCohortService.findByCohortId(dbCohort.getCohortId()))
+        .thenReturn(Optional.of(dbCohort));
+    when(mockCohortService.findByCohortIdOrThrow(dbCohort.getCohortId())).thenReturn(dbCohort);
+  }
+
+  private void stubConceptSet(DbConceptSet dbConceptSet, long workspaceId) {
+    when(mockConceptSetService.getDbConceptSet(workspaceId, dbConceptSet.getConceptSetId()))
+        .thenReturn(dbConceptSet);
+    when(mockConceptSetService.maybeGetDbConceptSet(workspaceId, dbConceptSet.getConceptSetId()))
+        .thenReturn(Optional.of(dbConceptSet));
+  }
+
   private void mockResponsesForWorkspace(
       DbWorkspace dbWorkspace, FirecloudWorkspaceResponse response) {
-
-    when(workspaceDao.findActiveByWorkspaceId(dbWorkspace.getWorkspaceId()))
-        .thenReturn(Optional.of(dbWorkspace));
-
-    when(workspaceDao.getRequired(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
-        .thenReturn(dbWorkspace);
 
     when(mockFireCloudService.getWorkspace(dbWorkspace)).thenReturn(Optional.of(response));
 
@@ -356,7 +377,9 @@ public class UserMetricsControllerTest {
 
     assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("notebook1.ipynb");
     assertThat(recentResources.get(1).getCohort()).isNotNull();
-    assertThat(recentResources.get(1).getCohort().getName()).isEqualTo("Cohort Name");
+    assertThat(recentResources.get(1).getCohort().getName()).isEqualTo(dbCohort.getName());
+    assertThat(recentResources.get(2).getConceptSet()).isNotNull();
+    assertThat(recentResources.get(2).getConceptSet().getName()).isEqualTo(dbConceptSet.getName());
   }
 
   @Test
@@ -436,29 +459,84 @@ public class UserMetricsControllerTest {
   }
 
   @Test
-  public void testHasValidBlobIdIfNotebookNamePresent_nullNotebookName_passes() {
+  public void testGetUserRecentResource_deleted_cohort() {
+    // input resources: Notebook, Cohort, Concept Set
+
+    // simulate a deleted cohort
+    when(mockCohortService.findByCohortId(dbCohort.getCohortId())).thenReturn(Optional.empty());
+    // and confirm that the recent-resource DB entry is not empty
+    assertThat(userRecentlyModifiedResourceDao.findById(dbUserRecentlyModifiedResource2.getId()))
+        .hasValue(dbUserRecentlyModifiedResource2);
+
+    WorkspaceResourceResponse recentResources =
+        userMetricsController.getUserRecentResources().getBody();
+    assertThat(recentResources).isNotNull();
+
+    // expected resources: Notebook and Concept Set (Cohort was deleted)
+
+    assertThat(recentResources.size()).isEqualTo(2);
+    assertThat(recentResources.get(0).getNotebook()).isNotNull();
+    assertThat(recentResources.get(1).getConceptSet()).isNotNull();
+  }
+
+  @Test
+  public void testGetUserRecentResource_deleted_conceptSet() {
+    // input resources: Notebook, Cohort, Concept Set
+
+    // simulate a deleted concept set
+    when(mockConceptSetService.maybeGetDbConceptSet(any(), any())).thenReturn(Optional.empty());
+    // and confirm that the recent-resource DB entry is not empty
+    assertThat(userRecentlyModifiedResourceDao.findById(dbUserRecentlyModifiedResource3.getId()))
+        .hasValue(dbUserRecentlyModifiedResource3);
+
+    WorkspaceResourceResponse recentResources =
+        userMetricsController.getUserRecentResources().getBody();
+    assertThat(recentResources).isNotNull();
+
+    // expected resources: Notebook and Cohort (Concept Set was deleted)
+
+    assertThat(recentResources.size()).isEqualTo(2);
+    assertThat(recentResources.get(0).getNotebook()).isNotNull();
+    assertThat(recentResources.get(1).getCohort()).isNotNull();
+  }
+
+  @Test
+  public void test_isValidResource_IfNotebookNamePresent_nullNotebookName_passes() {
     dbUserRecentlyModifiedResource1.setResourceId(null);
-    assertThat(
-            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
-                dbUserRecentlyModifiedResource1))
-        .isTrue();
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource1)).isTrue();
   }
 
   @Test
-  public void testHasValidBlobIdIfNotebookNamePresent_validNotebookName_passes() {
-    assertThat(
-            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
-                dbUserRecentlyModifiedResource1))
-        .isTrue();
+  public void test_isValidResource_IfNotebookNamePresent_validNotebookName_passes() {
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource1)).isTrue();
   }
 
   @Test
-  public void testHasValidBlobIdIfNotebookNamePresent_invalidNotebookName_fails() {
+  public void test_isValidResource_IfNotebookNamePresent_invalidNotebookName_fails() {
     dbUserRecentlyModifiedResource1.setResourceId("invalid-notebook@name");
-    assertThat(
-            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
-                dbUserRecentlyModifiedResource1))
-        .isFalse();
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource1)).isFalse();
+  }
+
+  @Test
+  public void test_isValidResource_deleted_cohort_fails() {
+    assertThat(dbUserRecentlyModifiedResource2.getResourceType())
+        .isEqualTo(DbUserRecentlyModifiedResourceType.COHORT);
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource2)).isTrue();
+
+    when(mockCohortService.findByCohortId(dbCohort.getCohortId())).thenReturn(Optional.empty());
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource2)).isFalse();
+  }
+
+  @Test
+  public void test_isValidResource_deleted_conceptSet_fails() {
+    assertThat(dbUserRecentlyModifiedResource3.getResourceType())
+        .isEqualTo(DbUserRecentlyModifiedResourceType.CONCEPT_SET);
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource3)).isTrue();
+
+    when(mockConceptSetService.maybeGetDbConceptSet(
+            dbWorkspace2.getWorkspaceId(), dbConceptSet.getConceptSetId()))
+        .thenReturn(Optional.empty());
+    assertThat(userMetricsController.isValidResource(dbUserRecentlyModifiedResource3)).isFalse();
   }
 
   @Test

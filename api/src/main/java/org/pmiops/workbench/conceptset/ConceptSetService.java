@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -198,9 +199,12 @@ public class ConceptSetService {
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 
+  public Optional<DbConceptSet> maybeGetDbConceptSet(Long workspaceId, Long conceptSetId) {
+    return conceptSetDao.findByWorkspaceIdAndConceptSetId(workspaceId, conceptSetId);
+  }
+
   public DbConceptSet getDbConceptSet(Long workspaceId, Long conceptSetId) {
-    return conceptSetDao
-        .findByWorkspaceIdAndConceptSetId(workspaceId, conceptSetId)
+    return maybeGetDbConceptSet(workspaceId, conceptSetId)
         .orElseThrow(
             () ->
                 new NotFoundException(

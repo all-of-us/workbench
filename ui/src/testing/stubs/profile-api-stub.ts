@@ -31,6 +31,9 @@ export class ProfileStubVariables {
     authorities: [],
     freeTierUsage: 1.23,
     freeTierDollarQuota: 34.56,
+    duccSignedVersion: 4,
+    duccSignedInitials: 'abc',
+    duccCompletionTimeEpochMillis: 1,
     address: {
       streetAddress1: 'Main street',
       city: 'Cambridge',
@@ -62,7 +65,6 @@ export class ProfileStubVariables {
           expirationEpochMillis: undefined,
         },
       ],
-      anyModuleHasExpired: false,
     },
     tierEligibilities: [
       {

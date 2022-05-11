@@ -24,6 +24,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -279,6 +280,7 @@ public class WorkspacesControllerTest {
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
+  @MockBean CohortBuilderService cohortBuilderService;
   @MockBean AccessTierService accessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
@@ -379,6 +381,8 @@ public class WorkspacesControllerTest {
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+
+    when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));

@@ -10,7 +10,7 @@ import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe
 import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { ProfileStore, profileStore, useStore } from 'app/utils/stores';
+import { profileStore, useStore } from 'app/utils/stores';
 import logo from 'assets/images/all-of-us-logo.svg';
 
 const styles = reactStyles({
@@ -63,24 +63,6 @@ const styles = reactStyles({
     textAlign: 'center',
   },
 });
-
-export interface Props {
-  profileState: ProfileStore;
-}
-
-export interface State {
-  sideNavVisible: boolean;
-  statusAlertVisible: boolean;
-  statusAlertDetails: {
-    statusAlertId: number;
-    title: string;
-    message: string;
-    link: string;
-  };
-  barsTransform: string;
-  hovering: boolean;
-  wrapperRef: React.RefObject<HTMLDivElement>;
-}
 
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';

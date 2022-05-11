@@ -9,15 +9,11 @@ import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { Ban, Check } from 'app/components/icons';
-import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
-import {
-  authDomainApi,
-  userAdminApi,
-} from 'app/services/swagger-fetch-clients';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import {
   cond,
   reactStyles,
@@ -29,7 +25,6 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getAdminUrl } from 'app/utils/institutions';
-import { serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
 
 const styles = reactStyles({
@@ -63,6 +58,21 @@ const DisabledIcon = () => (
     <Ban style={styles.enabledIconStyle} />
   </span>
 );
+
+interface DataTableFields {
+  name: JSX.Element;
+  nameText: string;
+  username: JSX.Element;
+  usernameText: string;
+  contactEmail: JSX.Element;
+  contactEmailText: string;
+  institutionName: JSX.Element | string;
+  institutionNameText: string;
+  enabled: JSX.Element;
+  dataAccess: JSX.Element;
+  bypass: JSX.Element;
+  firstSignInTime: string;
+}
 
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
@@ -109,46 +119,6 @@ export const AdminUserTable = withUserProfile()(
     async loadProfiles() {
       const userListResponse = await userAdminApi().getAllUsers();
       this.setState({ users: userListResponse.users });
-    }
-
-    async updateUserDisabledStatus(disable: boolean, username: string) {
-      this.setState({ loading: true });
-      await authDomainApi().updateUserDisabledStatus({
-        email: username,
-        disabled: disable,
-      });
-      await this.loadProfiles();
-      this.setState({ loading: false });
-    }
-
-    /**
-     * Returns the appropriate cell contents (icon plus tooltip) for an access module cell
-     * in the table.
-     */
-    accessModuleCellContents(
-      user: AdminTableUser,
-      key: string
-    ): string | React.ReactElement {
-      const completionTime = user[key + 'CompletionTime'];
-      const bypassTime = user[key + 'BypassTime'];
-
-      if (completionTime) {
-        const completionTimeString = moment(completionTime).format('lll');
-        return (
-          <TooltipTrigger content={`Completed at ${completionTimeString}`}>
-            <span>✔</span>
-          </TooltipTrigger>
-        );
-      } else if (bypassTime) {
-        const bypassTimeString = moment(bypassTime).format('lll');
-        return (
-          <TooltipTrigger content={`Bypassed at ${bypassTimeString}`}>
-            <span>B</span>
-          </TooltipTrigger>
-        );
-      } else {
-        return '';
-      }
     }
 
     dataAccessContents(user: AdminTableUser): JSX.Element {
@@ -204,63 +174,55 @@ export const AdminUserTable = withUserProfile()(
       }
     }
 
-    convertProfilesToFields(users: AdminTableUser[]) {
-      return users.map((user) => ({
-        bypass: (
-          <AdminUserBypass
-            user={{ ...user }}
-            onBypassModuleUpdate={() => this.loadProfiles()}
-          />
-        ),
-        complianceTraining: this.accessModuleCellContents(
-          user,
-          'complianceTraining'
-        ),
-        ctComplianceTraining: this.accessModuleCellContents(
-          user,
-          'ctComplianceTraining'
-        ),
-        contactEmail: (
-          <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
-        ),
-        dataAccess: this.dataAccessContents(user),
-        dataUseAgreement: this.accessModuleCellContents(
-          user,
-          'dataUseAgreement'
-        ),
-        enabled: user.disabled ? <DisabledIcon /> : <EnabledIcon />,
-        eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
-        rasLinkLoginGov: this.accessModuleCellContents(user, 'rasLinkLoginGov'),
-        firstSignInTime: this.formattedTimestampOrEmptyString(
-          user.firstSignInTime
-        ),
-        firstSignInTimestamp: user.firstSignInTime,
-        institutionName: this.displayInstitutionName(user),
-        name: (
-          <AdminUserLink username={user.username} target='_blank'>
-            {user.familyName + ', ' + user.givenName}
-          </AdminUserLink>
-        ),
-        // used for filter and sorting
-        nameText: user.familyName + ' ' + user.givenName,
-        twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
-        username: (
-          <AdminUserLink username={user.username} target='_blank'>
-            {usernameWithoutDomain(user.username)}
-          </AdminUserLink>
-        ),
-      }));
+    convertProfilesToFields(users: AdminTableUser[]): DataTableFields[] {
+      return users
+        .map((user) => ({
+          // 'text' fields are used for sorting
+
+          name: (
+            <AdminUserLink username={user.username} target='_blank'>
+              {user.familyName + ', ' + user.givenName}
+            </AdminUserLink>
+          ),
+          nameText: user.familyName + ' ' + user.givenName,
+
+          username: (
+            <AdminUserLink username={user.username} target='_blank'>
+              {usernameWithoutDomain(user.username)}
+            </AdminUserLink>
+          ),
+          usernameText: usernameWithoutDomain(user.username),
+
+          contactEmail: (
+            <a href={`mailto:${user.contactEmail}`}>{user.contactEmail}</a>
+          ),
+          contactEmailText: user.contactEmail,
+
+          institutionName: this.displayInstitutionName(user),
+          institutionNameText: user.institutionName,
+
+          enabled: user.disabled ? <DisabledIcon /> : <EnabledIcon />,
+          dataAccess: this.dataAccessContents(user),
+          bypass: (
+            <AdminUserBypass
+              user={{ ...user }}
+              onBypassModuleUpdate={() => this.loadProfiles()}
+            />
+          ),
+
+          firstSignInTime: this.formattedTimestampOrEmptyString(
+            user.firstSignInTime
+          ),
+        }))
+        .sort((f1: DataTableFields, f2: DataTableFields) =>
+          f1.nameText.localeCompare(f2.nameText)
+        );
     }
 
     render() {
       const { contentLoaded, filter, loading, users } = this.state;
-      const {
-        enableComplianceTraining,
-        enableEraCommons,
-        enableRasLoginGovLinking,
-      } = serverConfigStore.get().config;
       return (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', padding: '1em' }}>
           <h2>User Admin Table</h2>
           {loading && (
             <SpinnerOverlay
@@ -286,35 +248,29 @@ export const AdminUserTable = withUserProfile()(
                 frozenWidth='200px'
                 globalFilter={filter}
                 paginator={true}
-                rows={50}
+                rows={10}
+                rowsPerPageOptions={[5, 10, 50, 100]}
                 scrollable
-                sortField={'firstSignInTimestamp'}
                 style={styles.tableStyle}
               >
                 <Column
                   field='name'
                   bodyStyle={{ ...styles.colStyle }}
-                  filterField={'nameText'}
-                  filterMatchMode={'contains'}
+                  filterField='nameText'
+                  filterMatchMode='contains'
                   frozen={true}
                   header='Name'
                   headerStyle={{ ...styles.colStyle, width: '200px' }}
                   sortable={true}
-                  sortField={'nameText'}
-                />
-                <Column
-                  field='institutionName'
-                  bodyStyle={{ ...styles.colStyle }}
-                  header='Institution'
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                  sortable={true}
+                  sortField='nameText'
                 />
                 <Column
                   field='username'
                   bodyStyle={{ ...styles.colStyle }}
-                  header='User Name'
+                  header='Username'
                   headerStyle={{ ...styles.colStyle, width: '200px' }}
                   sortable={true}
+                  sortField='usernameText'
                 />
                 <Column
                   field='contactEmail'
@@ -322,6 +278,15 @@ export const AdminUserTable = withUserProfile()(
                   header='Contact Email'
                   headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
+                  sortField='contactEmailText'
+                />
+                <Column
+                  field='institutionName'
+                  bodyStyle={{ ...styles.colStyle }}
+                  header='Institution'
+                  headerStyle={{ ...styles.colStyle, width: '180px' }}
+                  sortable={true}
+                  sortField='institutionNameText'
                 />
                 <Column
                   field='enabled'
@@ -329,15 +294,7 @@ export const AdminUserTable = withUserProfile()(
                   excludeGlobalFilter={true}
                   header='Enabled'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  field='firstSignInTime'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='First Sign-in'
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                  sortable={true}
-                  sortField={'firstSignInTimestamp'}
+                  sortable={false}
                 />
                 <Column
                   field='dataAccess'
@@ -348,61 +305,21 @@ export const AdminUserTable = withUserProfile()(
                   sortable={false}
                 />
                 <Column
-                  field='twoFactorAuth'
-                  bodyStyle={{ ...styles.colStyle, textAlign: 'center' }}
-                  excludeGlobalFilter={true}
-                  header='2FA'
-                  headerStyle={{ ...styles.colStyle, width: '80px' }}
-                />
-                {enableComplianceTraining && (
-                  <Column
-                    field='complianceTraining'
-                    bodyStyle={{ ...styles.colStyle, textAlign: 'center' }}
-                    excludeGlobalFilter={true}
-                    header='RT RCR'
-                    headerStyle={{ ...styles.colStyle, width: '80px' }}
-                  />
-                )}
-                {enableComplianceTraining && (
-                  <Column
-                    field='ctComplianceTraining'
-                    bodyStyle={{ ...styles.colStyle, textAlign: 'center' }}
-                    excludeGlobalFilter={true}
-                    header='CT RCR'
-                    headerStyle={{ ...styles.colStyle, width: '80px' }}
-                  />
-                )}
-                {enableEraCommons && (
-                  <Column
-                    field='eraCommons'
-                    bodyStyle={{ ...styles.colStyle, textAlign: 'center' }}
-                    excludeGlobalFilter={true}
-                    header='eRA Commons'
-                    headerStyle={{ ...styles.colStyle, width: '80px' }}
-                  />
-                )}
-                <Column
-                  field='dataUseAgreement'
-                  bodyStyle={{ ...styles.colStyle, textAlign: 'center' }}
-                  excludeGlobalFilter={true}
-                  header='DUCC'
-                  headerStyle={{ ...styles.colStyle, width: '80px' }}
-                />
-                {enableRasLoginGovLinking && (
-                  <Column
-                    field='rasLinkLoginGov'
-                    bodyStyle={{ ...styles.colStyle, textAlign: 'center' }}
-                    excludeGlobalFilter={true}
-                    header='RAS Login.gov Link'
-                    headerStyle={{ ...styles.colStyle, width: '80px' }}
-                  />
-                )}
-                <Column
                   field='bypass'
                   bodyStyle={{ ...styles.colStyle }}
                   excludeGlobalFilter={true}
-                  header='Bypass'
+                  header='Access Module Bypass'
                   headerStyle={{ ...styles.colStyle, width: '150px' }}
+                  sortable={false}
+                />
+                <Column
+                  field='firstSignInTime'
+                  bodyStyle={{ ...styles.colStyle }}
+                  excludeGlobalFilter={true}
+                  header='First Sign-in'
+                  headerStyle={{ ...styles.colStyle, width: '180px' }}
+                  sortable={true}
+                  sortField='firstSignInTime'
                 />
               </DataTable>
             </div>

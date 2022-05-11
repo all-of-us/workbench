@@ -219,7 +219,7 @@ const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
   </Modal>
 );
 
-export interface State {
+interface State {
   autocompleteLoading: boolean;
   autocompleteUsers: User[];
   userNotFound: string;
@@ -235,12 +235,12 @@ export interface State {
   workflowRolesErrors: string[];
 }
 
-export interface Props {
+export interface WorkspaceShareProps {
   onClose: Function;
   workspace: WorkspaceData;
 }
 
-interface HocProps extends Props {
+interface HocProps extends WorkspaceShareProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
 }
 

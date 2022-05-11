@@ -41,9 +41,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.ctComplianceTrainingBypassTime
       ? [AccessModule.CTCOMPLIANCETRAINING]
       : []),
-    ...(user.dataUseAgreementBypassTime
-      ? [AccessModule.DATAUSERCODEOFCONDUCT]
-      : []),
+    ...(user.duccBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),

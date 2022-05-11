@@ -23,13 +23,16 @@ import {
 } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-import { AttributesPage, Props } from './attributes-page.component';
+import {
+  AttributesPage,
+  AttributesPageProps,
+} from './attributes-page.component';
 
 import SpyInstance = jest.SpyInstance;
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
-let props: Props;
+let props: AttributesPageProps;
 let mockCountParticipants: SpyInstance;
 let mockFindCriteriaAttributeByConceptId: SpyInstance;
 let mockFindSurveyVersionByQuestionConceptId: SpyInstance;
