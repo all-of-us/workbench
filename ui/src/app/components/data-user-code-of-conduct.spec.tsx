@@ -7,7 +7,7 @@ import { Profile, ProfileApi } from 'generated/fetch';
 import {
   DataUserCodeOfConduct,
   DuccSignatureState,
-} from 'app/pages/profile/data-user-code-of-conduct';
+} from 'app/components/data-user-code-of-conduct';
 import {
   profileApi,
   registerApiClient,
