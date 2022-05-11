@@ -148,8 +148,8 @@ public class UserControllerTest {
             .userSearch(registeredTier.getShortName(), "John", null, null, null)
             .getBody();
     assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameInstanceAs(john.getUsername());
-    assertThat(response.getUsers().get(0).getUserName()).isSameInstanceAs(john.getUsername());
+    assertThat(response.getUsers().get(0).getEmail()).isEqualTo(john.getUsername());
+    assertThat(response.getUsers().get(0).getUserName()).isEqualTo(john.getUsername());
   }
 
   @Test
