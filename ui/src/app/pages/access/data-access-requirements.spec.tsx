@@ -48,7 +48,7 @@ import {
   initialRequiredModules,
 } from './data-access-requirements';
 
-const profile = ProfileStubVariables.PROFILE_STUB as Profile;
+const stubProfile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
 const reload = jest.fn();
 const updateCache = jest.fn();
@@ -260,7 +260,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, unsafeAllowSelfBypass: true },
     });
-    profileStore.set({ profile, load, reload, updateCache });
+    profileStore.set({ profile: stubProfile, load, reload, updateCache });
   });
 
   afterEach(() => {
@@ -269,7 +269,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     initialRequiredModules.forEach((module) =>
       expect(enabledModules.includes(module)).toBeTruthy()
     );
@@ -283,7 +283,7 @@ describe('DataAccessRequirements', () => {
         enforceRasLoginGovLinking: false,
       },
     });
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
   });
 
@@ -298,7 +298,7 @@ describe('DataAccessRequirements', () => {
           enforceRasLoginGovLinking: true,
         },
       });
-      const enabledModules = getEligibleModules(allInitialModules, profile);
+      const enabledModules = getEligibleModules(allInitialModules, stubProfile);
       expect(
         enabledModules.includes(AccessModule.RASLINKLOGINGOV)
       ).toBeTruthy();
@@ -309,7 +309,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
   });
 
@@ -317,17 +317,20 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableComplianceTraining: false },
     });
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(
       enabledModules.includes(AccessModule.COMPLIANCETRAINING)
     ).toBeFalsy();
   });
 
   it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
     const activeModule = getActiveModule(
       enabledModules,
-      profile,
+      stubProfile,
       DARPageMode.INITIAL_REGISTRATION
     );
 
@@ -340,7 +343,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
@@ -348,7 +351,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
     const activeModule = getActiveModule(
       enabledModules,
       testProfile,
@@ -364,7 +370,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, bypassEpochMillis: 1 },
@@ -372,7 +378,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
     const activeModule = getActiveModule(
       enabledModules,
       testProfile,
@@ -399,7 +408,7 @@ describe('DataAccessRequirements', () => {
       });
 
       const testProfile = {
-        ...profile,
+        ...stubProfile,
         accessModules: {
           modules: [
             {
@@ -412,7 +421,7 @@ describe('DataAccessRequirements', () => {
 
       const enabledModules = getEligibleModules(
         initialRequiredModules,
-        profile
+        stubProfile
       );
       const activeModule = getActiveModule(
         enabledModules,
@@ -433,7 +442,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the fourth module (Compliance) from getActiveModule when the first 3 modules have been completed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
@@ -446,7 +455,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
     const activeModule = getActiveModule(
       enabledModules,
       testProfile,
@@ -462,7 +474,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return undefined from getActiveModule when all modules have been completed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: initialRequiredModules.map((module) => ({
           moduleName: module,
@@ -471,7 +483,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
     const activeModule = getActiveModule(
       enabledModules,
       testProfile,
@@ -484,7 +499,7 @@ describe('DataAccessRequirements', () => {
   it('should not indicate the RAS module as active when a user has completed it', () => {
     // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
@@ -501,7 +516,10 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
 
     let activeModule = getActiveModule(
       enabledModules,
