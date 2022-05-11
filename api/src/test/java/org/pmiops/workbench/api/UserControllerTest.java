@@ -148,8 +148,8 @@ public class UserControllerTest {
             .userSearch(registeredTier.getShortName(), "John", null, null, null)
             .getBody();
     assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUsername());
-    assertThat(response.getUsers().get(0).getUserName()).isSameAs(john.getUsername());
+    assertThat(response.getUsers().get(0).getEmail()).isSameInstanceAs(john.getUsername());
+    assertThat(response.getUsers().get(0).getUserName()).isSameInstanceAs(john.getUsername());
   }
 
   @Test
@@ -333,16 +333,16 @@ public class UserControllerTest {
             .getBody();
 
     // Assert we have the same elements in both responses
-    assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());
+    assertThat(robinsonsAsc.getUsers()).containsAtLeastElementsIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
     List<User> descendingReversed = Lists.reverse(robinsonsDesc.getUsers());
-    assertThat(robinsonsAsc.getUsers()).containsAllIn(descendingReversed).inOrder();
+    assertThat(robinsonsAsc.getUsers()).containsAtLeastElementsIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
     List<User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
     newAscending.sort(Comparator.comparing(User::getUserName));
-    assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
+    assertThat(robinsonsAsc.getUsers()).containsAtLeastElementsIn(newAscending).inOrder();
   }
 
   // Combinatorial tests for listBillingAccounts:

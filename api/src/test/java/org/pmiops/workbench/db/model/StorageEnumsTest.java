@@ -81,7 +81,9 @@ public class StorageEnumsTest {
       for (final Object enumValue : enumClass.getEnumConstants()) {
         final Method enumToStorageMethod = enumClassToStorageMethod.get(enumClass);
         Short shortValue = enumToStorage(enumValue, enumToStorageMethod);
-        assertThat(shortValue).named(enumClass.getName() + ":" + enumValue.toString()).isNotNull();
+        assertWithMessage(enumClass.getName() + ":" + enumValue.toString())
+            .that(shortValue)
+            .isNotNull();
         final Method storageToEnumMethod = storageMethodToEnumClass.get(enumClass);
         assertThat(storageToEnum(shortValue, storageToEnumMethod)).isEqualTo(enumValue);
       }
@@ -94,8 +96,8 @@ public class StorageEnumsTest {
 
     String invokedMethodDesc = String.format("%s(%s)", enumToStorageMethod.getName(), enumValue);
 
-    assertThat(returnValue).named(invokedMethodDesc).isNotNull();
-    assertThat(returnValue).named(invokedMethodDesc).isInstanceOf(Short.class);
+    assertWithMessage(invokedMethodDesc).that(returnValue).isNotNull();
+    assertWithMessage(invokedMethodDesc).that(returnValue).isInstanceOf(Short.class);
     return (Short) returnValue;
   }
 

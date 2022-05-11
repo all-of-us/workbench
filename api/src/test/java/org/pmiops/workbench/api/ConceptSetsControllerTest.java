@@ -667,7 +667,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
@@ -706,7 +706,8 @@ public class ConceptSetsControllerTest {
 
     assertThat(response.size()).isEqualTo(4);
     assertThat(response)
-        .containsAllIn(ImmutableList.of(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4));
+        .containsAtLeastElementsIn(
+            ImmutableList.of(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4));
   }
 
   @Test
@@ -734,7 +735,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
@@ -750,7 +751,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
@@ -766,7 +767,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).containsAllIn(ImmutableList.of(defaultConceptSet));
+    assertThat(response).containsAtLeastElementsIn(ImmutableList.of(defaultConceptSet));
   }
 
   @Test
@@ -1223,7 +1224,9 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSetCopy.getName()).contains(conceptSet.getName());
     assertThat(conceptSetCopy.getName()).contains("_copy");
     assertThat(conceptSetCopy.getDescription()).isEqualTo(conceptSet.getDescription());
-    assertThat(conceptSet.getCriteriums()).containsAllIn(conceptSetCopy.getCriteriums()).inOrder();
+    assertThat(conceptSet.getCriteriums())
+        .containsAtLeastElementsIn(conceptSetCopy.getCriteriums())
+        .inOrder();
   }
 
   @Test
@@ -1258,7 +1261,9 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSetCopy.getName()).contains(conceptSet.getName());
     assertThat(conceptSetCopy.getName()).contains("_copy");
     assertThat(conceptSetCopy.getDescription()).isEqualTo(conceptSet.getDescription());
-    assertThat(conceptSet.getCriteriums()).containsAllIn(conceptSetCopy.getCriteriums()).inOrder();
+    assertThat(conceptSet.getCriteriums())
+        .containsAtLeastElementsIn(conceptSetCopy.getCriteriums())
+        .inOrder();
   }
 
   @Test
@@ -1450,7 +1455,7 @@ public class ConceptSetsControllerTest {
   }
 
   private void assertConceptSets(ConceptSet actual, ConceptSet expected) {
-    assertThat(actual.getCriteriums()).containsAllIn(expected.getCriteriums());
+    assertThat(actual.getCriteriums()).containsAtLeastElementsIn(expected.getCriteriums());
     assertThat(actual.getDescription()).isEqualTo(UPDATED_DESC);
     assertThat(actual.getName()).isEqualTo(UPDATED_NAME);
     assertThat(actual.getDomain()).isEqualTo(expected.getDomain());
@@ -1478,7 +1483,7 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getLastModifiedTime()).isGreaterThan(initial.getLastModifiedTime());
     assertThat(updated.getEtag()).isNotEqualTo(initial.getEtag());
     assertThat(updated.getCriteriums().size()).isEqualTo(expectedCriteria.size());
-    assertThat(updated.getCriteriums()).containsAllIn(expectedCriteria);
+    assertThat(updated.getCriteriums()).containsAtLeastElementsIn(expectedCriteria);
   }
 
   private void assertConceptSetAndCriteria(ConceptSet conceptSet, List<Criteria> expectedCriteria) {
@@ -1489,7 +1494,7 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo(CONCEPT_SET_NAME_1);
     assertThat(conceptSet.getCriteriums().size()).isEqualTo(expectedCriteria.size());
-    assertThat(conceptSet.getCriteriums()).containsAllIn(expectedCriteria);
+    assertThat(conceptSet.getCriteriums()).containsAtLeastElementsIn(expectedCriteria);
   }
 
   //////////// other helpers for setup and intermediate objects ////////////

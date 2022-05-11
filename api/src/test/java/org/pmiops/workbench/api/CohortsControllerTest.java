@@ -434,7 +434,7 @@ public class CohortsControllerTest {
             .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getItems();
-    assertThat(cohorts).containsAllOf(c1, c2);
+    assertThat(cohorts).containsAtLeast(c1, c2);
     assertThat(cohorts.size()).isEqualTo(2);
   }
 
