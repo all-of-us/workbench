@@ -210,18 +210,11 @@ public class UserDaoTest {
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
     assertThat(rows.get(0).getEraCommonsBypassTime()).isEqualTo(eRABypassTime);
-    assertThat(rows.get(0).getEraCommonsCompletionTime()).isEqualTo(eRACompleteTime);
     assertThat(rows.get(0).getComplianceTrainingBypassTime()).isEqualTo(rtTrainingBypassTime);
-    assertThat(rows.get(0).getComplianceTrainingCompletionTime()).isEqualTo(rtTrainingCompleteTime);
     assertThat(rows.get(0).getCtComplianceTrainingBypassTime()).isEqualTo(ctTrainingBypassTime);
-    assertThat(rows.get(0).getCtComplianceTrainingCompletionTime())
-        .isEqualTo(ctTrainingCompleteTime);
-    assertThat(rows.get(0).getDataUseAgreementBypassTime()).isEqualTo(duccBypassTime);
-    assertThat(rows.get(0).getDataUseAgreementCompletionTime()).isEqualTo(duccCompleteTime);
+    assertThat(rows.get(0).getDuccBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
-    assertThat(rows.get(0).getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompleteTime);
     assertThat(rows.get(0).getRasLinkLoginGovBypassTime()).isEqualTo(rasBypassTime);
-    assertThat(rows.get(0).getRasLinkLoginGovCompletionTime()).isEqualTo(rasCompleteTime);
 
     final DbAdminTableUser row = rows.get(0);
     Class<DbAdminTableUser> dbAdminUserClass = DbAdminTableUser.class;
