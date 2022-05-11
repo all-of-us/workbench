@@ -1,8 +1,10 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +30,14 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.DemographicSurveyV2;
+import org.pmiops.workbench.model.Education;
+import org.pmiops.workbench.model.EthnicCategory;
+import org.pmiops.workbench.model.GenderIdentityV2;
+import org.pmiops.workbench.model.SexAtBirthV2;
+import org.pmiops.workbench.model.SexualOrientationV2;
+import org.pmiops.workbench.model.YesNoPreferNot;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -432,5 +442,33 @@ public class DbUser {
             .toString()
             .substring(0, PD_UUID_SUFFIX_SIZE);
     return getUserPDNamePrefix() + "-" + randomString;
+  }
+
+  // TEMP NONSENSE
+
+  @Transient
+  public DemographicSurveyV2 getDemographicSurveyV2() {
+    return new DemographicSurveyV2()
+        .completionTime(CommonMappers.offsetDateTimeUtc(Timestamp.from(Instant.now())))
+        .ethnicCategories(
+            ImmutableList.of(
+                EthnicCategory.ASIAN,
+                EthnicCategory.ASIAN_CHINESE,
+                EthnicCategory.ASIAN_OTHER,
+                EthnicCategory.WHITE))
+        .ethnicityAsianOtherText("Thai")
+        .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
+        .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
+        .sexAtBirth(SexAtBirthV2.FEMALE)
+        .yearOfBirth(1995)
+        .disabilityHearing(YesNoPreferNot.PREFER_NOT_TO_ANSWER)
+        .disabilitySeeing(YesNoPreferNot.FALSE)
+        .disabilityConcentrating(YesNoPreferNot.FALSE)
+        .disabilityWalking(YesNoPreferNot.FALSE)
+        .disabilityDressing(YesNoPreferNot.FALSE)
+        .disabilityErrands(YesNoPreferNot.FALSE)
+        .disabilityOtherText("I have difficulty speaking")
+        .education(Education.COLLEGE_GRADUATE)
+        .disadvantaged(YesNoPreferNot.TRUE);
   }
 }

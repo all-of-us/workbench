@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
+import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
 import org.pmiops.workbench.rdr.model.RdrDisability;
 import org.pmiops.workbench.rdr.model.RdrEducation;
 import org.pmiops.workbench.rdr.model.RdrEthnicity;
@@ -95,6 +97,7 @@ public interface RdrMapper {
   @Mapping(source = "dbUser.demographicSurvey.lgbtqIdentity", target = "lgbtqIdentity")
   @Mapping(source = "dbUser.demographicSurvey.identifiesAsLgbtq", target = "identifiesAsLgbtq")
   @Mapping(source = "accessTiers", target = "accessTierShortNames")
+  @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
   RdrResearcher toRdrResearcher(
       DbUser dbUser,
       List<DbAccessTier> accessTiers,
@@ -260,4 +263,6 @@ public interface RdrMapper {
 
     return rdrDemographic;
   }
+
+  RdrDemographicSurveyV2 toDemographicSurveyV2(DemographicSurveyV2 demoSurveyV2);
 }
