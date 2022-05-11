@@ -379,7 +379,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 Domain.DEVICE,
                 Domain.VISIT));
     cardCounts.addAll(findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT)));
-    cardCounts.addAll(findSurveyCounts(term));
+    Long sum = findSurveyCounts(term).stream().map(CardCount::getCount).reduce(0L, Long::sum);
+    if (sum > 0) {
+      cardCounts.add(new CardCount().domain(Domain.SURVEY).name("Survey").count(sum));
+    }
     return cardCounts;
   }
 
