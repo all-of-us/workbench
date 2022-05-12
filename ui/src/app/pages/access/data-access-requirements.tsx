@@ -411,6 +411,12 @@ export const getActiveModule = (
   pageMode: DARPageMode
 ): AccessModule => incompleteModules(modules, profile, pageMode)[0];
 
+const getNextActive = (
+  modules: AccessModule[],
+  profile: Profile,
+  pageMode: DARPageMode
+) => getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
+
 // the header(s) outside the Fadebox
 
 const OuterHeader = (props: { pageMode: DARPageMode }) => (
@@ -523,56 +529,7 @@ export const DataDetail = (props: { icon: string; text: string }) => {
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
-    const { profile, reload } = useStore(profileStore);
-    const {
-      config: { unsafeAllowSelfBypass },
-    } = useStore(serverConfigStore);
-    const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
-
-    useEffect(() => {
-      const onMount = async () => {
-        await syncModulesExternal(
-          incompleteModules(
-            getEligibleModules(allInitialModules, profile),
-            profile,
-            pageMode
-          )
-        );
-        await reload();
-        spinnerProps.hideSpinner();
-      };
-
-      onMount();
-    }, []);
-
-    const query = useQuery();
-
-    // handle the route /nih-callback?token=<token>
-    const token = query.get('token');
-    useEffect(() => {
-      if (token) {
-        handleTerraShibbolethCallback(token, spinnerProps, reload);
-      }
-    }, [token]);
-
-    // handle the route /ras-callback?code=<code>
-    const code = query.get('code');
-    useEffect(() => {
-      if (code) {
-        handleRasCallback(code, spinnerProps, reload);
-      }
-    }, [code]);
-
-    const pageModeParam = query.get('pageMode');
-    useEffect(() => {
-      if (
-        pageModeParam &&
-        Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
-      ) {
-        setPageMode(DARPageMode[pageModeParam]);
-      }
-    }, [pageModeParam]);
-
+    // Local State
     // At any given time, at most two modules will be clickable:
     //  1. The active module, which we visually direct the user to with a CTA
     //  2. The next required module, which may diverge when the active module is optional.
@@ -580,25 +537,32 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const [activeModule, setActiveModule] = useState(null);
     const [clickableModules, setClickableModules] = useState([]);
 
-    const getNextActive = (modules: AccessModule[]) =>
-      getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
-    const nextActive = getNextActive(allInitialModules);
+    // Local Variables
+    const { profile, reload } = useStore(profileStore);
+    const {
+      config: { unsafeAllowSelfBypass },
+    } = useStore(serverConfigStore);
+
+    const query = useQuery();
+    const code = query.get('code');
+    const token = query.get('token');
+
+    const pageModeParam = query.get('pageMode');
+    const pageMode =
+      pageModeParam &&
+      Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
+        ? DARPageMode[pageModeParam]
+        : DARPageMode.INITIAL_REGISTRATION;
+
+    const nextActive = getNextActive(allInitialModules, profile, pageMode);
     const nextRequired = getNextActive(
       pageMode === DARPageMode.INITIAL_REGISTRATION
         ? initialRequiredModules
-        : renewalRequiredModules
+        : renewalRequiredModules,
+      profile,
+      pageMode
     );
-
-    // whenever the profile changes, update the next modules to complete
-    useEffect(() => {
-      setActiveModule(nextActive);
-      setClickableModules(
-        fp.flow(
-          fp.filter((m) => !!m),
-          fp.uniq
-        )([nextActive, nextRequired])
-      );
-    }, [nextActive, nextRequired]);
+    const isComplete = profile && !nextRequired;
 
     const rtCard = (
       <RegisteredTierCard
@@ -629,7 +593,54 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const cards = [rtCard, ctCard, dCard];
 
-    const isComplete = profile && !nextRequired;
+    // Effects
+    useEffect(() => {
+      const onMount = async () => {
+        await syncModulesExternal(
+          incompleteModules(
+            getEligibleModules(allInitialModules, profile),
+            profile,
+            pageMode
+          )
+        );
+        await reload();
+        spinnerProps.hideSpinner();
+      };
+
+      onMount();
+    }, []);
+
+    /*
+      TODO Move these into the effect with an empty dependency array.
+       I suspect that these are only called when the component is reloaded,
+        so the initial effect should be run again. My goal here is that effects should
+        only depend on props or local state. When this is the case, we can them above the local
+        variables.
+     */
+    // handle the route /nih-callback?token=<token>
+    useEffect(() => {
+      if (token) {
+        handleTerraShibbolethCallback(token, spinnerProps, reload);
+      }
+    }, [token]);
+
+    // handle the route /ras-callback?code=<code>
+    useEffect(() => {
+      if (code) {
+        handleRasCallback(code, spinnerProps, reload);
+      }
+    }, [code]);
+
+    // whenever the profile changes, update the next modules to complete
+    useEffect(() => {
+      setActiveModule(nextActive);
+      setClickableModules(
+        fp.flow(
+          fp.filter((m) => !!m),
+          fp.uniq
+        )([nextActive, nextRequired])
+      );
+    }, [nextActive, nextRequired]);
 
     return (
       <FlexColumn style={styles.pageWrapper}>
