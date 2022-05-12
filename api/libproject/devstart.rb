@@ -1602,6 +1602,7 @@ Common.register_command({
 def update_user_disabled_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
@@ -1623,7 +1624,7 @@ def update_user_disabled_status(cmd_name, args)
     "User to update the disabled status for"
   )
   op.add_validator ->(opts) {
-    raise ArgumentError unless (opts.project and opts.disabled != nil and opts.account and opts.user)
+    raise ArgumentError unless (opts.disabled != nil and opts.account and opts.user)
   }
   op.parse.validate
 
