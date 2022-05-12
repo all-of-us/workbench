@@ -1614,9 +1614,9 @@ def update_user_disabled_status(cmd_name, args)
     "Disabled state to set: true/false"
   )
   op.add_option(
-    "--account [admin_account_email]",
+    "--admin_account [admin_account_email]",
     ->(opts, v) { opts.account = v},
-    "Workbench admin account to perform update disabled status as"
+    "Workbench account with ACCESS_CONTROL_ADMIN Authority to perform the update disabled status action"
   )
   op.add_option(
     "--user [target_email]",
@@ -1648,7 +1648,7 @@ Common.register_command({
                   "they are redirected to a page which explains that they are disabled. This is currently the \n" \
                   "only automated means by which the user is notified of their disabled status.\n" \
                   "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \
-                  "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
+                  "Requires four flags: --project [env project] --disabled [true/false], --admin_account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_disabled_status(UPDATE_USER_DISABLED_CMD, args) }
 })
 
