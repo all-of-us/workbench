@@ -175,7 +175,7 @@ export const styles = reactStyles({
     paddingRight: '0.5em',
   },
   clickableModuleBox: {
-    padding: '0.5em',
+    padding: '1.4em',
     margin: '0.2em',
     width: '593px',
     borderRadius: '0.2rem',
@@ -184,7 +184,7 @@ export const styles = reactStyles({
     borderColor: colors.accent,
   },
   backgroundModuleBox: {
-    padding: '0.5em',
+    padding: '1.4em',
     margin: '0.2em',
     width: '593px',
     borderRadius: '0.2rem',
