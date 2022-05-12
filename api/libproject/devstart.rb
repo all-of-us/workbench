@@ -1637,8 +1637,10 @@ def update_user_disabled_status(cmd_name, args)
       -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/users}
 end
 
+UPDATE_USER_DISABLED_CMD = "update-user-disabled-status"
+
 Common.register_command({
-  :invocation => "update-user-disabled-status",
+  :invocation => UPDATE_USER_DISABLED_CMD,
   :description => "Set a Workbench user's disabled status by email, using another Workbench admin account.\n" \
                   "Disabling a user immediately revokes CDR access and restricted API access in the \n" \
                   "Workbench, if they had access to begin with. When a disabled user loads the Workbench UI, \n" \
@@ -1646,7 +1648,7 @@ Common.register_command({
                   "only automated means by which the user is notified of their disabled status.\n" \
                   "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \
                   "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
-  :fn => ->(*args) { update_user_disabled_status("update_user_registered_status", args) }
+  :fn => ->(*args) { update_user_disabled_status(UPDATE_USER_DISABLED_CMD, args) }
 })
 
 def fetch_firecloud_user_profile(cmd_name, *args)
