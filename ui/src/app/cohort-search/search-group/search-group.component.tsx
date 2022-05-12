@@ -820,14 +820,13 @@ export const SearchGroup = withCurrentWorkspace()(
                   </div>
                 ))}
                 {/* Criteria menu for temporal group 1 items */}
-                {/* if feature flag is enabled - render the new component CohortCriteriaMenu */}
                 {serverConfigStore.get().config.enableUniversalSearch ? (
                   <CohortCriteriaMenu
                     launchSearch={(criteria, temporalGroup, searchTerms) =>
                       this.launchSearch(criteria, temporalGroup, searchTerms)
                     }
                     menuOptions={criteriaMenuOptions}
-                    temporalGroup={0}
+                    temporalGroup={1}
                     isTemporal={temporal}
                   />
                 ) : (
