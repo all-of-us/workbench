@@ -413,19 +413,22 @@ export const getActiveModule = (
 
 // the header(s) outside the Fadebox
 
-const InitialOuterHeader = () => (
+const OuterHeader = (props: { pageMode: DARPageMode }) => (
   <FlexColumn style={styles.initialRegistrationOuterHeader}>
     <Header style={styles.initialRegistrationHeaderRW}>
       Researcher Workbench
     </Header>
     <Header style={styles.initialRegistrationHeaderDAR}>
-      Data Access Requirements
+      {fp.cond([
+        [
+          (pm) => pm === DARPageMode.INITIAL_REGISTRATION,
+          () => 'Data Access Requirements',
+        ],
+        [(pm) => pm === DARPageMode.ANNUAL_RENEWAL, () => 'Annual Renewal'],
+      ])(props.pageMode)}
     </Header>
   </FlexColumn>
 );
-
-const OuterHeader = (props: { pageMode: DARPageMode }) =>
-  props.pageMode === DARPageMode.INITIAL_REGISTRATION && <InitialOuterHeader />;
 
 // the header(s) inside the Fadebox
 
