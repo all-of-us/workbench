@@ -1891,6 +1891,28 @@ describe('DataAccessRequirements', () => {
     expectComplete(wrapper);
   });
 
+  // RW-7473: sync expiring/expired Training module to gain access
+  test.each([
+    ['should', 'expired', 1, oneHourAgo()],
+    ['should', 'expiring', 1, nowPlusDays(10)],
+    ['should not', 'complete', 0, oneYearFromNow()],
+    ['should not', 'incomplete', 0, null],
+  ])(
+    '%s externally sync %s Compliance Training module status',
+    async (desc1, desc2, expected, expirationTime) => {
+      const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
+
+      updateOneModuleExpirationTime(
+        AccessModule.COMPLIANCETRAINING,
+        expirationTime
+      );
+
+      const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+      await waitOneTickAndUpdate(wrapper);
+      expect(spy).toHaveBeenCalledTimes(expected);
+    }
+  );
+
   it('should allow completion of profile and publication confirmations when incomplete', async () => {
     removeOneModule(AccessModule.PROFILECONFIRMATION);
     removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
