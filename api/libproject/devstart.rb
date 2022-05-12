@@ -1633,9 +1633,10 @@ def update_user_disabled_status(cmd_name, args)
   token = token.chomp
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
+  payload = "{\"username\": \"#{op.opts.user}\", \"accountDisabledStatus\": {\"disabled\": \"#{op.opts.disabled}\"}}"
+  endpoint = "/v1/admin/users/updateAccount"
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
-      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/users}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}#{endpoint}}
 end
 
 UPDATE_USER_DISABLED_CMD = "update-user-disabled-status"
