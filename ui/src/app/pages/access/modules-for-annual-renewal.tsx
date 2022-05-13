@@ -258,6 +258,8 @@ export const RenewalCardBody = (props: {
               Note that you are obliged by the Terms of Use of the Workbench to
               keep your profile information up-to-date at all times.
             </div>
+          </FlexColumn>
+          <FlexColumn style={{ alignSelf: 'flex-end' }}>
             <TimeEstimate />
             <ActionButton
               actionButtonText='Review'
