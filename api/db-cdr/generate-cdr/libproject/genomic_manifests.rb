@@ -1,7 +1,36 @@
 require "csv"
 require "date"
 
-PROD_SOURCE_CONFIG = {
+# Utilities for generating, managing, publishing genomic data files. At a high
+# level, this facilitiates the data flow:
+#
+#   Genome Centers / Broad genomic curation -> Researcher Workbench environment
+#
+# Inputs:
+#
+# Our primary inputs to this process are AW4 manifests. These are CSV files passed
+# from the Broad genomic curation team to the DRC for data handoff. A single manifest
+# corresponds to a batch of data which was processed, so you should expect to see many
+# manifests. In some cases, data will also be processed multiple times, in which case
+# the latest should be taken. Note that WGS and Microarray have different specs.
+#
+# In the Workbench, we are primarily using AW4 manifests as a lookup between research ID and
+# curated data file path, though it also contains some logging metadata such as QC status and
+# research inclusion. See the CDR playbook for more documentation on AW4s:
+# https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
+#
+# Intermediates:
+#
+# We generate one or more manifests of source/desintation GCS file paths, which
+# describe how data will be copied.
+#
+# TODO(RW-8266): details on the publishing/copy process, details on manifest provenance
+#
+# See the CDR playbook for more context on the overall publishing process:
+# https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
+
+
+CURATION_PROD_SOURCE_CONFIG = {
   # Optional: to speed up iteration with this script, download and run against a local directory instead.
   :wgs_aw4_prefix => "gs://prod-drc-broad/AW4_wgs_manifest/AoU_DRCB_SEQ_"
 }
@@ -9,10 +38,10 @@ PROD_SOURCE_CONFIG = {
 
 FILE_ENVIRONMENTS = {
   "all-of-us-rw-preprod" => {
-    :source_config => PROD_SOURCE_CONFIG,
+    :source_config => CURATION_PROD_SOURCE_CONFIG,
   },
   "all-of-us-rw-prod" => {
-    :source_config => PROD_SOURCE_CONFIG
+    :source_config => CURATION_PROD_SOURCE_CONFIG
   }
 }
 
@@ -41,13 +70,11 @@ def _aw4_filename_to_datetime(aw4_prefix, f)
   end
 end
 
-def _read_research_id_csvs(aw4_prefix, rids)
+def _read_aw4_rows_for_rids(aw4_prefix, rids)
   common = Common.new
 
   ridset = rids.to_set
 
-  # See the CDR playbook for more documentation on AW4s:
-  # https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#
   # Read all AW4s into a CSV::Row[]
   aw4_paths = []
   if aw4_prefix.start_with?("gs://")
@@ -74,15 +101,14 @@ def _read_research_id_csvs(aw4_prefix, rids)
     if aw4_str.empty?
       raise ArgumentError.new("failed to read content from #{f}")
     end
-    aw4_rows = CSV.parse(aw4_str, headers: true)
+    aw4_rows = CSV.parse(aw4_str, headers: true).filter do |row|
+      # Filter out rids which weren't requested for publishing.
+      not row.header_row? and ridset.include? row["research_id"]
+    end
+
     aw4_rows.each do |row|
       # Parse the filename for the effective datetime for downstream disambiguation.
       row["aw4_datetime"] = filename_date
-    end
-
-    aw4_rows.filter do |row|
-      # Filter out rids which weren't requested for publishing.
-      not row.header_row? and ridset.include? row["research_id"]
     end
   end
 
@@ -95,7 +121,7 @@ def _read_research_id_csvs(aw4_prefix, rids)
     if by_rid.key? rid
       common.warning "found multiple AW4 rows for #{rid}, using the most recent"
     end
-    if not by_rid.key? rid or aw4_time < by_rid[rid]["aw4_datetime"]
+    if not by_rid.key? rid or aw4_time > by_rid[rid]["aw4_datetime"]
       by_rid[rid] = aw4_row
     end
   end
@@ -105,7 +131,7 @@ def _read_research_id_csvs(aw4_prefix, rids)
     raise ArgumentError.new("AW4 manifests do not contain information for requested research IDs:\n" + missing_rids.join(","))
   end
 
-  # The input resarch ID set should already account for these properties, these
+  # The input research ID set should already account for these properties, these
   # warnings indicate an upstream data issue or an issue with the AW4.
   by_rid.each_value do |aw4_row|
     rid = aw4_row["research_id"]
@@ -126,7 +152,7 @@ def _read_research_id_csvs(aw4_prefix, rids)
 end
 
 def read_all_wgs_aw4s(project, rids)
-  _read_research_id_csvs(FILE_ENVIRONMENTS[project][:source_config][:wgs_aw4_prefix], rids)
+  _read_aw4_rows_for_rids(FILE_ENVIRONMENTS[project][:source_config][:wgs_aw4_prefix], rids)
 end
 
 def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id, rids)
@@ -146,7 +172,7 @@ def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id,
       dest_name = source_name.sub(replace_config[:matchSourceName], replace_config[:destNameFn].call(aw4_entry["research_id"]))
 
       if source_name == dest_name
-        raise ArgumentError.new("")
+        raise ArgumentError.new("filename replacement failed for #{source_name}")
       end
       {
         :source_path => source_path,

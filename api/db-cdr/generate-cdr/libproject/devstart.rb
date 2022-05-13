@@ -333,16 +333,11 @@ def publish_cdr_files(cmd_name, args)
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
     "this matches the CDR version display name in the product, e.g. 'v5'"
   )
-  op.add_option(
-    "--file-types [type1,type2,...]",
-    ->(opts, v) { opts.file_types = v},
-    "File types to publish; defaults to all supported types"
-  )
   supported_types = ["CRAM"]
   op.opts.data_types = supported_types
   op.add_option(
     "--data-types [CRAM,...]",
-    ->(opts, v) { opts.data_types = v},
+    ->(opts, v) { opts.data_types = v.split(",")},
     "Data types to publish; defaults to all supported types: #{supported_types}"
   )
   # TODO(RW-8266): Add support for STAGE_INGEST, PUBLISH.
@@ -350,7 +345,7 @@ def publish_cdr_files(cmd_name, args)
   op.opts.tasks = supported_tasks
   op.add_option(
     "--tasks [CREATE_MANIFESTS,...]",
-    ->(opts, v) { opts.data_types = v},
+    ->(opts, v) { opts.tasks = v.split(",")},
     "Publishing tasks to execute; defaults to all tasks: #{supported_tasks}"
   )
   op.opts.tier = "controlled"
@@ -360,9 +355,9 @@ def publish_cdr_files(cmd_name, args)
      "The access tier associated with this CDR, e.g. controlled." +
      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.tier and opts.wgs_rids_file and opts.data_types and opts.tasks }
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported data types: #{opts.data_types}") unless (opts.data_types.split(",") - supported_types).empty?}
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks.split(",") - supported_tasks).empty?}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported data types: #{opts.data_types}") unless (opts.data_types - supported_types).empty?}
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty?}
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
