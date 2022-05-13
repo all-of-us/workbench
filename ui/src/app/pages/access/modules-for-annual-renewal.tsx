@@ -480,7 +480,6 @@ export const RenewalCardBody = (props: {
     ]
   );
 
-  console.log('What is a module status? ', moduleStatus);
   return (
     <React.Fragment>
       <FlexRow
@@ -497,7 +496,7 @@ export const RenewalCardBody = (props: {
           <AARTitleComponent />
         </div>
       </FlexRow>
-      {!hide && <FlexRow>{module}</FlexRow>}
+      {!hide && <FlexRow style={{ paddingLeft: '2.25em' }}>{module}</FlexRow>}
     </React.Fragment>
   );
 };
