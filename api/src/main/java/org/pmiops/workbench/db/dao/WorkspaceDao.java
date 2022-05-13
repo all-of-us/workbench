@@ -125,8 +125,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     save(toUpdate);
   }
 
-  @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
-  Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
+  @Query(
+      "SELECT w.creator FROM DbWorkspace w "
+          + "WHERE w.billingStatus = (:status) AND w.billingAccountName = (:billingAccountName)")
+  Set<DbUser> findAllCreatorsByBillingStatusAndBillingAccountName(
+      @Param("status") BillingStatus status,
+      @Param("billingAccountName") String billingAccountName);
 
   @Query(
       "SELECT COUNT(workspace.workspaceId) AS workspaceCount, workspace.activeStatus AS activeStatus, tier AS tier "
