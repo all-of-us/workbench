@@ -216,10 +216,10 @@ public class FreeTierBillingService {
           } catch (final MessagingException e) {
             logger.log(Level.WARNING, "failed to mail threshold email", e);
           }
-
-          // break out here to ensure we don't alert for lower thresholds
-          break;
         }
+
+        // break out here to ensure we don't alert for lower thresholds
+        break;
       }
     }
   }
