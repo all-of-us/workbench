@@ -224,8 +224,8 @@ public class FreeTierBillingService {
     }
   }
 
-  // we set Workspaces to INACTIVE when their creators have exceeded their free credits
-  // so we can retrieve these users by querying for inactive workspaces
+  // Helper to identify candidate users with workspaces that may need deactivation, if those users'
+  // initial credits have expired.
   private Set<DbUser> getFreeTierActiveWorkspaceCreators() {
     return workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
         BillingStatus.ACTIVE, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
