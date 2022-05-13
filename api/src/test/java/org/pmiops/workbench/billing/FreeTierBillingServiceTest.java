@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.cloud.PageImpl;
@@ -524,6 +525,28 @@ public class FreeTierBillingServiceTest {
     assertThat(t1.after(t0)).isTrue();
   }
 
+  // Regression test coverage for RW-8328.
+  @Test
+  public void checkFreeTierBillingUsage_singleAlertForExhaustedAndByoBilling() throws Exception {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
+
+    // Simulate the user attaching their own billing account to the previously free tier workspace.
+    workspaceDao.save(
+        workspace
+            .setBillingAccountName("billingAccounts/byo-account")
+            .setBillingStatus(BillingStatus.ACTIVE));
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyNoMoreInteractions(mailService);
+  }
+
   @Test
   public void getUserFreeTierDollarLimit_default() {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
@@ -640,12 +663,13 @@ public class FreeTierBillingServiceTest {
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace freeTierWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    final DbWorkspace userAccountWorkspace = new DbWorkspace();
-    userAccountWorkspace.setCreator(user);
-    userAccountWorkspace.setWorkspaceNamespace("some other namespace");
-    userAccountWorkspace.setGoogleProject("other project");
-    userAccountWorkspace.setBillingAccountName("some other account");
-    userAccountWorkspace.setBillingStatus(BillingStatus.ACTIVE);
+    final DbWorkspace userAccountWorkspace =
+        new DbWorkspace()
+            .setCreator(user)
+            .setWorkspaceNamespace("some other namespace")
+            .setGoogleProject("other project")
+            .setBillingAccountName("some other account")
+            .setBillingStatus(BillingStatus.ACTIVE);
     workspaceDao.save(userAccountWorkspace);
 
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -695,19 +719,17 @@ public class FreeTierBillingServiceTest {
   }
 
   private DbUser createUser(String email) {
-    DbUser user = new DbUser();
-    user.setUsername(email);
-    return userDao.save(user);
+    return userDao.save(new DbUser().setUsername(email));
   }
 
   // we only alert/record for BillingMigrationStatus.NEW workspaces
   private DbWorkspace createWorkspace(DbUser creator, String project) {
-    DbWorkspace workspace = new DbWorkspace();
-    workspace.setCreator(creator);
-    workspace.setWorkspaceNamespace(project + "-ns");
-    workspace.setGoogleProject(project);
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    return workspaceDao.save(workspace);
+    return workspaceDao.save(
+        new DbWorkspace()
+            .setCreator(creator)
+            .setWorkspaceNamespace(project + "-ns")
+            .setGoogleProject(project)
+            .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName()));
   }
 
   private void assertWithinBillingTolerance(double actualValue, double expectedValue) {

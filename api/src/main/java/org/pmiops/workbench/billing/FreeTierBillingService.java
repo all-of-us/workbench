@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
-import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
@@ -98,35 +97,22 @@ public class FreeTierBillingService {
                 Collectors.groupingBy(
                     e -> e.getKey().getCreator(), Collectors.summingDouble(Entry::getValue)));
 
-    // check cost thresholds for the relevant users
-
-    // collect previously-expired and currently-expired users
-    // for users who are expired: alert only if they were not expired previously
-    // for users who are not yet expired: check for intermediate thresholds and alert
-
-    final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
-
+    // intersect active free-tier workspace creators and currently-expired users
+    final Set<DbUser> freeTierUsers = getFreeTierActiveWorkspaceCreators();
     final Set<DbUser> expiredUsers =
         userCosts.entrySet().stream()
             .filter(e -> costAboveLimit(e.getKey(), e.getValue()))
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
-    final Set<DbUser> newlyExpiredUsers = Sets.difference(expiredUsers, previouslyExpiredUsers);
-    for (final DbUser user : newlyExpiredUsers) {
-      try {
-        mailService.alertUserFreeTierExpiration(user);
-      } catch (final MessagingException e) {
-        logger.log(Level.WARNING, e.getMessage());
-      }
+    final Set<DbUser> newlyExpiredFreeTierUsers = Sets.intersection(expiredUsers, freeTierUsers);
+    for (final DbUser user : newlyExpiredFreeTierUsers) {
       updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
     }
 
+    // check for new expirations or intermediate thresholds and alert
     final List<DbUser> allUsers = userDao.findUsers();
-    final Collection<DbUser> usersToThresholdCheck =
-        CollectionUtils.subtract(allUsers, expiredUsers);
-
-    sendAlertsForCostThresholds(usersToThresholdCheck, previousUserCosts, userCosts);
+    sendAlertsForCostThresholds(allUsers, previousUserCosts, userCosts);
   }
 
   private int compareCosts(final double a, final double b) {
@@ -192,6 +178,16 @@ public class FreeTierBillingService {
       DbUser user, double currentCost, double previousCost, List<Double> thresholdsInDescOrder) {
     final double limit = getUserFreeTierDollarLimit(user);
     final double remainingBalance = limit - currentCost;
+    final double previousRemainingBalance = limit - previousCost;
+
+    if (remainingBalance < 0 && previousRemainingBalance > 0) {
+      try {
+        mailService.alertUserFreeTierExpiration(user);
+      } catch (MessagingException e) {
+        logger.log(Level.WARNING, "failed to mail free tier expiration email", e);
+      }
+      return;
+    }
 
     // this shouldn't happen, but it did (RW-4678)
     // alert if it happens again
@@ -218,7 +214,7 @@ public class FreeTierBillingService {
             mailService.alertUserFreeTierDollarThreshold(
                 user, threshold, currentCost, remainingBalance);
           } catch (final MessagingException e) {
-            logger.log(Level.WARNING, e.getMessage());
+            logger.log(Level.WARNING, "failed to mail threshold email", e);
           }
         }
 
@@ -228,10 +224,11 @@ public class FreeTierBillingService {
     }
   }
 
-  // we set Workspaces to INACTIVE when their creators have exceeded their free credits
-  // so we can retrieve these users by querying for inactive workspaces
-  private Set<DbUser> getExpiredUsersFromDb() {
-    return workspaceDao.findAllCreatorsByBillingStatus(BillingStatus.INACTIVE);
+  // Helper to identify candidate users with workspaces that may need deactivation, if those users'
+  // initial credits have expired.
+  private Set<DbUser> getFreeTierActiveWorkspaceCreators() {
+    return workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
+        BillingStatus.ACTIVE, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
   }
 
   private Map<DbWorkspace, Double> getFreeTierWorkspaceCostsFromBQ() {
