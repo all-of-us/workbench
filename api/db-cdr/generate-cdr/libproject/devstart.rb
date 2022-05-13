@@ -325,15 +325,34 @@ def publish_cdr_files(cmd_name, args)
   op.add_option(
     "--wgs-rids-file [file]",
     ->(opts, v) { opts.wgs_rids_file = v},
-    "x"
+    "A file containing all research IDs for which WGS data should be published."
   )
   op.add_option(
     "--display-version-id [version]",
     ->(opts, v) { opts.display_version_id = v},
-    "x"
+    "A version 'id' suitable for display in the published GCS directory. Conventionally " +
+    "this matches the CDR version display name in the product, e.g. 'v5'"
   )
-  # Implicit: file types: CRAM
-  # Implicit: operation: CREATE_MANIFEST
+  op.add_option(
+    "--file-types [type1,type2,...]",
+    ->(opts, v) { opts.file_types = v},
+    "File types to publish; defaults to all supported types"
+  )
+  supported_types = ["CRAM"]
+  op.opts.data_types = supported_types
+  op.add_option(
+    "--data-types [CRAM,...]",
+    ->(opts, v) { opts.data_types = v},
+    "Data types to publish; defaults to all supported types: #{supported_types}"
+  )
+  # TODO(RW-8266): Add support for STAGE_INGEST, PUBLISH.
+  supported_tasks = ["CREATE_MANIFESTS"]
+  op.opts.tasks = supported_tasks
+  op.add_option(
+    "--tasks [CREATE_MANIFESTS,...]",
+    ->(opts, v) { opts.data_types = v},
+    "Publishing tasks to execute; defaults to all tasks: #{supported_tasks}"
+  )
   op.opts.tier = "controlled"
   op.add_option(
      "--tier [tier]",
@@ -341,7 +360,9 @@ def publish_cdr_files(cmd_name, args)
      "The access tier associated with this CDR, e.g. controlled." +
      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.tier and opts.wgs_rids_file }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.tier and opts.wgs_rids_file and opts.data_types and opts.tasks }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported data types: #{opts.data_types}") unless (opts.data_types.split(",") - supported_types).empty?}
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks.split(",") - supported_tasks).empty?}
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
@@ -365,8 +386,10 @@ def publish_cdr_files(cmd_name, args)
     tier[:ingest_cdr_bucket],
     tier[:dest_cdr_bucket],
     op.opts.display_version_id,
-    wgs_rids.to_set
+    wgs_rids
   )
+  # TODO(RW-8266): Upoad this to a manifest bucket instead. Use a publish identifier
+  # to enable resumability of publishing with different stages of tasks.
   CSV.open('cram_manifest.csv', 'wb') do |f|
     f << cram_manifest.first.keys
     cram_manifest.each { |c| f << c.values }

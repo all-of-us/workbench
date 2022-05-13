@@ -2,12 +2,8 @@ require "csv"
 require "date"
 
 PROD_SOURCE_CONFIG = {
-  # XXX: sample value
-  # :wgs_aw4_glob => "/usr/local/google/home/calbach/aou/data-ops/2022q2_june_release/aw4_sample/*"
-  # XXX: fake, but more real value
-  :wgs_aw4_prefix => "/usr/local/google/home/calbach/aou/data-ops/2022q2_june_release/aw4s/AoU_DRCB_SEQ_"
-  # XXX: Real value
-  # :wgs_aw4_glob => "gs://prod-drc-broad/AW4_wgs_manifest/*"
+  # Optional: to speed up iteration with this script, download and run against a local directory instead.
+  :wgs_aw4_prefix => "gs://prod-drc-broad/AW4_wgs_manifest/AoU_DRCB_SEQ_"
 }
 
 
@@ -22,8 +18,9 @@ FILE_ENVIRONMENTS = {
 
 FILE_PREFIX_REPLACEMENTS = {
   :wgs_cram => {
-    :match => /^[^\/]+\.cram/,
-    :replacementFn => ->(rid) { "wgs_#{rid}.cram" }
+    # Match/replace the GC filename; this works for both .cram and .cram.crai
+    :matchSourceName => /^[^\/]+\.cram/,
+    :destNameFn => ->(rid) { "wgs_#{rid}.cram" }
   }
 }
 
@@ -44,18 +41,40 @@ def _aw4_filename_to_datetime(aw4_prefix, f)
   end
 end
 
-def _read_research_id_csvs(aw4_prefix, ridset)
+def _read_research_id_csvs(aw4_prefix, rids)
   common = Common.new
 
-  # TODO: doc link for AW4s
-  # Expected WGS header:
-  # biobank_id,sample_id,sex_at_birth,site_id,vcf_hf_path,vcf_hf_md5_path,vcf_hf_index_path,vcf_raw_path,vcf_raw_md5_path,vcf_raw_index_path,gvcf_path,gvcf_md5_path,cram_path,cram_md5_path,crai_path,research_id,qc_status,drc_sex_concordance,drc_contamination,drc_mean_coverage,drc_fp_concordance,pass_to_research_pipeline
+  ridset = rids.to_set
 
+  # See the CDR playbook for more documentation on AW4s:
+  # https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#
   # Read all AW4s into a CSV::Row[]
-  matching_aw4_rows = Dir.glob(aw4_prefix + "*").flat_map do |f|
+  aw4_paths = []
+  if aw4_prefix.start_with?("gs://")
+    aw4_paths = common.capture_stdout(["gsutil", "ls", aw4_prefix +  "*"]).split("\n")
+  else
+    aw4_paths = Dir.glob(aw4_prefix + "*")
+  end
+  if aw4_paths.empty?
+    raise ArgumentError.new("failed to find any matching aw4 manifests @ #{aw4_prefix}")
+  end
+  i = 0
+  matching_aw4_rows = aw4_paths.flat_map do |f|
+    common.status "processed #{i}/#{aw4_paths.length} AW4 manifests" if i % 10 == 0
+    i+=1
+
     filename_date = _aw4_filename_to_datetime(aw4_prefix, f)
 
-    aw4_rows = CSV.read(f, headers: true)
+    aw4_str = ""
+    if aw4_prefix.start_with?("gs://")
+      aw4_str = common.capture_stdout(["gsutil", "cat", f])
+    else
+      aw4_str = IO.read(f)
+    end
+    if aw4_str.empty?
+      raise ArgumentError.new("failed to read content from #{f}")
+    end
+    aw4_rows = CSV.parse(aw4_str, headers: true)
     aw4_rows.each do |row|
       # Parse the filename for the effective datetime for downstream disambiguation.
       row["aw4_datetime"] = filename_date
@@ -102,22 +121,18 @@ def _read_research_id_csvs(aw4_prefix, ridset)
     end
   end
 
-  by_rid.values
+  # Maintain the original requested order.
+  rids.map { |rid| by_rid[rid] }
 end
 
-def read_all_wgs_aw4s(project, ridset)
-  _read_research_id_csvs(FILE_ENVIRONMENTS[project][:source_config][:wgs_aw4_prefix], ridset)
+def read_all_wgs_aw4s(project, rids)
+  _read_research_id_csvs(FILE_ENVIRONMENTS[project][:source_config][:wgs_aw4_prefix], rids)
 end
 
-
-def read_all_microarry_aw4s(project, ridset)
-end
-
-
-def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id, ridset)
+def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id, rids)
   raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
 
-  wgs_aw4s = read_all_wgs_aw4s(project, ridset)
+  wgs_aw4s = read_all_wgs_aw4s(project, rids)
   replace_config = FILE_PREFIX_REPLACEMENTS[:wgs_cram]
 
   # TODO(RW-8269): Support delta directories.
@@ -128,7 +143,11 @@ def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id,
   return wgs_aw4s.flat_map do |aw4_entry|
     [aw4_entry["cram_path"], aw4_entry["crai_path"]].map do |source_path|
       source_name = File.basename(source_path)
-      dest_name = source_name.sub(replace_config[:match], replace_config[:replacementFn].call(aw4_entry["sample_id"]))
+      dest_name = source_name.sub(replace_config[:matchSourceName], replace_config[:destNameFn].call(aw4_entry["research_id"]))
+
+      if source_name == dest_name
+        raise ArgumentError.new("")
+      end
       {
         :source_path => source_path,
         :ingest_path => File.join(ingest_base_path, dest_name),
