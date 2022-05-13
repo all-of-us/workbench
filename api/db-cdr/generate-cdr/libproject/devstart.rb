@@ -331,7 +331,8 @@ def publish_cdr_files(cmd_name, args)
     "--display-version-id [version]",
     ->(opts, v) { opts.display_version_id = v},
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
-    "this matches the CDR version display name in the product, e.g. 'v5'"
+    "this matches the CDR version display name in the product, e.g. 'v5'. This ID will be " +
+    "included in the published file directory structure."
   )
   supported_types = ["CRAM"]
   op.opts.data_types = supported_types
@@ -355,7 +356,7 @@ def publish_cdr_files(cmd_name, args)
      "The access tier associated with this CDR, e.g. controlled." +
      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.wgs_rids_file and opts.display_version_id }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported data types: #{opts.data_types}") unless (opts.data_types - supported_types).empty?}
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty?}
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
