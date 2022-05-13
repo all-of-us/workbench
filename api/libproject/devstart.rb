@@ -1602,6 +1602,7 @@ Common.register_command({
 def update_user_disabled_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
@@ -1613,9 +1614,9 @@ def update_user_disabled_status(cmd_name, args)
     "Disabled state to set: true/false"
   )
   op.add_option(
-    "--account [admin_account_email]",
+    "--admin_account [admin_account_email]",
     ->(opts, v) { opts.account = v},
-    "Workbench admin account to perform update disabled status as"
+    "Workbench account with ACCESS_CONTROL_ADMIN Authority to perform the update disabled status action"
   )
   op.add_option(
     "--user [target_email]",
@@ -1623,7 +1624,7 @@ def update_user_disabled_status(cmd_name, args)
     "User to update the disabled status for"
   )
   op.add_validator ->(opts) {
-    raise ArgumentError unless (opts.project and opts.disabled != nil and opts.account and opts.user)
+    raise ArgumentError unless (opts.disabled != nil and opts.account and opts.user)
   }
   op.parse.validate
 
@@ -1632,21 +1633,24 @@ def update_user_disabled_status(cmd_name, args)
   token = token.chomp
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
+  payload = "{\"username\": \"#{op.opts.user}\", \"accountDisabledStatus\": {\"disabled\": \"#{op.opts.disabled}\"}}"
+  endpoint = "/v1/admin/users/updateAccount"
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
-      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/users}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}#{endpoint}}
 end
 
+UPDATE_USER_DISABLED_CMD = "update-user-disabled-status"
+
 Common.register_command({
-  :invocation => "update-user-disabled-status",
+  :invocation => UPDATE_USER_DISABLED_CMD,
   :description => "Set a Workbench user's disabled status by email, using another Workbench admin account.\n" \
                   "Disabling a user immediately revokes CDR access and restricted API access in the \n" \
                   "Workbench, if they had access to begin with. When a disabled user loads the Workbench UI, \n" \
                   "they are redirected to a page which explains that they are disabled. This is currently the \n" \
                   "only automated means by which the user is notified of their disabled status.\n" \
                   "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \
-                  "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
-  :fn => ->(*args) { update_user_disabled_status("update_user_registered_status", args) }
+                  "Requires four flags: --project [env project] --disabled [true/false], --admin_account [admin email], and --user [target user email]",
+  :fn => ->(*args) { update_user_disabled_status(UPDATE_USER_DISABLED_CMD, args) }
 })
 
 def fetch_firecloud_user_profile(cmd_name, *args)
