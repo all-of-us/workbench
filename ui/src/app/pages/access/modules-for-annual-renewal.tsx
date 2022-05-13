@@ -6,7 +6,7 @@ import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { Circle, Clock, ClrIcon } from 'app/components/icons';
+import { CheckCircle, Circle, Clock, ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
@@ -480,6 +480,7 @@ export const RenewalCardBody = (props: {
     ]
   );
 
+  console.log('What is a module status? ', moduleStatus);
   return (
     <React.Fragment>
       <FlexRow
@@ -487,14 +488,11 @@ export const RenewalCardBody = (props: {
           alignItems: 'center',
         }}
       >
-        <Circle
-          data-test-id='eligible'
-          color={'#cbcbcb'}
-          style={{
-            marginLeft: '0.2em',
-            marginRight: '1em',
-          }}
-        />
+        {isRenewalCompleteForModule(moduleStatus) ? (
+          <CheckCircle color={colors.success} style={styles.moduleStatus} />
+        ) : (
+          <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
+        )}
         <div style={renewalStyle.h3}>
           <AARTitleComponent />
         </div>
