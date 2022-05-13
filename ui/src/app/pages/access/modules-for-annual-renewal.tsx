@@ -6,7 +6,7 @@ import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { Clock, ClrIcon } from 'app/components/icons';
+import { Circle, Clock, ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
@@ -482,9 +482,23 @@ export const RenewalCardBody = (props: {
 
   return (
     <React.Fragment>
-      <div style={renewalStyle.h3}>
-        <AARTitleComponent />
-      </div>
+      <FlexRow
+        style={{
+          alignItems: 'center',
+        }}
+      >
+        <Circle
+          data-test-id='eligible'
+          color={'#cbcbcb'}
+          style={{
+            marginLeft: '0.2em',
+            marginRight: '1em',
+          }}
+        />
+        <div style={renewalStyle.h3}>
+          <AARTitleComponent />
+        </div>
+      </FlexRow>
       {!hide && <FlexRow>{module}</FlexRow>}
     </React.Fragment>
   );
