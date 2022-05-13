@@ -28,7 +28,7 @@ def _aw4_filename_to_datetime(aw4_prefix, f)
   common = Common.new
 
   date_match = f.delete_prefix(aw4_prefix).match(/([\d-]+)(_\d+)?.csv/)
-  if not date_match
+  unless date_match
     common.warning "AW4 filename does not match expected date format, assuming old: #{f}"
     return DateTime.new(1970)
   end
