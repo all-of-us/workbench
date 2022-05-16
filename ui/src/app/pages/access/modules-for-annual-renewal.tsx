@@ -135,11 +135,8 @@ const renewalStyle = {
   },
   hippo: {
     display: 'grid',
-    gridTemplateColumns: 'auto auto auto',
-    gridTemplateRows: 'auto auto',
-    gridTemplateAreas: `
-      'checkbox title title '
-      'spacing content action'
+    gridTemplateAreas: `'checkbox title .'
+      '. content action'
     `,
     alignItems: 'center',
   },
@@ -256,7 +253,7 @@ export const RenewalCardBody = (props: {
       AccessModule.PROFILECONFIRMATION,
       () => (
         <React.Fragment>
-          <div style={{ paddingRight: '1.4em' }}>
+          <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
             <Dates />
             <div style={{ marginBottom: '0.5rem', ...textStyle }}>
               Please update your profile information if any of it has changed
@@ -267,7 +264,13 @@ export const RenewalCardBody = (props: {
               keep your profile information up-to-date at all times.
             </div>
           </div>
-          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
+          <FlexColumn
+            style={{
+              alignSelf: 'end',
+              alignItems: 'center',
+              gridArea: 'action',
+            }}
+          >
             <TimeEstimate />
             <ActionButton
               actionButtonText='Review'
@@ -286,7 +289,7 @@ export const RenewalCardBody = (props: {
       () => {
         return (
           <React.Fragment>
-            <div>
+            <div style={{ gridArea: 'content' }}>
               <Dates />
               <div style={textStyle}>
                 The <AoU /> Publication and Presentation Policy requires that
@@ -332,7 +335,13 @@ export const RenewalCardBody = (props: {
                 </label>
               </div>
             </div>
-            <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
+            <FlexColumn
+              style={{
+                alignSelf: 'end',
+                alignItems: 'center',
+                gridArea: 'action',
+              }}
+            >
               <TimeEstimate />
               <ActionButton
                 actionButtonText='Confirm'
@@ -355,7 +364,7 @@ export const RenewalCardBody = (props: {
       AccessModule.COMPLIANCETRAINING,
       () => (
         <React.Fragment>
-          <div style={{ paddingRight: '1.4em' }}>
+          <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
             <Dates />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
@@ -374,7 +383,13 @@ export const RenewalCardBody = (props: {
               </div>
             )}
           </div>
-          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
+          <FlexColumn
+            style={{
+              alignSelf: 'end',
+              alignItems: 'center',
+              gridArea: 'action',
+            }}
+          >
             <TimeEstimate />
             <ActionButton
               actionButtonText='Complete Training'
@@ -410,7 +425,7 @@ export const RenewalCardBody = (props: {
       AccessModule.CTCOMPLIANCETRAINING,
       () => (
         <React.Fragment>
-          <div style={{ paddingRight: '1.4em' }}>
+          <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
             <Dates />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
@@ -429,7 +444,13 @@ export const RenewalCardBody = (props: {
               </div>
             )}
           </div>
-          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
+          <FlexColumn
+            style={{
+              alignSelf: 'end',
+              alignItems: 'center',
+              gridArea: 'action',
+            }}
+          >
             <TimeEstimate />
             <ActionButton
               actionButtonText='Complete Training'
@@ -465,14 +486,20 @@ export const RenewalCardBody = (props: {
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => (
         <React.Fragment>
-          <div>
+          <div style={{ gridArea: 'content' }}>
             <Dates />
             <div style={textStyle}>
               Please review and sign the data user code of conduct consenting to
               the <AoU /> data use policy.
             </div>
           </div>
-          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
+          <FlexColumn
+            style={{
+              alignSelf: 'end',
+              alignItems: 'center',
+              gridArea: 'action',
+            }}
+          >
             <TimeEstimate />
             <ActionButton
               actionButtonText='View & Sign'
@@ -492,16 +519,16 @@ export const RenewalCardBody = (props: {
 
   return (
     <div style={renewalStyle.hippo}>
-      {isRenewalCompleteForModule(moduleStatus) ? (
-        <CheckCircle color={colors.success} style={styles.moduleStatus} />
-      ) : (
-        <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
-      )}
-      <div>
+      <div style={{ gridArea: 'checkbox' }}>
+        {isRenewalCompleteForModule(moduleStatus) ? (
+          <CheckCircle color={colors.success} style={styles.moduleStatus} />
+        ) : (
+          <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
+        )}
+      </div>
+      <div style={{ gridArea: 'title' }}>
         <AARTitleComponent />
       </div>
-      <div />
-      <div />
       {!hide && module}
     </div>
   );
