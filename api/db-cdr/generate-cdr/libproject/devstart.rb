@@ -325,16 +325,16 @@ def publish_cdr_files(cmd_name, args)
   op.add_option(
     "--wgs-rids-file [file]",
     ->(opts, v) { opts.wgs_rids_file = v},
-    "A file containing all research IDs for which WGS data should be published. This " +
-    "parameter ONLY affects manifest creation. If resuming a publish job via an existing " +
-    "manifest, this flag is ignored."
+    "A file containing all research IDs for which WGS data should be published. " +
+    "Only applicable and required for task CREATE_MANIFESTS."
   )
   op.add_option(
     "--display-version-id [version]",
     ->(opts, v) { opts.display_version_id = v},
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
     "this matches the CDR version display name in the product, e.g. 'v5'. This ID will be " +
-    "included in the published file directory structure."
+    "included in the published file directory structure. " +
+    "Only applicable and required for task CREATE_MANIFESTS."
   )
   supported_types = ["CRAM"]
   op.opts.data_types = supported_types

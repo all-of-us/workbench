@@ -202,28 +202,28 @@ end
 #
 # Under logs_dir, this function generates the following outputs:
 # - done.txt: newline-delimited output identifiers for all successful processes
-# - stdout0.txt, ..., stdout{num_threads-1}.txt: stdout for each worker thread
-# - stderr0.txt, ..., stderr{num_threads-1}.txt: stderr for each worker thread
-def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_threads)
+# - stdout0.txt, ..., stdout{num_workers-1}.txt: stdout for each worker thread
+# - stderr0.txt, ..., stderr{num_workers-1}.txt: stderr for each worker thread
+def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_workers)
   common = Common.new
 
   FileUtils.makedirs(logs_dir)
   all_tasks = CSV.read(manifest_path, headers: true, return_headers: false)
 
-  num_threads = [all_tasks.length, num_threads].min
+  num_workers = [all_tasks.length, num_workers].min
 
   done = Queue.new
   error = Queue.new
 
   # Spawn a fixed set of threads, assign exclusive work to each
   fail_limit = 10
-  workers = num_threads.times.map do |i|
+  workers = num_workers.times.map do |i|
     t = Thread.new {
       File.open(File.join(logs_dir, "stdout#{i}.txt"), "w") do |wout|
         File.open(File.join(logs_dir, "stderr#{i}.txt"), "w") do |werr|
           fail_count = 0
 
-          # Process every num_threads'th task, starting at i
+          # Process every num_workers'th task, starting at i
           j = i
           while j < all_tasks.length
             task = all_tasks[j]
@@ -237,7 +237,7 @@ def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_threads
                 raise IOError.new("failed to process #{fail_count} manifest rows in a single worker")
               end
             end
-            j += num_threads
+            j += num_workers
           end
         end
       end
@@ -261,7 +261,7 @@ def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_threads
     end
   }
 
-  # In the main thread, watch the done channel and log updates.
+  # In the main thread, watch the done channel, write finished rows and log progress.
   File.open(File.join(logs_dir, "done.txt"), "w") do |w|
     start = Time.now.to_i
     count = 0
@@ -290,6 +290,10 @@ def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_threads
   end
 end
 
+# Stage files as specified in the given manifest. This copies files into the VPC-SC
+# ingest bucket to prepare them for publishing. This intermediate step is required
+# for publishing. For details, see:
+# https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
 def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
   deploy_account = must_get_env_value(project, :publisher_account)
 
@@ -309,6 +313,7 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
 
 end
 
+# Publish files to the CDR bucket as specified in the given manifest.
 def publish_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
   deploy_account = must_get_env_value(project, :publisher_account)
 
