@@ -14,7 +14,6 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
 
 import com.google.api.services.directory.model.User;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -38,6 +37,7 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
+import org.pmiops.workbench.config.ConfigConstants;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -454,9 +454,7 @@ public class UserServiceTest {
 
   @Test
   public void testSyncDuccVersionStatus_correctVersions() {
-    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
-
-    providedWorkbenchConfig.access.currentDuccVersions.forEach(
+    ConfigConstants.CURRENT_DUCC_VERSIONS.forEach(
         version -> {
           DbUser user = userDao.findUserByUsername(USERNAME);
           user.setDuccAgreement(signDucc(user, version));
@@ -468,10 +466,11 @@ public class UserServiceTest {
 
   @Test
   public void testSyncDuccVersionStatus_incorrectVersion() {
-    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
+    int badVersion = 2;
+    assertThat(ConfigConstants.CURRENT_DUCC_VERSIONS).doesNotContain(badVersion);
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    user.setDuccAgreement(signDucc(user, 2));
+    user.setDuccAgreement(signDucc(user, badVersion));
     user = userDao.save(user);
 
     userService.syncDuccVersionStatus(user, Agent.asSystem());

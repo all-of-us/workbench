@@ -1,6 +1,5 @@
 package org.pmiops.workbench.access;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -135,12 +134,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         .filter(a -> isModuleStatusReturnedInProfile(a.getModuleName()));
   }
 
-  @VisibleForTesting
-  @Override
-  public boolean isSignedDuccVersionCurrent(Integer signedVersion) {
-    return configProvider.get().access.currentDuccVersions.contains(signedVersion);
-  }
-
   @Override
   public boolean hasUserSignedACurrentDucc(DbUser targetUser) {
     final DbUserCodeOfConductAgreement duccAgreement = targetUser.getDuccAgreement();
@@ -148,7 +141,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       return false;
     }
 
-    return isSignedDuccVersionCurrent(duccAgreement.getSignedVersion());
+    return AccessModuleService.isSignedDuccVersionCurrent(duccAgreement.getSignedVersion());
   }
 
   @Override

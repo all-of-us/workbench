@@ -407,7 +407,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
-    if (!accessModuleService.isSignedDuccVersionCurrent(duccSignedVersion)) {
+    if (!AccessModuleService.isSignedDuccVersionCurrent(duccSignedVersion)) {
       throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = clockNow();

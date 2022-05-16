@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.config.ConfigConstants;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -164,7 +165,6 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(1, 2); // arbitrary
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.access.renewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
@@ -354,7 +354,8 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_ducc_unbypassed_aar_wrong_version_noncompliant() {
-    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(4, 5);
+    int badVersion = 2;
+    assertThat(ConfigConstants.CURRENT_DUCC_VERSIONS).doesNotContain(badVersion);
 
     testUnregistration(
         user -> {
@@ -362,7 +363,7 @@ public class UserServiceAccessTest {
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
-          user.setDuccAgreement(signDucc(user, 3));
+          user.setDuccAgreement(signDucc(user, badVersion));
           return userDao.save(user);
         });
   }
@@ -1200,7 +1201,7 @@ public class UserServiceAccessTest {
   }
 
   private DbUserCodeOfConductAgreement signCurrentDucc(DbUser dbUser) {
-    int aValidVersion = providedWorkbenchConfig.access.currentDuccVersions.get(0);
+    int aValidVersion = ConfigConstants.CURRENT_DUCC_VERSIONS.get(0);
     return signDucc(dbUser, aValidVersion);
   }
 

@@ -17,7 +17,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {AccessModuleNameMapper.class})
+    uses = {AccessModuleNameMapper.class, ConfigConstants.class})
 public interface WorkbenchConfigMapper {
   default RuntimeImage dataprocToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);
@@ -79,7 +79,9 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
-  @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
+  @Mapping(
+      target = "currentDuccVersions",
+      expression = "java(ConfigConstants.CURRENT_DUCC_VERSIONS)")
   @Mapping(
       target = "enableUpdatedDemographicSurvey",
       source = "config.featureFlags.enableUpdatedDemographicSurvey")

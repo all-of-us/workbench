@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
+import org.pmiops.workbench.config.ConfigConstants;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
@@ -78,14 +79,15 @@ public class AccessModuleServiceTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.access.enableComplianceTraining = true;
     config.access.enableEraCommons = true;
-    config.access.currentDuccVersions = ImmutableList.of(10, 11); // arbitrary for test
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+
+    int signedDuccVersion = ConfigConstants.CURRENT_DUCC_VERSIONS.get(0);
 
     user = new DbUser();
     user.setUsername("user");
     user.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(user, 10, FakeClockConfiguration.NOW));
+        TestMockFactory.createDuccAgreement(user, signedDuccVersion, FakeClockConfiguration.NOW));
     user = userDao.save(user);
   }
 

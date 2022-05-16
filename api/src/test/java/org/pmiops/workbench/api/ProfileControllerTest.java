@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -51,6 +52,7 @@ import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.config.ConfigConstants;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -119,6 +121,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -141,8 +144,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
 
+  @SpyBean private AccessModuleService accessModuleService;
+
   @Autowired private AccessModuleDao accessModuleDao;
-  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
@@ -170,9 +174,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String FULL_USER_NAME = USER_PREFIX + "@" + GSUITE_DOMAIN;
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
-  private static final int CURRENT_DUCC_VERSION = 27; // arbitrary for test
-  private static final String AOU_TOS_NOT_ACCEPTED_ERROR_MESSAGE =
-      "No Terms of Service acceptance recorded for user ID";
+  private static final int CURRENT_DUCC_VERSION =
+      ConfigConstants.CURRENT_DUCC_VERSIONS.stream().reduce(Math::max).get();
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
@@ -287,8 +290,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
-
-    config.access.currentDuccVersions = ImmutableList.of(CURRENT_DUCC_VERSION);
 
     when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
@@ -486,12 +487,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testSubmitDUCC_success_multiple_current() {
-    config.access.currentDuccVersions = ImmutableList.of(7, 8, 9);
+    // confirm the validity of this test
+    assertThat(ConfigConstants.CURRENT_DUCC_VERSIONS.size()).isGreaterThan(1);
 
     createAccountAndDbUserWithAffiliation();
     String initials = "NIH";
 
-    config.access.currentDuccVersions.forEach(
+    ConfigConstants.CURRENT_DUCC_VERSIONS.forEach(
         version -> {
           assertThat(profileController.submitDUCC(version, initials).getStatusCode())
               .isEqualTo(HttpStatus.OK);
@@ -505,26 +507,28 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testSubmitDUCC_wrongVersion_older() {
+    int invalidOlderVersion =
+        ConfigConstants.CURRENT_DUCC_VERSIONS.stream().reduce(Math::min).get() - 1;
+    createAccountAndDbUserWithAffiliation();
+    String initials = "NIH";
+
     assertThrows(
         BadRequestException.class,
-        () -> {
-          createAccountAndDbUserWithAffiliation();
-          String initials = "NIH";
-          profileController.submitDUCC(CURRENT_DUCC_VERSION - 1, initials);
-        });
+        () -> profileController.submitDUCC(invalidOlderVersion, initials));
   }
 
   // not really a use case for this, but shows we need an exact match
 
   @Test
   public void testSubmitDUCC_wrongVersion_newer() {
+    int invalidNewerVersion =
+        ConfigConstants.CURRENT_DUCC_VERSIONS.stream().reduce(Math::max).get() + 1;
+    createAccountAndDbUserWithAffiliation();
+    String initials = "NIH";
+
     assertThrows(
         BadRequestException.class,
-        () -> {
-          createAccountAndDbUserWithAffiliation();
-          String initials = "NIH";
-          profileController.submitDUCC(CURRENT_DUCC_VERSION + 1, initials);
-        });
+        () -> profileController.submitDUCC(invalidNewerVersion, initials));
   }
 
   // the user signs Version A of the DUCC, but the system later requires Version B instead
@@ -546,22 +550,18 @@ public class ProfileControllerTest extends BaseControllerTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, TIMESTAMP);
 
-    // arbitrary; at coding time the current version is 3
-    final int versionA = 5;
-    final int versionB = 8;
+    doReturn(true).when(accessModuleService).hasUserSignedACurrentDucc(any());
 
-    // set the current DUCC version to version A
-    config.access.currentDuccVersions = ImmutableList.of(versionA);
-
-    // sign the current version (A)
+    // sign the current version
 
     final String initials = "NIH";
-    assertThat(profileController.submitDUCC(versionA, initials).getStatusCode())
+    assertThat(profileController.submitDUCC(CURRENT_DUCC_VERSION, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
-    // time passes and the system now requires a newer version (B)
-    config.access.currentDuccVersions = ImmutableList.of(versionB);
+    // time passes and the system now requires a newer version
+
+    doReturn(false).when(accessModuleService).hasUserSignedACurrentDucc(any());
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352

@@ -3,6 +3,7 @@ package org.pmiops.workbench.access;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import org.pmiops.workbench.config.ConfigConstants;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.AccessBypassRequest;
@@ -10,6 +11,10 @@ import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 
 public interface AccessModuleService {
+  static boolean isSignedDuccVersionCurrent(Integer signedVersion) {
+    return ConfigConstants.CURRENT_DUCC_VERSIONS.contains(signedVersion);
+  }
+
   /** Updates bypass time for a module. */
   void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest);
 
@@ -40,8 +45,6 @@ public interface AccessModuleService {
 
   /** Returns true if the access module is bypassable and bypassed */
   boolean isModuleBypassed(DbUser dbUser, DbAccessModuleName accessModuleName);
-
-  boolean isSignedDuccVersionCurrent(Integer signedVersion);
 
   boolean hasUserSignedACurrentDucc(DbUser targetUser);
 }
