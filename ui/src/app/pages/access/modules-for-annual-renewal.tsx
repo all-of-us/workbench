@@ -235,12 +235,10 @@ export const RenewalCardBody = (props: {
     computeRenewalDisplayDates(moduleStatus);
   const TimeEstimate = () =>
     showTimeEstimate ? (
-      <div>
-        <span style={{ padding: 10 }}>
-          <Clock style={{ color: colors.disabled }} />
-        </span>
+      <FlexColumn style={{ alignItems: 'center' }}>
+        <Clock style={{ color: colors.disabled, width: '5em' }} />
         {renewalTimeEstimate} min
-      </div>
+      </FlexColumn>
     ) : null;
 
   const Dates = () => (
