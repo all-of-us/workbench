@@ -370,20 +370,21 @@ def publish_cdr_files(cmd_name, args)
 
   common = Common.new
 
-  wgs_rids = IO.readlines(op.opts.wgs_rids_file, chomp: true).filter do |line|
-    if line.to_i() == 0
-      common.warning "skipping non-numeric research ID line: #{line}"
-      false
-    else
-      true
-    end
-  end
-
   # TODO(RW-8266): Generalize this approach for all file types.
   cram_path = 'cram_manifest.csv'
   manifests = [cram_path]
   if op.opts.tasks.include? "CREATE_MANIFESTS"
     common.status "Starting: manifest creation"
+
+    wgs_rids = IO.readlines(op.opts.wgs_rids_file, chomp: true).filter do |line|
+      if line.to_i() == 0
+        common.warning "skipping non-numeric research ID line: #{line}"
+        false
+      else
+        true
+      end
+    end
+
     cram_manifest = build_cram_manifest(
       op.opts.project,
       tier[:ingest_cdr_bucket],

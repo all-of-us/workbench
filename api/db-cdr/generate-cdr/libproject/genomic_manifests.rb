@@ -55,7 +55,7 @@ FILE_PREFIX_REPLACEMENTS = {
   }
 }
 
-GSUTIL_TASK_CONCURRENCY = 16
+GSUTIL_TASK_CONCURRENCY = 64
 
 def _aw4_filename_to_datetime(aw4_prefix, f)
   common = Common.new
@@ -325,6 +325,8 @@ def publish_files_by_manifest(project, manifest_path, logs_dir, concurrency = GS
        "-i",
        deploy_account,
        "mv",
+       "-s",
+       task["dest_storage_class"],
        task["ingest_path"],
        dest_path,
        :out => wout,
