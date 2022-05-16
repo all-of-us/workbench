@@ -128,7 +128,6 @@ export const styles = reactStyles({
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.accent, 0.9),
     padding: '1em',
-    fontWeight: 500,
   },
   cardStep: {
     height: '19px',
@@ -176,7 +175,7 @@ export const styles = reactStyles({
   },
   clickableModuleBox: {
     padding: '1.4em',
-    margin: '0.2em',
+    margin: '0.0em 0.2em',
     width: '593px',
     borderRadius: '0.2rem',
     backgroundColor: colors.white,
@@ -185,7 +184,7 @@ export const styles = reactStyles({
   },
   backgroundModuleBox: {
     padding: '1.4em',
-    margin: '0.2em',
+    margin: '0.0em 0.2em',
     width: '593px',
     borderRadius: '0.2rem',
     backgroundColor: colorWithWhiteness(colors.accent, 0.95),

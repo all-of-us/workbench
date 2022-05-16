@@ -114,7 +114,6 @@ const renewalStyle = {
     borderRadius: '0.2rem',
     display: 'flex',
     fontSize: '0.58rem',
-    fontWeight: 500,
     height: '15.375rem',
     lineHeight: '22px',
     margin: 0,
@@ -138,7 +137,6 @@ const renewalStyle = {
     gridTemplateAreas: `'checkbox title .'
       '. content action'
     `,
-    alignItems: 'center',
   },
 };
 
@@ -239,7 +237,7 @@ export const RenewalCardBody = (props: {
     ) : null;
 
   const Dates = () => (
-    <div style={{ ...renewalStyle.dates, ...textStyle }}>
+    <div style={{ ...renewalStyle.dates, ...textStyle, fontWeight: 500 }}>
       <div>Last Updated On:</div>
       <div>Next Review:</div>
       <div>{lastConfirmedDate}</div>
@@ -255,7 +253,9 @@ export const RenewalCardBody = (props: {
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
             <Dates />
-            <div style={{ marginBottom: '0.5rem', ...textStyle }}>
+            <div
+              style={{ marginBottom: '0.5rem', ...textStyle, fontWeight: 500 }}
+            >
               Please update your profile information if any of it has changed
               recently.
             </div>
@@ -526,7 +526,7 @@ export const RenewalCardBody = (props: {
           <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
         )}
       </div>
-      <div style={{ gridArea: 'title' }}>
+      <div style={{ gridArea: 'title', fontWeight: 500 }}>
         <AARTitleComponent />
       </div>
       {!hide && module}
@@ -546,13 +546,21 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
   };
   return (
     <FlexColumn style={styles.modulesContainer}>
-      {modules.map((moduleName) => {
+      {modules.map((moduleName, index) => {
         // TODO RW-7797.  Until then, hardcode
         const showModule = true;
         return (
           <FlexColumn
             data-test-id={`module-${moduleName}`}
-            style={showModule ? showingStyle : hiddenStyle}
+            style={{
+              ...(showModule ? showingStyle : hiddenStyle),
+              ...{
+                marginTop:
+                  index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING
+                    ? '1.9em'
+                    : '0em',
+              },
+            }}
           >
             <RenewalCardBody
               moduleStatus={getAccessModuleStatusByNameOrEmpty(

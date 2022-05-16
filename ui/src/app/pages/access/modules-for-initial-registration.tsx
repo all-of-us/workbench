@@ -29,12 +29,18 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
 
   return (
     <FlexColumn style={styles.modulesContainer}>
-      {modules.map((moduleName) => (
+      {modules.map((moduleName, index) => (
         <MaybeModule
           {...{ moduleName, profile, spinnerProps }}
           key={moduleName}
           active={activeModule === moduleName}
           clickable={clickableModules.includes(moduleName)}
+          style={{
+            marginTop:
+              index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING
+                ? '1.9em'
+                : '0em',
+          }}
         />
       ))}
       {children}

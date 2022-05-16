@@ -59,9 +59,13 @@ const ControlledTierEraModule = (props: {
   );
 };
 
-const ControlledTierStep = (props: { enabled: boolean; text: String }) => {
+const ControlledTierStep = (props: {
+  enabled: boolean;
+  text: String;
+  style?;
+}) => {
   return (
-    <FlexRow>
+    <FlexRow style={props.style}>
       <FlexRow style={styles.moduleCTA} />
       {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
       <FlexRow style={styles.backgroundModuleBox}>
@@ -169,6 +173,7 @@ export const ControlledTierCard = (props: {
           data-test-id='controlled-user-email'
           enabled={isEligible}
           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}
+          style={{ marginTop: '1.9em' }}
         />
         {displayEraCommons && (
           <ControlledTierEraModule

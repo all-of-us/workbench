@@ -26,6 +26,7 @@ interface ModuleProps {
   active: boolean;
   clickable: boolean;
   spinnerProps: WithSpinnerOverlayProps;
+  style?;
 }
 
 export const MaybeModule = ({
@@ -34,6 +35,7 @@ export const MaybeModule = ({
   active,
   clickable,
   spinnerProps,
+  style,
 }: ModuleProps): JSX.Element => {
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
@@ -69,6 +71,7 @@ export const MaybeModule = ({
         profile,
         spinnerProps,
         status,
+        style,
       }}
     >
       {showTwoFactorAuthModal && (
