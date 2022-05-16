@@ -8,10 +8,11 @@ buildscript {
     // outside of the buildscript block aren't usable here.
     ext {
         GAE_VERSION = '2.0.4'
-        GSON_VERSION = '2.9.0'
         GOOGLE_TRUTH_VERSION = '1.1.3'
-        JACKSON_VERSION = '2.13.2'
+        GSON_VERSION = '2.9.0'
+        HIBERNATE_VERSION = '5.4.31.Final'
         JACKSON_DATABIND_VERSION = '2.13.2.2'
+        JACKSON_VERSION = '2.13.2'
         KOTLIN_VERSION = '1.5.32'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
@@ -22,8 +23,6 @@ buildscript {
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.34'
     }
-
-    project.ext['hibernate.version'] = '5.4.31.Final'
 
     repositories {
         mavenCentral()
@@ -415,7 +414,7 @@ dependencies {
     compile "commons-codec:commons-codec:1.15"
     compile 'com.auth0:java-jwt:3.19.1'
 
-    compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
+    compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
 
     // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
     // Kotlin dep, resulting in massive logspam.
