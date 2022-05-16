@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import { FlexColumn } from 'app/components/flex';
 import { CheckCircle, Circle, Clock, ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
@@ -92,7 +92,7 @@ const renewalStyle = {
     margin: '0.5rem 0',
     display: 'grid',
     columnGap: '1rem',
-    gridTemplateColumns: 'auto 1fr',
+    gridTemplateColumns: 'auto auto',
   },
   completedButton: {
     height: '1.6rem',
@@ -132,6 +132,16 @@ const renewalStyle = {
     borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
     marginTop: '0.5rem',
     paddingTop: '0.5rem',
+  },
+  hippo: {
+    display: 'grid',
+    gridTemplateColumns: 'auto auto auto',
+    gridTemplateRows: 'auto auto',
+    gridTemplateAreas: `
+      'checkbox title title '
+      'spacing content action'
+    `,
+    alignItems: 'center',
   },
 };
 
@@ -248,7 +258,7 @@ export const RenewalCardBody = (props: {
       AccessModule.PROFILECONFIRMATION,
       () => (
         <React.Fragment>
-          <FlexColumn>
+          <div style={{ paddingRight: '1.4em' }}>
             <Dates />
             <div style={{ marginBottom: '0.5rem', ...textStyle }}>
               Please update your profile information if any of it has changed
@@ -258,8 +268,8 @@ export const RenewalCardBody = (props: {
               Note that you are obliged by the Terms of Use of the Workbench to
               keep your profile information up-to-date at all times.
             </div>
-          </FlexColumn>
-          <FlexColumn style={{ alignSelf: 'flex-end' }}>
+          </div>
+          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
             <TimeEstimate />
             <ActionButton
               actionButtonText='Review'
@@ -276,16 +286,9 @@ export const RenewalCardBody = (props: {
     [
       AccessModule.PUBLICATIONCONFIRMATION,
       () => {
-        const buttonsStyle = {
-          ...renewalStyle.publicationConfirmation,
-          ...textStyle,
-          color: isRenewalCompleteForModule(moduleStatus)
-            ? colors.disabled
-            : colors.primary,
-        };
         return (
           <React.Fragment>
-            <FlexColumn>
+            <div>
               <Dates />
               <div style={textStyle}>
                 The <AoU /> Publication and Presentation Policy requires that
@@ -303,20 +306,8 @@ export const RenewalCardBody = (props: {
                 </a>{' '}
                 For any questions, please contact <SupportMailto />
               </div>
-              <TimeEstimate />
-              <div style={buttonsStyle}>
-                <ActionButton
-                  actionButtonText='Confirm'
-                  completedButtonText='Confirmed'
-                  moduleStatus={moduleStatus}
-                  onClick={async () => {
-                    setLoading(true);
-                    await confirmPublications();
-                    setLoading(false);
-                  }}
-                  disabled={publications === null}
-                  style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
-                />
+
+              <div>
                 <RadioButton
                   data-test-id='nothing-to-report'
                   id={noReportId}
@@ -325,9 +316,11 @@ export const RenewalCardBody = (props: {
                   checked={publications === true}
                   onChange={() => setPublications(true)}
                 />
-                <label htmlFor={noReportId}>
+                <label htmlFor={noReportId} style={textStyle}>
                   At this time, I have nothing to report
                 </label>
+              </div>
+              <div>
                 <RadioButton
                   data-test-id='report-submitted'
                   id={reportId}
@@ -336,8 +329,25 @@ export const RenewalCardBody = (props: {
                   checked={publications === false}
                   onChange={() => setPublications(false)}
                 />
-                <label htmlFor={reportId}>Report submitted</label>
+                <label htmlFor={reportId} style={textStyle}>
+                  Report submitted
+                </label>
               </div>
+            </div>
+            <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
+              <TimeEstimate />
+              <ActionButton
+                actionButtonText='Confirm'
+                completedButtonText='Confirmed'
+                moduleStatus={moduleStatus}
+                onClick={async () => {
+                  setLoading(true);
+                  await confirmPublications();
+                  setLoading(false);
+                }}
+                disabled={publications === null}
+                style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
+              />
             </FlexColumn>
           </React.Fragment>
         );
@@ -347,7 +357,7 @@ export const RenewalCardBody = (props: {
       AccessModule.COMPLIANCETRAINING,
       () => (
         <React.Fragment>
-          <FlexColumn>
+          <div style={{ paddingRight: '1.4em' }}>
             <Dates />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
@@ -365,35 +375,35 @@ export const RenewalCardBody = (props: {
                 reload the page.
               </div>
             )}
+          </div>
+          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
             <TimeEstimate />
-            <FlexRow style={{ marginTop: 'auto' }}>
-              <ActionButton
-                actionButtonText='Complete Training'
-                completedButtonText='Completed'
-                moduleStatus={moduleStatus}
-                onClick={() => {
-                  setTrainingRefreshButtonDisabled(false);
-                  redirectToRegisteredTraining();
+            <ActionButton
+              actionButtonText='Complete Training'
+              completedButtonText='Completed'
+              moduleStatus={moduleStatus}
+              onClick={() => {
+                setTrainingRefreshButtonDisabled(false);
+                redirectToRegisteredTraining();
+              }}
+            />
+            {!isRenewalCompleteForModule(moduleStatus) && (
+              <Button
+                disabled={trainingRefreshButtonDisabled}
+                onClick={async () => {
+                  setLoading(true);
+                  await syncAndReloadTraining();
+                  setLoading(false);
                 }}
-              />
-              {!isRenewalCompleteForModule(moduleStatus) && (
-                <Button
-                  disabled={trainingRefreshButtonDisabled}
-                  onClick={async () => {
-                    setLoading(true);
-                    await syncAndReloadTraining();
-                    setLoading(false);
-                  }}
-                  style={{
-                    height: '1.6rem',
-                    marginLeft: '0.75rem',
-                    width: 'max-content',
-                  }}
-                >
-                  Refresh
-                </Button>
-              )}
-            </FlexRow>
+                style={{
+                  height: '1.6rem',
+                  width: 'max-content',
+                  marginTop: '0.7em',
+                }}
+              >
+                Refresh
+              </Button>
+            )}
           </FlexColumn>
         </React.Fragment>
       ),
@@ -402,7 +412,7 @@ export const RenewalCardBody = (props: {
       AccessModule.CTCOMPLIANCETRAINING,
       () => (
         <React.Fragment>
-          <FlexColumn>
+          <div style={{ paddingRight: '1.4em' }}>
             <Dates />
             <div style={textStyle}>
               You are required to complete the refreshed ethics training courses
@@ -420,35 +430,35 @@ export const RenewalCardBody = (props: {
                 reload the page.
               </div>
             )}
+          </div>
+          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
             <TimeEstimate />
-            <FlexRow style={{ marginTop: 'auto' }}>
-              <ActionButton
-                actionButtonText='Complete Training'
-                completedButtonText='Completed'
-                moduleStatus={moduleStatus}
-                onClick={() => {
-                  setTrainingRefreshButtonDisabled(false);
-                  redirectToControlledTraining();
+            <ActionButton
+              actionButtonText='Complete Training'
+              completedButtonText='Completed'
+              moduleStatus={moduleStatus}
+              onClick={() => {
+                setTrainingRefreshButtonDisabled(false);
+                redirectToControlledTraining();
+              }}
+            />
+            {!isRenewalCompleteForModule(moduleStatus) && (
+              <Button
+                disabled={trainingRefreshButtonDisabled}
+                onClick={async () => {
+                  setLoading(true);
+                  await syncAndReloadTraining();
+                  setLoading(false);
                 }}
-              />
-              {!isRenewalCompleteForModule(moduleStatus) && (
-                <Button
-                  disabled={trainingRefreshButtonDisabled}
-                  onClick={async () => {
-                    setLoading(true);
-                    await syncAndReloadTraining();
-                    setLoading(false);
-                  }}
-                  style={{
-                    height: '1.6rem',
-                    marginLeft: '0.75rem',
-                    width: 'max-content',
-                  }}
-                >
-                  Refresh
-                </Button>
-              )}
-            </FlexRow>
+                style={{
+                  height: '1.6rem',
+                  width: 'max-content',
+                  marginTop: '0.7em',
+                }}
+              >
+                Refresh
+              </Button>
+            )}
           </FlexColumn>
         </React.Fragment>
       ),
@@ -457,12 +467,14 @@ export const RenewalCardBody = (props: {
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => (
         <React.Fragment>
-          <FlexColumn>
+          <div>
             <Dates />
             <div style={textStyle}>
               Please review and sign the data user code of conduct consenting to
               the <AoU /> data use policy.
             </div>
+          </div>
+          <FlexColumn style={{ alignSelf: 'end', alignItems: 'center' }}>
             <TimeEstimate />
             <ActionButton
               actionButtonText='View & Sign'
@@ -481,23 +493,19 @@ export const RenewalCardBody = (props: {
   );
 
   return (
-    <React.Fragment>
-      <FlexRow
-        style={{
-          alignItems: 'center',
-        }}
-      >
-        {isRenewalCompleteForModule(moduleStatus) ? (
-          <CheckCircle color={colors.success} style={styles.moduleStatus} />
-        ) : (
-          <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
-        )}
-        <div style={renewalStyle.h3}>
-          <AARTitleComponent />
-        </div>
-      </FlexRow>
-      {!hide && <FlexRow style={{ paddingLeft: '2.25em' }}>{module}</FlexRow>}
-    </React.Fragment>
+    <div style={renewalStyle.hippo}>
+      {isRenewalCompleteForModule(moduleStatus) ? (
+        <CheckCircle color={colors.success} style={styles.moduleStatus} />
+      ) : (
+        <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
+      )}
+      <div>
+        <AARTitleComponent />
+      </div>
+      <div />
+      <div />
+      {!hide && module}
+    </div>
   );
 };
 
