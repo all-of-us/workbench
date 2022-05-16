@@ -82,7 +82,7 @@ public class AccessModuleServiceTest {
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
-    int signedDuccVersion = ConfigConstants.CURRENT_DUCC_VERSIONS.get(0);
+    int signedDuccVersion = ConfigConstants.CURRENT_DUCC_VERSIONS.stream().findAny().get();
 
     user = new DbUser();
     user.setUsername("user");

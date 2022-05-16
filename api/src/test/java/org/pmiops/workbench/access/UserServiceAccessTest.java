@@ -1201,7 +1201,7 @@ public class UserServiceAccessTest {
   }
 
   private DbUserCodeOfConductAgreement signCurrentDucc(DbUser dbUser) {
-    int aValidVersion = ConfigConstants.CURRENT_DUCC_VERSIONS.get(0);
+    int aValidVersion = ConfigConstants.CURRENT_DUCC_VERSIONS.stream().findAny().get();
     return signDucc(dbUser, aValidVersion);
   }
 
