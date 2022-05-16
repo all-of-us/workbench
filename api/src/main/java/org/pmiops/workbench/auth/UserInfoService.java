@@ -5,6 +5,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.io.IOException;
 import org.pmiops.workbench.google.GoogleRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,15 @@ public class UserInfoService {
         new Oauth2.Builder(httpTransport, jsonFactory, credential)
             .setApplicationName(APPLICATION_NAME)
             .build();
+    System.out.println("~~~~~!!!!!!!!!");
+    System.out.println("~~~~~!!!!!!!!!");
+    System.out.println("~~~~~!!!!!!!!!");
+    try {
+      System.out.println(oauth2.tokeninfo());
+      System.out.println(oauth2.tokeninfo().getIdToken());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     return retryHandler.run((context) -> oauth2.userinfo().get().execute());
   }
 }
