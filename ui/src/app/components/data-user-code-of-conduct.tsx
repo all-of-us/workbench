@@ -7,8 +7,7 @@ import { validate } from 'validate.js';
 import { Profile } from 'generated/fetch';
 
 import { Button, StyledRouterLink } from 'app/components/buttons';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { flexStyle } from 'app/components/flex';
+import { FlexColumn, FlexRow, flexStyle } from 'app/components/flex';
 import { HtmlViewer } from 'app/components/html-viewer';
 import { TextInput } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
@@ -16,10 +15,14 @@ import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { DARPageMode } from 'app/pages/access/data-access-requirements';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
-import { wasReferredFromRenewal } from 'app/utils/access-utils';
+import {
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  wasReferredFromRenewal,
+} from 'app/utils/access-utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   canRenderSignedDucc,
@@ -427,7 +430,12 @@ export const DataUserCodeOfConduct = fp.flow(
         title: 'Your agreement has been updated',
         message:
           'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal']),
+        onDismiss: () =>
+          this.props.navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
+            queryParams: {
+              pageMode: DARPageMode.ANNUAL_RENEWAL,
+            },
+          }),
       }),
       withErrorModal({
         title: 'Your agreement failed to update',
