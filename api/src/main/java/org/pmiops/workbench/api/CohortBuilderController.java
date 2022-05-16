@@ -226,6 +226,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<CriteriaListResponse> findVersionedSurveys(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    return ResponseEntity.ok(
+        new CriteriaListResponse().items(cohortBuilderService.findVersionedSurveys()));
+  }
+
+  @Override
   public ResponseEntity<CardCountResponse> findConceptCounts(
       String workspaceNamespace, String workspaceId, String term) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(

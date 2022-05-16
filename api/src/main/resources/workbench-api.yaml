@@ -3877,6 +3877,20 @@ paths:
           description: A collection of SurveyVersion
           schema:
             "$ref": "#/definitions/SurveyVersionListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/versions":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns any surveys that are versioned
+      operationId: findVersionedSurveys
+      responses:
+        200:
+          description: A collection of versioned surveys
+          schema:
+            "$ref": "#/definitions/CriteriaListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/age/counts":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
