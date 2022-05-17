@@ -529,7 +529,7 @@ export const DataDetail = (props: { icon: string; text: string }) => {
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     // Local State
-    // At any given time, at most two modules will be clickable:
+    // At any given time, at most two modules will be clickable during initial registration:
     //  1. The active module, which we visually direct the user to with a CTA
     //  2. The next required module, which may diverge when the active module is optional.
     // This configuration allows the user to skip the optional CT section.
