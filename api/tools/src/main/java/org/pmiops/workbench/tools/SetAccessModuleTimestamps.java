@@ -86,6 +86,8 @@ public class SetAccessModuleTimestamps {
           username,
           DbAccessModuleName.PROFILE_CONFIRMATION,
           PROFILE_CONFIRMATION_TIMESTAMP);
+
+      updateCompletionTime(accessModuleService, username, DbAccessModuleName.RAS_LOGIN_GOV, null);
     };
   }
 
