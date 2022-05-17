@@ -27,6 +27,11 @@ const VERSIONS: VersionInfo[] = [
     path: '/data-user-code-of-conduct-v4.html',
     height: '90rem', // no inner vertical scrollbars at min width, via trial and error
   },
+  {
+    version: 5,
+    path: '/data-user-code-of-conduct-v5.html',
+    height: '95rem', // no inner vertical scrollbars at min width, via trial and error
+  },
 ];
 
 export const getDuccRenderingInfo = (versionToFind: number): VersionInfo => {
