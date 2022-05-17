@@ -13,10 +13,7 @@ import {
   DuccSignatureState,
 } from 'app/components/data-user-code-of-conduct';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
-import {
-  DARPageMode,
-  DataAccessRequirements,
-} from 'app/pages/access/data-access-requirements';
+import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
 import { AdminBanner } from 'app/pages/admin/admin-banner';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';
 import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
@@ -41,6 +38,7 @@ import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   ACCESS_RENEWAL_PATH,
+  DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   NIH_CALLBACK_PATH,
   RAS_CALLBACK_PATH,
