@@ -7,11 +7,10 @@ import { RegisteredTierBadge } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { switchCase } from 'app/utils';
 import { AccessTierDisplayNames } from 'app/utils/access-tiers';
-import { getAccessModuleConfig } from 'app/utils/access-utils';
+import { DARPageMode, getAccessModuleConfig } from 'app/utils/access-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import {
-  DARPageMode,
   DataDetail,
   getEligibleModules,
   initialRtModules,

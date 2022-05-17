@@ -15,7 +15,6 @@ import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
-import { DARPageMode } from 'app/pages/access/data-access-requirements';
 import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -43,6 +42,11 @@ export enum AccessRenewalStatus {
   EXPIRED = 'Expired',
   BYPASSED = 'Bypassed',
   INCOMPLETE = 'Incomplete',
+}
+
+export enum DARPageMode {
+  INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
+  ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
 }
 
 const { useState, useEffect } = React;

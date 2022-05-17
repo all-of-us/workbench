@@ -17,6 +17,7 @@ import {
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
 import {
+  DARPageMode,
   getAccessModuleStatusByName,
   isCompliant,
   redirectToNiH,
@@ -24,7 +25,7 @@ import {
 import { serverConfigStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
-import { DARPageMode, DataDetail, styles } from './data-access-requirements';
+import { DataDetail, styles } from './data-access-requirements';
 import { Module } from './module';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';

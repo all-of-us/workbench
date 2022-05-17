@@ -21,6 +21,7 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,
   bypassAll,
+  DARPageMode,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   getAccessModuleStatusByNameOrEmpty,
@@ -287,11 +288,6 @@ export const renewalRequiredModules: AccessModule[] = [
   ...renewalRtModules,
   duccModule,
 ];
-
-export enum DARPageMode {
-  INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
-  ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
-}
 
 const handleTerraShibbolethCallback = (
   token: string,

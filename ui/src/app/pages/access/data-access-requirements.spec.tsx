@@ -18,6 +18,7 @@ import {
 import { switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
+  DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   rtAccessRenewalModules,
 } from 'app/utils/access-utils';
@@ -41,7 +42,6 @@ import {
 
 import {
   allInitialModules,
-  DARPageMode,
   DataAccessRequirements,
   getActiveModule,
   getEligibleModules,
