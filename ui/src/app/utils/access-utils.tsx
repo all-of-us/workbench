@@ -44,6 +44,11 @@ export enum AccessRenewalStatus {
   INCOMPLETE = 'Incomplete',
 }
 
+export enum DARPageMode {
+  INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
+  ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
+}
+
 const { useState, useEffect } = React;
 
 export async function redirectToRegisteredTraining() {
@@ -124,8 +129,9 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url} />;
 };
 
-export const ACCESS_RENEWAL_PATH = '/access-renewal';
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
+export const ACCESS_RENEWAL_PATH =
+  DATA_ACCESS_REQUIREMENTS_PATH + '?pageMode=' + DARPageMode.ANNUAL_RENEWAL;
 
 interface DARTitleComponentConfig {
   profile: Profile;

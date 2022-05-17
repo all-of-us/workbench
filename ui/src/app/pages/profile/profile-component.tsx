@@ -4,8 +4,12 @@ import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
 
-import { AccessModule, InstitutionalRole, Profile } from 'generated/fetch';
-import { PublicInstitutionDetails } from 'generated/fetch';
+import {
+  AccessModule,
+  InstitutionalRole,
+  Profile,
+  PublicInstitutionDetails,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -18,8 +22,7 @@ import {
   ValidationError,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { Modal } from 'app/components/modals';
-import { withErrorModal, withSuccessModal } from 'app/components/modals';
+import { Modal, withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import {
@@ -32,7 +35,11 @@ import { styles } from 'app/pages/profile/profile-styles';
 import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { withUserProfile } from 'app/utils';
-import { wasReferredFromRenewal } from 'app/utils/access-utils';
+import {
+  DARPageMode,
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  wasReferredFromRenewal,
+} from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
@@ -97,7 +104,12 @@ export const ProfileComponent = fp.flow(
         title: 'Your profile has been updated',
         message:
           'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal']),
+        onDismiss: () =>
+          this.props.navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
+            queryParams: {
+              pageMode: DARPageMode.ANNUAL_RENEWAL,
+            },
+          }),
       },
       this.saveProfile.bind(this)
     );
@@ -107,7 +119,12 @@ export const ProfileComponent = fp.flow(
         title: 'You have confirmed your profile is accurate',
         message:
           'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal']),
+        onDismiss: () =>
+          this.props.navigate([DATA_ACCESS_REQUIREMENTS_PATH], {
+            queryParams: {
+              pageMode: DARPageMode.ANNUAL_RENEWAL,
+            },
+          }),
       }),
       withErrorModal({
         title: 'Failed To Confirm Profile',

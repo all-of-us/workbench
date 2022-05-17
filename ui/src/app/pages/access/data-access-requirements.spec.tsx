@@ -1,26 +1,36 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AccessModule,
+  AccessModuleStatus,
   InstitutionApi,
   Profile,
   ProfileApi,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
+import {
+  DARPageMode,
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  rtAccessRenewalModules,
+} from 'app/utils/access-utils';
+import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonDisabled,
+  expectButtonEnabled,
+  findNodesByExactText,
+  findNodesContainingText,
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -32,17 +42,21 @@ import {
 
 import {
   allInitialModules,
-  DARPageMode,
   DataAccessRequirements,
   getActiveModule,
   getEligibleModules,
   initialRequiredModules,
 } from './data-access-requirements';
 
-const profile = ProfileStubVariables.PROFILE_STUB as Profile;
+const stubProfile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
 const reload = jest.fn();
 const updateCache = jest.fn();
+
+const EXPIRY_DAYS = 365;
+const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
+const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
+const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('DataAccessRequirements', () => {
   const component = (pageMode?: string) => {
@@ -126,6 +140,119 @@ describe('DataAccessRequirements', () => {
       ]
     );
 
+  const expireAllModules = () => {
+    const expiredTime = oneHourAgo();
+    const { profile } = profileStore.get();
+
+    const newProfile = fp.set(
+      'accessModules',
+      {
+        modules: rtAccessRenewalModules.map(
+          (m) =>
+            ({
+              moduleName: m,
+              completionEpochMillis: expiredTime - 1,
+              expirationEpochMillis: expiredTime,
+            } as AccessModuleStatus)
+        ),
+      },
+      profile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  function updateOneModuleExpirationTime(
+    updateModuleName: AccessModule,
+    time: number
+  ) {
+    const oldProfile = profileStore.get().profile;
+    const newModules = [
+      ...oldProfile.accessModules.modules.filter(
+        (m) => m.moduleName !== updateModuleName
+      ),
+      {
+        ...oldProfile.accessModules.modules.find(
+          (m) => m.moduleName === updateModuleName
+        ),
+        completionEpochMillis: time - 1,
+        expirationEpochMillis: time,
+      } as AccessModuleStatus,
+    ];
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  }
+
+  const removeOneModule = (toBeRemoved: AccessModule) => {
+    const oldProfile = profileStore.get().profile;
+    const newModules = oldProfile.accessModules.modules.filter(
+      (m) => m.moduleName !== toBeRemoved
+    );
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const setCompletionTimes = (completionFn) => {
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(
+      (moduleStatus) => ({
+        ...moduleStatus,
+        completionEpochMillis: completionFn(),
+      }),
+      oldProfile.accessModules.modules
+    );
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const setBypassTimes = (bypassFn) => {
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(
+      (moduleStatus) => ({
+        ...moduleStatus,
+        bypassEpochMillis:
+          // profile and publication are not bypassable.
+          moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION ||
+          moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION
+            ? null
+            : bypassFn(),
+      }),
+      oldProfile.accessModules.modules
+    );
+    const newProfile = fp.set(
+      ['accessModules', 'modules'],
+      newModules,
+      oldProfile
+    );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const expectComplete = (wrapper: ReactWrapper) =>
+    expect(
+      findNodesByExactText(
+        wrapper,
+        'Thank you for completing all the necessary steps'
+      ).length
+    ).toBe(1);
+  const expectIncomplete = (wrapper: ReactWrapper) =>
+    expect(
+      findNodesByExactText(
+        wrapper,
+        'Thank you for completing all the necessary steps'
+      ).length
+    ).toBe(0);
+
   beforeEach(async () => {
     registerApiClient(InstitutionApi, new InstitutionApiStub());
     registerApiClient(ProfileApi, new ProfileApiStub());
@@ -133,7 +260,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, unsafeAllowSelfBypass: true },
     });
-    profileStore.set({ profile, load, reload, updateCache });
+    profileStore.set({ profile: stubProfile, load, reload, updateCache });
   });
 
   afterEach(() => {
@@ -142,7 +269,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     initialRequiredModules.forEach((module) =>
       expect(enabledModules.includes(module)).toBeTruthy()
     );
@@ -156,7 +283,7 @@ describe('DataAccessRequirements', () => {
         enforceRasLoginGovLinking: false,
       },
     });
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
   });
 
@@ -171,7 +298,7 @@ describe('DataAccessRequirements', () => {
           enforceRasLoginGovLinking: true,
         },
       });
-      const enabledModules = getEligibleModules(allInitialModules, profile);
+      const enabledModules = getEligibleModules(allInitialModules, stubProfile);
       expect(
         enabledModules.includes(AccessModule.RASLINKLOGINGOV)
       ).toBeTruthy();
@@ -182,7 +309,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
   });
 
@@ -190,15 +317,22 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableComplianceTraining: false },
     });
-    const enabledModules = getEligibleModules(allInitialModules, profile);
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(
       enabledModules.includes(AccessModule.COMPLIANCETRAINING)
     ).toBeFalsy();
   });
 
   it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
+    const activeModule = getActiveModule(
+      enabledModules,
+      stubProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[0]);
     expect(activeModule).toEqual(enabledModules[0]);
@@ -209,7 +343,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
@@ -217,8 +351,15 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
@@ -229,7 +370,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, bypassEpochMillis: 1 },
@@ -237,8 +378,15 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
@@ -260,7 +408,7 @@ describe('DataAccessRequirements', () => {
       });
 
       const testProfile = {
-        ...profile,
+        ...stubProfile,
         accessModules: {
           modules: [
             {
@@ -273,9 +421,13 @@ describe('DataAccessRequirements', () => {
 
       const enabledModules = getEligibleModules(
         initialRequiredModules,
-        profile
+        stubProfile
       );
-      const activeModule = getActiveModule(enabledModules, testProfile);
+      const activeModule = getActiveModule(
+        enabledModules,
+        testProfile,
+        DARPageMode.INITIAL_REGISTRATION
+      );
 
       // update this if the order changes
       expect(activeModule).toEqual(AccessModule.ERACOMMONS);
@@ -290,7 +442,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the fourth module (Compliance) from getActiveModule when the first 3 modules have been completed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
@@ -303,8 +455,15 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toEqual(initialRequiredModules[3]);
     expect(activeModule).toEqual(enabledModules[3]);
@@ -315,7 +474,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return undefined from getActiveModule when all modules have been completed', () => {
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: initialRequiredModules.map((module) => ({
           moduleName: module,
@@ -324,8 +483,15 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
-    const activeModule = getActiveModule(enabledModules, testProfile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
+    const activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
 
     expect(activeModule).toBeUndefined();
   });
@@ -333,7 +499,7 @@ describe('DataAccessRequirements', () => {
   it('should not indicate the RAS module as active when a user has completed it', () => {
     // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
     const testProfile = {
-      ...profile,
+      ...stubProfile,
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
@@ -350,9 +516,16 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    const enabledModules = getEligibleModules(initialRequiredModules, profile);
+    const enabledModules = getEligibleModules(
+      initialRequiredModules,
+      stubProfile
+    );
 
-    let activeModule = getActiveModule(enabledModules, testProfile);
+    let activeModule = getActiveModule(
+      enabledModules,
+      testProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
     expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
 
     // simulate handleRasCallback() by updating the profile
@@ -370,7 +543,11 @@ describe('DataAccessRequirements', () => {
       },
     };
 
-    activeModule = getActiveModule(enabledModules, updatedProfile);
+    activeModule = getActiveModule(
+      enabledModules,
+      updatedProfile,
+      DARPageMode.INITIAL_REGISTRATION
+    );
     expect(activeModule).toBeUndefined();
   });
 
@@ -1418,38 +1595,345 @@ describe('DataAccessRequirements', () => {
     ).toBeFalsy();
   });
 
-  it('Should render in INITIAL_REGISTRATION mode by default (mergedAccessRenewal is true)', async () => {
-    environment.mergedAccessRenewal = true;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
-  });
-
-  it('Should render in INITIAL_REGISTRATION mode by default (mergedAccessRenewal is false)', async () => {
-    environment.mergedAccessRenewal = false;
+  it('Should render in INITIAL_REGISTRATION mode by default', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
   });
 
   it('Should render in ANNUAL_RENEWAL mode when specified by query param', async () => {
-    environment.mergedAccessRenewal = true;
     const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.ANNUAL_RENEWAL);
   });
 
-  it('Should not render in ANNUAL_RENEWAL mode if mergedAccessRenewal is false', async () => {
-    environment.mergedAccessRenewal = false;
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+  it('Should render in INITIAL_REGISTRATION mode if the queryParam is invalid', async () => {
+    const wrapper = component('some-garbage');
     await waitOneTickAndUpdate(wrapper);
     expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
   });
 
-  it('Should render in INITIAL_REGISTRATION mode if the queryParam is invalid', async () => {
-    environment.mergedAccessRenewal = true;
-    const wrapper = component('some-garbage');
+  // ACCESS_RENEWAL specific tests
+  it('should show the correct state when all items are complete', async () => {
+    expireAllModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
     await waitOneTickAndUpdate(wrapper);
-    expectPageMode(wrapper, DARPageMode.INITIAL_REGISTRATION);
+
+    expectComplete(wrapper);
+    expect(true).toEqual(true);
+  });
+
+  it('should show the correct state when all modules are expired', async () => {
+    setCompletionTimes(oneYearAgo);
+    expireAllModules();
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+    expect(true).toEqual(true);
+  });
+
+  it('should show the correct state when all modules are incomplete', async () => {
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when profile confirmation is complete', async () => {
+    expireAllModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when profile and publication confirmations are complete', async () => {
+    expireAllModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when all items except DUCC are complete', async () => {
+    expireAllModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should ignore modules which are not expirable', async () => {
+    expireAllModules();
+
+    const newModules = [
+      ...profileStore.get().profile.accessModules.modules,
+      {
+        moduleName: AccessModule.TWOFACTORAUTH, // not expirable
+        completionEpochMillis: null,
+        bypassEpochMillis: null,
+        expirationEpochMillis: oneYearAgo(),
+      },
+    ];
+
+    const newProfile: Profile = {
+      ...profileStore.get().profile,
+      accessModules: { modules: newModules },
+    };
+
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // All Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
+
+    expectComplete(wrapper);
+  });
+
+  it('should show the correct state when items are bypassed', async () => {
+    expireAllModules();
+
+    // won't bypass Profile and Publication confirmation because those are unbypassable
+    setBypassTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+
+    // Bypassed
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(2);
+
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when all items are complete or bypassed', async () => {
+    expireAllModules();
+
+    setCompletionTimes(() => Date.now());
+
+    // won't bypass Profile and Publication confirmation because those are unbypassable
+    setBypassTimes(() => Date.now());
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    // Training and DUCC are bypassed
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
+
+    // Publications and Profile are complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(
+      findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
+    ).toBe(2);
+
+    expectComplete(wrapper);
+  });
+
+  it('should show the correct state when modules are disabled', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableComplianceTraining: false,
+      },
+    });
+
+    setCompletionTimes(() => Date.now());
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    // this module will not be returned in AccessModules because it is disabled
+    removeOneModule(AccessModule.COMPLIANCETRAINING);
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // profileConfirmation, publicationConfirmation, and DUCC are complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    expect(
+      findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
+    ).toBe(3);
+
+    // complianceTraining is not shown because it is disabled
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
+
+    // all of the necessary steps = 3 rather than the usual 4
+    expectComplete(wrapper);
+  });
+
+  // RW-7473: sync expiring/expired Training module to gain access
+  test.each([
+    ['should', 'expired', 1, oneHourAgo()],
+    ['should', 'expiring', 1, nowPlusDays(10)],
+    ['should not', 'complete', 0, oneYearFromNow()],
+    ['should not', 'incomplete', 0, null],
+  ])(
+    '%s externally sync %s Compliance Training module status',
+    async (desc1, desc2, expected, expirationTime) => {
+      const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
+
+      updateOneModuleExpirationTime(
+        AccessModule.COMPLIANCETRAINING,
+        expirationTime
+      );
+
+      const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+      await waitOneTickAndUpdate(wrapper);
+      expect(spy).toHaveBeenCalledTimes(expected);
+    }
+  );
+
+  it('should allow completion of profile and publication confirmations when incomplete', async () => {
+    removeOneModule(AccessModule.PROFILECONFIRMATION);
+    removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    // all are Incomplete
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectIncomplete(wrapper);
+
+    expectButtonEnabled(findNodesByExactText(wrapper, 'Review').parent());
+
+    // not yet - need to click a radio button
+    expectButtonDisabled(findNodesByExactText(wrapper, 'Confirm').parent());
+
+    wrapper.find('[data-test-id="report-submitted"]').first().simulate('click');
+
+    expectButtonEnabled(findNodesByExactText(wrapper, 'Confirm').parent());
   });
 });

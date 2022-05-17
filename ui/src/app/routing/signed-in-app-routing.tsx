@@ -13,7 +13,6 @@ import {
   DuccSignatureState,
 } from 'app/components/data-user-code-of-conduct';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
-import { AccessRenewal } from 'app/pages/access/access-renewal';
 import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
 import { AdminBanner } from 'app/pages/admin/admin-banner';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';
@@ -39,6 +38,7 @@ import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   ACCESS_RENEWAL_PATH,
+  DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   NIH_CALLBACK_PATH,
   RAS_CALLBACK_PATH,
@@ -47,10 +47,6 @@ import { AuthorityGuardedAction } from 'app/utils/authorities';
 
 import { authorityGuard, getAccessModuleGuard } from './guards';
 
-const AccessRenewalPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminEgressAuditPage = fp.flow(
   withRouteData,
@@ -135,7 +131,10 @@ export const SignedInRoutes = () => {
         <HomepagePage routeData={{ title: 'Homepage' }} />
       </AppRoute>
       <AppRoute exact path={ACCESS_RENEWAL_PATH}>
-        <AccessRenewalPage routeData={{ title: 'Access Renewal' }} />
+        <DataAccessRequirementsPage
+          routeData={{ title: 'Access Renewal' }}
+          pageMode={DARPageMode.ANNUAL_RENEWAL}
+        />
       </AppRoute>
       <AppRoute
         exact

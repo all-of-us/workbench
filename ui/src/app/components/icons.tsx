@@ -11,6 +11,7 @@ import {
   faMinusCircle,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
+import { faCircle } from '@fortawesome/pro-regular-svg-icons';
 import { faAlarmExclamation, faRepeat } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -19,6 +20,7 @@ import arrow from 'assets/icons/arrow-left-regular.svg';
 import { ReactComponent as controlledTierBadge } from 'assets/icons/controlled-tier-badge.svg';
 import googleCloudLogo from 'assets/icons/google-cloud.svg';
 import { ReactComponent as registeredTierBadge } from 'assets/icons/registered-tier-badge.svg';
+
 export const ControlledTierBadge = controlledTierBadge;
 export const RegisteredTierBadge = registeredTierBadge;
 
@@ -180,6 +182,7 @@ export const Ban = (props) => <Icon shape={faBan} {...props} />;
 export const CaretRight = (props) => <Icon shape={faCaretRight} {...props} />;
 export const Check = (props) => <Icon shape={faCheck} {...props} />;
 export const CheckCircle = (props) => <Icon shape={faCheckCircle} {...props} />;
+export const Circle = (props) => <Icon shape={faCircle} {...props} />;
 export const Clock = (props) => <Icon shape={faClock} {...props} />;
 export const ExclamationTriangle = (props) => (
   <Icon shape={faExclamationTriangle} color={colors.danger} {...props} />

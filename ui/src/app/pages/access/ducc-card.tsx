@@ -4,8 +4,9 @@ import { AccessModule, Profile } from 'generated/fetch';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { DARPageMode } from 'app/utils/access-utils';
 
-import { DARPageMode, styles } from './data-access-requirements';
+import { styles } from './data-access-requirements';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 

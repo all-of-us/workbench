@@ -17,13 +17,15 @@ import {
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
 import {
+  DARPageMode,
   getAccessModuleStatusByName,
   isCompliant,
   redirectToNiH,
 } from 'app/utils/access-utils';
+import { serverConfigStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
-import { DARPageMode, DataDetail, styles } from './data-access-requirements';
+import { DataDetail, styles } from './data-access-requirements';
 import { Module } from './module';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
@@ -58,9 +60,13 @@ const ControlledTierEraModule = (props: {
   );
 };
 
-const ControlledTierStep = (props: { enabled: boolean; text: String }) => {
+const ControlledTierStep = (props: {
+  enabled: boolean;
+  text: String;
+  style?;
+}) => {
   return (
-    <FlexRow>
+    <FlexRow style={props.style}>
       <FlexRow style={styles.moduleCTA} />
       {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
       <FlexRow style={styles.backgroundModuleBox}>
@@ -120,6 +126,8 @@ export const ControlledTierCard = (props: {
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
 
+  const { enableComplianceTraining } = serverConfigStore.get().config;
+
   return (
     <FlexRow data-test-id='controlled-card' style={styles.card}>
       <FlexColumn>
@@ -166,6 +174,7 @@ export const ControlledTierCard = (props: {
           data-test-id='controlled-user-email'
           enabled={isEligible}
           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}
+          style={{ marginTop: '1.9em' }}
         />
         {displayEraCommons && (
           <ControlledTierEraModule
@@ -173,15 +182,19 @@ export const ControlledTierCard = (props: {
             eligible={isEligible}
           />
         )}
-        {pageMode === DARPageMode.INITIAL_REGISTRATION && (
-          <ModulesForInitialRegistration
-            {...{ profile, activeModule, clickableModules, spinnerProps }}
-            modules={[ctModule]}
-          />
-        )}
-        {pageMode === DARPageMode.ANNUAL_RENEWAL && isEligible && (
-          <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
-        )}
+
+        {enableComplianceTraining &&
+          pageMode === DARPageMode.INITIAL_REGISTRATION && (
+            <ModulesForInitialRegistration
+              {...{ profile, activeModule, clickableModules, spinnerProps }}
+              modules={[ctModule]}
+            />
+          )}
+        {enableComplianceTraining &&
+          pageMode === DARPageMode.ANNUAL_RENEWAL &&
+          isEligible && (
+            <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
+          )}
       </FlexColumn>
     </FlexRow>
   );

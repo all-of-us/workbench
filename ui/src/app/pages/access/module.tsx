@@ -52,6 +52,7 @@ export const Module = (props: {
   profile: Profile;
   spinnerProps: WithSpinnerOverlayProps;
   status: AccessModuleStatus;
+  style?;
 }) => {
   const {
     active,
@@ -63,6 +64,7 @@ export const Module = (props: {
     profile,
     spinnerProps,
     status,
+    style,
   } = props;
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
@@ -72,7 +74,7 @@ export const Module = (props: {
     getAccessModuleConfig(moduleName);
 
   return isEnabledInEnvironment ? (
-    <FlexRow data-test-id={`module-${moduleName}`}>
+    <FlexRow data-test-id={`module-${moduleName}`} {...{ style }}>
       <FlexRow style={styles.moduleCTA}>
         {cond(
           [
@@ -100,11 +102,12 @@ export const Module = (props: {
             data-test-id={`module-${moduleName}-${
               clickable ? 'clickable' : 'unclickable'
             }-text`}
-            style={
-              clickable
+            style={{
+              ...(clickable
                 ? styles.clickableModuleText
-                : styles.backgroundModuleText
-            }
+                : styles.backgroundModuleText),
+              ...{ fontWeight: 500 },
+            }}
           >
             <DARTitleComponent
               {...{ profile }}

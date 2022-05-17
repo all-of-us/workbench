@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, Profile } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { useQuery } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -15,7 +14,6 @@ import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { RenewalRequirementsText } from 'app/pages/access/access-renewal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, switchCase } from 'app/utils';
@@ -23,11 +21,14 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,
   bypassAll,
+  DARPageMode,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
+  getAccessModuleStatusByNameOrEmpty,
   GetStartedButton,
   isCompliant,
   isEligibleModule,
+  isRenewalCompleteForModule,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
@@ -128,7 +129,6 @@ export const styles = reactStyles({
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.accent, 0.9),
     padding: '1em',
-    fontWeight: 500,
   },
   cardStep: {
     height: '19px',
@@ -175,8 +175,8 @@ export const styles = reactStyles({
     paddingRight: '0.5em',
   },
   clickableModuleBox: {
-    padding: '0.5em',
-    margin: '0.2em',
+    padding: '1.4em',
+    margin: '0.0em 0.2em',
     width: '593px',
     borderRadius: '0.2rem',
     backgroundColor: colors.white,
@@ -184,8 +184,8 @@ export const styles = reactStyles({
     borderColor: colors.accent,
   },
   backgroundModuleBox: {
-    padding: '0.5em',
-    margin: '0.2em',
+    padding: '1.4em',
+    margin: '0.0em 0.2em',
     width: '593px',
     borderRadius: '0.2rem',
     backgroundColor: colorWithWhiteness(colors.accent, 0.95),
@@ -203,6 +203,10 @@ export const styles = reactStyles({
   moduleDate: {
     opacity: '0.5',
     fontSize: '12px',
+  },
+  renewalStatus: {
+    marginLeft: '0.2em',
+    marginRight: '1em',
   },
   nextElement: {
     marginLeft: 'auto',
@@ -243,6 +247,15 @@ export const styles = reactStyles({
   },
 });
 
+const RenewalRequirementsText = () => (
+  <span>
+    Researchers are required to complete a number of steps as part of the annual
+    renewal to maintain access to <AoU /> data. Renewal of access will occur on
+    a rolling basis annually (i.e. for each user, access renewal will be due 365
+    days after the date of authorization to access <AoU /> data).
+  </span>
+);
+
 // in display order
 export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
@@ -271,10 +284,10 @@ export const allInitialModules: AccessModule[] = [
   duccModule,
 ];
 
-export enum DARPageMode {
-  INITIAL_REGISTRATION = 'INITIAL_REGISTRATION',
-  ANNUAL_RENEWAL = 'ANNUAL_RENEWAL',
-}
+export const renewalRequiredModules: AccessModule[] = [
+  ...renewalRtModules,
+  duccModule,
+];
 
 const handleTerraShibbolethCallback = (
   token: string,
@@ -375,34 +388,52 @@ export const getEligibleModules = (
 
 const incompleteModules = (
   modules: AccessModule[],
-  profile: Profile
+  profile: Profile,
+  pageMode: DARPageMode
 ): AccessModule[] =>
   modules.filter(
     (moduleName) =>
-      !isCompliant(getAccessModuleStatusByName(profile, moduleName))
+      !isCompliant(getAccessModuleStatusByName(profile, moduleName)) ||
+      (pageMode === DARPageMode.ANNUAL_RENEWAL &&
+        !isRenewalCompleteForModule(
+          getAccessModuleStatusByNameOrEmpty(
+            profile.accessModules.modules,
+            moduleName
+          )
+        ))
   );
 
 // exported for test
 export const getActiveModule = (
   modules: AccessModule[],
-  profile: Profile
-): AccessModule => incompleteModules(modules, profile)[0];
+  profile: Profile,
+  pageMode: DARPageMode
+): AccessModule => incompleteModules(modules, profile, pageMode)[0];
+
+const getNextActive = (
+  modules: AccessModule[],
+  profile: Profile,
+  pageMode: DARPageMode
+) => getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
 
 // the header(s) outside the Fadebox
 
-const InitialOuterHeader = () => (
+const OuterHeader = (props: { pageMode: DARPageMode }) => (
   <FlexColumn style={styles.initialRegistrationOuterHeader}>
     <Header style={styles.initialRegistrationHeaderRW}>
       Researcher Workbench
     </Header>
     <Header style={styles.initialRegistrationHeaderDAR}>
-      Data Access Requirements
+      {fp.cond([
+        [
+          (pm) => pm === DARPageMode.INITIAL_REGISTRATION,
+          () => 'Data Access Requirements',
+        ],
+        [(pm) => pm === DARPageMode.ANNUAL_RENEWAL, () => 'Annual Renewal'],
+      ])(props.pageMode)}
     </Header>
   </FlexColumn>
 );
-
-const OuterHeader = (props: { pageMode: DARPageMode }) =>
-  props.pageMode === DARPageMode.INITIAL_REGISTRATION && <InitialOuterHeader />;
 
 // the header(s) inside the Fadebox
 
@@ -497,79 +528,40 @@ export const DataDetail = (props: { icon: string; text: string }) => {
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
-    const { profile, reload } = useStore(profileStore);
-    const {
-      config: { unsafeAllowSelfBypass },
-    } = useStore(serverConfigStore);
-
-    useEffect(() => {
-      const onMount = async () => {
-        await syncModulesExternal(
-          incompleteModules(
-            getEligibleModules(allInitialModules, profile),
-            profile
-          )
-        );
-        await reload();
-        spinnerProps.hideSpinner();
-      };
-
-      onMount();
-    }, []);
-
-    const query = useQuery();
-
-    // handle the route /nih-callback?token=<token>
-    const token = query.get('token');
-    useEffect(() => {
-      if (token) {
-        handleTerraShibbolethCallback(token, spinnerProps, reload);
-      }
-    }, [token]);
-
-    // handle the route /ras-callback?code=<code>
-    const code = query.get('code');
-    useEffect(() => {
-      if (code) {
-        handleRasCallback(code, spinnerProps, reload);
-      }
-    }, [code]);
-
-    // handle the different page modes of Data Access Requirements
-    const [pageMode, setPageMode] = useState(DARPageMode.INITIAL_REGISTRATION);
-    const pageModeParam = query.get('pageMode');
-    useEffect(() => {
-      if (
-        environment.mergedAccessRenewal &&
-        pageModeParam &&
-        Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
-      ) {
-        setPageMode(DARPageMode[pageModeParam]);
-      }
-    }, [environment.mergedAccessRenewal, pageModeParam]);
-
-    // At any given time, at most two modules will be clickable:
+    // Local State
+    // At any given time, at most two modules will be clickable during initial registration:
     //  1. The active module, which we visually direct the user to with a CTA
     //  2. The next required module, which may diverge when the active module is optional.
     // This configuration allows the user to skip the optional CT section.
     const [activeModule, setActiveModule] = useState(null);
     const [clickableModules, setClickableModules] = useState([]);
 
-    const getNextActive = (modules: AccessModule[]) =>
-      getActiveModule(getEligibleModules(modules, profile), profile);
-    const nextActive = getNextActive(allInitialModules);
-    const nextRequired = getNextActive(initialRequiredModules);
+    // Local Variables
+    const { profile, reload } = useStore(profileStore);
+    const {
+      config: { unsafeAllowSelfBypass },
+    } = useStore(serverConfigStore);
 
-    // whenever the profile changes, update the next modules to complete
-    useEffect(() => {
-      setActiveModule(nextActive);
-      setClickableModules(
-        fp.flow(
-          fp.filter((m) => !!m),
-          fp.uniq
-        )([nextActive, nextRequired])
-      );
-    }, [nextActive, nextRequired]);
+    const query = useQuery();
+    const code = query.get('code');
+    const token = query.get('token');
+
+    const pageModeParam = query.get('pageMode');
+    const pageMode =
+      pageModeParam &&
+      Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
+        ? DARPageMode[pageModeParam]
+        : DARPageMode.INITIAL_REGISTRATION;
+
+    const nextActive = getNextActive(allInitialModules, profile, pageMode);
+    const nextRequired = getNextActive(
+      pageMode === DARPageMode.INITIAL_REGISTRATION
+        ? initialRequiredModules
+        : renewalRequiredModules,
+      profile,
+      pageMode
+    );
+    const isComplete = profile && !nextRequired;
 
     const rtCard = (
       <RegisteredTierCard
@@ -600,10 +592,59 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const cards = [rtCard, ctCard, dCard];
 
+    // Effects
+    useEffect(() => {
+      const onMount = async () => {
+        await syncModulesExternal(
+          incompleteModules(
+            getEligibleModules(allInitialModules, profile),
+            profile,
+            pageMode
+          )
+        );
+        await reload();
+        spinnerProps.hideSpinner();
+      };
+
+      onMount();
+    }, []);
+
+    /*
+      TODO Move these into the effect with an empty dependency array.
+       I suspect that these are only called when the component is reloaded,
+        so the initial effect should be run again. My goal here is that effects should
+        only depend on props or local state. When this is the case, we can them above the local
+        variables.
+     */
+    // handle the route /nih-callback?token=<token>
+    useEffect(() => {
+      if (token) {
+        handleTerraShibbolethCallback(token, spinnerProps, reload);
+      }
+    }, [token]);
+
+    // handle the route /ras-callback?code=<code>
+    useEffect(() => {
+      if (code) {
+        handleRasCallback(code, spinnerProps, reload);
+      }
+    }, [code]);
+
+    // whenever the profile changes, update the next modules to complete
+    useEffect(() => {
+      setActiveModule(nextActive);
+      setClickableModules(
+        fp.flow(
+          fp.filter((m) => !!m),
+          fp.uniq
+        )([nextActive, nextRequired])
+      );
+    }, [nextActive, nextRequired]);
+
     return (
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
-        {profile && !nextRequired && <Completed />}
+        {isComplete && <Completed />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
