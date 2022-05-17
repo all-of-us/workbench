@@ -481,7 +481,7 @@ dependencies {
     __tools__Compile 'commons-cli:commons-cli:1.5.0'
     __tools__Compile 'com.opencsv:opencsv:5.6'
 
-    testCompile 'org.mockito:mockito-core:2.28.2'
+    testCompile 'org.mockito:mockito-core:3.12.4'
     testCompile "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
     testCompile 'com.h2database:h2:1.4.194'
