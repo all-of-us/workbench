@@ -14,6 +14,7 @@ import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.auth.AuthService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
@@ -42,6 +44,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
+import org.pmiops.workbench.model.SignInRequestBody;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -87,6 +90,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
   private final RasLinkService rasLinkService;
+  private final AuthService authService;
 
   @Autowired
   ProfileController(
@@ -108,7 +112,7 @@ public class ProfileController implements ProfileApiDelegate {
       UserDao userDao,
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
-      RasLinkService rasLinkService) {
+      RasLinkService rasLinkService, AuthService authService) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -128,6 +132,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rasLinkService = rasLinkService;
+    this.authService = authService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -437,6 +442,16 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ServerErrorException("Failed to send billing setup email", e);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> signIn(SignInRequestBody body) {
+    try {
+      authService.googleOAuth(body.getAuthCode(), body.getRedirectUrl());
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   private boolean userHasEverLoggedIn(User googleUser, DbUser user) {

@@ -440,6 +440,40 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/user/sign-in":
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      security: [ ]
+      description: Signin User
+      operationId: signIn
+      parameters:
+        - in: body
+          name: signInRequestBody
+          description: The authorization code from Google.
+          schema:
+            "$ref": "#/definitions/SignInRequestBody"
+      responses:
+        200:
+          description: The user's profile
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        403:
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
   "/v1/page-visits":
     post:
       tags:
@@ -5744,6 +5778,21 @@ definitions:
       isNihFunded:
         type: boolean
         description: Whether its NIH Funded research
+  SignInRequestBody:
+    required:
+      - authCode
+      - redirectUrl
+    type: object
+    properties:
+      authCode:
+        type: string
+        description: 'the standard OAuth authorization code from RAS that we can use to exchange
+        access token.'
+      redirectUrl:
+        type: string
+        description: 'The redirect url that was used when generating the authorization code.'
+        example: "https://all-of-us-workbench-test.appspot.com/google-callback"
+
   UpdateContactEmailRequest:
     type: object
     required:

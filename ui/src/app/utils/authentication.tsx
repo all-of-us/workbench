@@ -12,6 +12,9 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
+import { withErrorModal } from 'app/components/modals';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 
 declare const gapi: any;
 
@@ -81,6 +84,48 @@ export const signIn = (): void => {
       redirect_uri: `${window.location.protocol}//${window.location.host}`,
     });
   });
+};
+
+export const handleRasCallback = (
+  code: string,
+  spinnerProps: WithSpinnerOverlayProps,
+  reloadProfile: Function
+) => {
+  const handler = withErrorModal({
+    title: 'Error saving RAS Login.Gov linkage status.',
+    message:
+      'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
+    onDismiss: () => {
+      spinnerProps.hideSpinner();
+    },
+  })(async () => {
+    spinnerProps.showSpinner();
+    await profileApi().signIn({
+      authCode: code,
+      redirectUrl: buildSigninUrl(),
+    });
+    spinnerProps.hideSpinner();
+    reloadProfile();
+
+    // Cleanup parameter from URL after linking.
+    window.history.replaceState({}, '', '/');
+  });
+
+  return handler();
+};
+
+export const buildSigninUrl = (openInNewTab: boolean = true): void => {
+  AnalyticsTracker.Registration.RasLoginGov();
+  // The scopes are also used in backend for fetching user info.
+  const url =
+    serverConfigStore.get().config.rasHost +
+    '/auth/oauth/v2/authorize?client_id=' +
+    serverConfigStore.get().config.rasClientId +
+    '&prompt=login+consent&redirect_uri=' +
+    buildRasRedirectUrl() +
+    '&response_type=code&scope=openid+profile+email+federated_identities';
+
+  openInNewTab ? window.open(url, '_blank') : <Redirect to={url} />;
 };
 
 export const signOut = (): void => {
