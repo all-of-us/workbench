@@ -552,6 +552,7 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
         return (
           <FlexColumn
             data-test-id={`module-${moduleName}`}
+            key={moduleName}
             style={{
               ...(showModule ? showingStyle : hiddenStyle),
               ...{
