@@ -521,9 +521,9 @@ export const RenewalCardBody = (props: {
     <div style={renewalStyle.hippo}>
       <div style={{ gridArea: 'checkbox' }}>
         {isRenewalCompleteForModule(moduleStatus) ? (
-          <CheckCircle color={colors.success} style={styles.moduleStatus} />
+          <CheckCircle color={colors.success} style={styles.renewalStatus} />
         ) : (
-          <Circle color={'#cbcbcb'} style={styles.moduleStatus} />
+          <Circle color={'#cbcbcb'} style={styles.renewalStatus} />
         )}
       </div>
       <div style={{ gridArea: 'title', fontWeight: 500 }}>

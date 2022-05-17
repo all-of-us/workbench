@@ -204,7 +204,7 @@ export const styles = reactStyles({
     opacity: '0.5',
     fontSize: '12px',
   },
-  moduleStatus: {
+  renewalStatus: {
     marginLeft: '0.2em',
     marginRight: '1em',
   },
