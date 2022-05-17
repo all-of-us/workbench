@@ -30,13 +30,13 @@ import {
   WithProfileErrorModalProps,
 } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { DARPageMode } from 'app/pages/access/data-access-requirements';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { styles } from 'app/pages/profile/profile-styles';
 import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { withUserProfile } from 'app/utils';
 import {
+  DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';

@@ -15,11 +15,11 @@ import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { DARPageMode } from 'app/pages/access/data-access-requirements';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
 import {
+  DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
