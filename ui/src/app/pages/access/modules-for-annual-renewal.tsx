@@ -132,7 +132,7 @@ const renewalStyle = {
     marginTop: '0.5rem',
     paddingTop: '0.5rem',
   },
-  hippo: {
+  moduleContainer: {
     display: 'grid',
     gridTemplateAreas: `'checkbox title .'
       '. content action'
@@ -518,7 +518,7 @@ export const RenewalCardBody = (props: {
   );
 
   return (
-    <div style={renewalStyle.hippo}>
+    <div style={renewalStyle.moduleContainer}>
       <div style={{ gridArea: 'checkbox' }}>
         {isRenewalCompleteForModule(moduleStatus) ? (
           <CheckCircle color={colors.success} style={styles.renewalStatus} />
