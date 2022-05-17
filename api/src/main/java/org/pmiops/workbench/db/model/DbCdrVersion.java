@@ -15,6 +15,7 @@ import org.pmiops.workbench.model.ArchivalStatus;
 @Entity
 @Table(name = "cdr_version")
 public class DbCdrVersion {
+
   private long cdrVersionId;
   private Boolean isDefault;
   private String name;
@@ -27,6 +28,7 @@ public class DbCdrVersion {
   private int numParticipants;
   private String cdrDbName;
   private String wgsBigqueryDataset;
+  private String wgsFilterSetName;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
   // TODO(calbach): Remove these columns.
@@ -180,6 +182,16 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "wgs_filter_set_name")
+  public String getWgsFilterSetName() {
+    return wgsFilterSetName;
+  }
+
+  public DbCdrVersion setWgsFilterSetName(String wgsFilterSetName) {
+    this.wgsFilterSetName = wgsFilterSetName;
+    return this;
+  }
+
   @Column(name = "has_fitbit_data")
   public Boolean getHasFitbitData() {
     return hasFitbitData == null ? false : hasFitbitData;
@@ -326,6 +338,6 @@ public class DbCdrVersion {
         && Objects.equals(wgsHailStoragePath, that.wgsHailStoragePath)
         && Objects.equals(microarrayHailStoragePath, that.microarrayHailStoragePath)
         && Objects.equals(
-            microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath);
+        microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath);
   }
 }

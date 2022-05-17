@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 // a Value Object for JSON parsing of cdr_config_*.json
 // adapted from DbCdrVersion
 public class CdrVersionVO {
+
   public long cdrVersionId;
   public Boolean isDefault;
   public String name;
@@ -20,6 +21,7 @@ public class CdrVersionVO {
   public int numParticipants;
   public String cdrDbName;
   public String wgsBigqueryDataset;
+  public String wgsFilterSetName;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
   public String allSamplesWgsDataBucket;

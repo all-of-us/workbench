@@ -32,7 +32,9 @@ public class WorkbenchConfig {
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
 
-  /** Creates a config with non-null-but-empty member variables, for use in testing. */
+  /**
+   * Creates a config with non-null-but-empty member variables, for use in testing.
+   */
   public static WorkbenchConfig createEmptyConfig() {
     WorkbenchConfig config = new WorkbenchConfig();
     config.access = new AccessConfig();
@@ -64,6 +66,7 @@ public class WorkbenchConfig {
 
   // Environment config variables related to Terra billing projects / GCP projects.
   public static class BillingConfig {
+
     // The environment-driven prefix to apply to Terra billing projects we create. Example:
     // "aou-rw-perf-" causes us to create projects named like "aou-rw-perf-8aec175b".
     public String projectNamePrefix;
@@ -86,6 +89,7 @@ public class WorkbenchConfig {
   }
 
   public static class FireCloudConfig {
+
     public boolean debugEndpoints;
     public String baseUrl;
     public String samBaseUrl;
@@ -125,17 +129,20 @@ public class WorkbenchConfig {
   }
 
   public static class RuntimeImages {
+
     public ArrayList<String> gce;
     public ArrayList<String> dataproc;
   }
 
   public static class AuthConfig {
+
     // A list of GCP service accounts (not affiliated with researchers) that can be used to
     // make API calls.
     public ArrayList<String> serviceAccountApiUsers;
   }
 
   public static class WgsCohortExtractionConfig {
+
     public String serviceAccount;
     public String serviceAccountTerraProxyGroup;
     public String operationalTerraWorkspaceNamespace;
@@ -155,25 +162,31 @@ public class WorkbenchConfig {
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
+    // TODO(RW-8265): rm on following release
+    @Deprecated
     public String extractionFilterSetName;
     public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
   }
 
   public static class CdrConfig {
+
     public boolean debugQueries;
   }
 
   public static class GoogleCloudStorageServiceConfig {
+
     public String credentialsBucketName;
     public String emailImagesBucketName;
   }
 
   public static class GoogleDirectoryServiceConfig {
+
     public String gSuiteDomain;
   }
 
   public static class ServerConfig {
+
     // Base URL for the App Engine API service (e.g. backend server).
     public String apiBaseUrl;
     // Base URL for the App Engine UI service (e.g. webapp / client).
@@ -189,26 +202,31 @@ public class WorkbenchConfig {
   }
 
   public static class AdminConfig {
+
     public String loginUrl;
   }
 
   public static class MandrillConfig {
+
     public String fromEmail;
     public int sendRetries;
   }
 
   public static class MoodleConfig {
+
     public String host;
     public String credentialsKeyV2;
   }
 
   public static class ZendeskConfig {
+
     public String host;
   }
 
   // Config related to user sign-up and registration, including access modules and controls around
   // the sign-up flow.
   public static class AccessConfig {
+
     // Allows a user to bypass their own access modules. This is used for testing purposes so that
     // We can give control over 3rd party access modules
     public boolean unsafeAllowSelfBypass;
@@ -231,6 +249,7 @@ public class WorkbenchConfig {
     public List<Integer> currentDuccVersions;
 
     public static class Renewal {
+
       // Days a user's module completion is good for until it expires
       public Long expiryDays;
       // Lookback period - the point when we give users the option to update their compliance items
@@ -246,6 +265,7 @@ public class WorkbenchConfig {
   }
 
   public static class FeatureFlagsConfig {
+
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
@@ -277,6 +297,7 @@ public class WorkbenchConfig {
   }
 
   public static class ActionAuditConfig {
+
     // Name of the Stackdriver log for Action Audit JSON entries.
     public String logName;
     // BigQuery dataset, which is the destination of a Stackdriver sink linking the
@@ -298,6 +319,7 @@ public class WorkbenchConfig {
   }
 
   public static class RdrExportConfig {
+
     // RDR Host to connect to to export data
     public String host;
     // Google cloud Queue name to which the task will be pushed to
@@ -307,11 +329,13 @@ public class WorkbenchConfig {
   }
 
   public static class CaptchaConfig {
+
     public boolean enableCaptcha;
     public boolean useTestCaptcha;
   }
 
   public static class ReportingConfig {
+
     public String dataset;
     // Max rows per batch queried in MySQL, and also the upload batch size for BigQuery. Max
     // possible is 10000, though around 2500 may be the most Workspace rows we can load into memory
@@ -319,8 +343,11 @@ public class WorkbenchConfig {
     public Integer maxRowsPerInsert;
   }
 
-  /** RAS(Researcher Auth Service) configurations. */
+  /**
+   * RAS(Researcher Auth Service) configurations.
+   */
   public static class RasConfig {
+
     // RAS hostname
     public String host;
     // RAS client id to finish the OAuth flow.
@@ -330,6 +357,7 @@ public class WorkbenchConfig {
   }
 
   public static class OfflineBatchConfig {
+
     // If specified, registers an alternate Cloud Tasks handler which immediately dispatches tasks
     // against the provided host. Intended for local development only.
     public String unsafeCloudTasksForwardingHost;
@@ -344,12 +372,9 @@ public class WorkbenchConfig {
   /**
    * One or more escalating remediation actions to take, depending on the number of observed egress
    * incidents. The highest matching escalation takes precedence. For example, with the given
-   * policy: <code>
-   * escalations: [
-   *   {afterIncidentCount: 1, suspendCompute: {durationMinutes: 10}},
-   *   {afterIncidentCount: 2, suspendCompute: {durationMinutes: 60}},
-   *   {afterIncidentCount: 4, disableUser: {}}
-   * ]
+   * policy: <code> escalations: [ {afterIncidentCount: 1, suspendCompute: {durationMinutes: 10}},
+   * {afterIncidentCount: 2, suspendCompute: {durationMinutes: 60}}, {afterIncidentCount: 4,
+   * disableUser: {}} ]
    * </code>
    *
    * <ul>
@@ -362,12 +387,17 @@ public class WorkbenchConfig {
    * Only has an effect if enableEgressAlertingV2 is enabled.
    */
   public static class EgressAlertRemediationPolicy {
+
     public static class Escalation {
+
       public static class SuspendCompute {
+
         public Long durationMinutes;
       }
 
-      public static class DisableUser {}
+      public static class DisableUser {
+
+      }
 
       // This policy will take effect after this many egress incidents have occurred. The highest
       // matching incident count escalation takes precedence. Should be a positive integer.
