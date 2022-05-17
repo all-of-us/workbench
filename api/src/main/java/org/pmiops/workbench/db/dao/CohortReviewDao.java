@@ -11,8 +11,6 @@ public interface CohortReviewDao extends JpaRepository<DbCohortReview, Long> {
 
   Set<DbCohortReview> findAllByCohortId(long cohortId);
 
-  List<DbCohortReview> findAllByCdrVersionId(@Param("cdrVersionId") long cdrVersionId);
-
   DbCohortReview findCohortReviewByCohortIdAndCdrVersionId(
       @Param("cohortId") long cohortId, @Param("cdrVersionId") long cdrVersionId);
 
@@ -31,18 +29,4 @@ public interface CohortReviewDao extends JpaRepository<DbCohortReview, Long> {
       @Param("ns") String workspaceNamespace,
       @Param("fcName") String fcName,
       @Param("status") short status);
-
-  @Query(
-      value =
-          "select * from cohort_review cr "
-              + "join cohort c on (cr.cohort_id = c.cohort_id) "
-              + "join workspace ws on (c.workspace_id = ws.workspace_id) "
-              + "where ws.workspace_namespace = :ns "
-              + "and ws.firecloud_name = :fcName "
-              + "and cr.cohort_review_id = :cohortReviewId",
-      nativeQuery = true)
-  DbCohortReview findByNamespaceAndFirecloudNameAndCohortReviewId(
-      @Param("ns") String workspaceNamespace,
-      @Param("fcName") String fcName,
-      @Param("cohortReviewId") long cohortReviewId);
 }
