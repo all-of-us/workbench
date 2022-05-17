@@ -15,7 +15,6 @@ import org.pmiops.workbench.model.ArchivalStatus;
 @Entity
 @Table(name = "cdr_version")
 public class DbCdrVersion {
-
   private long cdrVersionId;
   private Boolean isDefault;
   private String name;
@@ -338,6 +337,6 @@ public class DbCdrVersion {
         && Objects.equals(wgsHailStoragePath, that.wgsHailStoragePath)
         && Objects.equals(microarrayHailStoragePath, that.microarrayHailStoragePath)
         && Objects.equals(
-        microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath);
+            microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath);
   }
 }
