@@ -111,7 +111,7 @@
       "bigqueryProject": "fc-aou-cdr-stable-ct",
       "bigqueryDataset": "test_R2019q4r3",
       "wgsBigqueryDataset": "1kg_wgs_2022q1",
-      "wgsFilterSetName" "example",
+      "wgsFilterSetName": "example",
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 234525,
