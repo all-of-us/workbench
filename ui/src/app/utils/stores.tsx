@@ -59,6 +59,8 @@ export const useGenomicExtractionJobs = (
         .getGenomicExtractionJobs(workspaceNamespace, workspaceId)
         .then(({ jobs }) => jobs),
     {
+      // Genomic jobs will rarely change without user interaction. Avoid some extraneous revalidation.
+      revalidateOnFocus: false,
       refreshInterval: (data) => {
         if (
           pollWhileNonTerminal &&
