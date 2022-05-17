@@ -104,4 +104,6 @@ public interface CohortBuilderService {
 
   List<SurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
       Long questionConceptId, Long answerConceptId);
+
+  List<Criteria> findVersionedSurveys();
 }

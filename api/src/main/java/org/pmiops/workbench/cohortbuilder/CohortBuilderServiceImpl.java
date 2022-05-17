@@ -544,6 +544,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<Criteria> findVersionedSurveys() {
+    return cbCriteriaDao.findVersionedSurveys().stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
       String domain, String surveyName, Boolean standard, PageRequest pageRequest) {
     Page<DbCriteria> dbCriteriaPage;

@@ -314,6 +314,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("questionConceptId") Long questionConceptId,
       @Param("answerConceptId") Long answerConceptId);
 
+  @Query(
+      value =
+          "select distinct cr.* "
+              + "from cb_criteria cr "
+              + "join cb_survey_version sv on cr.concept_id = sv.survey_concept_id",
+      nativeQuery = true)
+  List<DbCriteria> findVersionedSurveys();
+
   @Query(value = "SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD", nativeQuery = true)
   List<String> findMySQLStopWords();
 

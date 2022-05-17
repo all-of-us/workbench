@@ -41,6 +41,7 @@ public class CBCriteriaDaoTest {
   private DbCriteria gender;
   private DbCriteria ethnicity;
   private DbCriteria sexAtBirth;
+  private DbCriteria versionedSurvey;
 
   @BeforeEach
   public void setUp() {
@@ -174,6 +175,18 @@ public class CBCriteriaDaoTest {
                 .addName("Male")
                 .addStandard(true)
                 .addParentId(1)
+                .build());
+    versionedSurvey =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(true)
+                .addConceptId("1333342")
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("COVID-19 Participant Experience (COPE) Survey")
                 .build());
   }
 
@@ -402,5 +415,17 @@ public class CBCriteriaDaoTest {
     assertThat(dbSurveyVersions.get(2).getItemCount()).isEqualTo(150);
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Test
+  public void findVersionedSurveys() {
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
+    List<DbCriteria> dbCriteria = cbCriteriaDao.findVersionedSurveys();
+    assertThat(dbCriteria).hasSize(1);
+    assertThat(dbCriteria).containsExactly(versionedSurvey);
+    jdbcTemplate.execute("drop table cb_survey_version");
   }
 }

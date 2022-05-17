@@ -1316,6 +1316,33 @@ public class CohortBuilderControllerTest {
     }
   }
 
+  @Test
+  public void findVersionedSurveys() {
+    DbCriteria versionedSurvey =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(true)
+                .addConceptId("1333342")
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("COVID-19 Participant Experience (COPE) Survey")
+                .build());
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
+
+    List<Criteria> response =
+        controller.findVersionedSurveys(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+    assertThat(response.size()).isEqualTo(1);
+    assertThat(response.get(0).getId()).isEqualTo(versionedSurvey.getId());
+
+    jdbcTemplate.execute("drop table cb_survey_version");
+  }
+
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
     return new Criteria()
         .code(dbCriteria.getCode())
