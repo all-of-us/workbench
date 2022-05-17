@@ -20,6 +20,7 @@ public class CdrVersionVO {
   public int numParticipants;
   public String cdrDbName;
   public String wgsBigqueryDataset;
+  public String wgsFilterSetName;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
   public String allSamplesWgsDataBucket;

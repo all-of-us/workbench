@@ -113,6 +113,7 @@
       "bigqueryProject": "fc-aou-cdr-staging-ct",
       "bigqueryDataset": "test_R2019q4r3",
       "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "wgsFilterSetName": "example",
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,

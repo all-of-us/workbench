@@ -155,7 +155,8 @@ public class WorkbenchConfig {
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
-    public String extractionFilterSetName;
+    // TODO(RW-8265): rm on following release
+    @Deprecated public String extractionFilterSetName;
     public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
   }

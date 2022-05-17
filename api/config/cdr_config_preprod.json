@@ -78,18 +78,16 @@
     {
       "cdrVersionId": 5,
       "name": "All of Us Controlled Tier Dataset v5 alpha",
+      "archivalStatus": 1,
       "bigqueryProject": "fc-aou-cdr-preprod-ct",
       "bigqueryDataset": "C2021Q2R1",
-      "wgsBigqueryDataset": "alpha2_prelim2",
       "creationTime": "2020-04-21 00:00:00Z",
       "releaseNumber": 6,
       "numParticipants": 318483,
       "cdrDbName": "c_2021q2_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "controlled",
-      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/alpha2",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha2"
+      "accessTier": "controlled"
     },
     {
       "cdrVersionId": 6,
@@ -112,6 +110,7 @@
       "bigqueryProject": "fc-aou-cdr-preprod-ct",
       "bigqueryDataset": "C2021Q3R6",
       "wgsBigqueryDataset": "wgs_C2021Q3_beta",
+      "wgsFilterSetName": "beta2_99k_row_10",
       "creationTime": "2021-10-06 00:00:00Z",
       "releaseNumber": 8,
       "numParticipants": 331382,

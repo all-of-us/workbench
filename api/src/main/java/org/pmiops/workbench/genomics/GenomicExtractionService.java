@@ -363,13 +363,12 @@ public class GenomicExtractionService {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
     }
-    if (!Strings.isNullOrEmpty(cohortExtractionConfig.extractionFilterSetName)) {
+    String filterSetName = workspace.getCdrVersion().getWgsFilterSetName();
+    if (!Strings.isNullOrEmpty(filterSetName)) {
       // If set, apply a joint callset filter during the extraction. There may be multiple such
       // filters defined within a GVS BigQuery dataset (see the filter_set table to view options).
       // Typically, we will want to specify a filter set.
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".filter_set_name",
-          "\"" + cohortExtractionConfig.extractionFilterSetName + "\"");
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".filter_set_name", "\"" + filterSetName + "\"");
     }
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider

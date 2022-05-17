@@ -27,6 +27,7 @@ public class DbCdrVersion {
   private int numParticipants;
   private String cdrDbName;
   private String wgsBigqueryDataset;
+  private String wgsFilterSetName;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
   // TODO(calbach): Remove these columns.
@@ -177,6 +178,16 @@ public class DbCdrVersion {
 
   public DbCdrVersion setWgsBigqueryDataset(String wgsBigqueryDataset) {
     this.wgsBigqueryDataset = wgsBigqueryDataset;
+    return this;
+  }
+
+  @Column(name = "wgs_filter_set_name")
+  public String getWgsFilterSetName() {
+    return wgsFilterSetName;
+  }
+
+  public DbCdrVersion setWgsFilterSetName(String wgsFilterSetName) {
+    this.wgsFilterSetName = wgsFilterSetName;
     return this;
   }
 
