@@ -75,12 +75,12 @@ const buildColumn = (props: ColumnProps) => {
   return (
     <Column
       {...{ header, field, sortField, frozen }}
+      bodyStyle={styles.colStyle}
+      headerStyle={{ ...styles.colStyle, width: headerWidth }}
       sortable={!!sortField}
       excludeGlobalFilter={!filterable}
       filterField={filterable && sortField}
       filterMatchMode={filterable && 'contains'}
-      bodyStyle={styles.colStyle}
-      headerStyle={{ ...styles.colStyle, width: headerWidth }}
     />
   );
 };
