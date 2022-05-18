@@ -3,7 +3,7 @@ import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
-import { DataTestIds, getNotificationText, Texts } from 'app/component/notification';
+import { assertNoNotification, DataTestIds, getNotificationText, Texts } from 'app/component/notification';
 
 export const PageTitle = 'Access Renewal';
 
@@ -23,6 +23,11 @@ export default class AccessRenewalMode extends AuthenticatedPage {
   async hasExpired(): Promise<boolean> {
     const notificationText = await getNotificationText(page, DataTestIds.AccessRenewal);
     return notificationText?.includes(Texts.AccessExpired);
+  }
+
+  async hasNotExpired(): Promise<boolean> {
+    await assertNoNotification(page, DataTestIds.AccessRenewal);
+    return true;
   }
 
   getReviewProfileButton(): Button {

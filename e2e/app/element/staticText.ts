@@ -11,6 +11,12 @@ export default class StaticText extends BaseElement {
     return new StaticText(page, xpath);
   }
 
+  static async assertNotPresent(page: Page, xOpt: XPathOptions, container?: Container) {
+    xOpt.type = ElementType.StaticText;
+    const xpath = buildXPath(xOpt, container);
+    return page.waitForXPath(xpath, { hidden: true });
+  }
+
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }
