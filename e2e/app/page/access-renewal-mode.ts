@@ -22,7 +22,7 @@ export default class AccessRenewalMode extends AuthenticatedPage {
 
   async hasExpired(): Promise<boolean> {
     const notificationText = await getNotificationText(page, DataTestIds.AccessRenewal);
-    return notificationText?.includes(Texts.AccessExpired);
+    return notificationText.includes(Texts.AccessExpired);
   }
 
   async hasNotExpired(): Promise<boolean> {

@@ -18,5 +18,6 @@ export async function assertNoNotification(page: Page, dataTestId: string) {
 }
 
 export async function getNotificationText(page: Page, dataTestId: string): Promise<string> {
-  return (await waitForNotification(page, dataTestId)).getText();
+  const notification = await waitForNotification(page, dataTestId);
+  return notification.getText();
 }
