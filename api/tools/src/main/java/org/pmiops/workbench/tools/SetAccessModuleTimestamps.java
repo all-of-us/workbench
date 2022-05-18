@@ -105,7 +105,7 @@ public class SetAccessModuleTimestamps {
       updateCompletionTime(accessModuleService, dbRasUser, DbAccessModuleName.RAS_LOGIN_GOV, null);
     };
   }
- 
+
   public static void main(String[] args) throws Exception {
     CommandLineToolConfig.runCommandLine(SetAccessModuleTimestamps.class, args);
   }
