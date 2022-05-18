@@ -59,6 +59,30 @@ const DisabledIcon = () => (
   </span>
 );
 
+// Ideally I'd create a functional component here, but DataTable doesn't like that.
+// see discussion at https://github.com/all-of-us/workbench/pull/6696#discussion_r876181248
+
+interface ColumnProps {
+  header: string;
+  field: string;
+  sortField?: string;
+  filterable: boolean;
+  headerWidth: number;
+}
+const constructColumn = (props: ColumnProps) => {
+  const { header, field, sortField, filterable, headerWidth } = props;
+  return (
+    <Column
+      {...{ header, field, sortField }}
+      sortable={!!sortField}
+      excludeGlobalFilter={!filterable}
+      filterField={filterable && sortField}
+      filterMatchMode={filterable && 'contains'}
+      bodyStyle={styles.colStyle}
+      headerStyle={{ ...styles.colStyle, width: headerWidth }}
+    />
+  );
+};
 interface DataTableFields {
   name: JSX.Element;
   nameText: string;
@@ -267,16 +291,13 @@ export const AdminUserTable = withUserProfile()(
                   bodyStyle={styles.colStyle}
                   headerStyle={{ ...styles.colStyle, width: '200px' }}
                 />
-                <Column
-                  header='Username'
-                  field='username'
-                  sortField='usernameText'
-                  filterField='usernameText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '200px' }}
-                />
+                {constructColumn({
+                  header: 'Username',
+                  field: 'username',
+                  sortField: 'usernameText',
+                  filterable: true,
+                  headerWidth: 200,
+                })}
                 <Column
                   header='Contact Email'
                   field='contactEmail'
