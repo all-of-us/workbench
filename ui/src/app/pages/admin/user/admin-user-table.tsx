@@ -64,9 +64,9 @@ const DisabledIcon = () => (
 
 interface ColumnProps {
   header: string;
-  field: string;
-  sortField?: string;
-  filterable: boolean;
+  field: string; // index to the rendered component (or string) to display in the cell
+  sortField?: string; // if sortable, index to the text string used for sorting and filtering
+  filterable: boolean; // whether the table's search box can filter results based on this column's `sortField`
   headerWidth: number;
   frozen?: boolean;
 }
