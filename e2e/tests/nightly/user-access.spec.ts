@@ -1,6 +1,6 @@
 import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
-import AccessRenewalPage from 'app/page/access-renewal-page';
+import AccessRenewalMode from 'app/page/access-renewal-mode';
 import ProfilePage from 'app/page/profile-page';
 import ProfileConfirmationModal from 'app/modal/profile-confirmation-modal';
 import Navigation, { NavLink } from 'app/component/navigation';
@@ -9,12 +9,12 @@ import HomePage from 'app/page/home-page';
 // Important: the access test user must be in a state where they are currently failing access renewal
 // due to an expired "profile last confirmed" date.
 // CircleCI accomplishes this by running the puppeteer-access-test-user-setup task, which executes
-// `./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}`.
+// `./project.rb set-access-module-timestamps --profile-user ${ACCESS_TEST_USER} --ras-user ${RAS_TEST_USER}`.
 // This can also be run locally.
 
 describe('User Access', () => {
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.ACCESS_TEST_USER, new AccessRenewalPage(page));
+    await signInWithAccessToken(page, config.ACCESS_TEST_USER, new AccessRenewalMode(page));
   });
 
   // note that this test is "destructive" in that it brings the user to a state
@@ -22,8 +22,9 @@ describe('User Access', () => {
   // AAR and are no longer forced into renewal
 
   test('Expired User can complete Annual Access Renewal (AAR)', async () => {
-    const aarPage = await new AccessRenewalPage(page).waitForLoad();
+    const aarPage = await new AccessRenewalMode(page).waitForLoad();
     expect(aarPage).toBeTruthy();
+
     expect(await aarPage.hasExpired()).toBeTruthy();
 
     // the profile confirmation is expired, so the Review action is active for the profile
@@ -53,7 +54,8 @@ describe('User Access', () => {
     await modalOK.click();
     await modal.waitUntilClose();
     await aarPage.waitForLoad();
-    expect(await aarPage.hasExpired()).toBeFalsy();
+
+    expect(await aarPage.hasNotExpired()).toBeTruthy();
 
     // and we can now access the home page
 

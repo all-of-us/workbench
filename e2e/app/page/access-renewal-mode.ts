@@ -3,14 +3,13 @@ import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
+import { assertNoNotification, DataTestIds, getNotificationText, Texts } from 'app/component/notification';
 
 export const PageTitle = 'Access Renewal';
 
-export const LabelAlias = {
-  AccessExpired: 'Researcher workbench access has expired.'
-};
-
-export default class AccessRenewalPage extends AuthenticatedPage {
+// concerns the Data Access Requirements page in Access Renewal Mode
+// which was formerly a separate page
+export default class AccessRenewalMode extends AuthenticatedPage {
   constructor(page: Page) {
     super(page);
   }
@@ -22,7 +21,13 @@ export default class AccessRenewalPage extends AuthenticatedPage {
   }
 
   async hasExpired(): Promise<boolean> {
-    return await this.containsText(LabelAlias.AccessExpired);
+    const notificationText = await getNotificationText(page, DataTestIds.AccessRenewal);
+    return notificationText.includes(Texts.AccessExpired);
+  }
+
+  async hasNotExpired(): Promise<boolean> {
+    await assertNoNotification(page, DataTestIds.AccessRenewal);
+    return true;
   }
 
   getReviewProfileButton(): Button {
