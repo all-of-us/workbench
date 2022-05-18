@@ -5,6 +5,8 @@ import expect from 'expect';
 import Navigation, { NavLink } from 'app/component/navigation';
 
 /**
+ * NIH Researcher Auth Service (RAS) Login Test
+ *
  * Important:
  *   The access test user must be in a state where they are currently failing access renewal
  *   due to an expired "profile last confirmed" date.
@@ -12,11 +14,7 @@ import Navigation, { NavLink } from 'app/component/navigation';
  *   `./project.rb set-access-module-timestamps --profile-user ${ACCESS_TEST_USER} --ras-user ${RAS_TEST_USER}`
  *   This can also be run locally in workbench/api dir.
  */
-
-/**
- * NIH Researcher Auth Service (RAS) Login Test
- */
-describe('RAS with login.gov', () => {
+describe('RAS Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page, config.RAS_TEST_USER);
   });
@@ -25,7 +23,7 @@ describe('RAS with login.gov', () => {
   // where they cannot complete this test again, because they have completed
   // DAR and are no longer forced into renewal
 
-  test('Sign in (DAR)', async () => {
+  test('Sign in login.gov', async () => {
     // At this time, first page opened after sign in is still the Home page
     await Navigation.navMenu(page, NavLink.DATA_ACCESS_REQUIREMENTS);
 
