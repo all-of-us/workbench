@@ -414,6 +414,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-validation'
     compile "commons-codec:commons-codec:1.15"
     compile 'com.auth0:java-jwt:3.19.2'
+    compile 'io.netty:netty-common:4.1.77.Final'
 
     compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
 
