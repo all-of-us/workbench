@@ -21,13 +21,10 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({
@@ -44,56 +41,69 @@ public class SetAccessModuleTimestamps {
 
   private static final Logger LOG = Logger.getLogger(SetAccessModuleTimestamps.class.getName());
 
-  private static final Option USER_OPT =
+  private static final Option PROFILE_USER_OPT =
       Option.builder()
-          .longOpt("user")
-          .desc("Username (email) of the user to modify")
+          .longOpt("profile-user")
+          .desc("Username (email) of the user to modify for the Profile module")
           .required()
           .hasArg()
           .build();
 
-  private static final Options OPTIONS = new Options().addOption(USER_OPT);
+  private static final Option RAS_USER_OPT =
+      Option.builder()
+          .longOpt("ras-user")
+          .desc("Username (email) of the user to modify for the RAS module")
+          .required()
+          .hasArg()
+          .build();
+
+  private static final Options OPTIONS =
+      new Options().addOption(PROFILE_USER_OPT).addOption(RAS_USER_OPT);
 
   private static final Timestamp PROFILE_CONFIRMATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
 
-  private static DbUser dbUser;
+  private static DbUser dbProfileUser;
+  private static DbUser dbRasUser;
 
   void updateCompletionTime(
       AccessModuleService accessModuleService,
-      String username,
+      DbUser dbUser,
       DbAccessModuleName moduleName,
       @Nullable Timestamp timestamp) {
     accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
 
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
     LOG.info(
-        String.format("Updating %s completion time for user %s to %s", moduleName, username, time));
+        String.format(
+            "Updating %s completion time for user %s to %s",
+            moduleName, dbUser.getUsername(), time));
   }
 
   @Bean
   public CommandLineRunner run(AccessModuleService accessModuleService, UserDao userDao) {
     return (args) -> {
       final CommandLine opts = new DefaultParser().parse(OPTIONS, args);
-      final String username = opts.getOptionValue(USER_OPT.getLongOpt());
-      dbUser = userDao.findUserByUsername(username);
-      if (dbUser == null) {
-        throw new IllegalArgumentException(String.format("User %s not found!", username));
+      final String profileUsername = opts.getOptionValue(PROFILE_USER_OPT.getLongOpt());
+      final String rasUsername = opts.getOptionValue(RAS_USER_OPT.getLongOpt());
+      dbProfileUser = userDao.findUserByUsername(profileUsername);
+      if (dbProfileUser == null) {
+        throw new IllegalArgumentException(
+            String.format("Profile user %s not found!", profileUsername));
+      }
+      dbRasUser = userDao.findUserByUsername(rasUsername);
+      if (dbRasUser == null) {
+        throw new IllegalArgumentException(String.format("RAS user %s not found!", rasUsername));
       }
 
       updateCompletionTime(
           accessModuleService,
-          username,
+          dbProfileUser,
           DbAccessModuleName.PROFILE_CONFIRMATION,
           PROFILE_CONFIRMATION_TIMESTAMP);
-    };
-  }
 
-  @Bean
-  @Primary
-  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  DbUser user() {
-    return dbUser;
+      updateCompletionTime(accessModuleService, dbRasUser, DbAccessModuleName.RAS_LOGIN_GOV, null);
+    };
   }
 
   public static void main(String[] args) throws Exception {

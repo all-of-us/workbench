@@ -2917,10 +2917,15 @@ def set_access_module_timestamps(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.project = TEST_PROJECT
   op.add_option(
-    "--user [user]",
-    ->(opts, v) { opts.user = v },
-    "User whose timestamps should be updated.  Use full email address.")
-  op.add_validator ->(opts) { raise ArgumentError if opts.user.nil?}
+    "--profile-user [profile-user]",
+    ->(opts, v) { opts.profile_user = v },
+    "User whose timestamps should be updated for the Profile module.  Use full email address.")
+  op.add_option(
+      "--ras-user [ras-user]",
+      ->(opts, v) { opts.ras_user = v },
+      "User whose timestamps should be updated for the RAS module.  Use full email address.")
+  op.add_validator ->(opts) { raise ArgumentError.new('--profile-user is required') if opts.profile_user.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new('--ras-user is required') if opts.ras_user.nil?}
   op.parse.validate
 
   # Create a cloud context and apply the DB connection variables to the environment.
@@ -2929,7 +2934,8 @@ def set_access_module_timestamps(cmd_name, *args)
   gcc.validate()
 
   gradle_args = ([
-      ["--user", op.opts.user]
+      ["--profile-user", op.opts.profile_user],
+      ["--ras-user", op.opts.ras_user]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
