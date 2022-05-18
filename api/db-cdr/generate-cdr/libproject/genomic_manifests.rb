@@ -270,13 +270,14 @@ def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_workers
       unless value.nil?
         w.write(value + "\n")
         count += 1
-        if count % 100 == 0
-          delta_min = (Time.now.to_i - start) / 60
-          # Carriage return here to keep the progress on the same terminal line
-          printf("\r%s %d/%d files [%.02f%%] (running for %dh%dm)",
-                 status_verb, count, all_tasks.length,
-                 100*count.to_f/all_tasks.length, delta_min/60, delta_min%60)
-        end
+      end
+      # Log every 100 and at the end (when the queue is closed, i.e. value=nil)
+      if count % 100 == 0 or value.nil?
+        delta_min = (Time.now.to_i - start) / 60
+        # Carriage return here to keep the progress on the same terminal line
+        printf("\r%s %d/%d files [%.02f%%] (running for %dh%dm)",
+               status_verb, count, all_tasks.length,
+               100*count.to_f/all_tasks.length, delta_min/60, delta_min%60)
       end
     end
   end
