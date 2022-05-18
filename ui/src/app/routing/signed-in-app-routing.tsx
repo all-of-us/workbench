@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect, Switch, useLocation } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
@@ -37,7 +37,6 @@ import { WorkspaceLibrary } from 'app/pages/workspace/workspace-library';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
-  ACCESS_RENEWAL_PATH,
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   NIH_CALLBACK_PATH,
@@ -125,16 +124,13 @@ const WorkspaceSearchAdminPage = fp.flow(
 )(AdminWorkspaceSearch);
 
 export const SignedInRoutes = () => {
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+
   return (
     <Switch>
       <AppRoute exact path='/' guards={[getAccessModuleGuard()]}>
         <HomepagePage routeData={{ title: 'Homepage' }} />
-      </AppRoute>
-      <AppRoute exact path={ACCESS_RENEWAL_PATH}>
-        <DataAccessRequirementsPage
-          routeData={{ title: 'Access Renewal' }}
-          pageMode={DARPageMode.ANNUAL_RENEWAL}
-        />
       </AppRoute>
       <AppRoute
         exact
@@ -287,7 +283,12 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute exact path={DATA_ACCESS_REQUIREMENTS_PATH}>
         <DataAccessRequirementsPage
-          routeData={{ title: 'Data Access Requirements' }}
+          routeData={{
+            title:
+              query.get('pageMode') === DARPageMode.ANNUAL_RENEWAL
+                ? 'Access Renewal'
+                : 'Data Access Requirements',
+          }}
         />
       </AppRoute>
       <AppRoute exact path='/data-code-of-conduct'>
