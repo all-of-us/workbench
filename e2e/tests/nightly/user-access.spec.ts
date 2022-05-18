@@ -1,6 +1,6 @@
 import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
-import AccessRenewalPage from 'app/page/access-renewal-page';
+import AccessRenewalMode from 'app/page/access-renewal-mode';
 import ProfilePage from 'app/page/profile-page';
 import ProfileConfirmationModal from 'app/modal/profile-confirmation-modal';
 import Navigation, { NavLink } from 'app/component/navigation';
@@ -14,7 +14,7 @@ import HomePage from 'app/page/home-page';
 
 describe('User Access', () => {
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.ACCESS_TEST_USER, new AccessRenewalPage(page));
+    await signInWithAccessToken(page, config.ACCESS_TEST_USER, new AccessRenewalMode(page));
   });
 
   // note that this test is "destructive" in that it brings the user to a state
@@ -22,7 +22,7 @@ describe('User Access', () => {
   // AAR and are no longer forced into renewal
 
   test('Expired User can complete Annual Access Renewal (AAR)', async () => {
-    const aarPage = await new AccessRenewalPage(page).waitForLoad();
+    const aarPage = await new AccessRenewalMode(page).waitForLoad();
     expect(aarPage).toBeTruthy();
     expect(await aarPage.hasExpired()).toBeTruthy();
 

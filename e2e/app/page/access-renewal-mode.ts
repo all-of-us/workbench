@@ -10,7 +10,9 @@ export const LabelAlias = {
   AccessExpired: 'Researcher workbench access has expired.'
 };
 
-export default class AccessRenewalPage extends AuthenticatedPage {
+// concerns the Data Access Requirements page in Access Renewal Mode
+// which was formerly a separate page
+export default class AccessRenewalMode extends AuthenticatedPage {
   constructor(page: Page) {
     super(page);
   }
@@ -21,9 +23,10 @@ export default class AccessRenewalPage extends AuthenticatedPage {
     return true;
   }
 
-  async hasExpired(): Promise<boolean> {
-    return await this.containsText(LabelAlias.AccessExpired);
-  }
+  // not a valid check as of 18 May 2022
+  // async hasExpired(): Promise<boolean> {
+  //   return await this.containsText(LabelAlias.AccessExpired);
+  // }
 
   getReviewProfileButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Review });
