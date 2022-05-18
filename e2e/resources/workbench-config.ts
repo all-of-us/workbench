@@ -33,6 +33,7 @@ const local: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
 };
 
@@ -50,6 +51,7 @@ const test: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
 };
 
@@ -67,6 +69,7 @@ const staging: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
 };
 
@@ -84,6 +87,7 @@ const stable: IEnvConfig = {
   EGRESS_TEST_USER: 'TODO - NOT AVAILABLE',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
 };
 
@@ -101,6 +105,7 @@ const perf: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
 };
 

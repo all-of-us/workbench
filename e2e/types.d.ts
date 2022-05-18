@@ -27,6 +27,7 @@ export interface IEnvConfig {
   OLD_CDR_VERSION_NAME: string;
   CONTROLLED_TIER_CDR_VERSION_NAME: string;
   LOGIN_GOV_USER: string;
+  RAS_TEST_USER: string;
   ENABLED_PERSISTENT_DISK: boolean;
 }
 

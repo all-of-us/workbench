@@ -4,18 +4,19 @@ import { ElementType } from 'app/xpath-options';
 import { exists } from 'utils/element-utils';
 
 export enum NavLink {
+  ADMIN = 'Admin',
+  CONTACT_US = 'Contact Us',
+  DATA_ACCESS_REQUIREMENTS = 'Data Access Requirements',
+  FEATURED_WORKSPACES = 'Featured Workspaces',
   HOME = 'Home',
+  INSTITUTION_ADMIN = 'Institution Admin',
   PROFILE = 'Profile',
   SIGN_OUT = 'Sign Out',
-  YOUR_WORKSPACES = 'Your Workspaces',
-  FEATURED_WORKSPACES = 'Featured Workspaces',
   USER_SUPPORT = 'User Support Hub',
-  CONTACT_US = 'Contact Us',
-  ADMIN = 'Admin',
   USER_ADMIN = 'User Admin',
   USER_AUDIT = 'User Audit',
   WORKSPACE_ADMIN = 'Workspaces',
-  INSTITUTION_ADMIN = 'Institution Admin'
+  YOUR_WORKSPACES = 'Your Workspaces'
 }
 
 export enum NavLinkIcon {
@@ -44,7 +45,7 @@ export default class Navigation {
       if (!applink) {
         // If it's a link under User submenu.
         const [username, admin] = await page.$x(angleIconXpath);
-        const UserSubmenuItems = [NavLink.PROFILE, NavLink.SIGN_OUT];
+        const UserSubmenuItems = [NavLink.PROFILE, NavLink.SIGN_OUT, NavLink.DATA_ACCESS_REQUIREMENTS];
         const AdminSubmenuItems = [
           NavLink.USER_ADMIN,
           NavLink.USER_AUDIT,

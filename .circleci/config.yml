@@ -703,10 +703,12 @@ workflows:
           env_name: "local"
       - puppeteer-test:
           <<: *filter-pr-branch
-          env_name: "local"
+          env_name: "test"
+          test_mode: "nightly-integration"
           parallel_num: 5
           optional_steps:
             - halt-puppeteer-check
+            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
