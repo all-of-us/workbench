@@ -124,8 +124,8 @@ const WorkspaceSearchAdminPage = fp.flow(
 )(AdminWorkspaceSearch);
 
 export const SignedInRoutes = () => {
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
+  const { search } = useLocation();
+  const query = new URLSearchParams(search);
 
   return (
     <Switch>
