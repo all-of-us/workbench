@@ -30,7 +30,7 @@ const VERSIONS: VersionInfo[] = [
   {
     version: 5,
     path: '/data-user-code-of-conduct-v5.html',
-    height: '95rem', // no inner vertical scrollbars at min width, via trial and error
+    height: '165em', // no inner vertical scrollbars at min width, via trial and error
   },
 ];
 
