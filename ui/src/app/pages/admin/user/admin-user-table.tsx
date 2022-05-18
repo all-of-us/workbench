@@ -68,12 +68,13 @@ interface ColumnProps {
   sortField?: string;
   filterable: boolean;
   headerWidth: number;
+  frozen?: boolean;
 }
-const constructColumn = (props: ColumnProps) => {
-  const { header, field, sortField, filterable, headerWidth } = props;
+const buildColumn = (props: ColumnProps) => {
+  const { header, field, sortField, filterable, headerWidth, frozen } = props;
   return (
     <Column
-      {...{ header, field, sortField }}
+      {...{ header, field, sortField, frozen }}
       sortable={!!sortField}
       excludeGlobalFilter={!filterable}
       filterField={filterable && sortField}
@@ -83,6 +84,7 @@ const constructColumn = (props: ColumnProps) => {
     />
   );
 };
+
 interface DataTableFields {
   name: JSX.Element;
   nameText: string;
@@ -280,18 +282,15 @@ export const AdminUserTable = withUserProfile()(
                 scrollable
                 style={styles.tableStyle}
               >
-                <Column
-                  header='Name'
-                  field='name'
-                  sortField='nameText'
-                  filterField='nameText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  frozen={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '200px' }}
-                />
-                {constructColumn({
+                {buildColumn({
+                  header: 'Name',
+                  field: 'name',
+                  sortField: 'nameText',
+                  filterable: true,
+                  headerWidth: 200,
+                  frozen: true,
+                })}
+                {buildColumn({
                   header: 'Username',
                   field: 'username',
                   sortField: 'usernameText',
