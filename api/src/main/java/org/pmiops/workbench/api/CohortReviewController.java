@@ -94,17 +94,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   /**
-   * Create a cohort review per the specified workspaceId, cohortId, cdrVersionId and size. If
-   * participant cohort status data exists for a review or no cohort review exists for
-   * cohortReviewId then throw a {@link BadRequestException}.
+   * Create a cohort review per the specified workspaceId, cohortId and size. If participant cohort
+   * status data exists for a review or no cohort review exists for cohortReviewId then throw a
+   * {@link BadRequestException}.
    */
   @Override
   public ResponseEntity<CohortReview> createCohortReview(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
-      CreateReviewRequest request) {
+      String workspaceNamespace, String workspaceId, Long cohortId, CreateReviewRequest request) {
     if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
       throw new BadRequestException(
           String.format(
@@ -115,13 +111,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
     CohortReview cohortReview;
     DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
     try {
-      cohortReview =
-          cohortReviewService.findCohortReview(
-              cohort.getCohortId(), dbWorkspace.getCdrVersion().getCdrVersionId());
+      cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
     } catch (NotFoundException nfe) {
       cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
       cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
@@ -350,15 +345,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * based on page, pageSize, sortOrder and sortColumn.
    */
   @Override
-  public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatuses(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
-      PageFilterRequest request) {
+  public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatusesOld(
+      String workspaceNamespace, String workspaceId, Long cohortId, PageFilterRequest request) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
     CohortReview cohortReview;
     List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
@@ -367,9 +359,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
     try {
-      cohortReview =
-          cohortReviewService.findCohortReview(
-              cohort.getCohortId(), dbWorkspace.getCdrVersion().getCdrVersionId());
+      cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
       participantCohortStatuses =
           cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
     } catch (NotFoundException nfe) {

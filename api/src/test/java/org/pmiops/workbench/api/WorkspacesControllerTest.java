@@ -1486,12 +1486,7 @@ public class WorkspacesControllerTest {
     reviewReq.setSize(1);
     CohortReview cr1 =
         cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c1.getId(),
-                cdrVersion.getCdrVersionId(),
-                reviewReq)
+            .createCohortReview(workspace.getNamespace(), workspace.getId(), c1.getId(), reviewReq)
             .getBody();
     CohortAnnotationDefinition cad1EnumResponse =
         cohortAnnotationDefinitionController
@@ -1548,12 +1543,7 @@ public class WorkspacesControllerTest {
     reviewReq.setSize(2);
     CohortReview cr2 =
         cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c2.getId(),
-                cdrVersion.getCdrVersionId(),
-                reviewReq)
+            .createCohortReview(workspace.getNamespace(), workspace.getId(), c2.getId(), reviewReq)
             .getBody();
     CohortAnnotationDefinition cad2EnumResponse =
         cohortAnnotationDefinitionController
@@ -1699,11 +1689,10 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr1 =
         cohortReviewController
-            .getParticipantCohortStatuses(
+            .getParticipantCohortStatusesOld(
                 cloned.getNamespace(),
                 cloned.getId(),
                 cohortsByName.get("c1").getId(),
-                cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
@@ -1734,11 +1723,10 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr2 =
         cohortReviewController
-            .getParticipantCohortStatuses(
+            .getParticipantCohortStatusesOld(
                 cloned.getNamespace(),
                 cloned.getId(),
                 cohortsByName.get("c2").getId(),
-                cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
@@ -3364,7 +3352,6 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohort.getId(),
-                cdrVersion.getCdrVersionId(),
                 new CreateReviewRequest().size(1))
             .getBody();
 

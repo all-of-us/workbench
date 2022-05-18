@@ -36,7 +36,6 @@ import {
 import { triggerEvent } from 'app/utils/analytics';
 import {
   currentCohortReviewStore,
-  currentWorkspaceStore,
   NavigationProps,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
@@ -327,7 +326,6 @@ export const DetailHeader = fp.flow(
 
         const { page, pageSize } = reviewPaginationStore.getValue();
         const { ns, wsid, cid } = this.props.match.params;
-        const { cdrVersionId } = currentWorkspaceStore.getValue();
         const request = {
           page: left ? page - 1 : page + 1,
           pageSize: pageSize,
@@ -335,7 +333,7 @@ export const DetailHeader = fp.flow(
           filters: { items: this.getRequestFilters() },
         } as PageFilterRequest;
         cohortReviewApi()
-          .getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, request)
+          .getParticipantCohortStatusesOld(ns, wsid, +cid, request)
           .then((response) => {
             currentCohortReviewStore.next(response.cohortReview);
             const status = statusGetter(

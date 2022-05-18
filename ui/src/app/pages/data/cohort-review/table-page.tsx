@@ -394,7 +394,6 @@ export const ParticipantsTable = fp.flow(
     getParticipantStatuses() {
       const { page, sortField, sortOrder } = this.state;
       const {
-        workspace: { cdrVersionId },
         match: {
           params: { ns, wsid, cid },
         },
@@ -410,11 +409,10 @@ export const ParticipantsTable = fp.flow(
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           filters: { items: filters },
         } as Request;
-        return cohortReviewApi().getParticipantCohortStatuses(
+        return cohortReviewApi().getParticipantCohortStatusesOld(
           ns,
           wsid,
           +cid,
-          +cdrVersionId,
           query
         );
       }

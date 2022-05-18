@@ -80,14 +80,13 @@ export const CohortReview = fp.flow(
 
     loadCohort() {
       const { ns, wsid, cid } = this.props.match.params;
-      const { cdrVersionId } = this.props.workspace;
 
       if (!cid) {
         return;
       }
 
       cohortReviewApi()
-        .getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, {
+        .getParticipantCohortStatusesOld(ns, wsid, +cid, {
           page: 0,
           pageSize: 25,
           sortOrder: SortOrder.Asc,
