@@ -24,6 +24,7 @@ describe('User Access', () => {
   test('Expired User can complete Annual Access Renewal (AAR)', async () => {
     const aarPage = await new AccessRenewalMode(page).waitForLoad();
     expect(aarPage).toBeTruthy();
+
     expect(await aarPage.hasExpired()).toBeTruthy();
 
     // the profile confirmation is expired, so the Review action is active for the profile
@@ -53,6 +54,7 @@ describe('User Access', () => {
     await modalOK.click();
     await modal.waitUntilClose();
     await aarPage.waitForLoad();
+
     expect(await aarPage.hasExpired()).toBeFalsy();
 
     // and we can now access the home page
