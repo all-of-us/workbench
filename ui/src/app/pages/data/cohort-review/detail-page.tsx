@@ -52,7 +52,7 @@ export const DetailPage = fp.flow(
 
     async componentDidMount() {
       const {
-        workspace: { cdrVersionId, id, namespace },
+        workspace: { id, namespace },
         hideSpinner,
       } = this.props;
       hideSpinner();
@@ -60,7 +60,7 @@ export const DetailPage = fp.flow(
       const { ns, wsid, cid } = this.props.match.params;
       if (!cohortReview) {
         await cohortReviewApi()
-          .getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, {
+          .getParticipantCohortStatusesOld(ns, wsid, +cid, {
             page: 0,
             pageSize: 25,
             sortOrder: SortOrder.Asc,

@@ -580,7 +580,6 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohort.getCohortId(),
-                    cdrVersion.getCdrVersionId(),
                     new CreateReviewRequest().size(0)));
 
     assertThat(exception)
@@ -599,7 +598,6 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohort.getCohortId(),
-                    cdrVersion.getCdrVersionId(),
                     new CreateReviewRequest().size(10001)));
 
     assertThat(exception)
@@ -620,7 +618,6 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohort.getCohortId(),
-                    cdrVersion.getCdrVersionId(),
                     new CreateReviewRequest().size(1)));
 
     assertThat(exception)
@@ -645,7 +642,6 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortId,
-                    cdrVersion.getCdrVersionId(),
                     new CreateReviewRequest().size(1)));
 
     assertNotFoundExceptionNoCohort(cohortId, exception);
@@ -666,7 +662,6 @@ public class CohortReviewControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
                 new CreateReviewRequest().size(1))
             .getBody();
 
@@ -691,7 +686,6 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortWithoutReview.getCohortId(),
-                    cdrVersion.getCdrVersionId(),
                     new CreateReviewRequest().size(1)));
 
     assertForbiddenException(exception);
@@ -1900,11 +1894,10 @@ public class CohortReviewControllerTest {
         assertThrows(
             NotFoundException.class,
             () ->
-                cohortReviewController.getParticipantCohortStatuses(
+                cohortReviewController.getParticipantCohortStatusesOld(
                     workspace2.getNamespace(),
                     workspace2.getId(),
                     cohortId,
-                    cdrVersion.getCdrVersionId(),
                     new PageFilterRequest()));
 
     assertNotFoundExceptionNoCohort(cohortId, exception);
@@ -1920,11 +1913,10 @@ public class CohortReviewControllerTest {
         assertThrows(
             NotFoundException.class,
             () ->
-                cohortReviewController.getParticipantCohortStatuses(
+                cohortReviewController.getParticipantCohortStatusesOld(
                     workspace.getNamespace(),
                     workspace.getId(),
                     worngCohortId,
-                    cdrVersion.getCdrVersionId(),
                     new PageFilterRequest()));
 
     assertNotFoundExceptionNoCohort(worngCohortId, exception);
@@ -1944,11 +1936,10 @@ public class CohortReviewControllerTest {
 
     CohortReview actualReview =
         cohortReviewController
-            .getParticipantCohortStatuses(
+            .getParticipantCohortStatusesOld(
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
                 pageFilterRequest)
             .getBody()
             .getCohortReview();
@@ -1975,11 +1966,10 @@ public class CohortReviewControllerTest {
 
     CohortReview actualReview =
         cohortReviewController
-            .getParticipantCohortStatuses(
+            .getParticipantCohortStatusesOld(
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
@@ -2007,11 +1997,10 @@ public class CohortReviewControllerTest {
         assertThrows(
             ForbiddenException.class,
             () ->
-                cohortReviewController.getParticipantCohortStatuses(
+                cohortReviewController.getParticipantCohortStatusesOld(
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohort.getCohortId(),
-                    cdrVersion.getCdrVersionId(),
                     new PageFilterRequest()));
 
     assertForbiddenException(exception);

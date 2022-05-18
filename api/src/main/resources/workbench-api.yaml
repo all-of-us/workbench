@@ -3103,12 +3103,11 @@ paths:
           description: the requested annotations
           schema:
             "$ref": "#/definitions/CohortAnnotationsResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     - "$ref": "#/parameters/cohortId"
-    - "$ref": "#/parameters/cdrVersionId"
     post:
       tags:
       - cohortReview
@@ -3129,21 +3128,19 @@ paths:
           description: A cohortReviewId and cohort count
           schema:
             "$ref": "#/definitions/CohortReview"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/participants":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     - "$ref": "#/parameters/cohortId"
-    - "$ref": "#/parameters/cdrVersionId"
     post:
       tags:
       - cohortReview
       consumes:
       - application/json
-      description: 'Returns a collection of participants for the specified cohortId
-        and cdrVersionId. This endpoint does pagination based on page, limit, order
-        and column.'
-      operationId: getParticipantCohortStatuses
+      description: 'Returns a collection of participants for the specified cohortId.
+        This endpoint does pagination based on page, limit, order and column.'
+      operationId: getParticipantCohortStatusesOld
       parameters:
       - in: body
         name: request

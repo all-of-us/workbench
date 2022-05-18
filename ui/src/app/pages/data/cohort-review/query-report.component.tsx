@@ -257,7 +257,7 @@ export const QueryReport = fp.flow(
         request = JSON.parse(cohortReview.cohortDefinition);
       } else {
         await cohortReviewApi()
-          .getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, {
+          .getParticipantCohortStatusesOld(ns, wsid, +cid, {
             page: 0,
             pageSize: 25,
             sortOrder: SortOrder.Asc,

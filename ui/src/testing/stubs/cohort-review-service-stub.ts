@@ -117,7 +117,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
     });
   }
 
-  getParticipantCohortStatuses(): Promise<CohortReviewWithCountResponse> {
+  getParticipantCohortStatusesOld(): Promise<CohortReviewWithCountResponse> {
     return new Promise<CohortReviewWithCountResponse>((resolve) =>
       resolve({ cohortReview: cohortReviewStubs[0], queryResultSize: 0 })
     );

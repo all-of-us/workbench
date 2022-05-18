@@ -99,13 +99,13 @@ export const CreateReviewModal = fp.flow(
       this.setState({ creating: true });
       const {
         cohort,
-        workspace: { cdrVersionId, id, namespace },
+        workspace: { id, namespace },
       } = this.props;
       const { numberOfParticipants } = this.state;
       const request = { size: parseInt(numberOfParticipants, 10) };
 
       cohortReviewApi()
-        .createCohortReview(namespace, id, cohort.id, +cdrVersionId, request)
+        .createCohortReview(namespace, id, cohort.id, request)
         .then((response) => {
           currentCohortReviewStore.next(response);
           queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
