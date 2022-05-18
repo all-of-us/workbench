@@ -1,9 +1,11 @@
-import * as fp from 'lodash/fp';
-import { RadioButton } from 'primereact/radiobutton';
 import * as React from 'react';
 import { useParams } from 'react-router';
+import * as fp from 'lodash/fp';
+import { RadioButton } from 'primereact/radiobutton';
 
 const { useState } = React;
+
+import { ResourceType } from 'generated/fetch';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
@@ -15,7 +17,6 @@ import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
-import { ResourceType } from 'generated/fetch';
 
 export const CohortReviewListItem = fp.flow(
   withConfirmDeleteModal(),
