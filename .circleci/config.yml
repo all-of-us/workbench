@@ -343,7 +343,7 @@ commands:
       - run:
           working_directory: ~/workbench/api
           name: Prep the e2e access test user (in Test env) by setting access module timestamps
-          command: ./project.rb set-access-module-timestamps --user "${ACCESS_TEST_USER}"
+          command: ./project.rb set-access-module-timestamps --profile-user "${ACCESS_TEST_USER}" --ras-user "${RAS_TEST_USER}"
 
 # -------------------------
 #        JOBS
