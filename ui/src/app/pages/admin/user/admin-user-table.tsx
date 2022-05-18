@@ -131,7 +131,10 @@ export const AdminUserTable = withUserProfile()(
               () => (
                 <>
                   {user.accessTierShortNames.map((accessTierShortName) => (
-                    <TierBadge {...{ accessTierShortName }} />
+                    <TierBadge
+                      {...{ accessTierShortName }}
+                      key={accessTierShortName}
+                    />
                   ))}
                 </>
               ),
