@@ -131,7 +131,10 @@ export const AdminUserTable = withUserProfile()(
               () => (
                 <>
                   {user.accessTierShortNames.map((accessTierShortName) => (
-                    <TierBadge {...{ accessTierShortName }} />
+                    <TierBadge
+                      {...{ accessTierShortName }}
+                      key={accessTierShortName}
+                    />
                   ))}
                 </>
               ),
@@ -254,72 +257,76 @@ export const AdminUserTable = withUserProfile()(
                 style={styles.tableStyle}
               >
                 <Column
+                  header='Name'
                   field='name'
-                  bodyStyle={{ ...styles.colStyle }}
+                  sortField='nameText'
                   filterField='nameText'
                   filterMatchMode='contains'
+                  sortable={true}
                   frozen={true}
-                  header='Name'
+                  bodyStyle={styles.colStyle}
                   headerStyle={{ ...styles.colStyle, width: '200px' }}
-                  sortable={true}
-                  sortField='nameText'
                 />
                 <Column
-                  field='username'
-                  bodyStyle={{ ...styles.colStyle }}
                   header='Username'
-                  headerStyle={{ ...styles.colStyle, width: '200px' }}
-                  sortable={true}
+                  field='username'
                   sortField='usernameText'
+                  filterField='usernameText'
+                  filterMatchMode='contains'
+                  sortable={true}
+                  bodyStyle={styles.colStyle}
+                  headerStyle={{ ...styles.colStyle, width: '200px' }}
                 />
                 <Column
-                  field='contactEmail'
-                  bodyStyle={{ ...styles.colStyle }}
                   header='Contact Email'
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                  sortable={true}
+                  field='contactEmail'
                   sortField='contactEmailText'
+                  filterField='contactEmailText'
+                  filterMatchMode='contains'
+                  sortable={true}
+                  bodyStyle={styles.colStyle}
+                  headerStyle={{ ...styles.colStyle, width: '180px' }}
                 />
                 <Column
-                  field='institutionName'
-                  bodyStyle={{ ...styles.colStyle }}
                   header='Institution'
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                  sortable={true}
+                  field='institutionName'
                   sortField='institutionNameText'
-                />
-                <Column
-                  field='enabled'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Enabled'
-                  headerStyle={{ ...styles.colStyle, width: '150px' }}
-                  sortable={false}
-                />
-                <Column
-                  field='dataAccess'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Data Access'
-                  headerStyle={{ ...styles.colStyle, width: '100px' }}
-                  sortable={false}
-                />
-                <Column
-                  field='bypass'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='Access Module Bypass'
-                  headerStyle={{ ...styles.colStyle, width: '150px' }}
-                  sortable={false}
-                />
-                <Column
-                  field='firstSignInTime'
-                  bodyStyle={{ ...styles.colStyle }}
-                  excludeGlobalFilter={true}
-                  header='First Sign-in'
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
                   sortable={true}
+                  bodyStyle={styles.colStyle}
+                  headerStyle={{ ...styles.colStyle, width: '180px' }}
+                />
+                <Column
+                  header='Enabled'
+                  field='enabled'
+                  sortable={false}
+                  excludeGlobalFilter={true}
+                  bodyStyle={{ ...styles.colStyle }}
+                  headerStyle={{ ...styles.colStyle, width: '150px' }}
+                />
+                <Column
+                  header='Data Access'
+                  field='dataAccess'
+                  sortable={false}
+                  excludeGlobalFilter={true}
+                  bodyStyle={{ ...styles.colStyle }}
+                  headerStyle={{ ...styles.colStyle, width: '100px' }}
+                />
+                <Column
+                  header='Access Module Bypass'
+                  field='bypass'
+                  sortable={false}
+                  excludeGlobalFilter={true}
+                  bodyStyle={{ ...styles.colStyle }}
+                  headerStyle={{ ...styles.colStyle, width: '150px' }}
+                />
+                <Column
+                  header='First Sign-in'
+                  field='firstSignInTime'
                   sortField='firstSignInTime'
+                  sortable={true}
+                  excludeGlobalFilter={true}
+                  bodyStyle={{ ...styles.colStyle }}
+                  headerStyle={{ ...styles.colStyle, width: '180px' }}
                 />
               </DataTable>
             </div>
