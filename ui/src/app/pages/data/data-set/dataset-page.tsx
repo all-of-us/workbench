@@ -988,6 +988,8 @@ export const DatasetPage = fp.flow(
       // We only need to set selections on the initial load of a saved dataset,
       // not for creating/updating since the selections will already be set
       if (initialLoad) {
+        const domainsWithConceptSetIds =
+          getDomainsWithConceptSetIdsFromDataSet(dataset);
         setIncludesAllParticipants(dataset.includesAllParticipants);
         setSelectedConceptSetIds(dataset.conceptSets.map((cs) => cs.id));
         setSelectedCohortIds(dataset.cohorts.map((c) => c.id));
@@ -995,19 +997,17 @@ export const DatasetPage = fp.flow(
           domainValuePairsToLowercase(dataset.domainValuePairs)
         );
         setSelectedDomains(getDomainsFromDataSet(dataset));
-        setSelectedDomainsWithConceptSetIds(
-          getDomainsWithConceptSetIdsFromDataSet(dataset)
-        );
+        setSelectedDomainsWithConceptSetIds(domainsWithConceptSetIds);
         setSelectedPrepackagedConceptSets(
           apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
         );
         setDomainValueSetIsLoading(
           new Set(dataset.conceptSets.map(({ domain }) => domain))
         );
-        dataset.conceptSets.forEach((conceptSet) => {
+        domainsWithConceptSetIds.forEach(({ conceptSetId, domain }) => {
           loadValueSetForDomain({
-            conceptSetId: conceptSet.id,
-            domain: conceptSet.domain,
+            conceptSetId,
+            domain,
           });
         });
       }
