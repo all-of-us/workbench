@@ -59,6 +59,17 @@ const DisabledIcon = () => (
   </span>
 );
 
+const Temp = () => (
+  <Column
+    field='username'
+    bodyStyle={{ ...styles.colStyle }}
+    header='Username'
+    headerStyle={{ ...styles.colStyle, width: '200px' }}
+    sortable={true}
+    sortField='usernameText'
+  />
+);
+
 interface DataTableFields {
   name: JSX.Element;
   nameText: string;
@@ -264,14 +275,15 @@ export const AdminUserTable = withUserProfile()(
                   sortable={true}
                   sortField='nameText'
                 />
-                <Column
-                  field='username'
-                  bodyStyle={{ ...styles.colStyle }}
-                  header='Username'
-                  headerStyle={{ ...styles.colStyle, width: '200px' }}
-                  sortable={true}
-                  sortField='usernameText'
-                />
+                <Temp />
+                {/* <Column*/}
+                {/*  field='username'*/}
+                {/*  bodyStyle={{ ...styles.colStyle }}*/}
+                {/*  header='Username'*/}
+                {/*  headerStyle={{ ...styles.colStyle, width: '200px' }}*/}
+                {/*  sortable={true}*/}
+                {/*  sortField='usernameText'*/}
+                {/* />*/}
                 <Column
                   field='contactEmail'
                   bodyStyle={{ ...styles.colStyle }}
