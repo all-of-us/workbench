@@ -297,59 +297,45 @@ export const AdminUserTable = withUserProfile()(
                   filterable: true,
                   headerWidth: 200,
                 })}
-                <Column
-                  header='Contact Email'
-                  field='contactEmail'
-                  sortField='contactEmailText'
-                  filterField='contactEmailText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                />
-                <Column
-                  header='Institution'
-                  field='institutionName'
-                  sortField='institutionNameText'
-                  filterField='institutionNameText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                />
-                <Column
-                  header='Enabled'
-                  field='enabled'
-                  sortable={false}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  header='Data Access'
-                  field='dataAccess'
-                  sortable={false}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '100px' }}
-                />
-                <Column
-                  header='Access Module Bypass'
-                  field='bypass'
-                  sortable={false}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  header='First Sign-in'
-                  field='firstSignInTime'
-                  sortField='firstSignInTime'
-                  sortable={true}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                />
+                {buildColumn({
+                  header: 'Contact Email',
+                  field: 'contactEmail',
+                  sortField: 'contactEmailText',
+                  filterable: true,
+                  headerWidth: 180,
+                })}
+                {buildColumn({
+                  header: 'Institution',
+                  field: 'institutionName',
+                  sortField: 'institutionNameText',
+                  filterable: true,
+                  headerWidth: 180,
+                })}
+                {buildColumn({
+                  header: 'Enabled',
+                  field: 'enabled',
+                  filterable: false,
+                  headerWidth: 150,
+                })}
+                {buildColumn({
+                  header: 'Data Access',
+                  field: 'dataAccess',
+                  filterable: false,
+                  headerWidth: 100,
+                })}
+                {buildColumn({
+                  header: 'Access Module Bypass',
+                  field: 'bypass',
+                  filterable: false,
+                  headerWidth: 150,
+                })}
+                {buildColumn({
+                  header: 'First Sign-in',
+                  field: 'firstSignInTime',
+                  sortField: 'firstSignInTime',
+                  filterable: false,
+                  headerWidth: 180,
+                })}
               </DataTable>
             </div>
           )}
