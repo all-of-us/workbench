@@ -9,7 +9,7 @@ import HomePage from 'app/page/home-page';
 // Important: the access test user must be in a state where they are currently failing access renewal
 // due to an expired "profile last confirmed" date.
 // CircleCI accomplishes this by running the puppeteer-access-test-user-setup task, which executes
-// `./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}`.
+// `./project.rb set-access-module-timestamps --profile-user ${ACCESS_TEST_USER} --ras-user ${RAS_TEST_USER}`.
 // This can also be run locally.
 
 describe('User Access', () => {
