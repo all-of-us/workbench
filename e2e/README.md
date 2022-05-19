@@ -50,7 +50,8 @@ e2e tests require 5 test users:
 - USER_NAME: Default test user
 - WRITER_USER: Share workspace to this test user with WRITER role
 - READER_USER: Share workspace to this test user with READER role
-- ACCESS_TEST_USER: User to be modified outside of e2e tests to prepare for access testing
+- ACCESS_TEST_USER: User to be modified outside e2e tests to prepare for access testing
+- RAS_TEST_USER: Researcher Auth Service (RAS) test user
 - ADMIN_TEST_USER: Test user with access to admin feature for admin-ui testing
 
 Fill out local test user credentials

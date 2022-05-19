@@ -1,8 +1,7 @@
 import AuthenticatedPage from 'app/page/authenticated-page';
 import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
-import Button from 'app/element/button';
-import { getStyleValue } from 'utils/element-utils';
+import Module from './module';
 
 // data-test-id
 export enum AccessModule {
@@ -26,25 +25,19 @@ export default class DataAccessRequirementsPage extends AuthenticatedPage {
     return true;
   }
 
-  getModuleButton(module: AccessModule): Button {
-    return new Button(this.page, `//*[@data-test-id="${module}"]/*[@role="button"]`);
+  async exists(): Promise<boolean> {
+    return this.page.url().includes(PageTitle);
   }
 
-  async clickModuleButton(module: AccessModule): Promise<Page> {
-    await this.getModuleButton(module).click();
+  findModule(module: AccessModule): Module {
+    return new Module(this.page, module);
+  }
+
+  async clickModule(module: AccessModule): Promise<Page> {
+    const moduleButton = this.findModule(module);
+    await moduleButton.getClickableText().click();
     // New tab opens. "browser" is a Jest-Puppeteer global variable.
     const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
     return newTarget.page();
-  }
-
-  // Find green check icon that indicates module has been completed
-  async hasCompletedModule(module: AccessModule): Promise<boolean> {
-    const ICON_GREEN_COLOR = 'rgb(139, 201, 144)';
-    const checkIcon = await this.page.waitForXPath(
-      `//*[@data-test-id="${module}"]//*[local-name()="svg" and @data-icon="check-circle"]`,
-      { visible: true }
-    );
-    const backgroundColor = await getStyleValue<string>(page, checkIcon, 'color');
-    return ICON_GREEN_COLOR === backgroundColor;
   }
 }

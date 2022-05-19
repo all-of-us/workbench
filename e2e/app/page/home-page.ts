@@ -70,6 +70,10 @@ export default class HomePage extends AuthenticatedPage {
     return true;
   }
 
+  async exists(): Promise<boolean> {
+    return this.page.url().includes(PageTitle);
+  }
+
   getCreateNewWorkspaceLink(): ClrIconLink {
     return ClrIconLink.findByName(this.page, { name: LabelAlias.CreateNewWorkspace, iconShape: 'plus-circle' });
   }

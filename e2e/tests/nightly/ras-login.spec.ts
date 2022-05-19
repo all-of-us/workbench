@@ -1,33 +1,31 @@
 import { generate2FACode, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import DataAccessRequirementsPage, { AccessModule } from 'app/page/data-access/data-access-requirements-page';
-import expect from 'expect';
 import Navigation, { NavLink } from 'app/component/navigation';
+import HomePage from 'app/page/home-page';
+import expect from 'expect';
 
 /**
  * NIH Researcher Auth Service (RAS) Login Test
  *
  * Important:
- *   The access test user must be in a state where they are currently failing access renewal
- *   due to an expired "profile last confirmed" date.
+ *   Running this test requires setting RAS module completion_time to NULL in DB for this test user.
+ *
  *   CircleCI accomplishes this by running the puppeteer-access-test-user-setup task, which executes
  *   `./project.rb set-access-module-timestamps --profile-user ${ACCESS_TEST_USER} --ras-user ${RAS_TEST_USER}`
  *   This can also be run locally in workbench/api dir.
  */
 describe('RAS Test', () => {
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.RAS_TEST_USER);
+    await signInWithAccessToken(page, config.RAS_TEST_USER, { waitForLoad: false });
   });
 
-  // note that this test is "destructive" in that it brings the user to a state
-  // where they cannot complete this test again, because they have completed
-  // DAR and are no longer forced into renewal
-
   test('Sign in login.gov', async () => {
-    // At this time, first page opened after sign in is still the Home page
-    await Navigation.navMenu(page, NavLink.DATA_ACCESS_REQUIREMENTS);
+    // To run this test on localhost, set following environment variables in Terminal.
+    // Get secret values from Google bucket:
+    //  `gsutil cp gs://all-of-us-workbench-test-credentials/ras-secrets.txt .`
 
-    // Verify configs are not empty strings
+    // Verify env variables are not empty strings
     expect(config.LOGIN_GOV_2FA_SECRET.length).toBeGreaterThan(0);
     expect(config.LOGIN_GOV_USER.length).toBeGreaterThan(0);
     expect(config.LOGIN_GOV_PASSWORD.length).toBeGreaterThan(0);
@@ -36,10 +34,19 @@ describe('RAS Test', () => {
     const govLoginUser = config.LOGIN_GOV_USER;
     const govLoginPassword = config.LOGIN_GOV_PASSWORD;
 
+    // First page opened after sign in could be the Home page or Data Access Requirements page.
+    // Because this test runs after a DB change, but we don't know exactly when the system has yet had time
+    // to perform access-sync. Therefore they will not be automatically redirected to DAR.
+    // We can still test that DAR shows the user's lack of RAS completion.
+    if (await new HomePage(page).exists()) {
+      await Navigation.navMenu(page, NavLink.DATA_ACCESS_REQUIREMENTS);
+    }
+    // else, the page is Data Access Requirements page
+
     const dataAccessPage = new DataAccessRequirementsPage(page);
     await dataAccessPage.waitForLoad();
 
-    const verifyIdentityButton = dataAccessPage.getModuleButton(AccessModule.RAS);
+    const verifyIdentityButton = await dataAccessPage.findModule(AccessModule.RAS).getClickableText();
     expect(await verifyIdentityButton.exists()).toBe(true);
 
     // Verify partial text found in button
@@ -48,7 +55,7 @@ describe('RAS Test', () => {
     expect(text).toMatch(/ontact us if you’re having trouble completing this step/);
 
     // New page open up
-    const newPage = await dataAccessPage.clickModuleButton(AccessModule.RAS);
+    const newPage = await dataAccessPage.clickModule(AccessModule.RAS);
 
     // Verify All-of-Us logo
     await newPage.waitForXPath('//img[@src="images/logos/AllofUs.png" and @class="header-logo"]', { visible: true });
@@ -87,6 +94,6 @@ describe('RAS Test', () => {
     await page.reload({ waitUntil: ['load', 'networkidle0'] });
     await dataAccessPage.waitForLoad();
 
-    expect(await dataAccessPage.hasCompletedModule(AccessModule.RAS)).toBe(true);
+    expect(await dataAccessPage.findModule(AccessModule.RAS).hasCompletedModule()).toBe(true);
   });
 });

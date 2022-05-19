@@ -52,8 +52,9 @@ declare const window: Window &
 export async function signInWithAccessToken(
   page: Page,
   userEmail = config.USER_NAME,
-  postSignInPage: AuthenticatedPage = new HomePage(page)
+  opts: { postSignInPage?: AuthenticatedPage; waitForLoad?: boolean } = {}
 ): Promise<void> {
+  const { postSignInPage = new HomePage(page), waitForLoad = true } = opts;
   const tokenLocation = `signin-tokens/${userEmail}.json`;
   // Keep file naming convention synchronized with generate-impersonated-user-tokens
   const tokenJson = fs.readFileSync(tokenLocation, 'ascii');
@@ -84,7 +85,9 @@ export async function signInWithAccessToken(
   await homePage.loadPage({ url: PageUrl.Home });
   // normally the user is routed to the homepage after sign-in, so that's the default here.
   // tests can override this.
-  await postSignInPage.waitForLoad();
+  if (waitForLoad) {
+    await postSignInPage.waitForLoad();
+  }
 }
 
 /**
