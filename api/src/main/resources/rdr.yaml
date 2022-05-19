@@ -534,6 +534,7 @@ definitions:
       - ASIAN_HMONG
       - ASIAN_JAPANESE
       - ASIAN_KOREAN
+      - ASIAN_LAO
       - ASIAN_PAKISTANI
       - ASIAN_VIETNAMESE
       - ASIAN_OTHER           # Asian / None of these fully describe me, and I want to specify
