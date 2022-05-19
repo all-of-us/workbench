@@ -478,8 +478,10 @@ const AnnualInnerHeader = (props: { hasExpired: boolean }) => (
         : 'Yearly Researcher Workbench access renewal'}
     </div>
     <div style={styles.renewalHeaderRequirements}>
-      <RenewalRequirementsText /> For any questions, please contact{' '}
-      <SupportMailto />.
+      <RenewalRequirementsText />
+      <div style={{ marginTop: '0.5rem' }}>
+        For any questions, please contact <SupportMailto />.
+      </div>
     </div>
     <div style={styles.pleaseComplete}>
       Please complete the following steps.
