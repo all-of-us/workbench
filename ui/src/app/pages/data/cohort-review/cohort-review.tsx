@@ -75,7 +75,7 @@ export const CohortReview = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
-      if (!serverConfigStore.get().config.enableMultiReview) {
+      if (serverConfigStore.get().config.enableMultiReview) {
         const { ns, wsid, cid } = this.props.match.params;
         this.props.navigate([
           'workspaces',
