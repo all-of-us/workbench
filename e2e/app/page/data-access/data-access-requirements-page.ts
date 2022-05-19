@@ -25,10 +25,6 @@ export default class DataAccessRequirementsPage extends AuthenticatedPage {
     return true;
   }
 
-  async exists(): Promise<boolean> {
-    return this.page.url().includes(PageTitle);
-  }
-
   findModule(module: AccessModule): Module {
     return new Module(this.page, module);
   }

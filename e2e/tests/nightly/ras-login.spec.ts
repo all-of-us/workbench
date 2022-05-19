@@ -4,6 +4,7 @@ import DataAccessRequirementsPage, { AccessModule } from 'app/page/data-access/d
 import Navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import expect from 'expect';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 /**
  * NIH Researcher Auth Service (RAS) Login Test
@@ -38,7 +39,12 @@ describe('RAS Test', () => {
     // Because this test runs after a DB change, but we don't know exactly when the system has yet had time
     // to perform access-sync. Therefore they will not be automatically redirected to DAR.
     // We can still test that DAR shows the user's lack of RAS completion.
-    if (await new HomePage(page).exists()) {
+
+    const homePage = new HomePage(page);
+    await homePage.isSignedIn();
+    await waitWhileLoading(page);
+
+    if (await homePage.exists()) {
       await Navigation.navMenu(page, NavLink.DATA_ACCESS_REQUIREMENTS);
     }
     // else, the page is Data Access Requirements page
@@ -46,7 +52,9 @@ describe('RAS Test', () => {
     const dataAccessPage = new DataAccessRequirementsPage(page);
     await dataAccessPage.waitForLoad();
 
-    const verifyIdentityButton = await dataAccessPage.findModule(AccessModule.RAS).getClickableText();
+    expect(await dataAccessPage.findModule(AccessModule.RAS).hasCompletedModule()).toBe(false);
+
+    const verifyIdentityButton = dataAccessPage.findModule(AccessModule.RAS).getClickableText();
     expect(await verifyIdentityButton.exists()).toBe(true);
 
     // Verify partial text found in button

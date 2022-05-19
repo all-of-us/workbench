@@ -71,7 +71,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async exists(): Promise<boolean> {
-    return this.page.url().includes(PageTitle);
+    return (await this.page.title()).includes(PageTitle);
   }
 
   getCreateNewWorkspaceLink(): ClrIconLink {

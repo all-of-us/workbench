@@ -44,7 +44,7 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
  * @param {Page} page The Puppeteer Page.
  * @param {string} titleSubstr The Document title partial string.
  */
-export async function waitForDocumentTitle(page: Page, titleSubstr: string, timeout = 60 * 1000): Promise<boolean> {
+export async function waitForDocumentTitle(page: Page, titleSubstr: string): Promise<boolean> {
   try {
     const jsHandle = await page.waitForFunction(
       (t) => {
@@ -52,7 +52,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string, time
         const actualTitle = document.title;
         return actualTitle && regExp.test(actualTitle);
       },
-      { timeout },
+      { timeout: 60 * 1000 },
       titleSubstr
     );
     return (await jsHandle.jsonValue()) as boolean;
