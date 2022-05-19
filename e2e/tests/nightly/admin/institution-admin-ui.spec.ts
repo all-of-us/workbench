@@ -3,11 +3,11 @@ import { config } from 'resources/workbench-config';
 import { HeaderName } from 'app/text-labels';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
-import InstitutionAdminPage from 'app/page/admin-institution-list-page';
+import InstitutionAdminPage from 'app/page/admin/admin-institution-list-page';
 import InstitutionEditPage, {
   AcceptedAddressSelectValue,
   InstitutionTypeSelectValue
-} from 'app/page/admin-institution-edit-page';
+} from 'app/page/admin/admin-institution-edit-page';
 import waitForExpect from 'wait-for-expect';
 
 describe('Institution Admin', () => {

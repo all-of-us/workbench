@@ -6,7 +6,7 @@ import UserProfileAdminPage from 'app/page/admin/user-profile-admin-page';
 import UserAdminTablePage from 'app/page/admin/user-admin-table-page';
 import { AccessTierDisplayNames, Institution, InstitutionRole } from 'app/text-labels';
 import Cell, { CellContent } from 'app/component/cell';
-import UserAuditPage from 'app/page/admin-user-audit-page';
+import UserAuditPage from 'app/page/admin/admin-user-audit-page';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
 import { isBlank } from 'utils/str-utils';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
