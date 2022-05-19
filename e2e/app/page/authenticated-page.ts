@@ -13,7 +13,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     super(page);
   }
 
-  protected async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
+  async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
     return exists(this.page, process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout });
   }
 

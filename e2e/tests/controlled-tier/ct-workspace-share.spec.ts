@@ -10,7 +10,7 @@ import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import HomePage from 'app/page/home-page';
 import UnavailableTierModal from 'app/modal/unavailable-tier-modal';
-import DataAccessRequirementsPage from 'app/page/data-access-requirements-page';
+import DataAccessRequirementsPage from 'app/page/data-access/data-access-requirements-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Share Controlled Tier Workspace', () => {

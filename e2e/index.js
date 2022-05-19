@@ -10,7 +10,8 @@ console.log('');
   'WRITER_USER',
   'ACCESS_TEST_USER',
   'ADMIN_TEST_USER',
-  'EGRESS_TEST_USER'
+  'EGRESS_TEST_USER',
+  'RAS_TEST_USER'
 ].forEach((k) => {
   console.log(`${k}: ${process.env[k]}`);
 });
