@@ -9,6 +9,7 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
+import { ExclamationTriangle } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
@@ -29,6 +30,7 @@ import {
   isCompliant,
   isEligibleModule,
   isRenewalCompleteForModule,
+  maybeDaysRemaining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
@@ -67,12 +69,14 @@ export const styles = reactStyles({
     color: colors.primary,
     fontSize: 20,
     fontWeight: 600,
-    marginBottom: '1em',
+    gridArea: 'header',
+    alignSelf: 'center',
   },
   renewalHeaderRequirements: {
     color: colors.primary,
     fontSize: 14,
     marginBottom: '1em',
+    gridArea: 'explanation',
   },
   completed: {
     height: '87px',
@@ -120,6 +124,7 @@ export const styles = reactStyles({
     color: colors.primary,
     fontSize: 16,
     fontWeight: 600,
+    gridArea: 'instructions',
   },
   card: {
     width: '1195px',
@@ -244,6 +249,18 @@ export const styles = reactStyles({
     opacity: '0.5',
     fontSize: '12px',
     lineHeight: '22px',
+  },
+  renewalInnerHeaderContainer: {
+    display: 'grid',
+    width: '1195px',
+    gridTemplateAreas: `'icon header'
+      '. explanation'
+      'instructions instructions'
+    `,
+  },
+  renewalInnerHeaderIcon: {
+    gridArea: 'icon',
+    marginRight: '0.5rem',
   },
 });
 
@@ -443,13 +460,22 @@ const InitialInnerHeader = () => (
   </div>
 );
 
-const AnnualInnerHeader = () => (
-  <FlexColumn>
+const AnnualInnerHeader = (props: { hasExpired: boolean }) => (
+  <div style={styles.renewalInnerHeaderContainer}>
+    {props.hasExpired && (
+      <ExclamationTriangle
+        size={40}
+        color={colors.warning}
+        style={styles.renewalInnerHeaderIcon}
+      />
+    )}
     <div
       data-test-id='annual-renewal-header'
       style={styles.renewalHeaderYearly}
     >
-      Yearly Researcher Workbench access renewal
+      {props.hasExpired
+        ? 'Researcher workbench access has expired'
+        : 'Yearly Researcher Workbench access renewal'}
     </div>
     <div style={styles.renewalHeaderRequirements}>
       <RenewalRequirementsText /> For any questions, please contact{' '}
@@ -458,14 +484,14 @@ const AnnualInnerHeader = () => (
     <div style={styles.pleaseComplete}>
       Please complete the following steps.
     </div>
-  </FlexColumn>
+  </div>
 );
 
-const InnerHeader = (props: { pageMode: DARPageMode }) =>
+const InnerHeader = (props: { pageMode: DARPageMode; hasExpired: boolean }) =>
   props.pageMode === DARPageMode.INITIAL_REGISTRATION ? (
     <InitialInnerHeader />
   ) : (
-    <AnnualInnerHeader />
+    <AnnualInnerHeader hasExpired={props.hasExpired} />
   );
 
 const SelfBypass = (props: { onClick: () => void }) => (
@@ -641,6 +667,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
+    const daysRemaining = maybeDaysRemaining(profile);
+    const hasExpired = daysRemaining && daysRemaining <= 0;
+
     return (
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
@@ -649,7 +678,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>
-          <InnerHeader {...{ pageMode }} />
+          <InnerHeader {...{ pageMode, hasExpired }} />
           <React.Fragment>{cards}</React.Fragment>
         </FadeBox>
       </FlexColumn>
