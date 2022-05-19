@@ -13,6 +13,7 @@ import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { NotebookList } from 'app/pages/analysis/notebook-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortReview } from 'app/pages/data/cohort-review/cohort-review';
+import { CohortReviewPage } from 'app/pages/data/cohort-review/cohort-review-page';
 import { DetailPage } from 'app/pages/data/cohort-review/detail-page';
 import { QueryReport } from 'app/pages/data/cohort-review/query-report.component';
 import { ParticipantsTable } from 'app/pages/data/cohort-review/table-page';
@@ -34,10 +35,14 @@ const CohortActionsPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(CohortActions);
-const CohortReviewPage = fp.flow(
+const CohortReviewRoute = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(CohortReview);
+const CohortReviewPagePage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(CohortReviewPage);
 const ConceptHomepagePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -333,7 +338,21 @@ export const WorkspaceRoutes = () => {
         path={`${path}/data/cohorts/:cid/review`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        <CohortReviewPage
+        <CohortReviewRoute
+          routeData={{
+            title: 'Review Cohort Participants',
+            breadcrumb: BreadcrumbType.Cohort,
+            workspaceNavBarTab: 'data',
+            pageKey: 'reviewParticipants',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/data/cohorts/:cid/reviews`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <CohortReviewPagePage
           routeData={{
             title: 'Review Cohort Participants',
             breadcrumb: BreadcrumbType.Cohort,
