@@ -2049,7 +2049,9 @@ def authority_options(cmd_name, args)
   op.add_option(
       "--authority [AUTHORITY,...]",
       ->(opts, v) { opts.authority = v},
-      "Comma-separated list of user authorities to add or remove for the users. ")
+      "Comma-separated list of user authorities to add or remove for the users. " +
+      "Include keyword ALL to include all authorities; typically that should only " +
+      "be used with removals. When granting authorities, use DEVELOPER to gain full access")
   op.add_option(
       "--remove",
       ->(opts, _) { opts.remove = "true"},
