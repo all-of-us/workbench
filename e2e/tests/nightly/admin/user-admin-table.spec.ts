@@ -1,4 +1,4 @@
-import UserAdminPage from 'app/page/admin-user-list-page';
+import UserAdminTablePage from 'app/page/admin/user-admin-table-page';
 import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
@@ -13,7 +13,7 @@ describe('User Admin Table', () => {
   });
 
   test('verify user-admin-table can access the bypass toggles and navigate to user-admin-profile', async () => {
-    const userAdminPage = new UserAdminPage(page);
+    const userAdminPage = new UserAdminTablePage(page);
     await userAdminPage.waitForLoad();
 
     //look up the user

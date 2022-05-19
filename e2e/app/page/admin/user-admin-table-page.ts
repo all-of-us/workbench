@@ -6,12 +6,12 @@ import Table from 'app/component/table';
 import AdminTable from 'app/component/admin-table';
 import Textbox from 'app/element/textbox';
 import BypassPopup from 'app/component/bypass-modules';
-import UserAuditPage from './admin-user-audit-page';
-import UserProfileAdminPage from './admin/user-profile-admin-page';
+import UserAuditPage from '../admin-user-audit-page';
+import UserProfileAdminPage from './user-profile-admin-page';
 
 const PageTitle = 'User Admin Table';
 
-export default class UserAdminPage extends AuthenticatedPage {
+export default class UserAdminTablePage extends AuthenticatedPage {
   constructor(page: Page) {
     super(page);
   }
