@@ -1,6 +1,6 @@
 import { Frame, Page } from 'puppeteer';
 import Link from 'app/element/link';
-import AuthenticatedPage from './authenticated-page';
+import AuthenticatedPage from '../authenticated-page';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
 

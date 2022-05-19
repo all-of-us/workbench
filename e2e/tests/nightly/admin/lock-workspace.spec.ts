@@ -2,7 +2,7 @@ import { createDatasetNotebook, openTab, signInWithAccessToken } from 'utils/tes
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
-import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
+import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin/admin-workspace-page';
 import { Tabs } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/card/workspace-card';

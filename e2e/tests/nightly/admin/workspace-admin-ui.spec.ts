@@ -1,13 +1,13 @@
 import { createDatasetNotebook, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
-import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin-workspace-page';
+import WorkspaceAdminPage, { workspaceStatus } from 'app/page/admin/admin-workspace-page';
 import { CloudStorageHeader } from 'app/text-labels';
 import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
+import AdminNotebookPreviewPage from 'app/page/admin/admin-notebook-preview-page';
 
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';

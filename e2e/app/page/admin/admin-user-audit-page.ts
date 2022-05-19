@@ -5,7 +5,7 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
 import Link from 'app/element/link';
-import UserProfileAdminPage from './admin/user-profile-admin-page';
+import UserProfileAdminPage from './user-profile-admin-page';
 
 const PageTitle = 'User Audit | All of Us Researcher Workbench';
 

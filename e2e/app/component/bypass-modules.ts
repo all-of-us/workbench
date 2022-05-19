@@ -35,6 +35,7 @@ export default class BypassPopup extends BaseMenu {
   async getBypassModuleTest(): Promise<boolean[]> {
     const bypassAdminTest = [
       'RT Compliance Training',
+      'CT Compliance Training',
       'eRA Commons Linking',
       'Two Factor Auth',
       'Data User Code of Conduct',

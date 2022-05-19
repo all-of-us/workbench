@@ -3,10 +3,10 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileAdminPage from 'app/page/admin/user-profile-admin-page';
-import UserAdminPage from 'app/page/admin-user-list-page';
+import UserAdminTablePage from 'app/page/admin/user-admin-table-page';
 import { AccessTierDisplayNames, Institution, InstitutionRole } from 'app/text-labels';
 import Cell, { CellContent } from 'app/component/cell';
-import UserAuditPage from 'app/page/admin-user-audit-page';
+import UserAuditPage from 'app/page/admin/admin-user-audit-page';
 import { getPropValue, getStyleValue } from 'utils/element-utils';
 import { isBlank } from 'utils/str-utils';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
@@ -31,8 +31,7 @@ import fp from 'lodash/fp';
  *
  */
 
-// disabling this test suite it has been failing since this PR #6602
-xdescribe('User Profile Admin page', () => {
+describe('User Profile Admin page', () => {
   enum TableColumns {
     ACCESS_MODULE = 'Access module',
     STATUS = 'Status',
@@ -334,7 +333,7 @@ xdescribe('User Profile Admin page', () => {
 
     // Check BACK (admin/user) link is working
     await userProfileAdminPage.getBackLink().click();
-    await new UserAdminPage(adminTab).waitForLoad();
+    await new UserAdminTablePage(adminTab).waitForLoad();
   });
 
   test('Can bypass Google 2-Step Verification module', async () => {
@@ -514,7 +513,7 @@ xdescribe('User Profile Admin page', () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
     await navigation.navMenu(page, NavLink.USER_ADMIN);
 
-    const userAdminPage = new UserAdminPage(page);
+    const userAdminPage = new UserAdminTablePage(page);
     await userAdminPage.waitForLoad();
 
     // Search for user

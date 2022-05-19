@@ -7,11 +7,11 @@ import AdminTable from 'app/component/admin-table';
 import Textbox from 'app/element/textbox';
 import BypassPopup from 'app/component/bypass-modules';
 import UserAuditPage from './admin-user-audit-page';
-import UserProfileAdminPage from './admin/user-profile-admin-page';
+import UserProfileAdminPage from './user-profile-admin-page';
 
 const PageTitle = 'User Admin Table';
 
-export default class UserAdminPage extends AuthenticatedPage {
+export default class UserAdminTablePage extends AuthenticatedPage {
   constructor(page: Page) {
     super(page);
   }
@@ -82,14 +82,12 @@ export default class UserAdminPage extends AuthenticatedPage {
     return textContent;
   }
 
-  //extract only the User name text to verify the search box result
-  async getUserNameText(rowIndex = 1, colIndex = 1): Promise<string> {
+  //extract only the Username text to verify the search box result
+  async getUsernameText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
-    const textContent = await getPropValue<string>(cell, 'textContent');
-    const regex = new RegExp(/.+?(?=@)/);
-    return regex.exec(textContent)[0];
+    return getPropValue<string>(cell, 'textContent');
   }
 
   // extract only the User Lockout text
