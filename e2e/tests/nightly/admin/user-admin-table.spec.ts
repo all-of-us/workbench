@@ -23,7 +23,7 @@ describe('User Admin Table', () => {
     const usernameColIndex = await adminTable.getColumnIndex('Username');
 
     //get the Username to verify the search result matches
-    const usernameValue = await userAdminPage.getUserNameText(1, usernameColIndex);
+    const usernameValue = await userAdminPage.getUsernameText(1, usernameColIndex);
     //validate that search box result matches
     expect(usernameValue).toEqual(userEmail);
 

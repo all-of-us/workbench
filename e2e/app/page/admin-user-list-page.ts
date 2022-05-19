@@ -82,14 +82,12 @@ export default class UserAdminPage extends AuthenticatedPage {
     return textContent;
   }
 
-  //extract only the User name text to verify the search box result
-  async getUserNameText(rowIndex = 1, colIndex = 1): Promise<string> {
+  //extract only the Username text to verify the search box result
+  async getUsernameText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
-    const textContent = await getPropValue<string>(cell, 'textContent');
-    const regex = new RegExp(/.+?(?=@)/);
-    return regex.exec(textContent)[0];
+    return getPropValue<string>(cell, 'textContent');
   }
 
   // extract only the User Lockout text
