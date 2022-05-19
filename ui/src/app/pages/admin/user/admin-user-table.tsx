@@ -59,6 +59,32 @@ const DisabledIcon = () => (
   </span>
 );
 
+// Ideally I'd create a functional component here, but DataTable doesn't like that.
+// see discussion at https://github.com/all-of-us/workbench/pull/6696#discussion_r876181248
+
+interface ColumnProps {
+  header: string;
+  field: string; // index to the rendered component (or string) to display in the cell
+  sortField?: string; // if sortable, index to the text string used for sorting and filtering
+  filterable: boolean; // whether the table's search box can filter results based on this column's `sortField`
+  headerWidth: number;
+  frozen?: boolean;
+}
+const buildColumn = (props: ColumnProps) => {
+  const { header, field, sortField, filterable, headerWidth, frozen } = props;
+  return (
+    <Column
+      {...{ header, field, sortField, frozen }}
+      bodyStyle={styles.colStyle}
+      headerStyle={{ ...styles.colStyle, width: headerWidth }}
+      sortable={!!sortField}
+      excludeGlobalFilter={!filterable}
+      filterField={filterable && sortField}
+      filterMatchMode={filterable && 'contains'}
+    />
+  );
+};
+
 interface DataTableFields {
   name: JSX.Element;
   nameText: string;
@@ -256,80 +282,60 @@ export const AdminUserTable = withUserProfile()(
                 scrollable
                 style={styles.tableStyle}
               >
-                <Column
-                  header='Name'
-                  field='name'
-                  sortField='nameText'
-                  filterField='nameText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  frozen={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '200px' }}
-                />
-                <Column
-                  header='Username'
-                  field='username'
-                  sortField='usernameText'
-                  filterField='usernameText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '200px' }}
-                />
-                <Column
-                  header='Contact Email'
-                  field='contactEmail'
-                  sortField='contactEmailText'
-                  filterField='contactEmailText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                />
-                <Column
-                  header='Institution'
-                  field='institutionName'
-                  sortField='institutionNameText'
-                  filterField='institutionNameText'
-                  filterMatchMode='contains'
-                  sortable={true}
-                  bodyStyle={styles.colStyle}
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                />
-                <Column
-                  header='Enabled'
-                  field='enabled'
-                  sortable={false}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  header='Data Access'
-                  field='dataAccess'
-                  sortable={false}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '100px' }}
-                />
-                <Column
-                  header='Access Module Bypass'
-                  field='bypass'
-                  sortable={false}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '150px' }}
-                />
-                <Column
-                  header='First Sign-in'
-                  field='firstSignInTime'
-                  sortField='firstSignInTime'
-                  sortable={true}
-                  excludeGlobalFilter={true}
-                  bodyStyle={{ ...styles.colStyle }}
-                  headerStyle={{ ...styles.colStyle, width: '180px' }}
-                />
+                {buildColumn({
+                  header: 'Name',
+                  field: 'name',
+                  sortField: 'nameText',
+                  filterable: true,
+                  headerWidth: 200,
+                  frozen: true,
+                })}
+                {buildColumn({
+                  header: 'Username',
+                  field: 'username',
+                  sortField: 'usernameText',
+                  filterable: true,
+                  headerWidth: 200,
+                })}
+                {buildColumn({
+                  header: 'Contact Email',
+                  field: 'contactEmail',
+                  sortField: 'contactEmailText',
+                  filterable: true,
+                  headerWidth: 180,
+                })}
+                {buildColumn({
+                  header: 'Institution',
+                  field: 'institutionName',
+                  sortField: 'institutionNameText',
+                  filterable: true,
+                  headerWidth: 180,
+                })}
+                {buildColumn({
+                  header: 'Enabled',
+                  field: 'enabled',
+                  filterable: false,
+                  headerWidth: 150,
+                })}
+                {buildColumn({
+                  header: 'Data Access',
+                  field: 'dataAccess',
+                  filterable: false,
+                  headerWidth: 100,
+                })}
+                {buildColumn({
+                  header: 'Access Module Bypass',
+                  field: 'bypass',
+                  filterable: false,
+                  headerWidth: 150,
+                })}
+                {buildColumn({
+                  header: 'First Sign-in',
+                  field: 'firstSignInTime',
+                  sortField: 'firstSignInTime',
+                  filterable: false,
+                  headerWidth: 180,
+                })}
               </DataTable>
             </div>
           )}
