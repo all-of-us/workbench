@@ -5,7 +5,7 @@ import { RadioButton } from 'primereact/radiobutton';
 
 const { useState } = React;
 
-import { ResourceType } from 'generated/fetch';
+import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
@@ -33,7 +33,8 @@ export const CohortReviewListItem = fp.flow(
     const { ns, wsid } = useParams<MatchParams>();
     const [showRenameModal, setShowRenameModal] = useState(false);
     const readOnly =
-      workspace.accessLevel !== 'OWNER' && workspace.accessLevel !== 'WRITER';
+      workspace.accessLevel !== WorkspaceAccessLevel.OWNER &&
+      workspace.accessLevel !== WorkspaceAccessLevel.WRITER;
 
     const deleteReview = async (reviewId) => {
       return cohortReviewApi()
