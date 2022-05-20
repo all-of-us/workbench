@@ -186,16 +186,4 @@ describe('DataUserCodeOfConduct', () => {
       wrapper.find('[data-test-id="ducc-signature-page"]').exists()
     ).toBeFalsy();
   });
-
-  it('should not display the Content and Signature pages in SIGNED mode if the user has signed an older DUCC', async () => {
-    updateProfile({ duccSignedVersion: 3 });
-
-    const wrapper = component(DuccSignatureState.SIGNED);
-    expect(
-      wrapper.find('[data-test-id="ducc-content-page"]').exists()
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-id="ducc-signature-page"]').exists()
-    ).toBeFalsy();
-  });
 });
