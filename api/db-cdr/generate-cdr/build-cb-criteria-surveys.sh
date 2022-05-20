@@ -166,6 +166,24 @@ LEFT JOIN (SELECT id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE
 WHERE a.domain_id = 'SURVEY'
     and a.subtype = 'ANSWER'"
 
+echo "PPI SURVEYS - update family history survey answers - names are very easy to understand"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.name = y.name
+FROM
+    (
+        SELECT id, CONCAT(SUBSTR(c.concept_name, 0, (STRPOS(c.concept_name, ' ') - 1)), ' ', cr.name) as name
+        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c ON CAST(cr.value AS INT64) = c.concept_id
+        WHERE path LIKE (SELECT CONCAT(id, '.%')
+                           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                          WHERE concept_id = 43528698)
+        AND subtype = 'ANSWER'
+        AND code NOT LIKE 'PMI_%'
+        AND code NOT LIKE 'FamilyMedicalHistoryAware_%'
+    ) y
+WHERE x.id = y.id"
+
 echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
