@@ -465,37 +465,40 @@ const InitialInnerHeader = () => (
   </div>
 );
 
-const AnnualInnerHeader = (props: { hasExpired: boolean }) => (
-  <div style={styles.renewalInnerHeaderContainer}>
-    {props.hasExpired && (
-      <ExclamationTriangle
-        size={40}
-        color={colors.warning}
-        style={styles.renewalInnerHeaderIcon}
-      />
-    )}
-    <div
-      data-test-id='annual-renewal-header'
-      style={{
-        ...{ ...styles.renewalHeaderYearly },
-        ...(props.hasExpired && styles.renewalHeaderYearlyExpired),
-      }}
-    >
-      {props.hasExpired
-        ? 'Researcher workbench access has expired'
-        : 'Yearly Researcher Workbench access renewal'}
-    </div>
-    <div style={styles.renewalHeaderRequirements}>
-      <RenewalRequirementsText />
-      <div style={{ marginTop: '0.5rem' }}>
-        For any questions, please contact <SupportMailto />.
+const AnnualInnerHeader = (props: { hasExpired: boolean }) => {
+  const { hasExpired } = props;
+  return (
+    <div style={styles.renewalInnerHeaderContainer}>
+      {hasExpired && (
+        <ExclamationTriangle
+          size={40}
+          color={colors.warning}
+          style={styles.renewalInnerHeaderIcon}
+        />
+      )}
+      <div
+        data-test-id='annual-renewal-header'
+        style={{
+          ...{ ...styles.renewalHeaderYearly },
+          ...(hasExpired && styles.renewalHeaderYearlyExpired),
+        }}
+      >
+        {hasExpired
+          ? 'Researcher workbench access has expired'
+          : 'Yearly Researcher Workbench access renewal'}
+      </div>
+      <div style={styles.renewalHeaderRequirements}>
+        <RenewalRequirementsText />
+        <div style={{ marginTop: '0.5rem' }}>
+          For any questions, please contact <SupportMailto />.
+        </div>
+      </div>
+      <div style={styles.pleaseComplete}>
+        Please complete the following steps.
       </div>
     </div>
-    <div style={styles.pleaseComplete}>
-      Please complete the following steps.
-    </div>
-  </div>
-);
+  );
+};
 
 const InnerHeader = (props: { pageMode: DARPageMode; hasExpired: boolean }) =>
   props.pageMode === DARPageMode.INITIAL_REGISTRATION ? (
