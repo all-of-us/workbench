@@ -325,14 +325,16 @@ def publish_cdr_files(cmd_name, args)
   op.add_option(
     "--wgs-rids-file [file]",
     ->(opts, v) { opts.wgs_rids_file = v},
-    "A file containing all research IDs for which WGS data should be published."
+    "A file containing all research IDs for which WGS data should be published. " +
+    "Only applicable and required for task CREATE_MANIFESTS."
   )
   op.add_option(
     "--display-version-id [version]",
     ->(opts, v) { opts.display_version_id = v},
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
     "this matches the CDR version display name in the product, e.g. 'v5'. This ID will be " +
-    "included in the published file directory structure."
+    "included in the published file directory structure. " +
+    "Only applicable and required for task CREATE_MANIFESTS."
   )
   supported_types = ["CRAM"]
   op.opts.data_types = supported_types
@@ -341,11 +343,10 @@ def publish_cdr_files(cmd_name, args)
     ->(opts, v) { opts.data_types = v.split(",")},
     "Data types to publish; defaults to all supported types: #{supported_types}"
   )
-  # TODO(RW-8266): Add support for STAGE_INGEST, PUBLISH.
-  supported_tasks = ["CREATE_MANIFESTS"]
+  supported_tasks = ["CREATE_MANIFESTS", "STAGE_INGEST", "PUBLISH"]
   op.opts.tasks = supported_tasks
   op.add_option(
-    "--tasks [CREATE_MANIFESTS,...]",
+    "--tasks [CREATE_MANIFESTS,STAGE_INGEST,PUBLISH]",
     ->(opts, v) { opts.tasks = v.split(",")},
     "Publishing tasks to execute; defaults to all tasks: #{supported_tasks}"
   )
@@ -356,7 +357,8 @@ def publish_cdr_files(cmd_name, args)
      "The access tier associated with this CDR, e.g. controlled." +
      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.wgs_rids_file and opts.display_version_id }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("--wgs-rids-file and --display-version-id are required for the CREATE_MANIFESTS task") unless !opts.tasks.include? "CREATE_MANIFESTS" or (opts.wgs_rids_file and opts.display_version_id) }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported data types: #{opts.data_types}") unless (opts.data_types - supported_types).empty?}
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty?}
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
@@ -368,33 +370,56 @@ def publish_cdr_files(cmd_name, args)
 
   common = Common.new
 
-  wgs_rids = IO.readlines(op.opts.wgs_rids_file, chomp: true).filter do |line|
-    if line.to_i() == 0
-      common.warning "skipping non-numeric research ID line: #{line}"
-      false
-    else
-      true
+  # TODO(RW-8266): Generalize this approach for all file types.
+  cram_path = 'cram_manifest.csv'
+  manifests = [cram_path]
+  if op.opts.tasks.include? "CREATE_MANIFESTS"
+    common.status "Starting: manifest creation"
+
+    wgs_rids = IO.readlines(op.opts.wgs_rids_file, chomp: true).filter do |line|
+      if line.to_i() == 0
+        common.warning "skipping non-numeric research ID line: #{line}"
+        false
+      else
+        true
+      end
     end
+
+    cram_manifest = build_cram_manifest(
+      op.opts.project,
+      tier[:ingest_cdr_bucket],
+      tier[:dest_cdr_bucket],
+      op.opts.display_version_id,
+      wgs_rids
+    )
+    # TODO(RW-8266): Upload this to a manifest bucket instead. Use a publish identifier
+    # to enable resumability of publishing with different stages of tasks.
+    CSV.open(cram_path, 'wb') do |f|
+      f << cram_manifest.first.keys
+      cram_manifest.each { |c| f << c.values }
+    end
+    common.status "Finished: manifests created"
   end
 
-  cram_manifest = build_cram_manifest(
-    op.opts.project,
-    tier[:ingest_cdr_bucket],
-    tier[:dest_cdr_bucket],
-    op.opts.display_version_id,
-    wgs_rids
-  )
-  # TODO(RW-8266): Upoad this to a manifest bucket instead. Use a publish identifier
-  # to enable resumability of publishing with different stages of tasks.
-  CSV.open('cram_manifest.csv', 'wb') do |f|
-    f << cram_manifest.first.keys
-    cram_manifest.each { |c| f << c.values }
+  logs_dir = Dir.mktmpdir("cdr-file-publish")
+  common.status "Writing logs to #{logs_dir}"
+
+  if op.opts.tasks.include? "STAGE_INGEST"
+    common.status "Starting: file staging to ingest bucket"
+    manifests.each { |m| stage_files_by_manifest(op.opts.project, m, File.join(logs_dir, "cram")) }
+    common.status "Finished: file staging"
+  end
+
+  if op.opts.tasks.include? "PUBLISH"
+    common.status "Starting: publishing to CDR bucket"
+    manifests.each { |m| publish_files_by_manifest(op.opts.project, m, File.join(logs_dir, "cram")) }
+    common.status "Finished: publishing"
   end
 end
 
 Common.register_command({
   :invocation => "publish-cdr-files",
-  :description => "Copies and/or publishes CDR files to the resaercher-accessible CDR bucket",
+  :description => "Copies and/or publishes CDR files to the researcher-accessible CDR bucket",
   :fn => ->(*args) { publish_cdr_files("publish-cdr-files", args) }
 })
 

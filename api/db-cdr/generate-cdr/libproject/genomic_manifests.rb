@@ -1,5 +1,8 @@
 require "csv"
 require "date"
+require "fileutils"
+require_relative "../../../../aou-utils/utils/common"
+require_relative "../../../libproject/environments"
 
 # Utilities for generating, managing, publishing genomic data files. At a high
 # level, this facilitiates the data flow:
@@ -35,7 +38,6 @@ CURATION_PROD_SOURCE_CONFIG = {
   :wgs_aw4_prefix => "gs://prod-drc-broad/AW4_wgs_manifest/AoU_DRCB_SEQ_"
 }
 
-
 FILE_ENVIRONMENTS = {
   "all-of-us-rw-preprod" => {
     :source_config => CURATION_PROD_SOURCE_CONFIG,
@@ -52,6 +54,8 @@ FILE_PREFIX_REPLACEMENTS = {
     :destNameFn => ->(rid) { "wgs_#{rid}.cram" }
   }
 }
+
+GSUTIL_TASK_CONCURRENCY = 64
 
 def _aw4_filename_to_datetime(aw4_prefix, f)
   common = Common.new
@@ -181,5 +185,152 @@ def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id,
         :dest_storage_class => "nearline"
       }
     end
+  end
+end
+
+# Concurrently run the given process block over all rows in the provided manifest.
+# The block should have the following signature:
+#
+#   |manifest_row: CSV::Row, io_out: IO, io_err: IO| => [identifier: str, ok: boolean]
+#
+# where
+# - identifier is a unique output identifier for this invocation, e.g. the
+#   destination URI for a copy
+# - ok is true if the invocation succeeded, false otherwise
+#
+# If ok=false is returned too many times, this function fails.
+#
+# Under logs_dir, this function generates the following outputs:
+# - done.txt: newline-delimited output identifiers for all successful processes
+# - stdout0.txt, ..., stdout{num_workers-1}.txt: stdout for each worker thread
+# - stderr0.txt, ..., stderr{num_workers-1}.txt: stderr for each worker thread
+def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_workers)
+  common = Common.new
+
+  FileUtils.makedirs(logs_dir)
+  all_tasks = CSV.read(manifest_path, headers: true, return_headers: false)
+
+  num_workers = [all_tasks.length, num_workers].min
+
+  done = Queue.new
+  error = Queue.new
+
+  # Spawn a fixed set of threads, assign exclusive work to each
+  fail_limit = 10
+  workers = num_workers.times.map do |i|
+    t = Thread.new {
+      File.open(File.join(logs_dir, "stdout#{i}.txt"), "w") do |wout|
+        File.open(File.join(logs_dir, "stderr#{i}.txt"), "w") do |werr|
+          fail_count = 0
+
+          # Process every num_workers'th task, starting at i
+          j = i
+          while j < all_tasks.length
+            task = all_tasks[j]
+            output, ok = yield task, wout, werr
+            if ok
+              done << output
+            else
+              error << output
+              fail_count+=1
+              if fail_count >= fail_limit
+                raise IOError.new("failed to process #{fail_count} manifest rows in a single worker")
+              end
+            end
+            j += num_workers
+          end
+        end
+      end
+    }
+    t.abort_on_exception = true
+    t
+  end
+
+  # In a separate thread, await worker completion and close channels.
+  Thread.new {
+    workers.each { |w| w.join }
+    [done, error].each { |q| q.close }
+  }
+
+  # In a separate thread, consume errors off the queue
+  errors = []
+  monitor_error = Thread.new {
+    until error.closed?
+      error_out = error.pop
+      errors.push(error_out) unless error_out.nil?
+    end
+  }
+
+  # In the main thread, watch the done channel, write finished rows and log progress.
+  File.open(File.join(logs_dir, "done.txt"), "w") do |w|
+    start = Time.now.to_i
+    count = 0
+    until done.closed?
+      value = done.pop
+      unless value.nil?
+        w.write(value + "\n")
+        count += 1
+      end
+      # Log every 100 and at the end (when the queue is closed, i.e. value=nil)
+      if count % 100 == 0 or value.nil?
+        delta_min = (Time.now.to_i - start) / 60
+        # Carriage return here to keep the progress on the same terminal line
+        printf("\r%s %d/%d files [%.02f%%] (running for %dh%dm)",
+               status_verb, count, all_tasks.length,
+               100*count.to_f/all_tasks.length, delta_min/60, delta_min%60)
+      end
+    end
+  end
+  # Force a newline to reset the carriage return interactions above.
+  puts ""
+
+  # Ensure the error monitor has closed.
+  monitor_error.join
+  unless errors.empty?
+    common.error "failed to process the following paths:\n#{errors.join("\n")}"
+  end
+end
+
+# Stage files as specified in the given manifest. This copies files into the VPC-SC
+# ingest bucket to prepare them for publishing. This intermediate step is required
+# for publishing. For details, see:
+# https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
+def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
+  deploy_account = must_get_env_value(project, :publisher_account)
+
+  _process_files_by_manifest(
+      manifest_path, File.join([logs_dir, 'stage']), "Staged", concurrency) do |task, wout, werr|
+    ingest_path = task["ingest_path"]
+    [ingest_path, system(
+       "gsutil",
+       "-i",
+       deploy_account,
+       "cp",
+       task["source_path"],
+       ingest_path,
+       :out => wout,
+       :err => werr)]
+  end
+
+end
+
+# Publish files to the CDR bucket as specified in the given manifest.
+def publish_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
+  deploy_account = must_get_env_value(project, :publisher_account)
+
+  _process_files_by_manifest(
+      manifest_path, File.join([logs_dir, 'publish']), "Published", concurrency) do |task, wout, werr|
+    dest_path = task["dest_path"]
+    [dest_path, system(
+       "gsutil",
+       "-i",
+       deploy_account,
+       "mv",
+       "-s",
+       task["dest_storage_class"],
+       task["ingest_path"],
+       dest_path,
+       :out => wout,
+       :err => werr)]
   end
 end
