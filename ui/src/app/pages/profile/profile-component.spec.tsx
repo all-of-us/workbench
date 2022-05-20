@@ -162,4 +162,13 @@ describe('ProfilePageComponent', () => {
       wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
     ).toBeFalsy();
   });
+
+  it('should not display a link to the signed DUCC if the user has signed an older DUCC', async () => {
+    updateProfile({ duccSignedVersion: 2 });
+
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
+    ).toBeFalsy();
+  });
 });
