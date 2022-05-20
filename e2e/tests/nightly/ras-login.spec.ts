@@ -5,6 +5,7 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 import expect from 'expect';
 import { waitWhileLoading } from 'utils/waits-utils';
+import Button from 'app/element/button';
 
 /**
  * NIH Researcher Auth Service (RAS) Login Test
@@ -64,14 +65,16 @@ describe('RAS Test', () => {
 
     // New page open up
     const newPage = await dataAccessPage.clickModule(AccessModule.RAS);
+    await newPage.waitForTimeout(1000);
 
-    // Verify All-of-Us logo
+    // Verify page text
     await newPage.waitForXPath('//img[@src="images/logos/AllofUs.png" and @class="header-logo"]', { visible: true });
+    await newPage.waitForXPath('//h2[.="NIH Researcher Auth Service (RAS)"]', { visible: true });
 
     // Click login.gov button
-    const loginButton = await newPage.waitForXPath(
-      '//a[@href="javascript:submitSocialLogin(1)" and contains(normalize-space(.), "Login.gov")]',
-      { visible: true }
+    const loginButton = new Button(
+      newPage,
+      '//a[@href="javascript:submitSocialLogin(1)" and contains(normalize-space(.), "Login.gov")]'
     );
     await loginButton.click();
 
@@ -93,6 +96,19 @@ describe('RAS Test', () => {
 
     const submitButton = await newPage.waitForXPath('//input[@value="Submit" and @type="submit"]', { visible: true });
     await submitButton.click();
+
+    // Could show up
+    try {
+      const maybeAgreeAndContinueButton = await newPage.waitForXPath(
+        '//input[@value="Agree and continue" and @type="submit"]',
+        {
+          visible: true
+        }
+      );
+      await maybeAgreeAndContinueButton.click();
+    } catch (err) {
+      // Blank
+    }
 
     // Automatically loads AoU Data Access Requirements page after sign in
     await new DataAccessRequirementsPage(newPage).waitForLoad(); // This is waiting for sign in to complete
