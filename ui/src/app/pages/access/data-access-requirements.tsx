@@ -71,6 +71,11 @@ export const styles = reactStyles({
     fontWeight: 600,
     gridArea: 'header',
     alignSelf: 'center',
+    marginBottom: '20px',
+  },
+  renewalHeaderYearlyExpired: {
+    lineHeight: '40px',
+    marginBottom: '0px',
   },
   renewalHeaderRequirements: {
     color: colors.primary,
@@ -471,7 +476,10 @@ const AnnualInnerHeader = (props: { hasExpired: boolean }) => (
     )}
     <div
       data-test-id='annual-renewal-header'
-      style={styles.renewalHeaderYearly}
+      style={{
+        ...{ ...styles.renewalHeaderYearly },
+        ...(props.hasExpired && styles.renewalHeaderYearlyExpired),
+      }}
     >
       {props.hasExpired
         ? 'Researcher workbench access has expired'
