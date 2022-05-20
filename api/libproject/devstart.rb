@@ -2070,6 +2070,14 @@ def set_authority(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
+  if not op.opts.remove and op.opts.authority.upcase.include? "ALL"
+    get_user_confirmation(
+      "Adding ALL authorities is redundant and rarely useful; to transitively " +
+      "grant all authorities, simply add the all-encompassing DEVELOPER authority.\n" +
+      "Do you want to add ALL authorities anyways?"
+    )
+  end
+
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     common.run_inline %W{
