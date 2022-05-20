@@ -15,6 +15,7 @@ import {
   MINUTE_SURVEY_GROUP_NAME,
 } from 'app/cohort-search/tree-node/tree-node.component';
 import {
+  domainToTitle,
   mapParameter,
   sanitizeNumericalInput,
   stripHtml,
@@ -32,7 +33,7 @@ import {
   withCurrentCohortCriteria,
   withCurrentWorkspace,
 } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   currentCohortCriteriaStore,
   currentWorkspaceStore,
@@ -801,10 +802,10 @@ export const AttributesPage = fp.flow(
 
       this.setState({ count: null, calculating: true, countError: false });
       const param = this.paramWithAttributes;
-      // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
-      if (this.isPhysicalMeasurement) {
-        this.trackEvent(param.subtype, 'Calculate');
-      }
+      const label = `Calculate - ${domainToTitle(param.domainId)}${
+        this.isPhysicalMeasurement ? subTypeToTitle(param.subtype) : ''
+      }`;
+      AnalyticsTracker.CohortBuilder.AttributesAction(label);
       const request = {
         excludes: [],
         includes: [
@@ -837,23 +838,15 @@ export const AttributesPage = fp.flow(
       const { close } = this.props;
       let { criteria } = this.props;
       const param = this.paramWithAttributes;
-      // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
-      if (this.isPhysicalMeasurement) {
-        this.trackEvent(param.subtype, 'Add');
-      }
+      const label = `Add - ${domainToTitle(param.domainId)}${
+        this.isPhysicalMeasurement ? subTypeToTitle(param.subtype) : ''
+      }`;
+      AnalyticsTracker.CohortBuilder.AttributesAction(label);
       criteria = criteria.filter(
         (crit) => crit.parameterId !== param.parameterId
       );
       currentCohortCriteriaStore.next([...criteria, param]);
       close();
-    }
-
-    trackEvent(subtype: string, eventType: string) {
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `Physical Measurements - ${subTypeToTitle(subtype)} - ${eventType}`
-      );
     }
 
     get hasUnits() {

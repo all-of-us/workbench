@@ -24,7 +24,7 @@ import {
   withCurrentCohortSearchContext,
   withCurrentWorkspace,
 } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentCohortSearchContextStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -377,7 +377,7 @@ export const ModifierPage = fp.flow(
 
     selectChange = (sel: any, index: number) => {
       const { formState } = this.state;
-      this.trackEvent(formState[index].label);
+      AnalyticsTracker.CohortBuilder.ModifierDropdown(formState[index].label);
       const { name } = formState[index];
       if (name === ModifierType.ENCOUNTERS) {
         formState[index].values = [sel];
@@ -436,6 +436,9 @@ export const ModifierPage = fp.flow(
 
     updateMods() {
       const { cohortContext } = this.props;
+      AnalyticsTracker.CohortBuilder.ModifiersAction(
+        `Apply modifiers - ${domainToTitle(cohortContext.domain)}`
+      );
       cohortContext.item.modifiers = this.getModifiersFromForm();
       currentCohortSearchContextStore.next(cohortContext);
       this.props.closeModifiers(cohortContext.item.modifiers);
@@ -458,7 +461,9 @@ export const ModifierPage = fp.flow(
         cohortContext: { domain, role },
         workspace: { id, namespace },
       } = this.props;
-      this.trackEvent('Calculate');
+      AnalyticsTracker.CohortBuilder.ModifiersAction(
+        `Calculate - ${domainToTitle(domain)}`
+      );
       try {
         this.setState({
           calculating: true,
@@ -490,19 +495,6 @@ export const ModifierPage = fp.flow(
         console.error(error);
         this.setState({ calculating: false, calculateError: true });
       }
-    };
-
-    trackEvent = (label: string) => {
-      const {
-        cohortContext: { domain },
-      } = this.props;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `Modifiers - ${label} - ${domainToTitle(
-          domain
-        )} - Cohort Builder Search`
-      );
     };
 
     validateValues() {

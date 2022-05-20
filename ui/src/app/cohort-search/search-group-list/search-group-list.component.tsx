@@ -24,7 +24,7 @@ import { ClrIcon } from 'app/components/icons';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -271,14 +271,13 @@ const SearchGroupList = fp.flow(
       }
       const { role } = this.props;
       const { domain, type, standard } = criteria;
-      const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
       // If domain is PERSON, list the type as well as the domain in the label
-      const label =
-        domainToTitle(domain) +
-        (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
-        ' - Cohort Builder';
-
-      triggerEvent(category, 'Click', `${category} - ${label}`);
+      const label = `Add ${
+        role === 'includes' ? 'Include' : 'Exclude'
+      } Criteria - ${domainToTitle(domain)}${
+        domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
+      }`;
+      AnalyticsTracker.CohortBuilder.LaunchSearch(label);
 
       const itemId = generateId('items');
       const groupId = null;

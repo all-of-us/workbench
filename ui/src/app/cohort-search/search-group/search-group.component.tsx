@@ -32,7 +32,7 @@ import { Spinner } from 'app/components/spinners';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -379,11 +379,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     remove() {
-      triggerEvent(
-        'Delete',
-        'Click',
-        'Snowman - Delete Group - Cohort Builder'
-      );
+      AnalyticsTracker.CohortBuilder.SearchGroupMenu('Delete group');
       this.hide('pending');
       this.deleteTimeout = global.setTimeout(() => {
         this.removeGroup();
@@ -391,27 +387,19 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     hide(status: string) {
-      triggerEvent(
-        'Suppress',
-        'Click',
-        'Snowman - Suppress Group - Cohort Builder'
-      );
+      AnalyticsTracker.CohortBuilder.SearchGroupMenu('Suppress group');
       this.setGroupProperty('status', status);
       setTimeout(() => this.setOverlayPosition());
     }
 
     enable() {
-      triggerEvent(
-        'Enable',
-        'Click',
-        'Enable - Suppress Group - Cohort Builder'
-      );
+      AnalyticsTracker.CohortBuilder.SearchGroupMenu('Enable suppressed group');
       this.setGroupProperty('status', 'active');
       this.setState({ overlayStyle: undefined });
     }
 
     undo() {
-      triggerEvent('Undo', 'Click', 'Undo - Delete Group - Cohort Builder');
+      AnalyticsTracker.CohortBuilder.SearchGroupMenu('Undo group delete');
       clearTimeout(this.deleteTimeout);
       this.enable();
     }
@@ -452,20 +440,13 @@ export const SearchGroup = withCurrentWorkspace()(
       }
       const { group, setSearchContext, role } = this.props;
       const { domain, type, standard } = criteria;
-      if (temporalGroup === 1) {
-        triggerEvent(
-          'Temporal',
-          'Click',
-          `${domainToTitle(domain)} - Temporal - Cohort Builder`
-        );
-      } else {
-        const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
-        // If domain is PERSON, list the type as well as the domain in the label
-        const label = `${domainToTitle(domain)} ${
-          domain === Domain.PERSON ? `- ${typeToTitle(type)}` : ''
-        } - Cohort Builder`;
-        triggerEvent(category, 'Click', `${category} - ${label}`);
-      }
+      // If domain is PERSON, list the type as well as the domain in the label
+      const label = `Add ${
+        role === 'includes' ? 'Include' : 'Exclude'
+      } Criteria - ${domainToTitle(domain)}${
+        domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
+      }${temporalGroup === 1 ? ' - Temporal' : ''}`;
+      AnalyticsTracker.CohortBuilder.LaunchSearch(label);
       const itemId = generateId('items');
       const item = initItem(itemId, domain, temporalGroup);
       const groupId = group.id;
@@ -497,10 +478,8 @@ export const SearchGroup = withCurrentWorkspace()(
 
     handleTemporalChange(e: any) {
       const { value } = e.target;
-      triggerEvent(
-        'Temporal',
-        'Click',
-        'Turn On Off - Temporal - Cohort Builder'
+      AnalyticsTracker.CohortBuilder.ToggleTemporal(
+        `Turn temporal ${value ? 'on' : 'off'}`
       );
       this.setGroupProperty('temporal', value);
       if ((!value && this.hasActiveItems) || (value && !this.temporalError)) {
@@ -510,10 +489,8 @@ export const SearchGroup = withCurrentWorkspace()(
 
     setMention(mention: TemporalMention) {
       if (mention !== this.props.group.mention) {
-        triggerEvent(
-          'Temporal',
-          'Click',
-          `${temporalEnumToText(mention)} - Temporal - Cohort Builder`
+        AnalyticsTracker.CohortBuilder.TemporalMenu(
+          `Mention - ${temporalEnumToText(mention)}`
         );
         this.setGroupProperty('mention', mention);
         if (!this.temporalError) {
@@ -523,10 +500,8 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     setTime(time: TemporalTime) {
-      triggerEvent(
-        'Temporal',
-        'Click',
-        `${temporalEnumToText(time)} - Temporal - Cohort Builder`
+      AnalyticsTracker.CohortBuilder.TemporalMenu(
+        `Time - ${temporalEnumToText(time)}`
       );
       this.setGroupProperty('time', time);
       if (!this.temporalError) {

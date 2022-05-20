@@ -11,7 +11,7 @@ import { Spinner } from 'app/components/spinners';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 const styles = reactStyles({
@@ -324,10 +324,8 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   selectOption(opt: any) {
-    triggerEvent(
-      'Cohort Builder Search',
-      'Click',
-      `Demo - ${typeToTitle(opt.type)} - ${opt.name}`
+    AnalyticsTracker.CohortBuilder.SelectDemographics(
+      `${typeToTitle(opt.type)} - ${opt.name}`
     );
     this.props.select({
       ...opt,

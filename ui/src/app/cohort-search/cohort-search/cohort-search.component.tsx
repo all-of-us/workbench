@@ -13,7 +13,11 @@ import {
 import { Demographics } from 'app/cohort-search/demographics/demographics.component';
 import { searchRequestStore } from 'app/cohort-search/search-state.service';
 import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
-import { generateId, typeToTitle } from 'app/cohort-search/utils';
+import {
+  domainToTitle,
+  generateId,
+  typeToTitle,
+} from 'app/cohort-search/utils';
 import { Button, Clickable } from 'app/components/buttons';
 import { FlexRowWrap } from 'app/components/flex';
 import {
@@ -29,7 +33,7 @@ import {
 } from 'app/pages/data/criteria-search';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withCurrentCohortSearchContext } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
@@ -123,15 +127,9 @@ export function getItemFromSearchRequest(
 }
 
 export function saveCriteria(selections?: Array<Selection>) {
-  const { domain, groupId, item, role, type } =
+  const { domain, groupId, item, role } =
     currentCohortSearchContextStore.getValue();
-  if (domain === Domain.PERSON) {
-    triggerEvent(
-      'Cohort Builder Search',
-      'Click',
-      `Demo - ${typeToTitle(type)} - Finish`
-    );
-  }
+  AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();
   if (groupId) {
