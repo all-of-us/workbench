@@ -9860,6 +9860,7 @@ definitions:
       - GENDERQUEER
       - MAN
       - NON_BINARY
+      - QUESTIONING           # Questioning or unsure of my gender identity
       - TRANS_MAN             # Trans man/Transgender man
       - TRANS_WOMAN           # Trans woman/Transgender woman
       - TWO_SPIRIT
