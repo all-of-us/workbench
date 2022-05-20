@@ -71,6 +71,7 @@ profiles {
       google.lifeSciences.subnetwork = "subnetwork"
       google.lifeSciences.usePrivateAddress = false
       google.lifeSciences.copyImage = "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
+      google.lifeSciences.bootDiskSize = "20.GB"
   }
 }
 EOF
