@@ -29,7 +29,7 @@ import { RenameModal } from 'app/components/rename-modal';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -262,29 +262,19 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     enable() {
-      triggerEvent(
-        'Enable',
-        'Click',
-        'Enable - Suppress Criteria - Cohort Builder'
+      AnalyticsTracker.CohortBuilder.SearchGroupItemMenu(
+        'Enable suppressed item'
       );
       this.updateSearchRequest('status', 'active', true);
     }
 
     suppress() {
-      triggerEvent(
-        'Suppress',
-        'Click',
-        'Snowman - Suppress Criteria - Cohort Builder'
-      );
+      AnalyticsTracker.CohortBuilder.SearchGroupItemMenu('Suppress item');
       this.updateSearchRequest('status', 'hidden', true);
     }
 
     remove() {
-      triggerEvent(
-        'Delete',
-        'Click',
-        'Snowman - Delete Criteria - Cohort Builder'
-      );
+      AnalyticsTracker.CohortBuilder.SearchGroupItemMenu('Delete item');
       this.updateSearchRequest('status', 'pending', true);
       const timeout: NodeJS.Timeout = global.setTimeout(() => {
         this.updateSearchRequest(null, null, false, true);
@@ -293,7 +283,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     undo() {
-      triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
+      AnalyticsTracker.CohortBuilder.SearchGroupItemMenu('Undo item delete');
       clearTimeout(this.state.timeout);
       this.updateSearchRequest('status', 'active', true);
     }
@@ -337,13 +327,19 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     launchSearch() {
-      triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
       const { groupId, item, setSearchContext, role } = this.props;
       if (!this.preventItemEdit) {
         const _item = JSON.parse(JSON.stringify(item));
         const { searchParameters } = _item;
         const domain = _item.type;
+        // If domain is PERSON, list the type as well as the domain in the label
         const { type, standard } = getTypeAndStandard(searchParameters, domain);
+        const label = `Edit item - ${
+          role === 'includes' ? 'Include' : 'Exclude'
+        } Criteria - ${domainToTitle(domain)}${
+          domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
+        }`;
+        AnalyticsTracker.CohortBuilder.LaunchSearch(label);
         const context = {
           item: _item,
           domain,

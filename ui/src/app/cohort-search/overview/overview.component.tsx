@@ -33,7 +33,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
@@ -321,7 +321,7 @@ export const ListOverview = fp.flow(
     }
 
     saveCohort() {
-      triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
+      AnalyticsTracker.CohortBuilder.CohortAction('Save cohort');
       const {
         cohort,
         updating,
@@ -354,7 +354,7 @@ export const ListOverview = fp.flow(
     }
 
     createCohort(name, description) {
-      triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
+      AnalyticsTracker.CohortBuilder.CohortAction('Create cohort');
       this.setState({ saving: true });
       const {
         updating,
@@ -386,7 +386,7 @@ export const ListOverview = fp.flow(
     }
 
     delete = () => {
-      triggerEvent('Click icon', 'Click', 'Icon - Delete - Cohort Builder');
+      AnalyticsTracker.CohortBuilder.CohortAction('Delete cohort');
       const {
         cohort,
         updating,
@@ -417,11 +417,11 @@ export const ListOverview = fp.flow(
       let url = `/workspaces/${ns}/${wsid}/`;
       switch (action) {
         case 'notebook':
-          triggerEvent('Click icon', 'Click', 'Icon - Export - Cohort Builder');
+          AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');
           url += 'notebooks';
           break;
         case 'review':
-          triggerEvent('Click icon', 'Click', 'Icon - Review - Cohort Builder');
+          AnalyticsTracker.CohortBuilder.CohortAction('Review cohort');
           url += `data/cohorts/${cohort.id}/review`;
           break;
       }
@@ -429,12 +429,10 @@ export const ListOverview = fp.flow(
     }
 
     toggleChartMode() {
-      triggerEvent(
-        'Graphs',
-        'Click',
-        'Graphs - Flip - Gender Age Race - Cohort Builder'
-      );
       const { stackChart } = this.state;
+      AnalyticsTracker.CohortBuilder.CohortCharts(
+        stackChart ? 'Normalized chart' : 'Stacked chart'
+      );
       this.setState({ stackChart: !stackChart });
     }
 
@@ -706,16 +704,7 @@ export const ListOverview = fp.flow(
                           currentGraphOptions.genderOrSexType
                         )}
                       </div>
-                      <div
-                        style={{ padding: '0.5rem 0.75rem' }}
-                        onMouseEnter={() =>
-                          triggerEvent(
-                            'Graphs',
-                            'Hover',
-                            'Graphs - Gender - Cohort Builder'
-                          )
-                        }
-                      >
+                      <div style={{ padding: '0.5rem 0.75rem' }}>
                         {!!chartData.length && <GenderChart data={chartData} />}
                       </div>
                       <div style={styles.cardHeader}>
@@ -729,16 +718,7 @@ export const ListOverview = fp.flow(
                           onClick={() => this.toggleChartMode()}
                         />
                       </div>
-                      <div
-                        style={{ padding: '0.5rem 0.75rem' }}
-                        onMouseEnter={() =>
-                          triggerEvent(
-                            'Graphs',
-                            'Hover',
-                            'Graphs - Gender Age Race - Cohort Builder'
-                          )
-                        }
-                      >
+                      <div style={{ padding: '0.5rem 0.75rem' }}>
                         {!!chartData.length && (
                           <ComboChart
                             mode={stackChart ? 'stacked' : 'normalized'}

@@ -11,14 +11,12 @@ import {
 
 import { PREDEFINED_ATTRIBUTES } from 'app/cohort-search/constant';
 import { ppiQuestions } from 'app/cohort-search/search-state.service';
-import { domainToTitle, subTypeToTitle } from 'app/cohort-search/utils';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { highlightSearchTerm, reactStyles } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
@@ -281,28 +279,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   toggleExpanded() {
     const {
-      node: { domainId, group, name, parentId, subtype },
-      source,
+      node: { group },
     } = this.props;
     if (group) {
       const { children, expanded } = this.state;
-      if (!expanded) {
-        if (parentId === 0) {
-          const labelName =
-            domainId === Domain.SURVEY.toString()
-              ? name
-              : subTypeToTitle(subtype);
-          const message =
-            source === 'concept' ? 'Concept Search' : 'Cohort Builder Search';
-          triggerEvent(
-            message,
-            'Click',
-            `${domainToTitle(domainId)} - ${labelName} - Expand`
-          );
-        }
-        if (!this.inMemorySearch && !children) {
-          this.loadChildren();
-        }
+      if (!expanded && !this.inMemorySearch && !children) {
+        this.loadChildren();
       }
       this.setState({ expanded: !expanded });
     }

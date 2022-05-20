@@ -35,7 +35,7 @@ import {
   withCurrentConcept,
   withCurrentWorkspace,
 } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   attributesSelectionStore,
@@ -383,11 +383,13 @@ export const ListSearch = fp.flow(
             this.setState({ inputErrors });
           } else {
             const { searchContext } = this.props;
-            triggerEvent(
-              `Cohort Builder Search - ${domainToTitle(searchContext.domain)}`,
-              'Search',
-              value
-            );
+            if (searchContext.source === 'cohort') {
+              AnalyticsTracker.CohortBuilder.SearchTerms(
+                `List search - ${domainToTitle(
+                  searchContext.domain
+                )} - '${value}'`
+              );
+            }
             if (searchContext.source === 'concept') {
               // Update search terms so they will persist if user returns to concept homepage
               currentCohortSearchContextStore.next({
@@ -452,7 +454,14 @@ export const ListSearch = fp.flow(
     };
 
     showStandardResults() {
-      this.trackEvent('Standard Vocab Hyperlink');
+      const {
+        searchContext: { domain, source },
+      } = this.props;
+      if (source === 'cohort') {
+        AnalyticsTracker.CohortBuilder.SourceOrStandardLink(
+          `Standard Vocab - ${domainToTitle(domain)}`
+        );
+      }
       this.setState({ standardOnly: true });
     }
 
@@ -503,7 +512,11 @@ export const ListSearch = fp.flow(
     }
 
     showHierarchy = (row: any) => {
-      this.trackEvent('More Info');
+      if (this.props.searchContext.source === 'cohort') {
+        AnalyticsTracker.CohortBuilder.ViewHierarchy(
+          domainToTitle(row.domainId)
+        );
+      }
       this.props.hierarchy(row);
     };
 
@@ -575,17 +588,6 @@ export const ListSearch = fp.flow(
         row.isStandard
       }`;
     }
-
-    trackEvent = (label: string) => {
-      const {
-        searchContext: { domain },
-      } = this.props;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `${label} - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
-    };
 
     onNameHover(el: HTMLDivElement, id: string) {
       if (el.offsetWidth < el.scrollWidth) {
@@ -930,9 +932,13 @@ export const ListSearch = fp.flow(
                       &nbsp;
                       <Clickable
                         style={styles.vocabLink}
-                        onMouseDown={() =>
-                          this.trackEvent('Source Vocab Hyperlink')
-                        }
+                        onMouseDown={() => {
+                          if (source === 'cohort') {
+                            AnalyticsTracker.CohortBuilder.SourceOrStandardLink(
+                              `Source Vocab - ${domainToTitle(domain)}`
+                            );
+                          }
+                        }}
                         onClick={() => this.setState({ standardOnly: false })}
                       >
                         Return to source code

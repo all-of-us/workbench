@@ -47,6 +47,7 @@ enum AnalyticsCategory {
   FOOTER = 'Footer',
   HELP = 'Help',
   WORKSPACE_UPDATE_PROMPT = 'Workspace update prompt',
+  COHORT_BUILDER = 'Cohort Builder',
 }
 
 function getCurrentPageLabel(suffix = '') {
@@ -325,6 +326,94 @@ export const AnalyticsTracker = {
         AnalyticsCategory.FOOTER,
         'US Dept of Health & Human Svcs',
         'hhs.gov'
+      ),
+  },
+  CohortBuilder: {
+    SelectDemographics: (suffix) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click select icon',
+        `Demographics - ${suffix}`
+      ),
+    SearchTerms: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Search terms entered',
+        label
+      ),
+    SaveCriteria: (domain) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click Save Criteria button',
+        `Save ${domain} criteria`
+      ),
+    LaunchSearch: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Launch criteria search',
+        label
+      ),
+    SourceOrStandardLink: (label) =>
+      triggerEvent(AnalyticsCategory.COHORT_BUILDER, 'Click vocab link', label),
+    ViewHierarchy: (domain) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click hierarchy icon',
+        domain
+      ),
+    SearchGroupMenu: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click search group menu option',
+        label
+      ),
+    SearchGroupItemMenu: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click search group item menu option',
+        label
+      ),
+    ToggleTemporal: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Toggle temporal switch',
+        label
+      ),
+    TemporalMenu: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Temporal menu selection',
+        label
+      ),
+    AttributesAction: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click attributes button',
+        label
+      ),
+    ModifiersAction: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click attributes button',
+        label
+      ),
+    ModifierDropdown: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Select modifier dropdown option',
+        label
+      ),
+    CohortAction: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click cohort  button',
+        label
+      ),
+    CohortCharts: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Navigate from cohort',
+        label
       ),
   },
 };

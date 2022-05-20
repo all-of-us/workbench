@@ -16,7 +16,7 @@ import {
   reactStyles,
   validateInputForMySQL,
 } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 const styles = reactStyles({
@@ -221,10 +221,8 @@ export class SearchBar extends React.Component<Props, State> {
         domainId === Domain.PHYSICALMEASUREMENT.toString() ||
         domainId === Domain.VISIT.toString()
       ) {
-        triggerEvent(
-          'Cohort Builder Search - Physical Measurements',
-          'Search',
-          searchTerms
+        AnalyticsTracker.CohortBuilder.SearchTerms(
+          `Hierarchy search - ${domainToTitle(domainId)} - '${searchTerms}'`
         );
       } else if (this.state.optionSelected) {
         this.setState({ optionSelected: false });
@@ -239,10 +237,8 @@ export class SearchBar extends React.Component<Props, State> {
       node: { domainId, isStandard, subtype, type },
       searchTerms,
     } = this.props;
-    triggerEvent(
-      `Cohort Builder Search - ${domainToTitle(domainId)}`,
-      'Search',
-      searchTerms
+    AnalyticsTracker.CohortBuilder.SearchTerms(
+      `${domainToTitle(domainId)} - '${searchTerms}'`
     );
     this.setState({ inputErrors: [], loading: true });
     const { id, namespace } = currentWorkspaceStore.getValue();
