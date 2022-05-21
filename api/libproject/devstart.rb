@@ -2049,7 +2049,9 @@ def authority_options(cmd_name, args)
   op.add_option(
       "--authority [AUTHORITY,...]",
       ->(opts, v) { opts.authority = v},
-      "Comma-separated list of user authorities to add or remove for the users. ")
+      "Comma-separated list of user authorities to add or remove for the users. " +
+      "Include keyword ALL to include all authorities; typically that should only " +
+      "be used with removals. When granting authorities, use DEVELOPER to gain full access")
   op.add_option(
       "--remove",
       ->(opts, _) { opts.remove = "true"},
@@ -2067,6 +2069,14 @@ def set_authority(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+
+  if not op.opts.remove and op.opts.authority.upcase.include? "ALL"
+    get_user_confirmation(
+      "Adding ALL authorities is redundant and rarely useful; to transitively " +
+      "grant all authorities, simply add the all-encompassing DEVELOPER authority.\n" +
+      "Do you want to add ALL authorities anyways?"
+    )
+  end
 
   with_cloud_proxy_and_db(gcc) do
     common = Common.new

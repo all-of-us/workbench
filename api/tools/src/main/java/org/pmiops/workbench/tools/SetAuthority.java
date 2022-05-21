@@ -19,9 +19,10 @@ import org.springframework.context.annotation.Configuration;
 public class SetAuthority {
 
   private static final Logger log = Logger.getLogger(SetAuthority.class.getName());
+  private static final String ALL_AUTHORITIES = "ALL";
 
   private Set<String> commaDelimitedStringToSet(String str) {
-    return new HashSet<String>(Arrays.asList(str.split(",")));
+    return new HashSet<>(Arrays.asList(str.split(",")));
   }
 
   private Set<Authority> commaDelimitedStringToAuthoritySet(String str) {
@@ -30,6 +31,9 @@ public class SetAuthority {
       String cleanedValue = value.trim().toUpperCase();
       if (cleanedValue.isEmpty()) {
         continue;
+      }
+      if (ALL_AUTHORITIES.equals(cleanedValue)) {
+        return new HashSet<>(Arrays.asList(Authority.values()));
       }
       auths.add(Authority.valueOf(cleanedValue));
     }
