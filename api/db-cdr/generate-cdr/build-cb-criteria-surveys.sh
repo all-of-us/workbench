@@ -166,7 +166,7 @@ LEFT JOIN (SELECT id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE
 WHERE a.domain_id = 'SURVEY'
     and a.subtype = 'ANSWER'"
 
-echo "PPI SURVEYS - update family history survey answers - names are very easy to understand"
+echo "PPI SURVEYS - update family history survey answers - make answers easy to understand"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.name = y.name
@@ -179,8 +179,7 @@ FROM
                            FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                           WHERE concept_id = 43528698)
         AND subtype = 'ANSWER'
-        AND code NOT LIKE 'PMI_%'
-        AND code NOT LIKE 'FamilyMedicalHistoryAware_%'
+        AND (code LIKE 'Sibling%' OR code LIKE 'Mother%' OR code LIKE 'Father%' OR code LIKE 'Daughter%' OR code LIKE 'Son%' OR code LIKE 'Grandparent%')
     ) y
 WHERE x.id = y.id"
 
