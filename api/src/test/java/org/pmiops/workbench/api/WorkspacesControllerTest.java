@@ -72,7 +72,6 @@ import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImp
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
@@ -343,7 +342,6 @@ public class WorkspacesControllerTest {
     CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
-    CohortMaterializationService.class,
     CohortQueryBuilder.class,
     CohortService.class,
     ConceptBigQueryService.class,
