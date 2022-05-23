@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -12,41 +13,48 @@ const styles = reactStyles({
   question: { fontWeight: 'bold' },
 });
 
-const YesNoOptionalQuestion = (props: { question: string }) => {
-  const { question } = props;
+const YesNoOptionalQuestion = (props: {
+  question: string;
+  style?: CSSProperties;
+}) => {
+  const { question, style } = props;
   const yesId = useId();
   const noId = useId();
   const preferNotId = useId();
   return (
-    <FlexRow>
-      <div style={styles.question}>{question}</div>
-      <label htmlFor={yesId}>Yes</label>
-      <RadioButton
-        data-test-id='nothing-to-report'
-        id={yesId}
-        disabled={false}
-        style={{ justifySelf: 'end' }}
-        checked={false}
-        onChange={() => console.log('ff')}
-      />
+    <FlexRow {...{ style }}>
+      <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
+        {question}
+      </div>
+      <div style={{ flex: 1 }}>
+        <label htmlFor={yesId}>Yes</label>
+        <RadioButton
+          data-test-id='nothing-to-report'
+          id={yesId}
+          disabled={false}
+          style={{ marginRight: '1rem' }}
+          checked={false}
+          onChange={() => console.log('ff')}
+        />
 
-      <label htmlFor={noId}>No</label>
-      <RadioButton
-        id={noId}
-        disabled={false}
-        style={{ justifySelf: 'end' }}
-        checked={false}
-        onChange={() => console.log('ff')}
-      />
+        <label htmlFor={noId}>No</label>
+        <RadioButton
+          id={noId}
+          disabled={false}
+          style={{ marginRight: '1rem' }}
+          checked={false}
+          onChange={() => console.log('ff')}
+        />
 
-      <label htmlFor={preferNotId}>Prefer not to answer</label>
-      <RadioButton
-        id={preferNotId}
-        disabled={false}
-        style={{ justifySelf: 'end' }}
-        checked={false}
-        onChange={() => console.log('ff')}
-      />
+        <label htmlFor={preferNotId}>Prefer not to answer</label>
+        <RadioButton
+          id={preferNotId}
+          disabled={false}
+          style={{ justifySelf: 'end' }}
+          checked={false}
+          onChange={() => console.log('ff')}
+        />
+      </div>
     </FlexRow>
   );
 };
@@ -54,7 +62,7 @@ const YesNoOptionalQuestion = (props: { question: string }) => {
 const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     return (
-      <FlexColumn>
+      <FlexColumn style={{ width: '750px' }}>
         <Header>Researcher Workbench</Header>
         <FlexColumn>
           <SmallHeader>Races and Ethnicities</SmallHeader>
@@ -80,22 +88,34 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           </div>
           <div>Select</div>
           <SmallHeader>Questions about disability status</SmallHeader>
-          <YesNoOptionalQuestion question='Are you deaf or do you have serious difficulty hearing?' />
+          <YesNoOptionalQuestion
+            question='Are you deaf or do you have serious difficulty hearing?'
+            style={{ marginBottom: '1rem' }}
+          />
           <YesNoOptionalQuestion
             question='Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
+            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Because of a physical, cognitive, or emotional condition, do you
             have serious difficulty concentrating, remembering, or making
             decisions?'
+            style={{ marginBottom: '1rem' }}
           />
-          <YesNoOptionalQuestion question='Do you have serious difficulty walking or climbing stairs?' />
-          <YesNoOptionalQuestion question='Do you have difficulty dressing or bathing?' />
+          <YesNoOptionalQuestion
+            question='Do you have serious difficulty walking or climbing stairs?'
+            style={{ marginBottom: '1rem' }}
+          />
+          <YesNoOptionalQuestion
+            question='Do you have difficulty dressing or bathing?'
+            style={{ marginBottom: '1rem' }}
+          />
           <YesNoOptionalQuestion
             question="Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
+            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Do you have a physical, cognitive, and/or emotional condition that
