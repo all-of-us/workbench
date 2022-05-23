@@ -188,7 +188,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should not display the Content and Signature pages in SIGNED mode if the user has signed an older DUCC', async () => {
-    updateProfile({ duccSignedVersion: 3 });
+    updateProfile({ duccSignedVersion: 2 });
 
     const wrapper = component(DuccSignatureState.SIGNED);
     expect(

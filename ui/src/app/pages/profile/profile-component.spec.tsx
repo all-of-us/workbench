@@ -12,8 +12,10 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
-import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import {
+  ProfileApiStub,
+  ProfileStubVariables,
+} from 'testing/stubs/profile-api-stub';
 
 describe('ProfilePageComponent', () => {
   function getSaveProfileButton(wrapper: ReactWrapper): ReactWrapper {
@@ -162,7 +164,7 @@ describe('ProfilePageComponent', () => {
   });
 
   it('should not display a link to the signed DUCC if the user has signed an older DUCC', async () => {
-    updateProfile({ duccSignedVersion: 3 });
+    updateProfile({ duccSignedVersion: 2 });
 
     const wrapper = component();
     expect(
