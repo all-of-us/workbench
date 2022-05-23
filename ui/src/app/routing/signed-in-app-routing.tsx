@@ -27,6 +27,7 @@ import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
+import DemographicSurvey from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import {
@@ -345,12 +346,11 @@ export const SignedInRoutes = () => {
           workspaceEditMode={WorkspaceEditMode.Create}
         />
       </AppRoute>
-      <AppRoute
-        path='/workspaces/:ns/:wsid'
-        exact={false}
-        guards={[getAccessModuleGuard()]}
-      >
+      <AppRoute path='/workspaces/:ns/:wsid' exact>
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
+      </AppRoute>
+      <AppRoute path='/demographic-survey' exact>
+        <DemographicSurvey />
       </AppRoute>
       <AppRoute exact path='*'>
         <Redirect to={'/not-found'} />
