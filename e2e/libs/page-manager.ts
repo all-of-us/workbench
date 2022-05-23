@@ -142,10 +142,10 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
     if (isLoggable(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
-      logger.log('info', 'HTTPRequest issued: %s %s %s', request.method(), request.url(), body);
+      logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
     /**
-     * May encounter "Error: HTTPRequest is already handled!"
+     * May encounter "Error: Request is already handled!"
      * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
      */
     return Promise.resolve()
@@ -179,7 +179,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
         await logRequestError(request);
       } else {
         if (isLoggable(request)) {
-          let text = `HTTPRequest finished: ${status} ${method} ${url}`;
+          let text = `Request finished: ${status} ${method} ${url}`;
           if (request.method() !== 'OPTIONS' && shouldLogResponse(request)) {
             const respBody = await formatResponseBody(request);
             text = `${text}\n${respBody}`;
@@ -192,7 +192,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
       logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
     /**
-     * May encounter "Error: HTTPRequest is already handled!"
+     * May encounter "Error: Request is already handled!"
      * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
      */
     return Promise.resolve()

@@ -127,7 +127,7 @@ export const logRequestError = async (request: HTTPRequest): Promise<void> => {
   const responseText = stringifyData(await getResponseText(request));
   logger.log(
     'error',
-    'HTTPRequest failed: %s %s %s\n%s %s',
+    'Request failed: %s %s %s\n%s %s',
     status,
     request.method(),
     request.url(),
