@@ -77,7 +77,7 @@ def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset
 
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
   # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
-  common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_fq_dataset}}
+  common.run_inline %W{bq mk -f --default_table_expiration 86400 --dataset #{ingest_fq_dataset}}
   ingest_args = %W{./copy-bq-dataset.sh
       #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
       #{table_match_filter} #{table_skip_filter}}
