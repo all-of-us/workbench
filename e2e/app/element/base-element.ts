@@ -3,6 +3,7 @@ import {
   ClickOptions,
   ElementHandle,
   JSHandle,
+  KeyInput,
   Page,
   WaitForOptions,
   WaitForSelectorOptions
@@ -231,14 +232,14 @@ export default class BaseElement {
     return this;
   }
 
-  async pressKeyboard(key: string, options?: { text?: string; delay?: number }): Promise<void> {
+  async pressKeyboard(key: KeyInput, options?: { text?: string; delay?: number }): Promise<void> {
     return this.asElementHandle().then((element) => {
       return element.press(key, options);
     });
   }
 
   async pressReturn(): Promise<void> {
-    return this.pressKeyboard(String.fromCharCode(13));
+    return this.pressKeyboard('Enter');
   }
 
   /**
