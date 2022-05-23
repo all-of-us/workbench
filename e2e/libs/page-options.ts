@@ -1,10 +1,17 @@
-import { defaultArgs } from 'puppeteer';
 import fp from 'lodash/fp';
+import { PuppeteerNode } from 'puppeteer';
 
 const { PUPPETEER_DEBUG, PUPPETEER_HEADLESS, CI } = process.env;
 const isCi = CI === 'true';
 const isDebug = PUPPETEER_DEBUG === 'true';
 const isHeadless = isDebug ? false : isCi || (PUPPETEER_HEADLESS || 'true') === 'true';
+
+// TODO what settings are correct here?
+const puppeteer = new PuppeteerNode({
+  isPuppeteerCore: undefined,
+  preferredRevision: undefined,
+  projectRoot: undefined
+});
 
 const customChromeOptions = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.
@@ -20,7 +27,7 @@ const customChromeOptions = [
 
 // Append to Puppeteer default chrome flags.
 // https://github.com/puppeteer/puppeteer/blob/33f1967072e07824c5bf6a8c1336f844d9efaabf/lib/Launcher.js#L261
-const chromeOptions = defaultArgs({
+const chromeOptions = puppeteer.defaultArgs({
   userDataDir: null,
   headless: isHeadless,
   devtools: true,
