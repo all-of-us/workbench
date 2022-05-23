@@ -1,4 +1,4 @@
-import { Browser, ConsoleMessage, launch, LaunchOptions, Page, Request } from 'puppeteer';
+import { Browser, ConsoleMessage, launch, LaunchOptions, Page, HTTPRequest } from 'puppeteer';
 import {
   showFailedResponse,
   describeJsHandle,
@@ -133,7 +133,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
    * Emitted when a page issues a request. The request object is read-only.
    * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
    */
-  page.on('request', (request: Request) => {
+  page.on('request', (request: HTTPRequest) => {
     // Abort Google Analytics requests.
     const blockRequestList = ['www.google-analytics.com', '/gtag/js', 'ga.js', 'analytics.js', 'zendesk'];
     if (blockRequestList.find((regex) => request.url().match(regex))) {
@@ -142,10 +142,10 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
     if (isLoggable(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
-      logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
+      logger.log('info', 'HTTPRequest issued: %s %s %s', request.method(), request.url(), body);
     }
     /**
-     * May encounter "Error: Request is already handled!"
+     * May encounter "Error: HTTPRequest is already handled!"
      * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
      */
     return Promise.resolve()
@@ -156,7 +156,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
   });
 
   // Emitted when a request fails: 4xx..5xx status codes
-  page.on('requestfailed', async (request: Request) => {
+  page.on('requestfailed', async (request: HTTPRequest) => {
     if (showFailedResponse(request)) {
       await logRequestError(request);
     }
@@ -166,7 +166,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
    * Emitted when a request finishes successfully.
    * NOTE: HTTP Error responses such as 404 or 503, are considered successful responses as 'requestfinished' event.
    */
-  page.on('requestfinished', async (request: Request) => {
+  page.on('requestfinished', async (request: HTTPRequest) => {
     let method;
     let url;
     let status;
@@ -179,7 +179,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
         await logRequestError(request);
       } else {
         if (isLoggable(request)) {
-          let text = `Request finished: ${status} ${method} ${url}`;
+          let text = `HTTPRequest finished: ${status} ${method} ${url}`;
           if (request.method() !== 'OPTIONS' && shouldLogResponse(request)) {
             const respBody = await formatResponseBody(request);
             text = `${text}\n${respBody}`;
@@ -192,7 +192,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
       logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
     /**
-     * May encounter "Error: Request is already handled!"
+     * May encounter "Error: HTTPRequest is already handled!"
      * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
      */
     return Promise.resolve()
