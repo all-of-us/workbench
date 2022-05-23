@@ -1,16 +1,55 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { FlexColumn } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import { NumberInput } from 'app/components/inputs';
+import { NumberInput, RadioButton } from 'app/components/inputs';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { reactStyles } from 'app/utils';
+import { reactStyles, useId } from 'app/utils';
 
 const styles = reactStyles({
   question: { fontWeight: 'bold' },
 });
+
+const YesNoOptionalQuestion = (props: { question: string }) => {
+  const { question } = props;
+  const yesId = useId();
+  const noId = useId();
+  const preferNotId = useId();
+  return (
+    <FlexRow>
+      <div style={styles.question}>{question}</div>
+      <label htmlFor={yesId}>Yes</label>
+      <RadioButton
+        data-test-id='nothing-to-report'
+        id={yesId}
+        disabled={false}
+        style={{ justifySelf: 'end' }}
+        checked={false}
+        onChange={() => console.log('ff')}
+      />
+
+      <label htmlFor={noId}>No</label>
+      <RadioButton
+        id={noId}
+        disabled={false}
+        style={{ justifySelf: 'end' }}
+        checked={false}
+        onChange={() => console.log('ff')}
+      />
+
+      <label htmlFor={preferNotId}>Prefer not to answer</label>
+      <RadioButton
+        id={preferNotId}
+        disabled={false}
+        style={{ justifySelf: 'end' }}
+        checked={false}
+        onChange={() => console.log('ff')}
+      />
+    </FlexRow>
+  );
+};
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
@@ -41,42 +80,29 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           </div>
           <div>Select</div>
           <SmallHeader>Questions about disability status</SmallHeader>
-          <div style={styles.question}>
-            Are you deaf or do you have serious difficulty hearing?
-          </div>
-          <div>Radio</div>
-          <div style={styles.question}>
-            Are you blind or do you have serious difficulty seeing, even when
-            wearing glasses?
-          </div>
-          <div>Radio</div>
-          <div style={styles.question}>
-            Because of a physical, cognitive, or emotional condition, do you
+          <YesNoOptionalQuestion question='Are you deaf or do you have serious difficulty hearing?' />
+          <YesNoOptionalQuestion
+            question='Are you blind or do you have serious difficulty seeing, even when
+            wearing glasses?'
+          />
+          <YesNoOptionalQuestion
+            question='Because of a physical, cognitive, or emotional condition, do you
             have serious difficulty concentrating, remembering, or making
-            decisions?
-          </div>
-          <div>Radio</div>
-          <div style={styles.question}>
-            Do you have serious difficulty walking or climbing stairs?
-          </div>
-          <div>Radio</div>
-          <div style={styles.question}>
-            Do you have difficulty dressing or bathing?
-          </div>
-          <div>Radio</div>
-          <div style={styles.question}>
-            Because of a physical, mental, or emotional condition, do you have
+            decisions?'
+          />
+          <YesNoOptionalQuestion question='Do you have serious difficulty walking or climbing stairs?' />
+          <YesNoOptionalQuestion question='Do you have difficulty dressing or bathing?' />
+          <YesNoOptionalQuestion
+            question="Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or
-            shopping?
-          </div>
-          <div>Radio</div>
-          <div style={styles.question}>
-            Do you have a physical, cognitive, and/or emotional condition that
+              shopping?"
+          />
+          <YesNoOptionalQuestion
+            question='Do you have a physical, cognitive, and/or emotional condition that
             substantially inhibits one or more life activities not specified
             through the above questions, and want to share more? Please
-            describe.
-          </div>
-          <div>Radio</div>
+            describe.'
+          />
           <SmallHeader>Other Questions</SmallHeader>
           <div>Year of birth</div>
           <NumberInput
