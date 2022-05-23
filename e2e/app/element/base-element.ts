@@ -3,8 +3,8 @@ import {
   ClickOptions,
   ElementHandle,
   JSHandle,
-  NavigationOptions,
   Page,
+  WaitForOptions,
   WaitForSelectorOptions
 } from 'puppeteer';
 import { exists, getAttrValue, getPropValue, getStyleValue } from 'utils/element-utils';
@@ -132,7 +132,7 @@ export default class BaseElement {
         .catch(() => {
           return null;
         });
-      return (await jsHandle.jsonValue()) as boolean;
+      return await jsHandle.jsonValue();
     };
 
     const boxModel = async (element: ElementHandle): Promise<BoxModel | null> => {
@@ -374,7 +374,7 @@ export default class BaseElement {
    * Click on element then wait for page navigation to finish.
    */
   async clickAndWait(
-    navOptions: NavigationOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
+    navOptions: WaitForOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
   ): Promise<void> {
     const navigationPromise = this.page.waitForNavigation(navOptions);
     await this.click({ delay: 10 });
