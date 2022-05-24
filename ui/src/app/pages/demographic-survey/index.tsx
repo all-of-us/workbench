@@ -102,6 +102,7 @@ const YesNoOptionalQuestion = (props: {
 interface MultipleChoiceOption {
   name: string;
   value?: string;
+  showInput?: boolean;
   onChange?: (any) => void;
 }
 
@@ -120,10 +121,21 @@ const MultipleChoiceQuestion = (props: {
       </div>
       <FlexRow style={{ flex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
         {choices.map((choice) => (
-          <RadioOption
-            option={choice.value}
-            checked={selected === choice.value}
-          />
+          <FlexColumn>
+            <RadioOption
+              option={choice.name}
+              checked={selected === choice.name}
+            />
+            {choice.showInput && selected === choice.name && (
+              <input
+                data-test-id='search'
+                style={{ marginBottom: '.5em', width: '300px' }}
+                type='text'
+                placeholder='Search'
+                onChange={(e) => console.log(e.target.value)}
+              />
+            )}
+          </FlexColumn>
         ))}
       </FlexRow>
     </FlexRow>
@@ -280,7 +292,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'College Graduate' },
               { name: 'Undergraduate' },
               { name: "Master's" },
-              { name: 'Doctorate' },
+              { name: 'Doctorate', showInput: true },
               { name: 'Prefer not to answer' },
             ]}
             selected={'Doctorate'}
