@@ -158,7 +158,11 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
     DbCohortReview cohortReview =
-        cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+        cohortReviewDao
+            .findCohortReviewByCohortIdAndCdrVersionIdOrderByCohortReviewId(cohortId, cdrVersionId)
+            .stream()
+            .findFirst()
+            .orElse(null);
 
     if (cohortReview == null) {
       throw new NotFoundException(
@@ -377,7 +381,8 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
     return participantCohortAnnotationDao
-        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId).stream()
+        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId)
+        .stream()
         .map(participantCohortAnnotationMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
