@@ -512,7 +512,7 @@ definitions:
           substantially inhibits one or more life activities not specified
           through the above questions, and want to share more? Please describe.
       education:
-        "$ref": "#/definitions/Education"
+        "$ref": "#/definitions/EducationV2"
       disadvantaged:
         "$ref": "#/definitions/YesNoPreferNot"
         description: >
@@ -588,10 +588,24 @@ definitions:
       - OTHER                 # None of these fully describe me, and I want to specify
       - PREFER_NOT_TO_ANSWER
 
+  EducationV2:
+    type: string
+    description: 'Highest Level of Education Completed'
+    enum:
+      - NO_EDUCATION          # Never attended school/No formal education
+      - GRADES_1_12           # Primary/Middle School/High School (Grades 1 through 12/GED)
+      - UNDERGRADUATE         # Some college, Associate Degree or Technical School (1 to 3 years) or current undergraduate student
+      - COLLEGE_GRADUATE      # College graduate (4 years or more) or current post-graduate trainee
+      - MASTER
+      - DOCTORATE
+      - PREFER_NOT_TO_ANSWER
+
+  # Note: Swagger and the YAML standard would auto-convert YES/NO to TRUE/FALSE, so we can't use those values
+  # https://github.com/swagger-api/swagger-parser/issues/1205
+  # https://hitchdev.com/strictyaml/why/implicit-typing-removed/
   YesNoPreferNot:
     type: string
-    # note: swagger converts these to TRUE/FALSE!  https://github.com/swagger-api/swagger-parser/issues/1205
     enum:
-      - YES
-      - NO
+      - TRUE
+      - FALSE
       - PREFER_NOT_TO_ANSWER
