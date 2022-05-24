@@ -19,22 +19,25 @@ const styles = reactStyles({
   radioAnswer: { marginRight: '0.25rem' },
 });
 
-const RadioOption = (props: { option: string; style?: CSSProperties }) => {
-  const { option } = props;
+const RadioOption = (props: {
+  checked: boolean;
+  option: string;
+  style?: CSSProperties;
+}) => {
+  const { checked, option } = props;
   const id = useId();
   return (
     <FlexRow style={{ alignItems: 'center' }}>
-      <label htmlFor={id} style={styles.radioAnswer}>
-        {option}
-      </label>
       <RadioButton
         data-test-id='nothing-to-report'
         id={id}
         disabled={false}
-        style={{ marginRight: '1rem' }}
-        checked={false}
+        checked={checked}
         onChange={() => console.log('ff')}
       />
+      <label htmlFor={id} style={styles.radioAnswer}>
+        {option}
+      </label>
     </FlexRow>
   );
 };
@@ -88,9 +91,40 @@ const YesNoOptionalQuestion = (props: {
         {question}
       </div>
       <FlexRow style={{ flex: 1 }}>
-        <RadioOption option='Yes' />
-        <RadioOption option='No' />
-        <RadioOption option='Prefer not to answer' />
+        <RadioOption option='Yes' checked={false} />
+        <RadioOption option='No' checked={false} />
+        <RadioOption option='Prefer not to answer' checked={false} />
+      </FlexRow>
+    </FlexRow>
+  );
+};
+
+interface MultipleChoiceOption {
+  name: string;
+  value?: string;
+  onChange?: (any) => void;
+}
+
+const MultipleChoiceQuestion = (props: {
+  question: string;
+  choices: MultipleChoiceOption[];
+  selected: string;
+  style?: CSSProperties;
+}) => {
+  const { choices, question, selected, style } = props;
+
+  return (
+    <FlexRow {...{ style }}>
+      <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
+        {question}
+      </div>
+      <FlexRow style={{ flex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
+        {choices.map((choice) => (
+          <RadioOption
+            option={choice.value}
+            checked={selected === choice.value}
+          />
+        ))}
       </FlexRow>
     </FlexRow>
   );
@@ -100,7 +134,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const [checked, setChecked] = useState(false);
     return (
-      <FlexColumn style={{ width: '750px' }}>
+      <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
         <Header>Researcher Workbench</Header>
         <FlexColumn>
           <SmallHeader>Races and Ethnicities</SmallHeader>
@@ -140,25 +174,62 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(e) => setChecked(e)}
           />
           <SmallHeader>Questions about genders</SmallHeader>
-          <div style={styles.question}>
-            What terms best express how you describe your current gender
-            identity?
-          </div>
-          <div>Select</div>
-          <div style={styles.question}>
-            What terms best express how you describe your sexual orientation?
-          </div>
-          <div>Select</div>
-          <div style={styles.question}>
-            What terms best express how you describe your current gender
-            identity?
-          </div>
-          <div>Select</div>
-          <div style={styles.question}>
-            What was the sex assigned to you at birth, such as on your original
-            birth certificate?
-          </div>
-          <div>Select</div>
+          <MultipleChoiceQuestion
+            question='What terms best express how you describe your current gender identity?'
+            choices={[
+              { name: 'Asexual' },
+              { name: 'Bisexual' },
+              { name: 'Gay' },
+              { name: 'Lesbian' },
+              { name: 'Polysexual, omnisexual, or pansexual' },
+              { name: 'Queer' },
+              { name: 'Questioning or unsure of my sexual orientation' },
+              { name: 'Same-gender loving' },
+              { name: 'Straight or heterosexual' },
+              { name: 'Two Spirit' },
+              {
+                name: 'None of these fully describe me, and I want to specify',
+              },
+              { name: 'Prefer not to answer' },
+            ]}
+            selected={'Doctorate'}
+          />
+          <MultipleChoiceQuestion
+            question='What terms best express how you describe your current sexual orientation?'
+            choices={[
+              { name: 'Gender Queer' },
+              { name: 'Man' },
+              { name: 'Non-binary' },
+              { name: 'Questioning or unsure of my gender identity' },
+              { name: 'Trans man/Transgender man' },
+              { name: 'Trans woman/Transgender woman' },
+              { name: 'Two Spirit' },
+              { name: 'Woman' },
+              {
+                name: 'None of these fully describe me, and I want to specify',
+              },
+              { name: 'Prefer not to answer' },
+            ]}
+            selected={'Doctorate'}
+          />
+          <MultipleChoiceQuestion
+            question='What was the sex assigned to you at birth, such as on your original birth certificate?'
+            choices={[
+              { name: 'Gender Queer' },
+              { name: 'Man' },
+              { name: 'Non-binary' },
+              { name: 'Questioning or unsure of my gender identity' },
+              { name: 'Trans man/Transgender man' },
+              { name: 'Trans woman/Transgender woman' },
+              { name: 'Two Spirit' },
+              { name: 'Woman' },
+              {
+                name: 'None of these fully describe me, and I want to specify',
+              },
+              { name: 'Prefer not to answer' },
+            ]}
+            selected={'Doctorate'}
+          />
           <SmallHeader>Questions about disability status</SmallHeader>
           <YesNoOptionalQuestion
             question='Are you deaf or do you have serious difficulty hearing?'
@@ -201,8 +272,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={() => console.log('A')}
             onBlur={() => console.log('A')}
           />
-          <div>Highest Level of Education</div>
-          <div>Select</div>
+          <MultipleChoiceQuestion
+            question={'Highest Level of Education'}
+            choices={[
+              { name: 'No Education' },
+              { name: 'Grades 1-12' },
+              { name: 'College Graduate' },
+              { name: 'Undergraduate' },
+              { name: "Master's" },
+              { name: 'Doctorate' },
+              { name: 'Prefer not to answer' },
+            ]}
+            selected={'Doctorate'}
+          />
         </FlexColumn>
       </FlexColumn>
     );
