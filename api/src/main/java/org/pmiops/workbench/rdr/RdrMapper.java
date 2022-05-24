@@ -18,6 +18,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -97,8 +98,7 @@ public interface RdrMapper {
   @Mapping(source = "dbUser.demographicSurvey.lgbtqIdentity", target = "lgbtqIdentity")
   @Mapping(source = "dbUser.demographicSurvey.identifiesAsLgbtq", target = "identifiesAsLgbtq")
   @Mapping(source = "accessTiers", target = "accessTierShortNames")
-  // re-enable with feature flag in RW-8355
-  // @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
+  @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
   RdrResearcher toRdrResearcher(
       DbUser dbUser,
       List<DbAccessTier> accessTiers,
@@ -265,8 +265,14 @@ public interface RdrMapper {
     return rdrDemographic;
   }
 
-  RdrDemographicSurveyV2 toDemographicSurveyV2(DemographicSurveyV2 demoSurveyV2);
+  // DbDemographicSurveyV2 has singular names for these because Hibernate seems to require
+  // that they match the column names in the join tables
 
+  @Mapping(source = "ethnicCategory", target = "ethnicCategories")
+  @Mapping(source = "genderIdentity", target = "genderIdentities")
+  @Mapping(source = "sexualOrientation", target = "sexualOrientations")
+  RdrDemographicSurveyV2 toDemographicSurveyV2(DbDemographicSurveyV2 demoSurveyV2);
+}
   // for round trip testing only
   DemographicSurveyV2 toModelDemographicSurveyV2(RdrDemographicSurveyV2 demoSurveyV2);
 }

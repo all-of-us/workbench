@@ -41,44 +41,45 @@ import org.springframework.stereotype.Service;
 @Service
 public class RdrExportServiceImpl implements RdrExportService {
 
+  private final AccessTierService accessTierService;
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<RdrApi> rdrApiProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final RdrExportDao rdrExportDao;
-  private final WorkspaceDao workspaceDao;
-  private final UserDao userDao;
-
-  private final InstitutionService institutionService;
-  private final AccessTierService accessTierService;
-  private final WorkspaceService workspaceService;
-  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final RdrMapper rdrMapper;
+  private final UserDao userDao;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
+
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
 
   @Autowired
   public RdrExportServiceImpl(
+      AccessTierService accessTierService,
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<RdrApi> rdrApiProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       RdrExportDao rdrExportDao,
       RdrMapper rdrMapper,
-      WorkspaceDao workspaceDao,
-      InstitutionService institutionService,
-      AccessTierService accessTierService,
-      WorkspaceService workspaceService,
       UserDao userDao,
+      WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
+    this.accessTierService = accessTierService;
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = rdrApiProvider;
+    this.rdrExportDao = rdrExportDao;
     this.rdrMapper = rdrMapper;
-    this.workspaceDao = workspaceDao;
-    this.institutionService = institutionService;
-    this.accessTierService = accessTierService;
-    this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
   }
 
   private List<String> excludedExportUserEmails() {
@@ -135,14 +136,12 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param userIds
    */
   @Override
-  public void exportUsers(List<Long> userIds, boolean backfill) {
-    List<RdrResearcher> rdrResearchersList;
+  public void exportUsers(List<Long> userId, boolean backfill) {
     try {
-      rdrResearchersList =
-          userIds.stream()
-              .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
-              .collect(Collectors.toList());
-      rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
+      rdrApiProvider
+          .get()
+          .exportResearchers(
+              userIds.stream().map(this::toRdrResearcher).collect(Collectors.toList()), backfill);
 
       if (!backfill) {
         updateDbRdrExport(RdrEntity.USER, userIds);
@@ -197,11 +196,16 @@ public class RdrExportServiceImpl implements RdrExportService {
     }
   }
 
-  private RdrResearcher toRdrResearcher(DbUser dbUser) {
-    return rdrMapper.toRdrResearcher(
-        dbUser,
-        accessTierService.getAccessTiersForUser(dbUser),
-        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
+  private RdrResearcher toRdrResearcher(long userId) {
+    DbUser dbUser = userDao.findUserByUserId(userId);
+    RdrResearcher researcher =
+        rdrMapper.toRdrResearcher(
+            dbUser,
+            accessTierService.getAccessTiersForUser(dbUser),
+            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
+    return workbenchConfigProvider.get().rdrExport.exportDemoSurveyV2
+        ? researcher
+        : researcher.demographicSurveyV2(null);
   }
 
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {

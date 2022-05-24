@@ -100,6 +100,7 @@ public class RdrExportServiceImplTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.auth.serviceAccountApiUsers = ImmutableList.of("appspot@gserviceaccount.com");
+      workbenchConfig.rdrExport.exportDemoSurveyV2 = false;
       return workbenchConfig;
     }
   }
