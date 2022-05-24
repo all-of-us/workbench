@@ -2,10 +2,9 @@
  * This file is required by jest-puppeteer preset.
  * https://github.com/smooth-code/jest-puppeteer#configure-puppeteer
  */
-const puppeteer = require('puppeteer');
 
 const fp = require('lodash/fp');
-
+const puppeteer = require('puppeteer');
 const isHeadless = (process.env.PUPPETEER_HEADLESS || 'true') === 'true';
 const slowMotion = parseInt(process.env.PUPPETEER_SLOWMO, 10) || 10;
 
