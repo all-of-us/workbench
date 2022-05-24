@@ -23,8 +23,9 @@ const RadioOption = (props: {
   checked: boolean;
   option: string;
   style?: CSSProperties;
+  onChange: (any) => void;
 }) => {
-  const { checked, option } = props;
+  const { checked, onChange, option } = props;
   const id = useId();
   return (
     <FlexRow style={{ alignItems: 'center' }}>
@@ -33,7 +34,8 @@ const RadioOption = (props: {
         id={id}
         disabled={false}
         checked={checked}
-        onChange={() => console.log('ff')}
+        onChange={onChange}
+        value={option}
       />
       <label htmlFor={id} style={styles.radioAnswer}>
         {option}
@@ -91,9 +93,21 @@ const YesNoOptionalQuestion = (props: {
         {question}
       </div>
       <FlexRow style={{ flex: 1 }}>
-        <RadioOption option='Yes' checked={false} />
-        <RadioOption option='No' checked={false} />
-        <RadioOption option='Prefer not to answer' checked={false} />
+        <RadioOption
+          option='Yes'
+          checked={false}
+          onChange={() => console.log('')}
+        />
+        <RadioOption
+          option='No'
+          checked={false}
+          onChange={() => console.log('')}
+        />
+        <RadioOption
+          option='Prefer not to answer'
+          checked={false}
+          onChange={() => console.log('')}
+        />
       </FlexRow>
     </FlexRow>
   );
@@ -110,9 +124,10 @@ const MultipleChoiceQuestion = (props: {
   question: string;
   choices: MultipleChoiceOption[];
   selected: string;
+  onChange: (any) => void;
   style?: CSSProperties;
 }) => {
-  const { choices, question, selected, style } = props;
+  const { choices, onChange, question, selected, style } = props;
 
   return (
     <FlexRow {...{ style }}>
@@ -125,6 +140,7 @@ const MultipleChoiceQuestion = (props: {
             <RadioOption
               option={choice.name}
               checked={selected === choice.name}
+              onChange={onChange}
             />
             {choice.showInput && selected === choice.name && (
               <input
@@ -145,6 +161,10 @@ const MultipleChoiceQuestion = (props: {
 const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const [checked, setChecked] = useState(false);
+    const [education, setEducation] = useState(null);
+    const [genderIdentity, setGenderIdentity] = useState(null);
+    const [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null);
+    const [sexualOrientation, setSexualOrientation] = useState(null);
     return (
       <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
         <Header>Researcher Workbench</Header>
@@ -204,7 +224,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               { name: 'Prefer not to answer' },
             ]}
-            selected={'Doctorate'}
+            selected={genderIdentity}
+            onChange={(e) => setGenderIdentity(e.target.value)}
           />
           <MultipleChoiceQuestion
             question='What terms best express how you describe your current sexual orientation?'
@@ -222,7 +243,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               { name: 'Prefer not to answer' },
             ]}
-            selected={'Doctorate'}
+            selected={sexualOrientation}
+            onChange={(e) => setSexualOrientation(e.target.value)}
           />
           <MultipleChoiceQuestion
             question='What was the sex assigned to you at birth, such as on your original birth certificate?'
@@ -240,7 +262,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               { name: 'Prefer not to answer' },
             ]}
-            selected={'Doctorate'}
+            selected={sexAssignedAtBirth}
+            onChange={(e) => setSexAssignedAtBirth(e.target.value)}
           />
           <SmallHeader>Questions about disability status</SmallHeader>
           <YesNoOptionalQuestion
@@ -295,7 +318,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'Doctorate', showInput: true },
               { name: 'Prefer not to answer' },
             ]}
-            selected={'Doctorate'}
+            selected={education}
+            onChange={(e) => setEducation(e.target.value)}
           />
         </FlexColumn>
       </FlexColumn>
