@@ -600,12 +600,9 @@ definitions:
       - DOCTORATE
       - PREFER_NOT_TO_ANSWER
 
-  # Note: Swagger and the YAML standard would auto-convert YES/NO to TRUE/FALSE, so we can't use those values
-  # https://github.com/swagger-api/swagger-parser/issues/1205
-  # https://hitchdev.com/strictyaml/why/implicit-typing-removed/
   YesNoPreferNot:
     type: string
     enum:
-      - TRUE
-      - FALSE
+      - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
+      - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
       - PREFER_NOT_TO_ANSWER

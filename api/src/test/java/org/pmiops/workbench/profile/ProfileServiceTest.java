@@ -543,8 +543,8 @@ public class ProfileServiceTest {
             .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
             .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
             .yearOfBirthPreferNot(true)
-            .disabilityHearing(YesNoPreferNot.FALSE)
-            .disabilitySeeing(YesNoPreferNot.TRUE)
+            .disabilityHearing(YesNoPreferNot.NO)
+            .disabilitySeeing(YesNoPreferNot.YES)
             .education(EducationV2.DOCTORATE)
             .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
 
@@ -575,8 +575,8 @@ public class ProfileServiceTest {
             .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
             .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
             .yearOfBirthPreferNot(true)
-            .disabilityHearing(YesNoPreferNot.FALSE)
-            .disabilitySeeing(YesNoPreferNot.TRUE)
+            .disabilityHearing(YesNoPreferNot.NO)
+            .disabilitySeeing(YesNoPreferNot.YES)
             .education(EducationV2.DOCTORATE)
             .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
 
@@ -587,10 +587,10 @@ public class ProfileServiceTest {
             .sexualOrientations(ImmutableList.of(SexualOrientationV2.PREFER_NOT_TO_ANSWER))
             .sexAtBirth(SexAtBirthV2.FEMALE)
             .yearOfBirth(1995)
-            .disabilityHearing(YesNoPreferNot.FALSE)
-            .disabilitySeeing(YesNoPreferNot.FALSE)
+            .disabilityHearing(YesNoPreferNot.NO)
+            .disabilitySeeing(YesNoPreferNot.NO)
             .education(EducationV2.PREFER_NOT_TO_ANSWER)
-            .disadvantaged(YesNoPreferNot.FALSE);
+            .disadvantaged(YesNoPreferNot.NO);
 
     Profile previousProfile = createValidProfile().demographicSurveyV2(v2Survey);
     Profile updatedProfile = createValidProfile().demographicSurveyV2(updatedV2Survey);

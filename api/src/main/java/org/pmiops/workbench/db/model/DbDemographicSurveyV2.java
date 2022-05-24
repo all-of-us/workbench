@@ -389,10 +389,9 @@ public class DbDemographicSurveyV2 {
     PREFER_NOT_TO_ANSWER
   }
 
-  // Swagger auto-translates YES/NO to TRUE/FALSE so we don't really benefit from using YES/NO here
   public enum DbYesNoPreferNot {
-    TRUE,
-    FALSE,
+    YES,
+    NO,
     PREFER_NOT_TO_ANSWER
   }
 }

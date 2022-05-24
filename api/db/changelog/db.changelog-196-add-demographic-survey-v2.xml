@@ -25,15 +25,15 @@
       <column name="sex_at_birth_other_text" type="VARCHAR(200)"/>
       <column name="year_of_birth" type="smallint"/>
       <column name="year_of_birth_prefer_not" type="boolean"/>
-      <column name="disability_hearing" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
-      <column name="disability_seeing" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
-      <column name="disability_concentrating" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
-      <column name="disability_walking" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
-      <column name="disability_dressing" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
-      <column name="disability_errands" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_hearing" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_seeing" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_concentrating" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_walking" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_dressing" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disability_errands" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
       <column name="disability_other_text" type="VARCHAR(200)"/>
       <column name="education" type="ENUM('NO_EDUCATION','GRADES_1_12','UNDERGRADUATE','COLLEGE_GRADUATE','MASTER','DOCTORATE','PREFER_NOT_TO_ANSWER')"/>
-      <column name="disadvantaged" type="ENUM('TRUE','FALSE','PREFER_NOT_TO_ANSWER')"/>
+      <column name="disadvantaged" type="ENUM('YES','NO','PREFER_NOT_TO_ANSWER')"/>
     </createTable>
 
     <createTable tableName="demographic_survey_v2_ethnic_category">
