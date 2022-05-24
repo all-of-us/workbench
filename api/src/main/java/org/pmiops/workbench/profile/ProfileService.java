@@ -277,11 +277,16 @@ public class ProfileService {
   }
 
   private void populateDemographicSurveyV2(DbUser dbUser, Profile updatedProfile) {
-    DbDemographicSurveyV2 dbDemoSurvey =
+    DbDemographicSurveyV2 newDemoSurvey =
         demographicSurveyMapper.toDbDemographicSurveyV2(updatedProfile.getDemographicSurveyV2());
-    if (dbDemoSurvey != null) {
-      dbUser.setDemographicSurveyV2(dbDemoSurvey);
-      dbDemoSurvey.setUser(dbUser);
+
+    if (newDemoSurvey != null) {
+      DbDemographicSurveyV2 existingSurvey = dbUser.getDemographicSurveyV2();
+      if (existingSurvey != null) {
+        newDemoSurvey.setId(existingSurvey.getId());
+      }
+      dbUser.setDemographicSurveyV2(newDemoSurvey);
+      newDemoSurvey.setUser(dbUser);
     }
   }
 
