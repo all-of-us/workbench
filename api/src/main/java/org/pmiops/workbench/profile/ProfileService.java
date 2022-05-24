@@ -279,10 +279,10 @@ public class ProfileService {
   private void populateDemographicSurveyV2(DbUser dbUser, Profile updatedProfile) {
     DbDemographicSurveyV2 dbDemoSurvey =
         demographicSurveyMapper.toDbDemographicSurveyV2(updatedProfile.getDemographicSurveyV2());
-    if (dbDemoSurvey != null && dbDemoSurvey.getUser() == null) {
+    if (dbDemoSurvey != null) {
+      dbUser.setDemographicSurveyV2(dbDemoSurvey);
       dbDemoSurvey.setUser(dbUser);
     }
-    dbUser.setDemographicSurveyV2(dbDemoSurvey);
   }
 
   // Save the verified institutional affiliation in the DB. The affiliation has already been
