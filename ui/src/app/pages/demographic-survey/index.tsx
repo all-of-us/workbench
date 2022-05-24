@@ -1,10 +1,15 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 import * as fp from 'lodash/fp';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import { NumberInput, RadioButton } from 'app/components/inputs';
+import {
+  CheckBox,
+  NumberInput,
+  RadioButton,
+  Select,
+} from 'app/components/inputs';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { reactStyles, useId } from 'app/utils';
@@ -34,6 +39,43 @@ const RadioOption = (props: { option: string; style?: CSSProperties }) => {
   );
 };
 
+const CategoryCheckbox = (props: {
+  checked: boolean;
+  category: string;
+  onChange: (any) => void;
+}) => {
+  const [value, setValue] = useState(null);
+  return (
+    <FlexColumn>
+      <CheckBox
+        label={props.category}
+        data-test-id={`checkbox`}
+        key={'value'}
+        checked={props.checked}
+        manageOwnState={false}
+        onChange={props.onChange}
+      />
+      {props.checked && (
+        <Select
+          {...{ value }}
+          styles={{
+            menuPortal: (base) => ({
+              ...base,
+              zIndex: 110,
+            }),
+          }}
+          menuPortalTarget={document.getElementById('popup-root')}
+          isDisabled={false}
+          classNamePrefix={''}
+          data-test-id={''}
+          onChange={(e) => setValue(e.value)}
+          options={['A', 'B', 'C']}
+        />
+      )}
+    </FlexColumn>
+  );
+};
+
 const YesNoOptionalQuestion = (props: {
   question: string;
   style?: CSSProperties;
@@ -56,12 +98,47 @@ const YesNoOptionalQuestion = (props: {
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
+    const [checked, setChecked] = useState(false);
     return (
       <FlexColumn style={{ width: '750px' }}>
         <Header>Researcher Workbench</Header>
         <FlexColumn>
           <SmallHeader>Races and Ethnicities</SmallHeader>
-          <div>Select</div>
+          <CategoryCheckbox
+            {...{ checked }}
+            category='American Indian or Alaska Native'
+            onChange={(e) => setChecked(e)}
+          />
+          <CategoryCheckbox
+            {...{ checked }}
+            category='Asian'
+            onChange={(e) => setChecked(e)}
+          />
+          <CategoryCheckbox
+            {...{ checked }}
+            category='Black, African American, or of African descent'
+            onChange={(e) => setChecked(e)}
+          />
+          <CategoryCheckbox
+            {...{ checked }}
+            category='Hispanic, Latino, or Spanish descent'
+            onChange={(e) => setChecked(e)}
+          />
+          <CategoryCheckbox
+            {...{ checked }}
+            category='Middle Eastern or North African'
+            onChange={(e) => setChecked(e)}
+          />
+          <CategoryCheckbox
+            {...{ checked }}
+            category='Native Hawaiian or other Pacific Islander'
+            onChange={(e) => setChecked(e)}
+          />
+          <CategoryCheckbox
+            {...{ checked }}
+            category='White, or of European descent'
+            onChange={(e) => setChecked(e)}
+          />
           <SmallHeader>Questions about genders</SmallHeader>
           <div style={styles.question}>
             What terms best express how you describe your current gender
