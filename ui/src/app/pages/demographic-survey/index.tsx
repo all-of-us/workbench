@@ -11,50 +11,45 @@ import { reactStyles, useId } from 'app/utils';
 
 const styles = reactStyles({
   question: { fontWeight: 'bold' },
+  radioAnswer: { marginRight: '0.25rem' },
 });
+
+const RadioOption = (props: { option: string; style?: CSSProperties }) => {
+  const { option } = props;
+  const id = useId();
+  return (
+    <FlexRow style={{ alignItems: 'center' }}>
+      <label htmlFor={id} style={styles.radioAnswer}>
+        {option}
+      </label>
+      <RadioButton
+        data-test-id='nothing-to-report'
+        id={id}
+        disabled={false}
+        style={{ marginRight: '1rem' }}
+        checked={false}
+        onChange={() => console.log('ff')}
+      />
+    </FlexRow>
+  );
+};
 
 const YesNoOptionalQuestion = (props: {
   question: string;
   style?: CSSProperties;
 }) => {
   const { question, style } = props;
-  const yesId = useId();
-  const noId = useId();
-  const preferNotId = useId();
+
   return (
     <FlexRow {...{ style }}>
       <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
         {question}
       </div>
-      <div style={{ flex: 1 }}>
-        <label htmlFor={yesId}>Yes</label>
-        <RadioButton
-          data-test-id='nothing-to-report'
-          id={yesId}
-          disabled={false}
-          style={{ marginRight: '1rem' }}
-          checked={false}
-          onChange={() => console.log('ff')}
-        />
-
-        <label htmlFor={noId}>No</label>
-        <RadioButton
-          id={noId}
-          disabled={false}
-          style={{ marginRight: '1rem' }}
-          checked={false}
-          onChange={() => console.log('ff')}
-        />
-
-        <label htmlFor={preferNotId}>Prefer not to answer</label>
-        <RadioButton
-          id={preferNotId}
-          disabled={false}
-          style={{ justifySelf: 'end' }}
-          checked={false}
-          onChange={() => console.log('ff')}
-        />
-      </div>
+      <FlexRow style={{ flex: 1 }}>
+        <RadioOption option='Yes' />
+        <RadioOption option='No' />
+        <RadioOption option='Prefer not to answer' />
+      </FlexRow>
     </FlexRow>
   );
 };
