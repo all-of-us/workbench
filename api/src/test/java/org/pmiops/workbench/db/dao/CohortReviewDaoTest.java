@@ -27,7 +27,6 @@ public class CohortReviewDaoTest {
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
   private DbCohortReview cohortReview;
-  private DbCohortReview anotherCohortReview;
   private long cohortId;
 
   @BeforeEach
@@ -40,7 +39,7 @@ public class CohortReviewDaoTest {
     cohort.setWorkspaceId(workspaceDao.save(workspace).getWorkspaceId());
     cohortId = cohortDao.save(cohort).getCohortId();
     cohortReview = cohortReviewDao.save(createCohortReview());
-    anotherCohortReview = cohortReviewDao.save(createCohortReview());
+    cohortReviewDao.save(createCohortReview());
   }
 
   @Test
