@@ -38,7 +38,7 @@
 
     <createTable tableName="demographic_survey_v2_ethnic_category">
       <column name="demographic_survey_v2_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="demographic_survey_v2_ethnic_category" references="demographic_survey_v2(demographic_survey_v2_id)"/>
+        <constraints nullable="false" foreignKeyName="fk_demographic_survey_v2_ethnic_category" references="demographic_survey_v2(demographic_survey_v2_id)"/>
       </column>
       <column name="ethnic_category" type="ENUM('AI_AN','AI_AN_CENTRAL_SOUTH','AI_AN_OTHER','ASIAN','ASIAN_INDIAN','ASIAN_CAMBODIAN','ASIAN_CHINESE','ASIAN_FILIPINO','ASIAN_HMONG','ASIAN_JAPANESE','ASIAN_KOREAN','ASIAN_LAO','ASIAN_PAKISTANI','ASIAN_VIETNAMESE','ASIAN_OTHER','BLACK','HISPANIC','MENA','NHPI','WHITE','OTHER','PREFER_NOT_TO_ANSWER')">
         <constraints nullable="false"/>
@@ -47,7 +47,7 @@
 
     <createTable tableName="demographic_survey_v2_gender_identity">
       <column name="demographic_survey_v2_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="demographic_survey_v2_gender_identity" references="demographic_survey_v2(demographic_survey_v2_id)"/>
+        <constraints nullable="false" foreignKeyName="fk_demographic_survey_v2_gender_identity" references="demographic_survey_v2(demographic_survey_v2_id)"/>
       </column>
       <column name="gender_identity" type="ENUM('GENDERQUEER','MAN','NON_BINARY','QUESTIONING','TRANS_MAN','TRANS_WOMAN','TWO_SPIRIT','WOMAN','OTHER','PREFER_NOT_TO_ANSWER')">
         <constraints nullable="false"/>
@@ -56,7 +56,7 @@
 
     <createTable tableName="demographic_survey_v2_sexual_orientation">
       <column name="demographic_survey_v2_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="demographic_survey_v2_sexual_orientation" references="demographic_survey_v2(demographic_survey_v2_id)"/>
+        <constraints nullable="false" foreignKeyName="fk_demographic_survey_v2_sexual_orientation" references="demographic_survey_v2(demographic_survey_v2_id)"/>
       </column>
       <column name="sexual_orientation" type="ENUM('ASEXUAL','BISEXUAL','GAY','LESBIAN','POLYSEXUAL','QUEER','QUESTIONING','SAME_GENDER','STRAIGHT','TWO_SPIRIT','OTHER','PREFER_NOT_TO_ANSWER')">
         <constraints nullable="false"/>
