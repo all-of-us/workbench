@@ -1,6 +1,5 @@
 import {
   Cohort,
-  CohortAnnotationsResponse,
   CohortsApi,
   EmptyResponse,
   ResourceType,
@@ -160,11 +159,5 @@ export class CohortsApiStub extends CohortsApi {
     const cohort =
       this.cohorts.find((c) => c.id === cohortId) || this.cohorts[0];
     return new Promise<Cohort>((resolve) => resolve(cohort));
-  }
-
-  getCohortAnnotations(): Promise<CohortAnnotationsResponse> {
-    return new Promise<CohortAnnotationsResponse>((resolve) =>
-      resolve({ results: [] })
-    );
   }
 }

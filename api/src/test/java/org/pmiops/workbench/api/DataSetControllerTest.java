@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -71,7 +70,6 @@ import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -167,8 +165,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataSetControllerTest {
 
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
-  private static final String CONCEPT_SET_TWO_NAME = "concept set two";
-  private static final String CONCEPT_SET_SURVEY_NAME = "concept survey set";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
@@ -254,7 +250,6 @@ public class DataSetControllerTest {
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
-    CohortMaterializationService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
@@ -1344,21 +1339,6 @@ public class DataSetControllerTest {
                     workspace.getNamespace(), workspace.getId(), dataSetRequest));
 
     assertForbiddenException(exception);
-  }
-
-  @Disabled(
-      "The DataSetController#getDataSetByResourceId(...) is a passthrough "
-          + "call to DataSetServiceImpl#getDataSets(...) which is already "
-          + "tested in DataSetServiceTest test suite.")
-  public void testGetDataSetByResourceId() {
-    // The DataSetController call is a pass through to
-    // DataSetServiceImpl.getDataSets(...)
-  }
-
-  @Disabled("Already tested as part of DataSetControllerTest#createDataSetMissingArguments")
-  public void testValidateDataSetCreateRequest() {
-    // The private method ValidateDataSetCreateRequest is already tested as
-    // part of DataSetControllerTest#createDataSetMissingArguments
   }
 
   private void assertForbiddenException(Throwable exception) {
