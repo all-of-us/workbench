@@ -47,7 +47,7 @@ import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurveyV2;
-import org.pmiops.workbench.model.Education;
+import org.pmiops.workbench.model.EducationV2;
 import org.pmiops.workbench.model.EthnicCategory;
 import org.pmiops.workbench.model.GenderIdentityV2;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -545,7 +545,7 @@ public class ProfileServiceTest {
             .yearOfBirthPreferNot(true)
             .disabilityHearing(YesNoPreferNot.FALSE)
             .disabilitySeeing(YesNoPreferNot.TRUE)
-            .education(Education.DOCTORATE)
+            .education(EducationV2.DOCTORATE)
             .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
 
     Profile previousProfile = createValidProfile();
@@ -577,7 +577,7 @@ public class ProfileServiceTest {
             .yearOfBirthPreferNot(true)
             .disabilityHearing(YesNoPreferNot.FALSE)
             .disabilitySeeing(YesNoPreferNot.TRUE)
-            .education(Education.DOCTORATE)
+            .education(EducationV2.DOCTORATE)
             .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
 
     DemographicSurveyV2 updatedV2Survey =
@@ -589,7 +589,7 @@ public class ProfileServiceTest {
             .yearOfBirth(1995)
             .disabilityHearing(YesNoPreferNot.FALSE)
             .disabilitySeeing(YesNoPreferNot.FALSE)
-            .education(Education.PREFER_NO_ANSWER)
+            .education(EducationV2.PREFER_NOT_TO_ANSWER)
             .disadvantaged(YesNoPreferNot.FALSE);
 
     Profile previousProfile = createValidProfile().demographicSurveyV2(v2Survey);

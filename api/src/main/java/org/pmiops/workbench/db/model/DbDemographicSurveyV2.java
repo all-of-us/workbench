@@ -39,7 +39,7 @@ public class DbDemographicSurveyV2 {
   private DbYesNoPreferNot disabilityDressing;
   private DbYesNoPreferNot disabilityErrands;
   private String disabilityOtherText;
-  private DbEducation education;
+  private DbEducationV2 education;
   private DbYesNoPreferNot disadvantaged;
 
   // singular names for these because Hibernate seems to require
@@ -298,11 +298,11 @@ public class DbDemographicSurveyV2 {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "education")
-  public DbEducation getEducation() {
+  public DbEducationV2 getEducation() {
     return education;
   }
 
-  public DbDemographicSurveyV2 setEducation(DbEducation education) {
+  public DbDemographicSurveyV2 setEducation(DbEducationV2 education) {
     this.education = education;
     return this;
   }
@@ -379,14 +379,14 @@ public class DbDemographicSurveyV2 {
     PREFER_NOT_TO_ANSWER
   }
 
-  public enum DbEducation {
+  public enum DbEducationV2 {
     NO_EDUCATION,
     GRADES_1_12,
     UNDERGRADUATE,
     COLLEGE_GRADUATE,
     MASTER,
     DOCTORATE,
-    PREFER_NO_ANSWER
+    PREFER_NOT_TO_ANSWER
   }
 
   // Swagger auto-translates YES/NO to TRUE/FALSE so we don't really benefit from using YES/NO here
