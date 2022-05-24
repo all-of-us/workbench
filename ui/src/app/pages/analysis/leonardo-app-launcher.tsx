@@ -34,6 +34,8 @@ import { fetchAbortableRetry } from 'app/utils/retry';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
+  RUNTIME_ERROR_STATUS_MESSAGE_SHORT,
+  RuntimeStatusError,
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
@@ -711,6 +713,12 @@ export const LeonardoAppLauncher = fp.flow(
           return (
             <NotebookFrameError errorMode={ErrorMode.FORBIDDEN}>
               <SecuritySuspendedMessage error={error} />
+            </NotebookFrameError>
+          );
+        } else if (error instanceof RuntimeStatusError) {
+          return (
+            <NotebookFrameError errorMode={ErrorMode.ERROR}>
+              {RUNTIME_ERROR_STATUS_MESSAGE_SHORT}
             </NotebookFrameError>
           );
         } else if (error instanceof InitialRuntimeNotFoundError) {
