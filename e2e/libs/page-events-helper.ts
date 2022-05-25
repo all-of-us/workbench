@@ -1,5 +1,5 @@
 import fp from 'lodash/fp';
-import { HTTPRequest, JSHandle } from 'puppeteer';
+import { JSHandle, Request } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { config } from 'resources/workbench-config';
 
@@ -13,7 +13,7 @@ export const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
       return obj;
     }, jsHandle)
     .then(async (jsHandle) => {
-      return await jsHandle.jsonValue();
+      return (await jsHandle.jsonValue()) as string;
     });
 };
 
@@ -33,7 +33,7 @@ const stringifyData = (data: string): string => {
  * @return: Returns request if this request does not match the exclude pattern.
  *  Returns null if this request matches the exclude pattern.
  */
-const isWorkbenchRequest = (request: HTTPRequest): HTTPRequest | null => {
+const isWorkbenchRequest = (request: Request): Request | null => {
   const apiHostName = config.API_HOSTNAME;
   const unwantedRequests = [
     'google',
@@ -55,14 +55,14 @@ const isWorkbenchRequest = (request: HTTPRequest): HTTPRequest | null => {
  * Returns this request only if request resource type are: "xhr", "fetch", "websocket", and "other".
  * @param request
  */
-const includeXhrResourceType = (request: HTTPRequest): HTTPRequest | null => {
+const includeXhrResourceType = (request: Request): Request | null => {
   const filters = ['xhr', 'fetch', 'websocket', 'other'];
   return filters.some((resource) => request && request.resourceType().includes(resource)) ? request : null;
 };
 
 // Disable logging of API response body in test log to make log less cluttered.
 // Following API response body are not helpful for error troubleshooting.
-export const shouldLogResponse = (request: HTTPRequest): boolean => {
+export const shouldLogResponse = (request: Request): boolean => {
   const filters = [
     '/readonly',
     '/chartinfo/',
@@ -86,20 +86,20 @@ export const shouldLogResponse = (request: HTTPRequest): boolean => {
 };
 
 // Truncate long Api response.
-const isResponseTruncatable = (request: HTTPRequest): boolean => {
+const isResponseTruncatable = (request: Request): boolean => {
   return request && request.url().endsWith('/v1/workspaces');
 };
 
-const getRequestPostData = (request: HTTPRequest): string | undefined => {
+const getRequestPostData = (request: Request): string | undefined => {
   return request && request.postData() ? request.postData() : undefined;
 };
 
-const notRedirectRequest = (request: HTTPRequest): boolean => {
+const notRedirectRequest = (request: Request): boolean => {
   // Response body can only be accessed for non-redirect requests
   return request && request.redirectChain().length === 0 && !request.isNavigationRequest();
 };
 
-const getResponseText = async (request: HTTPRequest): Promise<string> => {
+const getResponseText = async (request: Request): Promise<string> => {
   const REDIRECT_CODE_START = 300;
   const REDIRECT_CODE_END = 308;
   const NO_CONTENT_RESPONSE_CODE = 204;
@@ -120,7 +120,7 @@ const getResponseText = async (request: HTTPRequest): Promise<string> => {
   }
 };
 
-export const logRequestError = async (request: HTTPRequest): Promise<void> => {
+export const logRequestError = async (request: Request): Promise<void> => {
   const response = request.response();
   const status = response ? response.status() : '';
   const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
@@ -136,7 +136,7 @@ export const logRequestError = async (request: HTTPRequest): Promise<void> => {
   );
 };
 
-export const formatResponseBody = async (request: HTTPRequest): Promise<string> => {
+export const formatResponseBody = async (request: Request): Promise<string> => {
   if (request) {
     let responseText = stringifyData(await getResponseText(request));
     if (isResponseTruncatable(request)) {

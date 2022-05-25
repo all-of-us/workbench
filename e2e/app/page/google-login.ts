@@ -171,7 +171,7 @@ export default class GoogleLoginPage {
       await emailInput.type(config.INSTITUTION_CONTACT_EMAIL);
       await Promise.all([
         this.page.waitForNavigation({ waitUntil: ['networkidle2', 'load'], timeout: 60000 }),
-        this.page.keyboard.press('Enter')
+        this.page.keyboard.press(String.fromCharCode(13)) // Press Enter key.
       ]);
       return true;
     }
