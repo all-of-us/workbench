@@ -122,7 +122,7 @@ const MultipleChoiceQuestion = (props: {
   };
 
   return (
-    <FlexRow {...{ style }}>
+    <FlexRow style={{ ...style, alignItems: 'center' }}>
       <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
         {question}
       </div>
@@ -264,7 +264,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             selected={genderIdentity}
             onChange={setGenderIdentity}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '3rem' }}
           />
           <MultipleChoiceQuestion
             question='What terms best express how you describe your current sexual orientation?'
@@ -288,7 +288,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             multiple
             selected={sexualOrientation}
             onChange={setSexualOrientation}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '3rem' }}
           />
           <MultipleChoiceQuestion
             question='What was the sex assigned to you at birth, such as on your original birth certificate?'
