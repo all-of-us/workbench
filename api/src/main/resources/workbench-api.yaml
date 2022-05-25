@@ -5834,6 +5834,8 @@ definitions:
             description: >
               DEPRECATED - RW-8236. Remove after one cycle. Whether any modules have expired. Expiration information is also included with each
               module in the array; this field is provided for convenience.
+      demographicSurveyV2:
+        $ref: '#/definitions/DemographicSurveyV2'
 
   AccessModuleStatus:
     type: object
@@ -9504,3 +9506,174 @@ definitions:
       eraRequired:
          type: boolean
          description: If eRA Commons linking is required for this access tier.
+
+  DemographicSurveyV2:
+    type: object
+    properties:
+      completionTime:
+        type: string
+        format: date-time
+        description: The time the user most recently completed the survey
+      ethnicCategories:
+        type: array
+        items:
+          "$ref": "#/definitions/EthnicCategory"
+      ethnicityAiAnOtherText:
+        type: string
+        description: American Indian or Alaska Native /  None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityAsianOtherText:
+        type: string
+        description: Asian / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityOtherText:
+        type: string
+        description: None of these fully describe me, and I want to specify.  Max length 200.
+      genderIdentities:
+        type: array
+        items:
+          "$ref": "#/definitions/GenderIdentityV2"
+      genderOtherText:
+        type: string
+        description: None of these fully describe me, and I want to specify.  Max length 200.
+      sexualOrientations:
+        type: array
+        items:
+          "$ref": "#/definitions/SexualOrientationV2"
+      orientationOtherText:
+        type: string
+        description: None of these fully describe me, and I want to specify.  Max length 200.
+      sexAtBirth:
+        "$ref": "#/definitions/SexAtBirthV2"
+      sexAtBirthOtherText:
+        type: string
+        description: None of these fully describe me, and I want to specify.  Max length 200.
+      yearOfBirth:
+        type: integer
+      yearOfBirthPreferNot:
+        type: boolean
+      disabilityHearing:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: >
+          Are you deaf or do you have serious difficulty hearing?
+          (Note: Some people who are deaf or have serious difficulty
+          hearing use assistive devices to communicate by phone.)
+      disabilitySeeing:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: Are you blind or do you have serious difficulty seeing, even when wearing glasses?
+      disabilityConcentrating:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: >
+          Because of a physical, cognitive, or emotional condition,
+          do you have serious difficulty concentrating, remembering, or making decisions?
+      disabilityWalking:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: Do you have serious difficulty walking or climbing stairs?
+      disabilityDressing:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: Do you have difficulty dressing or bathing?
+      disabilityErrands:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: >
+          Because of a physical, mental, or emotional condition,
+          do you have difficulty doing errands alone such as visiting
+          a doctor’s office or shopping?
+      disabilityOtherText:
+        type: string
+        description: >
+          Do you have a physical, cognitive, and/or emotional condition that
+          substantially inhibits one or more life activities not specified
+          through the above questions, and want to share more? Please describe.
+      education:
+        "$ref": "#/definitions/EducationV2"
+      disadvantaged:
+        "$ref": "#/definitions/YesNoPreferNot"
+        description: >
+          Are you an individual from a disadvantaged background,
+          as defined by NIH Diversity in Extramural Programs?
+
+  EthnicCategory:
+    type: string
+    description: 'Which categories describe you? (Select all that apply). Note, you may select more than one group.'
+    enum:
+      - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
+      - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
+      - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
+      - ASIAN
+      - ASIAN_INDIAN
+      - ASIAN_CAMBODIAN
+      - ASIAN_CHINESE
+      - ASIAN_FILIPINO
+      - ASIAN_HMONG
+      - ASIAN_JAPANESE
+      - ASIAN_KOREAN
+      - ASIAN_LAO
+      - ASIAN_PAKISTANI
+      - ASIAN_VIETNAMESE
+      - ASIAN_OTHER           # Asian / None of these fully describe me, and I want to specify
+      - BLACK                 # Black, African American, or of African descent
+      - HISPANIC              # Hispanic, Latino, or Spanish descent
+      - MENA                  # Middle Eastern or North African
+      - NHPI                  # Native Hawaiian or other Pacific Islander
+      - WHITE                 # White, or of European descent
+      - OTHER                 # None of these fully describe me, and I want to specify
+      - PREFER_NOT_TO_ANSWER
+
+  GenderIdentityV2:
+    type: string
+    description: 'Which terms best express how you describe your current gender identity? (Select all that apply)'
+    enum:
+      - GENDERQUEER
+      - MAN
+      - NON_BINARY
+      - QUESTIONING           # Questioning or unsure of my gender identity
+      - TRANS_MAN             # Trans man/Transgender man
+      - TRANS_WOMAN           # Trans woman/Transgender woman
+      - TWO_SPIRIT
+      - WOMAN
+      - OTHER                 # None of these fully describe me, and I want to specify
+      - PREFER_NOT_TO_ANSWER
+
+  SexualOrientationV2:
+    type: string
+    description: 'Which terms best express how you describe your current sexual orientation? (Select all that apply)'
+    enum:
+      - ASEXUAL
+      - BISEXUAL
+      - GAY
+      - LESBIAN
+      - POLYSEXUAL            # Polysexual, omnisexual, or pansexual
+      - QUEER
+      - QUESTIONING           # Questioning or unsure of my sexual orientation
+      - SAME_GENDER           # Same-gender loving
+      - STRAIGHT              # Straight or heterosexual
+      - TWO_SPIRIT
+      - OTHER                 # None of these fully describe me, and I want to specify
+      - PREFER_NOT_TO_ANSWER
+
+  SexAtBirthV2:
+    type: string
+    description: 'What was the sex assigned to you at birth, such as on your original birth certificate?'
+    enum:
+      - FEMALE
+      - INTERSEX
+      - MALE
+      - OTHER                 # None of these fully describe me, and I want to specify
+      - PREFER_NOT_TO_ANSWER
+
+  EducationV2:
+    type: string
+    description: 'Highest Level of Education Completed'
+    enum:
+      - NO_EDUCATION          # Never attended school/No formal education
+      - GRADES_1_12           # Primary/Middle School/High School (Grades 1 through 12/GED)
+      - UNDERGRADUATE         # Some college, Associate Degree or Technical School (1 to 3 years) or current undergraduate student
+      - COLLEGE_GRADUATE      # College graduate (4 years or more) or current post-graduate trainee
+      - MASTER
+      - DOCTORATE
+      - PREFER_NOT_TO_ANSWER
+
+  YesNoPreferNot:
+    type: string
+    enum:
+      - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
+      - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
+      - PREFER_NOT_TO_ANSWER
