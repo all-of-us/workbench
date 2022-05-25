@@ -11,7 +11,7 @@ import { reactStyles, useId } from 'app/utils';
 
 const styles = reactStyles({
   question: { fontWeight: 'bold' },
-  answer: { marginRight: '0.25rem' },
+  answer: { margin: '0.0rem 0.25rem' },
 });
 
 const Option = (props: {
@@ -103,7 +103,11 @@ const MultipleChoiceQuestion = (props: {
                 selected === choice.name) && (
                 <input
                   data-test-id='search'
-                  style={{ marginBottom: '.5em', width: '300px' }}
+                  style={{
+                    marginBottom: '.5em',
+                    marginLeft: '0.75rem',
+                    width: '300px',
+                  }}
                   type='text'
                   placeholder='Search'
                   value={choice.otherText}
