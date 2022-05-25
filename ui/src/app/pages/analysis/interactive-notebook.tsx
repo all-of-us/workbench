@@ -207,8 +207,8 @@ export const InteractiveNotebook = fp.flow(
         );
         onRuntimeReady();
       } catch (e) {
+        this.setState({ userRequestedExecutableNotebook: false });
         if (e instanceof InitialRuntimeNotFoundError) {
-          this.setState({ userRequestedExecutableNotebook: false });
           // By awaiting the promise here, we're effectively blocking on the
           // user's input to the runtime intializer modal. We invoke this
           // callback with the targetRuntime configuration, or null if the user
