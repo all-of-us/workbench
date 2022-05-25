@@ -9,7 +9,8 @@ public class WorkspaceUtils {
 
   /** Returns {@code true} if the given billing account is workbench free tier billing account. */
   public static boolean isFreeTier(String billingAccountName, WorkbenchConfig workbenchConfig) {
-    return billingAccountName.equals(workbenchConfig.billing.freeTierBillingAccountName()) || billingAccountName.equals(workbenchConfig.billing.legacyFreeTierBillingAccountName());
+    return billingAccountName.equals(workbenchConfig.billing.freeTierBillingAccountName())
+        || billingAccountName.equals(workbenchConfig.billing.legacyFreeTierBillingAccountName());
   }
 
   /** Returns {@code BillingAccountType} by given billing account name. */
