@@ -115,7 +115,7 @@ const YesNoOptionalQuestion = (props: {
 
 interface MultipleChoiceOption {
   name: string;
-  value?: string;
+  otherText?: string;
   showInput?: boolean;
   onChange?: (any) => void;
 }
@@ -148,7 +148,8 @@ const MultipleChoiceQuestion = (props: {
                 style={{ marginBottom: '.5em', width: '300px' }}
                 type='text'
                 placeholder='Search'
-                onChange={(e) => console.log(e.target.value)}
+                value={choice.otherText}
+                onChange={choice.onChange}
               />
             )}
           </FlexColumn>
@@ -163,8 +164,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [checked, setChecked] = useState(false);
     const [education, setEducation] = useState(null);
     const [genderIdentity, setGenderIdentity] = useState(null);
+    const [genderIdentityOtherText, setGenderIdentityOtherText] =
+      useState(null);
     const [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null);
+    const [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
+      useState(null);
     const [sexualOrientation, setSexualOrientation] = useState(null);
+    const [sexualOrientationOtherText, setSexualOrientationOtherText] =
+      useState(null);
     return (
       <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
         <Header>Researcher Workbench</Header>
@@ -221,6 +228,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'Two Spirit' },
               {
                 name: 'None of these fully describe me, and I want to specify',
+                showInput: true,
+                otherText: genderIdentityOtherText,
+                onChange: (e) => setGenderIdentityOtherText(e.target.value),
               },
               { name: 'Prefer not to answer' },
             ]}
@@ -240,6 +250,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'Woman' },
               {
                 name: 'None of these fully describe me, and I want to specify',
+                showInput: true,
+                otherText: sexualOrientationOtherText,
+                onChange: (e) => setSexualOrientationOtherText(e.target.value),
               },
               { name: 'Prefer not to answer' },
             ]}
@@ -259,6 +272,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'Woman' },
               {
                 name: 'None of these fully describe me, and I want to specify',
+                showInput: true,
+                otherText: sexAssignedAtBirthOtherText,
+                onChange: (e) => setSexAssignedAtBirthOtherText(e.target.value),
               },
               { name: 'Prefer not to answer' },
             ]}
@@ -315,7 +331,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'College Graduate' },
               { name: 'Undergraduate' },
               { name: "Master's" },
-              { name: 'Doctorate', showInput: true },
+              { name: 'Doctorate' },
               { name: 'Prefer not to answer' },
             ]}
             selected={education}
