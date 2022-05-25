@@ -133,6 +133,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 cohortId, cdrVersionId));
       }
     }
+
     List<DbParticipantCohortStatus> participantCohortStatuses =
         cohortReviewService.createDbParticipantCohortStatusesList(
             cohort, request.getSize(), cohortReview.getCohortReviewId());
