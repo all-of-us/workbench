@@ -1,5 +1,5 @@
-import { defaultArgs } from 'puppeteer';
 import fp from 'lodash/fp';
+const puppeteer = require('puppeteer');
 
 const { PUPPETEER_DEBUG, PUPPETEER_HEADLESS, CI } = process.env;
 const isCi = CI === 'true';
@@ -20,7 +20,7 @@ const customChromeOptions = [
 
 // Append to Puppeteer default chrome flags.
 // https://github.com/puppeteer/puppeteer/blob/33f1967072e07824c5bf6a8c1336f844d9efaabf/lib/Launcher.js#L261
-const chromeOptions = defaultArgs({
+const chromeOptions = puppeteer.defaultArgs({
   userDataDir: null,
   headless: isHeadless,
   devtools: true,

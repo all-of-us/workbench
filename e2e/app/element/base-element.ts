@@ -3,8 +3,9 @@ import {
   ClickOptions,
   ElementHandle,
   JSHandle,
-  NavigationOptions,
+  KeyInput,
   Page,
+  WaitForOptions,
   WaitForSelectorOptions
 } from 'puppeteer';
 import { exists, getAttrValue, getPropValue, getStyleValue } from 'utils/element-utils';
@@ -132,7 +133,7 @@ export default class BaseElement {
         .catch(() => {
           return null;
         });
-      return (await jsHandle.jsonValue()) as boolean;
+      return await jsHandle.jsonValue();
     };
 
     const boxModel = async (element: ElementHandle): Promise<BoxModel | null> => {
@@ -231,14 +232,14 @@ export default class BaseElement {
     return this;
   }
 
-  async pressKeyboard(key: string, options?: { text?: string; delay?: number }): Promise<void> {
+  async pressKeyboard(key: KeyInput, options?: { text?: string; delay?: number }): Promise<void> {
     return this.asElementHandle().then((element) => {
       return element.press(key, options);
     });
   }
 
   async pressReturn(): Promise<void> {
-    return this.pressKeyboard(String.fromCharCode(13));
+    return this.pressKeyboard('Enter');
   }
 
   /**
@@ -374,7 +375,7 @@ export default class BaseElement {
    * Click on element then wait for page navigation to finish.
    */
   async clickAndWait(
-    navOptions: NavigationOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
+    navOptions: WaitForOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
   ): Promise<void> {
     const navigationPromise = this.page.waitForNavigation(navOptions);
     await this.click({ delay: 10 });
