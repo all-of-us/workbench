@@ -6,13 +6,15 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import { CheckBox, NumberInput, RadioButton } from 'app/components/inputs';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { reactStyles, useId } from 'app/utils';
 
 const styles = reactStyles({
   question: { fontWeight: 'bold' },
   answer: { margin: '0.0rem 0.25rem' },
 });
+
+const minYear = '0';
+const maxYear = '3000';
 
 const Option = (props: {
   checked: boolean;
@@ -144,230 +146,238 @@ const YesNoOptionalQuestion = (props: {
   );
 };
 
-const DemographicSurvey = fp.flow(withProfileErrorModal)(
-  (spinnerProps: WithSpinnerOverlayProps) => {
-    const [education, setEducation] = useState(null);
-    const [genderIdentity, setGenderIdentity] = useState(null);
-    const [genderIdentityOtherText, setGenderIdentityOtherText] =
-      useState(null);
-    const [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null);
-    const [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
-      useState(null);
-    const [sexualOrientation, setSexualOrientation] = useState([]);
-    const [sexualOrientationOtherText, setSexualOrientationOtherText] =
-      useState(null);
-    const [deaf, setDeaf] = useState(null);
-    const [blind, setBlind] = useState(null);
-    const [concentration, setConcentration] = useState(null);
-    const [walking, setWalking] = useState(null);
-    const [dressing, setDressing] = useState(null);
-    const [errands, setErrands] = useState(null);
-    const [otherLifeActivity, setOtherLifeActivity] = useState(null);
-    const [raceEthnicity, setRaceEthnicity] = useState([]);
-    const [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null);
-    const [aianOtherText, setAianOtherText] = useState(null);
-    const [asianOtherText, setAsianOtherText] = useState(null);
-    return (
-      <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
-        <Header>Researcher Workbench</Header>
-        <FlexColumn>
-          <SmallHeader>Races and Ethnicities</SmallHeader>
-          <MultipleChoiceQuestion
-            question='Which races and/or ethnicities do you identify with? Please select all that apply.'
-            choices={[
-              { name: 'American Indian or Alaska Native' },
-              {
-                name: 'American Indian or Alaska Native / Central or South American Indian',
-              },
-              {
-                name: 'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
-                showInput: true,
-                otherText: aianOtherText,
-                onChange: setAianOtherText,
-              },
-              {
-                name: 'Asian',
-              },
-              { name: 'Indian' },
-              { name: 'Cambodian' },
-              { name: 'Chinese' },
-              { name: 'Filipino' },
-              { name: 'Hmong' },
-              { name: 'Japanese' },
-              { name: 'Korean' },
-              { name: 'Lao' },
-              { name: 'Pakistani' },
-              { name: 'Vietnamese' },
-              {
-                name: 'Asian Other',
-                showInput: true,
-                otherText: asianOtherText,
-                onChange: setAsianOtherText,
-              },
-              { name: 'Black, African American, or of African descent' },
-              { name: 'Hispanic, Latino, or Spanish descent' },
-              { name: 'Middle Eastern or North African' },
-              { name: 'Native Hawaiian or other Pacific Islander' },
-              { name: 'White, or of European descent' },
-              {
-                name: 'None of these fully describe me, and I want to specify',
-                showInput: true,
-                otherText: raceEthnicityOtherText,
-                onChange: setRaceEthnicityOtherText,
-              },
-              { name: 'Prefer not to answer' },
-            ]}
-            multiple
-            selected={raceEthnicity}
-            onChange={setRaceEthnicity}
-            style={{ marginBottom: '3rem' }}
-          />
-          <SmallHeader>Questions about genders</SmallHeader>
-          <MultipleChoiceQuestion
-            question='What terms best express how you describe your current gender identity?'
-            choices={[
-              { name: 'Gender Queer' },
-              { name: 'Man' },
-              { name: 'Non-binary' },
-              { name: 'Questioning or unsure of my gender identity' },
-              { name: 'Trans man/Transgender man' },
-              { name: 'Trans woman/Transgender woman' },
-              { name: 'Two Spirit' },
-              { name: 'Woman' },
-              {
-                name: 'None of these fully describe me, and I want to specify',
-                showInput: true,
-                otherText: sexualOrientationOtherText,
-                onChange: setSexualOrientationOtherText,
-              },
-              { name: 'Prefer not to answer' },
-            ]}
-            multiple
-            selected={sexualOrientation}
-            onChange={setSexualOrientation}
-            style={{ marginBottom: '3rem' }}
-          />
-          <MultipleChoiceQuestion
-            question='What terms best express how you describe your current sexual orientation?'
-            choices={[
-              { name: 'Asexual' },
-              { name: 'Bisexual' },
-              { name: 'Gay' },
-              { name: 'Lesbian' },
-              { name: 'Polysexual, omnisexual, or pansexual' },
-              { name: 'Queer' },
-              { name: 'Questioning or unsure of my sexual orientation' },
-              { name: 'Same-gender loving' },
-              { name: 'Straight or heterosexual' },
-              { name: 'Two Spirit' },
-              {
-                name: 'None of these fully describe me, and I want to specify',
-                showInput: true,
-                otherText: genderIdentityOtherText,
-                onChange: setGenderIdentityOtherText,
-              },
-              { name: 'Prefer not to answer' },
-            ]}
-            selected={genderIdentity}
-            onChange={setGenderIdentity}
-            style={{ marginBottom: '3rem' }}
-          />
-          <MultipleChoiceQuestion
-            question='What was the sex assigned to you at birth, such as on your original birth certificate?'
-            choices={[
-              { name: 'Gender Queer' },
-              { name: 'Man' },
-              { name: 'Non-binary' },
-              { name: 'Questioning or unsure of my gender identity' },
-              { name: 'Trans man/Transgender man' },
-              { name: 'Trans woman/Transgender woman' },
-              { name: 'Two Spirit' },
-              { name: 'Woman' },
-              {
-                name: 'None of these fully describe me, and I want to specify',
-                showInput: true,
-                otherText: sexAssignedAtBirthOtherText,
-                onChange: setSexAssignedAtBirthOtherText,
-              },
-              { name: 'Prefer not to answer' },
-            ]}
-            selected={sexAssignedAtBirth}
-            onChange={setSexAssignedAtBirth}
-          />
-          <SmallHeader>Questions about disability status</SmallHeader>
-          <YesNoOptionalQuestion
-            question='Are you deaf or do you have serious difficulty hearing?'
-            selected={deaf}
-            onChange={setDeaf}
-            style={{ marginBottom: '1rem' }}
-          />
-          <YesNoOptionalQuestion
-            question='Are you blind or do you have serious difficulty seeing, even when
+const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
+  const [education, setEducation] = useState(null);
+  const [genderIdentity, setGenderIdentity] = useState(null);
+  const [genderIdentityOtherText, setGenderIdentityOtherText] = useState(null);
+  const [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null);
+  const [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
+    useState(null);
+  const [sexualOrientation, setSexualOrientation] = useState([]);
+  const [sexualOrientationOtherText, setSexualOrientationOtherText] =
+    useState(null);
+  const [deaf, setDeaf] = useState(null);
+  const [blind, setBlind] = useState(null);
+  const [concentration, setConcentration] = useState(null);
+  const [walking, setWalking] = useState(null);
+  const [dressing, setDressing] = useState(null);
+  const [errands, setErrands] = useState(null);
+  const [otherLifeActivity, setOtherLifeActivity] = useState(null);
+  const [raceEthnicity, setRaceEthnicity] = useState([]);
+  const [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null);
+  const [aianOtherText, setAianOtherText] = useState(null);
+  const [asianOtherText, setAsianOtherText] = useState(null);
+  const [birthYear, setBirthYear] = useState(null);
+
+  const handleBirthYearBlur = () => {
+    if (birthYear < minYear || birthYear > maxYear) {
+      setBirthYear(null);
+    }
+  };
+  return (
+    <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
+      <Header>Researcher Workbench</Header>
+      <FlexColumn>
+        <SmallHeader>Races and Ethnicities</SmallHeader>
+        <MultipleChoiceQuestion
+          question='Which races and/or ethnicities do you identify with? Please select all that apply.'
+          choices={[
+            { name: 'American Indian or Alaska Native' },
+            {
+              name: 'American Indian or Alaska Native / Central or South American Indian',
+            },
+            {
+              name: 'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
+              showInput: true,
+              otherText: aianOtherText,
+              onChange: setAianOtherText,
+            },
+            {
+              name: 'Asian',
+            },
+            { name: 'Indian' },
+            { name: 'Cambodian' },
+            { name: 'Chinese' },
+            { name: 'Filipino' },
+            { name: 'Hmong' },
+            { name: 'Japanese' },
+            { name: 'Korean' },
+            { name: 'Lao' },
+            { name: 'Pakistani' },
+            { name: 'Vietnamese' },
+            {
+              name: 'Asian Other',
+              showInput: true,
+              otherText: asianOtherText,
+              onChange: setAsianOtherText,
+            },
+            { name: 'Black, African American, or of African descent' },
+            { name: 'Hispanic, Latino, or Spanish descent' },
+            { name: 'Middle Eastern or North African' },
+            { name: 'Native Hawaiian or other Pacific Islander' },
+            { name: 'White, or of European descent' },
+            {
+              name: 'None of these fully describe me, and I want to specify',
+              showInput: true,
+              otherText: raceEthnicityOtherText,
+              onChange: setRaceEthnicityOtherText,
+            },
+            { name: 'Prefer not to answer' },
+          ]}
+          multiple
+          selected={raceEthnicity}
+          onChange={setRaceEthnicity}
+          style={{ marginBottom: '3rem' }}
+        />
+        <SmallHeader>Questions about genders</SmallHeader>
+        <MultipleChoiceQuestion
+          question='What terms best express how you describe your current gender identity?'
+          choices={[
+            { name: 'Gender Queer' },
+            { name: 'Man' },
+            { name: 'Non-binary' },
+            { name: 'Questioning or unsure of my gender identity' },
+            { name: 'Trans man/Transgender man' },
+            { name: 'Trans woman/Transgender woman' },
+            { name: 'Two Spirit' },
+            { name: 'Woman' },
+            {
+              name: 'None of these fully describe me, and I want to specify',
+              showInput: true,
+              otherText: sexualOrientationOtherText,
+              onChange: setSexualOrientationOtherText,
+            },
+            { name: 'Prefer not to answer' },
+          ]}
+          multiple
+          selected={sexualOrientation}
+          onChange={setSexualOrientation}
+          style={{ marginBottom: '3rem' }}
+        />
+        <MultipleChoiceQuestion
+          question='What terms best express how you describe your current sexual orientation?'
+          choices={[
+            { name: 'Asexual' },
+            { name: 'Bisexual' },
+            { name: 'Gay' },
+            { name: 'Lesbian' },
+            { name: 'Polysexual, omnisexual, or pansexual' },
+            { name: 'Queer' },
+            { name: 'Questioning or unsure of my sexual orientation' },
+            { name: 'Same-gender loving' },
+            { name: 'Straight or heterosexual' },
+            { name: 'Two Spirit' },
+            {
+              name: 'None of these fully describe me, and I want to specify',
+              showInput: true,
+              otherText: genderIdentityOtherText,
+              onChange: setGenderIdentityOtherText,
+            },
+            { name: 'Prefer not to answer' },
+          ]}
+          selected={genderIdentity}
+          onChange={setGenderIdentity}
+          style={{ marginBottom: '3rem' }}
+        />
+        <MultipleChoiceQuestion
+          question='What was the sex assigned to you at birth, such as on your original birth certificate?'
+          choices={[
+            { name: 'Gender Queer' },
+            { name: 'Man' },
+            { name: 'Non-binary' },
+            { name: 'Questioning or unsure of my gender identity' },
+            { name: 'Trans man/Transgender man' },
+            { name: 'Trans woman/Transgender woman' },
+            { name: 'Two Spirit' },
+            { name: 'Woman' },
+            {
+              name: 'None of these fully describe me, and I want to specify',
+              showInput: true,
+              otherText: sexAssignedAtBirthOtherText,
+              onChange: setSexAssignedAtBirthOtherText,
+            },
+            { name: 'Prefer not to answer' },
+          ]}
+          selected={sexAssignedAtBirth}
+          onChange={setSexAssignedAtBirth}
+        />
+        <SmallHeader>Questions about disability status</SmallHeader>
+        <YesNoOptionalQuestion
+          question='Are you deaf or do you have serious difficulty hearing?'
+          selected={deaf}
+          onChange={setDeaf}
+          style={{ marginBottom: '1rem' }}
+        />
+        <YesNoOptionalQuestion
+          question='Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
-            selected={blind}
-            onChange={setBlind}
-            style={{ marginBottom: '1rem' }}
-          />
-          <YesNoOptionalQuestion
-            question='Because of a physical, cognitive, or emotional condition, do you
+          selected={blind}
+          onChange={setBlind}
+          style={{ marginBottom: '1rem' }}
+        />
+        <YesNoOptionalQuestion
+          question='Because of a physical, cognitive, or emotional condition, do you
             have serious difficulty concentrating, remembering, or making
             decisions?'
-            selected={concentration}
-            onChange={setConcentration}
-            style={{ marginBottom: '1rem' }}
-          />
-          <YesNoOptionalQuestion
-            question='Do you have serious difficulty walking or climbing stairs?'
-            selected={walking}
-            onChange={setWalking}
-            style={{ marginBottom: '1rem' }}
-          />
-          <YesNoOptionalQuestion
-            question='Do you have difficulty dressing or bathing?'
-            selected={dressing}
-            onChange={setDressing}
-            style={{ marginBottom: '1rem' }}
-          />
-          <YesNoOptionalQuestion
-            question="Because of a physical, mental, or emotional condition, do you have
+          selected={concentration}
+          onChange={setConcentration}
+          style={{ marginBottom: '1rem' }}
+        />
+        <YesNoOptionalQuestion
+          question='Do you have serious difficulty walking or climbing stairs?'
+          selected={walking}
+          onChange={setWalking}
+          style={{ marginBottom: '1rem' }}
+        />
+        <YesNoOptionalQuestion
+          question='Do you have difficulty dressing or bathing?'
+          selected={dressing}
+          onChange={setDressing}
+          style={{ marginBottom: '1rem' }}
+        />
+        <YesNoOptionalQuestion
+          question="Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
-            selected={errands}
-            onChange={setErrands}
-            style={{ marginBottom: '1rem' }}
-          />
-          <YesNoOptionalQuestion
-            question='Do you have a physical, cognitive, and/or emotional condition that
+          selected={errands}
+          onChange={setErrands}
+          style={{ marginBottom: '1rem' }}
+        />
+        <YesNoOptionalQuestion
+          question='Do you have a physical, cognitive, and/or emotional condition that
             substantially inhibits one or more life activities not specified
             through the above questions, and want to share more? Please
             describe.'
-            selected={otherLifeActivity}
-            onChange={setOtherLifeActivity}
-          />
-          <SmallHeader>Other Questions</SmallHeader>
-          <div>Year of birth</div>
-          <NumberInput
-            onChange={() => console.log('A')}
-            onBlur={() => console.log('A')}
-          />
-          <MultipleChoiceQuestion
-            question={'Highest Level of Education'}
-            choices={[
-              { name: 'No Education' },
-              { name: 'Grades 1-12' },
-              { name: 'College Graduate' },
-              { name: 'Undergraduate' },
-              { name: "Master's" },
-              { name: 'Doctorate' },
-              { name: 'Prefer not to answer' },
-            ]}
-            selected={education}
-            onChange={setEducation}
-          />
-        </FlexColumn>
+          selected={otherLifeActivity}
+          onChange={setOtherLifeActivity}
+        />
+        <SmallHeader>Other Questions</SmallHeader>
+        <div style={styles.question}>Year of birth</div>
+        <NumberInput
+          onChange={setBirthYear}
+          onBlur={handleBirthYearBlur}
+          min={minYear}
+          max={maxYear}
+          value={birthYear}
+          style={{ width: '4rem' }}
+        />
+        <MultipleChoiceQuestion
+          question={'Highest Level of Education'}
+          choices={[
+            { name: 'No Education' },
+            { name: 'Grades 1-12' },
+            { name: 'College Graduate' },
+            { name: 'Undergraduate' },
+            { name: "Master's" },
+            { name: 'Doctorate' },
+            { name: 'Prefer not to answer' },
+          ]}
+          selected={education}
+          onChange={setEducation}
+        />
       </FlexColumn>
-    );
-  }
-);
+    </FlexColumn>
+  );
+});
 
 export default DemographicSurvey;
