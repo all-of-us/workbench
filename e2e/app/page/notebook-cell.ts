@@ -205,6 +205,6 @@ export default class NotebookCell extends NotebookFrame {
       propertyName,
       propertyValue
     );
-    return await jsHandle.jsonValue();
+    return (await jsHandle.jsonValue()) as boolean;
   }
 }

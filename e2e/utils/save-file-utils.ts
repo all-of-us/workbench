@@ -44,6 +44,6 @@ export const takeScreenshot = async (page: Page, fileName: string): Promise<void
 export const savePageToPdf = async (page: Page, fileName: string): Promise<void> => {
   const dir = 'logs/screenshot';
   await ensureDir(dir);
-  await page.pdf({ format: 'a4', path: `${dir}/${fileName}` });
+  await page.pdf({ format: 'A4', path: `${dir}/${fileName}` });
   logger.info(`Saved pdf file: ${fileName}`);
 };
