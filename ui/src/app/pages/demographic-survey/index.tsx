@@ -160,7 +160,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [errands, setErrands] = useState(null);
     const [otherLifeActivity, setOtherLifeActivity] = useState(null);
     const [raceEthnicity, setRaceEthnicity] = useState([]);
-    const [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState('');
+    const [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null);
+    const [aianOtherText, setAianOtherText] = useState(null);
+    const [asianOtherText, setAsianOtherText] = useState(null);
     return (
       <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
         <Header>Researcher Workbench</Header>
@@ -170,7 +172,34 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             question='Which races and/or ethnicities do you identify with? Please select all that apply.'
             choices={[
               { name: 'American Indian or Alaska Native' },
-              { name: 'Asian' },
+              {
+                name: 'American Indian or Alaska Native / Central or South American Indian',
+              },
+              {
+                name: 'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
+                showInput: true,
+                otherText: aianOtherText,
+                onChange: setAianOtherText,
+              },
+              {
+                name: 'Asian',
+              },
+              { name: 'Indian' },
+              { name: 'Cambodian' },
+              { name: 'Chinese' },
+              { name: 'Filipino' },
+              { name: 'Hmong' },
+              { name: 'Japanese' },
+              { name: 'Korean' },
+              { name: 'Lao' },
+              { name: 'Pakistani' },
+              { name: 'Vietnamese' },
+              {
+                name: 'Asian Other',
+                showInput: true,
+                otherText: asianOtherText,
+                onChange: setAsianOtherText,
+              },
               { name: 'Black, African American, or of African descent' },
               { name: 'Hispanic, Latino, or Spanish descent' },
               { name: 'Middle Eastern or North African' },
