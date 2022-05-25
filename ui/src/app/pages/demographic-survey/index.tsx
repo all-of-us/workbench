@@ -81,38 +81,6 @@ const CategoryCheckbox = (props: {
   );
 };
 
-const YesNoOptionalQuestion = (props: {
-  question: string;
-  style?: CSSProperties;
-}) => {
-  const { question, style } = props;
-
-  return (
-    <FlexRow {...{ style }}>
-      <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
-        {question}
-      </div>
-      <FlexRow style={{ flex: 1 }}>
-        <RadioOption
-          option='Yes'
-          checked={false}
-          onChange={() => console.log('')}
-        />
-        <RadioOption
-          option='No'
-          checked={false}
-          onChange={() => console.log('')}
-        />
-        <RadioOption
-          option='Prefer not to answer'
-          checked={false}
-          onChange={() => console.log('')}
-        />
-      </FlexRow>
-    </FlexRow>
-  );
-};
-
 interface MultipleChoiceOption {
   name: string;
   otherText?: string;
@@ -159,6 +127,29 @@ const MultipleChoiceQuestion = (props: {
   );
 };
 
+const YesNoOptionalQuestion = (props: {
+  question: string;
+  selected: string;
+  onChange: (any) => void;
+  style?: CSSProperties;
+}) => {
+  const { question, selected, onChange, style } = props;
+
+  return (
+    <MultipleChoiceQuestion
+      question={question}
+      choices={[
+        { name: 'Yes' },
+        { name: 'No' },
+        { name: 'Prefer not to answer' },
+      ]}
+      selected={selected}
+      onChange={onChange}
+      style={style}
+    />
+  );
+};
+
 const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     const [checked, setChecked] = useState(false);
@@ -172,6 +163,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [sexualOrientation, setSexualOrientation] = useState(null);
     const [sexualOrientationOtherText, setSexualOrientationOtherText] =
       useState(null);
+    const [deaf, setDeaf] = useState(null);
+    const [blind, setBlind] = useState(null);
+    const [concentration, setConcentration] = useState(null);
+    const [walking, setWalking] = useState(null);
+    const [dressing, setDressing] = useState(null);
+    const [errands, setErrands] = useState(null);
+    const [otherLifeActivity, setOtherLifeActivity] = useState(null);
     return (
       <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
         <Header>Researcher Workbench</Header>
@@ -236,6 +234,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             selected={genderIdentity}
             onChange={(e) => setGenderIdentity(e.target.value)}
+            style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
             question='What terms best express how you describe your current sexual orientation?'
@@ -258,6 +257,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             selected={sexualOrientation}
             onChange={(e) => setSexualOrientation(e.target.value)}
+            style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
             question='What was the sex assigned to you at birth, such as on your original birth certificate?'
@@ -284,31 +284,43 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           <SmallHeader>Questions about disability status</SmallHeader>
           <YesNoOptionalQuestion
             question='Are you deaf or do you have serious difficulty hearing?'
+            selected={deaf}
+            onChange={(e) => setDeaf(e.target.value)}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
+            selected={blind}
+            onChange={(e) => setBlind(e.target.value)}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Because of a physical, cognitive, or emotional condition, do you
             have serious difficulty concentrating, remembering, or making
             decisions?'
+            selected={concentration}
+            onChange={(e) => setConcentration(e.target.value)}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Do you have serious difficulty walking or climbing stairs?'
+            selected={walking}
+            onChange={(e) => setWalking(e.target.value)}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Do you have difficulty dressing or bathing?'
+            selected={dressing}
+            onChange={(e) => setDressing(e.target.value)}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question="Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
+            selected={errands}
+            onChange={(e) => setErrands(e.target.value)}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
@@ -316,6 +328,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             substantially inhibits one or more life activities not specified
             through the above questions, and want to share more? Please
             describe.'
+            selected={otherLifeActivity}
+            onChange={(e) => setOtherLifeActivity(e.target.value)}
           />
           <SmallHeader>Other Questions</SmallHeader>
           <div>Year of birth</div>
