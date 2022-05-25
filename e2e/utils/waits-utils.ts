@@ -31,7 +31,7 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
       {},
       urlSubstr
     );
-    return (await jsHandle.jsonValue()) as boolean;
+    return await jsHandle.jsonValue();
   } catch (err) {
     logger.error(`waitForUrl() failed: not contains "${urlSubstr}"`);
     logger.error(err);
@@ -55,7 +55,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
       { timeout: 60 * 1000 },
       titleSubstr
     );
-    return (await jsHandle.jsonValue()) as boolean;
+    return await jsHandle.jsonValue();
   } catch (err) {
     logger.error(
       `Failed to find the document title contains "${titleSubstr}". Actual page title is "${await page.title()}"`
@@ -218,7 +218,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
       {},
       cssSelector
     );
-    return (await jsHandle.jsonValue()) as boolean;
+    return await jsHandle.jsonValue();
   } catch (err) {
     logger.error(`waitForHidden() failed: css="${cssSelector}"`);
     logger.error(err);
@@ -258,7 +258,7 @@ export async function waitForAttributeEquality(
         attribute,
         value
       );
-      return (await jsHandle.jsonValue()) as boolean;
+      return await jsHandle.jsonValue();
     } catch (err) {
       logger.error(`waitForAttributeEquality() failed: css=${selector.css} attribute=${attribute} value=${value}`);
       logger.error(err);
@@ -282,7 +282,7 @@ export async function waitForAttributeEquality(
         attribute,
         value
       );
-      return (await jsHandle.jsonValue()) as boolean;
+      return await jsHandle.jsonValue();
     } catch (err) {
       logger.error(`waitForAttributeEquality() failed: xpath=${selector.xpath} attribute=${attribute} value=${value}`);
       logger.error(err);
@@ -307,7 +307,7 @@ export async function waitForNumberElements(page: Page, cssSelector: string, exp
       cssSelector,
       expectedCount
     );
-    return (await jsHandle.jsonValue()) as boolean;
+    return await jsHandle.jsonValue();
   } catch (err) {
     logger.error(`waitForNumberElements() failed: css="${cssSelector}" count=${expectedCount}`);
     logger.error(err);
@@ -480,5 +480,5 @@ export async function waitUntilEnabled(page: Page, cssSelector: string): Promise
       logger.error(err);
       throw new Error(err);
     });
-  return (await jsHandle.jsonValue()) as boolean;
+  return await jsHandle.jsonValue();
 }

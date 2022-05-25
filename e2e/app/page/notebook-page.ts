@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { Dialog, ElementHandle, Frame, Page } from 'puppeteer';
+import { Dialog, ElementHandle, Frame, KeyInput, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitForFn, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import { ResourceCard } from 'app/text-labels';
@@ -707,7 +707,7 @@ export default class NotebookPage extends NotebookFrame {
     return this.runCommand('Alt');
   }
 
-  private async runCommand(keyboardCommand: string): Promise<void> {
+  private async runCommand(keyboardCommand: KeyInput): Promise<void> {
     await this.page.bringToFront();
     await this.page.keyboard.down(keyboardCommand);
     await this.page.keyboard.press('Enter', { delay: 20 });
