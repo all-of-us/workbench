@@ -135,7 +135,9 @@ public class FreeTierBillingService {
   public boolean isFreeTier(final DbWorkspace workspace) {
     return workspace
         .getBillingAccountName()
-        .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+        .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName()) || workspace
+            .getBillingAccountName()
+            .equals(workbenchConfigProvider.get().billing.legacyFreeTierBillingAccountName());
   }
 
   private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
@@ -227,8 +229,10 @@ public class FreeTierBillingService {
   // Helper to identify candidate users with workspaces that may need deactivation, if those users'
   // initial credits have expired.
   private Set<DbUser> getFreeTierActiveWorkspaceCreators() {
-    return workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
-        BillingStatus.ACTIVE, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+    return Sets.union(workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
+        BillingStatus.ACTIVE, workbenchConfigProvider.get().billing.freeTierBillingAccountName()),
+        workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
+            BillingStatus.ACTIVE, workbenchConfigProvider.get().billing.legacyFreeTierBillingAccountName()));
   }
 
   private Map<DbWorkspace, Double> getFreeTierWorkspaceCostsFromBQ() {

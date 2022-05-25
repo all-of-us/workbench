@@ -70,8 +70,16 @@ public class WorkbenchConfig {
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
 
+    // The legacy free tier billing account id that is migrating away. This value helps to make
+    // migration process smooth.
+    public String legacyAccountId;
+
     public String freeTierBillingAccountName() {
       return "billingAccounts/" + accountId;
+    }
+
+    public String legacyFreeTierBillingAccountName() {
+      return "billingAccounts/" + legacyAccountId;
     }
 
     // The full table name for the BigQuery billing export, which is read from by the free-tier
