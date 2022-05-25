@@ -868,6 +868,33 @@ export const DatasetPage = fp.flow(
       return new Set(domains);
     };
 
+    const getIdsAndDomainsFromConceptSets = (
+      conceptSets: ConceptSet[],
+      prepackagedConceptSets: Set<PrepackagedConceptSet>
+    ): DomainWithConceptSetId[] => {
+      return conceptSets
+        .map((cs) => ({
+          conceptSetId: cs.id,
+          domain:
+            cs.domain === Domain.PHYSICALMEASUREMENT
+              ? Domain.MEASUREMENT
+              : cs.domain,
+        }))
+        .concat(
+          Array.from(prepackagedConceptSets).map((p) => ({
+            conceptSetId: null,
+            domain: PREPACKAGED_DOMAINS[p],
+          }))
+        );
+    };
+
+    const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
+      return getIdsAndDomainsFromConceptSets(
+        d.conceptSets,
+        apiEnumToPrePackageConceptSets(d.prePackagedConceptSet)
+      );
+    };
+
     const loadValueSetForDomain = async (
       domainWithConceptSetId: DomainWithConceptSetId
     ) => {
@@ -878,6 +905,10 @@ export const DatasetPage = fp.flow(
       const updatedCrossDomainConceptSetList = crossDomainConceptSetList;
       const updatedSelectedDomainsWithConceptSetIds =
         selectedDomainsWithConceptSetIds;
+      const updatedSelectedDomains = selectedDomains;
+      let updatedSelectedDomainValuePairs = selectedDomainValuePairs;
+      const newLoading = new Set(domainValueSetIsLoading);
+      const newLookup = new Map(domainValueSetLookup);
       const values = await dataSetApi().getValuesFromDomain(
         namespace,
         id,
@@ -907,14 +938,12 @@ export const DatasetPage = fp.flow(
               domain: reverseDomainEnum[domainWithDomainValues.domain],
               value: v.value,
             }));
-          setSelectedDomains(selectedDomains.add(domain));
-          setSelectedDomainValuePairs(
-            selectedDomainValuePairs.concat(morePairs)
-          );
+          updatedSelectedDomains.add(domain);
+          updatedSelectedDomainValuePairs =
+            updatedSelectedDomainValuePairs.concat(morePairs);
           // If any of the domain has not yet been loaded, add the schema
           // (value sets) for it.
         } else {
-          const newLookup = new Map(domainValueSetLookup);
           newLookup.set(domain, {
             domain,
             values: domainWithDomainValues.items,
@@ -931,49 +960,74 @@ export const DatasetPage = fp.flow(
                 value: v.value,
               })
             );
+            updatedSelectedDomainValuePairs =
+              updatedSelectedDomainValuePairs.concat(morePairs);
           }
-          setDomainValueSetLookup(newLookup);
-          setSelectedDomains(selectedDomains.add(domain));
-          setSelectedDomainValuePairs(
-            selectedDomainValuePairs.concat(morePairs)
-          );
+          updatedSelectedDomains.add(domain);
         }
       });
-      const newLoading = new Set(domainValueSetIsLoading);
       newLoading.delete(domainWithConceptSetId.domain);
-      setCrossDomainConceptSetList(updatedCrossDomainConceptSetList);
+      setDomainValueSetLookup(newLookup);
       setDomainValueSetIsLoading(newLoading);
       setSelectedDomainsWithConceptSetIds(
         updatedSelectedDomainsWithConceptSetIds
       );
+      setCrossDomainConceptSetList(updatedCrossDomainConceptSetList);
+      setSelectedDomains(updatedSelectedDomains);
+      setSelectedDomainValuePairs(updatedSelectedDomainValuePairs);
     };
 
-    const getIdsAndDomainsFromConceptSets = (
-      conceptSets: ConceptSet[],
-      prepackagedConceptSets: Set<PrepackagedConceptSet>
-    ): Set<DomainWithConceptSetId> => {
-      const conceptSetIdsWithDomains = conceptSets
-        .map((cs) => ({
-          conceptSetId: cs.id,
-          domain:
-            cs.domain === Domain.PHYSICALMEASUREMENT
-              ? Domain.MEASUREMENT
-              : cs.domain,
-        }))
-        .concat(
-          Array.from(prepackagedConceptSets).map((p) => ({
-            conceptSetId: null,
-            domain: PREPACKAGED_DOMAINS[p],
-          }))
-        );
-      return new Set(conceptSetIdsWithDomains);
-    };
-
-    const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
-      return getIdsAndDomainsFromConceptSets(
-        d.conceptSets,
-        apiEnumToPrePackageConceptSets(d.prePackagedConceptSet)
+    const loadValueSetsForDataset = async (loadedDataset: DataSet) => {
+      // TODO(RW-4426): There is a lot of complexity here around loading domain
+      // values which is static data for a given CDR version. Consider
+      // refactoring this page to load all schema data before rendering.
+      const { namespace, id } = workspace;
+      const newCrossDomainConceptSetList = new Set();
+      const domainsWithConceptSetIds =
+        getDomainsWithConceptSetIdsFromDataSet(loadedDataset);
+      const updatedSelectedDomains = getDomainsFromDataSet(loadedDataset);
+      const newLoading = new Set(domainValueSetIsLoading);
+      const newLookup = new Map(domainValueSetLookup);
+      const promises = domainsWithConceptSetIds.map(
+        ({ conceptSetId, domain }) =>
+          dataSetApi().getValuesFromDomain(
+            namespace,
+            id,
+            domain.toString(),
+            conceptSetId
+          )
       );
+      const domainsWithValues = await Promise.all(promises);
+      domainsWithValues.forEach((values, index) => {
+        const domainWithConceptSetId = domainsWithConceptSetIds[index];
+        values.items.forEach((domainWithDomainValues) => {
+          const domain = reverseDomainEnum[domainWithDomainValues.domain];
+          if (domain !== domainWithConceptSetId.domain) {
+            newCrossDomainConceptSetList.add(
+              domainWithConceptSetId.conceptSetId
+            );
+          }
+          const updateIndex = domainsWithConceptSetIds.findIndex(
+            (dc) => dc.conceptSetId === domainWithConceptSetId.conceptSetId
+          );
+          if (updateIndex > -1) {
+            domainsWithConceptSetIds[updateIndex].domain = domain;
+          }
+          if (!domainValueSetLookup.has(domain)) {
+            newLookup.set(domain, {
+              domain,
+              values: domainWithDomainValues.items,
+            });
+          }
+          updatedSelectedDomains.add(domain);
+        });
+        newLoading.delete(domainWithConceptSetId.domain);
+      });
+      setDomainValueSetLookup(newLookup);
+      setDomainValueSetIsLoading(newLoading);
+      setSelectedDomainsWithConceptSetIds(new Set(domainsWithConceptSetIds));
+      setCrossDomainConceptSetList(newCrossDomainConceptSetList);
+      setSelectedDomains(updatedSelectedDomains);
     };
 
     const loadDataset = (dataset: DataSet, initialLoad?: boolean) => {
@@ -982,34 +1036,24 @@ export const DatasetPage = fp.flow(
       if (window.location.href.endsWith('data-sets')) {
         history.pushState({}, '', `${window.location.href}/${dataset.id}`);
       }
-
       setDataSet(dataset);
       setDataSetTouched(false);
       // We only need to set selections on the initial load of a saved dataset,
       // not for creating/updating since the selections will already be set
       if (initialLoad) {
-        const domainsWithConceptSetIds =
-          getDomainsWithConceptSetIdsFromDataSet(dataset);
         setIncludesAllParticipants(dataset.includesAllParticipants);
         setSelectedConceptSetIds(dataset.conceptSets.map((cs) => cs.id));
         setSelectedCohortIds(dataset.cohorts.map((c) => c.id));
         setSelectedDomainValuePairs(
           domainValuePairsToLowercase(dataset.domainValuePairs)
         );
-        setSelectedDomains(getDomainsFromDataSet(dataset));
-        setSelectedDomainsWithConceptSetIds(domainsWithConceptSetIds);
         setSelectedPrepackagedConceptSets(
           apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
         );
         setDomainValueSetIsLoading(
           new Set(dataset.conceptSets.map(({ domain }) => domain))
         );
-        domainsWithConceptSetIds.forEach(({ conceptSetId, domain }) => {
-          loadValueSetForDomain({
-            conceptSetId,
-            domain,
-          });
-        });
+        loadValueSetsForDataset(dataset);
       }
     };
 
