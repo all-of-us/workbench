@@ -115,6 +115,12 @@ describe('Genomics Extraction Test', () => {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // EXTRACTING GENOMIC TO CREATE VCF FILES.
 
+    // Try waiting a few minutes before launching genomic extraction. We've observed that
+    // immediately launching an extraction can result in VPC-SC errors with BigQuery in a
+    // small fraction of test runs. Waiting a bit here may avoid consistency issues with
+    // adding the new project to the perimeter. See RW-8607.
+    await page.waitForTimeout(3 * 60 * 1000);
+
     // Export genomic data to new notebook.
     const analyzeButton = datasetPage.getAnalyzeButton();
     await analyzeButton.waitUntilEnabled();
