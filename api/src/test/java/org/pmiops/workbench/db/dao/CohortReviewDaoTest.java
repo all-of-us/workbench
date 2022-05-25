@@ -39,6 +39,7 @@ public class CohortReviewDaoTest {
     cohort.setWorkspaceId(workspaceDao.save(workspace).getWorkspaceId());
     cohortId = cohortDao.save(cohort).getCohortId();
     cohortReview = cohortReviewDao.save(createCohortReview());
+    cohortReviewDao.save(createCohortReview());
   }
 
   @Test
@@ -57,10 +58,14 @@ public class CohortReviewDaoTest {
   }
 
   @Test
-  public void findCohortReviewByCohortIdAndCdrVersionId() {
+  public void findCohortReviewByCohortIdAndCdrVersionIdOrderByCohortReviewId() {
     assertThat(
-            cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-                cohortReview.getCohortId(), cohortReview.getCdrVersionId()))
+            cohortReviewDao
+                .findCohortReviewByCohortIdAndCdrVersionIdOrderByCohortReviewId(
+                    cohortReview.getCohortId(), cohortReview.getCdrVersionId())
+                .stream()
+                .findFirst()
+                .orElse(null))
         .isEqualTo(cohortReview);
   }
 

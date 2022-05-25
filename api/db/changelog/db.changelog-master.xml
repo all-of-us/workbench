@@ -203,6 +203,7 @@
   <include file="changelog/db.changelog-193-institution-add-request-access-url.xml"/>
   <include file="changelog/db.changelog-194-add-terra-agreement-time.xml"/>
   <include file="changelog/db.changelog-195-add-filter-set-name.xml"/>
+  <include file="changelog/db.changelog-196-add-demographic-survey-v2.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

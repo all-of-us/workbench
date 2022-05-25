@@ -116,7 +116,7 @@ class JiraReleaseClient
                      "summary" => summary,
                      "description" => description,
                      "issuetype" => {
-                       "name" => "Task"
+                       "name" => "Release"
                      }
                    }
                   })
