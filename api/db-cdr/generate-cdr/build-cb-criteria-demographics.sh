@@ -5,8 +5,8 @@ SQL_FOR='DEMOGRAPHICS'
 TBL_CBC='cb_criteria'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-export DATA_BROWSER=$3      # data browser flag
-ID_PREFIX=$4
+ID_PREFIX=$3
+export DATA_BROWSER=$4      # data browser flag
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh

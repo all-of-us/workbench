@@ -1192,7 +1192,7 @@ def build_cb_criteria(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.id_prefix}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix} #{op.opts.data_browser}}
   end
 end
 
@@ -1200,6 +1200,44 @@ Common.register_command({
   :invocation => "build-cb-criteria",
   :description => "Builds cb_criteria",
   :fn => ->(*args) { build_cb_criteria("build-cb-criteria", *args) }
+})
+
+def build_cb_criteria_demographics(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--id-prefix [id-prefix]",
+    ->(opts, v) { opts.id_prefix = v},
+    "ID Prefix."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Generate for data browser. Optional - Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.id_prefix }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix} #{op.opts.data_browser}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-criteria-demographics",
+  :description => "Builds cb_criteria",
+  :fn => ->(*args) { build_cb_criteria_demographics("build-cb-criteria-demographics", *args) }
 })
 
 def create_local_csv_files(cmd_name, *args)
