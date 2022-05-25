@@ -147,33 +147,32 @@ const YesNoOptionalQuestion = (props: {
 };
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
-  const [education, setEducation] = useState(null);
-  const [genderIdentity, setGenderIdentity] = useState(null);
-  const [genderIdentityOtherText, setGenderIdentityOtherText] = useState(null);
-  const [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null);
-  const [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
-    useState(null);
-  const [sexualOrientation, setSexualOrientation] = useState([]);
-  const [sexualOrientationOtherText, setSexualOrientationOtherText] =
-    useState(null);
-  const [deaf, setDeaf] = useState(null);
-  const [blind, setBlind] = useState(null);
-  const [concentration, setConcentration] = useState(null);
-  const [walking, setWalking] = useState(null);
-  const [dressing, setDressing] = useState(null);
-  const [errands, setErrands] = useState(null);
-  const [otherLifeActivity, setOtherLifeActivity] = useState(null);
-  const [raceEthnicity, setRaceEthnicity] = useState([]);
-  const [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null);
-  const [aianOtherText, setAianOtherText] = useState(null);
-  const [asianOtherText, setAsianOtherText] = useState(null);
-  const [birthYear, setBirthYear] = useState(null);
-
-  const handleBirthYearBlur = () => {
-    if (birthYear < minYear || birthYear > maxYear) {
-      setBirthYear(null);
-    }
-  };
+  const [education, setEducation] = useState(null),
+    [genderIdentity, setGenderIdentity] = useState(null),
+    [genderIdentityOtherText, setGenderIdentityOtherText] = useState(null),
+    [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null),
+    [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
+      useState(null),
+    [sexualOrientation, setSexualOrientation] = useState([]),
+    [sexualOrientationOtherText, setSexualOrientationOtherText] =
+      useState(null),
+    [deaf, setDeaf] = useState(null),
+    [blind, setBlind] = useState(null),
+    [concentration, setConcentration] = useState(null),
+    [walking, setWalking] = useState(null),
+    [dressing, setDressing] = useState(null),
+    [errands, setErrands] = useState(null),
+    [otherLifeActivity, setOtherLifeActivity] = useState(null),
+    [raceEthnicity, setRaceEthnicity] = useState([]),
+    [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null),
+    [aianOtherText, setAianOtherText] = useState(null),
+    [asianOtherText, setAsianOtherText] = useState(null),
+    [birthYear, setBirthYear] = useState(null),
+    handleBirthYearBlur = () => {
+      if (birthYear < minYear || birthYear > maxYear) {
+        setBirthYear(null);
+      }
+    };
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
       <Header>Researcher Workbench</Header>
@@ -233,14 +232,20 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current gender identity?'
           choices={[
-            { name: 'Gender Queer' },
-            { name: 'Man' },
-            { name: 'Non-binary' },
-            { name: 'Questioning or unsure of my gender identity' },
-            { name: 'Trans man/Transgender man' },
-            { name: 'Trans woman/Transgender woman' },
-            { name: 'Two Spirit' },
-            { name: 'Woman' },
+            ...[
+              'Gender Queer',
+              'Man',
+              'Non-binary',
+              'Questioning or unsure of my gender identity',
+              'Trans man/Transgender man',
+              'Trans woman/Transgender woman',
+              'Two Spirit',
+              'Woman',
+            ].map((name) => {
+              return {
+                name,
+              };
+            }),
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
@@ -257,16 +262,22 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current sexual orientation?'
           choices={[
-            { name: 'Asexual' },
-            { name: 'Bisexual' },
-            { name: 'Gay' },
-            { name: 'Lesbian' },
-            { name: 'Polysexual, omnisexual, or pansexual' },
-            { name: 'Queer' },
-            { name: 'Questioning or unsure of my sexual orientation' },
-            { name: 'Same-gender loving' },
-            { name: 'Straight or heterosexual' },
-            { name: 'Two Spirit' },
+            ...[
+              'Asexual',
+              'Bisexual',
+              'Gay',
+              'Lesbian',
+              'Polysexual, omnisexual, or pansexual',
+              'Queer',
+              'Questioning or unsure of my sexual orientation',
+              'Same-gender loving',
+              'Straight or heterosexual',
+              'Two Spirit',
+            ].map((name) => {
+              return {
+                name,
+              };
+            }),
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
@@ -282,14 +293,20 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
         <MultipleChoiceQuestion
           question='What was the sex assigned to you at birth, such as on your original birth certificate?'
           choices={[
-            { name: 'Gender Queer' },
-            { name: 'Man' },
-            { name: 'Non-binary' },
-            { name: 'Questioning or unsure of my gender identity' },
-            { name: 'Trans man/Transgender man' },
-            { name: 'Trans woman/Transgender woman' },
-            { name: 'Two Spirit' },
-            { name: 'Woman' },
+            ...[
+              'Gender Queer',
+              'Man',
+              'Non-binary',
+              'Questioning or unsure of my gender identity',
+              'Trans man/Transgender man',
+              'Trans woman/Transgender woman',
+              'Two Spirit',
+              'Woman',
+            ].map((name) => {
+              return {
+                name,
+              };
+            }),
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
