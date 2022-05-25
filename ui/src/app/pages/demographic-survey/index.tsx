@@ -16,28 +16,40 @@ import { reactStyles, useId } from 'app/utils';
 
 const styles = reactStyles({
   question: { fontWeight: 'bold' },
-  radioAnswer: { marginRight: '0.25rem' },
+  answer: { marginRight: '0.25rem' },
 });
 
-const RadioOption = (props: {
+const Option = (props: {
   checked: boolean;
   option: string;
   style?: CSSProperties;
   onChange: (any) => void;
+  multiple?: boolean;
 }) => {
-  const { checked, onChange, option } = props;
+  const { checked, multiple, onChange, option } = props;
   const id = useId();
   return (
     <FlexRow style={{ alignItems: 'center' }}>
-      <RadioButton
-        data-test-id='nothing-to-report'
-        id={id}
-        disabled={false}
-        checked={checked}
-        onChange={onChange}
-        value={option}
-      />
-      <label htmlFor={id} style={styles.radioAnswer}>
+      {multiple ? (
+        <CheckBox
+          data-test-id='nothing-to-report'
+          manageOwnState={false}
+          id={id}
+          disabled={false}
+          checked={checked}
+          onChange={onChange}
+        />
+      ) : (
+        <RadioButton
+          data-test-id='nothing-to-report'
+          id={id}
+          disabled={false}
+          checked={checked}
+          onChange={onChange}
+          value={option}
+        />
+      )}
+      <label htmlFor={id} style={styles.answer}>
         {option}
       </label>
     </FlexRow>
@@ -91,11 +103,23 @@ interface MultipleChoiceOption {
 const MultipleChoiceQuestion = (props: {
   question: string;
   choices: MultipleChoiceOption[];
-  selected: string;
+  selected: string | string[];
   onChange: (any) => void;
   style?: CSSProperties;
+  multiple?: boolean;
 }) => {
-  const { choices, onChange, question, selected, style } = props;
+  const { choices, onChange, question, selected, multiple, style } = props;
+
+  const handleChange = (e, name) => {
+    if (multiple) {
+      const result = e
+        ? [...(selected as string[]), name]
+        : (selected as string[]).filter((r) => r !== name);
+      onChange(result);
+    } else {
+      onChange(e.target.value);
+    }
+  };
 
   return (
     <FlexRow {...{ style }}>
@@ -105,11 +129,17 @@ const MultipleChoiceQuestion = (props: {
       <FlexRow style={{ flex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
         {choices.map((choice) => (
           <FlexColumn>
-            <RadioOption
+            <Option
               option={choice.name}
-              checked={selected === choice.name}
-              onChange={onChange}
+              checked={
+                multiple
+                  ? selected.includes(choice.name)
+                  : selected === choice.name
+              }
+              onChange={(e) => handleChange(e, choice.name)}
+              multiple={multiple}
             />
+
             {choice.showInput && selected === choice.name && (
               <input
                 data-test-id='search'
@@ -160,7 +190,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null);
     const [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
       useState(null);
-    const [sexualOrientation, setSexualOrientation] = useState(null);
+    const [sexualOrientation, setSexualOrientation] = useState([]);
     const [sexualOrientationOtherText, setSexualOrientationOtherText] =
       useState(null);
     const [deaf, setDeaf] = useState(null);
@@ -228,12 +258,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 name: 'None of these fully describe me, and I want to specify',
                 showInput: true,
                 otherText: genderIdentityOtherText,
-                onChange: (e) => setGenderIdentityOtherText(e.target.value),
+                onChange: setGenderIdentityOtherText,
               },
               { name: 'Prefer not to answer' },
             ]}
             selected={genderIdentity}
-            onChange={(e) => setGenderIdentity(e.target.value)}
+            onChange={setGenderIdentity}
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
@@ -251,12 +281,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 name: 'None of these fully describe me, and I want to specify',
                 showInput: true,
                 otherText: sexualOrientationOtherText,
-                onChange: (e) => setSexualOrientationOtherText(e.target.value),
+                onChange: setSexualOrientationOtherText,
               },
               { name: 'Prefer not to answer' },
             ]}
+            multiple
             selected={sexualOrientation}
-            onChange={(e) => setSexualOrientation(e.target.value)}
+            onChange={setSexualOrientation}
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
@@ -274,25 +305,25 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 name: 'None of these fully describe me, and I want to specify',
                 showInput: true,
                 otherText: sexAssignedAtBirthOtherText,
-                onChange: (e) => setSexAssignedAtBirthOtherText(e.target.value),
+                onChange: setSexAssignedAtBirthOtherText,
               },
               { name: 'Prefer not to answer' },
             ]}
             selected={sexAssignedAtBirth}
-            onChange={(e) => setSexAssignedAtBirth(e.target.value)}
+            onChange={setSexAssignedAtBirth}
           />
           <SmallHeader>Questions about disability status</SmallHeader>
           <YesNoOptionalQuestion
             question='Are you deaf or do you have serious difficulty hearing?'
             selected={deaf}
-            onChange={(e) => setDeaf(e.target.value)}
+            onChange={setDeaf}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
             selected={blind}
-            onChange={(e) => setBlind(e.target.value)}
+            onChange={setBlind}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
@@ -300,19 +331,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             have serious difficulty concentrating, remembering, or making
             decisions?'
             selected={concentration}
-            onChange={(e) => setConcentration(e.target.value)}
+            onChange={setConcentration}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Do you have serious difficulty walking or climbing stairs?'
             selected={walking}
-            onChange={(e) => setWalking(e.target.value)}
+            onChange={setWalking}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='Do you have difficulty dressing or bathing?'
             selected={dressing}
-            onChange={(e) => setDressing(e.target.value)}
+            onChange={setDressing}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
@@ -320,7 +351,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
             selected={errands}
-            onChange={(e) => setErrands(e.target.value)}
+            onChange={setErrands}
             style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
@@ -329,7 +360,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             through the above questions, and want to share more? Please
             describe.'
             selected={otherLifeActivity}
-            onChange={(e) => setOtherLifeActivity(e.target.value)}
+            onChange={setOtherLifeActivity}
           />
           <SmallHeader>Other Questions</SmallHeader>
           <div>Year of birth</div>
@@ -349,7 +380,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { name: 'Prefer not to answer' },
             ]}
             selected={education}
-            onChange={(e) => setEducation(e.target.value)}
+            onChange={setEducation}
           />
         </FlexColumn>
       </FlexColumn>
