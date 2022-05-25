@@ -381,13 +381,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
         <MultipleChoiceQuestion
           question={'Highest Level of Education'}
           choices={[
-            { name: 'No Education' },
-            { name: 'Grades 1-12' },
-            { name: 'College Graduate' },
-            { name: 'Undergraduate' },
-            { name: "Master's" },
-            { name: 'Doctorate' },
-            { name: 'Prefer not to answer' },
+            ...[
+              'No Education',
+              'Grades 1-12',
+              'College Graduate',
+              'Undergraduate',
+              "Master's",
+              'Doctorate',
+              'Prefer not to answer',
+            ].map((name) => {
+              return {
+                name,
+              };
+            }),
           ]}
           selected={education}
           onChange={setEducation}
