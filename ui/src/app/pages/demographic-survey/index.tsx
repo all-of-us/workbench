@@ -244,6 +244,30 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           <MultipleChoiceQuestion
             question='What terms best express how you describe your current gender identity?'
             choices={[
+              { name: 'Gender Queer' },
+              { name: 'Man' },
+              { name: 'Non-binary' },
+              { name: 'Questioning or unsure of my gender identity' },
+              { name: 'Trans man/Transgender man' },
+              { name: 'Trans woman/Transgender woman' },
+              { name: 'Two Spirit' },
+              { name: 'Woman' },
+              {
+                name: 'None of these fully describe me, and I want to specify',
+                showInput: true,
+                otherText: sexualOrientationOtherText,
+                onChange: setSexualOrientationOtherText,
+              },
+              { name: 'Prefer not to answer' },
+            ]}
+            multiple
+            selected={sexualOrientation}
+            onChange={setSexualOrientation}
+            style={{ marginBottom: '3rem' }}
+          />
+          <MultipleChoiceQuestion
+            question='What terms best express how you describe your current sexual orientation?'
+            choices={[
               { name: 'Asexual' },
               { name: 'Bisexual' },
               { name: 'Gay' },
@@ -264,30 +288,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             selected={genderIdentity}
             onChange={setGenderIdentity}
-            style={{ marginBottom: '3rem' }}
-          />
-          <MultipleChoiceQuestion
-            question='What terms best express how you describe your current sexual orientation?'
-            choices={[
-              { name: 'Gender Queer' },
-              { name: 'Man' },
-              { name: 'Non-binary' },
-              { name: 'Questioning or unsure of my gender identity' },
-              { name: 'Trans man/Transgender man' },
-              { name: 'Trans woman/Transgender woman' },
-              { name: 'Two Spirit' },
-              { name: 'Woman' },
-              {
-                name: 'None of these fully describe me, and I want to specify',
-                showInput: true,
-                otherText: sexualOrientationOtherText,
-                onChange: setSexualOrientationOtherText,
-              },
-              { name: 'Prefer not to answer' },
-            ]}
-            multiple
-            selected={sexualOrientation}
-            onChange={setSexualOrientation}
             style={{ marginBottom: '3rem' }}
           />
           <MultipleChoiceQuestion
