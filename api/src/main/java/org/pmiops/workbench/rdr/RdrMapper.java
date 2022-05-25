@@ -99,7 +99,6 @@ public interface RdrMapper {
   @Mapping(source = "accessTiers", target = "accessTierShortNames")
   // re-enable with feature flag in RW-8355
   // @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
-  @Mapping(ignore = true, target = "demographicSurveyV2")
   RdrResearcher toRdrResearcher(
       DbUser dbUser,
       List<DbAccessTier> accessTiers,

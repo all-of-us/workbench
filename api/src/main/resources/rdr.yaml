@@ -325,8 +325,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/AccessTier'
-      demographicSurveyV2:
-        $ref: '#/definitions/DemographicSurveyV2'
 
   ResearcherVerifiedInstitutionalAffiliation:
     type: object
