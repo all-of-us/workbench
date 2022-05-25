@@ -4,12 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import {
-  CheckBox,
-  NumberInput,
-  RadioButton,
-  Select,
-} from 'app/components/inputs';
+import { CheckBox, NumberInput, RadioButton } from 'app/components/inputs';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { reactStyles, useId } from 'app/utils';
@@ -53,43 +48,6 @@ const Option = (props: {
         {option}
       </label>
     </FlexRow>
-  );
-};
-
-const CategoryCheckbox = (props: {
-  checked: boolean;
-  category: string;
-  onChange: (any) => void;
-}) => {
-  const [value, setValue] = useState(null);
-  return (
-    <FlexColumn>
-      <CheckBox
-        label={props.category}
-        data-test-id={`checkbox`}
-        key={'value'}
-        checked={props.checked}
-        manageOwnState={false}
-        onChange={props.onChange}
-      />
-      {props.checked && (
-        <Select
-          {...{ value }}
-          styles={{
-            menuPortal: (base) => ({
-              ...base,
-              zIndex: 110,
-            }),
-          }}
-          menuPortalTarget={document.getElementById('popup-root')}
-          isDisabled={false}
-          classNamePrefix={''}
-          data-test-id={''}
-          onChange={(e) => setValue(e.value)}
-          options={['A', 'B', 'C']}
-        />
-      )}
-    </FlexColumn>
   );
 };
 
@@ -184,7 +142,6 @@ const YesNoOptionalQuestion = (props: {
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
-    const [checked, setChecked] = useState(false);
     const [education, setEducation] = useState(null);
     const [genderIdentity, setGenderIdentity] = useState(null);
     const [genderIdentityOtherText, setGenderIdentityOtherText] =
