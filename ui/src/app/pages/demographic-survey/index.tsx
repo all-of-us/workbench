@@ -140,16 +140,18 @@ const MultipleChoiceQuestion = (props: {
               multiple={multiple}
             />
 
-            {choice.showInput && selected === choice.name && (
-              <input
-                data-test-id='search'
-                style={{ marginBottom: '.5em', width: '300px' }}
-                type='text'
-                placeholder='Search'
-                value={choice.otherText}
-                onChange={choice.onChange}
-              />
-            )}
+            {choice.showInput &&
+              ((multiple && selected.includes(choice.name)) ||
+                selected === choice.name) && (
+                <input
+                  data-test-id='search'
+                  style={{ marginBottom: '.5em', width: '300px' }}
+                  type='text'
+                  placeholder='Search'
+                  value={choice.otherText}
+                  onChange={choice.onChange}
+                />
+              )}
           </FlexColumn>
         ))}
       </FlexRow>
@@ -200,45 +202,35 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [dressing, setDressing] = useState(null);
     const [errands, setErrands] = useState(null);
     const [otherLifeActivity, setOtherLifeActivity] = useState(null);
+    const [raceEthnicity, setRaceEthnicity] = useState([]);
+    const [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState('');
     return (
       <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
         <Header>Researcher Workbench</Header>
         <FlexColumn>
           <SmallHeader>Races and Ethnicities</SmallHeader>
-          <CategoryCheckbox
-            {...{ checked }}
-            category='American Indian or Alaska Native'
-            onChange={(e) => setChecked(e)}
-          />
-          <CategoryCheckbox
-            {...{ checked }}
-            category='Asian'
-            onChange={(e) => setChecked(e)}
-          />
-          <CategoryCheckbox
-            {...{ checked }}
-            category='Black, African American, or of African descent'
-            onChange={(e) => setChecked(e)}
-          />
-          <CategoryCheckbox
-            {...{ checked }}
-            category='Hispanic, Latino, or Spanish descent'
-            onChange={(e) => setChecked(e)}
-          />
-          <CategoryCheckbox
-            {...{ checked }}
-            category='Middle Eastern or North African'
-            onChange={(e) => setChecked(e)}
-          />
-          <CategoryCheckbox
-            {...{ checked }}
-            category='Native Hawaiian or other Pacific Islander'
-            onChange={(e) => setChecked(e)}
-          />
-          <CategoryCheckbox
-            {...{ checked }}
-            category='White, or of European descent'
-            onChange={(e) => setChecked(e)}
+          <MultipleChoiceQuestion
+            question='Which races and/or ethnicities do you identify with? Please select all that apply.'
+            choices={[
+              { name: 'American Indian or Alaska Native' },
+              { name: 'Asian' },
+              { name: 'Black, African American, or of African descent' },
+              { name: 'Hispanic, Latino, or Spanish descent' },
+              { name: 'Middle Eastern or North African' },
+              { name: 'Native Hawaiian or other Pacific Islander' },
+              { name: 'White, or of European descent' },
+              {
+                name: 'None of these fully describe me, and I want to specify',
+                showInput: true,
+                otherText: raceEthnicityOtherText,
+                onChange: setRaceEthnicityOtherText,
+              },
+              { name: 'Prefer not to answer' },
+            ]}
+            multiple
+            selected={raceEthnicity}
+            onChange={setRaceEthnicity}
+            style={{ marginBottom: '3rem' }}
           />
           <SmallHeader>Questions about genders</SmallHeader>
           <MultipleChoiceQuestion
