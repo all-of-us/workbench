@@ -28,7 +28,9 @@ const userAgent =
  * @return {@link Browser}
  */
 export const launchBrowser = async (launchOpts?: LaunchOptions): Promise<Browser> => {
-  return launch(launchOpts ? launchOpts : defaultLaunchOptions);
+  const param: LaunchOptions = launchOpts ? launchOpts : defaultLaunchOptions;
+  console.log('launch options', JSON.stringify(param));
+  return launch(param);
 };
 
 /**

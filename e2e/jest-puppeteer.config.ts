@@ -8,7 +8,7 @@ const puppeteer = require('puppeteer');
 const headless = (process.env.PUPPETEER_HEADLESS || 'true') === 'true';
 const slowMotion = parseInt(process.env.PUPPETEER_SLOWMO, 10) || 10;
 
-console.log('jest-puppeteer-config headless = ', headless);
+console.log('jest-puppeteer-config headless =', headless);
 
 const NEW_CHROME_SWITCHES = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.

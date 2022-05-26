@@ -6,7 +6,7 @@ const isCi = CI === 'true';
 const isDebug = PUPPETEER_DEBUG === 'true';
 const headless = isDebug ? false : isCi || (PUPPETEER_HEADLESS || 'true') === 'true';
 
-console.log('page-options headless = ', headless);
+console.log('page-options headless =', headless);
 
 const customChromeOptions = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.
