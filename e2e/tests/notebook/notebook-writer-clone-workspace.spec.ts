@@ -31,12 +31,7 @@ describe('WRITER clone workspace and notebook tests', () => {
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);
 
-    // If workspace has not shared to the WRITER, share it now.
-    const isShared = await aboutPage.collaboratorExists(config.WRITER_USER, WorkspaceAccessLevel.Writer);
-    if (!isShared) {
-      await aboutPage.shareWorkspaceWithUser(config.WRITER_USER, WorkspaceAccessLevel.Writer);
-      await waitWhileLoading(page);
-    }
+    await aboutPage.ensureCollaboratorAccess(config.WRITER_USER, WorkspaceAccessLevel.Writer);
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);

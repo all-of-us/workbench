@@ -45,10 +45,28 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     return users;
   }
 
-  async collaboratorExists(email: string, workspaceAccessLevel: WorkspaceAccessLevel): Promise<boolean> {
+  private async findCollaboratorAccess(email: string): Promise<WorkspaceAccessLevel> {
     const allCollaborators = await this.findUsersInCollaboratorList();
-    const collaborators = allCollaborators.get(workspaceAccessLevel);
-    return collaborators ? collaborators.some((item) => item === email) : false;
+    for (const [access, users] of allCollaborators.entries()) {
+      if (users.includes(email)) {
+        return WorkspaceAccessLevel[access];
+      }
+    }
+    return null;
+  }
+
+  async ensureCollaboratorAccess(email: string, access: WorkspaceAccessLevel): Promise<void> {
+    const existingAccess = await this.findCollaboratorAccess(email);
+    if (existingAccess === access) {
+      // User already has the desired access.
+      return;
+    }
+    if (existingAccess) {
+      // User has some access, but not the desired level. Remove them first.
+      await this.removeCollaborator(email);
+    }
+    await this.shareWorkspaceWithUser(email, access);
+    await waitWhileLoading(page);
   }
 
   async openShareModal(): Promise<ShareModal> {
