@@ -36,8 +36,10 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
   @Query(value = UNCHANGED_WORKSPACE_IDS_QUERY + " limit :limit", nativeQuery = true)
   List<BigInteger> findTopUnchangedDbWorkspaceIds(@Param("limit") Integer limit);
 
-  DbRdrExport findByEntityTypeAndEntityId(short entity_type, long entity_id);
+  List<DbRdrExport> findAllByEntityType(short entityType);
+
+  DbRdrExport findByEntityTypeAndEntityId(short entityType, long entityId);
 
   @Transactional
-  void deleteDbRdrExportsByEntityTypeAndEntityId(short entity_type, Long entity_id);
+  void deleteDbRdrExportsByEntityTypeAndEntityId(short entityType, Long entityId);
 }

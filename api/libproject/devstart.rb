@@ -1978,7 +1978,7 @@ Common.register_command({
     :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })
 
-def delete_workspace_rdr_export(cmd_name, *args)
+def invalidate_rdr_export(cmd_name, *args)
   common = Common.new
 
   op = WbOptionsParser.new(cmd_name, args)
@@ -1990,13 +1990,20 @@ def delete_workspace_rdr_export(cmd_name, *args)
       TrueClass,
       ->(opts, v) { opts.dry_run = v},
       "When true, print debug lines instead of performing writes. Defaults to true.")
-
   op.add_typed_option(
-      "--workspace-list-filename [workspace-list-filename]",
+      "--entity-type [USER|WORKSPACE]",
       String,
-      ->(opts, v) { opts.workspaceListFilename = v},
-      "File containing list of workspaces to export to RDR.
-      Each line should contain a single workspace id, separated by a comma")
+      ->(opts, v) { opts.entity_type = v},
+      "The RDR entity type to export. USER or WORKSPACE. For WORKSPACE, please use backfill-workspaces-to-rdr instead.")
+  op.add_typed_option(
+      "--id-list-filename [id-list-filename]",
+      String,
+      ->(opts, v) { opts.id_list_filename = v},
+      "File containing list of entities by ID to export to RDR. " +
+      "Each line should contain a single entity id (workspace or user database ID). If unspecified, " +
+      "ALL entities of this type will be invalidated")
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.entity_type}
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -2008,9 +2015,19 @@ def delete_workspace_rdr_export(cmd_name, *args)
     common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
   end
 
+  if "WORKSPACE" == op.opts.entity_type.upcase
+    get_user_confirmation(
+      "WORKSPACE RDR export invalidation should rarely be used; for backfilling workspace data you " +
+      "should use backfill-workspaces-to-rdr instead. If you still think you need to run this, " +
+      "please consult with the team before continuing. Continue anyways?")
+  end
+
   flags = ([
-      ["--workspace-list-filename", op.opts.workspaceListFilename]
+    ['--entity-type', op.opts.entity_type]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.id_list_filename
+    flags += ["--id-list-filename", op.opts.id_list_filename]
+  end
   if op.opts.dry_run
     flags += ["--dry-run"]
   end
@@ -2019,17 +2036,17 @@ def delete_workspace_rdr_export(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        ./gradlew deleteWorkspaceFromRdrExport
+        ./gradlew invalidateRdrExport
        -PappArgs=[#{flags.join(',')}]}
   end
 end
 
-DELETE_WORKSPACE_RDR_EXPORT = "delete-workspace-rdr-export";
+INVALIDATE_RDR_EXPORT = "invalidate-rdr-export";
 
 Common.register_command({
-    :invocation => DELETE_WORKSPACE_RDR_EXPORT,
-    :description => "Delete workspace information from rdr_Export table, making it eligible for next Export job run.\n",
-    :fn => ->(*args) {delete_workspace_rdr_export(DELETE_WORKSPACE_RDR_EXPORT, *args)}
+    :invocation => INVALIDATE_RDR_EXPORT,
+    :description => "Invalidate exported RDR entities, causing them to be resent on the next RDR export.\n",
+    :fn => ->(*args) {invalidate_rdr_export(INVALIDATE_RDR_EXPORT, *args)}
 })
 
 def backfill_workspaces_to_rdr(cmd_name, *args)
