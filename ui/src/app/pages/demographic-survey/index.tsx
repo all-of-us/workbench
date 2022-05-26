@@ -33,6 +33,7 @@ const validateDemographicSurvey = (demographicSurvey) => {
 };
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
+  const [errors, setErrors] = useState(null);
   const [survey, setSurvey] = useState({
     aianOtherText: '',
     asianOtherText: '',
@@ -57,6 +58,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
   const [isAian, setIsAian] = useState(false);
 
   useEffect(() => {
+    setErrors(validateDemographicSurvey(survey));
+  }, [survey]);
+
+  useEffect(() => {
     setIsAian(
       survey.raceEthnicity.filter((s) =>
         s.includes('American Indian or Alaska Native')
@@ -76,9 +81,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
       handleInputChange('walking', null);
     }
   };
-
-  // Turn this into a state variable and make a useEffect for updating it.
-  const errors = validateDemographicSurvey(survey);
 
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
