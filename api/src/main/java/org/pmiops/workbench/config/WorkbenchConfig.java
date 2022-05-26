@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -76,6 +77,7 @@ public class WorkbenchConfig {
     // The legacy free tier billing account id that is migrating away. This value helps to make
     // migration process smooth.
     // Null if not set in Config.
+    @Nullable
     public String legacyAccountId;
 
     public String freeTierBillingAccountName() {
