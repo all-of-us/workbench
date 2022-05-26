@@ -1,163 +1,21 @@
 import * as React from 'react';
-import { CSSProperties, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import { Button } from 'app/components/buttons';
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import { FlexColumn } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import { CheckBox, NumberInput, RadioButton } from 'app/components/inputs';
+import { NumberInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
-import { reactStyles, useId } from 'app/utils';
 
-const styles = reactStyles({
-  question: { fontWeight: 'bold' },
-  answer: { margin: '0.0rem 0.25rem' },
-});
+import { MultipleChoiceQuestion } from './components/multiple-choice-question';
+import { styles } from './components/styles';
+import { YesNoOptionalQuestion } from './components/yes-no-optional-question';
 
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
-
-const Option = (props: {
-  checked: boolean;
-  option: string;
-  style?: CSSProperties;
-  onChange: (any) => void;
-  multiple?: boolean;
-  disabled?: boolean;
-  disabledText?: string;
-}) => {
-  const { checked, disabled, disabledText, multiple, onChange, option } = props;
-  const id = useId();
-  return (
-    <TooltipTrigger
-      content={disabled && disabledText && <div>{disabledText}</div>}
-    >
-      <FlexRow style={{ alignItems: 'center' }}>
-        {multiple ? (
-          <CheckBox
-            data-test-id='nothing-to-report'
-            manageOwnState={false}
-            id={id}
-            disabled={disabled}
-            checked={checked}
-            onChange={onChange}
-          />
-        ) : (
-          <RadioButton
-            data-test-id='nothing-to-report'
-            id={id}
-            disabled={disabled}
-            checked={checked}
-            onChange={onChange}
-            value={option}
-          />
-        )}
-        <label htmlFor={id} style={styles.answer}>
-          {option}
-        </label>
-      </FlexRow>
-    </TooltipTrigger>
-  );
-};
-
-interface MultipleChoiceOption {
-  name: string;
-  otherText?: string;
-  showInput?: boolean;
-  onChange?: (any) => void;
-  disabled?: boolean;
-  disabledText?: string;
-}
-
-const MultipleChoiceQuestion = (props: {
-  question: string;
-  choices: MultipleChoiceOption[];
-  selected: string | string[];
-  onChange: (any) => void;
-  style?: CSSProperties;
-  multiple?: boolean;
-}) => {
-  const { choices, onChange, question, selected, multiple, style } = props;
-
-  const handleChange = (e, name) => {
-    if (multiple) {
-      const result = e
-        ? [...(selected as string[]), name]
-        : (selected as string[]).filter((r) => r !== name);
-      onChange(result);
-    } else {
-      onChange(e.target.value);
-    }
-  };
-
-  return (
-    <FlexRow style={{ ...style, alignItems: 'center' }}>
-      <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
-        {question}
-      </div>
-      <FlexRow style={{ flex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
-        {choices.map((choice) => (
-          <FlexColumn>
-            <Option
-              disabled={choice.disabled}
-              disabledText={choice.disabledText}
-              option={choice.name}
-              checked={
-                multiple
-                  ? selected.includes(choice.name)
-                  : selected === choice.name
-              }
-              onChange={(e) => handleChange(e, choice.name)}
-              multiple={multiple}
-            />
-
-            {choice.showInput &&
-              ((multiple && selected.includes(choice.name)) ||
-                selected === choice.name) && (
-                <input
-                  data-test-id='search'
-                  style={{
-                    marginBottom: '.5em',
-                    marginLeft: '0.75rem',
-                    width: '300px',
-                  }}
-                  type='text'
-                  placeholder='Search'
-                  value={choice.otherText}
-                  onChange={choice.onChange}
-                />
-              )}
-          </FlexColumn>
-        ))}
-      </FlexRow>
-    </FlexRow>
-  );
-};
-
-const YesNoOptionalQuestion = (props: {
-  question: string;
-  selected: string;
-  onChange: (any) => void;
-  style?: CSSProperties;
-}) => {
-  const { question, selected, onChange, style } = props;
-
-  return (
-    <MultipleChoiceQuestion
-      question={question}
-      choices={[
-        { name: 'Yes' },
-        { name: 'No' },
-        { name: 'Prefer not to answer' },
-      ]}
-      selected={selected}
-      onChange={onChange}
-      style={style}
-    />
-  );
-};
 
 const validateDemographicSurvey = (demographicSurvey) => {
   validate.validators.nullBoolean = (v) =>
@@ -175,48 +33,53 @@ const validateDemographicSurvey = (demographicSurvey) => {
 };
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
-  const [education, setEducation] = useState(null),
-    [genderIdentity, setGenderIdentity] = useState([]),
-    [genderIdentityOtherText, setGenderIdentityOtherText] = useState(null),
-    [sexAtBirth, setSexAtBirth] = useState(null),
-    [sexAtBirthOtherText, setSexAtBirthOtherText] = useState(null),
-    [sexualOrientation, setSexualOrientation] = useState([]),
-    [sexualOrientationOtherText, setSexualOrientationOtherText] =
-      useState(null),
-    [deaf, setDeaf] = useState(null),
-    [blind, setBlind] = useState(null),
-    [concentration, setConcentration] = useState(null),
-    [walking, setWalking] = useState(null),
-    [dressing, setDressing] = useState(null),
-    [errands, setErrands] = useState(null),
-    [otherLifeActivity, setOtherLifeActivity] = useState(null),
-    [raceEthnicity, setRaceEthnicity] = useState([]),
-    [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null),
-    [aianOtherText, setAianOtherText] = useState(null),
-    [asianOtherText, setAsianOtherText] = useState(null),
-    [yearOfBirth, setYearOfBirth] = useState(null),
-    handleYearOfBirthBlur = () => {
-      if (yearOfBirth < minYear || yearOfBirth > maxYear) {
-        setYearOfBirth(null);
-      }
-    };
+  const [survey, setSurvey] = useState({
+    aianOtherText: '',
+    asianOtherText: '',
+    blind: null,
+    concentration: null,
+    deaf: null,
+    dressing: null,
+    education: null,
+    errands: null,
+    genderIdentity: [],
+    genderIdentityOtherText: null,
+    otherLifeActivity: null,
+    raceEthnicity: [],
+    raceEthnicityOtherText: null,
+    sexAtBirth: null,
+    sexAtBirthOtherText: null,
+    sexualOrientation: [],
+    sexualOrientationOtherText: null,
+    walking: null,
+    yearOfBirth: null,
+  });
+  const [isAian, setIsAian] = useState(false);
 
-  const demographicSurvey = {
-    education,
-    genderIdentityList: genderIdentity,
-    race: raceEthnicity,
-    sexAtBirth,
-    yearOfBirth,
+  useEffect(() => {
+    setIsAian(
+      survey.raceEthnicity.filter((s) =>
+        s.includes('American Indian or Alaska Native')
+      ).length > 0
+    );
+  }, [survey.raceEthnicity]);
+
+  const handleInputChange = (prop, value) => {
+    setSurvey({
+      ...survey,
+      [prop]: value,
+    });
+  };
+
+  const handleYearOfBirthBlur = () => {
+    if (survey.yearOfBirth < minYear || survey.yearOfBirth > maxYear) {
+      handleInputChange('walking', null);
+    }
   };
 
   // Turn this into a state variable and make a useEffect for updating it.
-  const errors = validateDemographicSurvey(demographicSurvey);
+  const errors = validateDemographicSurvey(survey);
 
-  const isAiAn =
-    raceEthnicity.filter((s) => s.includes('American Indian or Alaska Native'))
-      .length > 0;
-
-  console.log('What is a demographicSurvey? ', demographicSurvey);
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
       <Header>Researcher Workbench</Header>
@@ -232,8 +95,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: aianOtherText,
-              onChange: setAianOtherText,
+              otherText: survey.aianOtherText,
+              onChange: (value) => handleInputChange('aianOtherText', value),
             },
             {
               name: 'Asian',
@@ -251,8 +114,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'Asian Other',
               showInput: true,
-              otherText: asianOtherText,
-              onChange: setAsianOtherText,
+              otherText: survey.asianOtherText,
+              onChange: (value) => handleInputChange('asianOtherText', value),
             },
             { name: 'Black, African American, or of African descent' },
             { name: 'Hispanic, Latino, or Spanish descent' },
@@ -262,14 +125,15 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: raceEthnicityOtherText,
-              onChange: setRaceEthnicityOtherText,
+              otherText: survey.raceEthnicityOtherText,
+              onChange: (value) =>
+                handleInputChange('setRaceEthnicityOtherText', value),
             },
             { name: 'Prefer not to answer' },
           ]}
           multiple
-          selected={raceEthnicity}
-          onChange={setRaceEthnicity}
+          selected={survey.raceEthnicity}
+          onChange={(value) => handleInputChange('raceEthnicity', value)}
           style={{ marginBottom: '3rem' }}
         />
         <SmallHeader>Questions about gender</SmallHeader>
@@ -290,7 +154,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             }),
             {
               name: 'Two Spirit',
-              disabled: !isAiAn,
+              disabled: !isAian,
               disabledText:
                 'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
                 'ancestry. If this applies to you, please update your selection in the ' +
@@ -302,14 +166,15 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: genderIdentityOtherText,
-              onChange: setGenderIdentityOtherText,
+              otherText: survey.genderIdentityOtherText,
+              onChange: (value) =>
+                handleInputChange('genderIdentityOtherText', value),
             },
             { name: 'Prefer not to answer' },
           ]}
           multiple
-          selected={genderIdentity}
-          onChange={setGenderIdentity}
+          selected={survey.genderIdentity}
+          onChange={(value) => handleInputChange('genderIdentity', value)}
           style={{ marginBottom: '3rem' }}
         />
         <MultipleChoiceQuestion
@@ -332,7 +197,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             }),
             {
               name: 'Two Spirit',
-              disabled: !isAiAn,
+              disabled: !isAian,
               disabledText:
                 'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
                 'ancestry. If this applies to you, please update your selection in the ' +
@@ -341,13 +206,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: sexualOrientationOtherText,
-              onChange: setSexualOrientationOtherText,
+              otherText: survey.sexualOrientationOtherText,
+              onChange: (value) =>
+                handleInputChange('sexualOrientationOtherText', value),
             },
             { name: 'Prefer not to answer' },
           ]}
-          selected={sexualOrientation}
-          onChange={setSexualOrientation}
+          selected={survey.sexualOrientation}
+          onChange={(value) => handleInputChange('sexualOrientation', value)}
           style={{ marginBottom: '3rem' }}
         />
         <MultipleChoiceQuestion
@@ -361,56 +227,57 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: sexAtBirthOtherText,
-              onChange: setSexAtBirthOtherText,
+              otherText: survey.sexAtBirthOtherText,
+              onChange: (value) =>
+                handleInputChange('sexAtBirthOtherText', value),
             },
             { name: 'Prefer not to answer' },
           ]}
-          selected={sexAtBirth}
-          onChange={setSexAtBirth}
+          selected={survey.sexAtBirth}
+          onChange={(value) => handleInputChange('sexAtBirth', value)}
         />
         <SmallHeader style={{ marginBottom: '0.5rem' }}>
           Questions about disability status
         </SmallHeader>
         <YesNoOptionalQuestion
           question='Are you deaf or do you have serious difficulty hearing?'
-          selected={deaf}
-          onChange={setDeaf}
+          selected={survey.deaf}
+          onChange={(value) => handleInputChange('deaf', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
-          selected={blind}
-          onChange={setBlind}
+          selected={survey.blind}
+          onChange={(value) => handleInputChange('blind', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='Because of a physical, cognitive, or emotional condition, do you
             have serious difficulty concentrating, remembering, or making
             decisions?'
-          selected={concentration}
-          onChange={setConcentration}
+          selected={survey.concentration}
+          onChange={(value) => handleInputChange('concentration', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='Do you have serious difficulty walking or climbing stairs?'
-          selected={walking}
-          onChange={setWalking}
+          selected={survey.walking}
+          onChange={(value) => handleInputChange('walking', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='Do you have difficulty dressing or bathing?'
-          selected={dressing}
-          onChange={setDressing}
+          selected={survey.dressing}
+          onChange={(value) => handleInputChange('dressing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question="Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
-          selected={errands}
-          onChange={setErrands}
+          selected={survey.errands}
+          onChange={(value) => handleInputChange('errands', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
@@ -418,19 +285,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             substantially inhibits one or more life activities not specified
             through the above questions, and want to share more? Please
             describe.'
-          selected={otherLifeActivity}
-          onChange={setOtherLifeActivity}
+          selected={survey.otherLifeActivity}
+          onChange={(value) => handleInputChange('otherLifeActivity', value)}
         />
         <SmallHeader style={{ marginBottom: '0.5rem' }}>
           Other Questions
         </SmallHeader>
         <div style={styles.question}>Year of birth</div>
         <NumberInput
-          onChange={setYearOfBirth}
+          onChange={(value) => handleInputChange('yearOfBirth', value)}
           onBlur={handleYearOfBirthBlur}
           min={minYear}
           max={maxYear}
-          value={yearOfBirth}
+          value={survey.yearOfBirth}
           style={{ width: '4rem' }}
         />
         <MultipleChoiceQuestion
@@ -450,8 +317,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
               };
             }),
           ]}
-          selected={education}
-          onChange={setEducation}
+          selected={survey.education}
+          onChange={(value) => handleInputChange('education', value)}
         />
 
         <TooltipTrigger
