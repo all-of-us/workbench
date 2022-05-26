@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -133,12 +134,11 @@ public class FreeTierBillingService {
 
   // TODO: move to DbWorkspace?  RW-5107
   public boolean isFreeTier(final DbWorkspace workspace) {
-    return workspace
-            .getBillingAccountName()
-            .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName())
-        || workspace
-            .getBillingAccountName()
-            .equals(workbenchConfigProvider.get().billing.legacyFreeTierBillingAccountName());
+    return workbenchConfigProvider
+        .get()
+        .billing
+        .freeTierBillingAccountNames()
+        .contains(workspace.getBillingAccountName());
   }
 
   private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
@@ -230,13 +230,9 @@ public class FreeTierBillingService {
   // Helper to identify candidate users with workspaces that may need deactivation, if those users'
   // initial credits have expired.
   private Set<DbUser> getFreeTierActiveWorkspaceCreators() {
-    return Sets.union(
-        workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
-            BillingStatus.ACTIVE,
-            workbenchConfigProvider.get().billing.freeTierBillingAccountName()),
-        workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountName(
-            BillingStatus.ACTIVE,
-            workbenchConfigProvider.get().billing.legacyFreeTierBillingAccountName()));
+    return workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountNameIn(
+        BillingStatus.ACTIVE,
+        new ArrayList<String>(workbenchConfigProvider.get().billing.freeTierBillingAccountNames()));
   }
 
   private Map<DbWorkspace, Double> getFreeTierWorkspaceCostsFromBQ() {

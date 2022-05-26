@@ -1,7 +1,9 @@
 package org.pmiops.workbench.config;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -80,6 +82,11 @@ public class WorkbenchConfig {
 
     public String legacyFreeTierBillingAccountName() {
       return "billingAccounts/" + legacyAccountId;
+    }
+
+    /// All valid free tier billing accounts, including accountId and legacyAccountId.
+    public Set<String> freeTierBillingAccountNames() {
+      return ImmutableSet.of("billingAccounts/" + accountId, "billingAccounts/" + legacyAccountId);
     }
 
     // The full table name for the BigQuery billing export, which is read from by the free-tier
