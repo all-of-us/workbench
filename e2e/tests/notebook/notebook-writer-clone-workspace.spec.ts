@@ -5,7 +5,6 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
-import { waitWhileLoading } from 'utils/waits-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
