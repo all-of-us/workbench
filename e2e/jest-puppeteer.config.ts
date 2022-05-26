@@ -5,8 +5,10 @@
 
 const fp = require('lodash/fp');
 const puppeteer = require('puppeteer');
-const isHeadless = (process.env.PUPPETEER_HEADLESS || 'true') === 'true';
+const headless = (process.env.PUPPETEER_HEADLESS || 'true') === 'true';
 const slowMotion = parseInt(process.env.PUPPETEER_SLOWMO, 10) || 10;
+
+console.log('jest-puppeteer-config headless = ', headless);
 
 const NEW_CHROME_SWITCHES = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.
@@ -23,7 +25,7 @@ const NEW_CHROME_SWITCHES = [
 // Append to Puppeteer default chrome flags.
 // https://github.com/puppeteer/puppeteer/blob/33f1967072e07824c5bf6a8c1336f844d9efaabf/lib/Launcher.js#L261
 const DEFAULT_SWITCHES = fp.concat(
-  puppeteer.defaultArgs({ devtools: false, headless: isHeadless, userDataDir: null }),
+  puppeteer.defaultArgs({ devtools: false, headless, userDataDir: null }),
   NEW_CHROME_SWITCHES
 );
 
