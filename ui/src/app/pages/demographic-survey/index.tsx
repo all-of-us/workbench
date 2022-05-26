@@ -1,10 +1,13 @@
 import * as React from 'react';
 import { CSSProperties, useState } from 'react';
 import * as fp from 'lodash/fp';
+import validate from 'validate.js';
 
+import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import { CheckBox, NumberInput, RadioButton } from 'app/components/inputs';
+import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { reactStyles, useId } from 'app/utils';
 
@@ -13,8 +16,8 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem' },
 });
 
-const minYear = '0';
-const maxYear = '3000';
+const maxYear = new Date().getFullYear();
+const minYear = maxYear - 125;
 
 const Option = (props: {
   checked: boolean;
@@ -22,34 +25,40 @@ const Option = (props: {
   style?: CSSProperties;
   onChange: (any) => void;
   multiple?: boolean;
+  disabled?: boolean;
+  disabledText?: string;
 }) => {
-  const { checked, multiple, onChange, option } = props;
+  const { checked, disabled, disabledText, multiple, onChange, option } = props;
   const id = useId();
   return (
-    <FlexRow style={{ alignItems: 'center' }}>
-      {multiple ? (
-        <CheckBox
-          data-test-id='nothing-to-report'
-          manageOwnState={false}
-          id={id}
-          disabled={false}
-          checked={checked}
-          onChange={onChange}
-        />
-      ) : (
-        <RadioButton
-          data-test-id='nothing-to-report'
-          id={id}
-          disabled={false}
-          checked={checked}
-          onChange={onChange}
-          value={option}
-        />
-      )}
-      <label htmlFor={id} style={styles.answer}>
-        {option}
-      </label>
-    </FlexRow>
+    <TooltipTrigger
+      content={disabled && disabledText && <div>{disabledText}</div>}
+    >
+      <FlexRow style={{ alignItems: 'center' }}>
+        {multiple ? (
+          <CheckBox
+            data-test-id='nothing-to-report'
+            manageOwnState={false}
+            id={id}
+            disabled={disabled}
+            checked={checked}
+            onChange={onChange}
+          />
+        ) : (
+          <RadioButton
+            data-test-id='nothing-to-report'
+            id={id}
+            disabled={disabled}
+            checked={checked}
+            onChange={onChange}
+            value={option}
+          />
+        )}
+        <label htmlFor={id} style={styles.answer}>
+          {option}
+        </label>
+      </FlexRow>
+    </TooltipTrigger>
   );
 };
 
@@ -58,6 +67,8 @@ interface MultipleChoiceOption {
   otherText?: string;
   showInput?: boolean;
   onChange?: (any) => void;
+  disabled?: boolean;
+  disabledText?: string;
 }
 
 const MultipleChoiceQuestion = (props: {
@@ -90,6 +101,8 @@ const MultipleChoiceQuestion = (props: {
         {choices.map((choice) => (
           <FlexColumn>
             <Option
+              disabled={choice.disabled}
+              disabledText={choice.disabledText}
               option={choice.name}
               checked={
                 multiple
@@ -146,13 +159,27 @@ const YesNoOptionalQuestion = (props: {
   );
 };
 
+const validateDemographicSurvey = (demographicSurvey) => {
+  validate.validators.nullBoolean = (v) =>
+    v === true || v === false || v === null
+      ? undefined
+      : 'value must be selected';
+  const validationCheck = {
+    race: { presence: { allowEmpty: false } },
+    genderIdentityList: { presence: { allowEmpty: false } },
+    sexAtBirth: { presence: { allowEmpty: false } },
+    yearOfBirth: { presence: { allowEmpty: false } },
+    education: { presence: { allowEmpty: false } },
+  };
+  return validate(demographicSurvey, validationCheck);
+};
+
 const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
   const [education, setEducation] = useState(null),
-    [genderIdentity, setGenderIdentity] = useState(null),
+    [genderIdentity, setGenderIdentity] = useState([]),
     [genderIdentityOtherText, setGenderIdentityOtherText] = useState(null),
-    [sexAssignedAtBirth, setSexAssignedAtBirth] = useState(null),
-    [sexAssignedAtBirthOtherText, setSexAssignedAtBirthOtherText] =
-      useState(null),
+    [sexAtBirth, setSexAtBirth] = useState(null),
+    [sexAtBirthOtherText, setSexAtBirthOtherText] = useState(null),
     [sexualOrientation, setSexualOrientation] = useState([]),
     [sexualOrientationOtherText, setSexualOrientationOtherText] =
       useState(null),
@@ -167,12 +194,29 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
     [raceEthnicityOtherText, setRaceEthnicityOtherText] = useState(null),
     [aianOtherText, setAianOtherText] = useState(null),
     [asianOtherText, setAsianOtherText] = useState(null),
-    [birthYear, setBirthYear] = useState(null),
-    handleBirthYearBlur = () => {
-      if (birthYear < minYear || birthYear > maxYear) {
-        setBirthYear(null);
+    [yearOfBirth, setYearOfBirth] = useState(null),
+    handleYearOfBirthBlur = () => {
+      if (yearOfBirth < minYear || yearOfBirth > maxYear) {
+        setYearOfBirth(null);
       }
     };
+
+  const demographicSurvey = {
+    education,
+    genderIdentityList: genderIdentity,
+    race: raceEthnicity,
+    sexAtBirth,
+    yearOfBirth,
+  };
+
+  // Turn this into a state variable and make a useEffect for updating it.
+  const errors = validateDemographicSurvey(demographicSurvey);
+
+  const isAiAn =
+    raceEthnicity.filter((s) => s.includes('American Indian or Alaska Native'))
+      .length > 0;
+
+  console.log('What is a demographicSurvey? ', demographicSurvey);
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
       <Header>Researcher Workbench</Header>
@@ -228,7 +272,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
           onChange={setRaceEthnicity}
           style={{ marginBottom: '3rem' }}
         />
-        <SmallHeader>Questions about genders</SmallHeader>
+        <SmallHeader>Questions about gender</SmallHeader>
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current gender identity?'
           choices={[
@@ -239,24 +283,33 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
               'Questioning or unsure of my gender identity',
               'Trans man/Transgender man',
               'Trans woman/Transgender woman',
-              'Two Spirit',
-              'Woman',
             ].map((name) => {
               return {
                 name,
               };
             }),
             {
+              name: 'Two Spirit',
+              disabled: !isAiAn,
+              disabledText:
+                'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
+                'ancestry. If this applies to you, please update your selection in the ' +
+                '"Race and Ethnicities" section.',
+            },
+            {
+              name: 'Woman',
+            },
+            {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: sexualOrientationOtherText,
-              onChange: setSexualOrientationOtherText,
+              otherText: genderIdentityOtherText,
+              onChange: setGenderIdentityOtherText,
             },
             { name: 'Prefer not to answer' },
           ]}
           multiple
-          selected={sexualOrientation}
-          onChange={setSexualOrientation}
+          selected={genderIdentity}
+          onChange={setGenderIdentity}
           style={{ marginBottom: '3rem' }}
         />
         <MultipleChoiceQuestion
@@ -272,37 +325,35 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
               'Questioning or unsure of my sexual orientation',
               'Same-gender loving',
               'Straight or heterosexual',
-              'Two Spirit',
             ].map((name) => {
               return {
                 name,
               };
             }),
             {
+              name: 'Two Spirit',
+              disabled: !isAiAn,
+              disabledText:
+                'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
+                'ancestry. If this applies to you, please update your selection in the ' +
+                '"Race and Ethnicities" section.',
+            },
+            {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: genderIdentityOtherText,
-              onChange: setGenderIdentityOtherText,
+              otherText: sexualOrientationOtherText,
+              onChange: setSexualOrientationOtherText,
             },
             { name: 'Prefer not to answer' },
           ]}
-          selected={genderIdentity}
-          onChange={setGenderIdentity}
+          selected={sexualOrientation}
+          onChange={setSexualOrientation}
           style={{ marginBottom: '3rem' }}
         />
         <MultipleChoiceQuestion
           question='What was the sex assigned to you at birth, such as on your original birth certificate?'
           choices={[
-            ...[
-              'Gender Queer',
-              'Man',
-              'Non-binary',
-              'Questioning or unsure of my gender identity',
-              'Trans man/Transgender man',
-              'Trans woman/Transgender woman',
-              'Two Spirit',
-              'Woman',
-            ].map((name) => {
+            ...['Female', 'Intersex', 'Male'].map((name) => {
               return {
                 name,
               };
@@ -310,15 +361,17 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
-              otherText: sexAssignedAtBirthOtherText,
-              onChange: setSexAssignedAtBirthOtherText,
+              otherText: sexAtBirthOtherText,
+              onChange: setSexAtBirthOtherText,
             },
             { name: 'Prefer not to answer' },
           ]}
-          selected={sexAssignedAtBirth}
-          onChange={setSexAssignedAtBirth}
+          selected={sexAtBirth}
+          onChange={setSexAtBirth}
         />
-        <SmallHeader>Questions about disability status</SmallHeader>
+        <SmallHeader style={{ marginBottom: '0.5rem' }}>
+          Questions about disability status
+        </SmallHeader>
         <YesNoOptionalQuestion
           question='Are you deaf or do you have serious difficulty hearing?'
           selected={deaf}
@@ -368,14 +421,16 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
           selected={otherLifeActivity}
           onChange={setOtherLifeActivity}
         />
-        <SmallHeader>Other Questions</SmallHeader>
+        <SmallHeader style={{ marginBottom: '0.5rem' }}>
+          Other Questions
+        </SmallHeader>
         <div style={styles.question}>Year of birth</div>
         <NumberInput
-          onChange={setBirthYear}
-          onBlur={handleBirthYearBlur}
+          onChange={setYearOfBirth}
+          onBlur={handleYearOfBirthBlur}
           min={minYear}
           max={maxYear}
-          value={birthYear}
+          value={yearOfBirth}
           style={{ width: '4rem' }}
         />
         <MultipleChoiceQuestion
@@ -398,6 +453,35 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
           selected={education}
           onChange={setEducation}
         />
+
+        <TooltipTrigger
+          content={
+            errors && (
+              <>
+                <div>Please review the following:</div>
+                <ul>
+                  {Object.keys(errors).map((key) => (
+                    <li key={errors[key][0]}>{errors[key][0]}</li>
+                  ))}
+                  <li>
+                    You may select "Prefer not to answer" for each unfilled item
+                    to continue
+                  </li>
+                </ul>
+              </>
+            )
+          }
+        >
+          <Button
+            disabled={errors}
+            type='primary'
+            onClick={(_) => console.log('Save')}
+            data-test-id={'submit-button'}
+            style={{ marginTop: '3rem' }}
+          >
+            Submit
+          </Button>
+        </TooltipTrigger>
       </FlexColumn>
     </FlexColumn>
   );
