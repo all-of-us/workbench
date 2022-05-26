@@ -16,13 +16,20 @@ import { ConfirmPlaygroundModeModal } from 'app/pages/analysis/confirm-playgroun
 import { NotebookInUseModal } from 'app/pages/analysis/notebook-in-use-modal';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { hasNewValidProps, reactStyles, withCurrentWorkspace } from 'app/utils';
+import {
+  cond,
+  hasNewValidProps,
+  reactStyles,
+  withCurrentWorkspace,
+} from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
+  RUNTIME_ERROR_STATUS_MESSAGE_SHORT,
+  RuntimeStatusError,
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, profileStore, RuntimeStore } from 'app/utils/stores';
@@ -360,6 +367,13 @@ export const InteractiveNotebook = fp.flow(
             </NotebookFrameError>
           );
         }
+        if (error instanceof RuntimeStatusError) {
+          return (
+            <NotebookFrameError errorMode={ErrorMode.ERROR}>
+              {RUNTIME_ERROR_STATUS_MESSAGE_SHORT}
+            </NotebookFrameError>
+          );
+        }
         const status = error instanceof Response ? error.status : 500;
         if (status === 412) {
           return (
@@ -412,57 +426,64 @@ export const InteractiveNotebook = fp.flow(
             <div style={{ ...styles.navBarItem, ...styles.active }}>
               Preview (Read-Only)
             </div>
-            {userRequestedExecutableNotebook && !error ? (
-              <div style={{ ...styles.navBarItem, textTransform: 'none' }}>
-                <ClrIcon
-                  shape='sync'
-                  style={{ ...styles.navBarIcon, ...styles.rotate }}
-                />
-                {this.renderNotebookText()}
-              </div>
-            ) : (
-              <div style={{ display: 'flex' }}>
-                <TooltipTrigger
-                  content={
-                    this.billingLocked && ACTION_DISABLED_INVALID_BILLING
-                  }
-                >
-                  <div
-                    style={this.buttonStyleObj}
-                    onClick={() => {
-                      AnalyticsTracker.Notebooks.Edit();
-                      this.startEditMode();
-                    }}
-                  >
-                    <EditComponentReact
-                      enableHoverEffect={false}
-                      disabled={!this.canStartRuntimes}
-                      style={styles.navBarIcon}
+            {cond(
+              [!!error, () => null],
+              [
+                userRequestedExecutableNotebook,
+                () => (
+                  <div style={{ ...styles.navBarItem, textTransform: 'none' }}>
+                    <ClrIcon
+                      shape='sync'
+                      style={{ ...styles.navBarIcon, ...styles.rotate }}
                     />
-                    Edit {this.notebookInUse && '(In Use)'}
+                    {this.renderNotebookText()}
                   </div>
-                </TooltipTrigger>
-                <TooltipTrigger
-                  content={
-                    this.billingLocked && ACTION_DISABLED_INVALID_BILLING
-                  }
-                >
-                  <div
-                    style={this.buttonStyleObj}
-                    onClick={() => {
-                      AnalyticsTracker.Notebooks.Run();
-                      this.onPlaygroundModeClick();
-                    }}
+                ),
+              ],
+              () => (
+                <div style={{ display: 'flex' }}>
+                  <TooltipTrigger
+                    content={
+                      this.billingLocked && ACTION_DISABLED_INVALID_BILLING
+                    }
                   >
-                    <IconButton
-                      icon={PlaygroundIcon}
-                      disabled={!this.canStartRuntimes}
-                      style={styles.navBarIcon}
-                    />
-                    Run (Playground Mode)
-                  </div>
-                </TooltipTrigger>
-              </div>
+                    <div
+                      style={this.buttonStyleObj}
+                      onClick={() => {
+                        AnalyticsTracker.Notebooks.Edit();
+                        this.startEditMode();
+                      }}
+                    >
+                      <EditComponentReact
+                        enableHoverEffect={false}
+                        disabled={!this.canStartRuntimes}
+                        style={styles.navBarIcon}
+                      />
+                      Edit {this.notebookInUse && '(In Use)'}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipTrigger
+                    content={
+                      this.billingLocked && ACTION_DISABLED_INVALID_BILLING
+                    }
+                  >
+                    <div
+                      style={this.buttonStyleObj}
+                      onClick={() => {
+                        AnalyticsTracker.Notebooks.Run();
+                        this.onPlaygroundModeClick();
+                      }}
+                    >
+                      <IconButton
+                        icon={PlaygroundIcon}
+                        disabled={!this.canStartRuntimes}
+                        style={styles.navBarIcon}
+                      />
+                      Run (Playground Mode)
+                    </div>
+                  </TooltipTrigger>
+                </div>
+              )
             )}
           </div>
           <div style={styles.previewDiv}>{this.renderPreviewContents()}</div>
