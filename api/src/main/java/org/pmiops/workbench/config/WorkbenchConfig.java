@@ -1,8 +1,9 @@
 package org.pmiops.workbench.config;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -74,19 +75,23 @@ public class WorkbenchConfig {
 
     // The legacy free tier billing account id that is migrating away. This value helps to make
     // migration process smooth.
+    // Null if not set in Config.
     public String legacyAccountId;
 
     public String freeTierBillingAccountName() {
       return "billingAccounts/" + accountId;
     }
 
-    public String legacyFreeTierBillingAccountName() {
-      return "billingAccounts/" + legacyAccountId;
+    public Optional<String> legacyFreeTierBillingAccountName() {
+      return Optional.ofNullable(legacyAccountId);
     }
 
-    /// All valid free tier billing accounts, including accountId and legacyAccountId.
+    /// All valid free tier billing accounts, including accountId and legacyAccountId(if present).
     public Set<String> freeTierBillingAccountNames() {
-      return ImmutableSet.of("billingAccounts/" + accountId, "billingAccounts/" + legacyAccountId);
+      Set<String> billingAccountNames = new HashSet<>();
+      billingAccountNames.add(freeTierBillingAccountName());
+      legacyFreeTierBillingAccountName().ifPresent(billingAccountNames::add);
+      return billingAccountNames;
     }
 
     // The full table name for the BigQuery billing export, which is read from by the free-tier

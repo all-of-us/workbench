@@ -20,7 +20,6 @@
     "gceVmZone": "us-central1-c"
   },
   "billing": {
-    "legacyAccountId": "00293C-5DEA2D-6887E7",
     "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-perf-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
