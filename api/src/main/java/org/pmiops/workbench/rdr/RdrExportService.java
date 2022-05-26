@@ -14,5 +14,5 @@ public interface RdrExportService {
 
   void updateDbRdrExport(RdrEntity entity, List<Long> idList);
 
-  void deleteWorkspaceExportEntries(List<Long> workspaceIds);
+  void deleteRdrExportEntries(RdrEntity entity, List<Long> workspaceIds);
 }
