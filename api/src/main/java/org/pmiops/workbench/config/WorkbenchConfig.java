@@ -77,15 +77,14 @@ public class WorkbenchConfig {
     // The legacy free tier billing account id that is migrating away. This value helps to make
     // migration process smooth.
     // Null if not set in Config.
-    @Nullable
-    public String legacyAccountId;
+    @Nullable public String legacyAccountId;
 
     public String freeTierBillingAccountName() {
       return "billingAccounts/" + accountId;
     }
 
     public Optional<String> legacyFreeTierBillingAccountName() {
-      return Optional.ofNullable(legacyAccountId);
+      return Optional.ofNullable(legacyAccountId).map(a -> "billingAccounts/" + a);
     }
 
     /// All valid free tier billing accounts, including accountId and legacyAccountId(if present).
