@@ -98,30 +98,40 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
               otherText: survey.aianOtherText,
               onChange: (value) => handleInputChange('aianOtherText', value),
             },
-            {
-              name: 'Asian',
-            },
-            { name: 'Indian' },
-            { name: 'Cambodian' },
-            { name: 'Chinese' },
-            { name: 'Filipino' },
-            { name: 'Hmong' },
-            { name: 'Japanese' },
-            { name: 'Korean' },
-            { name: 'Lao' },
-            { name: 'Pakistani' },
-            { name: 'Vietnamese' },
+            ...[
+              'Asian',
+              'Indian',
+              'Cambodian',
+              'Chinese',
+              'Filipino',
+              'Hmong',
+              'Japanese',
+              'Korean',
+              'Lao',
+              'Pakistani',
+              'Vietnamese',
+            ].map((name) => {
+              return {
+                name,
+              };
+            }),
             {
               name: 'Asian Other',
               showInput: true,
               otherText: survey.asianOtherText,
               onChange: (value) => handleInputChange('asianOtherText', value),
             },
-            { name: 'Black, African American, or of African descent' },
-            { name: 'Hispanic, Latino, or Spanish descent' },
-            { name: 'Middle Eastern or North African' },
-            { name: 'Native Hawaiian or other Pacific Islander' },
-            { name: 'White, or of European descent' },
+            ...[
+              'Black, African American, or of African descent',
+              'Hispanic, Latino, or Spanish descent',
+              'Middle Eastern or North African',
+              'Native Hawaiian or other Pacific Islander',
+              'White, or of European descent',
+            ].map((name) => {
+              return {
+                name,
+              };
+            }),
             {
               name: 'None of these fully describe me, and I want to specify',
               showInput: true,
