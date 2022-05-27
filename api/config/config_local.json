@@ -44,7 +44,7 @@
     "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-test",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 10,
+    "extractionMethodConfigurationVersion": 14,
     "extractionMethodLogicalVersion": 3,
     "extractionCohortsDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",

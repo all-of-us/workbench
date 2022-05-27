@@ -381,6 +381,9 @@ public class GenomicExtractionService {
       maybeInputs.put(
           EXTRACT_WORKFLOW_NAME + ".reference_dict",
           "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_temp_tables_dataset",
+          "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"");
     } else {
       String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
       if (destinationParts.length != 2) {
@@ -428,9 +431,6 @@ public class GenomicExtractionService {
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_temp_tables_dataset",
-                                "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
                             // This value will need to be dynamically adjusted through testing
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))

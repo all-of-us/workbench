@@ -173,9 +173,9 @@ public class WorkbenchConfig {
     // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
     // are added.
     public Integer extractionMethodLogicalVersion;
-    public String extractionCohortsDataset;
+    @Deprecated public String extractionCohortsDataset;
     public String extractionDestinationDataset;
-    public String extractionTempTablesDataset;
+    @Deprecated public String extractionTempTablesDataset;
     // TODO(RW-8265): rm on following release
     @Deprecated public String extractionFilterSetName;
     public String gatkJarUri;
