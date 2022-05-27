@@ -196,8 +196,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  uame.era_commons_bypass_time,\n"
                 + "  uame.era_commons_completion_time,\n"
                 + "  u.family_name,\n"
-                // temporary solution to RW-6566
+                // temporary solution for RW-6566
                 + "  uat.first_enabled AS first_registration_completion_time,\n"
+                + "  uatr.first_enabled AS registered_tier_first_enabled_time,\n"
+                + "  uatc.first_enabled AS controlled_tier_first_enabled_time,\n"
                 + "  u.first_sign_in_time,\n"
                 + "  u.free_tier_credits_limit_dollars_override,\n"
                 + "  u.given_name,\n"
@@ -262,6 +264,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "      WHERE uat.access_status = 1 " // ENABLED
                 + "      GROUP BY u.user_id"
                 + "  ) as t ON t.user_id = u.user_id "
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uat.user_id, uat.first_enabled FROM user_access_tier uat "
+                + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
+                + "    WHERE at.short_name = 'registered' "
+                + "  ) uatr ON u.user_id = uatr.user_id "
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uat.user_id, uat.first_enabled FROM user_access_tier uat "
+                + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
+                + "    WHERE at.short_name = 'controlled' "
+                + "  ) uatc ON u.user_id = uatc.user_id "
                 // temporary solution to RW-6566: retrieve first_enabled from user_access_tier
                 // for 'registered' entries as a substitute for first_registration_completion_time
                 + "  LEFT OUTER JOIN ( "
@@ -269,7 +281,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
                 + "    WHERE uat.access_status = 1 AND at.short_name = 'registered' "
                 + "  ) uat ON u.user_id = uat.user_id "
-                // end temporary solution for RW-6566
+                // end temporary solution to RW-6566
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
                 + "      uam.bypass_time AS era_commons_bypass_time, "
@@ -328,6 +340,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .familyName(rs.getString("family_name"))
                 .firstRegistrationCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("first_registration_completion_time")))
+                .registeredTierFirstEnabledTime(
+                    offsetDateTimeUtc(rs.getTimestamp("registered_tier_first_enabled_time")))
+                .controlledTierFirstEnabledTime(
+                    offsetDateTimeUtc(rs.getTimestamp("controlled_tier_first_enabled_time")))
                 .firstSignInTime(offsetDateTimeUtc(rs.getTimestamp("first_sign_in_time")))
                 .freeTierCreditsLimitDollarsOverride(
                     rs.getDouble("free_tier_credits_limit_dollars_override"))

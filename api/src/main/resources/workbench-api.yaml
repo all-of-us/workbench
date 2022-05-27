@@ -8954,6 +8954,18 @@ definitions:
         type: string
         format: date-time
         description: Time user first completed registration.
+      registeredTierFirstEnabledTime:
+        type: string
+        format: date-time
+        description: |-
+          The time at which this user's registered tier access was first granted, if ever.
+          Note: expiration of access does not affect this field.
+      controlledTierFirstEnabledTime:
+        type: string
+        format: date-time
+        description: |-
+          The time at which this user's controlled tier access was first granted, if ever.
+          Note: expiration of access does not affect this field.
       firstSignInTime:
         type: string
         format: date-time
