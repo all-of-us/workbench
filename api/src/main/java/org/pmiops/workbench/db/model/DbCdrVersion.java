@@ -297,9 +297,11 @@ public class DbCdrVersion {
         numParticipants,
         cdrDbName,
         wgsBigqueryDataset,
+        wgsFilterSetName,
         hasFitbitData,
         hasCopeSurveyData,
         allSamplesWgsDataBucket,
+        singleSampleArrayDataBucket,
         storageBasePath,
         wgsVcfMergedStoragePath,
         wgsHailStoragePath,
@@ -312,7 +314,7 @@ public class DbCdrVersion {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof DbCdrVersion)) {
       return false;
     }
     DbCdrVersion that = (DbCdrVersion) o;
@@ -328,6 +330,7 @@ public class DbCdrVersion {
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(cdrDbName, that.cdrDbName)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
+        && Objects.equals(wgsFilterSetName, that.wgsFilterSetName)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket)
