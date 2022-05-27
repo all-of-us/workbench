@@ -358,11 +358,43 @@ public class GenomicExtractionService {
         Ints.constrainToRange(personIds.size() / 2, MIN_EXTRACTION_SCATTER, MAX_EXTRACTION_SCATTER);
 
     Map<String, String> maybeInputs = new HashMap<>();
-    if (cohortExtractionConfig.extractionMethodLogicalVersion != null
-        && cohortExtractionConfig.extractionMethodLogicalVersion >= 2) {
+    int methodLogicalVersion =
+        Optional.ofNullable(cohortExtractionConfig.extractionMethodLogicalVersion).orElse(0);
+    if (methodLogicalVersion >= 2) {
       // Added in https://github.com/broadinstitute/gatk/pull/7698
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
     }
+    if (methodLogicalVersion < 3) {
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_destination_dataset",
+          "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"");
+      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".do_not_filter_override", "true");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".wgs_intervals",
+          "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".reference",
+          "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".reference_index",
+          "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".reference_dict",
+          "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"");
+    } else {
+      String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
+      if (destinationParts.length != 2) {
+        log.severe(
+            "bad config value for destination BigQuery dataset: "
+                + cohortExtractionConfig.extractionDestinationDataset);
+        throw new ServerErrorException();
+      }
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"");
+      maybeInputs.put(
+          EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"");
+    }
+
     String filterSetName = workspace.getCdrVersion().getWgsFilterSetName();
     if (!Strings.isNullOrEmpty(filterSetName)) {
       // If set, apply a joint callset filter during the extraction. There may be multiple such
@@ -397,27 +429,11 @@ public class GenomicExtractionService {
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
                             .put(
-                                EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_destination_dataset",
-                                "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"")
-                            .put(
                                 EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_temp_tables_dataset",
                                 "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
-                            .put(EXTRACT_WORKFLOW_NAME + ".do_not_filter_override", "true")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".wgs_intervals",
-                                "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
                             // This value will need to be dynamically adjusted through testing
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".reference",
-                                "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".reference_index",
-                                "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".reference_dict",
-                                "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"")
                             // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
                             // etc
                             .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
