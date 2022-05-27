@@ -472,11 +472,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
     }
-    if (!dbWorkspace
-        .getCdrVersion()
-        .getAccessTier()
-        .getShortName()
-        .equals(workspace.getAccessTierShortName())) {
+
+    if (workspace.getAccessTierShortName() != null
+        && !dbWorkspace
+            .getCdrVersion()
+            .getAccessTier()
+            .getShortName()
+            .equals(workspace.getAccessTierShortName())) {
       throw new BadRequestException("Attempted to change data access tier");
     }
     if (workspace.getName() != null) {
