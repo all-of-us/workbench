@@ -49,7 +49,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     const allCollaborators = await this.findUsersInCollaboratorList();
     for (const [access, users] of allCollaborators.entries()) {
       if (users.includes(email)) {
-        return WorkspaceAccessLevel[access];
+        return access as WorkspaceAccessLevel;
       }
     }
     return null;
