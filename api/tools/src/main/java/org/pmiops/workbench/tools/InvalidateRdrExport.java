@@ -11,6 +11,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -74,6 +75,7 @@ public class InvalidateRdrExport {
   @Bean
   public RdrExportService rdrExportService(
       Clock clock,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
@@ -81,6 +83,7 @@ public class InvalidateRdrExport {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     return new RdrExportServiceImpl(
         clock,
+        workbenchConfigProvider,
         rdrApiProvider,
         rdrExportDao,
         null,
