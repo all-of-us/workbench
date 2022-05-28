@@ -104,7 +104,6 @@ public class FireCloudConfig {
       FirecloudApiClientFactory factory,
       @Qualifier(WGS_EXTRACTION_SA_CREDENTIALS) GoogleCredentials credentials) {
     ApiClient apiClient = factory.newApiClient();
-    apiClient.setDebugging(true);
     apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
     return apiClient;
   }
