@@ -101,7 +101,7 @@ public class WorkbenchConfig {
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;
     // Thresholds for email alerting based on free tier usage, by cost
-    public ArrayList<Double> freeTierCostAlertThresholds;
+    public List<Double> freeTierCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
   }
@@ -146,14 +146,14 @@ public class WorkbenchConfig {
   }
 
   public static class RuntimeImages {
-    public ArrayList<String> gce;
-    public ArrayList<String> dataproc;
+    public List<String> gce;
+    public List<String> dataproc;
   }
 
   public static class AuthConfig {
     // A list of GCP service accounts (not affiliated with researchers) that can be used to
     // make API calls.
-    public ArrayList<String> serviceAccountApiUsers;
+    public List<String> serviceAccountApiUsers;
   }
 
   public static class WgsCohortExtractionConfig {
