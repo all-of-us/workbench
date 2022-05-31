@@ -6688,7 +6688,15 @@ definitions:
         description: Window duration over which the egress was detected, in seconds.
       creationTime:
         type: string
-        description: Time at which the egress event was recorded, in ISO 8601 format.
+        description: Time at which the egress event was recorded in the RW DB, in ISO 8601 format.  This is NOT the event time itself.
+      timeWindowStartEpochMillis:
+        type: integer
+        format: int64
+        description: The beginning of the time window in which egress was detected, in epoch milliseconds.
+      timeWindowEndEpochMillis:
+        type: integer
+        format: int64
+        description: The end of the time window in which egress was detected, in epoch milliseconds.
       status:
         $ref: "#/definitions/EgressEventStatus"
   ArrayOfLong:
