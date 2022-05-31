@@ -20,7 +20,8 @@
     "gceVmZone": "us-central1-a"
   },
   "billing": {
-    "accountId": "00293C-5DEA2D-6887E7",
+    "legacyAccountId": "00293C-5DEA2D-6887E7",
+    "accountId": "01DDC8-7ED304-6E46FE",
     "projectNamePrefix": "aou-rw-stable-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "defaultFreeCreditsDollarLimit": 300.0,
