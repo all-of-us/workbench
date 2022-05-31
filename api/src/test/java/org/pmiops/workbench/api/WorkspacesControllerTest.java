@@ -1,26 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
-import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
-
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -30,18 +9,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -202,6 +169,40 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
+import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -1181,17 +1182,35 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceAccessTierThrows() {
+    Workspace ws =
+        workspacesController
+            .createWorkspace(createWorkspace())
+            .getBody()
+            .name("updated-name")
+            .accessTierShortName("new tier");
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
+
     assertThrows(
         BadRequestException.class,
-        () -> {
-          Workspace ws = createWorkspace();
-          ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
-          ws.setAccessTierShortName("new tier");
-          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-          request.setWorkspace(ws);
-          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
-        });
+        () -> workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request));
+  }
+
+  @Test
+  public void testUpdateWorkspaceNullAccessTierHasNoEffect() {
+    Workspace original = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    UpdateWorkspaceRequest request =
+        new UpdateWorkspaceRequest()
+            .workspace(createWorkspace().etag(original.getEtag()).accessTierShortName(null));
+    String resultAccessTier =
+        workspacesController
+            .updateWorkspace(original.getNamespace(), original.getId(), request)
+            .getBody()
+            .getAccessTierShortName();
+
+    assertThat(resultAccessTier).isNotNull();
+    assertThat(resultAccessTier).isEqualTo(original.getAccessTierShortName());
   }
 
   @Test
