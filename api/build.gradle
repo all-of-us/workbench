@@ -386,11 +386,11 @@ dependencies {
     compile 'com.google.auth:google-auth-library-oauth2-http:1.6.0'
     compile 'com.google.cloud.sql:mysql-socket-factory:1.6.0'
     compile 'com.google.cloud:google-cloud-bigquery:2.11.1'
-    compile 'com.google.cloud:google-cloud-iamcredentials:2.1.0'
-    compile 'com.google.cloud:google-cloud-logging:3.7.6'
-    compile 'com.google.cloud:google-cloud-monitoring:3.2.9'
+    compile 'com.google.cloud:google-cloud-iamcredentials:2.2.0'
+    compile 'com.google.cloud:google-cloud-logging:3.9.0'
+    compile 'com.google.cloud:google-cloud-monitoring:3.3.0'
     compile 'com.google.cloud:google-cloud-storage:2.6.1'
-    compile 'com.google.cloud:google-cloud-tasks:2.1.11'
+    compile 'com.google.cloud:google-cloud-tasks:2.2.0'
     compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     compile 'com.google.guava:guava:31.1-jre'
     compile "com.google.http-client:google-http-client-apache:2.1.2"
