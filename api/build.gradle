@@ -415,14 +415,13 @@ dependencies {
     compile "commons-codec:commons-codec:1.15"
     compile 'com.auth0:java-jwt:3.19.2'
     compile 'io.netty:netty-common:4.1.77.Final'
+    compile 'org.json:json:20220320'
 
     compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
 
     // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
     // Kotlin dep, resulting in massive logspam.
     compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
-
-    compile 'org.json:json:20220320'
 
     compile('org.apache.tomcat:tomcat-jdbc:10.0.20')
     compile("org.springframework.boot:spring-boot-starter-tomcat")
@@ -444,6 +443,12 @@ dependencies {
     compile "org.springframework.retry:spring-retry"
     compile "org.springframework.security:spring-security-core"
     compile "org.springframework.security:spring-security-web"
+
+    // updated versions of transitive dependencies to resolve vulnerabilities
+
+    // https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-2841508
+    compile 'org.bouncycastle:bcprov-jdk15on:1.70'
+
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
