@@ -24,8 +24,9 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
       value =
           "select u.user_id from user u LEFT JOIN rdr_export rdr on"
               + " u.user_id = rdr.entity_id and rdr.entity_type = 1 where "
-              + "u.last_modified_time > rdr.last_Export_date or rdr.export_id is null")
-  List<BigInteger> findDbUserIdsToExport();
+              + "(u.last_modified_time > rdr.last_Export_date or rdr.export_id is null) "
+              + "and NOT u.username IN :excludeUsers")
+  List<BigInteger> findDbUserIdsToExport(@Param("excludeUsers") List<String> excludeUsers);
 
   @Query(nativeQuery = true, value = WORKSPACE_IDS_TO_EXPORT_QUERY)
   List<BigInteger> findDbWorkspaceIdsToExport();

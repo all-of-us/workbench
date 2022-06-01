@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Service;
 public class RdrExportServiceImpl implements RdrExportService {
 
   private final Clock clock;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<RdrApi> rdrApiProvider;
   private final RdrExportDao rdrExportDao;
   private final WorkspaceDao workspaceDao;
@@ -56,6 +58,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   @Autowired
   public RdrExportServiceImpl(
       Clock clock,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
       RdrMapper rdrMapper,
@@ -66,6 +69,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       UserDao userDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.clock = clock;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = rdrApiProvider;
     this.rdrMapper = rdrMapper;
@@ -85,10 +89,12 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public List<Long> findAllUserIdsToExport() {
+    // Don't export service account users; they are lacking basic metadata.
+    List<String> excludeUsers = workbenchConfigProvider.get().auth.serviceAccountApiUsers;
     List<Long> userIdList = new ArrayList<>();
     try {
       userIdList =
-          rdrExportDao.findDbUserIdsToExport().stream()
+          rdrExportDao.findDbUserIdsToExport(excludeUsers).stream()
               .map(BigInteger::longValue)
               .collect(Collectors.toList());
     } catch (Exception ex) {

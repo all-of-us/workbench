@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -97,6 +98,13 @@ public class RdrExportServiceImplTest {
     @Bean
     public Clock clock() {
       return CLOCK;
+    }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+      workbenchConfig.auth.serviceAccountApiUsers = ImmutableList.of("appspot@gserviceaccount.com");
+      return workbenchConfig;
     }
   }
 
