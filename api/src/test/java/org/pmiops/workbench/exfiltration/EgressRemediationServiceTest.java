@@ -57,6 +57,8 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -91,10 +93,14 @@ public class EgressRemediationServiceTest {
 
   @TestConfiguration
   @Import({
+    EgressEventMapperImpl.class,
     EgressRemediationService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     JiraService.class
+  })
+  @MockBean({
+    CommonMappers.class,
   })
   static class Configuration {
 
@@ -229,7 +235,7 @@ public class EgressRemediationServiceTest {
     // Create 10 older events on different days.
     saveOldEvents(
         IntStream.range(1, 10)
-            .mapToObj(i -> Duration.ofDays(i))
+            .mapToObj(Duration::ofDays)
             .collect(Collectors.toList())
             .toArray(new Duration[] {}));
     egressRemediationService.remediateEgressEvent(saveNewEvent());
