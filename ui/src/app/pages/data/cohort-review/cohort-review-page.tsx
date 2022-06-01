@@ -4,9 +4,6 @@ import * as fp from 'lodash/fp';
 
 const { useEffect, useState } = React;
 
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-
 import {
   CriteriaType,
   Domain,
@@ -22,6 +19,7 @@ import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
 import { CohortReviewListItem } from 'app/pages/data/cohort-review/cohort-review-list-item';
+import { CohortReviewParticipantsTable } from 'app/pages/data/cohort-review/cohort-review-participants-table';
 import { CreateCohortReviewModal } from 'app/pages/data/cohort-review/create-cohort-review-modal';
 import { visitsFilterOptions } from 'app/services/review-state.service';
 import {
@@ -92,16 +90,6 @@ const reverseColumnEnum = {
   deceased: Columns.DECEASED,
   status: Columns.STATUS,
 };
-const fields = [
-  { field: 'participantId', name: 'Participant ID' },
-  { field: 'birthDate', name: 'Date of Birth' },
-  { field: 'deceased', name: 'Deceased' },
-  { field: 'sexAtBirth', name: 'Sex at Birth' },
-  { field: 'gender', name: 'Gender' },
-  { field: 'race', name: 'Race' },
-  { field: 'ethnicity', name: 'Ethnicity' },
-  { field: 'status', name: 'Status' },
-];
 const rows = 25;
 
 export const CohortReviewPage = fp.flow(
@@ -178,24 +166,6 @@ export const CohortReviewPage = fp.flow(
       getVisitsFilterOptions();
     }
   }, []);
-
-  const columns = fields.map((col) => {
-    const header = (
-      <React.Fragment>
-        <span style={styles.columnHeader}>{col.name}</span>
-      </React.Fragment>
-    );
-    return (
-      <Column
-        style={styles.tableBody}
-        bodyStyle={styles.columnBody}
-        key={col.field}
-        field={col.field}
-        header={header}
-        sortable
-      />
-    );
-  });
 
   return (
     <FadeBox style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}>
@@ -301,17 +271,7 @@ export const CohortReviewPage = fp.flow(
                 </div>
               ) : (
                 !!activeReview?.participantCohortStatuses && (
-                  <DataTable
-                    style={{ fontSize: '12px' }}
-                    value={activeReview.participantCohortStatuses}
-                    first={0}
-                    lazy
-                    rows={rows}
-                    scrollable
-                    scrollHeight='calc(100vh - 350px)'
-                  >
-                    {columns}
-                  </DataTable>
+                  <CohortReviewParticipantsTable cohortReview={activeReview} />
                 )
               )}
             </div>
