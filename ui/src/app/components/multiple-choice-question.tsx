@@ -4,9 +4,12 @@ import { CSSProperties } from 'react';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CheckBox, RadioButton } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
-import { useId } from 'app/utils';
+import { reactStyles, useId } from 'app/utils';
 
-import { styles } from './styles';
+const styles = reactStyles({
+  question: { fontWeight: 'bold' },
+  answer: { margin: '0.0rem 0.25rem' },
+});
 
 const Option = (props: {
   checked: boolean;

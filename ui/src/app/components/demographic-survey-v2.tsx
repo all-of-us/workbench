@@ -4,18 +4,22 @@ import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import { Button } from 'app/components/buttons';
-import { FlexColumn } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
 import { NumberInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
+import { reactStyles } from 'app/utils';
 
-import { MultipleChoiceQuestion } from './components/multiple-choice-question';
-import { styles } from './components/styles';
-import { YesNoOptionalQuestion } from './components/yes-no-optional-question';
+import { MultipleChoiceQuestion } from './multiple-choice-question';
+import { YesNoOptionalQuestion } from './yes-no-optional-question';
 
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
+const styles = reactStyles({
+  question: { fontWeight: 'bold' },
+  answer: { margin: '0.0rem 0.25rem' },
+});
 
 const validateDemographicSurvey = (demographicSurvey) => {
   validate.validators.nullBoolean = (v) =>
@@ -32,7 +36,9 @@ const validateDemographicSurvey = (demographicSurvey) => {
   return validate(demographicSurvey, validationCheck);
 };
 
-const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
+const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
   const [survey, setSurvey] = useState({
     education: null,
@@ -60,6 +66,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
   });
   const [isAian, setIsAian] = useState(false);
 
+  const { profile, saveProfile } = props;
+
   useEffect(() => {
     setErrors(validateDemographicSurvey(survey));
   }, [survey]);
@@ -84,6 +92,31 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
       handleInputChange('yearOfBirth', null);
     }
   };
+
+  // const saveSurvey = async () => {
+  //   setLoading(true);
+  //
+  //   try {
+  //     const newProfile = { ...profile, demographicSurveyV2: survey };
+  //     const savedProfile = await props.saveProfile(newProfile, captchaToken);
+  //
+  //     Still need to update this
+  //     this.setState((prevState) => ({
+  //       profile: savedProfile || prevState.profile,
+  //       loading: false,
+  //     }));
+  //   } catch (error) {
+  //     reportError(error);
+  //     const { message } = await convertAPIError(error);
+  //     this.props.showProfileErrorModal(message);
+  //     if (environment.enableCaptcha && this.props.enableCaptcha) {
+  //       // Reset captcha
+  //       this.captchaRef.current.reset();
+  //       this.setState({ captcha: false });
+  //     }
+  //     this.setState({ loading: false });
+  //   }
+  // };
 
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
@@ -338,35 +371,47 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(() => {
           selected={survey.education}
           onChange={(value) => handleInputChange('education', value)}
         />
-
-        <TooltipTrigger
-          content={
-            errors && (
-              <>
-                <div>Please review the following:</div>
-                <ul>
-                  {Object.keys(errors).map((key) => (
-                    <li key={errors[key][0]}>{errors[key][0]}</li>
-                  ))}
-                  <li>
-                    You may select "Prefer not to answer" for each unfilled item
-                    to continue
-                  </li>
-                </ul>
-              </>
-            )
-          }
-        >
-          <Button
-            disabled={errors}
-            type='primary'
-            onClick={(_) => console.log('Save')}
-            data-test-id={'submit-button'}
-            style={{ marginTop: '3rem' }}
+        <FlexRow>
+          {props.onPreviousClick && (
+            <Button
+              disabled={errors}
+              type='primary'
+              onClick={(_) => console.log('Save')}
+              data-test-id={'submit-button'}
+              style={{ marginTop: '3rem', marginRight: '1rem' }}
+            >
+              Previous
+            </Button>
+          )}
+          <TooltipTrigger
+            content={
+              errors && (
+                <>
+                  <div>Please review the following:</div>
+                  <ul>
+                    {Object.keys(errors).map((key) => (
+                      <li key={errors[key][0]}>{errors[key][0]}</li>
+                    ))}
+                    <li>
+                      You may select "Prefer not to answer" for each unfilled
+                      item to continue
+                    </li>
+                  </ul>
+                </>
+              )
+            }
           >
-            Submit
-          </Button>
-        </TooltipTrigger>
+            <Button
+              disabled={errors}
+              type='primary'
+              onClick={(_) => console.log('Save')}
+              data-test-id={'submit-button'}
+              style={{ marginTop: '3rem' }}
+            >
+              Submit
+            </Button>
+          </TooltipTrigger>
+        </FlexRow>
       </FlexColumn>
     </FlexColumn>
   );
