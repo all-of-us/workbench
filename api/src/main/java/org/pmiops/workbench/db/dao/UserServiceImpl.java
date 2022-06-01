@@ -292,6 +292,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
     user.setUsername(username);
+    user.setContactEmail(username);
     user.setDisabled(false);
     try {
       user = userDao.save(user);
