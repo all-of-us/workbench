@@ -640,7 +640,7 @@ public class UserServiceTest {
   public void testCreateServiceAccountUser() {
     String username = "test@@appspot.gserviceaccount.com";
     userService.createServiceAccountUser(username);
-    assertThat(userDao.findUserByUsername(USERNAME)).isNotNull();
+    assertThat(userDao.findUserByUsername(username)).isNotNull();
   }
 
   private void assertModuleCompletionEqual(
