@@ -31,9 +31,9 @@ public interface EgressEventMapper {
       return;
     }
 
-    Long timeWindowStart = sumoEvent.getTimeWindowStart();
-    Long timeWindowMillis = sumoEvent.getTimeWindowDuration() * 1000;
-    Long timeWindowEnd = timeWindowStart + timeWindowMillis;
+    long timeWindowStart = sumoEvent.getTimeWindowStart();
+    long timeWindowMillis = sumoEvent.getTimeWindowDuration() * 1000;
+    long timeWindowEnd = timeWindowStart + timeWindowMillis;
 
     target.timeWindowStartEpochMillis(timeWindowStart).timeWindowEndEpochMillis(timeWindowEnd);
   }
