@@ -6,7 +6,7 @@ import validate from 'validate.js';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import { NumberInput } from 'app/components/inputs';
+import { NumberInput, TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { reactStyles } from 'app/utils';
@@ -338,7 +338,23 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             describe.'
           selected={survey.disabilityOtherText}
           onChange={(value) => handleInputChange('disabilityOtherText', value)}
+          style={{ marginBottom: '1rem' }}
         />
+        <FlexRow style={{ alignItems: 'center', gap: '1.75rem' }}>
+          <div style={{ ...styles.question, flex: 1 }}>
+            Do you have a physical, cognitive, and/or emotional condition that
+            substantially inhibits one or more life activities not specified
+            through the above questions, and want to share more? Please
+            describe.
+          </div>
+          <TextInput
+            onChange={(value) =>
+              handleInputChange('disabilityOtherText', value)
+            }
+            value={survey.disabilityOtherText}
+            style={{ flex: 1 }}
+          />
+        </FlexRow>
         <SmallHeader style={{ marginBottom: '0.5rem' }}>
           Other Questions
         </SmallHeader>
@@ -370,7 +386,15 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           ]}
           selected={survey.education}
           onChange={(value) => handleInputChange('education', value)}
+          style={{ marginBottom: '1rem' }}
         />
+
+        <YesNoOptionalQuestion
+          question='Are you an individual from a disadvantaged background, as defined by NIH Diversity in Extramural Programs?'
+          selected={survey.disadvantaged}
+          onChange={(value) => handleInputChange('disadvantaged', value)}
+        />
+
         <FlexRow>
           {props.onPreviousClick && (
             <Button
