@@ -110,8 +110,8 @@ export const MultipleChoiceQuestion = (props: {
             />
 
             {choice.showInput &&
-              ((multiple && selected.includes(choice.label)) ||
-                selected === choice.label) && (
+              ((multiple && selected.includes(choice.value)) ||
+                selected === choice.value) && (
                 <input
                   data-test-id='search'
                   style={{
@@ -122,7 +122,7 @@ export const MultipleChoiceQuestion = (props: {
                   type='text'
                   placeholder='Search'
                   value={choice.otherText}
-                  onChange={choice.onChange}
+                  onChange={(e) => choice.onChange(e.target.value)}
                 />
               )}
           </FlexColumn>

@@ -157,8 +157,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: EthnicCategory.AIANOTHER,
               showInput: true,
               otherText: survey.ethnicityAiAnOtherText,
-              onChange: (value) =>
-                handleInputChange('ethnicityAiAnOtherText', value),
+              onChange: (value) => {
+                handleInputChange('ethnicityAiAnOtherText', value);
+              },
             },
             { label: 'Asian', value: EthnicCategory.ASIAN },
             { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
@@ -205,7 +206,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               showInput: true,
               otherText: survey.ethnicityOtherText,
               onChange: (value) =>
-                handleInputChange('setEthnicityOtherText', value),
+                handleInputChange('ethnicityOtherText', value),
             },
             {
               label: 'Prefer not to answer',
