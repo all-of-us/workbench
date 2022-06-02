@@ -60,7 +60,7 @@ public class CdrConfigVOMapperTest {
     testVersionJson.singleSampleArrayDataBucket = "gs://lol";
     testVersionJson.storageBasePath = "20";
     testVersionJson.microarrayHailStoragePath = "hail/mt";
-    testVersionJson.wgsCramManifestPath = "cram/manifest.csv";
+    testVersionJson.wgsCramManifestPath = "wgs/cram/manifest.csv";
   }
 
   @Test

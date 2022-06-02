@@ -272,7 +272,7 @@ public class RuntimeControllerTest {
                 TestMockFactory.createControlledTierForTests(accessTierDao)
                     .setDatasetsBucket("gs://cdr-bucket"))
             .setStorageBasePath("v99")
-            .setWgsCramManifestPath("cram/manifest.csv");
+            .setWgsCramManifestPath("wgs/cram/manifest.csv");
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
@@ -1243,7 +1243,7 @@ public class RuntimeControllerTest {
     assertThat(envVars.get(LeonardoNotebooksClient.WORKSPACE_CDR_ENV_KEY).getAsString())
         .isEqualTo(cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
     assertThat(envVars.get(LeonardoNotebooksClientImpl.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
-        .isEqualTo("gs://cdr-bucket/v99/cram/manifest.csv");
+        .isEqualTo("gs://cdr-bucket/v99/wgs/cram/manifest.csv");
   }
 
   @Test
