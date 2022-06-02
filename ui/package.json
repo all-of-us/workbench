@@ -120,6 +120,7 @@
     "react-test-renderer": "^16.6.3",
     "ts-jest": "^26.5.4",
     "ts-node": "~3.0.4",
+    "url": "^0.11.0",
     "wd": "^1.12.1"
   },
   "resolutions": {
