@@ -90,7 +90,8 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
       Arrays.asList(
           DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS,
               DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
-          DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
+          DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY,
+          DirectoryScopes.ADMIN_DIRECTORY_USER_SECURITY);
 
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;

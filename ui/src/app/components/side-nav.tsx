@@ -292,7 +292,7 @@ export const SideNav = (props: SideNavProps) => {
           content={'Sign Out'}
           onToggleSideNav={() => onToggleSideNav()}
           parentOnClick={() => {
-            signnavigateSignOutOut();
+            signOut();
           }}
         />
       )}
