@@ -67,6 +67,7 @@
     "portable-fetch": "^3.0.0",
     "primeicons": "^1.0.0",
     "primereact": "^4.2.0",
+    "querystring-es3": "^0.2.1",
     "react": "^16.13.1",
     "react-calendar": "^2.18.1",
     "react-dom": "^16.13.1",
