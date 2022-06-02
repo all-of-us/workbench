@@ -12,6 +12,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
+import { userApi } from 'app/services/swagger-fetch-clients';
 
 declare const gapi: any;
 
@@ -85,6 +86,7 @@ export const signIn = (): void => {
 
 export const signOut = (): void => {
   authStore.set({ ...authStore.get(), isSignedIn: false });
+  userApi().signOut();
 };
 
 function clearIdToken(): void {

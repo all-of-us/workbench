@@ -4,7 +4,6 @@ import { environment } from 'environments/environment';
 import { TextModal } from 'app/components/text-modal';
 import { debouncer } from 'app/utils';
 import { signOut } from 'app/utils/authentication';
-import { navigateSignOut } from 'app/utils/navigation';
 
 const { useState, useEffect } = React;
 
@@ -47,7 +46,6 @@ const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
     null
   );
   signOut();
-  navigateSignOut(continuePath);
 };
 
 export const InactivityMonitor = () => {

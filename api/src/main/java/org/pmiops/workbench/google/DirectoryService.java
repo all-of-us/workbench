@@ -51,4 +51,6 @@ public interface DirectoryService {
   User resetUserPassword(String username);
 
   void deleteUser(String username);
+
+  void signOut(String username);
 }

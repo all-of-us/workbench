@@ -157,4 +157,6 @@ public interface UserService {
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
   void maybeSendAccessExpirationEmail(DbUser user);
+
+  void signOut(DbUser user);
 }

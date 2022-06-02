@@ -292,6 +292,12 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   }
 
   @Override
+  public void signOut(String username) {
+    retryHandler.run(
+        (context) -> getGoogleDirectoryService().users().signOut(username).execute());
+  }
+
+  @Override
   public Collection<MeasurementBundle> getGaugeData() {
     ImmutableSet.Builder<MeasurementBundle> resultBuilder = ImmutableSet.builder();
 

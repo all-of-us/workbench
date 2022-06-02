@@ -902,6 +902,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
   }
 
+  @Override
+  public void signOut(DbUser user) {
+    directoryService.signOut(user.getUsername());
+  }
+
   /**
    * Return the user's registered tier access expiration time, for the purpose of sending an access
    * renewal reminder or expiration email.
