@@ -89,8 +89,9 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   private static final List<String> SCOPES =
       Arrays.asList(
           DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS,
-              DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
-          DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY,
+          DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
+          DirectoryScopes.ADMIN_DIRECTORY_USER,
+          DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY,
           DirectoryScopes.ADMIN_DIRECTORY_USER_SECURITY);
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -294,8 +295,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
   @Override
   public void signOut(String username) {
-    retryHandler.run(
-        (context) -> getGoogleDirectoryService().users().signOut(username).execute());
+    retryHandler.run((context) -> getGoogleDirectoryService().users().signOut(username).execute());
   }
 
   @Override

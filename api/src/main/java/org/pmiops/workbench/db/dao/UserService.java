@@ -158,5 +158,6 @@ public interface UserService {
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
   void maybeSendAccessExpirationEmail(DbUser user);
 
+  /** Signs a user out of all web and device sessions and reset their sign-in cookies. */
   void signOut(DbUser user);
 }

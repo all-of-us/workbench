@@ -14,7 +14,7 @@ import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
-import {useNavigation } from 'app/utils/navigation';
+import { useNavigation } from 'app/utils/navigation';
 import { getProfilePictureSrc } from 'app/utils/profile-picture';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 

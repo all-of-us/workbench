@@ -45,7 +45,7 @@ const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
     null
   );
-  signOut();
+  signOut(continuePath);
 };
 
 export const InactivityMonitor = () => {

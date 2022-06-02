@@ -3,8 +3,10 @@ import { useEffect } from 'react';
 import { ConfigResponse } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
+import { userApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker, setLoggedInState } from 'app/utils/analytics';
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
+import { navigateSignOut } from 'app/utils/navigation';
 import {
   AuthStore,
   authStore,
@@ -12,7 +14,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
-import { userApi } from 'app/services/swagger-fetch-clients';
 
 declare const gapi: any;
 
@@ -84,9 +85,13 @@ export const signIn = (): void => {
   });
 };
 
-export const signOut = (): void => {
+export const signOut = async (continuePath: string = '/login') => {
   authStore.set({ ...authStore.get(), isSignedIn: false });
-  userApi().signOut();
+  try {
+    await userApi().signOut();
+  } catch (ex) {
+    navigateSignOut(continuePath);
+  }
 };
 
 function clearIdToken(): void {
