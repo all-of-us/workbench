@@ -28,6 +28,9 @@ public class CdrVersionVO {
   public String storageBasePath;
   public String wgsVcfMergedStoragePath;
   public String wgsHailStoragePath;
+  public String wgsCramManifestPath;
   public String microarrayHailStoragePath;
   public String microarrayVcfSingleSampleStoragePath;
+  public String microarrayVcfManifestPath;
+  public String microarrayIdatManifestPath;
 }

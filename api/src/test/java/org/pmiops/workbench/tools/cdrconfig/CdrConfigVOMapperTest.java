@@ -60,6 +60,7 @@ public class CdrConfigVOMapperTest {
     testVersionJson.singleSampleArrayDataBucket = "gs://lol";
     testVersionJson.storageBasePath = "20";
     testVersionJson.microarrayHailStoragePath = "hail/mt";
+    testVersionJson.wgsCramManifestPath = "cram/manifest.csv";
   }
 
   @Test
@@ -132,8 +133,7 @@ public class CdrConfigVOMapperTest {
     CdrVersionVO cdrVersionVO = new CdrVersionVO();
     cdrVersionVO.accessTier = "a tier which doesn't exist";
 
-    DbCdrVersion dbCdrVersion = new DbCdrVersion();
-    dbCdrVersion.setCdrVersionId(3);
+    DbCdrVersion dbCdrVersion = new DbCdrVersion().setCdrVersionId(3);
 
     assertThat(dbCdrVersion.getAccessTier()).isNull();
     mapper.populateAccessTier(cdrVersionVO, dbCdrVersion, accessTierDao);
@@ -144,27 +144,25 @@ public class CdrConfigVOMapperTest {
   public void test_toDbVersion() {
     DbAccessTier testTierInDb = accessTierDao.save(mapper.toDbTier(testTierJson));
 
-    DbCdrVersion expected = new DbCdrVersion();
-
-    expected.setAccessTier(testTierInDb);
-
-    expected.setCdrVersionId(testVersionJson.cdrVersionId);
-    expected.setIsDefault(testVersionJson.isDefault);
-    expected.setName(testVersionJson.name);
-    expected.setReleaseNumber(testVersionJson.releaseNumber);
-    expected.setArchivalStatus(testVersionJson.archivalStatus);
-    expected.setBigqueryProject(testVersionJson.bigqueryProject);
-    expected.setBigqueryDataset(testVersionJson.bigqueryDataset);
-    expected.setCreationTime(testVersionJson.creationTime);
-    expected.setNumParticipants(testVersionJson.numParticipants);
-    expected.setCdrDbName(testVersionJson.cdrDbName);
-    expected.setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset);
-    expected.setHasFitbitData(testVersionJson.hasFitbitData);
-    expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);
-    expected.setAllSamplesWgsDataBucket(testVersionJson.allSamplesWgsDataBucket);
-    expected.setSingleSampleArrayDataBucket(testVersionJson.singleSampleArrayDataBucket);
-    expected.setStorageBasePath(testVersionJson.storageBasePath);
-    expected.setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath);
+    DbCdrVersion expected =
+        new DbCdrVersion()
+            .setAccessTier(testTierInDb)
+            .setCdrVersionId(testVersionJson.cdrVersionId)
+            .setIsDefault(testVersionJson.isDefault)
+            .setName(testVersionJson.name)
+            .setReleaseNumber(testVersionJson.releaseNumber)
+            .setArchivalStatus(testVersionJson.archivalStatus)
+            .setBigqueryProject(testVersionJson.bigqueryProject)
+            .setBigqueryDataset(testVersionJson.bigqueryDataset)
+            .setCreationTime(testVersionJson.creationTime)
+            .setNumParticipants(testVersionJson.numParticipants)
+            .setCdrDbName(testVersionJson.cdrDbName)
+            .setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset)
+            .setHasFitbitData(testVersionJson.hasFitbitData)
+            .setHasCopeSurveyData(testVersionJson.hasCopeSurveyData)
+            .setWgsCramManifestPath(testVersionJson.wgsCramManifestPath)
+            .setStorageBasePath(testVersionJson.storageBasePath)
+            .setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath);
 
     assertThat(mapper.toDbVersion(testVersionJson, accessTierDao)).isEqualTo(expected);
   }
