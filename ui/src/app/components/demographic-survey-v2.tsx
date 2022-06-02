@@ -3,14 +3,25 @@ import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
+import {
+  EducationV2,
+  EthnicCategory,
+  GenderIdentityV2,
+  SexAtBirthV2,
+  SexualOrientationV2,
+} from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header, SmallHeader } from 'app/components/headers';
-import { NumberInput, TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
+import { useNavigation } from 'app/utils/navigation';
+import { profileStore } from 'app/utils/stores';
 
+import { NumberInput, TextInput } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
 
@@ -27,8 +38,8 @@ const validateDemographicSurvey = (demographicSurvey) => {
       ? undefined
       : 'value must be selected';
   const validationCheck = {
-    race: { presence: { allowEmpty: false } },
-    genderIdentityList: { presence: { allowEmpty: false } },
+    ethnicCategories: { presence: { allowEmpty: false } },
+    genderIdentities: { presence: { allowEmpty: false } },
     sexAtBirth: { presence: { allowEmpty: false } },
     yearOfBirth: { presence: { allowEmpty: false } },
     education: { presence: { allowEmpty: false } },
@@ -37,20 +48,20 @@ const validateDemographicSurvey = (demographicSurvey) => {
 };
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
+  const [, navigateByUrl] = useNavigation();
   const [captchaToken, setCaptchaToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
   const [survey, setSurvey] = useState({
     education: null,
-    ethnicityAiAnOtherText: '',
-    ethnicityAsianOtherText: '',
+    ethnicityAiAnOtherText: null,
+    ethnicityAsianOtherText: null,
     ethnicCategories: [],
     ethnicityOtherText: null,
     disabilityConcentrating: null,
     disabilityDressing: null,
     disabilityErrands: null,
     disabilityHearing: null,
-    // ???? Should this have a yes no (yes if text, no otherwise, what about prefer not?)
     disabilityOtherText: null,
     disabilitySeeing: null,
     disabilityWalking: null,
@@ -66,7 +77,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   });
   const [isAian, setIsAian] = useState(false);
 
-  const { profile, saveProfile } = props;
+  // const { profile, saveProfile } = props;
 
   useEffect(() => {
     setErrors(validateDemographicSurvey(survey));
@@ -81,6 +92,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   }, [survey.ethnicCategories]);
 
   const handleInputChange = (prop, value) => {
+    console.log('What is the value? ', value);
     setSurvey({
       ...survey,
       [prop]: value,
@@ -93,30 +105,34 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     }
   };
 
-  // const saveSurvey = async () => {
-  //   setLoading(true);
-  //
-  //   try {
-  //     const newProfile = { ...profile, demographicSurveyV2: survey };
-  //     const savedProfile = await props.saveProfile(newProfile, captchaToken);
-  //
-  //     Still need to update this
-  //     this.setState((prevState) => ({
-  //       profile: savedProfile || prevState.profile,
-  //       loading: false,
-  //     }));
-  //   } catch (error) {
-  //     reportError(error);
-  //     const { message } = await convertAPIError(error);
-  //     this.props.showProfileErrorModal(message);
-  //     if (environment.enableCaptcha && this.props.enableCaptcha) {
-  //       // Reset captcha
-  //       this.captchaRef.current.reset();
-  //       this.setState({ captcha: false });
-  //     }
-  //     this.setState({ loading: false });
-  //   }
-  // };
+  const saveSurvey = async () => {
+    setLoading(true);
+    const profile = profileStore.get().profile;
+
+    try {
+      const newProfile = { ...profile, demographicSurveyV2: survey };
+      console.log('Do we have a profile here? Daisy? ', profile);
+      const savedProfile = await profileApi().updateProfile(newProfile, {});
+
+      // Still need to update this
+      // this.setState((prevState) => ({
+      //   profile: savedProfile || prevState.profile,
+      //   loading: false,
+      // }));
+    } catch (error) {
+      // reportError(error);
+      // const { message } = await convertAPIError(error);
+      // this.props.showProfileErrorModal(message);
+      // if (environment.enableCaptcha && this.props.enableCaptcha) {
+      //   // Reset captcha
+      //   this.captchaRef.current.reset();
+      //   this.setState({ captcha: false });
+      // }
+      console.log('ukgjh: ', error);
+      // this.setState({ loading: false });
+    }
+    // navigateByUrl('/');
+  };
 
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
@@ -126,60 +142,75 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <MultipleChoiceQuestion
           question='Which races and/or ethnicities do you identify with? Please select all that apply.'
           choices={[
-            { name: 'American Indian or Alaska Native' },
             {
-              name: 'American Indian or Alaska Native / Central or South American Indian',
+              label: 'American Indian or Alaska Native',
+              value: EthnicCategory.AIAN,
             },
             {
-              name: 'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
+              label:
+                'American Indian or Alaska Native / Central or South American Indian',
+              value: EthnicCategory.AIANCENTRALSOUTH,
+            },
+            {
+              label:
+                'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
+              value: EthnicCategory.AIANOTHER,
               showInput: true,
               otherText: survey.ethnicityAiAnOtherText,
               onChange: (value) =>
                 handleInputChange('ethnicityAiAnOtherText', value),
             },
-            ...[
-              'Asian',
-              'Indian',
-              'Cambodian',
-              'Chinese',
-              'Filipino',
-              'Hmong',
-              'Japanese',
-              'Korean',
-              'Lao',
-              'Pakistani',
-              'Vietnamese',
-            ].map((name) => {
-              return {
-                name,
-              };
-            }),
+            { label: 'Asian', value: EthnicCategory.ASIAN },
+            { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
+            { label: 'Cambodian', value: EthnicCategory.ASIANCAMBODIAN },
+            { label: 'Chinese', value: EthnicCategory.ASIANCHINESE },
+            { label: 'Filipino', value: EthnicCategory.ASIANFILIPINO },
+            { label: 'Hmong', value: EthnicCategory.ASIANHMONG },
+            { label: 'Japanese', value: EthnicCategory.ASIANJAPANESE },
+            { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
+            { label: 'Lao', value: EthnicCategory.ASIANLAO },
+            { label: 'Pakistani', value: EthnicCategory.ASIANPAKISTANI },
+            { label: 'Vietnamese', value: EthnicCategory.ASIANVIETNAMESE },
             {
-              name: 'Asian Other',
+              label: 'Asian Other',
+              value: EthnicCategory.ASIANOTHER,
               showInput: true,
               otherText: survey.ethnicityAsianOtherText,
               onChange: (value) =>
                 handleInputChange('ethnicityAsianOtherText', value),
             },
-            ...[
-              'Black, African American, or of African descent',
-              'Hispanic, Latino, or Spanish descent',
-              'Middle Eastern or North African',
-              'Native Hawaiian or other Pacific Islander',
-              'White, or of European descent',
-            ].map((name) => {
-              return {
-                name,
-              };
-            }),
             {
-              name: 'None of these fully describe me, and I want to specify',
+              label: 'Black, African American, or of African descent',
+              value: EthnicCategory.BLACK,
+            },
+            {
+              label: 'Hispanic, Latino, or Spanish descent',
+              value: EthnicCategory.HISPANIC,
+            },
+            {
+              label: 'Middle Eastern or North African',
+              value: EthnicCategory.MENA,
+            },
+            {
+              label: 'Native Hawaiian or other Pacific Islander',
+              value: EthnicCategory.NHPI,
+            },
+            {
+              label: 'White, or of European descent',
+              value: EthnicCategory.WHITE,
+            },
+            {
+              label: 'None of these fully describe me, and I want to specify',
+              value: EthnicCategory.OTHER,
               showInput: true,
               otherText: survey.ethnicityOtherText,
               onChange: (value) =>
                 handleInputChange('setEthnicityOtherText', value),
             },
-            { name: 'Prefer not to answer' },
+            {
+              label: 'Prefer not to answer',
+              value: EthnicCategory.PREFERNOTTOANSWER,
+            },
           ]}
           multiple
           selected={survey.ethnicCategories}
@@ -190,20 +221,24 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current gender identity?'
           choices={[
-            ...[
-              'Gender Queer',
-              'Man',
-              'Non-binary',
-              'Questioning or unsure of my gender identity',
-              'Trans man/Transgender man',
-              'Trans woman/Transgender woman',
-            ].map((name) => {
-              return {
-                name,
-              };
-            }),
+            { label: 'Gender Queer', value: GenderIdentityV2.GENDERQUEER },
+            { label: 'Man', value: GenderIdentityV2.MAN },
+            { label: 'Non-binary', value: GenderIdentityV2.NONBINARY },
             {
-              name: 'Two Spirit',
+              label: 'Questioning or unsure of my gender identity',
+              value: GenderIdentityV2.QUESTIONING,
+            },
+            {
+              label: 'Trans man/Transgender man',
+              value: GenderIdentityV2.TRANSMAN,
+            },
+            {
+              label: 'Trans woman/Transgender woman',
+              value: GenderIdentityV2.TRANSWOMAN,
+            },
+            {
+              label: 'Two Spirit',
+              value: GenderIdentityV2.TWOSPIRIT,
               disabled: !isAian,
               disabledText:
                 'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
@@ -211,15 +246,20 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 '"Race and Ethnicities" section.',
             },
             {
-              name: 'Woman',
+              label: 'Woman',
+              value: GenderIdentityV2.WOMAN,
             },
             {
-              name: 'None of these fully describe me, and I want to specify',
+              label: 'None of these fully describe me, and I want to specify',
+              value: GenderIdentityV2.OTHER,
               showInput: true,
               otherText: survey.genderOtherText,
               onChange: (value) => handleInputChange('genderOtherText', value),
             },
-            { name: 'Prefer not to answer' },
+            {
+              label: 'Prefer not to answer',
+              value: GenderIdentityV2.PREFERNOTTOANSWER,
+            },
           ]}
           multiple
           selected={survey.genderIdentities}
@@ -229,23 +269,30 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current sexual orientation?'
           choices={[
-            ...[
-              'Asexual',
-              'Bisexual',
-              'Gay',
-              'Lesbian',
-              'Polysexual, omnisexual, or pansexual',
-              'Queer',
-              'Questioning or unsure of my sexual orientation',
-              'Same-gender loving',
-              'Straight or heterosexual',
-            ].map((name) => {
-              return {
-                name,
-              };
-            }),
+            { label: 'Asexual', value: SexualOrientationV2.ASEXUAL },
+            { label: 'Bisexual', value: SexualOrientationV2.BISEXUAL },
+            { label: 'Gay', value: SexualOrientationV2.GAY },
+            { label: 'Lesbian', value: SexualOrientationV2.LESBIAN },
             {
-              name: 'Two Spirit',
+              label: 'Polysexual, omnisexual, or pansexual',
+              value: SexualOrientationV2.POLYSEXUAL,
+            },
+            { label: 'Queer', value: SexualOrientationV2.QUEER },
+            {
+              label: 'Questioning or unsure of my sexual orientation',
+              value: SexualOrientationV2.QUESTIONING,
+            },
+            {
+              label: 'Same-gender loving',
+              value: SexualOrientationV2.SAMEGENDER,
+            },
+            {
+              label: 'Straight or heterosexual',
+              value: SexualOrientationV2.STRAIGHT,
+            },
+            {
+              label: 'Two Spirit',
+              value: SexualOrientationV2.TWOSPIRIT,
               disabled: !isAian,
               disabledText:
                 'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
@@ -253,14 +300,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 '"Race and Ethnicities" section.',
             },
             {
-              name: 'None of these fully describe me, and I want to specify',
+              label: 'None of these fully describe me, and I want to specify',
+              value: SexualOrientationV2.OTHER,
               showInput: true,
               otherText: survey.orientationOtherText,
               onChange: (value) =>
                 handleInputChange('orientationOtherText', value),
             },
-            { name: 'Prefer not to answer' },
+            {
+              label: 'Prefer not to answer',
+              value: SexualOrientationV2.PREFERNOTTOANSWER,
+            },
           ]}
+          multiple
           selected={survey.sexualOrientations}
           onChange={(value) => handleInputChange('sexualOrientations', value)}
           style={{ marginBottom: '3rem' }}
@@ -268,19 +320,21 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <MultipleChoiceQuestion
           question='What was the sex assigned to you at birth, such as on your original birth certificate?'
           choices={[
-            ...['Female', 'Intersex', 'Male'].map((name) => {
-              return {
-                name,
-              };
-            }),
+            { label: 'Female', value: SexAtBirthV2.FEMALE },
+            { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
+            { label: 'Male', value: SexAtBirthV2.MALE },
             {
-              name: 'None of these fully describe me, and I want to specify',
+              label: 'None of these fully describe me, and I want to specify',
+              value: SexAtBirthV2.OTHER,
               showInput: true,
               otherText: survey.sexAtBirthOtherText,
               onChange: (value) =>
                 handleInputChange('sexAtBirthOtherText', value),
             },
-            { name: 'Prefer not to answer' },
+            {
+              label: 'Prefer not to answer',
+              value: SexAtBirthV2.PREFERNOTTOANSWER,
+            },
           ]}
           selected={survey.sexAtBirth}
           onChange={(value) => handleInputChange('sexAtBirth', value)}
@@ -331,15 +385,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           onChange={(value) => handleInputChange('disabilityErrands', value)}
           style={{ marginBottom: '1rem' }}
         />
-        <YesNoOptionalQuestion
-          question='Do you have a physical, cognitive, and/or emotional condition that
-            substantially inhibits one or more life activities not specified
-            through the above questions, and want to share more? Please
-            describe.'
-          selected={survey.disabilityOtherText}
-          onChange={(value) => handleInputChange('disabilityOtherText', value)}
-          style={{ marginBottom: '1rem' }}
-        />
         <FlexRow style={{ alignItems: 'center', gap: '1.75rem' }}>
           <div style={{ ...styles.question, flex: 1 }}>
             Do you have a physical, cognitive, and/or emotional condition that
@@ -370,19 +415,16 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <MultipleChoiceQuestion
           question={'Highest Level of Education'}
           choices={[
-            ...[
-              'No Education',
-              'Grades 1-12',
-              'College Graduate',
-              'Undergraduate',
-              "Master's",
-              'Doctorate',
-              'Prefer not to answer',
-            ].map((name) => {
-              return {
-                name,
-              };
-            }),
+            { label: 'No Education', value: EducationV2.NOEDUCATION },
+            { label: 'Grades 1-12', value: EducationV2.GRADES112 },
+            { label: 'College Graduate', value: EducationV2.COLLEGEGRADUATE },
+            { label: 'Undergraduate', value: EducationV2.UNDERGRADUATE },
+            { label: "Master's", value: EducationV2.MASTER },
+            { label: 'Doctorate', value: EducationV2.DOCTORATE },
+            {
+              label: 'Prefer not to answer',
+              value: EducationV2.PREFERNOTTOANSWER,
+            },
           ]}
           selected={survey.education}
           onChange={(value) => handleInputChange('education', value)}
@@ -426,9 +468,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             }
           >
             <Button
-              disabled={errors}
+              disabled={false}
               type='primary'
-              onClick={(_) => console.log('Save')}
+              onClick={saveSurvey}
               data-test-id={'submit-button'}
               style={{ marginTop: '3rem' }}
             >

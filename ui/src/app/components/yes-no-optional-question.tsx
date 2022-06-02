@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
+import { YesNoPreferNot } from 'generated/fetch';
+
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 
 export const YesNoOptionalQuestion = (props: {
@@ -15,9 +17,12 @@ export const YesNoOptionalQuestion = (props: {
     <MultipleChoiceQuestion
       question={question}
       choices={[
-        { name: 'Yes' },
-        { name: 'No' },
-        { name: 'Prefer not to answer' },
+        { label: 'Yes', value: YesNoPreferNot.YES },
+        { label: 'No', value: YesNoPreferNot.NO },
+        {
+          label: 'Prefer not to answer',
+          value: YesNoPreferNot.PREFERNOTTOANSWER,
+        },
       ]}
       selected={selected}
       onChange={onChange}

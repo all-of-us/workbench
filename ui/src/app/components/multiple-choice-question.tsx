@@ -13,14 +13,16 @@ const styles = reactStyles({
 
 const Option = (props: {
   checked: boolean;
-  option: string;
+  value: any;
+  label: string;
   style?: CSSProperties;
   onChange: (any) => void;
   multiple?: boolean;
   disabled?: boolean;
   disabledText?: string;
 }) => {
-  const { checked, disabled, disabledText, multiple, onChange, option } = props;
+  const { checked, disabled, disabledText, label, multiple, onChange, value } =
+    props;
   const id = useId();
   return (
     <TooltipTrigger
@@ -43,11 +45,11 @@ const Option = (props: {
             disabled={disabled}
             checked={checked}
             onChange={onChange}
-            value={option}
+            value={value}
           />
         )}
         <label htmlFor={id} style={styles.answer}>
-          {option}
+          {label}
         </label>
       </FlexRow>
     </TooltipTrigger>
@@ -55,7 +57,8 @@ const Option = (props: {
 };
 
 interface MultipleChoiceOption {
-  name: string;
+  label: string;
+  value: any;
   otherText?: string;
   showInput?: boolean;
   onChange?: (any) => void;
@@ -73,11 +76,11 @@ export const MultipleChoiceQuestion = (props: {
 }) => {
   const { choices, onChange, question, selected, multiple, style } = props;
 
-  const handleChange = (e, name) => {
+  const handleChange = (e, label) => {
     if (multiple) {
       const result = e
-        ? [...(selected as string[]), name]
-        : (selected as string[]).filter((r) => r !== name);
+        ? [...(selected as string[]), label]
+        : (selected as string[]).filter((r) => r !== label);
       onChange(result);
     } else {
       onChange(e.target.value);
@@ -95,19 +98,20 @@ export const MultipleChoiceQuestion = (props: {
             <Option
               disabled={choice.disabled}
               disabledText={choice.disabledText}
-              option={choice.name}
+              value={choice.value}
+              label={choice.label}
               checked={
                 multiple
-                  ? selected.includes(choice.name)
-                  : selected === choice.name
+                  ? selected.includes(choice.value)
+                  : selected === choice.value
               }
-              onChange={(e) => handleChange(e, choice.name)}
+              onChange={(e) => handleChange(e, choice.value)}
               multiple={multiple}
             />
 
             {choice.showInput &&
-              ((multiple && selected.includes(choice.name)) ||
-                selected === choice.name) && (
+              ((multiple && selected.includes(choice.label)) ||
+                selected === choice.label) && (
                 <input
                   data-test-id='search'
                   style={{
