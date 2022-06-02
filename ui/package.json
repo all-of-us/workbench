@@ -125,13 +125,11 @@
     "wd": "^1.12.1"
   },
   "resolutions": {
-    "ansi-html": "https://registry.yarnpkg.com/ansi-html-community/-/ansi-html-community-0.0.8.tgz#69fbc4d6ccbe383f9736934ae34c3f8290f1bf41",
     "ansi-regex": "^5.0.1",
     "browserslist": "^4.16.5",
     "ejs": "^3.1.7",
     "eventsource": "^2.0.2",
     "glob-parent": "^5.1.2",
-    "immer": "^9.0.6",
     "node-fetch": "^2.6.1",
     "node-forge": "^1.0.0",
     "nth-check": "^2.0.1",
