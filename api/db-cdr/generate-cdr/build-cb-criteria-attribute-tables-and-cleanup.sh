@@ -376,3 +376,20 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "DELETE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE domain_id = 'SURVEY'
 AND est_count = 0"
+
+echo "CLEAN UP - remove any empty survey topics"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE id in (
+   SELECT parent_id
+   FROM (
+     SELECT parent_id, COUNT(*) AS count
+     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+     WHERE parent_id IN (
+       SELECT id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+       WHERE domain_id = 'SURVEY'
+         AND subtype = 'TOPIC')
+     GROUP BY parent_id)
+ WHERE count = 0)"
