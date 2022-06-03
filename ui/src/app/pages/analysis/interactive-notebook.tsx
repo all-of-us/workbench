@@ -427,7 +427,12 @@ export const InteractiveNotebook = fp.flow(
               Preview (Read-Only)
             </div>
             {cond(
-              [!!error, () => null],
+              [
+                !!error &&
+                  (error instanceof ComputeSecuritySuspendedError ||
+                    error instanceof RuntimeStatusError),
+                () => null,
+              ],
               [
                 userRequestedExecutableNotebook,
                 () => (
