@@ -11,20 +11,20 @@ import org.springframework.data.repository.query.Param;
 public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
 
   String USER_IDS_TO_EXPORT_QUERY =
-      "select u.user_id from user u LEFT JOIN "
-          + "rdr_export rdr on u.user_id = rdr.entity_id and rdr.entity_type = 1 where "
-          + "u.last_modified_time > rdr.last_export_date or rdr.entity_id IS NULL "
-          + "and NOT u.email IN :excludeUsers";
+      "SELECT u.user_id FROM user u LEFT JOIN "
+          + "rdr_export rdr ON (u.user_id = rdr.entity_id AND rdr.entity_type = 1) where "
+          + "(u.last_modified_time > rdr.last_export_date OR rdr.entity_id IS NULL) "
+          + "AND NOT u.email IN :excludeUsers";
   String UNCHANGED_USER_IDS_QUERY =
-      "select entity_id from rdr_export where entity_type = 1 and entity_id not in ("
+      "SELECT entity_id FROM rdr_export where entity_type = 1 AND entity_id NOT IN ("
           + USER_IDS_TO_EXPORT_QUERY
           + ")";
   String WORKSPACE_IDS_TO_EXPORT_QUERY =
-      "select w.workspace_id from workspace w LEFT JOIN "
-          + "rdr_export rdr on w.workspace_id = rdr.entity_id and rdr.entity_type = 2 where "
-          + "w.last_modified_time > rdr.last_export_date or rdr.entity_id IS NULL";
+      "SELECT w.workspace_id FROM workspace w LEFT JOIN "
+          + "rdr_export rdr ON (w.workspace_id = rdr.entity_id AND rdr.entity_type = 2) where "
+          + "w.last_modified_time > rdr.last_export_date OR rdr.entity_id IS NULL";
   String UNCHANGED_WORKSPACE_IDS_QUERY =
-      "select entity_id from rdr_export where entity_type = 2 and entity_id not in ("
+      "SELECT entity_id FROM rdr_export where entity_type = 2 AND entity_id NOT IN ("
           + WORKSPACE_IDS_TO_EXPORT_QUERY
           + ")";
 
