@@ -17,11 +17,12 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
-import { NumberInput, TextInput } from './inputs';
+import { CheckBox, NumberInput, TextInput } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
 
@@ -73,7 +74,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     sexAtBirthOtherText: null,
     sexualOrientations: [],
     yearOfBirth: null,
-    yearOfBirthPreferNot: null,
+    yearOfBirthPreferNot: false,
   });
   const [isAian, setIsAian] = useState(false);
 
@@ -92,7 +93,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   }, [survey.ethnicCategories]);
 
   const handleInputChange = (prop, value) => {
-    console.log('What is the value? ', value);
     setSurvey({
       ...survey,
       [prop]: value,
@@ -103,6 +103,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     if (survey.yearOfBirth < minYear || survey.yearOfBirth > maxYear) {
       handleInputChange('yearOfBirth', null);
     }
+  };
+
+  const handleYearOfBirthPreferNotChange = (value) => {
+    setSurvey({
+      ...survey,
+      yearOfBirth: value && null,
+      yearOfBirthPreferNot: value,
+    });
   };
 
   const saveSurvey = async () => {
@@ -397,22 +405,43 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             onChange={(value) =>
               handleInputChange('disabilityOtherText', value)
             }
-            value={survey.disabilityOtherText}
+            value={survey.disabilityOtherText || ''}
             style={{ flex: 1 }}
           />
         </FlexRow>
         <SmallHeader style={{ marginBottom: '0.5rem' }}>
           Other Questions
         </SmallHeader>
+
         <div style={styles.question}>Year of birth</div>
-        <NumberInput
-          onChange={(value) => handleInputChange('yearOfBirth', value)}
-          onBlur={handleYearOfBirthBlur}
-          min={minYear}
-          max={maxYear}
-          value={survey.yearOfBirth}
-          style={{ width: '4rem' }}
-        />
+
+        <FlexRow style={{ alignItems: 'center' }}>
+          <NumberInput
+            onChange={(value) => handleInputChange('yearOfBirth', value)}
+            onBlur={handleYearOfBirthBlur}
+            disabled={survey.yearOfBirthPreferNot}
+            min={minYear}
+            max={maxYear}
+            value={survey.yearOfBirth || ''}
+            style={{ width: '4rem' }}
+          />
+          <CheckBox
+            id='show-again-checkbox'
+            checked={survey.yearOfBirthPreferNot}
+            onChange={(value) => handleYearOfBirthPreferNotChange(value)}
+            style={{ marginLeft: '1rem' }}
+          />
+          <label
+            htmlFor='show-again-checkbox'
+            style={{
+              marginLeft: '8px',
+              marginRight: 'auto',
+              color: colors.primary,
+            }}
+          >
+            Prefer not to answer
+          </label>
+        </FlexRow>
         <MultipleChoiceQuestion
           question={'Highest Level of Education'}
           choices={[
