@@ -56,9 +56,14 @@ public class CdrConfigVOMapperTest {
     testVersionJson.wgsBigqueryDataset = "wgs1";
     testVersionJson.hasFitbitData = false;
     testVersionJson.hasCopeSurveyData = true;
+    testVersionJson.wgsFilterSetName = "my_filter";
     testVersionJson.storageBasePath = "20";
     testVersionJson.microarrayHailStoragePath = "hail/mt";
+    testVersionJson.wgsVcfMergedStoragePath = "wgs/vcf/merged";
+    testVersionJson.wgsHailStoragePath = "wgs/vcf/hail.mt";
     testVersionJson.wgsCramManifestPath = "wgs/cram/manifest.csv";
+    testVersionJson.microarrayVcfManifestPath = "microarray/vcf/manifest.csv";
+    testVersionJson.microarrayIdatManifestPath = "microarray/idat/manifest.csv";
   }
 
   @Test
@@ -158,9 +163,14 @@ public class CdrConfigVOMapperTest {
             .setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset)
             .setHasFitbitData(testVersionJson.hasFitbitData)
             .setHasCopeSurveyData(testVersionJson.hasCopeSurveyData)
+            .setWgsFilterSetName(testVersionJson.wgsFilterSetName)
+            .setWgsVcfMergedStoragePath(testVersionJson.wgsVcfMergedStoragePath)
+            .setWgsHailStoragePath(testVersionJson.wgsHailStoragePath)
             .setWgsCramManifestPath(testVersionJson.wgsCramManifestPath)
             .setStorageBasePath(testVersionJson.storageBasePath)
-            .setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath);
+            .setMicroarrayHailStoragePath(testVersionJson.microarrayHailStoragePath)
+            .setMicroarrayVcfManifestPath(testVersionJson.microarrayVcfManifestPath)
+            .setMicroarrayIdatManifestPath(testVersionJson.microarrayIdatManifestPath);
 
     assertThat(mapper.toDbVersion(testVersionJson, accessTierDao)).isEqualTo(expected);
   }
