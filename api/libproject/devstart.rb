@@ -1994,7 +1994,7 @@ def invalidate_rdr_export(cmd_name, *args)
       "--entity-type [USER|WORKSPACE]",
       String,
       ->(opts, v) { opts.entity_type = v},
-      "The RDR entity type to export. USER or WORKSPACE. For WORKSPACE, please use backfill-entities-to-rdr instead.")
+      "The RDR entity type to export. USER or WORKSPACE.")
   op.add_typed_option(
       "--id-list-filename [id-list-filename]",
       String,
@@ -2015,12 +2015,10 @@ def invalidate_rdr_export(cmd_name, *args)
     common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
   end
 
-  if "WORKSPACE" == op.opts.entity_type.upcase
-    get_user_confirmation(
-      "WORKSPACE RDR export invalidation should rarely be used; for backfilling workspace data you " +
-      "should use backfill-entities-to-rdr instead. If you still think you need to run this, " +
-      "please consult with the team before continuing. Continue anyways?")
-  end
+  get_user_confirmation(
+    "RDR export invalidation should rarely be used; for backfilling workspace data you " +
+    "should use backfill-entities-to-rdr instead. If you still think you need to run this, " +
+    "please consult with the team before continuing. Continue anyways?")
 
   flags = ([
     ['--entity-type', op.opts.entity_type]

@@ -95,7 +95,7 @@ public class BackfillEntitiesToRdr {
   }
 
   @Bean
-  private TaskQueueService rdrTaskQueue(
+  public TaskQueueService rdrTaskQueue(
       WorkbenchLocationConfigService locationConfigService,
       Provider<CloudTasksClient> cloudTasksClientProvider,
       Provider<WorkbenchConfig> configProvider) {
