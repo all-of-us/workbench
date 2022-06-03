@@ -64,17 +64,18 @@ interface MultipleChoiceOption {
   onChange?: (any) => void;
   disabled?: boolean;
   disabledText?: string;
+  subOptions?: MultipleChoiceOption[];
 }
 
 export const MultipleChoiceQuestion = (props: {
   question: string;
-  choices: MultipleChoiceOption[];
+  options: MultipleChoiceOption[];
   selected: string | string[];
   onChange: (any) => void;
   style?: CSSProperties;
   multiple?: boolean;
 }) => {
-  const { choices, onChange, question, selected, multiple, style } = props;
+  const { options, onChange, question, selected, multiple, style } = props;
 
   const handleChange = (e, label) => {
     if (multiple) {
@@ -87,46 +88,58 @@ export const MultipleChoiceQuestion = (props: {
     }
   };
 
+  const renderOption = (option: MultipleChoiceOption) => (
+    <FlexColumn style={option.subOptions && { width: '100%' }}>
+      <Option
+        disabled={option.disabled}
+        disabledText={option.disabledText}
+        value={option.value}
+        label={option.label}
+        checked={
+          multiple ? selected.includes(option.value) : selected === option.value
+        }
+        onChange={(e) => handleChange(e, option.value)}
+        multiple={multiple}
+      />
+
+      {option.showInput &&
+        ((multiple && selected.includes(option.value)) ||
+          selected === option.value) && (
+          <input
+            data-test-id='search'
+            style={{
+              marginBottom: '.5em',
+              marginLeft: '0.75rem',
+              width: '300px',
+            }}
+            type='text'
+            placeholder='Search'
+            value={option.otherText}
+            onChange={(e) => option.onChange(e.target.value)}
+          />
+        )}
+      {option.subOptions && (
+        <FlexRow
+          style={{
+            flex: 1,
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+            marginLeft: '1.0rem',
+          }}
+        >
+          {option.subOptions.map(renderOption)}
+        </FlexRow>
+      )}
+    </FlexColumn>
+  );
+
   return (
     <FlexRow style={{ ...style, alignItems: 'center' }}>
       <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
         {question}
       </div>
       <FlexRow style={{ flex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
-        {choices.map((choice) => (
-          <FlexColumn>
-            <Option
-              disabled={choice.disabled}
-              disabledText={choice.disabledText}
-              value={choice.value}
-              label={choice.label}
-              checked={
-                multiple
-                  ? selected.includes(choice.value)
-                  : selected === choice.value
-              }
-              onChange={(e) => handleChange(e, choice.value)}
-              multiple={multiple}
-            />
-
-            {choice.showInput &&
-              ((multiple && selected.includes(choice.value)) ||
-                selected === choice.value) && (
-                <input
-                  data-test-id='search'
-                  style={{
-                    marginBottom: '.5em',
-                    marginLeft: '0.75rem',
-                    width: '300px',
-                  }}
-                  type='text'
-                  placeholder='Search'
-                  value={choice.otherText}
-                  onChange={(e) => choice.onChange(e.target.value)}
-                />
-              )}
-          </FlexColumn>
-        ))}
+        {options.map(renderOption)}
       </FlexRow>
     </FlexRow>
   );

@@ -16,7 +16,7 @@ export const YesNoOptionalQuestion = (props: {
   return (
     <MultipleChoiceQuestion
       question={question}
-      choices={[
+      options={[
         { label: 'Yes', value: YesNoPreferNot.YES },
         { label: 'No', value: YesNoPreferNot.NO },
         {

@@ -17,7 +17,6 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
@@ -117,29 +116,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     setLoading(true);
     const profile = profileStore.get().profile;
 
-    try {
-      const newProfile = { ...profile, demographicSurveyV2: survey };
-      console.log('Do we have a profile here? Daisy? ', profile);
-      const savedProfile = await profileApi().updateProfile(newProfile, {});
+    const newProfile = { ...profile, demographicSurveyV2: survey };
+    await profileApi().updateProfile(newProfile, {});
 
-      // Still need to update this
-      // this.setState((prevState) => ({
-      //   profile: savedProfile || prevState.profile,
-      //   loading: false,
-      // }));
-    } catch (error) {
-      // reportError(error);
-      // const { message } = await convertAPIError(error);
-      // this.props.showProfileErrorModal(message);
-      // if (environment.enableCaptcha && this.props.enableCaptcha) {
-      //   // Reset captcha
-      //   this.captchaRef.current.reset();
-      //   this.setState({ captcha: false });
-      // }
-      console.log('ukgjh: ', error);
-      // this.setState({ loading: false });
-    }
-    // navigateByUrl('/');
+    setLoading(false);
   };
 
   return (
@@ -149,44 +129,52 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <SmallHeader>Races and Ethnicities</SmallHeader>
         <MultipleChoiceQuestion
           question='Which races and/or ethnicities do you identify with? Please select all that apply.'
-          choices={[
+          options={[
             {
               label: 'American Indian or Alaska Native',
               value: EthnicCategory.AIAN,
+              subOptions: [
+                {
+                  label:
+                    'American Indian or Alaska Native / Central or South American Indian',
+                  value: EthnicCategory.AIANCENTRALSOUTH,
+                },
+                {
+                  label:
+                    'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
+                  value: EthnicCategory.AIANOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityAiAnOtherText,
+                  onChange: (value) => {
+                    handleInputChange('ethnicityAiAnOtherText', value);
+                  },
+                },
+              ],
             },
+
             {
-              label:
-                'American Indian or Alaska Native / Central or South American Indian',
-              value: EthnicCategory.AIANCENTRALSOUTH,
-            },
-            {
-              label:
-                'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
-              value: EthnicCategory.AIANOTHER,
-              showInput: true,
-              otherText: survey.ethnicityAiAnOtherText,
-              onChange: (value) => {
-                handleInputChange('ethnicityAiAnOtherText', value);
-              },
-            },
-            { label: 'Asian', value: EthnicCategory.ASIAN },
-            { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
-            { label: 'Cambodian', value: EthnicCategory.ASIANCAMBODIAN },
-            { label: 'Chinese', value: EthnicCategory.ASIANCHINESE },
-            { label: 'Filipino', value: EthnicCategory.ASIANFILIPINO },
-            { label: 'Hmong', value: EthnicCategory.ASIANHMONG },
-            { label: 'Japanese', value: EthnicCategory.ASIANJAPANESE },
-            { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
-            { label: 'Lao', value: EthnicCategory.ASIANLAO },
-            { label: 'Pakistani', value: EthnicCategory.ASIANPAKISTANI },
-            { label: 'Vietnamese', value: EthnicCategory.ASIANVIETNAMESE },
-            {
-              label: 'Asian Other',
-              value: EthnicCategory.ASIANOTHER,
-              showInput: true,
-              otherText: survey.ethnicityAsianOtherText,
-              onChange: (value) =>
-                handleInputChange('ethnicityAsianOtherText', value),
+              label: 'Asian',
+              value: EthnicCategory.ASIAN,
+              subOptions: [
+                { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
+                { label: 'Cambodian', value: EthnicCategory.ASIANCAMBODIAN },
+                { label: 'Chinese', value: EthnicCategory.ASIANCHINESE },
+                { label: 'Filipino', value: EthnicCategory.ASIANFILIPINO },
+                { label: 'Hmong', value: EthnicCategory.ASIANHMONG },
+                { label: 'Japanese', value: EthnicCategory.ASIANJAPANESE },
+                { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
+                { label: 'Lao', value: EthnicCategory.ASIANLAO },
+                { label: 'Pakistani', value: EthnicCategory.ASIANPAKISTANI },
+                { label: 'Vietnamese', value: EthnicCategory.ASIANVIETNAMESE },
+                {
+                  label: 'Asian Other',
+                  value: EthnicCategory.ASIANOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityAsianOtherText,
+                  onChange: (value) =>
+                    handleInputChange('ethnicityAsianOtherText', value),
+                },
+              ],
             },
             {
               label: 'Black, African American, or of African descent',
@@ -229,7 +217,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <SmallHeader>Questions about gender</SmallHeader>
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current gender identity?'
-          choices={[
+          options={[
             { label: 'Gender Queer', value: GenderIdentityV2.GENDERQUEER },
             { label: 'Man', value: GenderIdentityV2.MAN },
             { label: 'Non-binary', value: GenderIdentityV2.NONBINARY },
@@ -277,7 +265,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         />
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current sexual orientation?'
-          choices={[
+          options={[
             { label: 'Asexual', value: SexualOrientationV2.ASEXUAL },
             { label: 'Bisexual', value: SexualOrientationV2.BISEXUAL },
             { label: 'Gay', value: SexualOrientationV2.GAY },
@@ -328,7 +316,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         />
         <MultipleChoiceQuestion
           question='What was the sex assigned to you at birth, such as on your original birth certificate?'
-          choices={[
+          options={[
             { label: 'Female', value: SexAtBirthV2.FEMALE },
             { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
             { label: 'Male', value: SexAtBirthV2.MALE },
@@ -436,7 +424,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             style={{
               marginLeft: '8px',
               marginRight: 'auto',
-              color: colors.primary,
             }}
           >
             Prefer not to answer
@@ -444,7 +431,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         </FlexRow>
         <MultipleChoiceQuestion
           question={'Highest Level of Education'}
-          choices={[
+          options={[
             { label: 'No Education', value: EducationV2.NOEDUCATION },
             { label: 'Grades 1-12', value: EducationV2.GRADES112 },
             { label: 'College Graduate', value: EducationV2.COLLEGEGRADUATE },
