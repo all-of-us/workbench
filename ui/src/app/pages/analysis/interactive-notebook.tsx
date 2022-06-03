@@ -429,6 +429,7 @@ export const InteractiveNotebook = fp.flow(
             {cond(
               [
                 !!error &&
+                  // don't show executable buttons (Edit and Run/Playground) when notebooks cannot be executed
                   (error instanceof ComputeSecuritySuspendedError ||
                     error instanceof RuntimeStatusError),
                 () => null,
