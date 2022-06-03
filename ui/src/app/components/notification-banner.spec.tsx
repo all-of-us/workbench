@@ -8,7 +8,13 @@ describe('NotificationBanner', () => {
   const component = () => {
     return mount(
       <MemoryRouter>
-        <NotificationBanner />
+        <NotificationBanner
+          dataTestId='banner'
+          text='blah'
+          buttonText='BLAH'
+          buttonPath='yahoo.com'
+          buttonDisabled={true}
+        />
       </MemoryRouter>
     );
   };
