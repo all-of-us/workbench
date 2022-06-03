@@ -76,6 +76,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     yearOfBirthPreferNot: false,
   });
   const [isAian, setIsAian] = useState(false);
+  const [showAsianOptions, setShowAsianOptions] = useState(false);
+  const [showAiAnOptions, setShowAiAnOptions] = useState(false);
 
   // const { profile, saveProfile } = props;
 
@@ -150,6 +152,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   },
                 },
               ],
+              showSubOptions: showAiAnOptions,
+              onClick: () => setShowAiAnOptions(!showAiAnOptions),
             },
 
             {
@@ -175,6 +179,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                     handleInputChange('ethnicityAsianOtherText', value),
                 },
               ],
+              showSubOptions: showAsianOptions,
+              onClick: () => setShowAsianOptions(!showAsianOptions),
             },
             {
               label: 'Black, African American, or of African descent',
