@@ -41,45 +41,44 @@ import org.springframework.stereotype.Service;
 @Service
 public class RdrExportServiceImpl implements RdrExportService {
 
-  private final AccessTierService accessTierService;
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<RdrApi> rdrApiProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final RdrExportDao rdrExportDao;
-  private final RdrMapper rdrMapper;
-  private final UserDao userDao;
-  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final WorkspaceDao workspaceDao;
-  private final WorkspaceService workspaceService;
+  private final UserDao userDao;
 
+  private final InstitutionService institutionService;
+  private final AccessTierService accessTierService;
+  private final WorkspaceService workspaceService;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private final RdrMapper rdrMapper;
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
 
   @Autowired
   public RdrExportServiceImpl(
-      AccessTierService accessTierService,
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<RdrApi> rdrApiProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       RdrExportDao rdrExportDao,
       RdrMapper rdrMapper,
-      UserDao userDao,
       WorkspaceDao workspaceDao,
+      InstitutionService institutionService,
+      AccessTierService accessTierService,
       WorkspaceService workspaceService,
+      UserDao userDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
-    this.accessTierService = accessTierService;
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = rdrApiProvider;
-    this.rdrExportDao = rdrExportDao;
     this.rdrMapper = rdrMapper;
+    this.workspaceDao = workspaceDao;
+    this.institutionService = institutionService;
+    this.accessTierService = accessTierService;
+    this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceDao = workspaceDao;
-    this.workspaceService = workspaceService;
   }
 
   private List<String> excludedExportUserEmails() {
