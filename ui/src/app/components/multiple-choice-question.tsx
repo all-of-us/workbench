@@ -129,7 +129,6 @@ export const MultipleChoiceQuestion = (props: {
                 width: '300px',
               }}
               type='text'
-              placeholder='Search'
               value={option.otherText}
               onChange={(e) => option.onChange(e.target.value)}
             />
