@@ -248,7 +248,7 @@ public class ProfileService {
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
 
     populateDemographicSurvey(user, updatedProfile, now);
-    populateDemographicSurveyV2(user, updatedProfile);
+    populateDemographicSurveyV2(user, updatedProfile, now);
 
     // save user, update institution, and synchronize access tiers
     DbUser updatedUser =
@@ -276,7 +276,8 @@ public class ProfileService {
     user.setDemographicSurvey(dbDemographicSurvey);
   }
 
-  private void populateDemographicSurveyV2(DbUser dbUser, Profile updatedProfile) {
+  private void populateDemographicSurveyV2(
+      DbUser dbUser, Profile updatedProfile, Timestamp lastModifiedTime) {
     DbDemographicSurveyV2 newDemoSurvey =
         demographicSurveyMapper.toDbDemographicSurveyV2(updatedProfile.getDemographicSurveyV2());
 
@@ -286,6 +287,10 @@ public class ProfileService {
         newDemoSurvey.setId(existingSurvey.getId());
       }
       dbUser.setDemographicSurveyV2(newDemoSurvey);
+      // needed to trigger an RDR Export refresh for this Researcher
+      dbUser.setLastModifiedTime(lastModifiedTime);
+
+      // TODO: needed, or does Hibernate take care of both sides of this connection?
       newDemoSurvey.setUser(dbUser);
     }
   }
