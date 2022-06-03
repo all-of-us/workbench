@@ -151,13 +151,11 @@ export const MultipleChoiceQuestion = (props: {
   };
 
   return (
-    <FlexRow style={{ ...style, alignItems: 'center' }}>
-      <div style={{ ...styles.question, flex: 1, paddingRight: '1rem' }}>
-        {question}
-      </div>
-      <FlexRow style={{ flex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
+    <div style={{ ...style }}>
+      <div style={{ ...styles.question }}>{question}</div>
+      <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
         {options.map(renderOption)}
       </FlexRow>
-    </FlexRow>
+    </div>
   );
 };

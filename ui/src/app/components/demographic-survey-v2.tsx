@@ -218,7 +218,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           multiple
           selected={survey.ethnicCategories}
           onChange={(value) => handleInputChange('ethnicCategories', value)}
-          style={{ marginBottom: '3rem' }}
+          style={{ marginBottom: '1rem' }}
         />
         <SmallHeader>Questions about gender</SmallHeader>
         <MultipleChoiceQuestion
@@ -267,7 +267,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           multiple
           selected={survey.genderIdentities}
           onChange={(value) => handleInputChange('genderIdentities', value)}
-          style={{ marginBottom: '3rem' }}
+          style={{ marginBottom: '1rem' }}
         />
         <MultipleChoiceQuestion
           question='What terms best express how you describe your current sexual orientation?'
@@ -318,7 +318,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           multiple
           selected={survey.sexualOrientations}
           onChange={(value) => handleInputChange('sexualOrientations', value)}
-          style={{ marginBottom: '3rem' }}
+          style={{ marginBottom: '1rem' }}
         />
         <MultipleChoiceQuestion
           question='What was the sex assigned to you at birth, such as on your original birth certificate?'
