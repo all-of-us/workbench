@@ -23,11 +23,12 @@ public class CdrVersionVO {
   public String wgsFilterSetName;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
-  public String allSamplesWgsDataBucket;
-  public String singleSampleArrayDataBucket;
   public String storageBasePath;
   public String wgsVcfMergedStoragePath;
   public String wgsHailStoragePath;
+  public String wgsCramManifestPath;
   public String microarrayHailStoragePath;
   public String microarrayVcfSingleSampleStoragePath;
+  public String microarrayVcfManifestPath;
+  public String microarrayIdatManifestPath;
 }

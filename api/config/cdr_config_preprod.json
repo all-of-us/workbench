@@ -116,8 +116,6 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
-      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/beta",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha3",
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged/beta",
       "wgsHailStoragePath": "wgs/hail.mt",

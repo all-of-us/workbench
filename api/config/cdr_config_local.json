@@ -93,9 +93,8 @@
       "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/",
       "storageBasePath": "5",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
     },
