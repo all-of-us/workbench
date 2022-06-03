@@ -2,9 +2,11 @@ package org.pmiops.workbench.rdr;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -185,24 +187,33 @@ public class RdrExportServiceImplTest {
 
   @Test
   public void exportUsers() throws ApiException {
-    doNothing().when(mockRdrApi).exportResearchers(anyList());
+    doNothing().when(mockRdrApi).exportResearchers(anyList(), anyBoolean());
 
     rdrExportService.exportUsers(
-        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()));
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), false);
 
     verify(rdrExportService, times(1)).updateDbRdrExport(any(), anyList());
   }
 
   @Test
   public void exportUsersUnsuccessfulnoPersist() throws ApiException {
-    doThrow(new ApiException()).when(mockRdrApi).exportResearchers(anyList());
+    doThrow(new ApiException()).when(mockRdrApi).exportResearchers(anyList(), anyBoolean());
 
     List<Long> userIds = new ArrayList<>();
     userIds.add(dbUserWithEmail.getUserId());
     userIds.add(dbUserWithoutEmail.getUserId());
-    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds));
+    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds, false));
 
     verify(rdrExportService, times(0)).updateDbRdrExport(any(), anyList());
+  }
+
+  @Test
+  public void exportUsersBackfill() throws ApiException {
+    rdrExportService.exportUsers(
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), true);
+    verify(rdrExportDao, never()).saveAll(anyList());
+
+    verify(mockRdrApi).exportResearchers(anyList(), eq(true));
   }
 
   @Test

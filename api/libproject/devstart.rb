@@ -1994,7 +1994,7 @@ def invalidate_rdr_export(cmd_name, *args)
       "--entity-type [USER|WORKSPACE]",
       String,
       ->(opts, v) { opts.entity_type = v},
-      "The RDR entity type to export. USER or WORKSPACE. For WORKSPACE, please use backfill-workspaces-to-rdr instead.")
+      "The RDR entity type to export. USER or WORKSPACE. For WORKSPACE, please use backfill-entities-to-rdr instead.")
   op.add_typed_option(
       "--id-list-filename [id-list-filename]",
       String,
@@ -2018,7 +2018,7 @@ def invalidate_rdr_export(cmd_name, *args)
   if "WORKSPACE" == op.opts.entity_type.upcase
     get_user_confirmation(
       "WORKSPACE RDR export invalidation should rarely be used; for backfilling workspace data you " +
-      "should use backfill-workspaces-to-rdr instead. If you still think you need to run this, " +
+      "should use backfill-entities-to-rdr instead. If you still think you need to run this, " +
       "please consult with the team before continuing. Continue anyways?")
   end
 
@@ -2049,7 +2049,7 @@ Common.register_command({
     :fn => ->(*args) {invalidate_rdr_export(INVALIDATE_RDR_EXPORT, *args)}
 })
 
-def backfill_workspaces_to_rdr(cmd_name, *args)
+def backfill_entities_to_rdr(cmd_name, *args)
   common = Common.new
 
   op = WbOptionsParser.new(cmd_name, args)
@@ -2060,6 +2060,11 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
     TrueClass,
     ->(opts, v) { opts.dry_run = v},
     "When true, print the number of workspaces that will be exported, will not export")
+  op.add_typed_option(
+      "--entity-type [USER|WORKSPACE]",
+      String,
+      ->(opts, v) { opts.entity_type = v},
+      "The RDR entity type to export. USER or WORKSPACE.")
   op.add_typed_option(
     "--limit=[LIMIT]",
     String,
@@ -2073,11 +2078,20 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
   op.parse.validate
   context.validate()
 
-  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
-  isDryRun = op.opts.dry_run ? "--dry-run" : nil
-  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
+  flags = ([
+    ['--entity-type', op.opts.entity_type]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  if op.opts.limit
+    flags += ["--limit", op.opts.limit]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+
   gradleCommand = %W{
-    ./gradlew backfillWorkspacesToRdr
+    ./gradlew backfillEntitiesToRdr
    -PappArgs=[#{flags.join(',')}]}
 
   with_optional_cloud_proxy_and_db(context) do
@@ -2085,12 +2099,12 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
   end
 end
 
-BACKFILL_WORKSPACES_TO_RDR = "backfill-workspaces-to-rdr";
+BACKFILL_ENTITIES_TO_RDR = "backfill-entities-to-rdr";
 
 Common.register_command({
-    :invocation => BACKFILL_WORKSPACES_TO_RDR,
+    :invocation => BACKFILL_ENTITIES_TO_RDR,
     :description => "Backfill workspaces from workspace table, exporting them to the rdr.\n",
-    :fn => ->(*args) {backfill_workspaces_to_rdr(BACKFILL_WORKSPACES_TO_RDR, *args)}
+    :fn => ->(*args) {backfill_entities_to_rdr(BACKFILL_ENTITIES_TO_RDR, *args)}
 })
 
 def authority_options(cmd_name, args)

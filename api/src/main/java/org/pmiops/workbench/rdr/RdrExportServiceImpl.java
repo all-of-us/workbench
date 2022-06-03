@@ -81,6 +81,18 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
+  @Override
+  public List<Long> findAllEntityIdsToExport(RdrEntity entityType) {
+    switch (entityType) {
+      case USER:
+        return findAllUserIdsToExport();
+      case WORKSPACE:
+        return findAllWorkspacesIdsToExport();
+      default:
+        throw new IllegalArgumentException("invalid entityType: " + entityType);
+    }
+  }
+
   /**
    * Retrieve the list of all users ids that are either a) not in rdr_Export table or b) have
    * last_modified_time (user table) > export_time (rdr_export table)
@@ -134,16 +146,18 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param userIds
    */
   @Override
-  public void exportUsers(List<Long> userIds) {
+  public void exportUsers(List<Long> userIds, boolean backfill) {
     List<RdrResearcher> rdrResearchersList;
     try {
       rdrResearchersList =
           userIds.stream()
               .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
               .collect(Collectors.toList());
-      rdrApiProvider.get().exportResearchers(rdrResearchersList);
+      rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
 
-      updateDbRdrExport(RdrEntity.USER, userIds);
+      if (!backfill) {
+        updateDbRdrExport(RdrEntity.USER, userIds);
+      }
       log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
     } catch (ApiException ex) {
       log.severe(
