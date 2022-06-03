@@ -4,7 +4,7 @@ import java.util.List;
 import org.pmiops.workbench.model.RdrEntity;
 
 public interface RdrExportService {
-  List<Long> findAllEntityIdsToExport(RdrEntity entityType);
+  List<Long> findUnchangedEntitiesForBackfill(RdrEntity entityType);
 
   List<Long> findAllUserIdsToExport();
 

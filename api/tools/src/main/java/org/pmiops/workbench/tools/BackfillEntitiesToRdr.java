@@ -117,7 +117,7 @@ public class BackfillEntitiesToRdr {
 
       // Only backfill the workspaces that have not changed. The changed workspaces will be handled
       // by the nightly cron job. This way changed workspaces won't slip past the manual review
-      List<Long> idsToExport = rdrExportService.findAllEntityIdsToExport(entityType);
+      List<Long> idsToExport = rdrExportService.findUnchangedEntitiesForBackfill(entityType);
       if (limit.isPresent() && idsToExport.size() > limit.get()) {
         idsToExport = idsToExport.subList(0, limit.get());
       }
