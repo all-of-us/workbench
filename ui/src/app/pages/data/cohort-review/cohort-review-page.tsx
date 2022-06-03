@@ -69,6 +69,19 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
     cursor: 'pointer',
   },
+  reviewList: {
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    borderRadius: '3px',
+    flex: '0 0 20%',
+    marginBottom: '0.25rem',
+  },
+  reviewListHeader: {
+    borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    color: colors.primary,
+    fontSize: '16px',
+    fontWeight: 600,
+    padding: '0.5rem',
+  },
   sortIcon: {
     marginTop: '4px',
     color: '#2691D0',
@@ -210,25 +223,8 @@ export const CohortReviewPage = fp.flow(
             <div style={styles.description}>{cohort.description}</div>
           </div>
           <div style={{ display: 'flex' }}>
-            <div
-              style={{
-                border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-                borderRadius: '3px',
-                flex: '0 0 20%',
-              }}
-            >
-              <div
-                style={{
-                  borderBottom: `1px solid ${colorWithWhiteness(
-                    colors.black,
-                    0.8
-                  )}`,
-                  color: colors.primary,
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  padding: '0.5rem',
-                }}
-              >
+            <div style={styles.reviewList}>
+              <div style={styles.reviewListHeader}>
                 Review Sets
                 <Clickable
                   style={{ display: 'inline-block', marginLeft: '0.5rem' }}
@@ -245,8 +241,14 @@ export const CohortReviewPage = fp.flow(
                     cohortReview={cohortReview}
                     onUpdate={() => loadCohortAndReviews()}
                     onSelect={() => {
-                      setActiveReview(cohortReview);
-                      getParticipantData();
+                      if (
+                        cohortReview.cohortReviewId !==
+                        activeReview.cohortReviewId
+                      ) {
+                        console.log(cohortReview);
+                        setActiveReview(cohortReview);
+                        getParticipantData();
+                      }
                     }}
                     selected={
                       activeReview.cohortReviewId ===

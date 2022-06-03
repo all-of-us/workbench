@@ -33,7 +33,6 @@ export const datatableStyles = `
   }
   .p-datatable .p-paginator.p-paginator-bottom {
     border: 0;
-    margin-top: 20px;
     background: none;
     font-size: 12px;
     text-align: right;

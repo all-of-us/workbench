@@ -17,10 +17,10 @@ import {
 
 import { ClrIcon } from 'app/components/icons';
 import { NumberInput } from 'app/components/inputs';
+import { SpinnerOverlay } from 'app/components/spinners';
 import {
   filterStateStore,
   getVocabOptions,
-  queryResultSizeStore,
   reviewPaginationStore,
   vocabOptions,
 } from 'app/services/review-state.service';
@@ -276,7 +276,6 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         getParticipantStatuses().then(
           ({ cohortReview: review, queryResultSize }) => {
             currentCohortReviewStore.next(review);
-            queryResultSizeStore.next(queryResultSize);
             if (!vocabOptions.getValue()) {
               getVocabOptions(ns, wsid, review.cohortReviewId);
             }
@@ -296,7 +295,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         ...pageState,
         page: reviewPaginationStore.getValue().page,
       });
-      setTotalCount(queryResultSizeStore.getValue());
+      setTotalCount(cohortReview.reviewSize);
     }
     promises.push(
       cohortBuilderApi()
@@ -637,13 +636,13 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     <div>
       <DataTable
         style={{ fontSize: '12px' }}
-        value={data}
-        first={0}
+        value={loading ? null : data}
+        first={pageState.page * numberOfRows}
         sortField={sortState.sortField}
         sortOrder={sortState.sortOrder}
         onSort={onSort}
         lazy
-        paginator={data && data.length > 0}
+        paginator={!loading && data?.length > 0}
         onPage={onPage}
         alwaysShowPaginator={false}
         paginatorTemplate={paginatorTemplate()}
@@ -657,6 +656,11 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       >
         {getColumns()}
       </DataTable>
+      {loading && (
+        <div style={{ marginTop: '5rem', position: 'relative' }}>
+          <SpinnerOverlay />
+        </div>
+      )}
     </div>
   );
 };
