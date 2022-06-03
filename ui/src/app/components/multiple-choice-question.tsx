@@ -99,7 +99,13 @@ export const MultipleChoiceQuestion = (props: {
           {option.subOptions && (
             <ClrIcon
               shape='angle'
-              style={{ marginRight: '0.5rem' }}
+              style={{
+                marginRight: '0.5rem',
+                cursor: 'pointer',
+                transform: option.showSubOptions
+                  ? 'rotate(180deg)'
+                  : 'rotate(0deg)',
+              }}
               onClick={option.onClick}
             />
           )}
