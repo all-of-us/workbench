@@ -2059,12 +2059,12 @@ def backfill_entities_to_rdr(cmd_name, *args)
     ->(opts, v) { opts.dry_run = v},
     "When true, print the number of workspaces that will be exported, will not export")
   op.add_typed_option(
-      "--entity-type [USER|WORKSPACE]",
-      String,
-      ->(opts, v) { opts.entity_type = v},
-      "The RDR entity type to export. USER or WORKSPACE.")
+    "--entity-type [USER|WORKSPACE]",
+    String,
+    ->(opts, v) { opts.entity_type = v},
+    "The RDR entity type to export. USER or WORKSPACE.")
   op.add_typed_option(
-    "--limit=[LIMIT]",
+    "--limit [LIMIT]",
     String,
     ->(opts, v) { opts.limit = v},
     "The number of workspaces exported will not to exceed this limit.")

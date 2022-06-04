@@ -65,7 +65,8 @@ public class BackfillEntitiesToRdr {
           .desc("When true, print the number of entities that will be exported, will not export")
           .build();
 
-  private static Options options = new Options().addOption(limitOpt).addOption(dryRunOpt);
+  private static Options options =
+      new Options().addOption(entityTypeOpt).addOption(limitOpt).addOption(dryRunOpt);
 
   public static void main(String[] args) {
     CommandLineToolConfig.runCommandLine(BackfillEntitiesToRdr.class, args);
@@ -124,7 +125,7 @@ public class BackfillEntitiesToRdr {
       if (dryRun) {
         System.out.printf(
             "\nThis is a dry run. %d %s entities will be exported when running this command.\n\n",
-            entityType, idsToExport.size());
+            idsToExport.size(), entityType);
       } else {
         if (RdrEntity.USER.equals(entityType)) {
           taskQueueService.groupAndPushRdrResearcherTasks(idsToExport, /* backfill */ true);
@@ -134,7 +135,7 @@ public class BackfillEntitiesToRdr {
           throw new IllegalArgumentException("unknown entity type: " + entityType);
         }
         System.out.printf(
-            "\n\n%d %s entities queued for export\n\n", entityType, idsToExport.size());
+            "\n\n%d %s entities queued for export\n\n", idsToExport.size(), entityType);
       }
     };
   }
