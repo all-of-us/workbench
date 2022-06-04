@@ -14,7 +14,7 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
       "SELECT u.user_id FROM user u LEFT JOIN "
           + "rdr_export rdr ON (u.user_id = rdr.entity_id AND rdr.entity_type = 1) where "
           + "(u.last_modified_time > rdr.last_export_date OR rdr.entity_id IS NULL) "
-          + "AND NOT u.email IN :excludeUsers";
+          + "AND u.email NOT IN :excludeUsers";
   String UNCHANGED_USER_IDS_QUERY =
       "SELECT entity_id FROM rdr_export where entity_type = 1 AND entity_id NOT IN ("
           + USER_IDS_TO_EXPORT_QUERY

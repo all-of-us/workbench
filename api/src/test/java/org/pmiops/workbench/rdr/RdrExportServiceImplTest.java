@@ -26,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -81,7 +83,12 @@ public class RdrExportServiceImplTest {
   private DbUser dbUserWithoutEmail;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, RdrExportServiceImpl.class, RdrMapperImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
+    RdrExportServiceImpl.class,
+    RdrMapperImpl.class
+  })
   @MockBean({
     AccessTierService.class,
     ApiClient.class,
@@ -109,6 +116,7 @@ public class RdrExportServiceImplTest {
         userDao.save(
             new DbUser()
                 .setUserId(1L)
+                .setUsername("userWithEmail")
                 .setCreationTime(FakeClockConfiguration.NOW)
                 .setLastModifiedTime(FakeClockConfiguration.NOW)
                 .setGivenName("icanhas")
@@ -120,6 +128,7 @@ public class RdrExportServiceImplTest {
         userDao.save(
             new DbUser()
                 .setUserId(2L)
+                .setUsername("userWithoutEmail")
                 .setCreationTime(FakeClockConfiguration.NOW)
                 .setLastModifiedTime(FakeClockConfiguration.NOW)
                 .setGivenName("icannothas")
@@ -296,16 +305,19 @@ public class RdrExportServiceImplTest {
         () -> rdrExportService.findUnchangedEntitiesForBackfill(RdrEntity.USER);
     assertThat(findUnchangedUsers.get()).isEmpty();
 
-    rdrExportService.exportUsers(
-        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), false);
-    assertThat(findUnchangedUsers.get()).hasSize(2);
+    rdrExportService.exportUsers(ImmutableList.of(dbUserWithEmail.getUserId()), NO_BACKFILL);
+    assertThat(findUnchangedUsers.get()).hasSize(1);
 
     clock.increment(Duration.ofMinutes(5).toMillis());
     userDao.save(
         dbUserWithEmail
             .setAreaOfResearch("sorcery")
             .setLastModifiedTime(Timestamp.from(clock.instant())));
-    assertThat(findUnchangedUsers.get()).hasSize(1);
+    List<DbRdrExport> exps = ImmutableList.copyOf(rdrExportDao.findAll());
+    List<DbUser> users = ImmutableList.copyOf(userDao.findAll());
+    List<Long> exportIds = rdrExportService.findAllUserIdsToExport();
+    assertThat(exportIds).hasSize(2);
+    assertThat(findUnchangedUsers.get()).isEmpty();
   }
 
   @Test
