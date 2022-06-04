@@ -34,7 +34,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -313,10 +312,7 @@ public class RdrExportServiceImplTest {
         dbUserWithEmail
             .setAreaOfResearch("sorcery")
             .setLastModifiedTime(Timestamp.from(clock.instant())));
-    List<DbRdrExport> exps = ImmutableList.copyOf(rdrExportDao.findAll());
-    List<DbUser> users = ImmutableList.copyOf(userDao.findAll());
-    List<Long> exportIds = rdrExportService.findAllUserIdsToExport();
-    assertThat(exportIds).hasSize(2);
+    assertThat(rdrExportService.findAllUserIdsToExport()).hasSize(2);
     assertThat(findUnchangedUsers.get()).isEmpty();
   }
 
@@ -337,6 +333,7 @@ public class RdrExportServiceImplTest {
     clock.increment(Duration.ofMinutes(5).toMillis());
     workspaceDao.save(
         workspace.setAdditionalNotes("!!!").setLastModifiedTime(Timestamp.from(clock.instant())));
+    assertThat(rdrExportService.findAllWorkspacesIdsToExport()).hasSize(1);
     assertThat(findUnchangedWorkspaces.get()).hasSize(2);
   }
 
