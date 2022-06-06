@@ -403,6 +403,68 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                         cohortReview.getCohortReviewId(), pageRequest)));
   }
 
+  /**
+   * Get all participants for the specified cohortId and cohortReviewId. This endpoint does
+   * pagination based on page, pageSize, sortOrder and sortColumn.
+   */
+  @Override
+  public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatuses(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortId,
+      Long cohortReviewId,
+      PageFilterRequest request) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
+
+    CohortReview cohortReview;
+    List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
+    DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
+    PageRequest pageRequest = createPageRequest(request);
+    convertGenderRaceEthnicitySortOrder(pageRequest);
+
+    try {
+      cohortReview =
+          cohortReviewService.findCohortReviewForWorkspace(cohort.getCohortId(), cohortReviewId);
+      participantCohortStatuses =
+          cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
+    } catch (NotFoundException nfe) {
+      cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
+    }
+
+    cohortReview.participantCohortStatuses(participantCohortStatuses);
+
+    // Wrapping the following logic behind the feature flag so that only in test/local
+    // opening/creating cohort review will create an entry in user recent resource with
+    // resource type cohortReview rather than cohort,
+    // while the rest of the environments remains as is
+    if (!workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      userRecentResourceService.updateCohortEntry(
+          cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
+    }
+
+    // Cohort review id will be null if the user is creating a new Cohort Review
+    // In such cases createCohort will update the entry in userrecentresource
+    // Cohort review id will be populated, if  user is viewing an existing cohort review
+    if (cohortReview.getCohortReviewId() != null) {
+      userRecentResourceService.updateCohortReviewEntry(
+          cohort.getWorkspaceId(),
+          userProvider.get().getUserId(),
+          cohortReview.getCohortReviewId());
+    }
+
+    return ResponseEntity.ok(
+        new CohortReviewWithCountResponse()
+            .cohortReview(cohortReview)
+            .queryResultSize(
+                pageRequest.getFilters().isEmpty()
+                    ? cohortReview.getReviewSize()
+                    : cohortReviewService.findCount(
+                        cohortReview.getCohortReviewId(), pageRequest)));
+  }
+
   @Override
   public ResponseEntity<ParticipantDataCountResponse> getParticipantCount(
       String workspaceNamespace,
