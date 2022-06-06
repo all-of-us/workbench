@@ -2355,6 +2355,22 @@ paths:
           description: ACCEPTED
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concept-count":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - "$ref": "#/parameters/conceptSetId"
+    get:
+      tags:
+      - conceptSets
+      description: The number of concepts in this concept-set.
+      operationId: countConceptsInConceptSet
+      responses:
+        200:
+          description: A count of concepts
+          schema:
+            type: integer
+            format: int64
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"

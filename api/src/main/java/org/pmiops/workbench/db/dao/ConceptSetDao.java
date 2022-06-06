@@ -18,4 +18,6 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
   List<DbConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
 
   int countByWorkspaceId(long workspaceId);
+
+  long countByConceptSetId(long conceptSetId);
 }

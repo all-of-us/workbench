@@ -78,6 +78,11 @@ public class ConceptSetDaoTest {
   }
 
   @Test
+  public void countByConceptSetId() {
+    assertThat(conceptSetDao.countByConceptSetId(dbConceptSet.getConceptSetId())).isEqualTo(1);
+  }
+
+  @Test
   public void findConceptSetByNameAndWorkspaceId() {
     assertThat(
             conceptSetDao.findConceptSetByNameAndWorkspaceId(
