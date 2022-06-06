@@ -31,7 +31,7 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    rdrExportService.exportUsers(researcherIds);
+    rdrExportService.exportUsers(researcherIds, false);
 
     return ResponseEntity.noContent().build();
   }

@@ -81,6 +81,26 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
+  private List<String> excludedExportUserEmails() {
+    return workbenchConfigProvider.get().auth.serviceAccountApiUsers;
+  }
+
+  @Override
+  public List<Long> findUnchangedEntitiesForBackfill(RdrEntity entityType) {
+    List<BigInteger> ids;
+    switch (entityType) {
+      case USER:
+        ids = rdrExportDao.findAllUnchangedDbUserIds(excludedExportUserEmails());
+        break;
+      case WORKSPACE:
+        ids = rdrExportDao.findAllUnchangedDbWorkspaceIds();
+        break;
+      default:
+        throw new IllegalArgumentException("invalid entityType: " + entityType);
+    }
+    return ids.stream().map(BigInteger::longValue).collect(Collectors.toList());
+  }
+
   /**
    * Retrieve the list of all users ids that are either a) not in rdr_Export table or b) have
    * last_modified_time (user table) > export_time (rdr_export table)
@@ -90,19 +110,9 @@ public class RdrExportServiceImpl implements RdrExportService {
   @Override
   public List<Long> findAllUserIdsToExport() {
     // Don't export service account users; they are lacking basic metadata.
-    List<String> excludeUsers = workbenchConfigProvider.get().auth.serviceAccountApiUsers;
-    List<Long> userIdList = new ArrayList<>();
-    try {
-      userIdList =
-          rdrExportDao.findDbUserIdsToExport(excludeUsers).stream()
-              .map(BigInteger::longValue)
-              .collect(Collectors.toList());
-    } catch (Exception ex) {
-      log.severe(
-          String.format(
-              "Error while trying to fetch modified/created user list: %s", ex.getMessage()));
-    }
-    return userIdList;
+    return rdrExportDao.findDbUserIdsToExport(excludedExportUserEmails()).stream()
+        .map(BigInteger::longValue)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -113,18 +123,9 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public List<Long> findAllWorkspacesIdsToExport() {
-    List<Long> workspaceListToExport = new ArrayList<>();
-    try {
-      workspaceListToExport =
-          rdrExportDao.findDbWorkspaceIdsToExport().stream()
-              .map(BigInteger::longValue)
-              .collect(Collectors.toList());
-    } catch (Exception ex) {
-      log.severe(
-          String.format(
-              "Error while trying to fetch modified/created workspace list: %s", ex.getMessage()));
-    }
-    return workspaceListToExport;
+    return rdrExportDao.findDbWorkspaceIdsToExport().stream()
+        .map(BigInteger::longValue)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -134,16 +135,18 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param userIds
    */
   @Override
-  public void exportUsers(List<Long> userIds) {
+  public void exportUsers(List<Long> userIds, boolean backfill) {
     List<RdrResearcher> rdrResearchersList;
     try {
       rdrResearchersList =
           userIds.stream()
               .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
               .collect(Collectors.toList());
-      rdrApiProvider.get().exportResearchers(rdrResearchersList);
+      rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
 
-      updateDbRdrExport(RdrEntity.USER, userIds);
+      if (!backfill) {
+        updateDbRdrExport(RdrEntity.USER, userIds);
+      }
       log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
     } catch (ApiException ex) {
       log.severe(
