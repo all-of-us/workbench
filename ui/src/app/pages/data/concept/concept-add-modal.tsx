@@ -62,11 +62,13 @@ export const ConceptAddModal = withCurrentWorkspace()(
       errorSaving: boolean;
       addingToExistingSet: boolean;
       loading: boolean;
+      loadingSelectedSet: boolean;
       nameTouched: boolean;
       newSetDescription: string;
       name: string;
       saving: boolean;
       selectedSet: ConceptSet;
+      selectedSetCount: number;
       selectedConceptsInDomain: Criteria[];
     }
   > {
@@ -78,11 +80,13 @@ export const ConceptAddModal = withCurrentWorkspace()(
         errorSaving: false,
         addingToExistingSet: true,
         loading: true,
+        loadingSelectedSet: false,
         nameTouched: false,
         newSetDescription: '',
         name: '',
         saving: false,
         selectedSet: null,
+        selectedSetCount: null,
         selectedConceptsInDomain: filterConcepts(
           props.selectedConcepts,
           props.activeDomainTab.domain
@@ -114,8 +118,8 @@ export const ConceptAddModal = withCurrentWorkspace()(
           selectedConceptsInDomain: filterConcepts(selectedConcepts, domain),
           loading: false,
         });
-        if (conceptSetsInDomain) {
-          this.setState({ selectedSet: conceptSetsInDomain[0] });
+        if (conceptSetsInDomain && conceptSetsInDomain[0]) {
+          this.selectConceptSet(conceptSetsInDomain[0]);
         }
       } catch (error) {
         console.error(error);
@@ -202,18 +206,37 @@ export const ConceptAddModal = withCurrentWorkspace()(
     disableSave(errors) {
       const {
         addingToExistingSet,
+        loadingSelectedSet,
         saving,
-        selectedSet,
+        selectedSetCount,
         selectedConceptsInDomain,
       } = this.state;
       if (addingToExistingSet) {
         return (
-          selectedSet?.criteriums &&
-          selectedSet.criteriums.length + selectedConceptsInDomain.length >
-            CONCEPT_SET_CONCEPT_LIMIT
+          loadingSelectedSet ||
+          (selectedSetCount &&
+            selectedSetCount + selectedConceptsInDomain.length >
+              CONCEPT_SET_CONCEPT_LIMIT)
         );
       }
       return (!addingToExistingSet && !!errors) || saving;
+    }
+
+    async selectConceptSet(conceptSet: ConceptSet) {
+      this.setState({ loadingSelectedSet: true });
+      const {
+        workspace: { namespace, id },
+      } = this.props;
+      const selectedSetCount = await conceptSetsApi().countConceptsInConceptSet(
+        namespace,
+        id,
+        conceptSet.id
+      );
+      this.setState({
+        loadingSelectedSet: false,
+        selectedSet: conceptSet,
+        selectedSetCount,
+      });
     }
 
     render() {
@@ -221,6 +244,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
       const {
         conceptSets,
         loading,
+        loadingSelectedSet,
         nameTouched,
         saving,
         addingToExistingSet,
@@ -307,9 +331,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
                     }}
                     placeholder='Select Concept Set'
                     onChange={(e) =>
-                      this.setState({
-                        selectedSet: conceptSets[e.target.value],
-                      })
+                      this.selectConceptSet(conceptSets[e.target.value])
                     }
                   >
                     {conceptSets.map((set: ConceptSet, i) => (
@@ -376,7 +398,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
               </ModalFooter>
             </ModalBody>
           )}
-          {saving && <SpinnerOverlay />}
+          {(loadingSelectedSet || saving) && <SpinnerOverlay />}
         </Modal>
       );
     }
