@@ -249,7 +249,6 @@ public class RdrExportServiceImplTest {
         workspaceDao.save(
             workspace.setSpecificPopulationsEnum(ImmutableSet.of(SpecificPopulationEnum.RACE_AA)));
 
-    List<DbWorkspace> wks = ImmutableList.copyOf(workspaceDao.findAll());
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
 
     rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
