@@ -270,6 +270,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
 
   const initParticipantsTable = async () => {
     let updatedDemoFilters;
+    const updatedFilters = filters;
     const promises = [];
     if (!cohortReview) {
       promises.push(
@@ -305,7 +306,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
             const extract = (arr, _type?) =>
               fp.uniq([
                 ...arr.map((i) => {
-                  filters[_type].push(i.conceptId.toString());
+                  updatedFilters[_type].push(i.conceptId.toString());
                   return {
                     name: i.conceptName,
                     value: i.conceptId.toString(),
@@ -321,7 +322,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
               SEXATBIRTH: extract(sexAtBirthList, 'SEXATBIRTH'),
             };
             setDemoFilters(updatedDemoFilters);
-            setFilters(filters);
+            setFilters(updatedFilters);
           },
           (error) => {
             console.error(error);
@@ -408,30 +409,35 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
 
   const onCheckboxChange = (event, column) => {
     const { checked, value } = event.target;
+    const updatedFilters = filters;
     if (checked) {
       const options = demoFilters[column].map((opt) => opt.value);
       if (value === 'Select All') {
-        filters[column] = options;
+        updatedFilters[column] = options;
       } else {
-        filters[column].push(value);
-        if (options.length - 1 === filters[column].length) {
-          filters[column].push('Select All');
+        updatedFilters[column].push(value);
+        if (options.length - 1 === updatedFilters[column].length) {
+          updatedFilters[column].push('Select All');
         }
       }
     } else {
       if (value === 'Select All') {
-        filters[column] = [];
+        updatedFilters[column] = [];
       } else {
-        filters[column].splice(filters[column].indexOf(value), 1);
-        if (filters[column].includes('Select All')) {
-          filters[column].splice(filters[column].indexOf('Select All'), 1);
+        updatedFilters[column].splice(updatedFilters[column].indexOf(value), 1);
+        if (updatedFilters[column].includes('Select All')) {
+          updatedFilters[column].splice(updatedFilters[column].indexOf('Select All'), 1);
         }
       }
     }
     setLoading(true);
     setApiError(false);
-    setFilters(filters);
-    setTimeout(() => getTableData());
+    setFilters(updatedFilters);
+    if (updatedFilters[column].length === 0) {
+      setData([]);
+    } else {
+      getTableData();
+    }
   };
 
   const onInputChange = (value: any) => {
