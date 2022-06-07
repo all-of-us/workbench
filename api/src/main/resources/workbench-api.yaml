@@ -248,6 +248,16 @@ paths:
           schema:
             type: boolean
 
+  "/v1/signOut":
+    post:
+      tags:
+        - user
+      description: SignOut user's gsuite account
+      operationId: signOut
+      responses:
+        204:
+          description: User signout success
+
   "/v1/acceptTermsOfService":
     post:
       tags:

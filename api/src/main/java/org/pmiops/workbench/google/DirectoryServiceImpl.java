@@ -89,8 +89,10 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   private static final List<String> SCOPES =
       Arrays.asList(
           DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS,
-              DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
-          DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
+          DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
+          DirectoryScopes.ADMIN_DIRECTORY_USER,
+          DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY,
+          DirectoryScopes.ADMIN_DIRECTORY_USER_SECURITY);
 
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
@@ -289,6 +291,11 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
+  }
+
+  @Override
+  public void signOut(String username) {
+    retryHandler.run((context) -> getGoogleDirectoryService().users().signOut(username).execute());
   }
 
   @Override
