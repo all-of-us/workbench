@@ -145,9 +145,9 @@ describe('AppRouter', () => {
     expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
 
-  it('redirects to not found page when no route is matched', () => {
+  it('redirects to not found page when no route is matched', async () => {
     const wrapper = component(['/wharrgarbl'], 0);
-    waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('span').first().text()).toEqual('Not Found');
   });
 
