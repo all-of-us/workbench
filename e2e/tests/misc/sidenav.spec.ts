@@ -41,11 +41,5 @@ describe('Sidebar Navigation', () => {
     await Navigation.navMenu(page, NavLink.HOME);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
-
-    // Select Sign Out link
-    await signOut(page);
-    await waitForDocumentTitle(page, 'Sign In');
-    const href = await page.evaluate(() => location.href);
-    expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));
   });
 });
