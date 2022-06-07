@@ -425,14 +425,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     PageRequest pageRequest = createPageRequest(request);
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
-    try {
-      cohortReview =
-          cohortReviewService.findCohortReviewForWorkspace(cohort.getCohortId(), cohortReviewId);
-      participantCohortStatuses =
-          cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
-    } catch (NotFoundException nfe) {
-      cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
-    }
+    cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(cohort.getCohortId(), cohortReviewId);
+    participantCohortStatuses =
+        cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
 
     cohortReview.participantCohortStatuses(participantCohortStatuses);
 

@@ -2048,27 +2048,6 @@ public class CohortReviewControllerTest {
     assertNotFoundExceptionNoCohort(worngCohortId, exception);
   }
 
-  @Test
-  public void getParticipantCohortStatusesNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-    stubBigQueryCohortCalls();
-
-    Long wrongCohortReviewId = -1L;
-
-    CohortReview actualReview =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getCohortId(),
-                wrongCohortReviewId,
-                new PageFilterRequest())
-            .getBody()
-            .getCohortReview();
-
-    assertThat(actualReview.getParticipantCohortStatuses()).isEmpty();
-  }
-
   @ParameterizedTest(
       name = "getParticipantCohortStatusesSortByFilterColumn SortOrder={0}, FilterColumns={1}")
   @MethodSource("paramsSortByFilterColumn")
