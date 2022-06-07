@@ -40,6 +40,7 @@ import {
 } from 'testing/stubs/profile-api-stub';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
+const arbitraryModuleName = AccessModule.PUBLICATIONCONFIRMATION;
 
 describe('maybeDaysRemaining', () => {
   it('returns undefined when the profile has no accessModules', () => {
@@ -160,7 +161,11 @@ describe('computeRenewalDisplayDates', () => {
   });
 
   it('returns Unavailable/Incomplete when the module is incomplete', () => {
-    expect(computeRenewalDisplayDates({})).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates({
+        moduleName: arbitraryModuleName,
+      })
+    ).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
       moduleStatus: AccessRenewalStatus.INCOMPLETE,
@@ -186,6 +191,7 @@ describe('computeRenewalDisplayDates', () => {
   it('returns Unavailable/Incomplete when the module is incomplete, regardless of expiration date', () => {
     const expirationDate = nowPlusDays(25);
     const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
       expirationEpochMillis: expirationDate,
     };
 
@@ -199,6 +205,7 @@ describe('computeRenewalDisplayDates', () => {
   it('returns Unavailable/Bypassed when the module is bypassed, regardless of bypass date', () => {
     const bypassDate = nowPlusDays(-10000);
     const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
       bypassEpochMillis: bypassDate,
     };
 
@@ -218,6 +225,7 @@ describe('computeRenewalDisplayDates', () => {
     const expirationDate = nowPlusDays(200);
 
     const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
       bypassEpochMillis: bypassDate,
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate,
@@ -243,6 +251,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(expirationDate).toBeLessThan(endOfLookback);
 
     const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate,
     };
@@ -269,6 +278,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(expirationDate).toBeGreaterThan(endOfLookback);
 
     const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate,
     };
@@ -289,6 +299,7 @@ describe('computeRenewalDisplayDates', () => {
     const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
 
     const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate,
     };

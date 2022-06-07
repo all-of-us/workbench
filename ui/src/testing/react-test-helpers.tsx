@@ -4,6 +4,8 @@ import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
+import { setImmediate } from 'timers';
+
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   const waitImmediate = () =>
     new Promise<void>((resolve) => setImmediate(resolve));

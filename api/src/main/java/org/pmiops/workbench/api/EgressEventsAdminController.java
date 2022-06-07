@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.Gson;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -176,7 +175,7 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     return ResponseEntity.ok(
         new AuditEgressEventResponse()
             .egressEvent(egressEventMapper.toApiEvent(dbEgressEvent))
-            .sumologicEvent(new Gson().fromJson(dbEgressEvent.getSumologicEvent(), Object.class))
+            .sumologicEvent(egressEventMapper.toSumoLogicEvent(dbEgressEvent))
             .runtimeLogGroups(egressLogService.getRuntimeLogGroups(dbEgressEvent)));
   }
 

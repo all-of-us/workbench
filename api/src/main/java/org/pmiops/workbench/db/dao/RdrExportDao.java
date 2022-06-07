@@ -10,32 +10,35 @@ import org.springframework.data.repository.query.Param;
 
 public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
 
-  static final String WORKSPACE_IDS_TO_EXPORT_QUERY =
-      "select w.workspace_id from  workspace w LEFT JOIN "
-          + "rdr_export rdr on w.workspace_id = rdr.entity_id and rdr.entity_type = 2 where "
-          + "w.last_modified_time > rdr.last_export_date or rdr.entity_id IS NULL";
-  static final String UNCHANGED_WORKSPACE_IDS_QUERY =
-      "select entity_id from rdr_export where entity_type = 2 and entity_id not in ("
+  String USER_IDS_TO_EXPORT_QUERY =
+      "SELECT u.user_id FROM user u LEFT JOIN "
+          + "rdr_export rdr ON (u.user_id = rdr.entity_id AND rdr.entity_type = 1) where "
+          + "(u.last_modified_time > rdr.last_export_date OR rdr.entity_id IS NULL) "
+          + "AND u.email NOT IN :excludeUsers";
+  String UNCHANGED_USER_IDS_QUERY =
+      "SELECT entity_id FROM rdr_export where entity_type = 1 AND entity_id NOT IN ("
+          + USER_IDS_TO_EXPORT_QUERY
+          + ")";
+  String WORKSPACE_IDS_TO_EXPORT_QUERY =
+      "SELECT w.workspace_id FROM workspace w LEFT JOIN "
+          + "rdr_export rdr ON (w.workspace_id = rdr.entity_id AND rdr.entity_type = 2) where "
+          + "w.last_modified_time > rdr.last_export_date OR rdr.entity_id IS NULL";
+  String UNCHANGED_WORKSPACE_IDS_QUERY =
+      "SELECT entity_id FROM rdr_export where entity_type = 2 AND entity_id NOT IN ("
           + WORKSPACE_IDS_TO_EXPORT_QUERY
           + ")";
 
-  @Query(
-      nativeQuery = true,
-      value =
-          "select u.user_id from user u LEFT JOIN rdr_export rdr on"
-              + " u.user_id = rdr.entity_id and rdr.entity_type = 1 where "
-              + "(u.last_modified_time > rdr.last_Export_date or rdr.export_id is null) "
-              + "and NOT u.username IN :excludeUsers")
+  @Query(nativeQuery = true, value = USER_IDS_TO_EXPORT_QUERY)
   List<BigInteger> findDbUserIdsToExport(@Param("excludeUsers") List<String> excludeUsers);
+
+  @Query(value = UNCHANGED_USER_IDS_QUERY, nativeQuery = true)
+  List<BigInteger> findAllUnchangedDbUserIds(@Param("excludeUsers") List<String> excludeUsers);
 
   @Query(nativeQuery = true, value = WORKSPACE_IDS_TO_EXPORT_QUERY)
   List<BigInteger> findDbWorkspaceIdsToExport();
 
   @Query(value = UNCHANGED_WORKSPACE_IDS_QUERY, nativeQuery = true)
   List<BigInteger> findAllUnchangedDbWorkspaceIds();
-
-  @Query(value = UNCHANGED_WORKSPACE_IDS_QUERY + " limit :limit", nativeQuery = true)
-  List<BigInteger> findTopUnchangedDbWorkspaceIds(@Param("limit") Integer limit);
 
   List<DbRdrExport> findAllByEntityType(short entityType);
 

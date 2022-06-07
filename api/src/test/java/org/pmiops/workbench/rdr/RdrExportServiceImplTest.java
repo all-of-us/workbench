@@ -1,10 +1,11 @@
 package org.pmiops.workbench.rdr;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -16,16 +17,16 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Supplier;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
@@ -40,6 +41,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
@@ -49,57 +51,52 @@ import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@SpringJUnitConfig
+@DataJpaTest
 public class RdrExportServiceImplTest {
   @Autowired private RdrExportService rdrExportService;
   @Autowired private RdrMapper rdrMapper;
 
+  @Autowired private FakeClock clock;
   @Autowired private AccessTierService mockAccessTierService;
   @Autowired private ApiClient mockApiClient;
   @Autowired private RdrApi mockRdrApi;
-  @Autowired private RdrExportDao rdrExportDao;
-  @Autowired private UserDao mockUserDao;
-  @Autowired private WorkspaceDao mockWorkspaceDao;
   @Autowired private WorkspaceService mockWorkspaceService;
+  @Autowired private RdrExportDao rdrExportDao;
+  @Autowired private UserDao userDao;
+  @Autowired private WorkspaceDao workspaceDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private DbWorkspace workspace;
   private DbWorkspace deletedWorkspace;
   private DbWorkspace creatorWorkspace;
 
-  private static final Instant NOW = Instant.now();
-  private static final Timestamp NOW_TIMESTAMP = Timestamp.from(NOW);
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final boolean NO_BACKFILL = false;
 
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, RdrExportServiceImpl.class, RdrMapperImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
+    RdrExportServiceImpl.class,
+    RdrMapperImpl.class
+  })
   @MockBean({
     AccessTierService.class,
     ApiClient.class,
     RdrApi.class,
-    RdrExportDao.class,
-    UserDao.class,
     InstitutionService.class,
-    WorkspaceDao.class,
     WorkspaceService.class,
     VerifiedInstitutionalAffiliationDao.class
   })
   static class Configuration {
-    @Bean
-    public Clock clock() {
-      return CLOCK;
-    }
-
     @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
@@ -115,49 +112,60 @@ public class RdrExportServiceImplTest {
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
 
     dbUserWithEmail =
-        new DbUser()
-            .setUserId(1L)
-            .setCreationTime(NOW_TIMESTAMP)
-            .setLastModifiedTime(NOW_TIMESTAMP)
-            .setGivenName("icanhas")
-            .setFamilyName("email")
-            .setContactEmail("i.can.has.email@gmail.com")
-            .setDegreesEnum(Collections.singletonList(Degree.NONE));
+        userDao.save(
+            new DbUser()
+                .setUserId(1L)
+                .setUsername("userWithEmail")
+                .setCreationTime(FakeClockConfiguration.NOW)
+                .setLastModifiedTime(FakeClockConfiguration.NOW)
+                .setGivenName("icanhas")
+                .setFamilyName("email")
+                .setContactEmail("i.can.has.email@gmail.com")
+                .setDegreesEnum(Collections.singletonList(Degree.NONE)));
 
-    when(mockUserDao.findUserByUserId(1L)).thenReturn(dbUserWithEmail);
     dbUserWithoutEmail =
-        new DbUser()
-            .setUserId(2L)
-            .setCreationTime(NOW_TIMESTAMP)
-            .setLastModifiedTime(NOW_TIMESTAMP)
-            .setGivenName("icannothas")
-            .setFamilyName("email")
-            .setDegreesEnum(Collections.singletonList(Degree.NONE));
+        userDao.save(
+            new DbUser()
+                .setUserId(2L)
+                .setUsername("userWithoutEmail")
+                .setCreationTime(FakeClockConfiguration.NOW)
+                .setLastModifiedTime(FakeClockConfiguration.NOW)
+                .setGivenName("icannothas")
+                .setFamilyName("email")
+                .setDegreesEnum(Collections.singletonList(Degree.NONE)));
 
-    when(mockUserDao.findUserByUserId(2L)).thenReturn(dbUserWithoutEmail);
-
-    when(rdrExportDao.findByEntityTypeAndEntityId(anyShort(), anyLong())).thenReturn(null);
     workspace =
-        buildDbWorkspace(
-            1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE, dbUserWithEmail);
-    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(workspace);
+        workspaceDao.save(
+            buildDbWorkspace(
+                1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE, dbUserWithEmail));
 
     deletedWorkspace =
-        buildDbWorkspace(
-            2, "workspace_del", "workspaceNS", WorkspaceActiveStatus.DELETED, dbUserWithEmail);
-    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(2)).thenReturn(deletedWorkspace);
+        workspaceDao.save(
+            buildDbWorkspace(
+                2, "workspace_del", "workspaceNS", WorkspaceActiveStatus.DELETED, dbUserWithEmail));
 
     creatorWorkspace =
-        buildDbWorkspace(
-            3, "workspace_name_3", "workspaceNS", WorkspaceActiveStatus.ACTIVE, dbUserWithoutEmail);
-    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(3)).thenReturn(creatorWorkspace);
+        workspaceDao.save(
+            buildDbWorkspace(
+                3,
+                "workspace_name_3",
+                "workspaceNS",
+                WorkspaceActiveStatus.ACTIVE,
+                dbUserWithoutEmail));
 
-    when(verifiedInstitutionalAffiliationDao.findFirstByUser(dbUserWithEmail))
-        .thenReturn(
-            Optional.of(
-                new DbVerifiedInstitutionalAffiliation()
-                    .setInstitution(new DbInstitution().setShortName("mockInstitution"))
-                    .setInstitutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL)));
+    verifiedInstitutionalAffiliationDao.save(
+        new DbVerifiedInstitutionalAffiliation()
+            .setUser(dbUserWithEmail)
+            .setInstitution(new DbInstitution().setShortName("mockInstitution"))
+            .setInstitutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL));
+  }
+
+  @AfterEach
+  public void tearDown() {
+    rdrExportDao.deleteAll();
+    workspaceDao.deleteAll();
+    verifiedInstitutionalAffiliationDao.deleteAll();
+    userDao.deleteAll();
   }
 
   private DbWorkspace buildDbWorkspace(
@@ -166,10 +174,9 @@ public class RdrExportServiceImplTest {
       String namespace,
       WorkspaceActiveStatus activeStatus,
       DbUser creator) {
-    Timestamp nowTimestamp = Timestamp.from(NOW);
     return new DbWorkspace()
-        .setLastModifiedTime(nowTimestamp)
-        .setCreationTime(nowTimestamp)
+        .setLastModifiedTime(FakeClockConfiguration.NOW)
+        .setCreationTime(FakeClockConfiguration.NOW)
         .setName(name)
         .setWorkspaceId(dbId)
         .setWorkspaceNamespace(namespace)
@@ -185,33 +192,42 @@ public class RdrExportServiceImplTest {
 
   @Test
   public void exportUsers() throws ApiException {
-    doNothing().when(mockRdrApi).exportResearchers(anyList());
+    doNothing().when(mockRdrApi).exportResearchers(anyList(), anyBoolean());
 
     rdrExportService.exportUsers(
-        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()));
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), false);
 
     verify(rdrExportService, times(1)).updateDbRdrExport(any(), anyList());
   }
 
   @Test
   public void exportUsersUnsuccessfulnoPersist() throws ApiException {
-    doThrow(new ApiException()).when(mockRdrApi).exportResearchers(anyList());
+    doThrow(new ApiException()).when(mockRdrApi).exportResearchers(anyList(), anyBoolean());
 
     List<Long> userIds = new ArrayList<>();
     userIds.add(dbUserWithEmail.getUserId());
     userIds.add(dbUserWithoutEmail.getUserId());
-    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds));
+    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds, false));
 
     verify(rdrExportService, times(0)).updateDbRdrExport(any(), anyList());
   }
 
   @Test
+  public void exportUsersBackfill() throws ApiException {
+    rdrExportService.exportUsers(
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), true);
+    assertThat(rdrExportDao.findAll()).isEmpty();
+
+    verify(mockRdrApi).exportResearchers(anyList(), eq(true));
+  }
+
+  @Test
   public void exportWorkspace() throws ApiException {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
-    rdrExportService.exportWorkspaces(ImmutableList.of(1L), NO_BACKFILL);
+    rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).saveAll(anyList());
+    assertThat(rdrExportDao.findAll()).hasSize(1);
 
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), NO_BACKFILL);
   }
@@ -219,25 +235,26 @@ public class RdrExportServiceImplTest {
   @Test
   public void exportWorkspaceBackfill() throws ApiException {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
-    rdrExportService.exportWorkspaces(ImmutableList.of(1L), true);
+    rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), true);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    verify(rdrExportDao, never()).saveAll(anyList());
+    assertThat(rdrExportDao.findAll()).isEmpty();
 
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), true);
   }
 
   @Test
   public void exportWorkspaceFocusOnUnderservedPopulation() throws ApiException {
-    workspace.setSpecificPopulationsEnum(ImmutableSet.of(SpecificPopulationEnum.RACE_AA));
-    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(workspace);
+    workspace =
+        workspaceDao.save(
+            workspace.setSpecificPopulationsEnum(ImmutableSet.of(SpecificPopulationEnum.RACE_AA)));
 
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
 
-    rdrExportService.exportWorkspaces(ImmutableList.of(1L), NO_BACKFILL);
+    rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).saveAll(anyList());
+    assertThat(rdrExportDao.findAll()).hasSize(1);
 
     rdrWorkspace
         .getWorkspaceDemographic()
@@ -250,14 +267,18 @@ public class RdrExportServiceImplTest {
   public void exportWorkspaceCreatorInformation() throws ApiException {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(workspace);
 
-    rdrExportService.exportWorkspaces(ImmutableList.of(1L), NO_BACKFILL);
+    rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), NO_BACKFILL);
 
     rdrWorkspace = toDefaultRdrWorkspace(creatorWorkspace);
 
-    rdrExportService.exportWorkspaces(ImmutableList.of(3L), NO_BACKFILL);
+    rdrExportService.exportWorkspaces(
+        ImmutableList.of(creatorWorkspace.getWorkspaceId()), NO_BACKFILL);
     rdrWorkspace.setCreator(
-        new RdrWorkspaceCreator().userId(2l).familyName("email").givenName("icannothas"));
+        new RdrWorkspaceCreator()
+            .userId(dbUserWithoutEmail.getUserId())
+            .familyName("email")
+            .givenName("icannothas"));
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), NO_BACKFILL);
   }
 
@@ -265,14 +286,54 @@ public class RdrExportServiceImplTest {
   public void exportWorkspaceDeletedWorkspace() throws ApiException {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(deletedWorkspace);
 
-    rdrExportService.exportWorkspaces(ImmutableList.of(2L), NO_BACKFILL);
+    rdrExportService.exportWorkspaces(
+        ImmutableList.of(deletedWorkspace.getWorkspaceId()), NO_BACKFILL);
     verify(mockWorkspaceService, never())
         .getFirecloudUserRoles(
             deletedWorkspace.getWorkspaceNamespace(), deletedWorkspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).saveAll(anyList());
+    assertThat(rdrExportDao.findAll()).hasSize(1);
 
     rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.INACTIVE);
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), NO_BACKFILL);
+  }
+
+  @Test
+  public void findUnchangedEntitiesForBackfill_users() {
+    Supplier<List<Long>> findUnchangedUsers =
+        () -> rdrExportService.findUnchangedEntitiesForBackfill(RdrEntity.USER);
+    assertThat(findUnchangedUsers.get()).isEmpty();
+
+    rdrExportService.exportUsers(ImmutableList.of(dbUserWithEmail.getUserId()), NO_BACKFILL);
+    assertThat(findUnchangedUsers.get()).hasSize(1);
+
+    clock.increment(Duration.ofMinutes(5).toMillis());
+    userDao.save(
+        dbUserWithEmail
+            .setAreaOfResearch("sorcery")
+            .setLastModifiedTime(Timestamp.from(clock.instant())));
+    assertThat(rdrExportService.findAllUserIdsToExport()).hasSize(2);
+    assertThat(findUnchangedUsers.get()).isEmpty();
+  }
+
+  @Test
+  public void findUnchangedEntitiesForBackfill_workspaces() {
+    Supplier<List<Long>> findUnchangedWorkspaces =
+        () -> rdrExportService.findUnchangedEntitiesForBackfill(RdrEntity.WORKSPACE);
+    assertThat(findUnchangedWorkspaces.get()).isEmpty();
+
+    rdrExportService.exportWorkspaces(
+        ImmutableList.of(
+            workspace.getWorkspaceId(),
+            deletedWorkspace.getWorkspaceId(),
+            creatorWorkspace.getWorkspaceId()),
+        NO_BACKFILL);
+    assertThat(findUnchangedWorkspaces.get()).hasSize(3);
+
+    clock.increment(Duration.ofMinutes(5).toMillis());
+    workspaceDao.save(
+        workspace.setAdditionalNotes("!!!").setLastModifiedTime(Timestamp.from(clock.instant())));
+    assertThat(rdrExportService.findAllWorkspacesIdsToExport()).hasSize(1);
+    assertThat(findUnchangedWorkspaces.get()).hasSize(2);
   }
 
   private RdrWorkspace toDefaultRdrWorkspace(DbWorkspace dbWorkspace) {

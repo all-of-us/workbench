@@ -1,5 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -62,16 +63,18 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
 
-  // Deprecated env vars: remove once featured workspaces are updated.
-  private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
-  private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
-
   private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
   private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
   private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
+
+  @VisibleForTesting
+  public static final String WGS_CRAM_MANIFEST_PATH_KEY = "WGS_CRAM_MANIFEST_PATH";
+
   private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
   private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY =
       "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
+  private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
+  private static final String MICROARRAY_IDAT_MANIFEST_PATH_KEY = "MICROARRAY_IDAT_MANIFEST_PATH";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
@@ -226,11 +229,20 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   WGS_HAIL_STORAGE_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getWgsHailStoragePath()))
               .put(
+                  WGS_CRAM_MANIFEST_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsCramManifestPath()))
+              .put(
                   MICROARRAY_HAIL_STORAGE_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getMicroarrayHailStoragePath()))
               .put(
                   MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getMicroarrayVcfSingleSampleStoragePath()))
+              .put(
+                  MICROARRAY_VCF_MANIFEST_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getMicroarrayVcfManifestPath()))
+              .put(
+                  MICROARRAY_IDAT_MANIFEST_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getMicroarrayIdatManifestPath()))
               .build();
       vars.putAll(
           partialStoragePaths.entrySet().stream()
@@ -240,21 +252,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                       Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue().get()))));
     }
 
-    // TODO(calbach): Remove these env vars.
-    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
-      vars.put(
-          ALL_SAMPLES_WGS_KEY,
-          joinStoragePaths(
-              cdrVersion.getAccessTier().getDatasetsBucket(),
-              cdrVersion.getAllSamplesWgsDataBucket()));
-    }
-    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
-      vars.put(
-          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
-          joinStoragePaths(
-              cdrVersion.getAccessTier().getDatasetsBucket()
-                  + cdrVersion.getSingleSampleArrayDataBucket()));
-    }
     return vars;
   }
 

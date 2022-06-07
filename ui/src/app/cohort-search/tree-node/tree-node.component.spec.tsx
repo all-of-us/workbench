@@ -65,11 +65,12 @@ describe('TreeNode', () => {
         groupSelections={[]}
         node={treeNodeStub}
         scrollToMatch={() => {}}
-        searchTerms={''}
+        searchTerms=''
         select={() => {}}
         selectedIds={[]}
         source='cohort'
         setAttributes={() => {}}
+        domain={Domain.OBSERVATION}
       />
     );
     expect(wrapper).toBeTruthy();
@@ -81,10 +82,11 @@ describe('TreeNode', () => {
         groupSelections={[]}
         node={surveyCOPETreeNodeStub}
         scrollToMatch={() => {}}
-        searchTerms={''}
+        searchTerms=''
         select={() => {}}
         selectedIds={[]}
         setAttributes={() => {}}
+        domain={Domain.OBSERVATION}
       />
     );
     expect(wrapper).toBeTruthy();

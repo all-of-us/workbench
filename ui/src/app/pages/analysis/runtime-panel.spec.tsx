@@ -4,13 +4,13 @@ import * as fp from 'lodash/fp';
 import { ReactWrapper } from 'enzyme';
 
 import {
+  BillingStatus,
   ProfileApi,
   RuntimeConfigurationType,
   RuntimeStatus,
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { BillingStatus } from 'generated/fetch';
 import {
   Disk,
   DiskApi,
@@ -1584,6 +1584,7 @@ describe('RuntimePanel', () => {
   it('should allow runtime creation when running cost is too high for user provided billing', async () => {
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.OWNER,
       billingAccountName: 'user provided billing',
     });
 

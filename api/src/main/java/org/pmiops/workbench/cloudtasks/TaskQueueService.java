@@ -59,6 +59,10 @@ public class TaskQueueService {
     groupAndPushRdrWorkspaceTasks(workspaceIds, false);
   }
 
+  public void groupAndPushRdrResearcherTasks(List<Long> userIds) {
+    groupAndPushRdrResearcherTasks(userIds, false);
+  }
+
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds, boolean backfill) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     List<List<Long>> groups =
@@ -72,12 +76,16 @@ public class TaskQueueService {
     }
   }
 
-  public void groupAndPushRdrResearcherTasks(List<Long> userIds) {
+  public void groupAndPushRdrResearcherTasks(List<Long> userIds, boolean backfill) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     List<List<Long>> groups =
         CloudTasksUtils.partitionList(userIds, workbenchConfig.rdrExport.exportObjectsPerTask);
+    String path = EXPORT_RESEARCHER_PATH;
+    if (backfill) {
+      path += "?backfill=true";
+    }
     for (List<Long> group : groups) {
-      createAndPushTask(workbenchConfig.rdrExport.queueName, EXPORT_RESEARCHER_PATH, group);
+      createAndPushTask(workbenchConfig.rdrExport.queueName, path, group);
     }
   }
 

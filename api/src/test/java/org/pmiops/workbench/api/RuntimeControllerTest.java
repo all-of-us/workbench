@@ -17,6 +17,7 @@ import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -256,19 +257,22 @@ public class RuntimeControllerTest {
     config.access.enableComplianceTraining = true;
     config.firecloud.gceVmZone = "us-central-1";
 
-    user = new DbUser();
-    user.setUsername(LOGGED_IN_USER_EMAIL);
-    user.setUserId(123L);
+    user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
     createUser(OTHER_USER_EMAIL);
 
-    cdrVersion = new DbCdrVersion();
-    cdrVersion.setName("1");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion.setBigqueryDataset(BIGQUERY_DATASET);
-    cdrVersion.setAccessTier(TestMockFactory.createControlledTierForTests(accessTierDao));
+    cdrVersion =
+        new DbCdrVersion()
+            .setName("1")
+            // set the db name to be empty since test cases currently
+            // run in the workbench schema only.
+            .setCdrDbName("")
+            .setBigqueryDataset(BIGQUERY_DATASET)
+            .setAccessTier(
+                TestMockFactory.createControlledTierForTests(accessTierDao)
+                    .setDatasetsBucket("gs://cdr-bucket"))
+            .setStorageBasePath("v99")
+            .setWgsCramManifestPath("wgs/cram/manifest.csv");
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
@@ -343,12 +347,13 @@ public class RuntimeControllerTest {
             .googleProject(GOOGLE_PROJECT_ID_2)
             .status(LeonardoRuntimeStatus.RUNNING);
 
-    testWorkspace = new DbWorkspace();
-    testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
-    testWorkspace.setGoogleProject(GOOGLE_PROJECT_ID);
-    testWorkspace.setName(WORKSPACE_NAME);
-    testWorkspace.setFirecloudName(WORKSPACE_ID);
-    testWorkspace.setCdrVersion(cdrVersion);
+    testWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace(WORKSPACE_NS)
+            .setGoogleProject(GOOGLE_PROJECT_ID)
+            .setName(WORKSPACE_NAME)
+            .setFirecloudName(WORKSPACE_ID)
+            .setCdrVersion(cdrVersion);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
@@ -1213,6 +1218,32 @@ public class RuntimeControllerTest {
                 .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
+  }
+
+  @Test
+  public void testCreateRuntime_cdrEnvVars() throws ApiException {
+    // namespace == project, for v1 workspaces
+    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NS, WORKSPACE_ID, "test", WorkspaceAccessLevel.WRITER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    JsonObject envVars =
+        new Gson()
+            .toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+            .getAsJsonObject();
+    assertThat(envVars.get(LeonardoNotebooksClient.WORKSPACE_CDR_ENV_KEY).getAsString())
+        .isEqualTo(cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
+    assertThat(envVars.get(LeonardoNotebooksClientImpl.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
+        .isEqualTo("gs://cdr-bucket/v99/wgs/cram/manifest.csv");
   }
 
   @Test
