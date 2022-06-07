@@ -417,7 +417,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
     CohortReview cohortReview;
     List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
