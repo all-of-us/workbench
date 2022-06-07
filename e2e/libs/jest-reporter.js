@@ -4,9 +4,6 @@ const winston = require('winston');
 
 module.exports = class JestReporter {
   constructor(globalConfig, options) {
-    if (globalConfig.verbose === true) {
-      throw Error("Verbose must be false or Console messages won't be available.");
-    }
     this.logDir = options.outputdir || 'logs/jest';
     this.summaryFile = options.filename || 'test-results-summary.json';
   }
@@ -29,6 +26,11 @@ module.exports = class JestReporter {
 
       // Read jest console messages and save to a log file.
       // Get all console logs.
+      if (!testResult.console || testResult.console.length === 0 && globalConfig.verbose) {
+        const message = 'testResult.console is empty. Could be a bug in Jest. Try verbose=false.'
+        console.warn(message)
+        logger.warn(message)
+      }
       if (testResult.console) {
         testResult.console.forEach((log) => {
           logger.info(log.message);

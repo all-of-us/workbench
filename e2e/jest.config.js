@@ -1,5 +1,12 @@
 module.exports = {
-  verbose: false,
+  verbose: (() => {
+    if (process.env.JEST_VERBOSE) {
+      const verbose = process.env.JEST_VERBOSE === 'true' ? true : false
+      console.log('JEST_VERBOSE:', process.env.JEST_VERBOSE, '*'+verbose)
+      return verbose
+    }
+    return false // default
+  })(),
   preset: 'jest-puppeteer',
   testTimeout: 1200000,
   testRunner: 'jest-circus/runner',
