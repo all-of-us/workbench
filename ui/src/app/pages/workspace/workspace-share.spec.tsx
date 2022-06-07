@@ -200,7 +200,7 @@ describe('WorkspaceShare', () => {
     const roleSelectProps = wrapper
       .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
       .first()
-      .props() as object;
+      .props() as { isDisabled: boolean };
     expect(roleSelectProps.isDisabled).toBe(true);
   });
 

@@ -795,7 +795,7 @@ describe('WorkspaceEdit', () => {
     expect(
       intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props
         .children
-    ).toContain(charsRemaining);
+    ).toContain(charsRemaining.toString());
 
     // Warning message will appear onBlur
 

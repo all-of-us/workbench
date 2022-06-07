@@ -3,7 +3,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
 
 import { Button } from 'app/components/buttons';
-import { TermsOfService } from 'app/components/terms-of-service';
+import {
+  LATEST_TOS_VERSION,
+  TermsOfService,
+} from 'app/components/terms-of-service';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
@@ -87,7 +90,7 @@ describe('SignInReact', () => {
 
     // Terms of Service is part of the new-style flow.
     expect(wrapper.exists(TermsOfService)).toBeTruthy();
-    wrapper.find(TermsOfService).props().onComplete();
+    wrapper.find(TermsOfService).props().onComplete(LATEST_TOS_VERSION);
 
     expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
     wrapper

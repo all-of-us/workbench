@@ -8,6 +8,7 @@ import { mockNavigate } from 'setupTests';
 
 import {
   ErrorCode,
+  Runtime,
   RuntimeApi,
   RuntimeStatus,
   WorkspaceAccessLevel,

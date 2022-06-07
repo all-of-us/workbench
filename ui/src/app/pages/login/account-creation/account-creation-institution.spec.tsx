@@ -19,7 +19,7 @@ import { defaultInstitutions } from 'testing/stubs/institution-api-stub';
 
 import {
   AccountCreationInstitution,
-  Props,
+  AccountCreationInstitutionProps,
 } from './account-creation-institution';
 
 import SpyInstance = jest.SpyInstance;
@@ -28,7 +28,7 @@ let mockGetPublicInstitutionDetails: SpyInstance;
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
-let props: Props;
+let props: AccountCreationInstitutionProps;
 function component(): ReactWrapper {
   return mount(<AccountCreationInstitution {...props} />);
 }

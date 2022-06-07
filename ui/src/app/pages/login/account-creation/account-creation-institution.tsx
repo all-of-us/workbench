@@ -78,7 +78,7 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   }
 };
 
-interface Props {
+export interface AccountCreationInstitutionProps {
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
@@ -93,10 +93,13 @@ interface State {
   checkEmailError: boolean;
 }
 
-export class AccountCreationInstitution extends React.Component<Props, State> {
+export class AccountCreationInstitution extends React.Component<
+  AccountCreationInstitutionProps,
+  State
+> {
   private aborter: AbortController;
 
-  constructor(props: Props) {
+  constructor(props: AccountCreationInstitutionProps) {
     super(props);
     this.state = {
       profile: props.profile,
