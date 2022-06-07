@@ -3096,6 +3096,32 @@ paths:
           description: A collection of participants
           schema:
             "$ref": "#/definitions/CohortReviewWithCountResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cohortReviewId}/participants":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortId"
+      - "$ref": "#/parameters/cohortReviewId"
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: 'Returns a collection of participants for the specified cohortId.
+          This endpoint does pagination based on page, limit, order and column.'
+      operationId: getParticipantCohortStatuses
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            "$ref": "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of participants
+          schema:
+            "$ref": "#/definitions/CohortReviewWithCountResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
