@@ -147,24 +147,27 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.AIANOTHER,
                   showInput: true,
                   otherText: survey.ethnicityAiAnOtherText,
-                  onChange: (value) => {
+                  onChangeOtherText: (value) => {
                     handleInputChange('ethnicityAiAnOtherText', value);
                   },
                 },
               ],
               showSubOptions: showAiAnOptions,
-              onClick: () => setShowAiAnOptions(!showAiAnOptions),
+              onChange: (value) => setShowAiAnOptions(value),
+              onExpand: () => {
+                setShowAiAnOptions(!showAiAnOptions);
+              },
             },
 
             {
               label: 'Asian',
               value: EthnicCategory.ASIAN,
               subOptions: [
-                { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
                 { label: 'Cambodian', value: EthnicCategory.ASIANCAMBODIAN },
                 { label: 'Chinese', value: EthnicCategory.ASIANCHINESE },
                 { label: 'Filipino', value: EthnicCategory.ASIANFILIPINO },
                 { label: 'Hmong', value: EthnicCategory.ASIANHMONG },
+                { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
                 { label: 'Japanese', value: EthnicCategory.ASIANJAPANESE },
                 { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
                 { label: 'Lao', value: EthnicCategory.ASIANLAO },
@@ -175,12 +178,17 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.ASIANOTHER,
                   showInput: true,
                   otherText: survey.ethnicityAsianOtherText,
-                  onChange: (value) =>
+                  onChangeOtherText: (value) =>
                     handleInputChange('ethnicityAsianOtherText', value),
                 },
               ],
               showSubOptions: showAsianOptions,
-              onClick: () => setShowAsianOptions(!showAsianOptions),
+              onChange: (value) => {
+                setShowAsianOptions(value);
+              },
+              onExpand: () => {
+                setShowAsianOptions(!showAsianOptions);
+              },
             },
             {
               label: 'Black, African American, or of African descent',
@@ -207,7 +215,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: EthnicCategory.OTHER,
               showInput: true,
               otherText: survey.ethnicityOtherText,
-              onChange: (value) =>
+              onChangeOtherText: (value) =>
                 handleInputChange('ethnicityOtherText', value),
             },
             {
@@ -257,7 +265,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: GenderIdentityV2.OTHER,
               showInput: true,
               otherText: survey.genderOtherText,
-              onChange: (value) => handleInputChange('genderOtherText', value),
+              onChangeOtherText: (value) =>
+                handleInputChange('genderOtherText', value),
             },
             {
               label: 'Prefer not to answer',
@@ -307,7 +316,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: SexualOrientationV2.OTHER,
               showInput: true,
               otherText: survey.orientationOtherText,
-              onChange: (value) =>
+              onChangeOtherText: (value) =>
                 handleInputChange('orientationOtherText', value),
             },
             {
@@ -331,7 +340,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: SexAtBirthV2.OTHER,
               showInput: true,
               otherText: survey.sexAtBirthOtherText,
-              onChange: (value) =>
+              onChangeOtherText: (value) =>
                 handleInputChange('sexAtBirthOtherText', value),
             },
             {

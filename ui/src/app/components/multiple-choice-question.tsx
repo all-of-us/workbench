@@ -64,7 +64,9 @@ interface MultipleChoiceOption {
   otherText?: string;
   showInput?: boolean;
   onChange?: (any) => void;
+  onChangeOtherText?: (any) => void;
   onClick?: (any) => void;
+  onExpand?: () => void;
   disabled?: boolean;
   disabledText?: string;
   subOptions?: MultipleChoiceOption[];
@@ -106,7 +108,7 @@ export const MultipleChoiceQuestion = (props: {
                   ? 'rotate(180deg)'
                   : 'rotate(0deg)',
               }}
-              onClick={option.onClick}
+              onClick={option.onExpand}
             />
           )}
           <Option
@@ -119,7 +121,10 @@ export const MultipleChoiceQuestion = (props: {
                 ? selected.includes(option.value)
                 : selected === option.value
             }
-            onChange={(e) => handleChange(e, option.value)}
+            onChange={(e) => {
+              handleChange(e, option.value);
+              option.onChange && option.onChange(e);
+            }}
             multiple={multiple}
           />
         </FlexRow>
@@ -136,7 +141,10 @@ export const MultipleChoiceQuestion = (props: {
               }}
               type='text'
               value={option.otherText}
-              onChange={(e) => option.onChange(e.target.value)}
+              onChange={(e) =>
+                option.onChangeOtherText &&
+                option.onChangeOtherText(e.target.value)
+              }
             />
           )}
         {option.showSubOptions && option.subOptions && (
