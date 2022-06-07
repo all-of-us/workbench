@@ -13,6 +13,7 @@
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-stable",
+    "workspaceBucketLocation": "us-central1",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
