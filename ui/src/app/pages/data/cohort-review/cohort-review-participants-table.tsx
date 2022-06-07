@@ -34,7 +34,7 @@ import { triggerEvent } from 'app/utils/analytics';
 import { currentCohortReviewStore, useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
-const { useEffect, useState } = React;
+const { useEffect, useRef, useState } = React;
 
 const styles = reactStyles({
   backBtn: {
@@ -218,6 +218,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     sortOrder: 1,
   });
   const [totalCount, setTotalCount] = useState(null);
+  const initialRender = useRef(true);
 
   const mapFilters = () => {
     const filterArr = Object.keys(filters).reduce((acc, _type) => {
@@ -361,6 +362,14 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     );
   };
 
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+    } else {
+      getTableData();
+    }
+  }, [sortState]);
+
   const onPage = (event: any) => {
     if (event.page !== pageState.page) {
       setLoading(true);
@@ -394,7 +403,6 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         sortOrder: 1,
       });
     }
-    setTimeout(() => getTableData());
   };
 
   const filterInput = fp.debounce(300, () => {
@@ -426,16 +434,19 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       } else {
         updatedFilters[column].splice(updatedFilters[column].indexOf(value), 1);
         if (updatedFilters[column].includes('Select All')) {
-          updatedFilters[column].splice(updatedFilters[column].indexOf('Select All'), 1);
+          updatedFilters[column].splice(
+            updatedFilters[column].indexOf('Select All'),
+            1
+          );
         }
       }
     }
-    setLoading(true);
-    setApiError(false);
     setFilters(updatedFilters);
     if (updatedFilters[column].length === 0) {
       setData([]);
     } else {
+      setLoading(true);
+      setApiError(false);
       getTableData();
     }
   };

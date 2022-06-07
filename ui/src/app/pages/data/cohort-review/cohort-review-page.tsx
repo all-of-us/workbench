@@ -5,6 +5,7 @@ import * as fp from 'lodash/fp';
 const { useEffect, useState } = React;
 
 import {
+  CohortReview,
   CriteriaType,
   Domain,
   FilterColumns as Columns,
@@ -104,6 +105,13 @@ const reverseColumnEnum = {
   status: Columns.STATUS,
 };
 const rows = 25;
+const defaultReviewQuery = {
+  page: 0,
+  pageSize: rows,
+  sortColumn: reverseColumnEnum.participantId,
+  sortOrder: SortOrder.Asc,
+  filters: { items: [] },
+} as Request;
 
 export const CohortReviewPage = fp.flow(
   withCurrentWorkspace(),
@@ -120,20 +128,14 @@ export const CohortReviewPage = fp.flow(
 
   const getParticipantData = (newReview?: boolean) => {
     showSpinner();
-    const query = {
-      page: 0,
-      pageSize: rows,
-      sortColumn: reverseColumnEnum.participantId,
-      sortOrder: SortOrder.Asc,
-      filters: { items: [] },
-    } as Request;
     cohortReviewApi()
-      .getParticipantCohortStatusesOld(ns, wsid, +cid, query)
+      .getParticipantCohortStatusesOld(ns, wsid, +cid, defaultReviewQuery)
       .then(({ cohortReview }) => {
-        setActiveReview(cohortReview);
         if (newReview) {
           currentCohortReviewStore.next(cohortReview);
           setShowCreateModal(true);
+        } else {
+          setActiveReview(cohortReview);
         }
         hideSpinner();
       });
@@ -179,6 +181,57 @@ export const CohortReviewPage = fp.flow(
       getVisitsFilterOptions();
     }
   }, []);
+
+  const onReviewCreate = (review: CohortReview) => {
+    cohortReviewApi()
+      .getParticipantCohortStatusesOld(
+        ns,
+        wsid,
+        +review.cohortId,
+        defaultReviewQuery
+      )
+      .then(({ cohortReview }) => {
+        setCohortReviews((prevCohortReviews) => [
+          ...prevCohortReviews,
+          cohortReview,
+        ]);
+        // setCohortReviews(prevCohortReviews => {
+        //   const updateIndex = prevCohortReviews.findIndex(cr => cr.cohortReviewId === cohortReview.cohortReviewId);
+        //   if (updateIndex > -1) {
+        //     prevCohortReviews[updateIndex] = cohortReview;
+        //   }
+        //   return prevCohortReviews;
+        // });
+        setActiveReview(cohortReview);
+        setShowCreateModal(false);
+      });
+  };
+
+  const onReviewSelect = (review: CohortReview) => {
+    if (review.participantCohortStatuses?.length) {
+      setActiveReview(review);
+    } else {
+      cohortReviewApi()
+        .getParticipantCohortStatusesOld(
+          ns,
+          wsid,
+          +review.cohortId,
+          defaultReviewQuery
+        )
+        .then(({ cohortReview }) => {
+          setCohortReviews((prevCohortReviews) => {
+            const updateIndex = prevCohortReviews.findIndex(
+              (cr) => cr.cohortReviewId === cohortReview.cohortReviewId
+            );
+            if (updateIndex > -1) {
+              prevCohortReviews[updateIndex] = cohortReview;
+            }
+            return prevCohortReviews;
+          });
+          setActiveReview(cohortReview);
+        });
+    }
+  };
 
   return (
     <FadeBox style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}>
@@ -245,9 +298,7 @@ export const CohortReviewPage = fp.flow(
                         cohortReview.cohortReviewId !==
                         activeReview.cohortReviewId
                       ) {
-                        console.log(cohortReview);
-                        setActiveReview(cohortReview);
-                        getParticipantData();
+                        onReviewSelect(cohortReview);
                       }
                     }}
                     selected={
