@@ -87,9 +87,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
 
   useEffect(() => {
     setIsAian(
-      survey.ethnicCategories.filter((s) =>
-        s.includes('American Indian or Alaska Native')
-      ).length > 0
+      survey.ethnicCategories.filter((s) => s.includes(EthnicCategory.AIAN))
+        .length > 0
     );
   }, [survey.ethnicCategories]);
 
