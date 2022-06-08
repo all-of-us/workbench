@@ -16,6 +16,11 @@ module.exports = {
             environmentFilePath
         )
     );
+
+    // removes the last minimizer CssMinimizerPlugin() which has a bug
+    // see https://github.com/all-of-us/workbench/pull/6753#issuecomment-1150407055
+    config.optimization.minimizer = config.optimization.minimizer.filter(m => m.options.minimizer.options.parse?.ecma);
+
     return config;
   },
   jest: function(config) {
