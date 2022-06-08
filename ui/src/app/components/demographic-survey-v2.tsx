@@ -130,6 +130,16 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
       <Header>Researcher Workbench</Header>
+      <div>
+        The All of Us Research Program is dedicated to cultivating a diverse
+        research community and building an inclusive platform. Your answers to
+        these questions will help us learn more about who is using the platform.
+        Your privacy is important to us. Your individual responses will not be
+        displayed on your researcher profile and will only be accessible to a
+        limited number of authorized All of Us personnel. All of Us may
+        externally report de-identified, aggregate data on the demographics of
+        individuals using the Researcher Workbench.
+      </div>
       <FlexColumn>
         <SmallHeader>Races and Ethnicities</SmallHeader>
         <MultipleChoiceQuestion
@@ -175,7 +185,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
                 { label: 'Lao', value: EthnicCategory.ASIANLAO },
                 { label: 'Pakistani', value: EthnicCategory.ASIANPAKISTANI },
-                { label: 'Vietnamese', value: EthnicCategory.ASIANVIETNAMESE },
+                {
+                  label: 'Vietnamese',
+                  value: EthnicCategory.ASIANVIETNAMESE,
+                },
                 {
                   label: 'Asian Other',
                   value: EthnicCategory.ASIANOTHER,
