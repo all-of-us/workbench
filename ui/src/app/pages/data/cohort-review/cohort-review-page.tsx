@@ -124,6 +124,7 @@ export const CohortReviewPage = fp.flow(
   const [activeReview, setActiveReview] = useState(undefined);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [participantCount, setParticipantCount] = useState(undefined);
   const readOnly = workspace.accessLevel === WorkspaceAccessLevel.READER;
 
   const getParticipantData = (cohortReviewId: number) => {
@@ -162,12 +163,15 @@ export const CohortReviewPage = fp.flow(
   };
 
   const loadCohortAndReviews = async () => {
-    const [cohortResponse, cohortReviewResponse] = await Promise.all([
-      cohortsApi().getCohort(ns, wsid, +cid),
-      cohortReviewApi().getCohortReviewsByCohortId(ns, wsid, +cid),
-    ]);
+    const [cohortResponse, cohortReviewResponse, participantCountResponse] =
+      await Promise.all([
+        cohortsApi().getCohort(ns, wsid, +cid),
+        cohortReviewApi().getCohortReviewsByCohortId(ns, wsid, +cid),
+        cohortReviewApi().cohortParticipantCount(ns, wsid, +cid),
+      ]);
     setCohort(cohortResponse);
     setCohortReviews(cohortReviewResponse.items);
+    setParticipantCount(participantCountResponse);
     if (cohortReviewResponse.items.length > 0) {
       setActiveReview(cohortReviewResponse.items[0]);
       getParticipantData(cohortReviewResponse.items[0].cohortReviewId);
