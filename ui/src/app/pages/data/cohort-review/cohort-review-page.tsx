@@ -126,19 +126,39 @@ export const CohortReviewPage = fp.flow(
   const [showCreateModal, setShowCreateModal] = useState(false);
   const readOnly = workspace.accessLevel === WorkspaceAccessLevel.READER;
 
-  const getParticipantData = (newReview?: boolean) => {
+  const getParticipantData = (cohortReviewId: number) => {
     showSpinner();
-    cohortReviewApi()
-      .getParticipantCohortStatusesOld(ns, wsid, +cid, defaultReviewQuery)
-      .then(({ cohortReview }) => {
-        if (newReview) {
+    if (cohortReviewId) {
+      cohortReviewApi()
+        .getParticipantCohortStatuses(
+          ns,
+          wsid,
+          +cid,
+          cohortReviewId,
+          defaultReviewQuery
+        )
+        .then(({ cohortReview }) => {
+          setCohortReviews((prevCohortReviews) => {
+            const updateIndex = prevCohortReviews.findIndex(
+              (cr) => cr.cohortReviewId === cohortReview.cohortReviewId
+            );
+            if (updateIndex > -1) {
+              prevCohortReviews[updateIndex] = cohortReview;
+            }
+            return prevCohortReviews;
+          });
+          setActiveReview(cohortReview);
+          hideSpinner();
+        });
+    } else {
+      cohortReviewApi()
+        .getParticipantCohortStatusesOld(ns, wsid, +cid, defaultReviewQuery)
+        .then(({ cohortReview }) => {
           currentCohortReviewStore.next(cohortReview);
           setShowCreateModal(true);
-        } else {
-          setActiveReview(cohortReview);
-        }
-        hideSpinner();
-      });
+          hideSpinner();
+        });
+    }
   };
 
   const loadCohortAndReviews = async () => {
@@ -150,7 +170,7 @@ export const CohortReviewPage = fp.flow(
     setCohortReviews(cohortReviewResponse.items);
     if (cohortReviewResponse.items.length > 0) {
       setActiveReview(cohortReviewResponse.items[0]);
-      getParticipantData();
+      getParticipantData(cohortReviewResponse.items[0].cohortReviewId);
     } else {
       hideSpinner();
     }
@@ -183,28 +203,9 @@ export const CohortReviewPage = fp.flow(
   }, []);
 
   const onReviewCreate = (review: CohortReview) => {
-    cohortReviewApi()
-      .getParticipantCohortStatusesOld(
-        ns,
-        wsid,
-        +review.cohortId,
-        defaultReviewQuery
-      )
-      .then(({ cohortReview }) => {
-        setCohortReviews((prevCohortReviews) => [
-          ...prevCohortReviews,
-          cohortReview,
-        ]);
-        // setCohortReviews(prevCohortReviews => {
-        //   const updateIndex = prevCohortReviews.findIndex(cr => cr.cohortReviewId === cohortReview.cohortReviewId);
-        //   if (updateIndex > -1) {
-        //     prevCohortReviews[updateIndex] = cohortReview;
-        //   }
-        //   return prevCohortReviews;
-        // });
-        setActiveReview(cohortReview);
-        setShowCreateModal(false);
-      });
+    setCohortReviews((prevCohortReviews) => [...prevCohortReviews, review]);
+    setActiveReview(review);
+    setShowCreateModal(false);
   };
 
   const onReviewSelect = (review: CohortReview) => {
@@ -212,10 +213,11 @@ export const CohortReviewPage = fp.flow(
       setActiveReview(review);
     } else {
       cohortReviewApi()
-        .getParticipantCohortStatusesOld(
+        .getParticipantCohortStatuses(
           ns,
           wsid,
-          +review.cohortId,
+          review.cohortId,
+          review.cohortReviewId,
           defaultReviewQuery
         )
         .then(({ cohortReview }) => {
@@ -282,7 +284,7 @@ export const CohortReviewPage = fp.flow(
                 <Clickable
                   style={{ display: 'inline-block', marginLeft: '0.5rem' }}
                   disabled={readOnly}
-                  onClick={() => getParticipantData(true)}
+                  onClick={() => getParticipantData(null)}
                 >
                   <ClrIcon shape='plus-circle' class='is-solid' size={18} />
                 </Clickable>
@@ -295,14 +297,14 @@ export const CohortReviewPage = fp.flow(
                     onUpdate={() => loadCohortAndReviews()}
                     onSelect={() => {
                       if (
-                        cohortReview.cohortReviewId !==
-                        activeReview.cohortReviewId
+                        activeReview?.cohortReviewId !==
+                        cohortReview.cohortReviewId
                       ) {
                         onReviewSelect(cohortReview);
                       }
                     }}
                     selected={
-                      activeReview.cohortReviewId ===
+                      activeReview?.cohortReviewId ===
                       cohortReview.cohortReviewId
                     }
                   />
