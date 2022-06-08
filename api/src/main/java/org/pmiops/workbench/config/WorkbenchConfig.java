@@ -139,6 +139,9 @@ public class WorkbenchConfig {
     // information such as runtime VM server logs.
     public String workspaceLogsProject;
 
+    // The workspace GCS bucket location
+    public String workspaceBucketLocation;
+
     public RuntimeImages runtimeImages;
 
     // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c

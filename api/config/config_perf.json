@@ -13,6 +13,7 @@
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
+    "workspaceBucketLocation": "us-central1",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
