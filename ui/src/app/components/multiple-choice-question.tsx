@@ -92,18 +92,25 @@ export const MultipleChoiceQuestion = (props: {
     style,
   } = props;
 
-  const handleQuestionChange = (e, label) => {
+  // TODO: Change variable names and/or split into two functions
+  const handleQuestionChange = (e, label, parentValue?: any) => {
     if (multiple) {
+      console.log('What is e? ', e);
       const result = e
         ? [...(selected as string[]), label]
         : (selected as string[]).filter((r) => r !== label);
+
+      // Add parent if e true
+      if (e && parentValue && result.indexOf(parentValue) === -1) {
+        result.push(parentValue);
+      }
       onChange(result);
     } else {
       onChange(e.target.value);
     }
   };
 
-  const renderOption = (option: MultipleChoiceOption) => {
+  const renderOption = (option: MultipleChoiceOption, parentValue?: any) => {
     return (
       <FlexColumn style={option.subOptions && { width: '100%' }}>
         <FlexRow style={{ alignItems: 'center' }}>
@@ -131,8 +138,8 @@ export const MultipleChoiceQuestion = (props: {
                 : selected === option.value
             }
             onChange={(e) => {
-              handleQuestionChange(e, option.value);
-              option.onChange && option.onChange(e);
+              handleQuestionChange(e, option.value, parentValue);
+              option.onChange?.(e);
             }}
             multiple={multiple}
           />
@@ -150,10 +157,7 @@ export const MultipleChoiceQuestion = (props: {
               }}
               type='text'
               value={option.otherText}
-              onChange={(e) =>
-                option.onChangeOtherText &&
-                option.onChangeOtherText(e.target.value)
-              }
+              onChange={(e) => option.onChangeOtherText?.(e.target.value)}
             />
           )}
         {option.showSubOptions &&
@@ -167,7 +171,9 @@ export const MultipleChoiceQuestion = (props: {
                 marginLeft: '2.0rem',
               }}
             >
-              {option.subOptions.map(renderOption)}
+              {option.subOptions.map((subOption) =>
+                renderOption(subOption, option.value)
+              )}
             </FlexRow>
           ) : (
             <FlexColumn
@@ -177,7 +183,9 @@ export const MultipleChoiceQuestion = (props: {
                 marginLeft: '2.0rem',
               }}
             >
-              {option.subOptions.map(renderOption)}
+              {option.subOptions.map((subOption) =>
+                renderOption(subOption, option.value)
+              )}
             </FlexColumn>
           ))}
       </FlexColumn>
