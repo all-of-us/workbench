@@ -93,6 +93,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.clock = clock;
   }
 
+  @Override
+  public ResponseEntity<Long> cohortParticipantCount(
+      String workspaceNamespace, String workspaceId, Long cohortId) {
+    // this validates that the user is in the proper workspace
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
+    return ResponseEntity.ok(cohortReviewService.participationCount(dbCohort));
+  }
+
   /**
    * Create a cohort review per the specified workspaceId, cohortId and size. If participant cohort
    * status data exists for a review or no cohort review exists for cohortReviewId then throw a

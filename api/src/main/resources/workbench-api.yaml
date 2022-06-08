@@ -1084,8 +1084,8 @@ paths:
       - workspaces
       consumes:
       - application/json
-      description: 'DEPRECATED in favor of shareWorkspacePatch.  
-        Shares/unshares a workspace with the given users and permissions.  Use the 
+      description: 'DEPRECATED in favor of shareWorkspacePatch.
+        Shares/unshares a workspace with the given users and permissions.  Use the
         WorkspaceAccessLevel enum value "NO ACCESS" to unshare. Note
         that the entire ACL must be provided to this method (including all existing
         users and roles), not just the additional roles desired. Clients should first
@@ -1108,8 +1108,8 @@ paths:
         - workspaces
       consumes:
         - application/json
-      description: 'Shares/unshares a workspace with the given users and permissions. Use the 
-        WorkspaceAccessLevel enum value "NO ACCESS" to unshare.  All existing users and roles 
+      description: 'Shares/unshares a workspace with the given users and permissions. Use the
+        WorkspaceAccessLevel enum value "NO ACCESS" to unshare.  All existing users and roles
         who are not specified in this request are not affected.'
       operationId: shareWorkspacePatch
       parameters:
@@ -3071,6 +3071,24 @@ paths:
           description: A cohortReviewId and cohort count
           schema:
             "$ref": "#/definitions/CohortReview"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/cohort-count":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - "$ref": "#/parameters/cohortId"
+    post:
+      tags:
+      - cohortReview
+      consumes:
+      - application/json
+      description: 'This endpoint will return the cohort total participant count.'
+      operationId: cohortParticipantCount
+      responses:
+        200:
+          description: A cohort total participant count
+          schema:
+            type: integer
+            format: int64
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/participants":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
