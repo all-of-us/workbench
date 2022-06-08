@@ -92,7 +92,7 @@ export const MultipleChoiceQuestion = (props: {
     style,
   } = props;
 
-  const handleChange = (e, label) => {
+  const handleQuestionChange = (e, label) => {
     if (multiple) {
       const result = e
         ? [...(selected as string[]), label]
@@ -131,7 +131,7 @@ export const MultipleChoiceQuestion = (props: {
                 : selected === option.value
             }
             onChange={(e) => {
-              handleChange(e, option.value);
+              handleQuestionChange(e, option.value);
               option.onChange && option.onChange(e);
             }}
             multiple={multiple}
