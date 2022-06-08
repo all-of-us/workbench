@@ -144,7 +144,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
       <FlexColumn>
         <SmallHeader>Races and Ethnicities</SmallHeader>
         <MultipleChoiceQuestion
-          question='Which races and/or ethnicities do you identify with? Please select all that apply.'
+          question='1. Which races and/or ethnicities do you identify with? Please select all that apply.'
           options={[
             {
               label: 'American Indian or Alaska Native',
@@ -247,7 +247,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         />
         <SmallHeader>Questions about gender</SmallHeader>
         <MultipleChoiceQuestion
-          question='What terms best express how you describe your current gender identity?'
+          question='2. What terms best express how you describe your current gender identity?'
           options={[
             { label: 'Gender Queer', value: GenderIdentityV2.GENDERQUEER },
             { label: 'Man', value: GenderIdentityV2.MAN },
@@ -296,7 +296,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           style={{ marginBottom: '1rem' }}
         />
         <MultipleChoiceQuestion
-          question='What terms best express how you describe your current sexual orientation?'
+          question='3. What terms best express how you describe your current sexual orientation?'
           options={[
             { label: 'Asexual', value: SexualOrientationV2.ASEXUAL },
             { label: 'Bisexual', value: SexualOrientationV2.BISEXUAL },
@@ -347,7 +347,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           style={{ marginBottom: '1rem' }}
         />
         <MultipleChoiceQuestion
-          question='What was the sex assigned to you at birth, such as on your original birth certificate?'
+          question='4. What was the sex assigned to you at birth, such as on your original birth certificate?'
           options={[
             { label: 'Female', value: SexAtBirthV2.FEMALE },
             { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
@@ -372,20 +372,20 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           Questions about disability status
         </SmallHeader>
         <YesNoOptionalQuestion
-          question='Are you deaf or do you have serious difficulty hearing?'
+          question='5. Are you deaf or do you have serious difficulty hearing?'
           selected={survey.disabilityHearing}
           onChange={(value) => handleInputChange('disabilityHearing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
-          question='Are you blind or do you have serious difficulty seeing, even when
+          question='6. Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
           selected={survey.disabilitySeeing}
           onChange={(value) => handleInputChange('disabilitySeeing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
-          question='Because of a physical, cognitive, or emotional condition, do you
+          question='7. Because of a physical, cognitive, or emotional condition, do you
             have serious difficulty concentrating, remembering, or making
             decisions?'
           selected={survey.disabilityConcentrating}
@@ -395,19 +395,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
-          question='Do you have serious difficulty walking or climbing stairs?'
+          question='8. Do you have serious difficulty walking or climbing stairs?'
           selected={survey.disabilityWalking}
           onChange={(value) => handleInputChange('disabilityWalking', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
-          question='Do you have difficulty dressing or bathing?'
+          question='9. Do you have difficulty dressing or bathing?'
           selected={survey.disabilityDressing}
           onChange={(value) => handleInputChange('disabilityDressing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
-          question="Because of a physical, mental, or emotional condition, do you have
+          question="10. Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
           selected={survey.disabilityErrands}
@@ -416,10 +416,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         />
         <FlexRow style={{ alignItems: 'center', gap: '1.75rem' }}>
           <div style={{ ...styles.question, flex: 1 }}>
-            Do you have a physical, cognitive, and/or emotional condition that
-            substantially inhibits one or more life activities not specified
-            through the above questions, and want to share more? Please
-            describe.
+            11. Do you have a physical, cognitive, and/or emotional condition
+            that substantially inhibits one or more life activities not
+            specified through the above questions, and want to share more?
+            Please describe.
           </div>
           <TextInput
             onChange={(value) =>
@@ -433,7 +433,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           Other Questions
         </SmallHeader>
 
-        <div style={styles.question}>Year of birth</div>
+        <div style={styles.question}>12. Year of birth</div>
 
         <FlexRow style={{ alignItems: 'center' }}>
           <NumberInput
@@ -454,6 +454,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           <label
             htmlFor='show-again-checkbox'
             style={{
+              ...styles.answer,
               marginLeft: '8px',
               marginRight: 'auto',
             }}
@@ -462,7 +463,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           </label>
         </FlexRow>
         <MultipleChoiceQuestion
-          question={'Highest Level of Education'}
+          question={'13. Highest Level of Education'}
           options={[
             { label: 'No Education', value: EducationV2.NOEDUCATION },
             { label: 'Grades 1-12', value: EducationV2.GRADES112 },
@@ -481,7 +482,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         />
 
         <YesNoOptionalQuestion
-          question='Are you an individual from a disadvantaged background, as defined by NIH Diversity in Extramural Programs?'
+          question='14. Are you an individual from a disadvantaged background, as defined by NIH Diversity in Extramural Programs?'
           selected={survey.disadvantaged}
           onChange={(value) => handleInputChange('disadvantaged', value)}
         />
