@@ -13,15 +13,16 @@ import {
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { Header, SmallHeader } from 'app/components/headers';
+import { SemiBoldHeader } from 'app/components/headers';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
+import { Divider } from './divider';
 import { CheckBox, NumberInput, TextInput } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
@@ -130,8 +131,15 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
 
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
-      <Header>Researcher Workbench</Header>
-      <div style={{ color: colors.primary }}>
+      <div
+        style={{
+          backgroundColor: colorWithWhiteness(colors.accent, 0.75),
+          padding: '1rem',
+          borderRadius: '5px',
+          color: colors.primary,
+          marginTop: '1rem',
+        }}
+      >
         The All of Us Research Program is dedicated to cultivating a diverse
         research community and building an inclusive platform. Your answers to
         these questions will help us learn more about who is using the platform.
@@ -142,7 +150,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         individuals using the Researcher Workbench.
       </div>
       <FlexColumn>
-        <SmallHeader>Races and Ethnicities</SmallHeader>
+        <SemiBoldHeader>Races and Ethnicities</SemiBoldHeader>
+        <Divider style={{ marginTop: '.25rem' }} />
         <MultipleChoiceQuestion
           question='1. Which races and/or ethnicities do you identify with? Please select all that apply.'
           options={[
@@ -245,7 +254,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           onChange={(value) => handleInputChange('ethnicCategories', value)}
           style={{ marginBottom: '1rem' }}
         />
-        <SmallHeader>Questions about gender</SmallHeader>
+        <SemiBoldHeader>Questions about gender</SemiBoldHeader>
+        <Divider style={{ marginTop: '.25rem' }} />
         <MultipleChoiceQuestion
           question='2. What terms best express how you describe your current gender identity?'
           options={[
@@ -368,9 +378,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           selected={survey.sexAtBirth}
           onChange={(value) => handleInputChange('sexAtBirth', value)}
         />
-        <SmallHeader style={{ marginBottom: '0.5rem' }}>
+        <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
           Questions about disability status
-        </SmallHeader>
+        </SemiBoldHeader>
+        <Divider style={{ marginTop: '.25rem' }} />
         <YesNoOptionalQuestion
           question='5. Are you deaf or do you have serious difficulty hearing?'
           selected={survey.disabilityHearing}
@@ -429,10 +440,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             style={{ flex: 1 }}
           />
         </FlexRow>
-        <SmallHeader style={{ marginBottom: '0.5rem' }}>
+        <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
           Other Questions
-        </SmallHeader>
-
+        </SemiBoldHeader>
+        <Divider style={{ marginTop: '.25rem' }} />
         <div style={styles.question}>12. Year of birth</div>
 
         <FlexRow style={{ alignItems: 'center' }}>

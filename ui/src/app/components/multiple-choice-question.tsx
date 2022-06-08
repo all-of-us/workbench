@@ -10,7 +10,7 @@ import { reactStyles, useId } from 'app/utils';
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
-  question: { fontWeight: 'bold', color: colors.primary },
+  question: { fontWeight: 'bold', color: colors.primary, fontSize: '14px' },
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
@@ -124,19 +124,6 @@ export const MultipleChoiceQuestion = (props: {
     return (
       <FlexColumn style={option.subOptions && { width: '100%' }}>
         <FlexRow style={{ alignItems: 'center' }}>
-          {option.subOptions && (
-            <ClrIcon
-              shape='angle'
-              style={{
-                marginRight: '0.5rem',
-                cursor: 'pointer',
-                transform: option.showSubOptions
-                  ? 'rotate(180deg)'
-                  : 'rotate(0deg)',
-              }}
-              onClick={option.onExpand}
-            />
-          )}
           <Option
             disabled={option.disabled}
             disabledText={option.disabledText}
@@ -158,6 +145,19 @@ export const MultipleChoiceQuestion = (props: {
             }}
             multiple={multiple}
           />
+          {option.subOptions && (
+            <ClrIcon
+              shape='angle'
+              style={{
+                marginRight: '0.5rem',
+                cursor: 'pointer',
+                transform: option.showSubOptions
+                  ? 'rotate(180deg)'
+                  : 'rotate(0deg)',
+              }}
+              onClick={option.onExpand}
+            />
+          )}
         </FlexRow>
 
         {option.showInput &&
