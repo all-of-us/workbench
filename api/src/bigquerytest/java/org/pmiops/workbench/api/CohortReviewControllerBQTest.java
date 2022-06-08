@@ -354,6 +354,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void cohortParticipantCount() {
+    assertThat(
+            controller
+                .cohortParticipantCount(NAMESPACE, NAME, reviewWithEHRData.getCohortId())
+                .getBody())
+        .isEqualTo(1);
+  }
+
+  @Test
   public void getCohortReviewsInWorkspace() {
     CohortReview expectedReview =
         new CohortReview()
