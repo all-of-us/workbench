@@ -17,6 +17,7 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import { profileApi } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
@@ -28,8 +29,8 @@ import { YesNoOptionalQuestion } from './yes-no-optional-question';
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
 const styles = reactStyles({
-  question: { fontWeight: 'bold' },
-  answer: { margin: '0.0rem 0.25rem' },
+  question: { fontWeight: 'bold', color: colors.primary },
+  answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
 const validateDemographicSurvey = (demographicSurvey) => {
@@ -130,7 +131,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   return (
     <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
       <Header>Researcher Workbench</Header>
-      <div>
+      <div style={{ color: colors.primary }}>
         The All of Us Research Program is dedicated to cultivating a diverse
         research community and building an inclusive platform. Your answers to
         these questions will help us learn more about who is using the platform.

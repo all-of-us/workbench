@@ -4,13 +4,14 @@ import { CSSProperties } from 'react';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CheckBox, RadioButton } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
+import colors from 'app/styles/colors';
 import { reactStyles, useId } from 'app/utils';
 
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
-  question: { fontWeight: 'bold' },
-  answer: { margin: '0.0rem 0.25rem' },
+  question: { fontWeight: 'bold', color: colors.primary },
+  answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
 const Option = (props: {
@@ -99,7 +100,6 @@ export const MultipleChoiceQuestion = (props: {
     parentValue?: any,
     childValues?: any[]
   ) => {
-    console.log('What are your children values? ', childValues);
     if (multiple) {
       console.log('What is e? ', e);
       let result = e
