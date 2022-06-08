@@ -1,5 +1,5 @@
 import ProfilePage from 'app/page/profile-page';
-import { signInWithAccessToken, signOut } from 'utils/test-utils';
+import { signInWithAccessToken } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { withPageTest, withSignIn } from 'libs/page-manager';
 import { config } from 'resources/workbench-config';
@@ -18,8 +18,6 @@ describe('login tests', () => {
       const profilePage = new ProfilePage(page);
       await profilePage.waitForLoad();
       expect(await profilePage.isLoaded()).toBe(true);
-
-      await signOut(page);
     });
   });
 
