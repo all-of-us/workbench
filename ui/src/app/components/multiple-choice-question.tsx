@@ -192,7 +192,7 @@ export const MultipleChoiceQuestion = (props: {
     );
   };
 
-  const optionComponents = options.map(renderOption);
+  const optionComponents = options.map((option) => renderOption(option, null));
 
   return (
     <div style={{ ...style }}>
