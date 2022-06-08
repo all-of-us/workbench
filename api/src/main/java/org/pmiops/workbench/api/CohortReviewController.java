@@ -99,7 +99,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     // this validates that the user is in the proper workspace
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
     return ResponseEntity.ok(cohortReviewService.participationCount(dbCohort));
