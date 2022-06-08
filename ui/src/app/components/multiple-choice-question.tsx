@@ -80,8 +80,17 @@ export const MultipleChoiceQuestion = (props: {
   onChange: (any) => void;
   style?: CSSProperties;
   multiple?: boolean;
+  horizontalOptions?: boolean;
 }) => {
-  const { options, onChange, question, selected, multiple, style } = props;
+  const {
+    horizontalOptions,
+    options,
+    onChange,
+    question,
+    selected,
+    multiple,
+    style,
+  } = props;
 
   const handleChange = (e, label) => {
     if (multiple) {
@@ -147,28 +156,48 @@ export const MultipleChoiceQuestion = (props: {
               }
             />
           )}
-        {option.showSubOptions && option.subOptions && (
-          <FlexRow
-            style={{
-              flex: 1,
-              flexWrap: 'wrap',
-              gap: '0.5rem',
-              marginLeft: '2.0rem',
-            }}
-          >
-            {option.subOptions.map(renderOption)}
-          </FlexRow>
-        )}
+        {option.showSubOptions &&
+          option.subOptions &&
+          (horizontalOptions ? (
+            <FlexRow
+              style={{
+                flex: 1,
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                marginLeft: '2.0rem',
+              }}
+            >
+              {option.subOptions.map(renderOption)}
+            </FlexRow>
+          ) : (
+            <FlexColumn
+              style={{
+                flex: 1,
+                gap: '0.5rem',
+                marginLeft: '2.0rem',
+              }}
+            >
+              {option.subOptions.map(renderOption)}
+            </FlexColumn>
+          ))}
       </FlexColumn>
     );
   };
 
+  const optionComponents = options.map(renderOption);
+
   return (
     <div style={{ ...style }}>
       <div style={{ ...styles.question }}>{question}</div>
-      <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-        {options.map(renderOption)}
-      </FlexRow>
+      {horizontalOptions ? (
+        <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+          {optionComponents}
+        </FlexRow>
+      ) : (
+        <FlexColumn style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+          {optionComponents}
+        </FlexColumn>
+      )}
     </div>
   );
 };

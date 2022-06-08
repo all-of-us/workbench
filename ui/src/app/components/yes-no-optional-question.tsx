@@ -27,6 +27,7 @@ export const YesNoOptionalQuestion = (props: {
       selected={selected}
       onChange={onChange}
       style={style}
+      horizontalOptions={true}
     />
   );
 };

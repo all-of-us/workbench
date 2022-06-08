@@ -87,8 +87,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
 
   useEffect(() => {
     setIsAian(
-      survey.ethnicCategories.filter((s) => s.includes(EthnicCategory.AIAN))
-        .length > 0
+      survey.ethnicCategories.filter(
+        (s) =>
+          s.includes(EthnicCategory.AIAN) ||
+          s.includes(EthnicCategory.AIANCENTRALSOUTH) ||
+          s.includes(EthnicCategory.AIANOTHER)
+      ).length > 0
     );
   }, [survey.ethnicCategories]);
 
