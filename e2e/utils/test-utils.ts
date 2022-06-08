@@ -19,7 +19,6 @@ import {
   WorkspaceAccessLevel
 } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
-import Navigation, { NavLink } from 'app/component/navigation';
 import { isBlank, makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
@@ -33,15 +32,6 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import { Ethnicity, GenderIdentity } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-
-export async function signOut(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    return 'window.setTestAccessTokenOverride(null)';
-  });
-
-  await Navigation.navMenu(page, NavLink.SIGN_OUT);
-  await page.waitForTimeout(1000);
-}
 
 // Resolve typescript error: TS2339: Property 'setTestAccessTokenOverride' does not exist on type 'Window & typeof globalThis'.
 declare const window: Window &
