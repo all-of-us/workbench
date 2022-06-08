@@ -3553,7 +3553,6 @@ ansi-escapes@^4.2.1, ansi-escapes@^4.3.1:
     type-fest "^0.21.3"
 
 ansi-html-community@^0.0.8:
-  name ansi-html
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/ansi-html-community/-/ansi-html-community-0.0.8.tgz#69fbc4d6ccbe383f9736934ae34c3f8290f1bf41"
   integrity sha512-1APHAyr3+PCamwNw3bXCPp4HFLONZt/yIH0sZp0/469KWNTEy+qN5jQ3GVX6DMZ1UXAi34yVwtTeaG/HpBuuzw==
