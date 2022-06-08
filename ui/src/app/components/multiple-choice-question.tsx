@@ -93,16 +93,26 @@ export const MultipleChoiceQuestion = (props: {
   } = props;
 
   // TODO: Change variable names and/or split into two functions
-  const handleQuestionChange = (e, label, parentValue?: any) => {
+  const handleQuestionChange = (
+    e,
+    label,
+    parentValue?: any,
+    childValues?: any[]
+  ) => {
+    console.log('What are your children values? ', childValues);
     if (multiple) {
       console.log('What is e? ', e);
-      const result = e
+      let result = e
         ? [...(selected as string[]), label]
         : (selected as string[]).filter((r) => r !== label);
 
       // Add parent if e true
       if (e && parentValue && result.indexOf(parentValue) === -1) {
         result.push(parentValue);
+      }
+
+      if (!e && childValues) {
+        result = result.filter((item) => !childValues.includes(item));
       }
       onChange(result);
     } else {
@@ -138,7 +148,12 @@ export const MultipleChoiceQuestion = (props: {
                 : selected === option.value
             }
             onChange={(e) => {
-              handleQuestionChange(e, option.value, parentValue);
+              handleQuestionChange(
+                e,
+                option.value,
+                parentValue,
+                option.subOptions?.map((subOption) => subOption.value)
+              );
               option.onChange?.(e);
             }}
             multiple={multiple}
