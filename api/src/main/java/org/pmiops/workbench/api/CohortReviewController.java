@@ -130,6 +130,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     if (workbenchConfigProvider.get().featureFlags.enableMultiReview) {
       cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
+      cohortReview.setCohortName(request.getName());
       cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
     } else {
       try {

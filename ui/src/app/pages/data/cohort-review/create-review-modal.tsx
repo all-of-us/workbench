@@ -103,7 +103,10 @@ export const CreateReviewModal = fp.flow(
         workspace: { id, namespace },
       } = this.props;
       const { numberOfParticipants } = this.state;
-      const request = { size: parseInt(numberOfParticipants, 10) };
+      const request = {
+        name: cohort.name,
+        size: parseInt(numberOfParticipants, 10),
+      };
 
       cohortReviewApi()
         .createCohortReview(namespace, id, cohort.id, request)
