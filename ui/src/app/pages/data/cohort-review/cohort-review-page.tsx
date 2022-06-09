@@ -22,7 +22,7 @@ import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
 import { CohortReviewListItem } from 'app/pages/data/cohort-review/cohort-review-list-item';
-import { CreateReviewModal } from 'app/pages/data/cohort-review/create-review-modal';
+import { CreateCohortReviewModal } from 'app/pages/data/cohort-review/create-cohort-review-modal';
 import { visitsFilterOptions } from 'app/services/review-state.service';
 import {
   cohortBuilderApi,
@@ -319,14 +319,16 @@ export const CohortReviewPage = fp.flow(
         </React.Fragment>
       )}
       {showCreateModal && (
-        <CreateReviewModal
+        <CreateCohortReviewModal
           canceled={() => setShowCreateModal(false)}
-          cohort={cohort}
+          cohortName={cohort.name}
           created={(review) => {
             setCohortReviews([...cohortReviews, review]);
             setActiveReview(review);
             setShowCreateModal(false);
           }}
+          existingNames={cohortReviews.map(({ cohortName }) => cohortName)}
+          participantCount={100} // Temp placeholder value until new cohort count call is added
         />
       )}
     </FadeBox>
