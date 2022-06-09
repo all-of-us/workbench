@@ -181,7 +181,7 @@ public class ConceptSetService {
         .collect(Collectors.toList());
   }
 
-  public Long countConceptsInConceptSet(Long conceptSetId) {
+  public Integer countConceptsInConceptSet(Long conceptSetId) {
     return conceptSetDao.countByConceptSetId(conceptSetId);
   }
 

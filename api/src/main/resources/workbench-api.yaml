@@ -2370,7 +2370,6 @@ paths:
           description: A count of concepts
           schema:
             type: integer
-            format: int64
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"

@@ -45,7 +45,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Long> countConceptsInConceptSet(
+  public ResponseEntity<Integer> countConceptsInConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);

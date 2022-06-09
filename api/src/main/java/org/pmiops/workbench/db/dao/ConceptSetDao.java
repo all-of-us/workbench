@@ -27,5 +27,5 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
               + "from concept_set_concept_id "
               + "where concept_set_id = :conceptSetId",
       nativeQuery = true)
-  long countByConceptSetId(@Param("conceptSetId") Long conceptSetId);
+  int countByConceptSetId(@Param("conceptSetId") Long conceptSetId);
 }
