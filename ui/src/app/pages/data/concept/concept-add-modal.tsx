@@ -118,7 +118,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
           selectedConceptsInDomain: filterConcepts(selectedConcepts, domain),
           loading: false,
         });
-        if (conceptSetsInDomain && conceptSetsInDomain[0]) {
+        if (conceptSetsInDomain?.[0]) {
           this.selectConceptSet(conceptSetsInDomain[0]);
         }
       } catch (error) {
