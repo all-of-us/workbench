@@ -3095,11 +3095,9 @@ paths:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     - "$ref": "#/parameters/cohortId"
-    post:
+    get:
       tags:
       - cohortReview
-      consumes:
-      - application/json
       description: 'This endpoint will return the cohort total participant count.'
       operationId: cohortParticipantCount
       responses:

@@ -68,6 +68,7 @@ interface Props extends NavigationProps {
   cohort: Cohort;
   cohortReview: CohortReview;
   created: Function;
+  participantCount?: number;
   workspace: WorkspaceData;
 }
 
@@ -136,9 +137,12 @@ export const CreateReviewModal = fp.flow(
       const {
         cohort,
         cohortReview: { matchedParticipantCount },
+        participantCount,
       } = this.props;
+      const cohortParticipantCount =
+        participantCount || matchedParticipantCount;
       const { creating, numberOfParticipants } = this.state;
-      const max = Math.min(matchedParticipantCount, 10000);
+      const max = Math.min(cohortParticipantCount, 10000);
       const errors = validate(
         { numberOfParticipants },
         {
@@ -159,10 +163,10 @@ export const CreateReviewModal = fp.flow(
           <ModalBody style={styles.body}>
             <div style={{ marginBottom: '0.5rem' }}>
               Cohort {cohort.name} has{' '}
-              {matchedParticipantCount.toLocaleString() + ' '}
+              {cohortParticipantCount.toLocaleString() + ' '}
               participants for possible review. How many would you like to
               review?
-              {matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
+              {cohortParticipantCount > 10000 && <span> (max 10,000)</span>}
             </div>
             <ValidationError>
               {summarizeErrors(

@@ -21,7 +21,6 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import {
   filterStateStore,
   getVocabOptions,
-  reviewPaginationStore,
   vocabOptions,
 } from 'app/services/review-state.service';
 import {
@@ -260,10 +259,11 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         sortOrder: sortState.sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
         filters: { items: queryFilters },
       } as Request;
-      return cohortReviewApi().getParticipantCohortStatusesOld(
+      return cohortReviewApi().getParticipantCohortStatuses(
         ns,
         wsid,
         +cid,
+        cohortReview.cohortReviewId,
         query
       );
     }
@@ -293,10 +293,6 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       );
     } else {
       setData(cohortReview.participantCohortStatuses.map(mapData));
-      setPageState({
-        ...pageState,
-        page: reviewPaginationStore.getValue().page,
-      });
       setTotalCount(cohortReview.reviewSize);
     }
     promises.push(
@@ -347,6 +343,8 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
   }, []);
 
   const getTableData = () => {
+    setLoading(true);
+    setApiError(false);
     getParticipantStatuses().then(
       ({ cohortReview: review, queryResultSize }) => {
         currentCohortReviewStore.next(review);
@@ -363,12 +361,19 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
   };
 
   useEffect(() => {
+    if (!initialRender.current) {
+      getTableData();
+    }
+  }, [filters, pageState, sortState]);
+
+  useEffect(() => {
     if (initialRender.current) {
       initialRender.current = false;
     } else {
-      getTableData();
+      setData(cohortReview.participantCohortStatuses.map(mapData));
+      setTotalCount(cohortReview.reviewSize);
     }
-  }, [sortState]);
+  }, [cohortReview]);
 
   const onPage = (event: any) => {
     if (event.page !== pageState.page) {
@@ -378,7 +383,6 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         ...pageState,
         page: event.page,
       });
-      setTimeout(() => getTableData());
     }
   };
 
@@ -405,10 +409,11 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     }
   };
 
-  const filterInput = fp.debounce(300, () => {
-    setLoading(true);
-    setApiError(false);
-    getTableData();
+  const onInputChange = fp.debounce(300, (value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      PARTICIPANTID: value,
+    }));
   });
 
   const onSort = (event: any) => {
@@ -417,46 +422,31 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
 
   const onCheckboxChange = (event, column) => {
     const { checked, value } = event.target;
-    const updatedFilters = filters;
+    let columnFilter = filters[column];
     if (checked) {
       const options = demoFilters[column].map((opt) => opt.value);
       if (value === 'Select All') {
-        updatedFilters[column] = options;
+        columnFilter = options;
       } else {
-        updatedFilters[column].push(value);
-        if (options.length - 1 === updatedFilters[column].length) {
-          updatedFilters[column].push('Select All');
+        columnFilter.push(value);
+        if (options.length - 1 === columnFilter.length) {
+          columnFilter.push('Select All');
         }
       }
     } else {
       if (value === 'Select All') {
-        updatedFilters[column] = [];
+        columnFilter = [];
       } else {
-        updatedFilters[column].splice(updatedFilters[column].indexOf(value), 1);
-        if (updatedFilters[column].includes('Select All')) {
-          updatedFilters[column].splice(
-            updatedFilters[column].indexOf('Select All'),
-            1
-          );
+        columnFilter.splice(columnFilter.indexOf(value), 1);
+        if (columnFilter.includes('Select All')) {
+          columnFilter.splice(columnFilter.indexOf('Select All'), 1);
         }
       }
     }
-    setFilters(updatedFilters);
-    if (updatedFilters[column].length === 0) {
-      setData([]);
-    } else {
-      setLoading(true);
-      setApiError(false);
-      getTableData();
-    }
-  };
-
-  const onInputChange = (value: any) => {
-    setFilters({
-      ...filters,
-      PARTICIPANTID: value,
-    });
-    filterInput();
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [column]: columnFilter,
+    }));
   };
 
   const onRowClick = (event: any) => {
@@ -518,7 +508,6 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
               <NumberInput
                 ref={(i) => (ip = i)}
                 style={styles.numberInput}
-                value={filters.PARTICIPANTID}
                 onChange={(v) => onInputChange(v)}
                 placeholder={'Search'}
               />

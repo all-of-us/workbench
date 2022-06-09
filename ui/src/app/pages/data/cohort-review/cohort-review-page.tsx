@@ -31,7 +31,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { datatableStyles } from 'app/styles/datatable';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { currentCohortReviewStore, useNavigation } from 'app/utils/navigation';
+import { useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
@@ -129,37 +129,27 @@ export const CohortReviewPage = fp.flow(
 
   const getParticipantData = (cohortReviewId: number) => {
     showSpinner();
-    if (cohortReviewId) {
-      cohortReviewApi()
-        .getParticipantCohortStatuses(
-          ns,
-          wsid,
-          +cid,
-          cohortReviewId,
-          defaultReviewQuery
-        )
-        .then(({ cohortReview }) => {
-          setCohortReviews((prevCohortReviews) => {
-            const updateIndex = prevCohortReviews.findIndex(
-              (cr) => cr.cohortReviewId === cohortReview.cohortReviewId
-            );
-            if (updateIndex > -1) {
-              prevCohortReviews[updateIndex] = cohortReview;
-            }
-            return prevCohortReviews;
-          });
-          setActiveReview(cohortReview);
-          hideSpinner();
+    cohortReviewApi()
+      .getParticipantCohortStatuses(
+        ns,
+        wsid,
+        +cid,
+        cohortReviewId,
+        defaultReviewQuery
+      )
+      .then(({ cohortReview }) => {
+        setCohortReviews((prevCohortReviews) => {
+          const updateIndex = prevCohortReviews.findIndex(
+            (cr) => cr.cohortReviewId === cohortReview.cohortReviewId
+          );
+          if (updateIndex > -1) {
+            prevCohortReviews[updateIndex] = cohortReview;
+          }
+          return prevCohortReviews;
         });
-    } else {
-      cohortReviewApi()
-        .getParticipantCohortStatusesOld(ns, wsid, +cid, defaultReviewQuery)
-        .then(({ cohortReview }) => {
-          currentCohortReviewStore.next(cohortReview);
-          setShowCreateModal(true);
-          hideSpinner();
-        });
-    }
+        setActiveReview(cohortReview);
+        hideSpinner();
+      });
   };
 
   const loadCohortAndReviews = async () => {
@@ -216,26 +206,7 @@ export const CohortReviewPage = fp.flow(
     if (review.participantCohortStatuses?.length) {
       setActiveReview(review);
     } else {
-      cohortReviewApi()
-        .getParticipantCohortStatuses(
-          ns,
-          wsid,
-          review.cohortId,
-          review.cohortReviewId,
-          defaultReviewQuery
-        )
-        .then(({ cohortReview }) => {
-          setCohortReviews((prevCohortReviews) => {
-            const updateIndex = prevCohortReviews.findIndex(
-              (cr) => cr.cohortReviewId === cohortReview.cohortReviewId
-            );
-            if (updateIndex > -1) {
-              prevCohortReviews[updateIndex] = cohortReview;
-            }
-            return prevCohortReviews;
-          });
-          setActiveReview(cohortReview);
-        });
+      getParticipantData(review.cohortReviewId);
     }
   };
 
@@ -288,7 +259,7 @@ export const CohortReviewPage = fp.flow(
                 <Clickable
                   style={{ display: 'inline-block', marginLeft: '0.5rem' }}
                   disabled={readOnly}
-                  onClick={() => getParticipantData(null)}
+                  onClick={() => setShowCreateModal(true)}
                 >
                   <ClrIcon shape='plus-circle' class='is-solid' size={18} />
                 </Clickable>
@@ -347,7 +318,7 @@ export const CohortReviewPage = fp.flow(
             setShowCreateModal(false);
           }}
           existingNames={cohortReviews.map(({ cohortName }) => cohortName)}
-          participantCount={100} // Temp placeholder value until new cohort count call is added
+          participantCount={participantCount}
         />
       )}
     </FadeBox>
