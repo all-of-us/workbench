@@ -157,6 +157,7 @@ public class ConceptSetService {
     conceptSetDao.deleteById(conceptSetId);
   }
 
+  /** Read concept-sets with hydrated collection of concept ids. */
   public ConceptSet getConceptSet(Long workspaceId, Long conceptSetId) {
     DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
     return toHydratedConcepts(
@@ -169,10 +170,19 @@ public class ConceptSetService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Read concept-sets with empty collection of concept ids. If the collection of concept ids needs
+   * to be populated please use: {@link ConceptSetService#getConceptSet(Long, Long)}. In most cases,
+   * there is not a need to load all the concept ids, so this call should be sufficient.
+   */
   public List<ConceptSet> findByWorkspaceId(long workspaceId) {
     return conceptSetDao.findByWorkspaceId(workspaceId).stream()
-        .map(conceptSet -> toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSet)))
+        .map(conceptSetMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  public Integer countConceptsInConceptSet(Long conceptSetId) {
+    return conceptSetDao.countByConceptSetId(conceptSetId);
   }
 
   @Transactional
