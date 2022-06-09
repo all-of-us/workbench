@@ -206,6 +206,7 @@
   <include file="changelog/db.changelog-196-add-demographic-survey-v2.xml"/>
   <include file="changelog/db.changelog-197-add-genomic-cdr-paths.xml"/>
   <include file="changelog/db.changelog-198-index-rdr-export-entities.xml"/>
+  <include file="changelog/db.changelog-199-update-demographic-survey-v2.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
