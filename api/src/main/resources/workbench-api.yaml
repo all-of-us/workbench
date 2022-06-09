@@ -7267,10 +7267,14 @@ definitions:
     type: object
     required:
     - size
+    - name
     properties:
       size:
         description: A sample size to review
         type: integer
+      name:
+        description: A name for the cohort review
+        type: string
   CohortReview:
     type: object
     required:
