@@ -49,7 +49,8 @@ public class CloudTaskInterceptorTest {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
         .thenReturn(
-            CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
+            CloudTaskRdrExportApi.class.getMethod(
+                CLOUD_TASK_METHOD_NAME, ArrayOfLong.class, Boolean.class));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
@@ -58,7 +59,8 @@ public class CloudTaskInterceptorTest {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
         .thenReturn(
-            CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
+            CloudTaskRdrExportApi.class.getMethod(
+                CLOUD_TASK_METHOD_NAME, ArrayOfLong.class, Boolean.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER))
         .thenReturn("rdrExportQueue");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
