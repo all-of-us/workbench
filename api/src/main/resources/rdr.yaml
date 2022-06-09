@@ -455,6 +455,21 @@ definitions:
       ethnicityAsianOtherText:
         type: string
         description: Asian / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityBlackOtherText:
+        type: string
+        description: Black / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityHispanicOtherText:
+        type: string
+        description: Hispanic / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityMeNaOtherText:
+        type: string
+        description: Middle Eastern or North African / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityNhPiOtherText:
+        type: string
+        description: Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityWhiteOtherText:
+        type: string
+        description: White / None of these fully describe me, and I want to specify.  Max length 200.
       ethnicityOtherText:
         type: string
         description: None of these fully describe me, and I want to specify.  Max length 200.

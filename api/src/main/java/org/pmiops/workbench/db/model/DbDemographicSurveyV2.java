@@ -25,6 +25,11 @@ public class DbDemographicSurveyV2 {
   private Timestamp completionTime;
   private String ethnicityAiAnOtherText;
   private String ethnicityAsianOtherText;
+  private String ethnicityBlackOtherText;
+  private String ethnicityHispanicOtherText;
+  private String ethnicityMeNaOtherText;
+  private String ethnicityNhPiOtherText;
+  private String ethnicityWhiteOtherText;
   private String ethnicityOtherText;
   private String genderOtherText;
   private String orientationOtherText;
@@ -115,6 +120,56 @@ public class DbDemographicSurveyV2 {
 
   public DbDemographicSurveyV2 setEthnicityAsianOtherText(String ethnicityAsianOtherText) {
     this.ethnicityAsianOtherText = ethnicityAsianOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_black_other_text")
+  public String getEthnicityBlackOtherText() {
+    return ethnicityBlackOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityBlackOtherText(String ethnicityBlackOtherText) {
+    this.ethnicityBlackOtherText = ethnicityBlackOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_hispanic_other_text")
+  public String getEthnicityHispanicOtherText() {
+    return ethnicityHispanicOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityHispanicOtherText(String ethnicityHispanicOtherText) {
+    this.ethnicityHispanicOtherText = ethnicityHispanicOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_me_na_other_text")
+  public String getEthnicityMeNaOtherText() {
+    return ethnicityMeNaOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityMeNaOtherText(String ethnicityMeNaOtherText) {
+    this.ethnicityMeNaOtherText = ethnicityMeNaOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_nh_pi_other_text")
+  public String getEthnicityNhPiOtherText() {
+    return ethnicityNhPiOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityNhPiOtherText(String ethnicityNhPiOtherText) {
+    this.ethnicityNhPiOtherText = ethnicityNhPiOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_white_other_text")
+  public String getEthnicityWhiteOtherText() {
+    return ethnicityWhiteOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityWhiteOtherText(String ethnicityWhiteOtherText) {
+    this.ethnicityWhiteOtherText = ethnicityWhiteOtherText;
     return this;
   }
 
