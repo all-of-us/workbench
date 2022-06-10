@@ -282,6 +282,9 @@ export const CohortReviewPage = fp.flow(
                       activeReview?.cohortReviewId ===
                       cohortReview.cohortReviewId
                     }
+                    existingNames={cohortReviews.map(
+                      ({ cohortName }) => cohortName
+                    )}
                   />
                 ))}
               </div>
@@ -312,11 +315,7 @@ export const CohortReviewPage = fp.flow(
         <CreateCohortReviewModal
           canceled={() => setShowCreateModal(false)}
           cohortName={cohort.name}
-          created={(review) => {
-            setCohortReviews([...cohortReviews, review]);
-            setActiveReview(review);
-            setShowCreateModal(false);
-          }}
+          created={(review) => onReviewCreate(review)}
           existingNames={cohortReviews.map(({ cohortName }) => cohortName)}
           participantCount={participantCount}
         />

@@ -19,8 +19,8 @@ import { ClrIcon } from 'app/components/icons';
 import { NumberInput } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
 import {
-  filterStateStore,
   getVocabOptions,
+  initialFilterState,
   vocabOptions,
 } from 'app/services/review-state.service';
 import {
@@ -205,7 +205,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
   const [data, setData] = useState(null);
   const [demoFilters, setDemoFilters] = useState(defaultDemoFilters);
   const [filters, setFilters] = useState(
-    filterStateStore.getValue().participants
+    JSON.parse(JSON.stringify(initialFilterState.participants))
   );
   const [loading, setLoading] = useState(false);
   const [pageState, setPageState] = useState({
@@ -342,22 +342,18 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     initParticipantsTable();
   }, []);
 
-  const getTableData = () => {
+  const getTableData = async () => {
     setLoading(true);
     setApiError(false);
-    getParticipantStatuses().then(
-      ({ cohortReview: review, queryResultSize }) => {
-        currentCohortReviewStore.next(review);
-        setData(review.participantCohortStatuses.map(mapData));
-        setLoading(false);
-        setTotalCount(queryResultSize);
-      },
-      (error) => {
-        console.error(error);
-        setLoading(false);
-        setApiError(true);
-      }
-    );
+    const reviewResponse = await getParticipantStatuses();
+    if (reviewResponse) {
+      currentCohortReviewStore.next(reviewResponse.cohortReview);
+      setData(
+        reviewResponse.cohortReview.participantCohortStatuses.map(mapData)
+      );
+      setLoading(false);
+      setTotalCount(reviewResponse.queryResultSize);
+    }
   };
 
   useEffect(() => {
