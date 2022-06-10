@@ -6,6 +6,7 @@ module.exports = class JestReporter {
   constructor(globalConfig, options) {
     this.logDir = options.outputdir || 'logs/jest';
     this.summaryFile = options.filename || 'test-results-summary.json';
+    this.globalConfig = globalConfig
   }
 
   // Called at the beginning of every test file
@@ -24,13 +25,15 @@ module.exports = class JestReporter {
       const testLogName = `${this.logDir}/${testName}.FAILED.log`;
       const logger = this.createLogger(testLogName);
 
-      // Read jest console messages and save to a log file.
-      // Get all console logs.
-      if (!testResult.console || testResult.console.length === 0 && globalConfig.verbose) {
+      // Attempting to catch a bug that may no longer exist.
+      if (!testResult.console || testResult.console.length === 0 && this.globalConfig.verbose) {
         const message = 'testResult.console is empty. Could be a bug in Jest. Try verbose=false.'
         console.warn(message)
         logger.warn(message)
       }
+
+      // Read jest console messages and save to a log file.
+      // Get all console logs.
       if (testResult.console) {
         testResult.console.forEach((log) => {
           logger.info(log.message);
