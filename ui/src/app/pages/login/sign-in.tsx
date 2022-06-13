@@ -4,16 +4,19 @@ import * as fp from 'lodash/fp';
 import { Degree, Profile } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { FlexColumn } from 'app/components/flex';
+import { Button } from 'app/components/buttons';
+import DemographicSurvey from 'app/components/demographic-survey-v2';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
+import { TooltipTrigger } from 'app/components/popups';
 import { PUBLIC_HEADER_IMAGE } from 'app/components/public-layout';
 import { TermsOfService } from 'app/components/terms-of-service';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
-import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import { LoginReactComponent } from 'app/pages/login/login';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -133,6 +136,8 @@ interface SignInState {
   termsOfServiceVersion?: number;
   // Page has been loaded by clicking Previous Button
   isPreviousStep: boolean;
+  // Validation errors
+  errors: any[];
 }
 
 export const createEmptyProfile = (): Profile => {
@@ -154,6 +159,29 @@ export const createEmptyProfile = (): Profile => {
       zipCode: '',
     },
     demographicSurvey: {},
+    demographicSurveyV2: {
+      education: null,
+      ethnicityAiAnOtherText: null,
+      ethnicityAsianOtherText: null,
+      ethnicCategories: [],
+      ethnicityOtherText: null,
+      disabilityConcentrating: null,
+      disabilityDressing: null,
+      disabilityErrands: null,
+      disabilityHearing: null,
+      disabilityOtherText: null,
+      disabilitySeeing: null,
+      disabilityWalking: null,
+      disadvantaged: null,
+      genderIdentities: [],
+      genderOtherText: null,
+      orientationOtherText: null,
+      sexAtBirth: null,
+      sexAtBirthOtherText: null,
+      sexualOrientations: [],
+      yearOfBirth: null,
+      yearOfBirthPreferNot: false,
+    },
     degrees: [] as Degree[],
   };
 
@@ -185,6 +213,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       // data in its onComplete callback.
       profile: createEmptyProfile(),
       isPreviousStep: false,
+      errors: [],
     };
   }
 
@@ -237,6 +266,43 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     return steps[index - 1];
   }
 
+  // TODO: Move Previous, Next, and Submit buttons out of each of the
+  // steps and into this component
+  render() {
+    const showFooter =
+      environment.enableFooter &&
+      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
+    const backgroundImages = StepToImageConfig.get(this.state.currentStep);
+    return (
+      <FlexColumn
+        style={styles.signInContainer}
+        data-test-id='sign-in-container'
+      >
+        <FlexColumn
+          data-test-id='sign-in-page'
+          style={backgroundStyleTemplate(
+            this.props.windowSize,
+            backgroundImages
+          )}
+        >
+          <div>
+            <img
+              style={{
+                height: '1.75rem',
+                marginLeft: '1rem',
+                marginTop: '1rem',
+              }}
+              src={PUBLIC_HEADER_IMAGE}
+            />
+          </div>
+          {this.renderSignInStep(this.state.currentStep)}
+        </FlexColumn>
+        {this.renderNavigation(this.state.currentStep)}
+        {showFooter && <Footer type={FooterTypeEnum.Registration} />}
+      </FlexColumn>
+    );
+  }
+
   private renderSignInStep(currentStep: SignInStep) {
     const onComplete = (profile: Profile) => {
       this.setState({
@@ -250,6 +316,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         profile: profile,
         currentStep: this.getPreviousStep(currentStep),
         isPreviousStep: true,
+      });
+    };
+    const onUpdate = (profile: Profile, errors: any[]) => {
+      this.setState({
+        profile,
+        errors,
       });
     };
 
@@ -299,12 +371,14 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
         return (
-          <AccountCreationSurvey
-            profile={this.state.profile}
-            termsOfServiceVersion={this.state.termsOfServiceVersion}
-            onComplete={onComplete}
-            onPreviousClick={onPrevious}
-          />
+          <div
+            style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}
+          >
+            <DemographicSurvey
+              onUpdate={onUpdate}
+              profile={this.state.profile}
+            />
+          </div>
         );
       case SignInStep.SUCCESS_PAGE:
         return <AccountCreationSuccess profile={this.state.profile} />;
@@ -313,38 +387,59 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
-  render() {
-    const showFooter =
-      environment.enableFooter &&
-      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
-    const backgroundImages = StepToImageConfig.get(this.state.currentStep);
-    return (
-      <FlexColumn
-        style={styles.signInContainer}
-        data-test-id='sign-in-container'
-      >
-        <FlexColumn
-          data-test-id='sign-in-page'
-          style={backgroundStyleTemplate(
-            this.props.windowSize,
-            backgroundImages
-          )}
-        >
-          <div>
-            <img
-              style={{
-                height: '1.75rem',
-                marginLeft: '1rem',
-                marginTop: '1rem',
-              }}
-              src={PUBLIC_HEADER_IMAGE}
-            />
-          </div>
-          {this.renderSignInStep(this.state.currentStep)}
-        </FlexColumn>
-        {showFooter && <Footer type={FooterTypeEnum.Registration} />}
-      </FlexColumn>
-    );
+  private onSubmit = async (updatedProfile: any) => {
+    await profileApi().updateProfile(updatedProfile, {});
+  };
+
+  private renderNavigation(currentStep: SignInStep) {
+    if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
+      const { errors } = this.state;
+      return (
+        <FlexRow style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+          <Button
+            type='secondary'
+            style={{ marginRight: '1rem' }}
+            onClick={() => {
+              this.setState({
+                currentStep: this.getPreviousStep(currentStep),
+                isPreviousStep: true,
+              });
+            }}
+          >
+            Previous
+          </Button>
+          <TooltipTrigger
+            content={
+              errors && (
+                <>
+                  <div>Please review the following:</div>
+                  <ul>
+                    {Object.keys(errors).map((key) => (
+                      <li key={errors[key][0]}>{errors[key][0]}</li>
+                    ))}
+                    <li>
+                      You may select "Prefer not to answer" for each unfilled
+                      item to continue
+                    </li>
+                  </ul>
+                </>
+              )
+            }
+          >
+            <Button
+              disabled={!!errors}
+              type='primary'
+              data-test-id={'submit-button'}
+              onClick={this.onSubmit}
+            >
+              Submit
+            </Button>
+          </TooltipTrigger>
+        </FlexRow>
+      );
+    }
+
+    return <></>;
   }
 }
 

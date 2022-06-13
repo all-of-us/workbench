@@ -11,16 +11,12 @@ import {
   SexualOrientationV2,
 } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SemiBoldHeader } from 'app/components/headers';
-import { TooltipTrigger } from 'app/components/popups';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
-import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
-import { profileStore } from 'app/utils/stores';
 
 import { Divider } from './divider';
 import { CheckBox, NumberInput, TextInput } from './inputs';
@@ -53,39 +49,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   const [, navigateByUrl] = useNavigation();
   const [captchaToken, setCaptchaToken] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState(null);
-  const [survey, setSurvey] = useState({
-    education: null,
-    ethnicityAiAnOtherText: null,
-    ethnicityAsianOtherText: null,
-    ethnicCategories: [],
-    ethnicityOtherText: null,
-    disabilityConcentrating: null,
-    disabilityDressing: null,
-    disabilityErrands: null,
-    disabilityHearing: null,
-    disabilityOtherText: null,
-    disabilitySeeing: null,
-    disabilityWalking: null,
-    disadvantaged: null,
-    genderIdentities: [],
-    genderOtherText: null,
-    orientationOtherText: null,
-    sexAtBirth: null,
-    sexAtBirthOtherText: null,
-    sexualOrientations: [],
-    yearOfBirth: null,
-    yearOfBirthPreferNot: false,
-  });
   const [isAian, setIsAian] = useState(false);
   const [showAsianOptions, setShowAsianOptions] = useState(false);
   const [showAiAnOptions, setShowAiAnOptions] = useState(false);
 
-  // const { profile, saveProfile } = props;
-
-  useEffect(() => {
-    setErrors(validateDemographicSurvey(survey));
-  }, [survey]);
+  const { profile } = props;
+  const { demographicSurveyV2: survey } = profile;
 
   useEffect(() => {
     setIsAian(
@@ -99,10 +68,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   }, [survey.ethnicCategories]);
 
   const handleInputChange = (prop, value) => {
-    setSurvey({
+    const newSurvey = {
       ...survey,
       [prop]: value,
-    });
+    };
+    const errors = validateDemographicSurvey(survey);
+    const newProfile = { ...profile, demographicSurveyV2: newSurvey };
+    props.onUpdate(newProfile, errors);
   };
 
   const handleYearOfBirthBlur = () => {
@@ -112,25 +84,18 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   };
 
   const handleYearOfBirthPreferNotChange = (value) => {
-    setSurvey({
+    const newSurvey = {
       ...survey,
       yearOfBirth: value && null,
       yearOfBirthPreferNot: value,
-    });
-  };
-
-  const saveSurvey = async () => {
-    setLoading(true);
-    const profile = profileStore.get().profile;
-
-    const newProfile = { ...profile, demographicSurveyV2: survey };
-    await profileApi().updateProfile(newProfile, {});
-
-    setLoading(false);
+    };
+    const errors = validateDemographicSurvey(survey);
+    const newProfile = { ...profile, demographicSurveyV2: newSurvey };
+    props.onUpdate(newProfile, errors);
   };
 
   return (
-    <FlexColumn style={{ width: '750px', marginBottom: '10rem' }}>
+    <FlexColumn>
       <div
         style={{
           backgroundColor: colorWithWhiteness(colors.accent, 0.75),
@@ -446,7 +411,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <Divider style={{ marginTop: '.25rem' }} />
         <div style={styles.question}>12. Year of birth</div>
 
-        <FlexRow style={{ alignItems: 'center' }}>
+        <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
           <NumberInput
             onChange={(value) => handleInputChange('yearOfBirth', value)}
             onBlur={handleYearOfBirthBlur}
@@ -497,48 +462,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           selected={survey.disadvantaged}
           onChange={(value) => handleInputChange('disadvantaged', value)}
         />
-
-        <FlexRow>
-          {props.onPreviousClick && (
-            <Button
-              disabled={errors}
-              type='primary'
-              onClick={(_) => console.log('Save')}
-              data-test-id={'submit-button'}
-              style={{ marginTop: '3rem', marginRight: '1rem' }}
-            >
-              Previous
-            </Button>
-          )}
-          <TooltipTrigger
-            content={
-              errors && (
-                <>
-                  <div>Please review the following:</div>
-                  <ul>
-                    {Object.keys(errors).map((key) => (
-                      <li key={errors[key][0]}>{errors[key][0]}</li>
-                    ))}
-                    <li>
-                      You may select "Prefer not to answer" for each unfilled
-                      item to continue
-                    </li>
-                  </ul>
-                </>
-              )
-            }
-          >
-            <Button
-              disabled={false}
-              type='primary'
-              onClick={saveSurvey}
-              data-test-id={'submit-button'}
-              style={{ marginTop: '3rem' }}
-            >
-              Submit
-            </Button>
-          </TooltipTrigger>
-        </FlexRow>
       </FlexColumn>
     </FlexColumn>
   );

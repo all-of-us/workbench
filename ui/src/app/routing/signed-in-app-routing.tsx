@@ -12,7 +12,6 @@ import {
   DataUserCodeOfConduct,
   DuccSignatureState,
 } from 'app/components/data-user-code-of-conduct';
-import DemographicSurveyV2 from 'app/components/demographic-survey-v2';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { DataAccessRequirements } from 'app/pages/access/data-access-requirements';
 import { AdminBanner } from 'app/pages/admin/admin-banner';
@@ -28,6 +27,7 @@ import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
+import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import {
@@ -351,7 +351,7 @@ export const SignedInRoutes = () => {
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
       <AppRoute path='/demographic-survey' exact>
-        <DemographicSurveyV2 />
+        <DemographicSurvey />
       </AppRoute>
       <AppRoute exact path='*'>
         <Redirect to={'/not-found'} />
