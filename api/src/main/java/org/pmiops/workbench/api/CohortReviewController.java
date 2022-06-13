@@ -438,7 +438,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
     cohortReview =
-        cohortReviewService.findCohortReviewForWorkspace(cohort.getCohortId(), cohortReviewId);
+        cohortReviewService.findCohortReviewForWorkspace(cohort.getWorkspaceId(), cohortReviewId);
     participantCohortStatuses =
         cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
 

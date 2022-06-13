@@ -29,6 +29,7 @@ export const CohortReviewListItem = fp.flow(
     onUpdate,
     selected,
     onSelect,
+    existingNames,
   }) => {
     const { ns, wsid } = useParams<MatchParams>();
     const [showRenameModal, setShowRenameModal] = useState(false);
@@ -116,7 +117,7 @@ export const CohortReviewListItem = fp.flow(
         </div>
         {showRenameModal && (
           <RenameModal
-            existingNames={[]}
+            existingNames={existingNames}
             oldName={cohortReview.cohortName}
             onCancel={() => setShowRenameModal(false)}
             onRename={(name, description) => rename(name, description)}
