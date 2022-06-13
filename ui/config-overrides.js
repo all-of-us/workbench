@@ -22,13 +22,13 @@ module.exports = {
     // * TerserPlugin for JS - this works and reduces our size by ~ 2/3
     // * CSSMnimizerPlugin - this has bug when trying to minimize clr-min-ui.css (b/c already minimized?)
     //    see https://github.com/all-of-us/workbench/pull/6753#issuecomment-1150407055
-    //    we re-init this plugin by excluding the problematic file from its config
+    //    we re-init this plugin by excluding problematic files from its config
 
     config.optimization.minimizer = config.optimization.minimizer.map(m =>
-      // this matches TerserPlugin - keep it as-is 
-      m.options.minimizer.options.parse?.ecma 
-        ? m 
-        : new CssMinimizerPlugin({ exclude: /clr-ui\.min\.css$/i })
+      // this matches TerserPlugin - keep it as-is
+      m.options.minimizer.options.parse?.ecma
+        ? m
+        : new CssMinimizerPlugin({ exclude: [/clr-ui\.min\.css$/i, /clr-icons\.min\.js$/i] })
     );
 
     return config;
