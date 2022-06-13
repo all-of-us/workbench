@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
-import * as querystring from 'querystring';
+import * as querystring from 'querystring-es3';
 
 import {
   Cohort,
