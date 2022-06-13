@@ -394,10 +394,15 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private onSubmit = async () => {
-    await profileApi().createAccount({
+    const newProfile = await profileApi().createAccount({
       profile: this.state.profile,
       captchaVerificationToken: this.state.captchaToken,
       termsOfServiceVersion: this.state.termsOfServiceVersion,
+    });
+    this.setState({
+      profile: newProfile,
+      currentStep: this.getNextStep(this.state.currentStep),
+      isPreviousStep: false,
     });
   };
 
