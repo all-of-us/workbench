@@ -97,14 +97,10 @@
     "eslint-plugin-react": "^7.27.1",
     "eslint-plugin-react-hooks": "^4.5.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
-    "jest-svg-transformer": "1.0.0",
     "lolex": "^3.0.0",
     "prettier": "^2.0.4",
     "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
-    "react-test-renderer": "^16.6.3",
-    "ts-jest": "^26.5.4",
-    "ts-node": "~3.0.4",
     "url": "^0.11.0"
   },
   "resolutions": {
