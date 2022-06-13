@@ -18,11 +18,17 @@ module.exports = {
         )
     );
 
+    // there are 2 active minimizers:
+    // * TerserPlugin for JS - this works and reduces our size by ~ 2/3
+    // * CSSMnimizerPlugin - this has bug when trying to minimize clr-min-ui.css (b/c already minimized?)
+    //    see https://github.com/all-of-us/workbench/pull/6753#issuecomment-1150407055
+    //    we re-init this plugin by excluding the problematic file from its config
+
     config.optimization.minimizer = config.optimization.minimizer.map(m =>
-      // CssMinimizerPlugin is unable to minimize clr-min-ui.css (b/c already minimized?)
-      // so we exclude that file
-      // see https://github.com/all-of-us/workbench/pull/6753#issuecomment-1150407055
-      m.options.minimizer.options.parse?.ecma ? new CssMinimizerPlugin({ exclude: /clr-ui\.min.\.css$/i }) : m
+      // this matches TerserPlugin - keep it as-is 
+      m.options.minimizer.options.parse?.ecma 
+        ? m 
+        : new CssMinimizerPlugin({ exclude: /clr-ui\.min.\.css$/i })
     );
 
     return config;
