@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import * as fp from 'lodash/fp';
 
 import { Degree, Profile } from 'generated/fetch';
@@ -129,6 +130,8 @@ export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
 }
 
 interface SignInState {
+  captcha: boolean;
+  captchaToken: string;
   currentStep: SignInStep;
   profile: Profile;
   // Tracks the Terms of Service version that was viewed and acknowledged by the user.
@@ -203,9 +206,12 @@ export const createEmptyProfile = (): Profile => {
  */
 
 export class SignInImpl extends React.Component<SignInProps, SignInState> {
+  private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: SignInProps) {
     super(props);
     this.state = {
+      captcha: false,
+      captchaToken: null,
       currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
@@ -391,51 +397,72 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     await profileApi().updateProfile(updatedProfile, {});
   };
 
+  private captureCaptchaResponse(token) {
+    this.setState({ captchaToken: token, captcha: true });
+  }
+
   private renderNavigation(currentStep: SignInStep) {
     if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
       const { errors } = this.state;
       return (
-        <FlexRow style={{ marginTop: '2rem', marginBottom: '1rem' }}>
-          <Button
-            type='secondary'
-            style={{ marginRight: '1rem' }}
-            onClick={() => {
-              this.setState({
-                currentStep: this.getPreviousStep(currentStep),
-                isPreviousStep: true,
-              });
-            }}
-          >
-            Previous
-          </Button>
-          <TooltipTrigger
-            content={
-              errors && (
-                <>
-                  <div>Please review the following:</div>
-                  <ul>
-                    {Object.keys(errors).map((key) => (
-                      <li key={errors[key][0]}>{errors[key][0]}</li>
-                    ))}
-                    <li>
-                      You may select "Prefer not to answer" for each unfilled
-                      item to continue
-                    </li>
-                  </ul>
-                </>
-              )
-            }
-          >
+        <div
+          style={{
+            marginTop: '2rem',
+            marginBottom: '1rem',
+            marginLeft: '1rem',
+          }}
+        >
+          {environment.enableCaptcha && (
+            <div style={{ paddingBottom: '1rem' }}>
+              <ReCAPTCHA
+                sitekey={environment.captchaSiteKey}
+                ref={this.captchaRef}
+                onChange={(value) => this.captureCaptchaResponse(value)}
+              />
+            </div>
+          )}
+          <FlexRow>
             <Button
-              disabled={!!errors}
-              type='primary'
-              data-test-id={'submit-button'}
-              onClick={this.onSubmit}
+              type='secondary'
+              style={{ marginRight: '1rem' }}
+              onClick={() => {
+                this.setState({
+                  currentStep: this.getPreviousStep(currentStep),
+                  isPreviousStep: true,
+                });
+              }}
             >
-              Submit
+              Previous
             </Button>
-          </TooltipTrigger>
-        </FlexRow>
+            <TooltipTrigger
+              content={
+                errors && (
+                  <>
+                    <div>Please review the following:</div>
+                    <ul>
+                      {Object.keys(errors).map((key) => (
+                        <li key={errors[key][0]}>{errors[key][0]}</li>
+                      ))}
+                      <li>
+                        You may select "Prefer not to answer" for each unfilled
+                        item to continue
+                      </li>
+                    </ul>
+                  </>
+                )
+              }
+            >
+              <Button
+                disabled={!!errors}
+                type='primary'
+                data-test-id={'submit-button'}
+                onClick={this.onSubmit}
+              >
+                Submit
+              </Button>
+            </TooltipTrigger>
+          </FlexRow>
+        </div>
       );
     }
 
