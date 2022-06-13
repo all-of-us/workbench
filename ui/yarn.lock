@@ -1836,11 +1836,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/core-js@^2.5.0":
-  version "2.5.5"
-  resolved "https://registry.yarnpkg.com/@types/core-js/-/core-js-2.5.5.tgz#dc5a013ee0b23bd5ac126403854fadabb4f24f75"
-  integrity sha512-C4vwOHrhsvxn7UFyk4NDQNUpgNKdWsT/bL39UWyD75KSEOObZSKa9mYDOCM5FGeJG2qtbG0XiEbUKND2+j0WOg==
-
 "@types/enzyme@^3.10.10":
   version "3.10.11"
   resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.11.tgz#8924bd92cc63ac1843e215225dfa8f71555fe814"
@@ -1901,16 +1896,6 @@
     "@types/express-serve-static-core" "^4.17.18"
     "@types/qs" "*"
     "@types/serve-static" "*"
-
-"@types/geojson@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-1.0.6.tgz#3e02972728c69248c2af08d60a48cbb8680fffdf"
-  integrity sha512-Xqg/lIZMrUd0VRmSRbCAewtwGZiAk3mEUDvV4op1tGl+LvyPcb/MIOSxTl9z+9+J+R4/vpjiCAT4xeKzH9ji1w==
-
-"@types/google.analytics@0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@types/google.analytics/-/google.analytics-0.0.39.tgz#19a952003dbf3c7373d655a5c3203b4726b8b802"
-  integrity sha512-AwVtVYACQg26MJz+752H6uskn53BR7eilCOHksUGkzobZNKc7O3RFTJrbD3yKAluXy6favVdynnr9btijjcakQ==
 
 "@types/graceful-fs@^4.1.2":
   version "4.1.5"
@@ -2027,13 +2012,6 @@
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
-
-"@types/react-copy-to-clipboard@^4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@types/react-copy-to-clipboard/-/react-copy-to-clipboard-4.3.0.tgz#8e07becb4f11cfced4bd36038cb5bdf5c2658be5"
-  integrity sha512-iideNPRyroENqsOFh1i2Dv3zkviYS9r/9qD9Uh3Z9NNoAAqqa2x53i7iGndGNnJFIo20wIu7Hgh77tx1io8bgw==
-  dependencies:
-    "@types/react" "*"
 
 "@types/react-dom@^16.0.11":
   version "16.9.14"
