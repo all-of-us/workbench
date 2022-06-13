@@ -28,7 +28,7 @@ module.exports = {
       // this matches TerserPlugin - keep it as-is 
       m.options.minimizer.options.parse?.ecma 
         ? m 
-        : new CssMinimizerPlugin({ exclude: /clr-ui\.min.\.css$/i })
+        : new CssMinimizerPlugin({ exclude: /clr-ui\.min\.css$/i })
     );
 
     return config;
