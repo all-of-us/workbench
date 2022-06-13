@@ -142,7 +142,7 @@
       "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-preprod-ct",
       "bigqueryDataset": "C2022Q2R2",
-      "wgsBigqueryDataset": "wgs_C2021Q3_beta",
+      "wgsBigqueryDataset": "wgs_C2022Q2",
       "creationTime": "2022-01-01 00:00:00Z",
       "releaseNumber": 10,
       "numParticipants": 372397,
