@@ -393,8 +393,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
-  private onSubmit = async (updatedProfile: any) => {
-    await profileApi().updateProfile(updatedProfile, {});
+  private onSubmit = async () => {
+    await profileApi().createAccount({
+      profile: this.state.profile,
+      captchaVerificationToken: this.state.captchaToken,
+      termsOfServiceVersion: this.state.termsOfServiceVersion,
+    });
   };
 
   private captureCaptchaResponse(token) {
@@ -436,24 +440,31 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             </Button>
             <TooltipTrigger
               content={
-                errors && (
+                (errors || !this.state.captcha) && (
                   <>
                     <div>Please review the following:</div>
                     <ul>
-                      {Object.keys(errors).map((key) => (
-                        <li key={errors[key][0]}>{errors[key][0]}</li>
-                      ))}
-                      <li>
-                        You may select "Prefer not to answer" for each unfilled
-                        item to continue
-                      </li>
+                      {errors && (
+                        <>
+                          {Object.keys(errors).map((key) => (
+                            <li key={errors[key][0]}>{errors[key][0]}</li>
+                          ))}
+                          <li>
+                            You may select "Prefer not to answer" for each
+                            unfilled item listed above to continue
+                          </li>
+                        </>
+                      )}
+                      {!this.state.captcha && (
+                        <li key='captcha'>Please fill out reCAPTCHA.</li>
+                      )}
                     </ul>
                   </>
                 )
               }
             >
               <Button
-                disabled={!!errors}
+                disabled={!!errors || !this.state.captcha}
                 type='primary'
                 data-test-id={'submit-button'}
                 onClick={this.onSubmit}
