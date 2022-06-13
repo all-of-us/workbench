@@ -44,7 +44,6 @@
     "@types/react-onclickoutside": "^6.7.0",
     "@types/react-router-dom": "^5.3.2",
     "@webcomponents/custom-elements": "^1.0.0",
-    "browserslist": "^4.16.5",
     "classnames": "^2.2.6",
     "color": "^3.1.1",
     "eslint": "^7.11.0",
@@ -56,7 +55,6 @@
     "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "ngx-popper": "^5.1.7",
-    "node-forge": "^1.0.0",
     "nouislider": "^14.1.1",
     "nouislider-react": "^3.3.7",
     "outdated-browser-rework": "^2.8.0",
@@ -99,8 +97,6 @@
     "eslint-plugin-react": "^7.27.1",
     "eslint-plugin-react-hooks": "^4.5.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
-    "jasmine-core": "~3.10.1",
-    "jasmine-spec-reporter": "~4.2.1",
     "jest-svg-transformer": "1.0.0",
     "lolex": "^3.0.0",
     "prettier": "^2.0.4",
@@ -109,8 +105,7 @@
     "react-test-renderer": "^16.6.3",
     "ts-jest": "^26.5.4",
     "ts-node": "~3.0.4",
-    "url": "^0.11.0",
-    "wd": "^1.12.1"
+    "url": "^0.11.0"
   },
   "resolutions": {
     "ansi-regex": "^5.0.1",
