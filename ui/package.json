@@ -58,7 +58,6 @@
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.24.0",
-    "mutationobserver-shim": "^0.3.2",
     "ngx-popper": "^5.1.7",
     "node-forge": "^1.0.0",
     "nouislider": "^14.1.1",
