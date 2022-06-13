@@ -98,9 +98,5 @@
     "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
     "url": "^0.11.0"
-  },
-  "resolutions": {
-    "ansi-regex": "^5.0.1",
-    "glob-parent": "^5.1.2"
   }
 }
