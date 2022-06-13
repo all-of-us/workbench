@@ -98,5 +98,8 @@
     "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
     "url": "^0.11.0"
+  },
+  "resolutions": {
+    "node-fetch": "^2.6.7"
   }
 }
