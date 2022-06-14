@@ -667,7 +667,18 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).contains(defaultConceptSet);
+    assertConceptSet(response.get(0), defaultConceptSet);
+  }
+
+  @Test
+  public void countConceptsInConceptSet() {
+    // use defaultConceptSet
+    assertThat(
+            conceptSetsController
+                .countConceptsInConceptSet(
+                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
+                .getBody())
+        .isEqualTo(1);
   }
 
   @Test
@@ -705,7 +716,14 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(4);
-    assertThat(response).containsExactly(defaultConceptSet, conceptSet2, conceptSet3, conceptSet4);
+    // defaultConceptSet
+    assertConceptSet(response.get(0), defaultConceptSet);
+    // conceptSet2
+    assertConceptSet(response.get(1), conceptSet2);
+    // conceptSet3
+    assertConceptSet(response.get(2), conceptSet3);
+    // conceptSet4
+    assertConceptSet(response.get(3), conceptSet4);
   }
 
   @Test
@@ -733,7 +751,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).contains(defaultConceptSet);
+    assertConceptSet(response.get(0), defaultConceptSet);
   }
 
   @Test
@@ -749,7 +767,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).contains(defaultConceptSet);
+    assertConceptSet(response.get(0), defaultConceptSet);
   }
 
   @Test
@@ -765,7 +783,7 @@ public class ConceptSetsControllerTest {
             .getItems();
 
     assertThat(response.size()).isEqualTo(1);
-    assertThat(response).contains(defaultConceptSet);
+    assertConceptSet(response.get(0), defaultConceptSet);
   }
 
   @Test
@@ -1609,5 +1627,16 @@ public class ConceptSetsControllerTest {
         .addName(criteria.getName())
         .addFullText("+[" + criteria.getDomainId() + "_rank1]")
         .build();
+  }
+
+  private void assertConceptSet(ConceptSet actualConceptSet, ConceptSet expectedConceptSet) {
+    assertThat(actualConceptSet.getCriteriums()).isNotNull();
+    assertThat(actualConceptSet.getCreationTime()).isEqualTo(expectedConceptSet.getCreationTime());
+    assertThat(actualConceptSet.getDescription()).isEqualTo(expectedConceptSet.getDescription());
+    assertThat(actualConceptSet.getDomain()).isEqualTo(expectedConceptSet.getDomain());
+    assertThat(actualConceptSet.getEtag()).isEqualTo(expectedConceptSet.getEtag());
+    assertThat(actualConceptSet.getLastModifiedTime())
+        .isEqualTo(expectedConceptSet.getLastModifiedTime());
+    assertThat(actualConceptSet.getName()).isEqualTo(expectedConceptSet.getName());
   }
 }

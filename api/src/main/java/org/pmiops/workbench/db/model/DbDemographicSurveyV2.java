@@ -25,6 +25,11 @@ public class DbDemographicSurveyV2 {
   private Timestamp completionTime;
   private String ethnicityAiAnOtherText;
   private String ethnicityAsianOtherText;
+  private String ethnicityBlackOtherText;
+  private String ethnicityHispanicOtherText;
+  private String ethnicityMeNaOtherText;
+  private String ethnicityNhPiOtherText;
+  private String ethnicityWhiteOtherText;
   private String ethnicityOtherText;
   private String genderOtherText;
   private String orientationOtherText;
@@ -115,6 +120,56 @@ public class DbDemographicSurveyV2 {
 
   public DbDemographicSurveyV2 setEthnicityAsianOtherText(String ethnicityAsianOtherText) {
     this.ethnicityAsianOtherText = ethnicityAsianOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_black_other_text")
+  public String getEthnicityBlackOtherText() {
+    return ethnicityBlackOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityBlackOtherText(String ethnicityBlackOtherText) {
+    this.ethnicityBlackOtherText = ethnicityBlackOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_hispanic_other_text")
+  public String getEthnicityHispanicOtherText() {
+    return ethnicityHispanicOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityHispanicOtherText(String ethnicityHispanicOtherText) {
+    this.ethnicityHispanicOtherText = ethnicityHispanicOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_me_na_other_text")
+  public String getEthnicityMeNaOtherText() {
+    return ethnicityMeNaOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityMeNaOtherText(String ethnicityMeNaOtherText) {
+    this.ethnicityMeNaOtherText = ethnicityMeNaOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_nh_pi_other_text")
+  public String getEthnicityNhPiOtherText() {
+    return ethnicityNhPiOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityNhPiOtherText(String ethnicityNhPiOtherText) {
+    this.ethnicityNhPiOtherText = ethnicityNhPiOtherText;
+    return this;
+  }
+
+  @Column(name = "ethnicity_white_other_text")
+  public String getEthnicityWhiteOtherText() {
+    return ethnicityWhiteOtherText;
+  }
+
+  public DbDemographicSurveyV2 setEthnicityWhiteOtherText(String ethnicityWhiteOtherText) {
+    this.ethnicityWhiteOtherText = ethnicityWhiteOtherText;
     return this;
   }
 
@@ -322,6 +377,7 @@ public class DbDemographicSurveyV2 {
     AI_AN,
     AI_AN_CENTRAL_SOUTH,
     AI_AN_OTHER,
+
     ASIAN,
     ASIAN_INDIAN,
     ASIAN_CAMBODIAN,
@@ -334,11 +390,72 @@ public class DbDemographicSurveyV2 {
     ASIAN_PAKISTANI,
     ASIAN_VIETNAMESE,
     ASIAN_OTHER,
+
     BLACK,
+    BLACK_AA,
+    BLACK_BARBADIAN,
+    BLACK_CARIBBEAN,
+    BLACK_ETHIOPIAN,
+    BLACK_GHANAIAN,
+    BLACK_HAITIAN,
+    BLACK_JAMAICAN,
+    BLACK_LIBERIAN,
+    BLACK_NIGERIAN,
+    BLACK_SOMALI,
+    BLACK_SOUTH_AFRICAN,
+    BLACK_OTHER,
+
     HISPANIC,
+    HISPANIC_COLUMBIAN,
+    HISPANIC_CUBAN,
+    HISPANIC_DOMINICAN,
+    HISPANIC_ECUADORIAN,
+    HISPANIC_HONDURAN,
+    HISPANIC_MEXICAN,
+    HISPANIC_PUERTO_RICAN,
+    HISPANIC_SALVADORAN,
+    HISPANIC_SPANISH,
+    HISPANIC_OTHER,
+
     MENA,
+    MENA_AFGHAN,
+    MENA_ALGERIAN,
+    MENA_EGYPTIAN,
+    MENA_IRANIAN,
+    MENA_IRAQI,
+    MENA_ISRAELI,
+    MENA_LEBANESE,
+    MENA_MOROCCAN,
+    MENA_SYRIAN,
+    MENA_TUNISIAN,
+    MENA_OTHER,
+
     NHPI,
+    NHPI_CHAMORRO,
+    NHPI_CHUUKESE,
+    NHPI_FIJIAN,
+    NHPI_MARSHALLESE,
+    NHPI_HAWAIIAN,
+    NHPI_PALAUAN,
+    NHPI_SAMOAN,
+    NHPI_TAHITIAN,
+    NHPI_TONGAN,
+    NHPI_OTHER,
+
     WHITE,
+    WHITE_DUTCH,
+    WHITE_ENGLISH,
+    WHITE_EUROPEAN,
+    WHITE_FRENCH,
+    WHITE_GERMAN,
+    WHITE_IRISH,
+    WHITE_ITALIAN,
+    WHITE_NORWEGIAN,
+    WHITE_POLISH,
+    WHITE_SCOTTISH,
+    WHITE_SPANISH,
+    WHITE_OTHER,
+
     OTHER,
     PREFER_NOT_TO_ANSWER
   }

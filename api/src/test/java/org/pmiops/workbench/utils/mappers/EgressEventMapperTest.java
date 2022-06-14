@@ -38,6 +38,11 @@ public class EgressEventMapperTest {
 
     Instant created = FakeClockConfiguration.NOW.toInstant();
     Instant modified = created.plus(Duration.ofMinutes(5L));
+    long timeWindowStartMilli = created.minus(Duration.ofHours(1L)).toEpochMilli();
+    long timeWindowDurationSeconds = Duration.ofHours(1L).getSeconds();
+    double egressMB = 201.0;
+    double egressMib = 200.0;
+
     assertThat(
             mapper.toApiEvent(
                 new DbEgressEvent()
@@ -48,16 +53,15 @@ public class EgressEventMapperTest {
                     .setCreationTime(Timestamp.from(created))
                     .setStatus(DbEgressEventStatus.PENDING)
                     .setLastModifiedTime(Timestamp.from(modified))
-                    .setEgressMegabytes((float) 201.0)
-                    .setEgressWindowSeconds(3600L)
+                    .setEgressMegabytes((float) egressMB)
+                    .setEgressWindowSeconds(timeWindowDurationSeconds)
                     .setSumologicEvent(
                         new Gson()
                             .toJson(
                                 new SumologicEgressEvent()
-                                    .egressMib(200.0)
-                                    .timeWindowStart(
-                                        created.minus(Duration.ofHours(1L)).toEpochMilli())
-                                    .timeWindowDuration(Duration.ofHours(1L).toMillis())
+                                    .egressMib(egressMib)
+                                    .timeWindowStart(timeWindowStartMilli)
+                                    .timeWindowDuration(timeWindowDurationSeconds)
                                     .vmPrefix(user.getRuntimeName())))))
         .isEqualTo(
             new EgressEvent()
@@ -67,8 +71,10 @@ public class EgressEventMapperTest {
                 .sourceGoogleProject("proj")
                 .creationTime("2000-01-01T00:00:00Z")
                 .status(EgressEventStatus.PENDING)
-                .egressMegabytes(201.0)
-                .egressWindowSeconds(BigDecimal.valueOf(3600L)));
+                .egressMegabytes(egressMB)
+                .egressWindowSeconds(BigDecimal.valueOf(timeWindowDurationSeconds))
+                .timeWindowStartEpochMillis(timeWindowStartMilli)
+                .timeWindowEndEpochMillis(timeWindowStartMilli + timeWindowDurationSeconds * 1000));
   }
 
   @Test

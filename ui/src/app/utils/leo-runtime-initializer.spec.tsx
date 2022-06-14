@@ -21,6 +21,7 @@ import {
 } from 'app/utils/leo-runtime-initializer';
 import { serverConfigStore } from 'app/utils/stores';
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
+import { setImmediate } from 'timers';
 
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';

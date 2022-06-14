@@ -107,7 +107,10 @@ public class EgressEventsAdminControllerTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class
   })
-  @MockBean({BigQueryService.class, EgressEventAuditor.class})
+  @MockBean({
+    BigQueryService.class,
+    EgressEventAuditor.class,
+  })
   static class Configuration {
     @Bean
     WorkbenchConfig config() {
@@ -478,7 +481,8 @@ public class EgressEventsAdminControllerTest {
     return new DbEgressEvent()
         .setStatus(DbEgressEventStatus.PENDING)
         .setEgressWindowSeconds(600L)
-        .setSumologicEvent("{\"egressWindowStart\": 123}");
+        .setSumologicEvent(
+            "{\"egressWindowStart\": 123, \"timeWindowStart\": 123, \"timeWindowDuration\": 456}");
   }
 
   private DbUser saveNewUser(String username) {

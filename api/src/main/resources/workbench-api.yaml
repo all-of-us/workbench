@@ -248,6 +248,16 @@ paths:
           schema:
             type: boolean
 
+  "/v1/signOut":
+    post:
+      tags:
+        - user
+      description: SignOut user's gsuite account
+      operationId: signOut
+      responses:
+        204:
+          description: User signout success
+
   "/v1/acceptTermsOfService":
     post:
       tags:
@@ -1074,8 +1084,8 @@ paths:
       - workspaces
       consumes:
       - application/json
-      description: 'DEPRECATED in favor of shareWorkspacePatch.  
-        Shares/unshares a workspace with the given users and permissions.  Use the 
+      description: 'DEPRECATED in favor of shareWorkspacePatch.
+        Shares/unshares a workspace with the given users and permissions.  Use the
         WorkspaceAccessLevel enum value "NO ACCESS" to unshare. Note
         that the entire ACL must be provided to this method (including all existing
         users and roles), not just the additional roles desired. Clients should first
@@ -1098,8 +1108,8 @@ paths:
         - workspaces
       consumes:
         - application/json
-      description: 'Shares/unshares a workspace with the given users and permissions. Use the 
-        WorkspaceAccessLevel enum value "NO ACCESS" to unshare.  All existing users and roles 
+      description: 'Shares/unshares a workspace with the given users and permissions. Use the
+        WorkspaceAccessLevel enum value "NO ACCESS" to unshare.  All existing users and roles
         who are not specified in this request are not affected.'
       operationId: shareWorkspacePatch
       parameters:
@@ -2345,6 +2355,21 @@ paths:
           description: ACCEPTED
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concept-count":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - "$ref": "#/parameters/conceptSetId"
+    get:
+      tags:
+      - conceptSets
+      description: The number of concepts in this concept-set.
+      operationId: countConceptsInConceptSet
+      responses:
+        200:
+          description: A count of concepts
+          schema:
+            type: integer
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2739,6 +2764,10 @@ paths:
       consumes:
       - application/json
       parameters:
+      - in: query
+        name: backfill
+        type: boolean
+        required: false
       - in: body
         name: researcherIds
         required: true
@@ -3061,6 +3090,22 @@ paths:
           description: A cohortReviewId and cohort count
           schema:
             "$ref": "#/definitions/CohortReview"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/cohort-count":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - "$ref": "#/parameters/cohortId"
+    get:
+      tags:
+      - cohortReview
+      description: 'This endpoint will return the cohort total participant count.'
+      operationId: cohortParticipantCount
+      responses:
+        200:
+          description: A cohort total participant count
+          schema:
+            type: integer
+            format: int64
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/participants":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3081,6 +3126,32 @@ paths:
         description: request body for getting list of ParticipantCohortStatuses.
         schema:
           "$ref": "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of participants
+          schema:
+            "$ref": "#/definitions/CohortReviewWithCountResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cohortReviewId}/participants":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortId"
+      - "$ref": "#/parameters/cohortReviewId"
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: 'Returns a collection of participants for the specified cohortId.
+          This endpoint does pagination based on page, limit, order and column.'
+      operationId: getParticipantCohortStatuses
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            "$ref": "#/definitions/PageFilterRequest"
       responses:
         200:
           description: A collection of participants
@@ -6688,7 +6759,15 @@ definitions:
         description: Window duration over which the egress was detected, in seconds.
       creationTime:
         type: string
-        description: Time at which the egress event was recorded, in ISO 8601 format.
+        description: Time at which the egress event was recorded in the RW DB, in ISO 8601 format.  This is NOT the event time itself.
+      timeWindowStartEpochMillis:
+        type: integer
+        format: int64
+        description: The beginning of the time window in which egress was detected, in epoch milliseconds.
+      timeWindowEndEpochMillis:
+        type: integer
+        format: int64
+        description: The end of the time window in which egress was detected, in epoch milliseconds.
       status:
         $ref: "#/definitions/EgressEventStatus"
   ArrayOfLong:
@@ -7205,10 +7284,14 @@ definitions:
     type: object
     required:
     - size
+    - name
     properties:
       size:
         description: A sample size to review
         type: integer
+      name:
+        description: A name for the cohort review
+        type: string
   CohortReview:
     type: object
     required:
@@ -8954,6 +9037,18 @@ definitions:
         type: string
         format: date-time
         description: Time user first completed registration.
+      registeredTierFirstEnabledTime:
+        type: string
+        format: date-time
+        description: |-
+          The time at which this user's registered tier access was first granted, if ever.
+          Note: expiration of access does not affect this field.
+      controlledTierFirstEnabledTime:
+        type: string
+        format: date-time
+        description: |-
+          The time at which this user's controlled tier access was first granted, if ever.
+          Note: expiration of access does not affect this field.
       firstSignInTime:
         type: string
         format: date-time
@@ -9524,6 +9619,21 @@ definitions:
       ethnicityAsianOtherText:
         type: string
         description: Asian / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityBlackOtherText:
+        type: string
+        description: Black / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityHispanicOtherText:
+        type: string
+        description: Hispanic / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityMeNaOtherText:
+        type: string
+        description: Middle Eastern or North African / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityNhPiOtherText:
+        type: string
+        description: Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityWhiteOtherText:
+        type: string
+        description: White / None of these fully describe me, and I want to specify.  Max length 200.
       ethnicityOtherText:
         type: string
         description: None of these fully describe me, and I want to specify.  Max length 200.
@@ -9552,10 +9662,7 @@ definitions:
         type: boolean
       disabilityHearing:
         "$ref": "#/definitions/YesNoPreferNot"
-        description: >
-          Are you deaf or do you have serious difficulty hearing?
-          (Note: Some people who are deaf or have serious difficulty
-          hearing use assistive devices to communicate by phone.)
+        description: Are you deaf or do you have serious difficulty hearing?
       disabilitySeeing:
         "$ref": "#/definitions/YesNoPreferNot"
         description: Are you blind or do you have serious difficulty seeing, even when wearing glasses?
@@ -9597,6 +9704,7 @@ definitions:
       - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
       - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
       - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
+
       - ASIAN
       - ASIAN_INDIAN
       - ASIAN_CAMBODIAN
@@ -9609,11 +9717,72 @@ definitions:
       - ASIAN_PAKISTANI
       - ASIAN_VIETNAMESE
       - ASIAN_OTHER           # Asian / None of these fully describe me, and I want to specify
+
       - BLACK                 # Black, African American, or of African descent
+      - BLACK_AA              # Black / African American
+      - BLACK_BARBADIAN
+      - BLACK_CARIBBEAN
+      - BLACK_ETHIOPIAN
+      - BLACK_GHANAIAN
+      - BLACK_HAITIAN
+      - BLACK_JAMAICAN
+      - BLACK_LIBERIAN
+      - BLACK_NIGERIAN
+      - BLACK_SOMALI
+      - BLACK_SOUTH_AFRICAN
+      - BLACK_OTHER           # Black / None of these fully describe me, and I want to specify
+
       - HISPANIC              # Hispanic, Latino, or Spanish descent
+      - HISPANIC_COLUMBIAN
+      - HISPANIC_CUBAN
+      - HISPANIC_DOMINICAN
+      - HISPANIC_ECUADORIAN
+      - HISPANIC_HONDURAN
+      - HISPANIC_MEXICAN      # Hispanic / Mexican or Mexican American
+      - HISPANIC_PUERTO_RICAN
+      - HISPANIC_SALVADORAN
+      - HISPANIC_SPANISH
+      - HISPANIC_OTHER        # Hispanic / None of these fully describe me, and I want to specify
+
       - MENA                  # Middle Eastern or North African
+      - MENA_AFGHAN
+      - MENA_ALGERIAN
+      - MENA_EGYPTIAN
+      - MENA_IRANIAN
+      - MENA_IRAQI
+      - MENA_ISRAELI
+      - MENA_LEBANESE
+      - MENA_MOROCCAN
+      - MENA_SYRIAN
+      - MENA_TUNISIAN
+      - MENA_OTHER            # Middle Eastern or North African / None of these fully describe me, and I want to specify
+
       - NHPI                  # Native Hawaiian or other Pacific Islander
+      - NHPI_CHAMORRO
+      - NHPI_CHUUKESE
+      - NHPI_FIJIAN
+      - NHPI_MARSHALLESE
+      - NHPI_HAWAIIAN         # Native Hawaiian
+      - NHPI_PALAUAN
+      - NHPI_SAMOAN
+      - NHPI_TAHITIAN
+      - NHPI_TONGAN
+      - NHPI_OTHER            # Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify
+
       - WHITE                 # White, or of European descent
+      - WHITE_DUTCH
+      - WHITE_ENGLISH
+      - WHITE_EUROPEAN
+      - WHITE_FRENCH
+      - WHITE_GERMAN
+      - WHITE_IRISH
+      - WHITE_ITALIAN
+      - WHITE_NORWEGIAN
+      - WHITE_POLISH
+      - WHITE_SCOTTISH
+      - WHITE_SPANISH
+      - WHITE_OTHER           # White / None of these fully describe me, and I want to specify
+
       - OTHER                 # None of these fully describe me, and I want to specify
       - PREFER_NOT_TO_ANSWER
 

@@ -93,6 +93,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.clock = clock;
   }
 
+  @Override
+  public ResponseEntity<Long> cohortParticipantCount(
+      String workspaceNamespace, String workspaceId, Long cohortId) {
+    // this validates that the user is in the proper workspace
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
+    return ResponseEntity.ok(cohortReviewService.participationCount(dbCohort));
+  }
+
   /**
    * Create a cohort review per the specified workspaceId, cohortId and size. If participant cohort
    * status data exists for a review or no cohort review exists for cohortReviewId then throw a
@@ -113,19 +125,26 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
-    CohortReview cohortReview;
     DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
-    try {
-      cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
-    } catch (NotFoundException nfe) {
+    CohortReview cohortReview;
+
+    if (workbenchConfigProvider.get().featureFlags.enableMultiReview) {
       cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
+      cohortReview.setCohortName(request.getName());
       cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
-    }
-    if (cohortReview.getReviewSize() > 0) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
-              cohortId, cdrVersionId));
+    } else {
+      try {
+        cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
+      } catch (NotFoundException nfe) {
+        cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
+        cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
+      }
+      if (cohortReview.getReviewSize() > 0) {
+        throw new BadRequestException(
+            String.format(
+                "Bad Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
+                cohortId, cdrVersionId));
+      }
     }
 
     List<DbParticipantCohortStatus> participantCohortStatuses =
@@ -365,6 +384,63 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     } catch (NotFoundException nfe) {
       cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
     }
+
+    cohortReview.participantCohortStatuses(participantCohortStatuses);
+
+    // Wrapping the following logic behind the feature flag so that only in test/local
+    // opening/creating cohort review will create an entry in user recent resource with
+    // resource type cohortReview rather than cohort,
+    // while the rest of the environments remains as is
+    if (!workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      userRecentResourceService.updateCohortEntry(
+          cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
+    }
+
+    // Cohort review id will be null if the user is creating a new Cohort Review
+    // In such cases createCohort will update the entry in userrecentresource
+    // Cohort review id will be populated, if  user is viewing an existing cohort review
+    if (cohortReview.getCohortReviewId() != null) {
+      userRecentResourceService.updateCohortReviewEntry(
+          cohort.getWorkspaceId(),
+          userProvider.get().getUserId(),
+          cohortReview.getCohortReviewId());
+    }
+
+    return ResponseEntity.ok(
+        new CohortReviewWithCountResponse()
+            .cohortReview(cohortReview)
+            .queryResultSize(
+                pageRequest.getFilters().isEmpty()
+                    ? cohortReview.getReviewSize()
+                    : cohortReviewService.findCount(
+                        cohortReview.getCohortReviewId(), pageRequest)));
+  }
+
+  /**
+   * Get all participants for the specified cohortId and cohortReviewId. This endpoint does
+   * pagination based on page, pageSize, sortOrder and sortColumn.
+   */
+  @Override
+  public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatuses(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortId,
+      Long cohortReviewId,
+      PageFilterRequest request) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    CohortReview cohortReview;
+    List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
+    DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
+    PageRequest pageRequest = createPageRequest(request);
+    convertGenderRaceEthnicitySortOrder(pageRequest);
+
+    cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(cohort.getWorkspaceId(), cohortReviewId);
+    participantCohortStatuses =
+        cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
 
     cohortReview.participantCohortStatuses(participantCohortStatuses);
 

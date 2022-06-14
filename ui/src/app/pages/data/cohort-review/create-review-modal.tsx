@@ -27,6 +27,7 @@ import {
   currentCohortReviewStore,
   NavigationProps,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -67,6 +68,7 @@ interface Props extends NavigationProps {
   cohort: Cohort;
   cohortReview: CohortReview;
   created: Function;
+  participantCount?: number;
   workspace: WorkspaceData;
 }
 
@@ -102,7 +104,10 @@ export const CreateReviewModal = fp.flow(
         workspace: { id, namespace },
       } = this.props;
       const { numberOfParticipants } = this.state;
-      const request = { size: parseInt(numberOfParticipants, 10) };
+      const request = {
+        name: cohort.name,
+        size: parseInt(numberOfParticipants, 10),
+      };
 
       cohortReviewApi()
         .createCohortReview(namespace, id, cohort.id, request)
@@ -110,17 +115,21 @@ export const CreateReviewModal = fp.flow(
           currentCohortReviewStore.next(response);
           queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
           this.setState({ creating: false });
-          this.props.created(true);
-          this.props.navigate([
-            'workspaces',
-            namespace,
-            id,
-            'data',
-            'cohorts',
-            cohort.id,
-            'review',
-            'participants',
-          ]);
+          if (serverConfigStore.get().config.enableMultiReview) {
+            this.props.created(response);
+          } else {
+            this.props.created(true);
+            this.props.navigate([
+              'workspaces',
+              namespace,
+              id,
+              'data',
+              'cohorts',
+              cohort.id,
+              'review',
+              'participants',
+            ]);
+          }
         });
     }
 
@@ -128,9 +137,12 @@ export const CreateReviewModal = fp.flow(
       const {
         cohort,
         cohortReview: { matchedParticipantCount },
+        participantCount,
       } = this.props;
+      const cohortParticipantCount =
+        participantCount || matchedParticipantCount;
       const { creating, numberOfParticipants } = this.state;
-      const max = Math.min(matchedParticipantCount, 10000);
+      const max = Math.min(cohortParticipantCount, 10000);
       const errors = validate(
         { numberOfParticipants },
         {
@@ -151,10 +163,10 @@ export const CreateReviewModal = fp.flow(
           <ModalBody style={styles.body}>
             <div style={{ marginBottom: '0.5rem' }}>
               Cohort {cohort.name} has{' '}
-              {matchedParticipantCount.toLocaleString() + ' '}
+              {cohortParticipantCount.toLocaleString() + ' '}
               participants for possible review. How many would you like to
               review?
-              {matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
+              {cohortParticipantCount > 10000 && <span> (max 10,000)</span>}
             </div>
             <ValidationError>
               {summarizeErrors(

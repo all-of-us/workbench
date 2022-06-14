@@ -292,6 +292,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
     user.setUsername(username);
+    user.setContactEmail(username);
     user.setDisabled(false);
     try {
       user = userDao.save(user);
@@ -899,6 +900,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
+  }
+
+  @Override
+  public void signOut(DbUser user) {
+    directoryService.signOut(user.getUsername());
   }
 
   /**

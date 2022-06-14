@@ -636,6 +636,13 @@ public class UserServiceTest {
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
+  @Test
+  public void testCreateServiceAccountUser() {
+    String username = "test@@appspot.gserviceaccount.com";
+    userService.createServiceAccountUser(username);
+    assertThat(userDao.findUserByUsername(username)).isNotNull();
+  }
+
   private void assertModuleCompletionEqual(
       DbAccessModuleName moduleName, DbUser user, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);

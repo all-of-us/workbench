@@ -30,15 +30,16 @@ public class DbCdrVersion {
   private String wgsFilterSetName;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
-  // TODO(calbach): Remove these columns.
-  private String allSamplesWgsDataBucket;
-  private String singleSampleArrayDataBucket;
 
   private String storageBasePath;
   private String wgsVcfMergedStoragePath;
   private String wgsHailStoragePath;
+  private String wgsCramManifestPath;
   private String microarrayHailStoragePath;
+  // Older CDR versions only, new CDRs should use microarrayVcfManifestpath.
   private String microarrayVcfSingleSampleStoragePath;
+  private String microarrayVcfManifestPath;
+  private String microarrayIdatManifestPath;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -211,26 +212,6 @@ public class DbCdrVersion {
     return this;
   }
 
-  @Column(name = "all_samples_wgs_data_bucket")
-  public String getAllSamplesWgsDataBucket() {
-    return allSamplesWgsDataBucket;
-  }
-
-  public DbCdrVersion setAllSamplesWgsDataBucket(String allSamplesWgsDataBucket) {
-    this.allSamplesWgsDataBucket = allSamplesWgsDataBucket;
-    return this;
-  }
-
-  @Column(name = "single_sample_array_data_bucket")
-  public String getSingleSampleArrayDataBucket() {
-    return singleSampleArrayDataBucket;
-  }
-
-  public DbCdrVersion setSingleSampleArrayDataBucket(String singleSampleArrayDataBucket) {
-    this.singleSampleArrayDataBucket = singleSampleArrayDataBucket;
-    return this;
-  }
-
   @Column(name = "storage_base_path")
   public String getStorageBasePath() {
     return storageBasePath;
@@ -282,6 +263,36 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "wgs_cram_manifest_path")
+  public String getWgsCramManifestPath() {
+    return wgsCramManifestPath;
+  }
+
+  public DbCdrVersion setWgsCramManifestPath(String wgsCramManifestPath) {
+    this.wgsCramManifestPath = wgsCramManifestPath;
+    return this;
+  }
+
+  @Column(name = "microarray_vcf_manifest_path")
+  public String getMicroarrayVcfManifestPath() {
+    return microarrayVcfManifestPath;
+  }
+
+  public DbCdrVersion setMicroarrayVcfManifestPath(String microarrayVcfManifestPath) {
+    this.microarrayVcfManifestPath = microarrayVcfManifestPath;
+    return this;
+  }
+
+  @Column(name = "microarray_idat_manifest_path")
+  public String getMicroarrayIdatManifestPath() {
+    return microarrayIdatManifestPath;
+  }
+
+  public DbCdrVersion setMicroarrayIdatManifestPath(String microarrayIdatManifestPath) {
+    this.microarrayIdatManifestPath = microarrayIdatManifestPath;
+    return this;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -297,14 +308,17 @@ public class DbCdrVersion {
         numParticipants,
         cdrDbName,
         wgsBigqueryDataset,
+        wgsFilterSetName,
         hasFitbitData,
         hasCopeSurveyData,
-        allSamplesWgsDataBucket,
         storageBasePath,
         wgsVcfMergedStoragePath,
         wgsHailStoragePath,
+        wgsCramManifestPath,
         microarrayHailStoragePath,
-        microarrayVcfSingleSampleStoragePath);
+        microarrayVcfSingleSampleStoragePath,
+        microarrayVcfManifestPath,
+        microarrayIdatManifestPath);
   }
 
   @Override
@@ -312,7 +326,7 @@ public class DbCdrVersion {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof DbCdrVersion)) {
       return false;
     }
     DbCdrVersion that = (DbCdrVersion) o;
@@ -328,15 +342,17 @@ public class DbCdrVersion {
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(cdrDbName, that.cdrDbName)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
+        && Objects.equals(wgsFilterSetName, that.wgsFilterSetName)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
-        && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket)
-        && Objects.equals(singleSampleArrayDataBucket, that.singleSampleArrayDataBucket)
         && Objects.equals(storageBasePath, that.storageBasePath)
         && Objects.equals(wgsVcfMergedStoragePath, that.wgsVcfMergedStoragePath)
         && Objects.equals(wgsHailStoragePath, that.wgsHailStoragePath)
+        && Objects.equals(wgsCramManifestPath, that.wgsCramManifestPath)
         && Objects.equals(microarrayHailStoragePath, that.microarrayHailStoragePath)
         && Objects.equals(
-            microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath);
+            microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath)
+        && Objects.equals(microarrayVcfManifestPath, that.microarrayVcfManifestPath)
+        && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath);
   }
 }

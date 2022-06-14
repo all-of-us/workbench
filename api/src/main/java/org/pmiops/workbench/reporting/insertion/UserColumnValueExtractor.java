@@ -38,6 +38,12 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   FIRST_REGISTRATION_COMPLETION_TIME(
       "first_registration_completion_time",
       u -> toInsertRowString(u.getFirstRegistrationCompletionTime())),
+  REGISTERED_TIER_FIRST_ENABLED_TIME(
+      "registered_tier_first_enabled_time",
+      u -> toInsertRowString(u.getRegisteredTierFirstEnabledTime())),
+  CONTROLLED_TIER_FIRST_ENABLED_TIME(
+      "controlled_tier_first_enabled_time",
+      u -> toInsertRowString(u.getControlledTierFirstEnabledTime())),
   FIRST_SIGN_IN_TIME("first_sign_in_time", u -> toInsertRowString(u.getFirstSignInTime())),
   FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE(
       "free_tier_credits_limit_dollars_override",

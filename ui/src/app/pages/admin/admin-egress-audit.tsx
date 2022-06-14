@@ -117,36 +117,46 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
   const event = egressDetails.egressEvent;
   const eventChanged =
     !!pendingUpdateEvent && !fp.equals(pendingUpdateEvent, event);
-  const [username] = event.sourceUserEmail.split('@');
+
+  const {
+    sourceUserEmail,
+    sourceWorkspaceNamespace,
+    sourceGoogleProject,
+    status,
+    egressEventId,
+    egressMegabytes,
+    egressWindowSeconds,
+    timeWindowStartEpochMillis,
+    timeWindowEndEpochMillis,
+  } = event;
+
+  const [username] = sourceUserEmail.split('@');
+
   return (
     <div style={{ padding: '0 20px' }}>
-      <h2>Egress event {event.egressEventId}</h2>
+      <h2>Egress event {egressEventId}</h2>
       <div style={{ display: 'table', marginBottom: '15px' }}>
-        <DetailRow label='Detection time'>
-          {new Date(event.creationTime).toLocaleString()}
+        <DetailRow label='Detection window'>
+          {new Date(timeWindowStartEpochMillis).toLocaleString()} to{' '}
+          {new Date(timeWindowEndEpochMillis).toLocaleString()}
         </DetailRow>
         <DetailRow label='Source user'>
-          <AdminUserLink {...{ username }}>
-            {event.sourceUserEmail}
-          </AdminUserLink>
+          <AdminUserLink {...{ username }}>{sourceUserEmail}</AdminUserLink>
         </DetailRow>
         <DetailRow label='Source workspace'>
           <StyledRouterLink
-            path={`/admin/workspaces/${event.sourceWorkspaceNamespace}`}
+            path={`/admin/workspaces/${sourceWorkspaceNamespace}`}
           >
-            {event.sourceWorkspaceNamespace}
+            {sourceWorkspaceNamespace}
           </StyledRouterLink>
         </DetailRow>
-        <DetailRow label='Google project'>
-          {event.sourceGoogleProject}
-        </DetailRow>
+        <DetailRow label='Google project'>{sourceGoogleProject}</DetailRow>
         <DetailRow label='Egress volume'>
-          {event.egressMegabytes?.toFixed(2)} MB (over{' '}
-          {event.egressWindowSeconds / 60} min)
+          {egressMegabytes?.toFixed(2)} MB (over {egressWindowSeconds / 60} min)
         </DetailRow>
         <DetailRow label='Status'>
           <Dropdown
-            value={pendingUpdateEvent?.status ?? event.status}
+            value={pendingUpdateEvent?.status ?? status}
             options={mutableEgressEventStatuses}
             onChange={(e) => {
               setPendingUpdateEvent({

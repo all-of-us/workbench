@@ -92,10 +92,9 @@
       "cdrDbName": "synth_c_2019q4_38",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/",
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled"
     },

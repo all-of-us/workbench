@@ -8,7 +8,6 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 import { cdrVersionStore, profileStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
@@ -22,9 +21,9 @@ describe('CTAvailableBannerMaybe', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
-  const component = () => {
+  const component = (path: string = '/') => {
     return mount(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[path]}>
         <CTAvailableBannerMaybe />
       </MemoryRouter>
     );
@@ -87,9 +86,6 @@ describe('CTAvailableBannerMaybe', () => {
       defaultCdrVersionCreationTime: TIME2,
     };
 
-    // the user is not currently visiting the DAR page
-    window.location.pathname = '/';
-
     updateProfile({ newTierEligibilities, newUserTiers, newFirstSignIn });
     updateCdrVersions(controlledTierCdrVersions);
   };
@@ -135,28 +131,22 @@ describe('CTAvailableBannerMaybe', () => {
   const userIsNew = () => {
     updateProfile({ newFirstSignIn: TIME3 });
   };
-  const darActive = () => {
-    window.location.pathname = DATA_ACCESS_REQUIREMENTS_PATH;
-  };
+  const darActive = () => component(DATA_ACCESS_REQUIREMENTS_PATH);
 
   test.each([
-    ['the user is not CT eligible', userIneligible, () => {}],
-    ['the user has CT access already', ctAccess, () => {}],
-    ['the user is too new', userIsNew, () => {}],
+    ['the user is not CT eligible', userIneligible, component],
+    ['the user has CT access already', ctAccess, component],
+    ['the user is too new', userIsNew, component],
     ['the user is currently visiting the DAR', () => {}, darActive],
   ])(
     'should not render if all of the requirements are met, except that %s',
-    (desc, preMountModifier, postMountModifier) => {
+    (desc, preMountModifier, initWrapper) => {
       fulfillAllBannerRequirements();
 
       preMountModifier();
 
-      const wrapper = component();
+      const wrapper = initWrapper();
       expect(wrapper.exists()).toBeTruthy();
-
-      postMountModifier();
-      waitOneTickAndUpdate(wrapper);
-
       expect(ctBannerExists(wrapper)).toBeFalsy();
     }
   );

@@ -9,7 +9,7 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-const LATEST_TOS_VERSION = 1;
+export const LATEST_TOS_VERSION = 1;
 const baseCheckboxLabelStyle = {
   color: colors.primary,
   fontFamily: 'Montserrat',

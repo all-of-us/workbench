@@ -1,7 +1,11 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -70,8 +74,25 @@ public class WorkbenchConfig {
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
 
+    // The legacy free tier billing account id that is migrating away. This value helps to make
+    // migration process smooth.
+    // Null if not set in Config.
+    @Nullable public String legacyAccountId;
+
     public String freeTierBillingAccountName() {
       return "billingAccounts/" + accountId;
+    }
+
+    public Optional<String> legacyFreeTierBillingAccountName() {
+      return Optional.ofNullable(legacyAccountId).map(a -> "billingAccounts/" + a);
+    }
+
+    /// All valid free tier billing accounts, including accountId and legacyAccountId(if present).
+    public Set<String> freeTierBillingAccountNames() {
+      Set<String> billingAccountNames = new HashSet<>();
+      billingAccountNames.add(freeTierBillingAccountName());
+      legacyFreeTierBillingAccountName().ifPresent(billingAccountNames::add);
+      return billingAccountNames;
     }
 
     // The full table name for the BigQuery billing export, which is read from by the free-tier
@@ -80,7 +101,7 @@ public class WorkbenchConfig {
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;
     // Thresholds for email alerting based on free tier usage, by cost
-    public ArrayList<Double> freeTierCostAlertThresholds;
+    public List<Double> freeTierCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
   }
@@ -118,6 +139,9 @@ public class WorkbenchConfig {
     // information such as runtime VM server logs.
     public String workspaceLogsProject;
 
+    // The workspace GCS bucket location
+    public String workspaceBucketLocation;
+
     public RuntimeImages runtimeImages;
 
     // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
@@ -125,14 +149,14 @@ public class WorkbenchConfig {
   }
 
   public static class RuntimeImages {
-    public ArrayList<String> gce;
-    public ArrayList<String> dataproc;
+    public List<String> gce;
+    public List<String> dataproc;
   }
 
   public static class AuthConfig {
     // A list of GCP service accounts (not affiliated with researchers) that can be used to
     // make API calls.
-    public ArrayList<String> serviceAccountApiUsers;
+    public List<String> serviceAccountApiUsers;
   }
 
   public static class WgsCohortExtractionConfig {
@@ -152,9 +176,9 @@ public class WorkbenchConfig {
     // backwards incompatible changes are introduced into the Workflow, e.g. new required inputs
     // are added.
     public Integer extractionMethodLogicalVersion;
-    public String extractionCohortsDataset;
+    @Deprecated public String extractionCohortsDataset;
     public String extractionDestinationDataset;
-    public String extractionTempTablesDataset;
+    @Deprecated public String extractionTempTablesDataset;
     // TODO(RW-8265): rm on following release
     @Deprecated public String extractionFilterSetName;
     public String gatkJarUri;

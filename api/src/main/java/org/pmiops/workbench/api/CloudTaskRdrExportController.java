@@ -26,12 +26,12 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportResearcherData(ArrayOfLong researcherIds) {
+  public ResponseEntity<Void> exportResearcherData(ArrayOfLong researcherIds, Boolean backfill) {
     if (researcherIds == null || researcherIds.isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    rdrExportService.exportUsers(researcherIds);
+    rdrExportService.exportUsers(researcherIds, Boolean.TRUE.equals(backfill));
 
     return ResponseEntity.noContent().build();
   }

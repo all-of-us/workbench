@@ -13,6 +13,7 @@
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
+    "workspaceBucketLocation": "us-central1",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
@@ -20,7 +21,8 @@
     "gceVmZone": "us-central1-c"
   },
   "billing": {
-    "accountId": "00293C-5DEA2D-6887E7",
+    "legacyAccountId": "00293C-5DEA2D-6887E7",
+    "accountId": "013713-75CFF6-1751E5",
     "projectNamePrefix": "aou-rw-perf-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "defaultFreeCreditsDollarLimit": 300.0,
@@ -44,13 +46,10 @@
     "extractionPetServiceAccount": "pet-111879944971009838720@aouwgscohortextraction-perf.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-perf",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 4,
-    "extractionMethodLogicalVersion": 2,
-    "extractionCohortsDataset": "fc-aou-cdr-perf-ct.wgs_extraction_cohorts",
+    "extractionMethodConfigurationVersion": 5,
+    "extractionMethodLogicalVersion": 3,
     "extractionDestinationDataset": "fc-aou-cdr-perf-ct.wgs_extraction_destination",
-    "extractionTempTablesDataset": "fc-aou-cdr-perf-ct.wgs_extraction_temp_tables",
-    "extractionFilterSetName": "example",
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-464-g86f1116-SNAPSHOT-local.jar",
+    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
   "cdr": {

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.exfiltration;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -40,8 +39,10 @@ import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.stereotype.Service;
 
 /** Service for automated egress alert remediation. */
@@ -64,6 +65,7 @@ public class EgressRemediationService {
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
+  private final EgressEventMapper egressEventMapper;
   private final JiraService jiraService;
 
   public EgressRemediationService(
@@ -74,6 +76,7 @@ public class EgressRemediationService {
       LeonardoNotebooksClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
+      EgressEventMapper egressEventMapper,
       JiraService jiraService) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -82,6 +85,7 @@ public class EgressRemediationService {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
+    this.egressEventMapper = egressEventMapper;
     this.jiraService = jiraService;
   }
 
@@ -336,8 +340,7 @@ public class EgressRemediationService {
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
-    SumologicEgressEvent originalEvent =
-        new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
+    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
     return Stream.concat(
         Stream.of(
             JiraContent.text(
@@ -371,8 +374,8 @@ public class EgressRemediationService {
   private Stream<AtlassianContent> jiraEventDescriptionShort(
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
-    SumologicEgressEvent originalEvent =
-        new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
+    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
+    EgressEvent apiEvent = egressEventMapper.toApiEvent(event);
     return Stream.of(
         JiraContent.text(String.format("Egress event details (as RW admin): ", action)),
         JiraContent.link(
@@ -388,9 +391,11 @@ public class EgressRemediationService {
             String.format("Google project ID: %s\n\n", originalEvent.getProjectName())),
         JiraContent.text(
             String.format(
-                "Detected @ %s\n",
+                "Detected between %s and %s\n",
                 JiraService.detailedDateFormat.format(
-                    Instant.ofEpochMilli(originalEvent.getTimeWindowStart())))),
+                    Instant.ofEpochMilli(apiEvent.getTimeWindowStartEpochMillis())),
+                JiraService.detailedDateFormat.format(
+                    Instant.ofEpochMilli(apiEvent.getTimeWindowEndEpochMillis())))),
         JiraContent.text(
             String.format(
                 "Total egress detected: %.2f MiB in %d secs\n",

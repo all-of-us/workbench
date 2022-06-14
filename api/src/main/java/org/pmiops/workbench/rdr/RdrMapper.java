@@ -266,4 +266,7 @@ public interface RdrMapper {
   }
 
   RdrDemographicSurveyV2 toDemographicSurveyV2(DemographicSurveyV2 demoSurveyV2);
+
+  // for round trip testing only
+  DemographicSurveyV2 toModelDemographicSurveyV2(RdrDemographicSurveyV2 demoSurveyV2);
 }

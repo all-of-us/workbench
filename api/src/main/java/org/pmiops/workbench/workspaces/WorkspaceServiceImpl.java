@@ -399,8 +399,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       return;
     }
 
-    if (newBillingAccountName.equals(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+    if (workbenchConfigProvider
+        .get()
+        .billing
+        .freeTierBillingAccountNames()
+        .contains(newBillingAccountName)) {
       fireCloudService.updateBillingAccountAsService(
           workspace.getWorkspaceNamespace(), newBillingAccountName);
     } else {
@@ -423,8 +426,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     workspace.setBillingAccountName(newBillingAccountName);
 
-    if (newBillingAccountName.equals(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+    if (workbenchConfigProvider
+        .get()
+        .billing
+        .freeTierBillingAccountNames()
+        .contains(newBillingAccountName)) {
       workspace.setBillingStatus(
           freeTierBillingService.userHasRemainingFreeTierCredits(workspace.getCreator())
               ? BillingStatus.ACTIVE

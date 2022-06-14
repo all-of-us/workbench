@@ -10,6 +10,7 @@ import {
   PersistentDiskRequest,
   Runtime,
   RuntimeConfigurationType,
+  RuntimeError,
   RuntimeStatus,
   SecuritySuspendedErrorParameters,
 } from 'generated/fetch';
@@ -53,6 +54,19 @@ export class ComputeSecuritySuspendedError extends Error {
     Object.setPrototypeOf(this, ComputeSecuritySuspendedError.prototype);
 
     this.name = 'ComputeSecuritySuspendedError';
+  }
+}
+
+export class RuntimeStatusError extends Error {
+  constructor(public errors?: RuntimeError[]) {
+    super(
+      'runtime creation failed:\n' +
+        errors?.map((m) => m.errorMessage).join('\n')
+    );
+    // See https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, RuntimeStatusError.prototype);
+
+    this.name = 'RuntimeStatusError';
   }
 }
 
@@ -110,6 +124,10 @@ export interface UpdateMessaging {
   warn?: string;
   warnMore?: string;
 }
+
+export const RUNTIME_ERROR_STATUS_MESSAGE_SHORT =
+  'An error was encountered with your cloud environment. ' +
+  'To resolve, please see the cloud analysis environment side panel.';
 
 const errorToSecuritySuspendedParams = async (
   error
@@ -884,11 +902,15 @@ export const maybeInitializeRuntime = async (
   }
 
   try {
-    return await LeoRuntimeInitializer.initialize({
+    const runtime = await LeoRuntimeInitializer.initialize({
       workspaceNamespace,
       pollAbortSignal: signal,
       targetRuntime,
     });
+    if (runtime.status === RuntimeStatus.Error) {
+      throw new RuntimeStatusError(runtime.errors);
+    }
+    return runtime;
   } catch (error) {
     throw await maybeUnwrapSecuritySuspendedError(error);
   }

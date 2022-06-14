@@ -1,25 +1,27 @@
 import * as React from 'react';
 import { useParams } from 'react-router';
+import * as fp from 'lodash/fp';
 
 const { useEffect, useState } = React;
 
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-
 import {
+  CohortReview,
   CriteriaType,
   Domain,
   FilterColumns as Columns,
   PageFilterRequest as Request,
   SortOrder,
+  WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
 import { CohortReviewListItem } from 'app/pages/data/cohort-review/cohort-review-list-item';
+import { CohortReviewParticipantsTable } from 'app/pages/data/cohort-review/cohort-review-participants-table';
+import { CreateCohortReviewModal } from 'app/pages/data/cohort-review/create-cohort-review-modal';
 import { visitsFilterOptions } from 'app/services/review-state.service';
 import {
   cohortBuilderApi,
@@ -28,7 +30,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { datatableStyles } from 'app/styles/datatable';
-import { reactStyles } from 'app/utils';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
@@ -68,6 +70,19 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
     cursor: 'pointer',
   },
+  reviewList: {
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    borderRadius: '3px',
+    flex: '0 0 20%',
+    marginBottom: '0.25rem',
+  },
+  reviewListHeader: {
+    borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    color: colors.primary,
+    fontSize: '16px',
+    fontWeight: 600,
+    padding: '0.5rem',
+  },
   sortIcon: {
     marginTop: '4px',
     color: '#2691D0',
@@ -89,210 +104,222 @@ const reverseColumnEnum = {
   deceased: Columns.DECEASED,
   status: Columns.STATUS,
 };
-const fields = [
-  { field: 'participantId', name: 'Participant ID' },
-  { field: 'birthDate', name: 'Date of Birth' },
-  { field: 'deceased', name: 'Deceased' },
-  { field: 'sexAtBirth', name: 'Sex at Birth' },
-  { field: 'gender', name: 'Gender' },
-  { field: 'race', name: 'Race' },
-  { field: 'ethnicity', name: 'Ethnicity' },
-  { field: 'status', name: 'Status' },
-];
 const rows = 25;
+const defaultReviewQuery = {
+  page: 0,
+  pageSize: rows,
+  sortColumn: reverseColumnEnum.participantId,
+  sortOrder: SortOrder.Asc,
+  filters: { items: [] },
+} as Request;
 
-export const CohortReviewPage = withSpinnerOverlay()(
-  ({ hideSpinner, showSpinner }) => {
-    const { ns, wsid, cid } = useParams<MatchParams>();
-    const [navigate, navigateByUrl] = useNavigation();
-    const [cohort, setCohort] = useState(undefined);
-    const [cohortReviews, setCohortReviews] = useState(undefined);
-    const [activeReview, setActiveReview] = useState(undefined);
-    const [loading, setLoading] = useState(true);
+export const CohortReviewPage = fp.flow(
+  withCurrentWorkspace(),
+  withSpinnerOverlay()
+)(({ hideSpinner, showSpinner, workspace }) => {
+  const { ns, wsid, cid } = useParams<MatchParams>();
+  const [navigate, navigateByUrl] = useNavigation();
+  const [cohort, setCohort] = useState(undefined);
+  const [cohortReviews, setCohortReviews] = useState(undefined);
+  const [activeReview, setActiveReview] = useState(undefined);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [participantCount, setParticipantCount] = useState(undefined);
+  const readOnly = workspace.accessLevel === WorkspaceAccessLevel.READER;
 
-    const getParticipantData = () => {
-      showSpinner();
-      const query = {
-        page: 0,
-        pageSize: rows,
-        sortColumn: reverseColumnEnum.participantId,
-        sortOrder: SortOrder.Asc,
-        filters: { items: [] },
-      } as Request;
-      cohortReviewApi()
-        .getParticipantCohortStatusesOld(ns, wsid, +cid, query)
-        .then((response) => {
-          setActiveReview(response.cohortReview);
-          hideSpinner();
+  const getParticipantData = (cohortReviewId: number) => {
+    showSpinner();
+    cohortReviewApi()
+      .getParticipantCohortStatuses(
+        ns,
+        wsid,
+        +cid,
+        cohortReviewId,
+        defaultReviewQuery
+      )
+      .then(({ cohortReview }) => {
+        setCohortReviews((prevCohortReviews) => {
+          const updateIndex = prevCohortReviews.findIndex(
+            (cr) => cr.cohortReviewId === cohortReview.cohortReviewId
+          );
+          if (updateIndex > -1) {
+            prevCohortReviews[updateIndex] = cohortReview;
+          }
+          return prevCohortReviews;
         });
-    };
+        setActiveReview(cohortReview);
+        hideSpinner();
+      });
+  };
 
-    const loadCohortAndReviews = async () => {
-      const [cohortResponse, cohortReviewResponse] = await Promise.all([
+  const loadCohortAndReviews = async () => {
+    const [cohortResponse, cohortReviewResponse, participantCountResponse] =
+      await Promise.all([
         cohortsApi().getCohort(ns, wsid, +cid),
         cohortReviewApi().getCohortReviewsByCohortId(ns, wsid, +cid),
+        cohortReviewApi().cohortParticipantCount(ns, wsid, +cid),
       ]);
-      setCohort(cohortResponse);
-      setCohortReviews(cohortReviewResponse.items);
-      if (cohortReviewResponse.items.length > 0) {
-        setActiveReview(cohortReviewResponse.items[0]);
-        getParticipantData();
-      } else {
-        hideSpinner();
-      }
-      setLoading(false);
-    };
+    setCohort(cohortResponse);
+    setCohortReviews(cohortReviewResponse.items);
+    setParticipantCount(participantCountResponse);
+    if (cohortReviewResponse.items.length > 0) {
+      setActiveReview(cohortReviewResponse.items[0]);
+      getParticipantData(cohortReviewResponse.items[0].cohortReviewId);
+    } else {
+      hideSpinner();
+    }
+    setLoading(false);
+  };
 
-    const getVisitsFilterOptions = () => {
-      cohortBuilderApi()
-        .findCriteriaBy(
-          ns,
-          wsid,
-          Domain[Domain.VISIT],
-          CriteriaType[CriteriaType.VISIT]
-        )
-        .then((response) => {
-          visitsFilterOptions.next([
-            { value: null, label: 'Any' },
-            ...response.items.map((option) => {
-              return { value: option.name, label: option.name };
-            }),
-          ]);
-        });
-    };
+  const getVisitsFilterOptions = () => {
+    cohortBuilderApi()
+      .findCriteriaBy(
+        ns,
+        wsid,
+        Domain[Domain.VISIT],
+        CriteriaType[CriteriaType.VISIT]
+      )
+      .then((response) => {
+        visitsFilterOptions.next([
+          { value: null, label: 'Any' },
+          ...response.items.map((option) => {
+            return { value: option.name, label: option.name };
+          }),
+        ]);
+      });
+  };
 
-    useEffect(() => {
-      loadCohortAndReviews();
-      if (!visitsFilterOptions.getValue()) {
-        getVisitsFilterOptions();
-      }
-    }, []);
+  useEffect(() => {
+    loadCohortAndReviews();
+    if (!visitsFilterOptions.getValue()) {
+      getVisitsFilterOptions();
+    }
+  }, []);
 
-    const columns = fields.map((col) => {
-      const header = (
+  const onReviewCreate = (review: CohortReview) => {
+    setCohortReviews((prevCohortReviews) => [...prevCohortReviews, review]);
+    setActiveReview(review);
+    setShowCreateModal(false);
+  };
+
+  const onReviewSelect = (review: CohortReview) => {
+    if (review.participantCohortStatuses?.length) {
+      setActiveReview(review);
+    } else {
+      getParticipantData(review.cohortReviewId);
+    }
+  };
+
+  return (
+    <FadeBox style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}>
+      {loading ? (
+        <SpinnerOverlay />
+      ) : (
         <React.Fragment>
-          <span style={styles.columnHeader}>{col.name}</span>
-        </React.Fragment>
-      );
-      return (
-        <Column
-          style={styles.tableBody}
-          bodyStyle={styles.columnBody}
-          key={col.field}
-          field={col.field}
-          header={header}
-          sortable
-        />
-      );
-    });
-
-    return (
-      <FadeBox style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}>
-        {loading ? (
-          <SpinnerOverlay />
-        ) : (
-          <React.Fragment>
-            <style>{datatableStyles}</style>
-            <div>
-              <button
-                style={styles.backBtn}
-                type='button'
+          <style>{datatableStyles}</style>
+          <div>
+            <button
+              style={styles.backBtn}
+              type='button'
+              onClick={() =>
+                navigateByUrl(`workspaces/${ns}/${wsid}/data/cohorts/build`, {
+                  queryParams: { cohortId: cid },
+                })
+              }
+            >
+              Back to cohort
+            </button>
+            <h4 style={styles.title}>
+              Review Sets for {cohort.name}
+              <Button
+                style={{ float: 'right', height: '1.3rem' }}
+                disabled={loading}
                 onClick={() =>
-                  navigateByUrl(`workspaces/${ns}/${wsid}/data/cohorts/build`, {
-                    queryParams: { cohortId: cid },
-                  })
+                  navigate([
+                    'workspaces',
+                    ns,
+                    wsid,
+                    'data',
+                    'cohorts',
+                    cid,
+                    'review',
+                    'cohort-description',
+                  ])
                 }
               >
-                Back to cohort
-              </button>
-              <h4 style={styles.title}>
-                Review Sets for {cohort.name}
-                <Button
-                  style={{ float: 'right', height: '1.3rem' }}
-                  disabled={loading}
-                  onClick={() =>
-                    navigate([
-                      'workspaces',
-                      ns,
-                      wsid,
-                      'data',
-                      'cohorts',
-                      cid,
-                      'review',
-                      'cohort-description',
-                    ])
-                  }
+                Cohort Description
+              </Button>
+            </h4>
+            <div style={styles.description}>{cohort.description}</div>
+          </div>
+          <div style={{ display: 'flex' }}>
+            <div style={styles.reviewList}>
+              <div style={styles.reviewListHeader}>
+                Review Sets
+                <Clickable
+                  style={{ display: 'inline-block', marginLeft: '0.5rem' }}
+                  disabled={readOnly}
+                  onClick={() => setShowCreateModal(true)}
                 >
-                  Cohort Description
-                </Button>
-              </h4>
-              <div style={styles.description}>{cohort.description}</div>
+                  <ClrIcon shape='plus-circle' class='is-solid' size={18} />
+                </Clickable>
+              </div>
+              <div style={{ minHeight: '10rem', padding: '0.25rem' }}>
+                {cohortReviews.map((cohortReview, cr) => (
+                  <CohortReviewListItem
+                    key={cr}
+                    cohortReview={cohortReview}
+                    onUpdate={() => loadCohortAndReviews()}
+                    onSelect={() => {
+                      if (
+                        activeReview?.cohortReviewId !==
+                        cohortReview.cohortReviewId
+                      ) {
+                        onReviewSelect(cohortReview);
+                      }
+                    }}
+                    selected={
+                      activeReview?.cohortReviewId ===
+                      cohortReview.cohortReviewId
+                    }
+                    existingNames={cohortReviews.map(
+                      ({ cohortName }) => cohortName
+                    )}
+                  />
+                ))}
+              </div>
             </div>
-            <div style={{ display: 'flex' }}>
-              <div
-                style={{
-                  border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-                  borderRadius: '3px',
-                  flex: '0 0 20%',
-                }}
-              >
+            <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}>
+              {!cohortReviews.length ? (
                 <div
                   style={{
-                    borderBottom: `1px solid ${colorWithWhiteness(
-                      colors.black,
-                      0.8
-                    )}`,
-                    color: colors.primary,
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    padding: '0.5rem',
+                    color: colorWithWhiteness(colors.dark, 0.6),
+                    fontSize: '20px',
+                    fontWeight: 400,
+                    padding: '1rem',
                   }}
                 >
-                  Review Sets
-                  <ClrIcon
-                    shape='plus-circle'
-                    class='is-solid'
-                    size={18}
-                    style={{ cursor: 'pointer', marginLeft: '0.5rem' }}
-                  />
+                  There are no review sets for this cohort. Click the plus icon
+                  to create a review set.
                 </div>
-                <div style={{ padding: '0.25rem' }}>
-                  {cohortReviews.map((cohortReview, cr) => (
-                    <CohortReviewListItem
-                      key={cr}
-                      cohortReview={cohortReview}
-                      onUpdate={() => loadCohortAndReviews()}
-                      onSelect={() => {
-                        setActiveReview(cohortReview);
-                        getParticipantData();
-                      }}
-                      selected={
-                        activeReview.cohortReviewId ===
-                        cohortReview.cohortReviewId
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-              <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}>
-                {!!activeReview?.participantCohortStatuses && (
-                  <DataTable
-                    style={{ fontSize: '12px' }}
-                    value={activeReview.participantCohortStatuses}
-                    first={0}
-                    lazy
-                    rows={rows}
-                    scrollable
-                    scrollHeight='calc(100vh - 350px)'
-                  >
-                    {columns}
-                  </DataTable>
-                )}
-              </div>
+              ) : (
+                !!activeReview?.participantCohortStatuses && (
+                  <CohortReviewParticipantsTable cohortReview={activeReview} />
+                )
+              )}
             </div>
-          </React.Fragment>
-        )}
-      </FadeBox>
-    );
-  }
-);
+          </div>
+        </React.Fragment>
+      )}
+      {showCreateModal && (
+        <CreateCohortReviewModal
+          canceled={() => setShowCreateModal(false)}
+          cohortName={cohort.name}
+          created={(review) => onReviewCreate(review)}
+          existingNames={cohortReviews.map(({ cohortName }) => cohortName)}
+          participantCount={participantCount}
+        />
+      )}
+    </FadeBox>
+  );
+});

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import * as querystring from 'querystring';
+import * as querystring from 'querystring-es3';
 
 import { Cohort } from 'generated/fetch';
 

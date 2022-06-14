@@ -258,6 +258,12 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     });
   }
 
+  public countConceptsInConceptSet(): Promise<number> {
+    return new Promise<number>((resolve) => {
+      resolve(this.conceptSets[0].criteriums.length);
+    });
+  }
+
   copyConceptSet(): Promise<any> {
     return new Promise<any>((resolve) => {
       resolve({});

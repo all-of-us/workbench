@@ -72,6 +72,10 @@ paths:
       consumes:
         - application/json
       parameters:
+        - in: query
+          name: backfill
+          type: boolean
+          required: false
         - in: body
           required: true
           name: researchers
@@ -451,6 +455,21 @@ definitions:
       ethnicityAsianOtherText:
         type: string
         description: Asian / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityBlackOtherText:
+        type: string
+        description: Black / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityHispanicOtherText:
+        type: string
+        description: Hispanic / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityMeNaOtherText:
+        type: string
+        description: Middle Eastern or North African / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityNhPiOtherText:
+        type: string
+        description: Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify.  Max length 200.
+      ethnicityWhiteOtherText:
+        type: string
+        description: White / None of these fully describe me, and I want to specify.  Max length 200.
       ethnicityOtherText:
         type: string
         description: None of these fully describe me, and I want to specify.  Max length 200.
@@ -479,10 +498,7 @@ definitions:
         type: boolean
       disabilityHearing:
         "$ref": "#/definitions/YesNoPreferNot"
-        description: >
-          Are you deaf or do you have serious difficulty hearing?
-          (Note: Some people who are deaf or have serious difficulty
-          hearing use assistive devices to communicate by phone.)
+        description: Are you deaf or do you have serious difficulty hearing?
       disabilitySeeing:
         "$ref": "#/definitions/YesNoPreferNot"
         description: Are you blind or do you have serious difficulty seeing, even when wearing glasses?
@@ -524,6 +540,7 @@ definitions:
       - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
       - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
       - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
+
       - ASIAN
       - ASIAN_INDIAN
       - ASIAN_CAMBODIAN
@@ -536,11 +553,72 @@ definitions:
       - ASIAN_PAKISTANI
       - ASIAN_VIETNAMESE
       - ASIAN_OTHER           # Asian / None of these fully describe me, and I want to specify
+
       - BLACK                 # Black, African American, or of African descent
+      - BLACK_AA              # Black / African American
+      - BLACK_BARBADIAN
+      - BLACK_CARIBBEAN
+      - BLACK_ETHIOPIAN
+      - BLACK_GHANAIAN
+      - BLACK_HAITIAN
+      - BLACK_JAMAICAN
+      - BLACK_LIBERIAN
+      - BLACK_NIGERIAN
+      - BLACK_SOMALI
+      - BLACK_SOUTH_AFRICAN
+      - BLACK_OTHER           # Black / None of these fully describe me, and I want to specify
+
       - HISPANIC              # Hispanic, Latino, or Spanish descent
+      - HISPANIC_COLUMBIAN
+      - HISPANIC_CUBAN
+      - HISPANIC_DOMINICAN
+      - HISPANIC_ECUADORIAN
+      - HISPANIC_HONDURAN
+      - HISPANIC_MEXICAN      # Hispanic / Mexican or Mexican American
+      - HISPANIC_PUERTO_RICAN
+      - HISPANIC_SALVADORAN
+      - HISPANIC_SPANISH
+      - HISPANIC_OTHER        # Hispanic / None of these fully describe me, and I want to specify
+
       - MENA                  # Middle Eastern or North African
+      - MENA_AFGHAN
+      - MENA_ALGERIAN
+      - MENA_EGYPTIAN
+      - MENA_IRANIAN
+      - MENA_IRAQI
+      - MENA_ISRAELI
+      - MENA_LEBANESE
+      - MENA_MOROCCAN
+      - MENA_SYRIAN
+      - MENA_TUNISIAN
+      - MENA_OTHER            # Middle Eastern or North African / None of these fully describe me, and I want to specify
+
       - NHPI                  # Native Hawaiian or other Pacific Islander
+      - NHPI_CHAMORRO
+      - NHPI_CHUUKESE
+      - NHPI_FIJIAN
+      - NHPI_MARSHALLESE
+      - NHPI_HAWAIIAN         # Native Hawaiian
+      - NHPI_PALAUAN
+      - NHPI_SAMOAN
+      - NHPI_TAHITIAN
+      - NHPI_TONGAN
+      - NHPI_OTHER            # Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify
+
       - WHITE                 # White, or of European descent
+      - WHITE_DUTCH
+      - WHITE_ENGLISH
+      - WHITE_EUROPEAN
+      - WHITE_FRENCH
+      - WHITE_GERMAN
+      - WHITE_IRISH
+      - WHITE_ITALIAN
+      - WHITE_NORWEGIAN
+      - WHITE_POLISH
+      - WHITE_SCOTTISH
+      - WHITE_SPANISH
+      - WHITE_OTHER           # White / None of these fully describe me, and I want to specify
+
       - OTHER                 # None of these fully describe me, and I want to specify
       - PREFER_NOT_TO_ANSWER
 

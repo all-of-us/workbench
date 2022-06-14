@@ -1,5 +1,6 @@
 package org.pmiops.workbench.utils;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -18,6 +19,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -35,11 +38,18 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.EducationV2;
+import org.pmiops.workbench.model.EthnicCategory;
+import org.pmiops.workbench.model.GenderIdentityV2;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.SexAtBirthV2;
+import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.YesNoPreferNot;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
@@ -335,5 +345,52 @@ public class TestMockFactory {
     ducc.setUserInitials("XYZ");
     ducc.setCompletionTime(completionTime);
     return ducc;
+  }
+
+  public static DemographicSurveyV2 createDemoSurveyV2AllCategories() {
+    return new DemographicSurveyV2()
+        .ethnicCategories(Lists.asList(EthnicCategory.values()))
+        .ethnicityAiAnOtherText("ethnicityAiAnOtherText")
+        .ethnicityAsianOtherText("ethnicityAsianOtherText")
+        .ethnicityBlackOtherText("ethnicityBlackOtherText")
+        .ethnicityHispanicOtherText("ethnicityHispanicOtherText")
+        .ethnicityMeNaOtherText("ethnicityMeNaOtherText")
+        .ethnicityNhPiOtherText("ethnicityNhPiOtherText")
+        .ethnicityWhiteOtherText("ethnicityWhiteOtherText")
+        .ethnicityOtherText("ethnicityOtherText")
+        .genderIdentities(Lists.asList(GenderIdentityV2.values()))
+        .genderOtherText("genderOtherText")
+        .sexualOrientations(Lists.asList(SexualOrientationV2.values()))
+        .orientationOtherText("orientationOtherText")
+        .sexAtBirth(SexAtBirthV2.OTHER)
+        .sexAtBirthOtherText("sexAtBirthOtherText")
+        .yearOfBirth(2000)
+        .yearOfBirthPreferNot(false)
+        .disabilityHearing(YesNoPreferNot.NO)
+        .disabilitySeeing(YesNoPreferNot.YES)
+        .disabilityConcentrating(YesNoPreferNot.PREFER_NOT_TO_ANSWER)
+        .disabilityWalking(YesNoPreferNot.NO)
+        .disabilityDressing(YesNoPreferNot.YES)
+        .disabilityErrands(YesNoPreferNot.PREFER_NOT_TO_ANSWER)
+        .disabilityOtherText("disabilityOtherText")
+        .education(EducationV2.PREFER_NOT_TO_ANSWER)
+        .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
+  }
+
+  public static void assertEqualDemographicSurveys(
+      DemographicSurveyV2 survey1, DemographicSurveyV2 survey2) {
+    assertThat(normalizeLists(survey1)).isEqualTo(normalizeLists(survey2));
+  }
+
+  // we make no guarantees about the order of the lists in DemographicSurveyV2
+  // so let's normalize them for comparison
+  private static DemographicSurveyV2 normalizeLists(DemographicSurveyV2 rawSurvey) {
+    return rawSurvey
+        .ethnicCategories(
+            rawSurvey.getEthnicCategories().stream().sorted().collect(Collectors.toList()))
+        .genderIdentities(
+            rawSurvey.getGenderIdentities().stream().sorted().collect(Collectors.toList()))
+        .sexualOrientations(
+            rawSurvey.getSexualOrientations().stream().sorted().collect(Collectors.toList()));
   }
 }

@@ -92,9 +92,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
-  // The default location for AoU buckets. Setting this location when cloning workspaces to make it
-  // work in service perimter environment. See shorturl.at/mAHQY for more details.
-  private static final String GOOGLE_BUCKETS_LOCATION = "US";
 
   // All options are defined in this document:
   // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
@@ -334,6 +331,7 @@ public class FireCloudServiceImpl implements FireCloudService {
         new FirecloudWorkspaceIngest()
             .namespace(workspaceNamespace)
             .name(workspaceName)
+            .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation)
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
@@ -357,7 +355,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)))
-            .bucketLocation(GOOGLE_BUCKETS_LOCATION);
+            .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation);
     return retryHandler.run(
         (context) ->
             workspacesApi.cloneWorkspace(cloneRequest, fromWorkspaceNamespace, fromFirecloudName));

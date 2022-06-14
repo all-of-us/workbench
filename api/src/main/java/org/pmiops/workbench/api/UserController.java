@@ -204,6 +204,12 @@ public class UserController implements UserApiDelegate {
         new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
   }
 
+  @Override
+  public ResponseEntity<Void> signOut() {
+    userService.signOut(userProvider.get());
+    return ResponseEntity.ok().build();
+  }
+
   /** @return the free tier billing account, if the user has free credits */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
     if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {

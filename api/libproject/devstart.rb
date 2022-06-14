@@ -1196,6 +1196,44 @@ Common.register_command({
   :fn => ->(*args) { build_cb_criteria("build-cb-criteria", *args) }
 })
 
+def build_cb_criteria_demographics(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--id-prefix [id-prefix]",
+    ->(opts, v) { opts.id_prefix = v},
+    "ID Prefix."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Generate for data browser. Optional - Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.id_prefix }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix} #{op.opts.data_browser}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-criteria-demographics",
+  :description => "Builds cb_criteria",
+  :fn => ->(*args) { build_cb_criteria_demographics("build-cb-criteria-demographics", *args) }
+})
+
 def create_local_csv_files(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1940,7 +1978,7 @@ Common.register_command({
     :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })
 
-def delete_workspace_rdr_export(cmd_name, *args)
+def invalidate_rdr_export(cmd_name, *args)
   common = Common.new
 
   op = WbOptionsParser.new(cmd_name, args)
@@ -1952,13 +1990,20 @@ def delete_workspace_rdr_export(cmd_name, *args)
       TrueClass,
       ->(opts, v) { opts.dry_run = v},
       "When true, print debug lines instead of performing writes. Defaults to true.")
-
   op.add_typed_option(
-      "--workspace-list-filename [workspace-list-filename]",
+      "--entity-type [USER|WORKSPACE]",
       String,
-      ->(opts, v) { opts.workspaceListFilename = v},
-      "File containing list of workspaces to export to RDR.
-      Each line should contain a single workspace id, separated by a comma")
+      ->(opts, v) { opts.entity_type = v},
+      "The RDR entity type to export. USER or WORKSPACE.")
+  op.add_typed_option(
+      "--id-list-filename [id-list-filename]",
+      String,
+      ->(opts, v) { opts.id_list_filename = v},
+      "File containing list of entities by ID to export to RDR. " +
+      "Each line should contain a single entity id (workspace or user database ID). If unspecified, " +
+      "ALL entities of this type will be invalidated")
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.entity_type}
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1970,9 +2015,17 @@ def delete_workspace_rdr_export(cmd_name, *args)
     common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
   end
 
+  get_user_confirmation(
+    "RDR export invalidation should rarely be used; for backfilling workspace data you " +
+    "should use backfill-entities-to-rdr instead. If you still think you need to run this, " +
+    "please consult with the team before continuing. Continue anyways?")
+
   flags = ([
-      ["--workspace-list-filename", op.opts.workspaceListFilename]
+    ['--entity-type', op.opts.entity_type]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.id_list_filename
+    flags += ["--id-list-filename", op.opts.id_list_filename]
+  end
   if op.opts.dry_run
     flags += ["--dry-run"]
   end
@@ -1981,20 +2034,20 @@ def delete_workspace_rdr_export(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        ./gradlew deleteWorkspaceFromRdrExport
+        ./gradlew invalidateRdrExport
        -PappArgs=[#{flags.join(',')}]}
   end
 end
 
-DELETE_WORKSPACE_RDR_EXPORT = "delete-workspace-rdr-export";
+INVALIDATE_RDR_EXPORT = "invalidate-rdr-export";
 
 Common.register_command({
-    :invocation => DELETE_WORKSPACE_RDR_EXPORT,
-    :description => "Delete workspace information from rdr_Export table, making it eligible for next Export job run.\n",
-    :fn => ->(*args) {delete_workspace_rdr_export(DELETE_WORKSPACE_RDR_EXPORT, *args)}
+    :invocation => INVALIDATE_RDR_EXPORT,
+    :description => "Invalidate exported RDR entities, causing them to be resent on the next RDR export.\n",
+    :fn => ->(*args) {invalidate_rdr_export(INVALIDATE_RDR_EXPORT, *args)}
 })
 
-def backfill_workspaces_to_rdr(cmd_name, *args)
+def backfill_entities_to_rdr(cmd_name, *args)
   common = Common.new
 
   op = WbOptionsParser.new(cmd_name, args)
@@ -2006,7 +2059,12 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
     ->(opts, v) { opts.dry_run = v},
     "When true, print the number of workspaces that will be exported, will not export")
   op.add_typed_option(
-    "--limit=[LIMIT]",
+    "--entity-type [USER|WORKSPACE]",
+    String,
+    ->(opts, v) { opts.entity_type = v},
+    "The RDR entity type to export. USER or WORKSPACE.")
+  op.add_typed_option(
+    "--limit [LIMIT]",
     String,
     ->(opts, v) { opts.limit = v},
     "The number of workspaces exported will not to exceed this limit.")
@@ -2018,11 +2076,20 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
   op.parse.validate
   context.validate()
 
-  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
-  isDryRun = op.opts.dry_run ? "--dry-run" : nil
-  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
+  flags = ([
+    ['--entity-type', op.opts.entity_type]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  if op.opts.limit
+    flags += ["--limit", op.opts.limit]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+
   gradleCommand = %W{
-    ./gradlew backfillWorkspacesToRdr
+    ./gradlew backfillEntitiesToRdr
    -PappArgs=[#{flags.join(',')}]}
 
   with_optional_cloud_proxy_and_db(context) do
@@ -2030,12 +2097,12 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
   end
 end
 
-BACKFILL_WORKSPACES_TO_RDR = "backfill-workspaces-to-rdr";
+BACKFILL_ENTITIES_TO_RDR = "backfill-entities-to-rdr";
 
 Common.register_command({
-    :invocation => BACKFILL_WORKSPACES_TO_RDR,
+    :invocation => BACKFILL_ENTITIES_TO_RDR,
     :description => "Backfill workspaces from workspace table, exporting them to the rdr.\n",
-    :fn => ->(*args) {backfill_workspaces_to_rdr(BACKFILL_WORKSPACES_TO_RDR, *args)}
+    :fn => ->(*args) {backfill_entities_to_rdr(BACKFILL_ENTITIES_TO_RDR, *args)}
 })
 
 def authority_options(cmd_name, args)

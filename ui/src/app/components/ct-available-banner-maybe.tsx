@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { CdrVersionTier, Profile } from 'generated/fetch';
 
@@ -22,7 +23,8 @@ const CT_COOKIE_KEY = 'controlled-tier-available';
 
 const shouldShowBanner = (
   profile: Profile,
-  cdrVersionTiers: CdrVersionTier[]
+  cdrVersionTiers: CdrVersionTier[],
+  pathname: string
 ) => {
   const ctCdrVersions = cdrVersionTiers?.find(
     (v) => v.accessTierShortName === AccessTierShortNames.Controlled
@@ -39,7 +41,7 @@ const shouldShowBanner = (
     // the user's first sign-in time was before the release of the default CT CDR Version
     profile.firstSignInTime < ctCdrVersions.defaultCdrVersionCreationTime &&
     // the user is not currently visiting the DAR page
-    window.location.pathname !== DATA_ACCESS_REQUIREMENTS_PATH;
+    pathname !== DATA_ACCESS_REQUIREMENTS_PATH;
 
   if (cookiesEnabled()) {
     const cookie = localStorage.getItem(CT_COOKIE_KEY);
@@ -53,10 +55,11 @@ export const CTAvailableBannerMaybe = () => {
   const [showBanner, setShowBanner] = useState(false);
   const { profile } = useStore(profileStore);
   const { tiers } = useStore(cdrVersionStore);
+  const { pathname } = useLocation();
 
   useEffect(
-    () => setShowBanner(shouldShowBanner(profile, tiers)),
-    [profile, tiers]
+    () => setShowBanner(shouldShowBanner(profile, tiers, pathname)),
+    [profile, tiers, pathname]
   );
 
   const acknowledgeBanner = () => {
