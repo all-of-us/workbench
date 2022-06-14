@@ -325,7 +325,8 @@ def publish_cdr_files(cmd_name, args)
   op.add_option(
     "--input-manifest-file [file.yaml]",
     ->(opts, v) { opts.input_manifest_file = v },
-    "The input manifest file which desribes a logical mapping of the files to be published"
+    "The input manifest YAML file which desribes a logical mapping of the files to be " +
+    "published. For details on the YAML format see genomic_manifests.rb"
   )
   op.add_option(
     "--microarray-rids-file [file]",

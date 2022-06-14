@@ -8,20 +8,25 @@ require_relative "../../../libproject/environments"
 # Utilities for generating, managing, publishing genomic data files. At a high
 # level, this facilitiates the data flow:
 #
-#   Genome Centers / Broad genomic curation -> Researcher Workbench environment
+#   Genome Centers / Broad genomic curation / preprod
+#    -> CDR ingest bucket
+#    -> Researcher Workbench CDR bucket
 #
 # Inputs:
 #
-# Our primary inputs to this process are AW4 manifests. These are CSV files passed
-# from the Broad genomic curation team to the DRC for data handoff. A single manifest
-# corresponds to a batch of data which was processed, so you should expect to see many
-# manifests. In some cases, data will also be processed multiple times, in which case
-# the latest should be taken. Note that WGS and Microarray have different specs.
+# 1. The input manifest yaml file. This describes a mapping of upstream data sources
+#    to the CDR bucket. See INPUT_SCHEMAS below for the file schema / documentation.
+# 2. The microarray and/or WGS research ID lists.
+# 3. AW4 manifests. These are CSV files passed from the Broad genomic curation
+#    team to the DRC for data handoff. A single manifest corresponds to a batch
+#    of data which was processed, so you should expect to see many manifests. In
+#    some cases, data will also be processed multiple times, in which case
+#    the latest should be taken. Note that WGS and Microarray have different specs.
 #
-# In the Workbench, we are primarily using AW4 manifests as a lookup between research ID and
-# curated data file path, though it also contains some logging metadata such as QC status and
-# research inclusion. See the CDR playbook for more documentation on AW4s:
-# https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
+#    In the Workbench, we are primarily using AW4 manifests as a lookup between research ID and
+#    curated data file path, though it also contains some logging metadata such as QC status and
+#    research inclusion. See the CDR playbook for more documentation on AW4s:
+#    https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
 #
 # Intermediates:
 #
@@ -54,37 +59,64 @@ GSUTIL_TASK_CONCURRENCY = 64
 
 AW4_INPUT_SECTION_SCHEMA = {
   :required => {
+    # Which AW4 column(s) to pull source URIs from.
     "aw4Columns" => Array,
+    # The destination path infix; this excluded the bucket and display version ID.
     "pooledDestPathInfix" => String,
   },
   :optional => {
+    # A regex pattern which MUST match all source URIs
     "filenameMatch" => String,
+    # A regex replacement, which can include group captures from filenameMatch.
+    # Additionally, the string {RID} will be replaced with the corresponding research
+    # ID for this file.
     "filenameReplace" => String,
+    # The GCS storage class, e.g. STANDARD, NEARLINE. Defaults to STANDARD.
     "storageClass" => String,
   },
 }
 
+# This describes the input manifest YAML file.
 INPUT_SCHEMAS = {
+  # Data sources backed from the microarray AW4 manifests. The manifests
+  # refer to either raw GC files, or curated operational files
   "aw4MicroarraySources" => AW4_INPUT_SECTION_SCHEMA,
+  # Data sources backed from the WGS AW4 manifests. The manifests
+  # refer to either raw GC files, or curated operational files
   "aw4WgsSources" => AW4_INPUT_SECTION_SCHEMA,
+  # Curation sources, usually backed by the Broad DRC bucket, i.e. an internal
+  # operational bucket.
   "curationSources" => {
     :required => {
+      # A gsutil wildcard pattern to select the upstream files. gsutil ls -d is used,
+      # which allows one to select subdirectories, in addition to invidual files.
+      # filenameMatch and filenameReplace should only be used in combination with a
+      # sourcePattern that matches individual files.
       "sourcePattern" => String,
+      # A relative destination directory in the published bucket. This should not include
+      # the bucket or display version ID.
       "destination" => String,
     },
     :optional => {
       "filenameMatch" => String,
+      # See above documentation, but does NOT support {RID} replacement.
       "filenameReplace" => String,
     }
   },
+  # Curation sources, usually backed by the Broad DRC bucket, i.e. an internal
+  # operational bucket.
   "preprodCTSources" => {
     :required => {
+      # The preprod CT Terra source project for this data. This field is primarily
+      # for documentation purposes, but should correspond to the project containing
+      # the pattern referenced by the sourcePattern's below bucket.
       "preprodCtTerraProject" => String,
       "sourcePattern" => String,
       "destination" => String,
     },
     :optional => {
       "filenameMatch" => String,
+      # See above documentation, but does NOT support {RID} replacement.
       "filenameReplace" => String,
     }
   },
