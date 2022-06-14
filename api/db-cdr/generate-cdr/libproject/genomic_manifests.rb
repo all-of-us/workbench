@@ -277,8 +277,6 @@ def read_all_microarray_aw4s(project, rids)
 end
 
 def _apply_filename_replacement(source_name, match, replace_tmpl, rid=nil)
-  common = Common.new
-
   replace = replace_tmpl
   unless rid.nil?
     replace = replace_tmpl.sub("{RID}", rid)
@@ -535,7 +533,7 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
 end
 
 # Publish files to the CDR bucket as specified in the given manifests.
-def publish_files_by_manifests(project, manifest_paths)
+def publish_files_by_manifests(_project, _manifest_paths)
   # TODO(RW-8266): Implement.
   raise NotImplementedError.new()
 end
