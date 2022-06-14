@@ -73,7 +73,10 @@ const DataUserCodeOfConductPage = fp.flow(
   withFullHeight,
   withRoutingSpinner
 )(DataUserCodeOfConduct);
-
+const DemographicSurveyPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(DemographicSurvey);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(
   withRouteData,
@@ -351,7 +354,11 @@ export const SignedInRoutes = () => {
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
       <AppRoute path='/demographic-survey' exact>
-        <DemographicSurvey />
+        <DemographicSurveyPage
+          routeData={{
+            title: 'Demographic Survey',
+          }}
+        />
       </AppRoute>
       <AppRoute exact path='*'>
         <Redirect to={'/not-found'} />
