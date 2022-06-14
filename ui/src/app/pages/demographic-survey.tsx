@@ -7,12 +7,14 @@ import { Button } from 'app/components/buttons';
 import DemographicSurveyV2 from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
 import { profileApi } from 'app/services/swagger-fetch-clients';
+import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
 export const DemographicSurvey = (props) => {
   const [errors, setErrors] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [, navigateByUrl] = useNavigation();
 
   useEffect(() => {
     setProfile(profileStore.get().profile);
@@ -24,6 +26,8 @@ export const DemographicSurvey = (props) => {
     props.showSpinner();
     await profileApi().updateProfile(profile);
     props.hideSpinner();
+    const returnAddress = props.returnAddress ?? '/profile';
+    navigateByUrl(returnAddress);
   };
 
   const handleUpdate = (updatedProfile: Profile, updatedErrors: any) => {
