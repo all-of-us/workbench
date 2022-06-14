@@ -325,7 +325,7 @@ def publish_cdr_files(cmd_name, args)
   op.add_option(
     "--input-manifest-file [file.yaml]",
     ->(opts, v) { opts.input_manifest_file = v },
-    "The input manifest YAML file which desribes a logical mapping of the files to be " +
+    "The input manifest YAML file which describes a logical mapping of the files to be " +
     "published. For details on the YAML format see genomic_manifests.rb"
   )
   op.add_option(
@@ -341,13 +341,6 @@ def publish_cdr_files(cmd_name, args)
     "A file containing all research IDs for which WGS data should be published. " +
       "Only applicable and required for task CREATE_COPY_MANIFESTS where " +
       "aw4WgsSources are specified."
-  )
-  op.add_option(
-    "--microarray-rids-file [file]",
-    ->(opts, v) { opts.microarray_rids_file = v },
-    "A file containing all research IDs for which Microarray data should be published. " +
-      "Only applicable and required for task CREATE_COPY_MANIFESTS where " +
-      "aw4MicroarraySources are specified."
   )
   op.add_option(
     "--working-dir [path]",
@@ -397,6 +390,7 @@ def publish_cdr_files(cmd_name, args)
   common.status("local working directory: '#{work_dir}'")
 
   input_manifest = parse_input_manifest(op.opts.input_manifest_file)
+  copy_manifest_files = {}
   if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
     common.status "Starting: copy manifest creation"
     copy_manifests = {}
@@ -410,7 +404,7 @@ def publish_cdr_files(cmd_name, args)
 
       aw4_microarray_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
-        copy_manifests["aw4_microarry_" + source_name] = build_copy_manifest_for_aw4_section(
+        copy_manifests["aw4_microarray_" + source_name] = build_copy_manifest_for_aw4_section(
           section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows)
       end
     end
@@ -450,10 +444,12 @@ def publish_cdr_files(cmd_name, args)
     end
 
     copy_manifests.each do |source_name, copy_manifest|
-      CSV.open("#{work_dir}/#{source_name}_copy_manifest.csv", 'wb') do |f|
+      path = "#{work_dir}/#{source_name}_copy_manifest.csv"
+      CSV.open(path, 'wb') do |f|
         f << copy_manifest.first.keys
         copy_manifest.each { |c| f << c.values }
       end
+      copy_manifest_files[source_name] = path
     end
     common.status "Finished: manifests created"
   end
@@ -463,7 +459,7 @@ def publish_cdr_files(cmd_name, args)
 
   if op.opts.tasks.include? "STAGE_INGEST"
     common.status "Starting: file staging to ingest bucket"
-    manifests.each { |m| stage_files_by_manifest(op.opts.project, m, File.join(logs_dir, "cram")) }
+    copy_manifest_files.each { |name, path| stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, name)) }
     common.status "Finished: file staging"
   end
 

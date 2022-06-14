@@ -89,7 +89,7 @@ INPUT_SCHEMAS = {
   "curationSources" => {
     :required => {
       # A gsutil wildcard pattern to select the upstream files. gsutil ls -d is used,
-      # which allows one to select subdirectories, in addition to invidual files.
+      # which allows one to select subdirectories, in addition to individual files.
       # filenameMatch and filenameReplace should only be used in combination with a
       # sourcePattern that matches individual files.
       "sourcePattern" => String,
@@ -110,7 +110,7 @@ INPUT_SCHEMAS = {
       # The preprod CT Terra source project for this data. This field is primarily
       # for documentation purposes, but should correspond to the project containing
       # the pattern referenced by the sourcePattern's below bucket.
-      "preprodCtTerraProject" => String,
+      "preprodCTTerraProject" => String,
       "sourcePattern" => String,
       "destination" => String,
     },
@@ -228,10 +228,7 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
 
   missing_rids = ridset - by_rid.keys
   unless missing_rids.empty?
-    missing_str = missing_rids.join(",")
-    if missing_rids.length > 100
-      missing_str = missing_rids.to_a[0..50].join(",") + "..."
-    end
+    missing_str = missing_rids.length <= 100 ? missing_rids.join(",") : (missing_rids.to_a[0..100].join(",") + "...")
     raise ArgumentError.new("AW4 manifests do not contain information for #{missing_rids.length} requested research IDs (of #{by_rid.length} AW4 rows):\n" + missing_str)
   end
 
@@ -490,7 +487,11 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
   end
 
   _process_files_by_manifest(
-    all_tasks, File.join([logs_dir, "stage", File.basename(manifest_path, ".csv")]), "Staged", concurrency) do |task, wout, werr|
+    all_tasks,
+    File.join([logs_dir, "stage", File.basename(manifest_path, ".csv")]),
+    "Staged",
+    concurrency
+  ) do |task, wout, werr|
     ingest_path = task["ingest_path"]
 
     unless task["preprod_source_ingest_path"].to_s.empty?
@@ -504,6 +505,8 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
           task["preprod_source_ingest_path"],
           :out => wout,
           :err => werr)
+        # Note: we use next here because this is inside a block; this yields the value up
+        # to the caller which is yielding to this block, i.e. _process_files_by_manifest.
         next [ingest_path, false]
       end
       next [ingest_path, system(
