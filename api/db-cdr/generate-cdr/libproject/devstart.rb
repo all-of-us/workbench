@@ -51,7 +51,7 @@ def service_account_context_for_bq(project, account)
 end
 
 # By default, skip empty lines only.
-def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")
+def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter="", table_skip_filter="^$")
   common = Common.new
   source_fq_dataset = "#{source_project}:#{source_dataset_name}"
   ingest_fq_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{dest_dataset_name}"
@@ -80,21 +80,21 @@ def bq_ingest(tier, tier_name, source_project, source_dataset_name, dest_dataset
   common.run_inline %W{bq mk -f --default_table_expiration 86400 --dataset #{ingest_fq_dataset}}
   ingest_args = %W{./copy-bq-dataset.sh
       #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
-  #{table_match_filter} #{table_skip_filter}}
+      #{table_match_filter} #{table_skip_filter}}
   ingest_dry_stdout = common.capture_stdout(ingest_args + %W{--dry-run}, nil)
   common.run_inline ingest_args
 
   common.run_inline %W{bq mk -f --dataset #{dest_fq_dataset}}
   publish_args = %W{./copy-bq-dataset.sh
       #{ingest_fq_dataset} #{dest_fq_dataset} #{tier.fetch(:ingest_cdr_project)}
-  #{table_match_filter} #{table_skip_filter}}
+      #{table_match_filter} #{table_skip_filter}}
   publish_dry_stdout = common.capture_stdout(publish_args + %W{--dry-run}, nil)
 
   unless ingest_dry_stdout.lines.length == publish_dry_stdout.lines.length
     raise RuntimeError.new(
-      "mismatched line count between ingest and publish:\n" +
-        "ingest:\n#{ingest_dry_stdout}\n" +
-        "publish:\n#{publish_dry_stdout}")
+            "mismatched line count between ingest and publish:\n" +
+            "ingest:\n#{ingest_dry_stdout}\n" +
+            "publish:\n#{publish_dry_stdout}")
   end
 
   common.run_inline publish_args
@@ -136,31 +136,31 @@ def publish_cdr(cmd_name, args)
 
   op.add_option(
     "--bq-dataset [dataset]",
-    ->(opts, v) { opts.bq_dataset = v },
+    ->(opts, v) { opts.bq_dataset = v},
     "BigQuery dataset name for the CDR version (project not included), e.g. " +
-      "'2019Q4R3'. Required."
+    "'2019Q4R3'. Required."
   )
   op.add_option(
     "--project [project]",
-    ->(opts, v) { opts.project = v },
+    ->(opts, v) { opts.project = v},
     "The Google Cloud project associated with this workbench environment, " +
-      "e.g. all-of-us-rw-staging. Required."
+    "e.g. all-of-us-rw-staging. Required."
   )
   op.opts.tier = "registered"
   op.add_option(
-    "--tier [tier]",
-    ->(opts, v) { opts.tier = v },
-    "The access tier associated with this CDR, " +
-      "e.g. registered. Default is registered."
-  )
+     "--tier [tier]",
+     ->(opts, v) { opts.tier = v},
+     "The access tier associated with this CDR, " +
+     "e.g. registered. Default is registered."
+   )
   op.add_option(
     "--table-prefixes [prefix1,prefix2,...]",
-    ->(opts, v) { opts.table_prefixes = v },
+    ->(opts, v) { opts.table_prefixes = v},
     "Optional comma-delimited list of table prefixes to filter the publish " +
-      "by, e.g. cb_,ds_. This should only be used in special situations e.g. " +
-      "when the auxilliary cb_ or ds_ tables need to be updated, or if there " +
-      "was an issue with the publish. In general, CDRs should be treated as " +
-      "immutable after the initial publish."
+    "by, e.g. cb_,ds_. This should only be used in special situations e.g. " +
+    "when the auxilliary cb_ or ds_ tables need to be updated, or if there " +
+    "was an issue with the publish. In general, CDRs should be treated as " +
+    "immutable after the initial publish."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
@@ -215,7 +215,7 @@ def publish_cdr(cmd_name, args)
         common.status "#{app_sa} already in ACL, skipping..."
       else
         common.status "Adding #{app_sa} as a READER..."
-        acl_json["access"].push({ "userByEmail" => app_sa, "role" => "READER" })
+        acl_json["access"].push({ "userByEmail" => app_sa, "role" => "READER"})
       end
 
       acl_json
@@ -234,36 +234,36 @@ def publish_cdr_wgs(cmd_name, args)
 
   op.add_option(
     "--source-bq-dataset [dataset]",
-    ->(opts, v) { opts.source_bq_dataset = v },
+    ->(opts, v) { opts.source_bq_dataset = v},
     "BigQuery source dataset name for the CDR version (project not included), e.g. " +
-      "'2019Q4R3'. Required."
+    "'2019Q4R3'. Required."
   )
   op.add_option(
     "--dest-bq-dataset [dataset]",
-    ->(opts, v) { opts.dest_bq_dataset = v },
+    ->(opts, v) { opts.dest_bq_dataset = v},
     "Destination BigQuery dataset name for the CDR version (project not included), e.g. " +
-      "'2019Q4R3'. Defaults to --source-bq-dataset."
+    "'2019Q4R3'. Defaults to --source-bq-dataset."
   )
   op.add_option(
     "--project [project]",
-    ->(opts, v) { opts.project = v },
+    ->(opts, v) { opts.project = v},
     "The Google Cloud project associated with this workbench environment, " +
-      "e.g. all-of-us-rw-staging. Required."
+    "e.g. all-of-us-rw-staging. Required."
   )
   op.opts.tier = "controlled"
   op.add_option(
-    "--tier [tier]",
-    ->(opts, v) { opts.tier = v },
-    "The access tier associated with this CDR, e.g. controlled." +
-      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
+     "--tier [tier]",
+     ->(opts, v) { opts.tier = v},
+     "The access tier associated with this CDR, e.g. controlled." +
+     "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
   op.add_option(
     "--table-prefixes [prefix1,prefix2,...]",
-    ->(opts, v) { opts.table_prefixes = v },
+    ->(opts, v) { opts.table_prefixes = v},
     "Optional comma-delimited list of table prefixes to filter the publish " +
-      "by, e.g. myfilter_,sample_info. This should only be used in special situations e.g. " +
-      "if there was an issue with the publish. In general, CDRs should be treated as " +
-      "immutable after the initial publish."
+    "by, e.g. myfilter_,sample_info. This should only be used in special situations e.g. " +
+    "if there was an issue with the publish. In general, CDRs should be treated as " +
+    "immutable after the initial publish."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.source_bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
@@ -300,7 +300,7 @@ def publish_cdr_wgs(cmd_name, args)
         common.status "#{extraction_proxy_group} already in ACL, skipping..."
       else
         common.status "Adding #{extraction_proxy_group} as a READER..."
-        acl_json["access"].push({ "groupByEmail" => extraction_proxy_group, "role" => "READER" })
+        acl_json["access"].push({"groupByEmail" => extraction_proxy_group, "role" => "READER"})
       end
       acl_json
     end
@@ -376,7 +376,7 @@ def publish_cdr_files(cmd_name, args)
       "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.input_manifest_file }
-  # xxx: op.add_validator ->(opts) { raise ArgumentError.new("--wgs-rids-file and --display-version-id are required for the CREATE_COPY_MANIFESTS task") unless !opts.tasks.include? "CREATE_COPY_MANIFESTS" or (opts.wgs_rids_file and opts.display_version_id) }
+  op.add_validator ->(opts) { raise ArgumentError.new("--display-version-id is required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and not opts.display_version_id }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
@@ -484,21 +484,21 @@ def create_wgs_extraction_datasets(cmd_name, args)
 
   op.add_option(
     "--project [project]",
-    ->(opts, v) { opts.project = v },
+    ->(opts, v) { opts.project = v},
     "The Google Cloud project associated with this workbench environment, " +
-    "e.g. all-of-us-rw-staging. Required."
+      "e.g. all-of-us-rw-staging. Required."
   )
   op.opts.tier = "controlled"
   op.add_option(
     "--tier [tier]",
-    ->(opts, v) { opts.tier = v },
+    ->(opts, v) { opts.tier = v},
     "The access tier associated with this CDR, " +
-    "e.g. registered. Default is controlled."
+      "e.g. registered. Default is controlled."
   )
   op.opts.ttl = 60 * 60 * 24 * 7
   op.add_option(
     "--ttl [ttl]",
-    ->(opts, v) { opts.ttl = v },
+    ->(opts, v) { opts.ttl = v},
     "Add default ttl to dataset tables. Given in seconds.")
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.tier and opts.ttl }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
@@ -531,7 +531,7 @@ def create_wgs_extraction_datasets(cmd_name, args)
           common.status "#{proxy_group} already in ACL, skipping..."
         else
           common.status "Adding #{proxy_group} as a WRITER..."
-          acl_json["access"].push({ "groupByEmail" => proxy_group, "role" => "WRITER" })
+          acl_json["access"].push({"groupByEmail" => proxy_group, "role" => "WRITER"})
         end
 
         acl_json
