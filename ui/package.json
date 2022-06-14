@@ -100,6 +100,7 @@
     "url": "^0.11.0"
   },
   "resolutions": {
+    "nth-check": "^2.0.1",
     "node-fetch": "^2.6.7"
   }
 }
