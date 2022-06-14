@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
@@ -31,6 +32,7 @@ import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
+import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
 import org.pmiops.workbench.rdr.model.RdrDisability;
 import org.pmiops.workbench.rdr.model.RdrEducation;
 import org.pmiops.workbench.rdr.model.RdrEthnicity;
@@ -232,5 +234,13 @@ public class RdrMapperTest {
   public void testMapRdrResearcher_noAccess() {
     RdrResearcher got = rdrMapper.toRdrResearcher(new DbUser(), ImmutableList.of(), null);
     assertThat(got.getAccessTierShortNames()).isEmpty();
+  }
+
+  @Test
+  public void test_demoSurveyV2() {
+    DemographicSurveyV2 original = TestMockFactory.createDemoSurveyV2AllCategories();
+    RdrDemographicSurveyV2 rdrSurvey = rdrMapper.toDemographicSurveyV2(original);
+    DemographicSurveyV2 roundTrip = rdrMapper.toModelDemographicSurveyV2(rdrSurvey);
+    TestMockFactory.assertEqualDemographicSurveys(roundTrip, original);
   }
 }

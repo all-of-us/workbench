@@ -16,7 +16,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +56,7 @@ import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.YesNoPreferNot;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -559,7 +559,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
 
-    assertEqualDemographicSurveys(
+    TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),
         updatedProfile.getDemographicSurveyV2());
   }
@@ -603,7 +603,27 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
 
-    assertEqualDemographicSurveys(
+    TestMockFactory.assertEqualDemographicSurveys(
+        profileService.getProfile(targetUser).getDemographicSurveyV2(),
+        updatedProfile.getDemographicSurveyV2());
+  }
+
+  @Test
+  public void updateProfile_demo_survey_add_v2_all_selections() {
+    DemographicSurveyV2 v2Survey = TestMockFactory.createDemoSurveyV2AllCategories();
+
+    Profile previousProfile = createValidProfile();
+    Profile updatedProfile = createValidProfile().demographicSurveyV2(v2Survey);
+
+    DbUser targetUser =
+        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+
+    TestMockFactory.assertEqualDemographicSurveys(
         profileService.getProfile(targetUser).getDemographicSurveyV2(),
         updatedProfile.getDemographicSurveyV2());
   }
@@ -832,22 +852,5 @@ public class ProfileServiceTest {
     assertThat(adminTableUsers.get(0).getDisabled()).isEqualTo(false);
     assertThat(adminTableUsers.get(1).getUserId()).isEqualTo(user2.getUserId());
     assertThat(adminTableUsers.get(2).getUserId()).isEqualTo(user3.getUserId());
-  }
-
-  private void assertEqualDemographicSurveys(
-      DemographicSurveyV2 survey1, DemographicSurveyV2 survey2) {
-    assertThat(normalizeLists(survey1)).isEqualTo(normalizeLists(survey2));
-  }
-
-  // we make no guarantees about the order of the lists in DemographicSurveyV2
-  // so let's normalize them for comparison
-  private DemographicSurveyV2 normalizeLists(DemographicSurveyV2 rawSurvey) {
-    return rawSurvey
-        .ethnicCategories(
-            rawSurvey.getEthnicCategories().stream().sorted().collect(Collectors.toList()))
-        .genderIdentities(
-            rawSurvey.getGenderIdentities().stream().sorted().collect(Collectors.toList()))
-        .sexualOrientations(
-            rawSurvey.getSexualOrientations().stream().sorted().collect(Collectors.toList()));
   }
 }
