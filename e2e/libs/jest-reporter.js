@@ -4,11 +4,9 @@ const winston = require('winston');
 
 module.exports = class JestReporter {
   constructor(globalConfig, options) {
-    if (globalConfig.verbose === true) {
-      throw Error("Verbose must be false or Console messages won't be available.");
-    }
     this.logDir = options.outputdir || 'logs/jest';
     this.summaryFile = options.filename || 'test-results-summary.json';
+    this.globalConfig = globalConfig;
   }
 
   // Called at the beginning of every test file
@@ -26,6 +24,13 @@ module.exports = class JestReporter {
       const testName = path.parse(testResult.testFilePath).name;
       const testLogName = `${this.logDir}/${testName}.FAILED.log`;
       const logger = this.createLogger(testLogName);
+
+      // Attempting to catch a bug that may no longer exist.
+      if (!testResult.console || (testResult.console.length === 0 && this.globalConfig.verbose)) {
+        const message = 'testResult.console is empty. Could be a bug in Jest. Try verbose=false.';
+        console.warn(message);
+        logger.warn(message);
+      }
 
       // Read jest console messages and save to a log file.
       // Get all console logs.
