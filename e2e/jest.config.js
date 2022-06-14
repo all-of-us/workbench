@@ -1,7 +1,7 @@
 module.exports = {
   verbose: (() => {
     if (process.env.JEST_VERBOSE) {
-      const verbose = process.env.JEST_VERBOSE === 'true' ? true : false;
+      const verbose = process.env.JEST_VERBOSE === 'true';
       console.log('JEST_VERBOSE:', process.env.JEST_VERBOSE, '*' + verbose);
       return verbose;
     }
