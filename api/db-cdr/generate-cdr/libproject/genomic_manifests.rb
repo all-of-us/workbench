@@ -1,6 +1,7 @@
 require "csv"
 require "date"
 require "fileutils"
+require "yaml"
 require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/environments"
 
@@ -32,10 +33,12 @@ require_relative "../../../libproject/environments"
 # See the CDR playbook for more context on the overall publishing process:
 # https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
 
-
 CURATION_PROD_SOURCE_CONFIG = {
   # Optional: to speed up iteration with this script, download and run against a local directory instead.
-  :wgs_aw4_prefix => "gs://prod-drc-broad/AW4_wgs_manifest/AoU_DRCB_SEQ_"
+  :wgs_aw4_prefix => "gs://prod-drc-broad/AW4_wgs_manifest/AoU_DRCB_SEQ_",
+  # The array_old_egt_files should be removed, likely in late 2022. This contains older
+  # AW4 manifests before reprocessing.
+  :microarray_aw4_prefix => "gs://prod-drc-broad/array_old_egt_files/AW4_array_manifest/AoU_DRCB_GEN_"
 }
 
 FILE_ENVIRONMENTS = {
@@ -47,22 +50,83 @@ FILE_ENVIRONMENTS = {
   }
 }
 
-FILE_PREFIX_REPLACEMENTS = {
-  :wgs_cram => {
-    # Match/replace the GC filename; this works for both .cram and .cram.crai
-    :matchSourceName => /^[^\/]+\.cram/,
-    :destNameFn => ->(rid) { "wgs_#{rid}.cram" }
-  }
+GSUTIL_TASK_CONCURRENCY = 64
+
+AW4_INPUT_SECTION_SCHEMA = {
+  :required => {
+    "aw4Columns" => Array,
+    "pooledDestPathInfix" => String,
+  },
+  :optional => {
+    "filenameMatch" => String,
+    "filenameReplace" => String,
+    "storageClass" => String,
+  },
 }
 
-GSUTIL_TASK_CONCURRENCY = 64
+INPUT_SCHEMAS = {
+  "aw4MicroarraySources" => AW4_INPUT_SECTION_SCHEMA,
+  "aw4WgsSources" => AW4_INPUT_SECTION_SCHEMA,
+  "curationSources" => {
+    :required => {
+      "sourcePattern" => String,
+      "destination" => String,
+    },
+    :optional => {
+      "filenameMatch" => String,
+      "filenameReplace" => String,
+    }
+  },
+  "preprodCTSources" => {
+    :required => {
+      "preprodCtTerraProject" => String,
+      "sourcePattern" => String,
+      "destination" => String,
+    },
+    :optional => {
+      "filenameMatch" => String,
+      "filenameReplace" => String,
+    }
+  },
+}
+
+def parse_input_manifest(filename)
+  manifest = YAML.load_file(filename)
+  manifest.each do |k, v|
+    raise ArgumentError.new("unknown input manifest key '#{k}'") unless INPUT_SCHEMAS.key? k
+    section_schema = INPUT_SCHEMAS[k]
+    v.each do |section_key, section_value|
+      missing_keys = section_schema[:required].keys.to_set - section_value.keys.to_set
+      extra_keys = section_value.keys.to_set - (section_schema[:required].keys + section_schema[:optional].keys).to_set
+
+      unless missing_keys.empty? and extra_keys.empty?
+        raise ArgumentError.new(
+          "bad section definition '#{section_key}'\n" +
+            "missing required keys: #{missing_keys.join(',')}\n" +
+            "had unknown keys: #{extra_keys.join(',')}")
+      end
+
+      section_value.each do |inner_k, inner_v|
+        want_type = section_schema[:required][inner_k]
+        if want_type.nil?
+          want_type = section_schema[:optional][inner_k]
+        end
+        unless inner_v.instance_of? want_type
+          raise ArgumentError.new("'#{k}.#{inner_k}' is the wrong type, got value '#{inner_v}', wanted type #{want_type}")
+        end
+      end
+    end
+  end
+
+  return manifest
+end
 
 def _aw4_filename_to_datetime(aw4_prefix, f)
   common = Common.new
 
   date_match = f.delete_prefix(aw4_prefix).match(/([\d-]+)(_\d+)?.csv/)
   unless date_match
-    common.warning "AW4 filename does not match expected date format, assuming old: #{f}"
+    common.warning " AW4 filename does not match expected date format, assuming old: #{f}"
     return DateTime.new(1970)
   end
   date_part = date_match[1]
@@ -82,7 +146,7 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
   # Read all AW4s into a CSV::Row[]
   aw4_paths = []
   if aw4_prefix.start_with?("gs://")
-    aw4_paths = common.capture_stdout(["gsutil", "ls", aw4_prefix +  "*"]).split("\n")
+    aw4_paths = common.capture_stdout(["gsutil", "ls", aw4_prefix + "*"]).split("\n")
   else
     aw4_paths = Dir.glob(aw4_prefix + "*")
   end
@@ -92,7 +156,7 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
   i = 0
   matching_aw4_rows = aw4_paths.flat_map do |f|
     common.status "processed #{i}/#{aw4_paths.length} AW4 manifests" if i % 10 == 0
-    i+=1
+    i += 1
 
     filename_date = _aw4_filename_to_datetime(aw4_prefix, f)
 
@@ -132,7 +196,11 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
 
   missing_rids = ridset - by_rid.keys
   unless missing_rids.empty?
-    raise ArgumentError.new("AW4 manifests do not contain information for requested research IDs:\n" + missing_rids.join(","))
+    missing_str = missing_rids.join(",")
+    if missing_rids.length > 100
+      missing_str = missing_rids.to_a[0..50].join(",") + "..."
+    end
+    raise ArgumentError.new("AW4 manifests do not contain information for #{missing_rids.length} requested research IDs (of #{by_rid.length} AW4 rows):\n" + missing_str)
   end
 
   # The input research ID set should already account for these properties, these
@@ -155,36 +223,108 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
   rids.map { |rid| by_rid[rid] }
 end
 
+def read_research_ids_file(filename)
+  IO.readlines(filename, chomp: true).filter do |line|
+    if line.to_i() == 0
+      Common.new.warning "skipping non-numeric research ID line: #{line}"
+      false
+    else
+      true
+    end
+  end
+end
+
 def read_all_wgs_aw4s(project, rids)
+  raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
   _read_aw4_rows_for_rids(FILE_ENVIRONMENTS[project][:source_config][:wgs_aw4_prefix], rids)
 end
 
-def build_cram_manifest(project, ingest_bucket, dest_bucket, display_version_id, rids)
+def read_all_microarray_aw4s(project, rids)
   raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
+  _read_aw4_rows_for_rids(FILE_ENVIRONMENTS[project][:source_config][:microarray_aw4_prefix], rids)
+end
 
-  wgs_aw4s = read_all_wgs_aw4s(project, rids)
-  replace_config = FILE_PREFIX_REPLACEMENTS[:wgs_cram]
+def _apply_filename_replacement(source_name, match, replace_tmpl, rid=nil)
+  common = Common.new
 
-  # TODO(RW-8269): Support delta directories.
-  path_prefix = "pooled/wgs/cram/#{display_version_id}_base"
-  ingest_base_path = File.join(ingest_bucket, path_prefix)
-  dest_base_path = File.join(dest_bucket, path_prefix)
+  replace = replace_tmpl
+  unless rid.nil?
+    replace = replace_tmpl.sub("{RID}", rid)
+  end
+  if match.nil?
+    match = ".*"
+  end
+  return source_name.sub(Regexp.new(match), replace)
+end
 
-  return wgs_aw4s.flat_map do |aw4_entry|
-    [aw4_entry["cram_path"], aw4_entry["crai_path"]].map do |source_path|
-      source_name = File.basename(source_path)
-      dest_name = source_name.sub(replace_config[:matchSourceName], replace_config[:destNameFn].call(aw4_entry["research_id"]))
-
-      if source_name == dest_name
-        raise ArgumentError.new("filename replacement failed for #{source_name}")
-      end
-      {
-        :source_path => source_path,
-        :ingest_path => File.join(ingest_base_path, dest_name),
-        :dest_path => File.join(dest_base_path, dest_name),
-        :dest_storage_class => "nearline"
-      }
+def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, rid=nil, preprod_source_ingest_base_path=nil)
+  source_name = File.basename(source_path)
+  dest_name = source_name
+  replace = input_section["filenameReplace"]
+  unless replace.nil?
+    dest_name = _apply_filename_replacement(
+      source_name, input_section["filenameMatch"], replace, rid)
+    if source_name == dest_name
+      raise ArgumentError.new("filename replacement failed for '#{source_name}'")
     end
+  end
+  preprod_source_ingest_path = nil
+  unless preprod_source_ingest_base_path.nil?
+    preprod_source_ingest_path = File.join(preprod_source_ingest_base_path, dest_name)
+  end
+  {
+    :source_path => source_path,
+    :preprod_source_ingest_path => preprod_source_ingest_path,
+    :ingest_path => File.join(ingest_base_path, dest_name),
+    :destination_dir => destination,
+    :dest_storage_class => input_section.fetch("storageClass", "STANDARD")
+  }
+end
+
+def build_copy_manifest_for_aw4_section(input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows)
+  # TODO(RW-8269): handle delta directories
+  path_prefix = "pooled/#{input_section["pooledDestPathInfix"]}/#{display_version_id}_base"
+  ingest_base_path = File.join(ingest_bucket, path_prefix)
+  destination = File.join(dest_bucket, path_prefix)
+
+  return aw4_rows.flat_map do |aw4_entry|
+    source_paths = input_section["aw4Columns"].map { |k| aw4_entry[k] }
+    source_paths.map do |source_path|
+      _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, aw4_entry["research_id"])
+    end
+  end
+end
+
+def build_copy_manifest_for_curation_section(input_section, ingest_bucket, dest_bucket, display_version_id)
+  path_prefix = "#{display_version_id}/#{input_section['destination']}"
+  ingest_base_path = File.join(ingest_bucket, path_prefix)
+  destination = File.join(dest_bucket, path_prefix)
+
+  # -d allows the input manifest to specify subdirectories to copy in-place
+  source_uris = Common.new.capture_stdout(["gsutil", "ls", "-d", input_section["sourcePattern"]]).split("\n")
+  if source_uris.empty?
+    raise ArgumentError.new("sourcePattern '#{input_section["sourcePattern"]}' did not match any files")
+  end
+  return source_uris.map do |source_path|
+    _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section)
+  end
+end
+
+def build_copy_manifest_for_preprod_section(input_section, ingest_bucket, dest_bucket, display_version_id)
+  path_prefix = "#{display_version_id}/#{input_section['destination']}"
+  ingest_base_path = File.join(ingest_bucket, path_prefix)
+
+  preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
+  preprod_ingest_base_path = ingest_base_path.sub(ingest_bucket, preprod_ingest_bucket)
+
+  destination = File.join(dest_bucket, path_prefix)
+
+  source_uris = Common.new.capture_stdout(["gsutil", "-i", "all-of-us-rw-preprod@appspot.gserviceaccount.com", "ls", "-d", input_section["sourcePattern"]]).split("\n")
+  if source_uris.empty?
+    raise ArgumentError.new("sourcePattern '#{input_section["sourcePattern"]}' did not match any files")
+  end
+  return source_uris.map do |source_path|
+    _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, nil, preprod_ingest_base_path)
   end
 end
 
@@ -204,11 +344,10 @@ end
 # - done.txt: newline-delimited output identifiers for all successful processes
 # - stdout0.txt, ..., stdout{num_workers-1}.txt: stdout for each worker thread
 # - stderr0.txt, ..., stderr{num_workers-1}.txt: stderr for each worker thread
-def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_workers)
+def _process_files_by_manifest(all_tasks, logs_dir, status_verb, num_workers)
   common = Common.new
 
   FileUtils.makedirs(logs_dir)
-  all_tasks = CSV.read(manifest_path, headers: true, return_headers: false)
 
   num_workers = [all_tasks.length, num_workers].min
 
@@ -232,7 +371,7 @@ def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_workers
               done << output
             else
               error << output
-              fail_count+=1
+              fail_count += 1
               if fail_count >= fail_limit
                 raise IOError.new("failed to process #{fail_count} manifest rows in a single worker")
               end
@@ -277,7 +416,7 @@ def _process_files_by_manifest(manifest_path, logs_dir, status_verb, num_workers
         # Carriage return here to keep the progress on the same terminal line
         printf("\r%s %d/%d files [%.02f%%] (running for %dh%dm)",
                status_verb, count, all_tasks.length,
-               100*count.to_f/all_tasks.length, delta_min/60, delta_min%60)
+               100 * count.to_f / all_tasks.length, delta_min / 60, delta_min % 60)
       end
     end
   end
@@ -296,41 +435,75 @@ end
 # for publishing. For details, see:
 # https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
 def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
+  common = Common.new
   deploy_account = must_get_env_value(project, :publisher_account)
 
-  _process_files_by_manifest(
-      manifest_path, File.join([logs_dir, 'stage']), "Staged", concurrency) do |task, wout, werr|
-    ingest_path = task["ingest_path"]
-    [ingest_path, system(
-       "gsutil",
-       "-i",
-       deploy_account,
-       "cp",
-       task["source_path"],
-       ingest_path,
-       :out => wout,
-       :err => werr)]
+  all_tasks = CSV.read(manifest_path, headers: true, return_headers: false)
+
+  # For now, we support pulling specifically from a ct preprod workspace project as a source.
+  # This scenario is special-cased, since it's where we're doing operational prep of CDR assets.
+  # For publishing in lower environments, i.e. from an arbitrary bucket, just use a normal curationSource.
+  preprod_deploy_account = must_get_env_value("all-of-us-rw-preprod", :publisher_account)
+  preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
+
+  needs_preprod_grant = false
+  if all_tasks.any? { |task| not task["preprod_source_ingest_path"].to_s.empty? }
+    unless ["all-of-us-rw-prod", "all-of-us-rw-preprod"].include? project
+      raise ArgumentError.new("specified a preprod source with project #{project}, this is not allowed")
+    end
+    # preprod -> prod requires a temporary access grant
+    needs_preprod_grant = project == "all-of-us-rw-prod"
   end
 
+  if needs_preprod_grant
+    common.run_inline(["gsutil", "-i", preprod_deploy_account, "iam", "ch", "serviceAccount:#{deploy_account}:storageAdmin", preprod_ingest_bucket])
+  end
+
+  _process_files_by_manifest(
+    all_tasks, File.join([logs_dir, "stage", File.basename(manifest_path, ".csv")]), "Staged", concurrency) do |task, wout, werr|
+    ingest_path = task["ingest_path"]
+
+    unless task["preprod_source_ingest_path"].to_s.empty?
+      # preprod workspace -> (cp) -> preprod ingest -> (mv) -> prod ingest
+      unless system(
+          "gsutil",
+          "-i",
+          preprod_deploy_account,
+          "cp",
+          task["source_path"],
+          task["preprod_source_ingest_path"],
+          :out => wout,
+          :err => werr)
+        next [ingest_path, false]
+      end
+      next [ingest_path, system(
+         "gsutil",
+         "-i",
+         deploy_account,
+         "mv",
+         task["preprod_source_ingest_path"],
+         ingest_path,
+         :out => wout,
+         :err => werr)]
+    end
+    next [ingest_path, system(
+      "gsutil",
+      "-i",
+      deploy_account,
+      "cp",
+      task["source_path"],
+      ingest_path,
+      :out => wout,
+      :err => werr)]
+  end
+
+  if needs_preprod_grant
+    common.run_inline(["gsutil", "-i", preprod_deploy_account, "iam", "ch", "-d", "serviceAccount:#{deploy_account}:storageAdmin", preprod_ingest_bucket])
+  end
 end
 
-# Publish files to the CDR bucket as specified in the given manifest.
-def publish_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
-  deploy_account = must_get_env_value(project, :publisher_account)
-
-  _process_files_by_manifest(
-      manifest_path, File.join([logs_dir, 'publish']), "Published", concurrency) do |task, wout, werr|
-    dest_path = task["dest_path"]
-    [dest_path, system(
-       "gsutil",
-       "-i",
-       deploy_account,
-       "mv",
-       "-s",
-       task["dest_storage_class"],
-       task["ingest_path"],
-       dest_path,
-       :out => wout,
-       :err => werr)]
-  end
+# Publish files to the CDR bucket as specified in the given manifests.
+def publish_files_by_manifests(project, manifest_paths)
+  # TODO(RW-8266): Implement.
+  raise NotImplementedError.new()
 end
