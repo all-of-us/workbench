@@ -140,7 +140,7 @@ interface SignInState {
   // Page has been loaded by clicking Previous Button
   isPreviousStep: boolean;
   // Validation errors
-  errors: any[];
+  errors: any;
 }
 
 export const createEmptyProfile = (): Profile => {
@@ -219,7 +219,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       // data in its onComplete callback.
       profile: createEmptyProfile(),
       isPreviousStep: false,
-      errors: [],
+      errors: null,
     };
   }
 

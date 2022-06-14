@@ -16,7 +16,6 @@ import { SemiBoldHeader } from 'app/components/headers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { useNavigation } from 'app/utils/navigation';
 
 import { Divider } from './divider';
 import { CheckBox, NumberInput, TextInput } from './inputs';
@@ -46,15 +45,17 @@ const validateDemographicSurvey = (demographicSurvey) => {
 };
 
 const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
-  const [, navigateByUrl] = useNavigation();
-  const [captchaToken, setCaptchaToken] = useState('');
-  const [loading, setLoading] = useState(false);
   const [isAian, setIsAian] = useState(false);
   const [showAsianOptions, setShowAsianOptions] = useState(false);
   const [showAiAnOptions, setShowAiAnOptions] = useState(false);
 
   const { profile } = props;
   const { demographicSurveyV2: survey } = profile;
+
+  useEffect(() => {
+    const errors = validateDemographicSurvey(survey);
+    props.onUpdate(profile, errors);
+  }, []);
 
   useEffect(() => {
     setIsAian(
