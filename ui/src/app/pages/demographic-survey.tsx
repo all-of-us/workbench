@@ -6,6 +6,7 @@ import { Profile } from 'generated/fetch';
 import { Button } from 'app/components/buttons';
 import DemographicSurveyV2 from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import { profileStore } from 'app/utils/stores';
 
 export const DemographicSurvey = (props) => {
@@ -19,11 +20,14 @@ export const DemographicSurvey = (props) => {
     setLoading(false);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     props.showSpinner();
+    await profileApi().updateProfile(profile);
+    props.hideSpinner();
   };
 
   const handleUpdate = (updatedProfile: Profile, updatedErrors: any) => {
+    setProfile(updatedProfile);
     setErrors(updatedErrors);
   };
 
