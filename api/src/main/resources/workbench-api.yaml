@@ -9662,10 +9662,7 @@ definitions:
         type: boolean
       disabilityHearing:
         "$ref": "#/definitions/YesNoPreferNot"
-        description: >
-          Are you deaf or do you have serious difficulty hearing?
-          (Note: Some people who are deaf or have serious difficulty
-          hearing use assistive devices to communicate by phone.)
+        description: Are you deaf or do you have serious difficulty hearing?
       disabilitySeeing:
         "$ref": "#/definitions/YesNoPreferNot"
         description: Are you blind or do you have serious difficulty seeing, even when wearing glasses?
