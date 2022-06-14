@@ -18,7 +18,6 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -33,6 +32,7 @@ import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
@@ -50,7 +50,7 @@ import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class)
+@Mapper(config = MapStructConfig.class, uses = DemographicSurveyMapper.class)
 public interface RdrMapper {
   ZoneOffset offset = OffsetDateTime.now().getOffset();
 
@@ -265,14 +265,8 @@ public interface RdrMapper {
     return rdrDemographic;
   }
 
-  // DbDemographicSurveyV2 has singular names for these because Hibernate seems to require
-  // that they match the column names in the join tables
+  RdrDemographicSurveyV2 toDemographicSurveyV2(DemographicSurveyV2 demoSurveyV2);
 
-  @Mapping(source = "ethnicCategory", target = "ethnicCategories")
-  @Mapping(source = "genderIdentity", target = "genderIdentities")
-  @Mapping(source = "sexualOrientation", target = "sexualOrientations")
-  RdrDemographicSurveyV2 toDemographicSurveyV2(DbDemographicSurveyV2 demoSurveyV2);
-}
   // for round trip testing only
   DemographicSurveyV2 toModelDemographicSurveyV2(RdrDemographicSurveyV2 demoSurveyV2);
 }

@@ -30,6 +30,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
@@ -67,7 +68,10 @@ public class RdrMapperTest {
   private static final Timestamp TIME2 = Timestamp.from(Instant.parse("2001-06-01T00:00:00.00Z"));
 
   @TestConfiguration
-  @Import(RdrMapperImpl.class)
+  @Import({
+    DemographicSurveyMapperImpl.class,
+    RdrMapperImpl.class,
+  })
   static class Configuration {}
 
   private @Autowired RdrMapper rdrMapper;

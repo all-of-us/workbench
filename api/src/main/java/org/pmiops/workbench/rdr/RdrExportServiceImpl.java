@@ -135,7 +135,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param userIds
    */
   @Override
-  public void exportUsers(List<Long> userId, boolean backfill) {
+  public void exportUsers(List<Long> userIds, boolean backfill) {
     try {
       rdrApiProvider
           .get()
