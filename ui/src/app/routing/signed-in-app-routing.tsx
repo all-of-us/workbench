@@ -44,6 +44,7 @@ import {
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
+import { serverConfigStore } from 'app/utils/stores';
 
 import { authorityGuard, getAccessModuleGuard } from './guards';
 
@@ -353,13 +354,15 @@ export const SignedInRoutes = () => {
       <AppRoute path='/workspaces/:ns/:wsid' exact>
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
-      <AppRoute path='/demographic-survey' exact>
-        <DemographicSurveyPage
-          routeData={{
-            title: 'Demographic Survey',
-          }}
-        />
-      </AppRoute>
+      {serverConfigStore.get().config.enableUpdatedDemographicSurvey && (
+        <AppRoute path='/demographic-survey' exact>
+          <DemographicSurveyPage
+            routeData={{
+              title: 'Demographic Survey',
+            }}
+          />
+        </AppRoute>
+      )}
       <AppRoute exact path='*'>
         <Redirect to={'/not-found'} />
       </AppRoute>
