@@ -22,7 +22,30 @@ export const DemographicSurvey = (props) => {
   useEffect(() => {
     const profileStoreProfile = profileStore.get().profile;
     setInitialSurvey(profileStoreProfile.demographicSurveyV2);
-    setProfile(profileStoreProfile);
+    const currentSurvey = profileStoreProfile.demographicSurveyV2 || {
+      education: null,
+      ethnicityAiAnOtherText: null,
+      ethnicityAsianOtherText: null,
+      ethnicCategories: [],
+      ethnicityOtherText: null,
+      disabilityConcentrating: null,
+      disabilityDressing: null,
+      disabilityErrands: null,
+      disabilityHearing: null,
+      disabilityOtherText: null,
+      disabilitySeeing: null,
+      disabilityWalking: null,
+      disadvantaged: null,
+      genderIdentities: [],
+      genderOtherText: null,
+      orientationOtherText: null,
+      sexAtBirth: null,
+      sexAtBirthOtherText: null,
+      sexualOrientations: [],
+      yearOfBirth: null,
+      yearOfBirthPreferNot: false,
+    };
+    setProfile({ ...profileStoreProfile, demographicSurveyV2: currentSurvey });
     props.hideSpinner();
     setLoading(false);
   }, []);
