@@ -171,10 +171,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.ASIANVIETNAMESE,
                 },
                 {
-                  label: 'Asian Other',
+                  label:
+                    'Asian / None of these fully describe me, and I want to specify.',
                   value: EthnicCategory.ASIANOTHER,
                   showInput: true,
                   otherText: survey.ethnicityAsianOtherText,
+                  otherTextMaxLength: 200,
                   onChangeOtherText: (value) =>
                     handleInputChange('ethnicityAsianOtherText', value),
                 },
@@ -214,6 +216,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.BLACKOTHER,
                   showInput: true,
                   otherText: survey.ethnicityBlackOtherText,
+                  otherTextMaxLength: 200,
                   onChangeOtherText: (value) =>
                     handleInputChange('ethnicityBlackOtherText', value),
                 },
@@ -257,6 +260,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.HISPANICOTHER,
                   showInput: true,
                   otherText: survey.ethnicityHispanicOtherText,
+                  otherTextMaxLength: 200,
                   onChangeOtherText: (value) =>
                     handleInputChange('ethnicityHispanicOtherText', value),
                 },
@@ -301,6 +305,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.MENAOTHER,
                   showInput: true,
                   otherText: survey.ethnicityMeNaOtherText,
+                  otherTextMaxLength: 200,
                   onChangeOtherText: (value) =>
                     handleInputChange('ethnicityMeNaOtherText', value),
                 },
@@ -347,6 +352,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.NHPIOTHER,
                   showInput: true,
                   otherText: survey.ethnicityNhPiOtherText,
+                  otherTextMaxLength: 200,
                   onChangeOtherText: (value) =>
                     handleInputChange('ethnicityNhPiOtherText', value),
                 },
@@ -395,6 +401,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.WHITEOTHER,
                   showInput: true,
                   otherText: survey.ethnicityWhiteOtherText,
+                  otherTextMaxLength: 200,
                   onChangeOtherText: (value) =>
                     handleInputChange('ethnicityWhiteOtherText', value),
                 },
@@ -412,6 +419,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: EthnicCategory.OTHER,
               showInput: true,
               otherText: survey.ethnicityOtherText,
+              otherTextMaxLength: 200,
               onChangeOtherText: (value) =>
                 handleInputChange('ethnicityOtherText', value),
             },
@@ -463,6 +471,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: GenderIdentityV2.OTHER,
               showInput: true,
               otherText: survey.genderOtherText,
+              otherTextMaxLength: 200,
               onChangeOtherText: (value) =>
                 handleInputChange('genderOtherText', value),
             },
@@ -514,6 +523,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: SexualOrientationV2.OTHER,
               showInput: true,
               otherText: survey.orientationOtherText,
+              otherTextMaxLength: 200,
               onChangeOtherText: (value) =>
                 handleInputChange('orientationOtherText', value),
             },
@@ -538,6 +548,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: SexAtBirthV2.OTHER,
               showInput: true,
               otherText: survey.sexAtBirthOtherText,
+              otherTextMaxLength: 200,
               onChangeOtherText: (value) =>
                 handleInputChange('sexAtBirthOtherText', value),
             },

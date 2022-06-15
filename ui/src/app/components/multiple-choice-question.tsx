@@ -72,6 +72,7 @@ interface MultipleChoiceOption {
   disabledText?: string;
   subOptions?: MultipleChoiceOption[];
   showSubOptions?: boolean;
+  otherTextMaxLength?: number;
 }
 
 export const MultipleChoiceQuestion = (props: {
@@ -172,6 +173,7 @@ export const MultipleChoiceQuestion = (props: {
               }}
               type='text'
               value={option.otherText}
+              maxLength={option.otherTextMaxLength}
               onChange={(e) => option.onChangeOtherText?.(e.target.value)}
             />
           )}
