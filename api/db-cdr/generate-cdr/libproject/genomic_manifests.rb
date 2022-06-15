@@ -71,7 +71,7 @@ AW4_INPUT_SECTION_SCHEMA = {
     # Additionally, the string {RID} will be replaced with the corresponding research
     # ID for this file.
     "filenameReplace" => String,
-    # The GCS storage class, e.g. STANDARD, NEARLINE. Defaults to STANDARD.
+    # The GCS storage class, e.g. STANDARD, NEARLINE. Defaults STANDARD.
     "storageClass" => String,
   },
 }
@@ -284,6 +284,15 @@ def _apply_filename_replacement(source_name, match, replace_tmpl, rid=nil)
   return source_name.sub(Regexp.new(match), replace)
 end
 
+def _apply_storage_class_staging_prefix(path, storage_class)
+  parts = path.split("/")
+  unless parts[0] == "gs:" and parts[1] == ""
+    raise ArgumentError("expected input path to be a full gs:// path")
+  end
+  # insert the prefix after the bucket
+  (parts[0..2] + ["#{storage_class.downcase}-staged"] + parts[3..-1]).join("/")
+end
+
 def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, rid=nil, preprod_source_ingest_base_path=nil)
   source_name = File.basename(source_path)
   dest_name = source_name
@@ -299,12 +308,21 @@ def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_s
   unless preprod_source_ingest_base_path.nil?
     preprod_source_ingest_path = File.join(preprod_source_ingest_base_path, dest_name)
   end
+
+  # For custom storage classes, we apply a global path prefix so that we can still use
+  # cloud storage transfer service downstream (it operates on prefix matching only). This
+  # allows us to interleave storage classes within the same directory, e.g. for CRAM files
+  # (NEARLINE) and CRAM indexes (STANDARD).
+  storage_class = input_section.fetch("storageClass", "STANDARD")
+  unless storage_class == "STANDARD"
+    ingest_base_path = _apply_storage_class_staging_prefix(ingest_base_path, storage_class)
+  end
   {
     :source_path => source_path,
     :preprod_source_ingest_path => preprod_source_ingest_path,
     :ingest_path => File.join(ingest_base_path, dest_name),
     :destination_dir => destination,
-    :dest_storage_class => input_section.fetch("storageClass", "STANDARD")
+    :dest_storage_class => input_section["storageClass"]
   }
 end
 
@@ -461,6 +479,10 @@ end
 # ingest bucket to prepare them for publishing. This intermediate step is required
 # for publishing. For details, see:
 # https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
+#
+# IMPORTANT: custom storage classes should NOT be respected within the ingest staging
+# bucket; only STANDARD storage class should be used here. This file staging is transient
+# and therefore receives only penalties for colder storage.
 def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
   common = Common.new
   deploy_account = must_get_env_value(project, :publisher_account)
@@ -488,7 +510,7 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
 
   _process_files_by_manifest(
     all_tasks,
-    File.join([logs_dir, "stage", File.basename(manifest_path, ".csv")]),
+    File.join([logs_dir, "stage"]),
     "Staged",
     concurrency
   ) do |task, wout, werr|
@@ -501,6 +523,7 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
           "-i",
           preprod_deploy_account,
           "cp",
+          "-r",
           task["source_path"],
           task["preprod_source_ingest_path"],
           :out => wout,
@@ -524,6 +547,7 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
       "-i",
       deploy_account,
       "cp",
+      "-r",
       task["source_path"],
       ingest_path,
       :out => wout,
