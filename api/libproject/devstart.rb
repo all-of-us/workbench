@@ -5,6 +5,7 @@
 require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
+require_relative "affirm"
 require_relative "cloudsqlproxycontext"
 require_relative "environments"
 require_relative "gcloudcontext"
@@ -402,19 +403,6 @@ def liquibase_gradlew_command(command, argument = '', run_list = '')
   end
 
   full_cmd_array
-end
-
-YES_RESPONSES = ['roger', 'affirmative', 'indubitably', 'yep', 'positively', 'aye', 'definitely']
-
-# Get user confirmation
-def get_user_confirmation(message)
-  yes_response = YES_RESPONSES.sample
-  Common.new.status("#{message} [#{yes_response}/N]")
-
-  answer = STDIN.gets.chomp
-  unless answer.downcase == yes_response
-    raise RuntimeError.new("Operation cancelled by user.")
-  end
 end
 
 # Run a Liquibase command against the specified project. Where possible, show SQL
