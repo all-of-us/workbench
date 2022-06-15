@@ -78,5 +78,8 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
+  @Mapping(
+      target = "enableUpdatedDemographicSurvey",
+      source = "config.featureFlags.enableUpdatedDemographicSurvey")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

@@ -112,7 +112,8 @@
     "ccSupportWhenAdminLocking": true,
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": false,
-    "enableMultiReview": false
+    "enableMultiReview": false,
+    "enableUpdatedDemographicSurvey": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
