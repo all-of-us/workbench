@@ -40,7 +40,7 @@ export const DemographicSurvey = (props) => {
   }
 
   return profile ? (
-    <>
+    <div style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}>
       <DemographicSurveyV2 profile={profile} onUpdate={handleUpdate} />
       <TooltipTrigger
         content={
@@ -74,7 +74,7 @@ export const DemographicSurvey = (props) => {
           Submit
         </Button>
       </TooltipTrigger>
-    </>
+    </div>
   ) : (
     <div style={{ marginTop: '1rem' }}>
       Unfortunately, your profile did not load. Please try again later.
