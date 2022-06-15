@@ -559,8 +559,88 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
   end
 end
 
-# Publish files to the CDR bucket as specified in the given manifests.
-def publish_files_by_manifests(_project, _manifest_paths)
-  # TODO(RW-8266): Implement.
-  raise NotImplementedError.new()
+def _find_common_prefix(a, b)
+  prefix = ""
+  for i in 0..a.length-1 do
+    if a[i] != b[i]
+      break
+    end
+    prefix += a[i]
+  end
+  prefix
+end
+
+# Returns a list of publishing configs in the form of a dictionary with the following structure:
+# [{
+#   :source => "gs://..."
+#   :dest => "gs://..."
+#   :storage_class => nil | "NEARLINE" | "..."
+# }, ...]
+#
+# This function attempts to merge the given copy manifests into the smallest number of possible
+# publishing configs, executable by Storage Transfer Service. When finding common path prefixes
+# it will not be unnnecessarily broad, but if other files exist in the ingest bucket at time of
+# copying which are under a common parent directory of the copy manifest paths, it may be
+# picked up in a transfer. For this reason, it is recommended that the ingest bucket is cleared
+# before staging any new data, and to avoid concurrent file staging/publishing.
+def build_publish_configs(manifest_paths)
+  # Group by unique ingest directory.
+  config_by_source_dir = {}
+  manifest_paths.each do |path|
+    CSV.foreach(path, headers: true, return_headers: false) do |row|
+      ingest_dir = File.dirname(row["ingest_path"])
+      unless config_by_source_dir.key? ingest_dir
+        config_by_source_dir[ingest_dir] = {
+          :source => ingest_dir,
+          :dest => row["destination_dir"],
+          :storage_class => row["dest_storage_class"],
+        }
+      end
+    end
+  end
+
+  # Group by configuration parameters which cannot vary within a single transfer job. Currently, this is
+  # just storage class.
+  configs_by_storage_class = {}
+  config_by_source_dir.each_value do |c|
+    existing = configs_by_storage_class[c[:storage_class]]
+    if existing.nil?
+      configs_by_storage_class[c[:storage_class]] = c
+      next
+    end
+
+    # Merge all values that share configuration settings into the longest common shared prefix.
+    configs_by_storage_class[c[:storage_class]] = {
+      :source => _find_common_prefix(existing[:source], c[:source]),
+      :dest => _find_common_prefix(existing[:dest], c[:dest]),
+      :storage_class => c[:storage_class],
+    }
+  end
+
+  configs_by_storage_class.values
+end
+
+# Creates Cloud Storage Transfer service jobs to publish data to the CDR bucket,
+# according to the given configs.
+def publish(project, config, job_name)
+  common = Common.new
+  deploy_account = must_get_env_value(project, :publisher_account)
+
+  maybe_args = []
+  unless config[:storage_class].to_s.empty?
+    maybe_args += ["--custom-storage-class=#{config[:storage_class]}"]
+  end
+  common.run_inline([
+      "gcloud",
+      "--impersonate-service-account",
+      deploy_account,
+      "transfer",
+      "jobs",
+      "create",
+      config[:source],
+      config[:dest],
+      "--name='#{job_name}'",
+      "--description='This transfer job was automatically created by RW tooling and is intended to be run only once, see genomic_manifests.rb.'",
+      "--delete-from=source-after-transfer",
+  ] + maybe_args)
 end

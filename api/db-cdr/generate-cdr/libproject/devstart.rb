@@ -1,6 +1,7 @@
 require_relative "genomic_manifests"
 require_relative "../../../../aou-utils/serviceaccounts"
 require_relative "../../../../aou-utils/utils/common"
+require_relative "../../../libproject/affirm"
 require_relative "../../../libproject/gcloudcontext"
 require_relative "../../../libproject/environments"
 require_relative "../../../libproject/wboptionsparser"
@@ -348,6 +349,11 @@ def publish_cdr_files(cmd_name, args)
     "Directory for intermediate manifest files and logs."
   )
   op.add_option(
+    "--jira-ticket [RW-XXX]",
+    ->(opts, v) { opts.jira_ticket = v },
+    "Optional RW jira ticket associated with this publish; used for provenance."
+  )
+  op.add_option(
     "--display-version-id [version]",
     ->(opts, v) { opts.display_version_id = v },
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
@@ -381,13 +387,13 @@ def publish_cdr_files(cmd_name, args)
 
   common = Common.new
 
-  work_dir = op.opts.work_dir
-  if work_dir.nil?
-    work_dir = Dir.mktmpdir("cdr-file-publish")
+  working_dir = op.opts.working_dir
+  if working_dir.nil?
+    working_dir = Dir.mktmpdir("cdr-file-publish")
   else
-    FileUtils.makedirs(work_dir)
+    FileUtils.makedirs(working_dir)
   end
-  common.status("local working directory: '#{work_dir}'")
+  common.status("local working directory: '#{working_dir}'")
 
   input_manifest = parse_input_manifest(op.opts.input_manifest_file)
   copy_manifest_files = {}
@@ -444,7 +450,7 @@ def publish_cdr_files(cmd_name, args)
     end
 
     copy_manifests.each do |source_name, copy_manifest|
-      path = "#{work_dir}/#{source_name}_copy_manifest.csv"
+      path = "#{working_dir}/#{source_name}_copy_manifest.csv"
       CSV.open(path, 'wb') do |f|
         f << copy_manifest.first.keys
         copy_manifest.each { |c| f << c.values }
@@ -454,18 +460,42 @@ def publish_cdr_files(cmd_name, args)
     common.status "Finished: manifests created"
   end
 
-  logs_dir = FileUtils.makedirs(File.join(work_dir, "logs"))
+  logs_dir = FileUtils.makedirs(File.join(working_dir, "logs"))
   common.status "Writing logs to #{logs_dir}"
 
   if op.opts.tasks.include? "STAGE_INGEST"
-    common.status "Starting: file staging to ingest bucket"
-    copy_manifest_files.each { |name, path| stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, name)) }
-    common.status "Finished: file staging"
+    copy_manifest_files.each do |name, path|
+      common.status "Starting file staging for #{name}"
+      stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, name))
+    end
+    common.status "Finished: all file staging"
   end
 
   if op.opts.tasks.include? "PUBLISH"
-    common.status "Starting: publishing to CDR bucket"
-    publish_files_by_manifests(op.opts.project, manifest_paths)
+    if copy_manifest_files.empty?
+      copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+      if copy_manifest_files.empty?
+        raise ArgumentError.new(
+            "no copy manifests generated or found in the working dir #{working_dir}; if you " +
+            "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
+            "specify an existing --working-dir which contains copy manifest CSV files")
+      end
+    end
+
+    configs = build_publish_configs(copy_manifest_files)
+    configs.each_index do |i|
+      config = configs[i]
+      with_storage_class = config[:storage_class].to_s.empty? ? "" : " (with storage class #{config[:storage_class]})"
+      get_user_confirmation(
+        "About to create transfer job#{with_storage_class}:\n" +
+        "#{config[:source]} ->\n#{config[:dest]}\n\nAre you sure?")
+
+      job_name = "publish-cdr-files (#{i+1}/#{configs.length})"
+      unless op.opts.jira_ticket.to_s.empty?
+        job_name = "[#{op.opts.jira_ticket}] #{job_name}"
+      end
+      publish(op.opts.project, config, job_name)
+    end
     common.status "Finished: publishing"
   end
 end
