@@ -43,6 +43,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceCreator;
@@ -84,6 +85,7 @@ public class RdrExportServiceImplTest {
   @Import({
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
+    DemographicSurveyMapperImpl.class,
     RdrExportServiceImpl.class,
     RdrMapperImpl.class
   })
