@@ -18,7 +18,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -192,33 +191,36 @@ public class RdrExportServiceImplTest {
 
   @Test
   public void exportUsers() throws ApiException {
+    boolean backfill = false;
     doNothing().when(mockRdrApi).exportResearchers(anyList(), anyBoolean());
 
-    rdrExportService.exportUsers(
-        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), false);
+    List<Long> userIds =
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId());
+    rdrExportService.exportUsers(userIds, backfill);
 
-    verify(rdrExportService, times(1)).updateDbRdrExport(any(), anyList());
+    verify(rdrExportService, times(1)).updateDbRdrExport(RdrEntity.USER, userIds);
   }
 
   @Test
-  public void exportUsersUnsuccessfulnoPersist() throws ApiException {
+  public void exportUsersUnsuccessfulNoPersist() throws ApiException {
+    boolean backfill = false;
     doThrow(new ApiException()).when(mockRdrApi).exportResearchers(anyList(), anyBoolean());
 
-    List<Long> userIds = new ArrayList<>();
-    userIds.add(dbUserWithEmail.getUserId());
-    userIds.add(dbUserWithoutEmail.getUserId());
-    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds, false));
+    List<Long> userIds =
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId());
+    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds, backfill));
 
     verify(rdrExportService, times(0)).updateDbRdrExport(any(), anyList());
   }
 
   @Test
   public void exportUsersBackfill() throws ApiException {
+    boolean backfill = true;
     rdrExportService.exportUsers(
-        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), true);
+        ImmutableList.of(dbUserWithEmail.getUserId(), dbUserWithoutEmail.getUserId()), backfill);
     assertThat(rdrExportDao.findAll()).isEmpty();
 
-    verify(mockRdrApi).exportResearchers(anyList(), eq(true));
+    verify(mockRdrApi).exportResearchers(anyList(), eq(backfill));
   }
 
   @Test

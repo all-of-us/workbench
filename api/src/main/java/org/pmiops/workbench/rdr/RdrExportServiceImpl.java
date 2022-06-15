@@ -162,6 +162,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * table with current date as the lastExport date
    *
    * @param workspaceIds
+   * @param backfill
    */
   @Override
   public void exportWorkspaces(List<Long> workspaceIds, boolean backfill) {
