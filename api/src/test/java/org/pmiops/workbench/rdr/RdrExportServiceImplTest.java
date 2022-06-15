@@ -32,6 +32,8 @@ import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2.DbEducationV2;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -45,17 +47,20 @@ import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.rdr.api.RdrApi;
+import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceCreator;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 public class RdrExportServiceImplTest {
@@ -81,6 +86,8 @@ public class RdrExportServiceImplTest {
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
 
+  private static final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
@@ -99,16 +106,17 @@ public class RdrExportServiceImplTest {
   })
   static class Configuration {
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.auth.serviceAccountApiUsers = ImmutableList.of("appspot@gserviceaccount.com");
-      workbenchConfig.rdrExport.exportDemoSurveyV2 = false;
       return workbenchConfig;
     }
   }
 
   @BeforeEach
   public void setUp() {
+    workbenchConfig.auth.serviceAccountApiUsers = ImmutableList.of("appspot@gserviceaccount.com");
+    workbenchConfig.rdrExport.exportDemoSurveyV2 = false;
+
     rdrExportService = spy(rdrExportService);
     when(mockAccessTierService.getAccessTiersForUser(any())).thenReturn(ImmutableList.of());
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
@@ -224,6 +232,56 @@ public class RdrExportServiceImplTest {
     assertThat(rdrExportDao.findAll()).isEmpty();
 
     verify(mockRdrApi).exportResearchers(anyList(), eq(backfill));
+  }
+
+  @Test
+  public void exportUsers_DemoSurveyV2Export() throws ApiException {
+    workbenchConfig.rdrExport.exportDemoSurveyV2 = true;
+    boolean backfill = false;
+
+    dbUserWithEmail =
+        userDao.save(
+            dbUserWithEmail.setDemographicSurveyV2(
+                new DbDemographicSurveyV2()
+                    .setUser(dbUserWithEmail)
+                    .setEducation(DbEducationV2.DOCTORATE)));
+
+    List<Long> userIds = Collections.singletonList(dbUserWithEmail.getUserId());
+    rdrExportService.exportUsers(userIds, backfill);
+
+    RdrResearcher expectedWithSurvey =
+        rdrMapper.toRdrResearcher(dbUserWithEmail, Collections.emptyList(), null);
+    // test sanity check
+    assertThat(expectedWithSurvey.getDemographicSurveyV2()).isNotNull();
+
+    verify(rdrExportService, times(1)).updateDbRdrExport(RdrEntity.USER, userIds);
+    verify(mockRdrApi).exportResearchers(Collections.singletonList(expectedWithSurvey), backfill);
+  }
+
+  @Test
+  public void exportUsers_DemoSurveyV2NoExport() throws ApiException {
+    workbenchConfig.rdrExport.exportDemoSurveyV2 = false;
+    boolean backfill = false;
+
+    dbUserWithEmail =
+        userDao.save(
+            dbUserWithEmail.setDemographicSurveyV2(
+                new DbDemographicSurveyV2()
+                    .setUser(dbUserWithEmail)
+                    .setEducation(DbEducationV2.DOCTORATE)));
+
+    List<Long> userIds = Collections.singletonList(dbUserWithEmail.getUserId());
+    rdrExportService.exportUsers(userIds, backfill);
+
+    RdrResearcher expectedNoSurvey =
+        rdrMapper
+            .toRdrResearcher(dbUserWithEmail, Collections.emptyList(), null)
+            .demographicSurveyV2(null);
+    // test sanity check
+    assertThat(expectedNoSurvey.getDemographicSurveyV2()).isNull();
+
+    verify(rdrExportService, times(1)).updateDbRdrExport(RdrEntity.USER, userIds);
+    verify(mockRdrApi).exportResearchers(Collections.singletonList(expectedNoSurvey), backfill);
   }
 
   @Test
