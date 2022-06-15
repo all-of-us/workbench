@@ -2016,7 +2016,7 @@ def invalidate_rdr_export(cmd_name, *args)
   end
 
   get_user_confirmation(
-    "RDR export invalidation should rarely be used; for backfilling workspace data you " +
+    "RDR export invalidation should rarely be used; for backfilling data you " +
     "should use backfill-entities-to-rdr instead. If you still think you need to run this, " +
     "please consult with the team before continuing. Continue anyways?")
 
