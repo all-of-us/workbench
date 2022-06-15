@@ -115,7 +115,6 @@ public class RdrExportServiceImplTest {
   @BeforeEach
   public void setUp() {
     workbenchConfig.auth.serviceAccountApiUsers = ImmutableList.of("appspot@gserviceaccount.com");
-    workbenchConfig.rdrExport.exportDemoSurveyV2 = false;
 
     rdrExportService = spy(rdrExportService);
     when(mockAccessTierService.getAccessTiersForUser(any())).thenReturn(ImmutableList.of());
