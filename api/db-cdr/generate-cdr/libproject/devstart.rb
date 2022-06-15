@@ -318,49 +318,60 @@ def publish_cdr_files(cmd_name, args)
 
   op.add_option(
     "--project [project]",
-    ->(opts, v) { opts.project = v},
+    ->(opts, v) { opts.project = v },
     "The Google Cloud project associated with this workbench environment, " +
-    "e.g. all-of-us-rw-staging. Required."
+      "e.g. all-of-us-rw-staging. Required."
+  )
+  op.add_option(
+    "--input-manifest-file [file.yaml]",
+    ->(opts, v) { opts.input_manifest_file = v },
+    "The input manifest YAML file which describes a logical mapping of the files to be " +
+    "published. For details on the YAML format see genomic_manifests.rb"
+  )
+  op.add_option(
+    "--microarray-rids-file [file]",
+    ->(opts, v) { opts.microarray_rids_file = v },
+    "A file containing all research IDs for which Microarray data should be published. " +
+      "Only applicable and required for task CREATE_COPY_MANIFESTS where " +
+      "aw4MicroarraySources are specified."
   )
   op.add_option(
     "--wgs-rids-file [file]",
-    ->(opts, v) { opts.wgs_rids_file = v},
+    ->(opts, v) { opts.wgs_rids_file = v },
     "A file containing all research IDs for which WGS data should be published. " +
-    "Only applicable and required for task CREATE_MANIFESTS."
+      "Only applicable and required for task CREATE_COPY_MANIFESTS where " +
+      "aw4WgsSources are specified."
+  )
+  op.add_option(
+    "--working-dir [path]",
+    ->(opts, v) { opts.working_dir = v },
+    "Directory for intermediate manifest files and logs."
   )
   op.add_option(
     "--display-version-id [version]",
-    ->(opts, v) { opts.display_version_id = v},
+    ->(opts, v) { opts.display_version_id = v },
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
-    "this matches the CDR version display name in the product, e.g. 'v5'. This ID will be " +
-    "included in the published file directory structure. " +
-    "Only applicable and required for task CREATE_MANIFESTS."
+      "this matches the CDR version display name in the product, e.g. 'v5'. This ID will be " +
+      "included in the published file directory structure. " +
+      "Only applicable and required for task CREATE_COPY_MANIFESTS."
   )
-  supported_types = ["CRAM"]
-  op.opts.data_types = supported_types
-  op.add_option(
-    "--data-types [CRAM,...]",
-    ->(opts, v) { opts.data_types = v.split(",")},
-    "Data types to publish; defaults to all supported types: #{supported_types}"
-  )
-  supported_tasks = ["CREATE_MANIFESTS", "STAGE_INGEST", "PUBLISH"]
+  supported_tasks = ["CREATE_COPY_MANIFESTS", "STAGE_INGEST", "PUBLISH"]
   op.opts.tasks = supported_tasks
   op.add_option(
-    "--tasks [CREATE_MANIFESTS,STAGE_INGEST,PUBLISH]",
-    ->(opts, v) { opts.tasks = v.split(",")},
+    "--tasks [CREATE_COPY_MANIFESTS,STAGE_INGEST,PUBLISH]",
+    ->(opts, v) { opts.tasks = v.split(",") },
     "Publishing tasks to execute; defaults to all tasks: #{supported_tasks}"
   )
   op.opts.tier = "controlled"
   op.add_option(
-     "--tier [tier]",
-     ->(opts, v) { opts.tier = v},
-     "The access tier associated with this CDR, e.g. controlled." +
-     "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
+    "--tier [tier]",
+    ->(opts, v) { opts.tier = v },
+    "The access tier associated with this CDR, e.g. controlled." +
+      "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
-  op.add_validator ->(opts) { raise ArgumentError.new("--wgs-rids-file and --display-version-id are required for the CREATE_MANIFESTS task") unless !opts.tasks.include? "CREATE_MANIFESTS" or (opts.wgs_rids_file and opts.display_version_id) }
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported data types: #{opts.data_types}") unless (opts.data_types - supported_types).empty?}
-  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty?}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.input_manifest_file }
+  op.add_validator ->(opts) { raise ArgumentError.new("--display-version-id is required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and not opts.display_version_id }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
@@ -370,49 +381,91 @@ def publish_cdr_files(cmd_name, args)
 
   common = Common.new
 
-  # TODO(RW-8266): Generalize this approach for all file types.
-  cram_path = 'cram_manifest.csv'
-  manifests = [cram_path]
-  if op.opts.tasks.include? "CREATE_MANIFESTS"
-    common.status "Starting: manifest creation"
+  work_dir = op.opts.work_dir
+  if work_dir.nil?
+    work_dir = Dir.mktmpdir("cdr-file-publish")
+  else
+    FileUtils.makedirs(work_dir)
+  end
+  common.status("local working directory: '#{work_dir}'")
 
-    wgs_rids = IO.readlines(op.opts.wgs_rids_file, chomp: true).filter do |line|
-      if line.to_i() == 0
-        common.warning "skipping non-numeric research ID line: #{line}"
-        false
-      else
-        true
+  input_manifest = parse_input_manifest(op.opts.input_manifest_file)
+  copy_manifest_files = {}
+  if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
+    common.status "Starting: copy manifest creation"
+    copy_manifests = {}
+
+    aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
+    unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
+      if op.opts.microarray_rids_file.to_s.empty?
+        raise ArgumentError.new("--microarray-rids-file is required to generate copy manifests for AW4 microarray sources")
+      end
+      microarray_aw4_rows = read_all_microarray_aw4s(op.opts.project, read_research_ids_file(op.opts.microarray_rids_file))
+
+      aw4_microarray_sources.each do |source_name, section|
+        common.status("building manifest for '#{source_name}'")
+        copy_manifests["aw4_microarray_" + source_name] = build_copy_manifest_for_aw4_section(
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows)
       end
     end
 
-    cram_manifest = build_cram_manifest(
-      op.opts.project,
-      tier[:ingest_cdr_bucket],
-      tier[:dest_cdr_bucket],
-      op.opts.display_version_id,
-      wgs_rids
-    )
-    # TODO(RW-8266): Upload this to a manifest bucket instead. Use a publish identifier
-    # to enable resumability of publishing with different stages of tasks.
-    CSV.open(cram_path, 'wb') do |f|
-      f << cram_manifest.first.keys
-      cram_manifest.each { |c| f << c.values }
+    aw4_wgs_sources = input_manifest["aw4WgsSources"]
+    unless aw4_wgs_sources.nil? or aw4_wgs_sources.empty?
+      if op.opts.wgs_rids_file.to_s.empty?
+        raise ArgumentError.new("--wgs-rids-file is required to generate copy manifests for AW4 WGS sources")
+      end
+      wgs_aw4_rows = read_all_wgs_aw4s(op.opts.project, read_research_ids_file(op.opts.wgs_rids_file))
+
+      aw4_wgs_sources.each do |source_name, section|
+        common.status("building manifest for '#{source_name}'")
+        copy_manifests["aw4_wgs_" + source_name] = build_copy_manifest_for_aw4_section(
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows)
+      end
+    end
+
+    curation_sources = input_manifest["curationSources"]
+    unless curation_sources.nil? or curation_sources.empty?
+      curation_sources.each do |source_name, section|
+        common.status("building manifest for '#{source_name}'")
+        copy_manifests["curation_" + source_name] = build_copy_manifest_for_curation_section(section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id)
+      end
+    end
+
+    preprod_sources = input_manifest["preprodCTSources"]
+    unless preprod_sources.nil? or preprod_sources.empty?
+      preprod_sources.each do |source_name, section|
+        common.status("building manifest for '#{source_name}'")
+        copy_manifests["preprod_" + source_name] = build_copy_manifest_for_preprod_section(section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id)
+      end
+    end
+
+    if copy_manifests.empty?
+      raise ArgumentError.new("CREATE_COPY_MANIFESTS was requested, but no copy manifests were created, input manifest may be empty")
+    end
+
+    copy_manifests.each do |source_name, copy_manifest|
+      path = "#{work_dir}/#{source_name}_copy_manifest.csv"
+      CSV.open(path, 'wb') do |f|
+        f << copy_manifest.first.keys
+        copy_manifest.each { |c| f << c.values }
+      end
+      copy_manifest_files[source_name] = path
     end
     common.status "Finished: manifests created"
   end
 
-  logs_dir = Dir.mktmpdir("cdr-file-publish")
+  logs_dir = FileUtils.makedirs(File.join(work_dir, "logs"))
   common.status "Writing logs to #{logs_dir}"
 
   if op.opts.tasks.include? "STAGE_INGEST"
     common.status "Starting: file staging to ingest bucket"
-    manifests.each { |m| stage_files_by_manifest(op.opts.project, m, File.join(logs_dir, "cram")) }
+    copy_manifest_files.each { |name, path| stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, name)) }
     common.status "Finished: file staging"
   end
 
   if op.opts.tasks.include? "PUBLISH"
     common.status "Starting: publishing to CDR bucket"
-    manifests.each { |m| publish_files_by_manifest(op.opts.project, m, File.join(logs_dir, "cram")) }
+    publish_files_by_manifests(op.opts.project, manifest_paths)
     common.status "Finished: publishing"
   end
 end
