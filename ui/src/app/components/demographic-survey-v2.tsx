@@ -48,6 +48,11 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   const [isAian, setIsAian] = useState(false);
   const [showAsianOptions, setShowAsianOptions] = useState(false);
   const [showAiAnOptions, setShowAiAnOptions] = useState(false);
+  const [showBlackOptions, setShowBlackOptions] = useState(false);
+  const [showHispanicOptions, setShowHispanicOptions] = useState(false);
+  const [showMeNaOptions, setShowMeNaOptions] = useState(false);
+  const [showNhPiOptions, setShowNhPiOptions] = useState(false);
+  const [showWhiteOptions, setShowWhiteOptions] = useState(false);
 
   const { profile } = props;
   const { demographicSurveyV2: survey } = profile;
@@ -185,22 +190,222 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             {
               label: 'Black, African American, or of African descent',
               value: EthnicCategory.BLACK,
+              subOptions: [
+                {
+                  label: 'Black / African American',
+                  value: EthnicCategory.BLACKAA,
+                },
+                { label: 'Barbadian', value: EthnicCategory.BLACKBARBADIAN },
+                { label: 'Caribbean', value: EthnicCategory.BLACKCARIBBEAN },
+                { label: 'Ethiopian', value: EthnicCategory.BLACKETHIOPIAN },
+                { label: 'Ghanaian', value: EthnicCategory.BLACKGHANAIAN },
+                { label: 'Haitian', value: EthnicCategory.BLACKHAITIAN },
+                { label: 'Jamaican', value: EthnicCategory.BLACKJAMAICAN },
+                { label: 'Liberian', value: EthnicCategory.BLACKLIBERIAN },
+                { label: 'Nigerian', value: EthnicCategory.BLACKNIGERIAN },
+                { label: 'Somali', value: EthnicCategory.BLACKSOMALI },
+                {
+                  label: 'South African',
+                  value: EthnicCategory.BLACKSOUTHAFRICAN,
+                },
+                {
+                  label:
+                    'Black / None of these fully describe me, and I want to specify',
+                  value: EthnicCategory.BLACKOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityBlackOtherText,
+                  onChangeOtherText: (value) =>
+                    handleInputChange('ethnicityBlackOtherText', value),
+                },
+              ],
+              showSubOptions: showBlackOptions,
+              onChange: (value) => {
+                setShowBlackOptions(value);
+              },
+              onExpand: () => {
+                setShowBlackOptions(!showBlackOptions);
+              },
             },
             {
               label: 'Hispanic, Latino, or Spanish descent',
               value: EthnicCategory.HISPANIC,
+              subOptions: [
+                {
+                  label: 'Columbian',
+                  value: EthnicCategory.HISPANICCOLUMBIAN,
+                },
+                { label: 'Cuban', value: EthnicCategory.HISPANICCUBAN },
+                { label: 'Dominican', value: EthnicCategory.HISPANICDOMINICAN },
+                {
+                  label: 'Ecuadorian',
+                  value: EthnicCategory.HISPANICECUADORIAN,
+                },
+                { label: 'Honduran', value: EthnicCategory.HISPANICHONDURAN },
+                { label: 'Mexican', value: EthnicCategory.HISPANICMEXICAN },
+                {
+                  label: 'Puerto Rican',
+                  value: EthnicCategory.HISPANICPUERTORICAN,
+                },
+                {
+                  label: 'Salvadoran',
+                  value: EthnicCategory.HISPANICSALVADORAN,
+                },
+                { label: 'Spanish', value: EthnicCategory.HISPANICSPANISH },
+                {
+                  label:
+                    'Hispanic / None of these fully describe me, and I want to specify',
+                  value: EthnicCategory.HISPANICOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityHispanicOtherText,
+                  onChangeOtherText: (value) =>
+                    handleInputChange('ethnicityHispanicOtherText', value),
+                },
+              ],
+              showSubOptions: showHispanicOptions,
+              onChange: (value) => {
+                setShowHispanicOptions(value);
+              },
+              onExpand: () => {
+                setShowHispanicOptions(!showHispanicOptions);
+              },
             },
             {
               label: 'Middle Eastern or North African',
               value: EthnicCategory.MENA,
+              subOptions: [
+                {
+                  label: 'Afghan',
+                  value: EthnicCategory.MENAAFGHAN,
+                },
+                { label: 'Algerian', value: EthnicCategory.MENAALGERIAN },
+                { label: 'Egyptian', value: EthnicCategory.MENAEGYPTIAN },
+                {
+                  label: 'Iranian',
+                  value: EthnicCategory.MENAIRANIAN,
+                },
+                { label: 'Iraqi', value: EthnicCategory.MENAIRAQI },
+                { label: 'Israeli', value: EthnicCategory.MENAISRAELI },
+                {
+                  label: 'Lebanese',
+                  value: EthnicCategory.MENALEBANESE,
+                },
+                {
+                  label: 'Moroccan',
+                  value: EthnicCategory.MENAMOROCCAN,
+                },
+                { label: 'Syrian', value: EthnicCategory.MENASYRIAN },
+                { label: 'Tunisian', value: EthnicCategory.MENATUNISIAN },
+                {
+                  label:
+                    'Middle Eastern or North African / None of these fully describe me, and I want to specify',
+                  value: EthnicCategory.MENAOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityMeNaOtherText,
+                  onChangeOtherText: (value) =>
+                    handleInputChange('ethnicityMeNaOtherText', value),
+                },
+              ],
+              showSubOptions: showMeNaOptions,
+              onChange: (value) => {
+                setShowMeNaOptions(value);
+              },
+              onExpand: () => {
+                setShowMeNaOptions(!showMeNaOptions);
+              },
             },
             {
               label: 'Native Hawaiian or other Pacific Islander',
               value: EthnicCategory.NHPI,
+              subOptions: [
+                {
+                  label: 'Chamorro',
+                  value: EthnicCategory.NHPICHAMORRO,
+                },
+                { label: 'Chuukese', value: EthnicCategory.NHPICHUUKESE },
+                { label: 'Fijian', value: EthnicCategory.NHPIFIJIAN },
+                {
+                  label: 'Marshallese',
+                  value: EthnicCategory.NHPIMARSHALLESE,
+                },
+                {
+                  label: 'Native Hawaiian',
+                  value: EthnicCategory.NHPIHAWAIIAN,
+                },
+                { label: 'Palauan', value: EthnicCategory.NHPIPALAUAN },
+                {
+                  label: 'Samoan',
+                  value: EthnicCategory.NHPISAMOAN,
+                },
+                {
+                  label: 'Tahitian',
+                  value: EthnicCategory.NHPITAHITIAN,
+                },
+                { label: 'Tongan', value: EthnicCategory.NHPITONGAN },
+                {
+                  label:
+                    'Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify',
+                  value: EthnicCategory.NHPIOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityNhPiOtherText,
+                  onChangeOtherText: (value) =>
+                    handleInputChange('ethnicityNhPiOtherText', value),
+                },
+              ],
+              showSubOptions: showNhPiOptions,
+              onChange: (value) => {
+                setShowNhPiOptions(value);
+              },
+              onExpand: () => {
+                setShowNhPiOptions(!showNhPiOptions);
+              },
             },
             {
               label: 'White, or of European descent',
               value: EthnicCategory.WHITE,
+              subOptions: [
+                {
+                  label: 'Dutch',
+                  value: EthnicCategory.WHITEDUTCH,
+                },
+                { label: 'English', value: EthnicCategory.WHITEENGLISH },
+                { label: 'European', value: EthnicCategory.WHITEEUROPEAN },
+                {
+                  label: 'French',
+                  value: EthnicCategory.WHITEFRENCH,
+                },
+                {
+                  label: 'German',
+                  value: EthnicCategory.WHITEGERMAN,
+                },
+                { label: 'Irish', value: EthnicCategory.WHITEIRISH },
+                {
+                  label: 'Italian',
+                  value: EthnicCategory.WHITEITALIAN,
+                },
+                {
+                  label: 'Norwegian',
+                  value: EthnicCategory.WHITENORWEGIAN,
+                },
+                { label: 'Polish', value: EthnicCategory.WHITEPOLISH },
+                { label: 'Scottish', value: EthnicCategory.WHITESCOTTISH },
+                { label: 'Spanish', value: EthnicCategory.WHITESPANISH },
+                {
+                  label:
+                    'White / None of these fully describe me, and I want to specify',
+                  value: EthnicCategory.WHITEOTHER,
+                  showInput: true,
+                  otherText: survey.ethnicityWhiteOtherText,
+                  onChangeOtherText: (value) =>
+                    handleInputChange('ethnicityWhiteOtherText', value),
+                },
+              ],
+              showSubOptions: showWhiteOptions,
+              onChange: (value) => {
+                setShowWhiteOptions(value);
+              },
+              onExpand: () => {
+                setShowWhiteOptions(!showWhiteOptions);
+              },
             },
             {
               label: 'None of these fully describe me, and I want to specify',
