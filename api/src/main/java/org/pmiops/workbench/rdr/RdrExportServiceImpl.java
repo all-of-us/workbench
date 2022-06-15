@@ -133,19 +133,15 @@ public class RdrExportServiceImpl implements RdrExportService {
    * table with current date as the lastExport date
    *
    * @param userIds
+   * @param backfill
    */
   @Override
   public void exportUsers(List<Long> userIds, boolean backfill) {
-    try {
-      rdrApiProvider
-          .get()
-          .exportResearchers(
-              userIds.stream().map(this::toRdrResearcher).collect(Collectors.toList()), backfill);
+    List<RdrResearcher> rdrResearchersList =
+        userIds.stream().map(this::toRdrResearcher).collect(Collectors.toList());
 
-      if (!backfill) {
-        updateDbRdrExport(RdrEntity.USER, userIds);
-      }
-      log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
+    try {
+      rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
     } catch (ApiException ex) {
       log.severe(
           String.format(
@@ -153,6 +149,11 @@ public class RdrExportServiceImpl implements RdrExportService {
               userIds, ex.getResponseBody()));
       throw new ServerErrorException(ex);
     }
+
+    if (!backfill) {
+      updateDbRdrExport(RdrEntity.USER, userIds);
+    }
+    log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
   }
 
   /**
