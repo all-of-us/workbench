@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import * as fp from 'lodash/fp';
 
 import { Profile } from 'generated/fetch';
 
@@ -12,12 +13,16 @@ import { profileStore } from 'app/utils/stores';
 
 export const DemographicSurvey = (props) => {
   const [errors, setErrors] = useState(null);
+  const [changed, setChanged] = useState(false);
+  const [initialSurvey, setInitialSurvey] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [, navigateByUrl] = useNavigation();
 
   useEffect(() => {
-    setProfile(profileStore.get().profile);
+    const profileStoreProfile = profileStore.get().profile;
+    setInitialSurvey(profileStoreProfile.demographicSurveyV2);
+    setProfile(profileStoreProfile);
     props.hideSpinner();
     setLoading(false);
   }, []);
@@ -33,6 +38,7 @@ export const DemographicSurvey = (props) => {
   const handleUpdate = (updatedProfile: Profile, updatedErrors: any) => {
     setProfile(updatedProfile);
     setErrors(updatedErrors);
+    setChanged(!fp.isEqual(initialSurvey, updatedProfile.demographicSurveyV2));
   };
 
   if (loading) {
@@ -44,7 +50,7 @@ export const DemographicSurvey = (props) => {
       <DemographicSurveyV2 profile={profile} onUpdate={handleUpdate} />
       <TooltipTrigger
         content={
-          errors && (
+          (errors || !changed) && (
             <>
               <div>Please review the following:</div>
               <ul>
@@ -59,13 +65,18 @@ export const DemographicSurvey = (props) => {
                     </li>
                   </>
                 )}
+                {!changed && (
+                  <li>
+                    Your survey has not changed since your last submission.
+                  </li>
+                )}
               </ul>
             </>
           )
         }
       >
         <Button
-          disabled={!!errors}
+          disabled={!!errors || !changed}
           type='primary'
           data-test-id={'submit-button'}
           onClick={handleSubmit}
