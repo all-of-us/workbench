@@ -131,13 +131,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: EthnicCategory.AIAN,
               subOptions: [
                 {
-                  label:
-                    'American Indian or Alaska Native / Central or South American Indian',
+                  label: 'Central or South American Indian',
                   value: EthnicCategory.AIANCENTRALSOUTH,
                 },
                 {
                   label:
-                    'American Indian or Alaska Native / None of these fully describe me, and I want to specify',
+                    'None of these fully describe me, and I want to specify',
                   value: EthnicCategory.AIANOTHER,
                   showInput: true,
                   otherText: survey.ethnicityAiAnOtherText,
@@ -172,7 +171,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 },
                 {
                   label:
-                    'Asian / None of these fully describe me, and I want to specify.',
+                    'None of these fully describe me, and I want to specify.',
                   value: EthnicCategory.ASIANOTHER,
                   showInput: true,
                   otherText: survey.ethnicityAsianOtherText,
@@ -194,7 +193,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               value: EthnicCategory.BLACK,
               subOptions: [
                 {
-                  label: 'Black / African American',
+                  label: 'African American',
                   value: EthnicCategory.BLACKAA,
                 },
                 { label: 'Barbadian', value: EthnicCategory.BLACKBARBADIAN },
@@ -212,7 +211,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 },
                 {
                   label:
-                    'Black / None of these fully describe me, and I want to specify',
+                    'None of these fully describe me, and I want to specify',
                   value: EthnicCategory.BLACKOTHER,
                   showInput: true,
                   otherText: survey.ethnicityBlackOtherText,
@@ -256,7 +255,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 { label: 'Spanish', value: EthnicCategory.HISPANICSPANISH },
                 {
                   label:
-                    'Hispanic / None of these fully describe me, and I want to specify',
+                    'None of these fully describe me, and I want to specify',
                   value: EthnicCategory.HISPANICOTHER,
                   showInput: true,
                   otherText: survey.ethnicityHispanicOtherText,
@@ -301,7 +300,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 { label: 'Tunisian', value: EthnicCategory.MENATUNISIAN },
                 {
                   label:
-                    'Middle Eastern or North African / None of these fully describe me, and I want to specify',
+                    'None of these fully describe me, and I want to specify',
                   value: EthnicCategory.MENAOTHER,
                   showInput: true,
                   otherText: survey.ethnicityMeNaOtherText,
@@ -348,7 +347,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 { label: 'Tongan', value: EthnicCategory.NHPITONGAN },
                 {
                   label:
-                    'Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify',
+                    'None of these fully describe me, and I want to specify',
                   value: EthnicCategory.NHPIOTHER,
                   showInput: true,
                   otherText: survey.ethnicityNhPiOtherText,
@@ -397,7 +396,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 { label: 'Spanish', value: EthnicCategory.WHITESPANISH },
                 {
                   label:
-                    'White / None of these fully describe me, and I want to specify',
+                    'None of these fully describe me, and I want to specify',
                   value: EthnicCategory.WHITEOTHER,
                   showInput: true,
                   otherText: survey.ethnicityWhiteOtherText,
