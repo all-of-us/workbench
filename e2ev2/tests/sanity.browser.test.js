@@ -1,27 +1,18 @@
-const puppeteer = require('puppeteer-core')
-const utils = require('../src/utils')
+const config = require('../src/config')
+const tu = require('../src/test-utils')
 
-let browser = null
+const browserTest = tu.browserTest(__filename)
 
-beforeEach(async () => {
-  browser = await utils.launch()
-})
-
-afterEach(async () => {
-  await utils.closeBrowser(browser)
-  browser = null
-})
-
-test('page loads', async () => {
-  const page = (await browser.pages())[0]
+browserTest('page loads', async browser => {
+  const page = browser.initialPage
   await page.goto('https://example.com')
   const h1 = await page.waitForSelector('h1')
   expect(await h1.evaluate(n => n.innerText)).toBe('Example Domain')
 })
 
-test('view cookie policy page', async () => {
-  const page = (await browser.pages())[0]
-  await page.goto(utils.urlRoot()+'/login')
+browserTest('view cookie policy page', async browser => {
+  const page = browser.initialPage
+  await page.goto(config.urlRoot()+'/login')
   const cpLink = await page.waitForSelector('a[href="/cookie-policy"]')
   expect(cpLink).toBeDefined()
   await cpLink.click()
@@ -32,10 +23,11 @@ test('view cookie policy page', async () => {
     .toBe('All of Us Research Program Cookie Policy')
 })
 
-const paths = ['/workspaces', '/profile'].map(x => [x]) // expected format for test.each
-test.each(paths)('navigation to %s redirects to sign-in page', async p => {
-  const page = (await browser.pages())[0]
-  await page.goto(utils.urlRoot()+p)
-  const button = await page.waitForSelector('[role="button"]')
-  expect(await button.evaluate(n => n.textContent)).toBe('Sign In')
-})
+for (const p of ['/workspaces', '/profile']) {
+  browserTest(`navigation to ${p} redirects to sign-in page`, async browser => {
+    const page = browser.initialPage
+    await page.goto(config.urlRoot()+p)
+    const button = await page.waitForSelector('[role="button"]')
+    expect(await button.evaluate(n => n.textContent)).toBe('Sign In')
+  })
+}

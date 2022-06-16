@@ -1,24 +1,12 @@
+const config = require('../src/config')
 const impersonate = require('../src/impersonate')
-const utils = require('../src/utils')
+const tu = require('../src/test-utils')
 
-let browser = null
+const browserTest = tu.browserTest(__filename)
 
-beforeEach(async () => {
-  browser = await utils.launch()
-  browser.initialPage = (await browser.pages())[0]
-})
-
-afterEach(async () => {
-  await utils.closeBrowser(browser)
-  browser = null
-})
-
-test('sign in', async () => {
-  const projectName = 'all-of-us-workbench-test'
-  const username = 'puppeteer-tester-6@fake-research-aou.org'
+browserTest('sign in', async browser => {
   const page = browser.initialPage
-  await page.goto(utils.urlRoot())
-  const bearerToken = await impersonate.getBearerToken(projectName, username).toPromise()
-  await page.evaluate(x => setTestAccessTokenOverride(x), bearerToken)
-  expect(await page.waitForSelector('[data-test-id="signed-in"]')).toBeDefined()
+  await page.goto(config.urlRoot())
+  await tu.impersonateUser(page, config.usernames[0])
+  expect(await page.waitForSelector('[data-test-id="signed-in"]', 4e3)).toBeDefined()
 })
