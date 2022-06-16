@@ -32,6 +32,7 @@ import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
@@ -49,7 +50,7 @@ import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class)
+@Mapper(config = MapStructConfig.class, uses = DemographicSurveyMapper.class)
 public interface RdrMapper {
   ZoneOffset offset = OffsetDateTime.now().getOffset();
 
@@ -97,8 +98,7 @@ public interface RdrMapper {
   @Mapping(source = "dbUser.demographicSurvey.lgbtqIdentity", target = "lgbtqIdentity")
   @Mapping(source = "dbUser.demographicSurvey.identifiesAsLgbtq", target = "identifiesAsLgbtq")
   @Mapping(source = "accessTiers", target = "accessTierShortNames")
-  // re-enable with feature flag in RW-8355
-  // @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
+  @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
   RdrResearcher toRdrResearcher(
       DbUser dbUser,
       List<DbAccessTier> accessTiers,
