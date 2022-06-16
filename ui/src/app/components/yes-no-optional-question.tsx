@@ -15,7 +15,8 @@ export const YesNoOptionalQuestion = (props: {
 
   return (
     <MultipleChoiceQuestion
-      question={question}
+      {...{ onChange, question, selected, style }}
+      horizontalOptions={true}
       options={[
         { label: 'Yes', value: YesNoPreferNot.YES },
         { label: 'No', value: YesNoPreferNot.NO },
@@ -24,10 +25,6 @@ export const YesNoOptionalQuestion = (props: {
           value: YesNoPreferNot.PREFERNOTTOANSWER,
         },
       ]}
-      selected={selected}
-      onChange={onChange}
-      style={style}
-      horizontalOptions={true}
     />
   );
 };
