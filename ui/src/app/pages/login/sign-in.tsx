@@ -12,6 +12,10 @@ import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { TooltipTrigger } from 'app/components/popups';
 import { PUBLIC_HEADER_IMAGE } from 'app/components/public-layout';
 import { TermsOfService } from 'app/components/terms-of-service';
+import {
+  withProfileErrorModal,
+  WithProfileErrorModalProps,
+} from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
@@ -21,6 +25,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { convertAPIError, reportError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
@@ -128,7 +133,10 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> =
     ],
   ]);
 
-export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
+export interface SignInProps
+  extends WindowSizeProps,
+    WithSpinnerOverlayProps,
+    WithProfileErrorModalProps {
   initialStep?: SignInStep;
 }
 
@@ -406,18 +414,30 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   private onSubmit = async () => {
     this.props.showSpinner();
 
-    const newProfile = await profileApi().createAccount({
-      profile: this.state.profile,
-      captchaVerificationToken: this.state.captchaToken,
-      termsOfServiceVersion: this.state.termsOfServiceVersion,
-    });
-    this.props.hideSpinner();
+    try {
+      const newProfile = await profileApi().createAccount({
+        profile: this.state.profile,
+        captchaVerificationToken: this.state.captchaToken,
+        termsOfServiceVersion: this.state.termsOfServiceVersion,
+      });
 
-    this.setState({
-      profile: newProfile,
-      currentStep: this.getNextStep(this.state.currentStep),
-      isPreviousStep: false,
-    });
+      this.setState({
+        profile: newProfile,
+        currentStep: this.getNextStep(this.state.currentStep),
+        isPreviousStep: false,
+      });
+    } catch (error) {
+      reportError(error);
+      const { message } = await convertAPIError(error);
+      this.props.showProfileErrorModal(message);
+      if (environment.enableCaptcha) {
+        // Reset captcha
+        this.captchaRef.current.reset();
+        this.setState({ captchaToken: null, captcha: true });
+      }
+    }
+
+    this.props.hideSpinner();
   };
 
   private captureCaptchaResponse(token) {
@@ -503,4 +523,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 }
 
-export const SignIn = fp.flow(withWindowSize())(SignInImpl);
+export const SignIn = fp.flow(
+  withWindowSize(),
+  withProfileErrorModal
+)(SignInImpl);
