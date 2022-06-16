@@ -455,7 +455,7 @@ def publish_cdr_files(cmd_name, args)
         f << copy_manifest.first.keys
         copy_manifest.each { |c| f << c.values }
       end
-      copy_manifest_files[source_name] = path
+      copy_manifest_files.push(path)
     end
     common.status "Finished: manifests created"
   end
@@ -463,25 +463,24 @@ def publish_cdr_files(cmd_name, args)
   logs_dir = FileUtils.makedirs(File.join(working_dir, "logs"))
   common.status "Writing logs to #{logs_dir}"
 
+  if copy_manifest_files.empty?
+    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+    if copy_manifest_files.empty?
+      raise ArgumentError.new(
+              "no copy manifests generated or found in the working dir #{working_dir}; if you " +
+              "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
+              "specify an existing --working-dir which contains copy manifest CSV files")
+    end
+  end
   if op.opts.tasks.include? "STAGE_INGEST"
-    copy_manifest_files.each do |name, path|
-      common.status "Starting file staging for #{name}"
-      stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, name))
+    copy_manifest_files.each do |path|
+      common.status "Starting file staging for #{path}"
+      stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, File.basename(path, '.csv')))
     end
     common.status "Finished: all file staging"
   end
 
   if op.opts.tasks.include? "PUBLISH"
-    if copy_manifest_files.empty?
-      copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
-      if copy_manifest_files.empty?
-        raise ArgumentError.new(
-            "no copy manifests generated or found in the working dir #{working_dir}; if you " +
-            "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
-            "specify an existing --working-dir which contains copy manifest CSV files")
-      end
-    end
-
     configs = build_publish_configs(copy_manifest_files)
     configs.each_index do |i|
       config = configs[i]
