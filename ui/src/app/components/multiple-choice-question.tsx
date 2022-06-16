@@ -34,21 +34,14 @@ const Option = (props: {
       <FlexRow style={{ alignItems: 'center' }}>
         {multiple ? (
           <CheckBox
+            {...{ id, disabled, checked, onChange }}
             data-test-id='nothing-to-report'
             manageOwnState={false}
-            id={id}
-            disabled={disabled}
-            checked={checked}
-            onChange={onChange}
           />
         ) : (
           <RadioButton
+            {...{ id, disabled, checked, onChange, value }}
             data-test-id='nothing-to-report'
-            id={id}
-            disabled={disabled}
-            checked={checked}
-            onChange={onChange}
-            value={value}
           />
         )}
         <label htmlFor={id} style={styles.answer}>
@@ -102,7 +95,6 @@ export const MultipleChoiceQuestion = (props: {
     childValues?: any[]
   ) => {
     if (multiple) {
-      console.log('What is e? ', e);
       let result = e
         ? [...(selected as string[]), label]
         : (selected as string[]).filter((r) => r !== label);
@@ -122,48 +114,51 @@ export const MultipleChoiceQuestion = (props: {
   };
 
   const renderOption = (option: MultipleChoiceOption, parentValue?: any) => {
+    const {
+      disabled,
+      disabledText,
+      label,
+      onChange,
+      onChangeOtherText,
+      onExpand,
+      otherText,
+      otherTextMaxLength,
+      showInput,
+      showSubOptions,
+      subOptions,
+      value,
+    } = option;
     return (
-      <FlexColumn style={option.subOptions && { width: '100%' }}>
+      <FlexColumn style={subOptions && { width: '100%' }}>
         <FlexRow style={{ alignItems: 'center' }}>
           <Option
-            disabled={option.disabled}
-            disabledText={option.disabledText}
-            value={option.value}
-            label={option.label}
-            checked={
-              multiple
-                ? selected.includes(option.value)
-                : selected === option.value
-            }
+            {...{ disabled, disabledText, label, multiple, value }}
+            checked={multiple ? selected.includes(value) : selected === value}
             onChange={(e) => {
               handleQuestionChange(
                 e,
-                option.value,
+                value,
                 parentValue,
-                option.subOptions?.map((subOption) => subOption.value)
+                subOptions?.map((so) => so.value)
               );
-              option.onChange?.(e);
+              onChange?.(e);
             }}
-            multiple={multiple}
           />
-          {option.subOptions && (
+          {subOptions && (
             <ClrIcon
               shape='angle'
               style={{
                 marginRight: '0.5rem',
                 cursor: 'pointer',
-                transform: option.showSubOptions
-                  ? 'rotate(180deg)'
-                  : 'rotate(0deg)',
+                transform: showSubOptions ? 'rotate(180deg)' : 'rotate(0deg)',
               }}
-              onClick={option.onExpand}
+              onClick={onExpand}
             />
           )}
         </FlexRow>
 
-        {option.showInput &&
-          ((multiple && selected.includes(option.value)) ||
-            selected === option.value) && (
+        {showInput &&
+          ((multiple && selected.includes(value)) || selected === value) && (
             <input
               data-test-id='search'
               style={{
@@ -172,13 +167,13 @@ export const MultipleChoiceQuestion = (props: {
                 width: '300px',
               }}
               type='text'
-              value={option.otherText}
-              maxLength={option.otherTextMaxLength}
-              onChange={(e) => option.onChangeOtherText?.(e.target.value)}
+              value={otherText}
+              maxLength={otherTextMaxLength}
+              onChange={(e) => onChangeOtherText?.(e.target.value)}
             />
           )}
-        {option.showSubOptions &&
-          option.subOptions &&
+        {showSubOptions &&
+          subOptions &&
           (horizontalOptions ? (
             <FlexRow
               style={{
@@ -188,9 +183,7 @@ export const MultipleChoiceQuestion = (props: {
                 marginLeft: '2.0rem',
               }}
             >
-              {option.subOptions.map((subOption) =>
-                renderOption(subOption, option.value)
-              )}
+              {subOptions.map((so) => renderOption(so, value))}
             </FlexRow>
           ) : (
             <FlexColumn
@@ -200,9 +193,7 @@ export const MultipleChoiceQuestion = (props: {
                 marginLeft: '2.0rem',
               }}
             >
-              {option.subOptions.map((subOption) =>
-                renderOption(subOption, option.value)
-              )}
+              {subOptions.map((so) => renderOption(so, value))}
             </FlexColumn>
           ))}
       </FlexColumn>
@@ -212,7 +203,7 @@ export const MultipleChoiceQuestion = (props: {
   const optionComponents = options.map((option) => renderOption(option, null));
 
   return (
-    <div style={{ ...style }}>
+    <div {...{ style }}>
       <div style={{ ...styles.question }}>{question}</div>
       {horizontalOptions ? (
         <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
