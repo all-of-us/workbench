@@ -29,6 +29,7 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
             classpath "$rootDir"
+            showBanner false
         }
         data {
             if (project.hasProperty('contexts')) {
@@ -39,6 +40,7 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
             classpath "$rootDir"
+            showBanner false
         }
         add_bigdata_indexes {
             if (project.hasProperty('contexts')) {
@@ -49,6 +51,7 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
             classpath "$rootDir"
+            showBanner false
         }
         drop_bigdata_indexes {
             if (project.hasProperty('contexts')) {
@@ -59,6 +62,7 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
             classpath "$rootDir"
+            showBanner false
         }
         runList = project.ext.runList
     }

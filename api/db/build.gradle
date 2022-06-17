@@ -27,6 +27,7 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
             classpath "$rootDir"
+            showBanner false
         }
         runList = project.ext.runList
     }
