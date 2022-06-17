@@ -20,6 +20,7 @@ import { reactStyles } from 'app/utils';
 import { Divider } from './divider';
 import { CheckBox, NumberInput, TextInput } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
+import { AoU } from './text-wrappers';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
 
 const maxYear = new Date().getFullYear();
@@ -100,6 +101,16 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     props.onUpdate(newProfile, errors);
   };
 
+  const disadvantagedBackgroundQuestion = (
+    <div>
+      14. Are you an individual from a disadvantaged background, as defined by
+      &nbsp;
+      <a href='https://extramural-diversity.nih.gov/diversity-matters/disadvantaged-backgrounds'>
+        NIH Diversity in Extramural Programs?
+      </a>
+    </div>
+  );
+
   return (
     <FlexColumn>
       <div
@@ -111,14 +122,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           marginTop: '1rem',
         }}
       >
-        The All of Us Research Program is dedicated to cultivating a diverse
-        research community and building an inclusive platform. Your answers to
-        these questions will help us learn more about who is using the platform.
-        Your privacy is important to us. Your individual responses will not be
-        displayed on your researcher profile and will only be accessible to a
-        limited number of authorized All of Us personnel. All of Us may
-        externally report de-identified, aggregate data on the demographics of
-        individuals using the Researcher Workbench.
+        <div>
+          The <AoU /> Research Program is dedicated to cultivating a diverse
+          research community and building an inclusive platform. Your answers to
+          these questions will help us learn more about who is using the
+          research platform.
+        </div>
+        <div style={{ marginTop: '1rem' }}>
+          Your privacy is important to us. Your individual responses will not be
+          displayed on your researcher profile and will only be accessible to a
+          limited number of authorized <AoU /> personnel. <AoU /> may externally
+          report de-identified, aggregate data on the demographics of
+          individuals using the Researcher Workbench.
+        </div>
       </div>
       <FlexColumn>
         <SemiBoldHeader>Races and Ethnicities</SemiBoldHeader>
@@ -425,6 +441,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             {
               label: 'Prefer not to answer',
               value: EthnicCategory.PREFERNOTTOANSWER,
+              onChange: () =>
+                handleInputChange('ethnicCategories', [
+                  EthnicCategory.PREFERNOTTOANSWER,
+                ]),
             },
           ]}
           multiple
@@ -477,6 +497,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             {
               label: 'Prefer not to answer',
               value: GenderIdentityV2.PREFERNOTTOANSWER,
+              onChange: () =>
+                handleInputChange('genderIdentities', [
+                  GenderIdentityV2.PREFERNOTTOANSWER,
+                ]),
             },
           ]}
           multiple
@@ -529,6 +553,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             {
               label: 'Prefer not to answer',
               value: SexualOrientationV2.PREFERNOTTOANSWER,
+              onChange: () =>
+                handleInputChange('sexualOrientations', [
+                  SexualOrientationV2.PREFERNOTTOANSWER,
+                ]),
             },
           ]}
           multiple
@@ -554,6 +582,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             {
               label: 'Prefer not to answer',
               value: SexAtBirthV2.PREFERNOTTOANSWER,
+              onChange: () =>
+                handleInputChange('ethnicCategories', [
+                  SexAtBirthV2.PREFERNOTTOANSWER,
+                ]),
             },
           ]}
           selected={survey.sexAtBirth}
@@ -609,9 +641,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <FlexRow style={{ alignItems: 'center', gap: '1.75rem' }}>
           <div style={{ ...styles.question, flex: 1 }}>
             11. Do you have a physical, cognitive, and/or emotional condition
-            that substantially inhibits one or more life activities not
-            specified through the above questions, and want to share more?
-            Please describe.
+            that substantially limits one or more life activities not specified
+            through the above questions, and want to share more? Please
+            describe.
           </div>
           <TextInput
             onChange={(value) =>
@@ -626,7 +658,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         </SemiBoldHeader>
         <Divider style={{ marginTop: '.25rem' }} />
         <div style={styles.question}>12. Year of birth</div>
-
         <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
           <NumberInput
             onChange={(value) => handleInputChange('yearOfBirth', value)}
@@ -674,7 +705,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         />
 
         <YesNoOptionalQuestion
-          question='14. Are you an individual from a disadvantaged background, as defined by NIH Diversity in Extramural Programs?'
+          question={disadvantagedBackgroundQuestion}
           selected={survey.disadvantaged}
           onChange={(value) => handleInputChange('disadvantaged', value)}
         />

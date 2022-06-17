@@ -6,7 +6,7 @@ import { YesNoPreferNot } from 'generated/fetch';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 
 export const YesNoOptionalQuestion = (props: {
-  question: string;
+  question: any;
   selected: string;
   onChange: (any) => void;
   style?: CSSProperties;

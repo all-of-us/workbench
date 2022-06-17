@@ -69,7 +69,7 @@ interface MultipleChoiceOption {
 }
 
 export const MultipleChoiceQuestion = (props: {
-  question: string;
+  question: any;
   options: MultipleChoiceOption[];
   selected: string | string[];
   onChange: (any) => void;
@@ -118,7 +118,7 @@ export const MultipleChoiceQuestion = (props: {
       disabled,
       disabledText,
       label,
-      onChange,
+      onChange: onChangeOption,
       onChangeOtherText,
       onExpand,
       otherText,
@@ -141,7 +141,7 @@ export const MultipleChoiceQuestion = (props: {
                 parentValue,
                 subOptions?.map((so) => so.value)
               );
-              onChange?.(e);
+              onChangeOption?.(e);
             }}
           />
           {subOptions && (
