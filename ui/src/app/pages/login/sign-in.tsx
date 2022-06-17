@@ -398,6 +398,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           </div>
         ) : (
           <AccountCreationSurvey
+            {...{ onComplete }}
             profile={this.state.profile}
             termsOfServiceVersion={this.state.termsOfServiceVersion}
             onComplete={onComplete}

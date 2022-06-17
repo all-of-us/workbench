@@ -29,7 +29,6 @@ export const DemographicSurveyPanel = (props: Props) => {
         {surveyCompleted ? (
           <>
             <div>Survey Completed</div>
-            {/* If a user has created an account, they have, by definition, completed the demographic survey*/}
             <div>
               {displayDateWithoutHours(
                 demographicSurveyCompletionTime !== null
@@ -42,9 +41,9 @@ export const DemographicSurveyPanel = (props: Props) => {
           <div>Survey Incomplete</div>
         )}
         <Button
+          {...{ onClick }}
           type={'link'}
           style={styles.updateSurveyButton}
-          onClick={() => onClick()}
           data-test-id={'demographics-survey-button'}
         >
           {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
