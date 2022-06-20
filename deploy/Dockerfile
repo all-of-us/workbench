@@ -17,8 +17,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm install --global yarn n
-# Upgrade to Node 12, above installs 10.
-RUN n 12
+# Upgrade to Node 14, above installs 10.
+RUN n 14
 
 ENV CLOUD_SDK_VERSION 321.0.0
 
