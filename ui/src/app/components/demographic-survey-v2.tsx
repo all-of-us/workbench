@@ -55,13 +55,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
   const [showNhPiOptions, setShowNhPiOptions] = useState(false);
   const [showWhiteOptions, setShowWhiteOptions] = useState(false);
 
-  const { profile } = props;
+  const { onError, onUpdate, profile } = props;
   const { demographicSurveyV2: survey } = profile;
 
   useEffect(() => {
-    const errors = validateDemographicSurvey(survey);
-    props.onUpdate(profile, errors);
-  }, []);
+    onError(validateDemographicSurvey(survey));
+  }, [props.profile]);
 
   useEffect(() => {
     setIsAian(
@@ -74,19 +73,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     );
   }, [survey.ethnicCategories]);
 
-  const handleInputChange = (prop, value) => {
-    const newSurvey = {
-      ...survey,
-      [prop]: value,
-    };
-    const errors = validateDemographicSurvey(newSurvey);
-    const newProfile = { ...profile, demographicSurveyV2: newSurvey };
-    props.onUpdate(newProfile, errors);
-  };
-
   const handleYearOfBirthBlur = () => {
     if (survey.yearOfBirth < minYear || survey.yearOfBirth > maxYear) {
-      handleInputChange('yearOfBirth', null);
+      onUpdate('yearOfBirth', null);
     }
   };
 
@@ -98,7 +87,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     };
     const errors = validateDemographicSurvey(survey);
     const newProfile = { ...profile, demographicSurveyV2: newSurvey };
-    props.onUpdate(newProfile, errors);
+    onUpdate(newProfile, errors);
   };
 
   const disadvantagedBackgroundQuestion = (
@@ -159,8 +148,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   value: EthnicCategory.AIANOTHER,
                   showInput: true,
                   otherText: survey.ethnicityAiAnOtherText,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityAiAnOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) => {
-                    handleInputChange('ethnicityAiAnOtherText', value);
+                    onUpdate('ethnicityAiAnOtherText', value);
                   },
                 },
               ],
@@ -197,8 +191,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   showInput: true,
                   otherText: survey.ethnicityAsianOtherText,
                   otherTextMaxLength: 200,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityAsianOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) =>
-                    handleInputChange('ethnicityAsianOtherText', value),
+                    onUpdate('ethnicityAsianOtherText', value),
                 },
               ],
               showSubOptions: showAsianOptions,
@@ -237,8 +236,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   showInput: true,
                   otherText: survey.ethnicityBlackOtherText,
                   otherTextMaxLength: 200,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityBlackOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) =>
-                    handleInputChange('ethnicityBlackOtherText', value),
+                    onUpdate('ethnicityBlackOtherText', value),
                 },
               ],
               showSubOptions: showBlackOptions,
@@ -281,8 +285,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   showInput: true,
                   otherText: survey.ethnicityHispanicOtherText,
                   otherTextMaxLength: 200,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityHispanicOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) =>
-                    handleInputChange('ethnicityHispanicOtherText', value),
+                    onUpdate('ethnicityHispanicOtherText', value),
                 },
               ],
               showSubOptions: showHispanicOptions,
@@ -326,8 +335,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   showInput: true,
                   otherText: survey.ethnicityMeNaOtherText,
                   otherTextMaxLength: 200,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityMeNaOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) =>
-                    handleInputChange('ethnicityMeNaOtherText', value),
+                    onUpdate('ethnicityMeNaOtherText', value),
                 },
               ],
               showSubOptions: showMeNaOptions,
@@ -373,8 +387,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   showInput: true,
                   otherText: survey.ethnicityNhPiOtherText,
                   otherTextMaxLength: 200,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityNhPiOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) =>
-                    handleInputChange('ethnicityNhPiOtherText', value),
+                    onUpdate('ethnicityNhPiOtherText', value),
                 },
               ],
               showSubOptions: showNhPiOptions,
@@ -422,8 +441,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                   showInput: true,
                   otherText: survey.ethnicityWhiteOtherText,
                   otherTextMaxLength: 200,
+                  onChange: (value) => {
+                    if (!value) {
+                      onUpdate('ethnicityWhiteOtherText', null);
+                    }
+                  },
                   onChangeOtherText: (value) =>
-                    handleInputChange('ethnicityWhiteOtherText', value),
+                    onUpdate('ethnicityWhiteOtherText', value),
                 },
               ],
               showSubOptions: showWhiteOptions,
@@ -440,14 +464,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               showInput: true,
               otherText: survey.ethnicityOtherText,
               otherTextMaxLength: 200,
+              onChange: (value) => {
+                if (!value) {
+                  onUpdate('ethnicityOtherText', null);
+                }
+              },
               onChangeOtherText: (value) =>
-                handleInputChange('ethnicityOtherText', value),
+                onUpdate('ethnicityOtherText', value),
             },
             {
               label: 'Prefer not to answer',
               value: EthnicCategory.PREFERNOTTOANSWER,
               onChange: () =>
-                handleInputChange('ethnicCategories', [
+                onUpdate('ethnicCategories', [
                   EthnicCategory.PREFERNOTTOANSWER,
                 ]),
             },
@@ -455,7 +484,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           multiple
           selected={survey.ethnicCategories}
           onChange={(value) => {
-            handleInputChange('ethnicCategories', value);
+            onUpdate('ethnicCategories', value);
           }}
           style={{ marginBottom: '1rem' }}
         />
@@ -498,21 +527,25 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               showInput: true,
               otherText: survey.genderOtherText,
               otherTextMaxLength: 200,
-              onChangeOtherText: (value) =>
-                handleInputChange('genderOtherText', value),
+              onChange: (value) => {
+                if (!value) {
+                  onUpdate('genderOtherText', null);
+                }
+              },
+              onChangeOtherText: (value) => onUpdate('genderOtherText', value),
             },
             {
               label: 'Prefer not to answer',
               value: GenderIdentityV2.PREFERNOTTOANSWER,
               onChange: () =>
-                handleInputChange('genderIdentities', [
+                onUpdate('genderIdentities', [
                   GenderIdentityV2.PREFERNOTTOANSWER,
                 ]),
             },
           ]}
           multiple
           selected={survey.genderIdentities}
-          onChange={(value) => handleInputChange('genderIdentities', value)}
+          onChange={(value) => onUpdate('genderIdentities', value)}
           style={{ marginBottom: '1rem' }}
         />
         <MultipleChoiceQuestion
@@ -554,21 +587,26 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               showInput: true,
               otherText: survey.orientationOtherText,
               otherTextMaxLength: 200,
+              onChange: (value) => {
+                if (!value) {
+                  onUpdate('orientationOtherText', null);
+                }
+              },
               onChangeOtherText: (value) =>
-                handleInputChange('orientationOtherText', value),
+                onUpdate('orientationOtherText', value),
             },
             {
               label: 'Prefer not to answer',
               value: SexualOrientationV2.PREFERNOTTOANSWER,
               onChange: () =>
-                handleInputChange('sexualOrientations', [
+                onUpdate('sexualOrientations', [
                   SexualOrientationV2.PREFERNOTTOANSWER,
                 ]),
             },
           ]}
           multiple
           selected={survey.sexualOrientations}
-          onChange={(value) => handleInputChange('sexualOrientations', value)}
+          onChange={(value) => onUpdate('sexualOrientations', value)}
           style={{ marginBottom: '1rem' }}
         />
         <MultipleChoiceQuestion
@@ -583,20 +621,23 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
               showInput: true,
               otherText: survey.sexAtBirthOtherText,
               otherTextMaxLength: 200,
+              onChange: (value) => {
+                if (!value) {
+                  onUpdate('sexAtBirthOtherText', null);
+                }
+              },
               onChangeOtherText: (value) =>
-                handleInputChange('sexAtBirthOtherText', value),
+                onUpdate('sexAtBirthOtherText', value),
             },
             {
               label: 'Prefer not to answer',
               value: SexAtBirthV2.PREFERNOTTOANSWER,
               onChange: () =>
-                handleInputChange('ethnicCategories', [
-                  SexAtBirthV2.PREFERNOTTOANSWER,
-                ]),
+                onUpdate('sexAtBirth', [SexAtBirthV2.PREFERNOTTOANSWER]),
             },
           ]}
           selected={survey.sexAtBirth}
-          onChange={(value) => handleInputChange('sexAtBirth', value)}
+          onChange={(value) => onUpdate('sexAtBirth', value)}
         />
         <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
           Questions about disability status
@@ -605,14 +646,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <YesNoOptionalQuestion
           question='5. Are you deaf or do you have serious difficulty hearing?'
           selected={survey.disabilityHearing}
-          onChange={(value) => handleInputChange('disabilityHearing', value)}
+          onChange={(value) => onUpdate('disabilityHearing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='6. Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
           selected={survey.disabilitySeeing}
-          onChange={(value) => handleInputChange('disabilitySeeing', value)}
+          onChange={(value) => onUpdate('disabilitySeeing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
@@ -620,21 +661,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             have serious difficulty concentrating, remembering, or making
             decisions?'
           selected={survey.disabilityConcentrating}
-          onChange={(value) =>
-            handleInputChange('disabilityConcentrating', value)
-          }
+          onChange={(value) => onUpdate('disabilityConcentrating', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='8. Do you have serious difficulty walking or climbing stairs?'
           selected={survey.disabilityWalking}
-          onChange={(value) => handleInputChange('disabilityWalking', value)}
+          onChange={(value) => onUpdate('disabilityWalking', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
           question='9. Do you have difficulty dressing or bathing?'
           selected={survey.disabilityDressing}
-          onChange={(value) => handleInputChange('disabilityDressing', value)}
+          onChange={(value) => onUpdate('disabilityDressing', value)}
           style={{ marginBottom: '1rem' }}
         />
         <YesNoOptionalQuestion
@@ -642,7 +681,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             difficulty doing errands alone such as visiting doctor's office or
               shopping?"
           selected={survey.disabilityErrands}
-          onChange={(value) => handleInputChange('disabilityErrands', value)}
+          onChange={(value) => onUpdate('disabilityErrands', value)}
           style={{ marginBottom: '1rem' }}
         />
         <FlexRow style={{ alignItems: 'center', gap: '1.75rem' }}>
@@ -653,9 +692,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             describe.
           </div>
           <TextInput
-            onChange={(value) =>
-              handleInputChange('disabilityOtherText', value)
-            }
+            onChange={(value) => onUpdate('disabilityOtherText', value)}
             value={survey.disabilityOtherText || ''}
             style={{ flex: 1 }}
           />
@@ -667,7 +704,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
         <div style={styles.question}>12. Year of birth</div>
         <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
           <NumberInput
-            onChange={(value) => handleInputChange('yearOfBirth', value)}
+            onChange={(value) => onUpdate('yearOfBirth', value)}
             onBlur={handleYearOfBirthBlur}
             disabled={survey.yearOfBirthPreferNot}
             min={minYear}
@@ -707,14 +744,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
             },
           ]}
           selected={survey.education}
-          onChange={(value) => handleInputChange('education', value)}
+          onChange={(value) => onUpdate('education', value)}
           style={{ marginBottom: '1rem' }}
         />
 
         <YesNoOptionalQuestion
           question={disadvantagedBackgroundQuestion}
           selected={survey.disadvantaged}
-          onChange={(value) => handleInputChange('disadvantaged', value)}
+          onChange={(value) => onUpdate('disadvantaged', value)}
         />
       </FlexColumn>
     </FlexColumn>

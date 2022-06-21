@@ -94,20 +94,31 @@ export const MultipleChoiceQuestion = (props: {
     parentValue?: any,
     childValues?: any[]
   ) => {
+    // If the question is a multi-select, e represents whether the
+    // selected option is selected (true|false).
+    // If the question is a single select, e represents an event where e.target.value represents
+    // the value of the option selected.
     if (multiple) {
-      let result = e
+      let updatedSelectedOptions = e
         ? [...(selected as string[]), label]
         : (selected as string[]).filter((r) => r !== label);
 
-      // Add parent if e true
-      if (e && parentValue && result.indexOf(parentValue) === -1) {
-        result.push(parentValue);
+      // If adding a child and parent is not currently checked, add the parent too
+      if (
+        e &&
+        parentValue &&
+        updatedSelectedOptions.indexOf(parentValue) === -1
+      ) {
+        updatedSelectedOptions.push(parentValue);
       }
 
+      // If unchecking a parent also uncheck all of its children
       if (!e && childValues) {
-        result = result.filter((item) => !childValues.includes(item));
+        updatedSelectedOptions = updatedSelectedOptions.filter(
+          (item) => !childValues.includes(item)
+        );
       }
-      onChange(result);
+      onChange(updatedSelectedOptions);
     } else {
       onChange(e.target.value);
     }

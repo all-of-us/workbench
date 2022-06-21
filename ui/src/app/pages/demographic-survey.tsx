@@ -2,8 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { Profile } from 'generated/fetch';
-
 import { Button } from 'app/components/buttons';
 import DemographicSurveyV2 from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
@@ -50,6 +48,10 @@ export const DemographicSurvey = (props) => {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    setChanged(!fp.isEqual(initialSurvey, profile?.demographicSurveyV2));
+  }, [profile]);
+
   const handleSubmit = async () => {
     props.showSpinner();
     await profileApi().updateProfile(profile);
@@ -58,10 +60,10 @@ export const DemographicSurvey = (props) => {
     navigateByUrl(returnAddress);
   };
 
-  const handleUpdate = (updatedProfile: Profile, updatedErrors: any) => {
-    setProfile(updatedProfile);
-    setErrors(updatedErrors);
-    setChanged(!fp.isEqual(initialSurvey, updatedProfile.demographicSurveyV2));
+  const handleUpdate = (updatedProfile) => {
+    setProfile((prevState) => {
+      return updatedProfile(prevState);
+    });
   };
 
   if (loading) {
@@ -70,7 +72,13 @@ export const DemographicSurvey = (props) => {
 
   return profile ? (
     <div style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}>
-      <DemographicSurveyV2 profile={profile} onUpdate={handleUpdate} />
+      <DemographicSurveyV2
+        profile={profile}
+        onUpdate={(prop, value) =>
+          handleUpdate(fp.set(['demographicSurveyV2', prop], value))
+        }
+        onError={setErrors}
+      />
       <TooltipTrigger
         content={
           (errors || !changed) && (

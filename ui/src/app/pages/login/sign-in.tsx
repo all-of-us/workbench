@@ -335,10 +335,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         isPreviousStep: true,
       });
     };
-    const onUpdate = (profile: Profile, errors: any[]) => {
-      this.setState({
-        profile,
-        errors,
+    const handleUpdate = (updatedProfile) => {
+      this.setState((prevState) => {
+        return updatedProfile(prevState);
       });
     };
 
@@ -392,7 +391,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}
           >
             <DemographicSurvey
-              onUpdate={onUpdate}
+              onError={(value) => handleUpdate(fp.set(['errors'], value))}
+              onUpdate={(prop, value) =>
+                handleUpdate(
+                  fp.set(['profile', 'demographicSurveyV2', prop], value)
+                )
+              }
               profile={this.state.profile}
             />
           </div>
