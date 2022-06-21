@@ -167,7 +167,7 @@ export const MultipleChoiceQuestion = (props: {
                 width: '300px',
               }}
               type='text'
-              value={otherText}
+              value={otherText || ''}
               maxLength={otherTextMaxLength}
               onChange={(e) => onChangeOtherText?.(e.target.value)}
             />

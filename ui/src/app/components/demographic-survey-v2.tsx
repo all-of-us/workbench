@@ -79,7 +79,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
       ...survey,
       [prop]: value,
     };
-    const errors = validateDemographicSurvey(survey);
+    const errors = validateDemographicSurvey(newSurvey);
     const newProfile = { ...profile, demographicSurveyV2: newSurvey };
     props.onUpdate(newProfile, errors);
   };
@@ -105,7 +105,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
     <div>
       14. Are you an individual from a disadvantaged background, as defined by
       &nbsp;
-      <a href='https://extramural-diversity.nih.gov/diversity-matters/disadvantaged-backgrounds'>
+      <a
+        target='_blank'
+        href='https://extramural-diversity.nih.gov/diversity-matters/disadvantaged-backgrounds'
+      >
         NIH Diversity in Extramural Programs?
       </a>
     </div>
@@ -162,7 +165,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
                 },
               ],
               showSubOptions: showAiAnOptions,
-              onChange: (value) => setShowAiAnOptions(value),
+              onChange: (value) => {
+                setShowAiAnOptions(value);
+              },
               onExpand: () => {
                 setShowAiAnOptions(!showAiAnOptions);
               },
@@ -449,7 +454,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)((props) => {
           ]}
           multiple
           selected={survey.ethnicCategories}
-          onChange={(value) => handleInputChange('ethnicCategories', value)}
+          onChange={(value) => {
+            handleInputChange('ethnicCategories', value);
+          }}
           style={{ marginBottom: '1rem' }}
         />
         <SemiBoldHeader>Questions about gender</SemiBoldHeader>
