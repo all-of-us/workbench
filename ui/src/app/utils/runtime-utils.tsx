@@ -1081,8 +1081,10 @@ export const useCustomRuntime = (
   const { runtime, workspaceNamespace } = useStore(runtimeStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const { pendingRuntime = null } = runtimeOps[currentWorkspaceNamespace] || {};
-  const [request, setRequest] =
-    useState<{ runtime: Runtime; detachedDisk: Disk | null }>();
+  const [request, setRequest] = useState<{
+    runtime: Runtime;
+    detachedDisk: Disk | null;
+  }>();
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);

@@ -123,7 +123,8 @@
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",
     "queueName": "rdrExportQueue",
-    "exportObjectsPerTask": 10
+    "exportObjectsPerTask": 10,
+    "exportDemoSurveyV2": false
   },
   "captcha": {
     "enableCaptcha": true,

@@ -14,7 +14,7 @@ buildscript {
         JACKSON_DATABIND_VERSION = '2.13.3'
         JACKSON_VERSION = '2.13.3'
         KOTLIN_VERSION = '1.5.32'
-        LIQUIBASE_VERSION = '4.10.0'
+        LIQUIBASE_VERSION = '4.12.0'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
         OKHTTP_VERSION = '2.7.5'

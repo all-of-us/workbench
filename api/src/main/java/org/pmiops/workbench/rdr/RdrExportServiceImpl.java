@@ -133,21 +133,15 @@ public class RdrExportServiceImpl implements RdrExportService {
    * table with current date as the lastExport date
    *
    * @param userIds
+   * @param backfill
    */
   @Override
   public void exportUsers(List<Long> userIds, boolean backfill) {
-    List<RdrResearcher> rdrResearchersList;
-    try {
-      rdrResearchersList =
-          userIds.stream()
-              .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
-              .collect(Collectors.toList());
-      rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
+    List<RdrResearcher> rdrResearchersList =
+        userIds.stream().map(this::toRdrResearcher).collect(Collectors.toList());
 
-      if (!backfill) {
-        updateDbRdrExport(RdrEntity.USER, userIds);
-      }
-      log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
+    try {
+      rdrApiProvider.get().exportResearchers(rdrResearchersList, backfill);
     } catch (ApiException ex) {
       log.severe(
           String.format(
@@ -155,6 +149,11 @@ public class RdrExportServiceImpl implements RdrExportService {
               userIds, ex.getResponseBody()));
       throw new ServerErrorException(ex);
     }
+
+    if (!backfill) {
+      updateDbRdrExport(RdrEntity.USER, userIds);
+    }
+    log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
   }
 
   /**
@@ -197,11 +196,16 @@ public class RdrExportServiceImpl implements RdrExportService {
     }
   }
 
-  private RdrResearcher toRdrResearcher(DbUser dbUser) {
-    return rdrMapper.toRdrResearcher(
-        dbUser,
-        accessTierService.getAccessTiersForUser(dbUser),
-        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
+  private RdrResearcher toRdrResearcher(long userId) {
+    DbUser dbUser = userDao.findUserByUserId(userId);
+    RdrResearcher researcher =
+        rdrMapper.toRdrResearcher(
+            dbUser,
+            accessTierService.getAccessTiersForUser(dbUser),
+            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
+    return workbenchConfigProvider.get().rdrExport.exportDemoSurveyV2
+        ? researcher
+        : researcher.demographicSurveyV2(null);
   }
 
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
