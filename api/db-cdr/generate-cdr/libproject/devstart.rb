@@ -375,8 +375,8 @@ def publish_cdr_files(cmd_name, args)
     "The access tier associated with this CDR, e.g. controlled." +
       "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.input_manifest_file }
-  op.add_validator ->(opts) { raise ArgumentError.new("--display-version-id is required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and not opts.display_version_id }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and (not opts.display_version_id or not opts.input_manifest_file ) }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
@@ -395,11 +395,13 @@ def publish_cdr_files(cmd_name, args)
   end
   common.status("local working directory: '#{working_dir}'")
 
-  input_manifest = parse_input_manifest(op.opts.input_manifest_file)
-  copy_manifest_files = {}
+  copy_manifest_files = []
   if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
     common.status "Starting: copy manifest creation"
     copy_manifests = {}
+    output_manifests = {}
+
+    input_manifest = parse_input_manifest(op.opts.input_manifest_file)
 
     aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
     unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
@@ -410,8 +412,13 @@ def publish_cdr_files(cmd_name, args)
 
       aw4_microarray_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
-        copy_manifests["aw4_microarray_" + source_name] = build_copy_manifest_for_aw4_section(
+        copy, output = build_manifests_for_aw4_section(
           section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows)
+        key_name = "aw4_microarray_" + source_name
+        copy_manifests[key_name] = copy
+        unless output.nil?
+          output_manifests[key_name] = output
+        end
       end
     end
 
@@ -424,8 +431,13 @@ def publish_cdr_files(cmd_name, args)
 
       aw4_wgs_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
-        copy_manifests["aw4_wgs_" + source_name] = build_copy_manifest_for_aw4_section(
+        copy, output = build_manifests_for_aw4_section(
           section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows)
+        key_name = "aw4_wgs_" + source_name
+        copy_manifests[key_name] = copy
+        unless output.nil?
+          output_manifests[key_name] = output
+        end
       end
     end
 
@@ -456,6 +468,13 @@ def publish_cdr_files(cmd_name, args)
         copy_manifest.each { |c| f << c.values }
       end
       copy_manifest_files.push(path)
+    end
+    output_manifests.each do |source_name, output_manifest|
+      path = "#{working_dir}/#{source_name}_output_manifest.csv"
+      CSV.open(path, 'wb') do |f|
+        f << output_manifest.first.keys
+        output_manifest.each { |c| f << c.values }
+      end
     end
     common.status "Finished: manifests created"
   end
@@ -489,9 +508,9 @@ def publish_cdr_files(cmd_name, args)
         "About to create transfer job#{with_storage_class}:\n" +
         "#{config[:source]} ->\n#{config[:dest]}\n\nAre you sure?")
 
-      job_name = "publish-cdr-files (#{i+1}/#{configs.length})"
+      job_name = "publish-cdr-files_#{i+1}-of-#{configs.length}"
       unless op.opts.jira_ticket.to_s.empty?
-        job_name = "[#{op.opts.jira_ticket}] #{job_name}"
+        job_name = "#{op.opts.jira_ticket}_#{job_name}"
       end
       publish(op.opts.project, config, job_name)
     end

@@ -55,7 +55,7 @@ FILE_ENVIRONMENTS = {
   }
 }
 
-GSUTIL_TASK_CONCURRENCY = 64
+GSUTIL_TASK_CONCURRENCY = 32
 
 AW4_INPUT_SECTION_SCHEMA = {
   :required => {
@@ -65,6 +65,10 @@ AW4_INPUT_SECTION_SCHEMA = {
     "pooledDestPathInfix" => String,
   },
   :optional => {
+    # Mapping of AW4 source column to output manifest CSV column. If specified, creates a local
+    # manifest of destination URIs corresponding to the given AW4 columns. filename{Match,Replace}
+    # are applied as usual.
+    "outputManifestSpec" => Hash,
     # A regex pattern which MUST match all source URIs
     "filenameMatch" => String,
     # A regex replacement, which can include group captures from filenameMatch.
@@ -270,6 +274,7 @@ end
 
 def read_all_microarray_aw4s(project, rids)
   raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
+  # XXX: old_egt_files workaround...
   _read_aw4_rows_for_rids(FILE_ENVIRONMENTS[project][:source_config][:microarray_aw4_prefix], rids)
 end
 
@@ -293,7 +298,9 @@ def _apply_storage_class_staging_prefix(path, storage_class)
   (parts[0..2] + ["#{storage_class.downcase}-staged"] + parts[3..-1]).join("/")
 end
 
-def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, rid=nil, preprod_source_ingest_base_path=nil)
+def _build_copy_manifest_row(
+    source_path, ingest_base_path, destination, input_section,
+    rid=nil, preprod_source_cdr_base_path=nil, preprod_source_ingest_base_path=nil)
   source_name = File.basename(source_path)
   dest_name = source_name
   replace = input_section["filenameReplace"]
@@ -303,6 +310,11 @@ def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_s
     if source_name == dest_name
       raise ArgumentError.new("filename replacement failed for '#{source_name}'")
     end
+  end
+
+  preprod_source_cdr_path = nil
+  unless preprod_source_cdr_base_path.nil?
+    preprod_source_cdr_path = File.join(preprod_source_cdr_base_path, dest_name)
   end
   preprod_source_ingest_path = nil
   unless preprod_source_ingest_base_path.nil?
@@ -318,7 +330,10 @@ def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_s
     ingest_base_path = _apply_storage_class_staging_prefix(ingest_base_path, storage_class)
   end
   {
-    :source_path => source_path,
+    # Due to idiosyncracies of gsutil cp, we want to specify src directories without a trailing /
+    :source_path => source_path.chomp("/"),
+    :preprod_source_project => input_section["preprodCTTerraProject"],
+    :preprod_source_cdr_path => preprod_source_cdr_path,
     :preprod_source_ingest_path => preprod_source_ingest_path,
     :ingest_path => File.join(ingest_base_path, dest_name),
     :destination_dir => destination,
@@ -326,18 +341,35 @@ def _build_copy_manifest_row(source_path, ingest_base_path, destination, input_s
   }
 end
 
-def build_copy_manifest_for_aw4_section(input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows)
+def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows)
   # TODO(RW-8269): handle delta directories
   path_prefix = "pooled/#{input_section["pooledDestPathInfix"]}/#{display_version_id}_base"
   ingest_base_path = File.join(ingest_bucket, path_prefix)
   destination = File.join(dest_bucket, path_prefix)
 
-  return aw4_rows.flat_map do |aw4_entry|
+  output_manifest = nil
+  unless input_section["outputManifestSpec"].to_s.empty?
+    output_manifest = []
+  end
+
+  copy_manifest = aw4_rows.flat_map do |aw4_entry|
+    unless output_manifest.nil?
+      out_row = {"person_id" => aw4_entry["research_id"]}
+      input_section["outputManifestSpec"].each do |aw4_col, out_col|
+        row = _build_copy_manifest_row(aw4_entry[aw4_col], ingest_base_path, destination, input_section, aw4_entry["research_id"])
+        destination_uri = File.join(row[:destination_dir], File.basename(row[:ingest_path]))
+        out_row[out_col] = destination_uri
+      end
+      output_manifest.push(out_row)
+    end
+
     source_paths = input_section["aw4Columns"].map { |k| aw4_entry[k] }
     source_paths.map do |source_path|
       _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, aw4_entry["research_id"])
     end
   end
+
+  return [copy_manifest, output_manifest]
 end
 
 def build_copy_manifest_for_curation_section(input_section, ingest_bucket, dest_bucket, display_version_id)
@@ -359,8 +391,9 @@ def build_copy_manifest_for_preprod_section(input_section, ingest_bucket, dest_b
   path_prefix = "#{display_version_id}/#{input_section['destination']}"
   ingest_base_path = File.join(ingest_bucket, path_prefix)
 
-  preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
-  preprod_ingest_base_path = ingest_base_path.sub(ingest_bucket, preprod_ingest_bucket)
+  tier = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"]
+  preprod_cdr_base_path = ingest_base_path.sub(ingest_bucket, tier[:dest_cdr_bucket])
+  preprod_ingest_base_path = ingest_base_path.sub(ingest_bucket, tier[:ingest_cdr_bucket])
 
   destination = File.join(dest_bucket, path_prefix)
 
@@ -369,7 +402,7 @@ def build_copy_manifest_for_preprod_section(input_section, ingest_bucket, dest_b
     raise ArgumentError.new("sourcePattern '#{input_section["sourcePattern"]}' did not match any files")
   end
   return source_uris.map do |source_path|
-    _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, nil, preprod_ingest_base_path)
+    _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, nil, preprod_cdr_base_path, preprod_ingest_base_path)
   end
 end
 
@@ -475,6 +508,31 @@ def _process_files_by_manifest(all_tasks, logs_dir, status_verb, num_workers)
   end
 end
 
+def _update_project_iam_object_viewer(sa_actor, sa_principal, project_id, add)
+  Common.new.run_inline([
+    "echo", "skipping",
+    "gcloud",
+    "--impersonate-service-account",
+    sa_actor,
+    "--quiet",
+    "projects",
+    add ? "add-iam-policy-binding" : "remove-iam-policy-binding",
+    project_id,
+    "--member",
+    "serviceAccount:#{sa_principal}",
+    "--role",
+    "roles/storage.objectViewer"
+  ])
+end
+
+def _update_bucket_storage_admin(sa_actor, sa_principal, bucket, add)
+  Common.new.run_inline(
+    ["gsutil", "-i", sa_actor, "iam", "ch"] +
+    (add ? [] : ["-d"]) +
+    ["serviceAccount:#{sa_principal}:objectAdmin", bucket]
+  )
+end
+
 # Stage files as specified in the given manifest. This copies files into the VPC-SC
 # ingest bucket to prepare them for publishing. This intermediate step is required
 # for publishing. For details, see:
@@ -492,11 +550,19 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
   # For now, we support pulling specifically from a ct preprod workspace project as a source.
   # This scenario is special-cased, since it's where we're doing operational prep of CDR assets.
   # For publishing in lower environments, i.e. from an arbitrary bucket, just use a normal curationSource.
+  preprod_appspot_account = "all-of-us-rw-preprod@appspot.gserviceaccount.com"
   preprod_deploy_account = must_get_env_value("all-of-us-rw-preprod", :publisher_account)
   preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
 
-  needs_preprod_grant = false
-  if all_tasks.any? { |task| not task["preprod_source_ingest_path"].to_s.empty? }
+  needs_cross_env_grant = false
+  preprod_source_projects = (
+    all_tasks
+      .map { |task| task["preprod_source_project"] }
+      .filter { |p| !p.to_s.empty? }
+      .to_set
+  )
+  needs_preprod_grant = !preprod_source_projects.empty?
+  if needs_preprod_grant
     unless ["all-of-us-rw-prod", "all-of-us-rw-preprod"].include? project
       raise ArgumentError.new("specified a preprod source with project #{project}, this is not allowed")
     end
@@ -505,7 +571,14 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
   end
 
   if needs_preprod_grant
-    common.run_inline(["gsutil", "-i", preprod_deploy_account, "iam", "ch", "serviceAccount:#{deploy_account}:storageAdmin", preprod_ingest_bucket])
+    preprod_source_projects.each do |p|
+      _update_project_iam_object_viewer(preprod_appspot_account, preprod_deploy_account, p, true)
+      #common.status "Sleeping for 5m after IAM grant to mitigate consistency issues"
+      #sleep 300
+    end
+  end
+  if needs_cross_env_grant
+    _update_bucket_storage_admin(preprod_deploy_account, deploy_account, preprod_ingest_bucket, true)
   end
 
   _process_files_by_manifest(
@@ -516,26 +589,41 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
   ) do |task, wout, werr|
     ingest_path = task["ingest_path"]
 
-    unless task["preprod_source_ingest_path"].to_s.empty?
+    unless task["preprod_source_project"].to_s.empty?
       # preprod workspace -> (cp) -> preprod ingest -> (mv) -> prod ingest
       unless system(
           "gsutil",
           "-i",
           preprod_deploy_account,
+          "-m",
           "cp",
           "-r",
           task["source_path"],
-          task["preprod_source_ingest_path"],
+          task["preprod_source_cdr_path"],
           :out => wout,
           :err => werr)
         # Note: we use next here because this is inside a block; this yields the value up
         # to the caller which is yielding to this block, i.e. _process_files_by_manifest.
         next [ingest_path, false]
       end
+      unless system(
+          "gsutil",
+          "-i",
+          preprod_deploy_account,
+          "-m",
+          "cp",
+          "-r",
+          task["preprod_source_cdr_path"],
+          task["preprod_source_ingest_path"],
+          :out => wout,
+          :err => werr)
+        next [ingest_path, false]
+      end
       next [ingest_path, system(
          "gsutil",
          "-i",
          deploy_account,
+          "-m",
          "mv",
          task["preprod_source_ingest_path"],
          ingest_path,
@@ -546,6 +634,7 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
       "gsutil",
       "-i",
       deploy_account,
+      "-m",
       "cp",
       "-r",
       task["source_path"],
@@ -555,17 +644,27 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
   end
 
   if needs_preprod_grant
-    common.run_inline(["gsutil", "-i", preprod_deploy_account, "iam", "ch", "-d", "serviceAccount:#{deploy_account}:storageAdmin", preprod_ingest_bucket])
+    preprod_source_projects.each do |p|
+      _update_project_iam_object_viewer(preprod_appspot_account, preprod_deploy_account, p, false)
+    end
+  end
+  if needs_cross_env_grant
+    _update_bucket_storage_admin(preprod_deploy_account, deploy_account, preprod_ingest_bucket, false)
   end
 end
 
-def _find_common_prefix(a, b)
+def _find_common_gcs_prefix(a, b)
   prefix = ""
   for i in 0..a.length-1 do
     if a[i] != b[i]
       break
     end
     prefix += a[i]
+  end
+
+  # A common GCS prefix contain at least one path component.
+  if prefix["gs://".length, prefix.length].chomp("/").split("/").length < 2
+    return nil
   end
   prefix
 end
@@ -605,19 +704,35 @@ def build_publish_configs(manifest_paths)
   config_by_source_dir.each_value do |c|
     existing = configs_by_storage_class[c[:storage_class]]
     if existing.nil?
-      configs_by_storage_class[c[:storage_class]] = c
+      configs_by_storage_class[c[:storage_class]] = {
+        c[:source] => c
+      }
       next
     end
 
     # Merge all values that share configuration settings into the longest common shared prefix.
-    configs_by_storage_class[c[:storage_class]] = {
-      :source => _find_common_prefix(existing[:source], c[:source]),
-      :dest => _find_common_prefix(existing[:dest], c[:dest]),
-      :storage_class => c[:storage_class],
-    }
+    mergable_config = nil
+    existing.each do |existing_source, existing_config|
+      unless _find_common_gcs_prefix(existing_source, c[:source]).nil?
+        mergable_config = existing_config
+        break
+      end
+    end
+
+    if mergable_config.nil?
+      existing[c[:source]] = c
+    else
+      existing.delete(mergable_config[:source])
+      common_source = _find_common_gcs_prefix(mergable_config[:source], c[:source])
+      existing[common_source] = {
+        :source => common_source,
+        :dest => _find_common_gcs_prefix(mergable_config[:dest], c[:dest]),
+        :storage_class => c[:storage_class],
+      }
+    end
   end
 
-  configs_by_storage_class.values
+  configs_by_storage_class.values.flat_map { |configs| configs.values }
 end
 
 # Creates Cloud Storage Transfer service jobs to publish data to the CDR bucket,
@@ -639,8 +754,9 @@ def publish(project, config, job_name)
       "create",
       config[:source],
       config[:dest],
-      "--name='#{job_name}'",
-      "--description='This transfer job was automatically created by RW tooling and is intended to be run only once, see genomic_manifests.rb.'",
+      "--project=#{project}",
+      "--name=#{job_name}",
+      "--description='#{job_name}: transfer job was automatically created by RW tooling and is intended to be run only once, see genomic_manifests.rb.'",
       "--delete-from=source-after-transfer",
   ] + maybe_args)
 end
