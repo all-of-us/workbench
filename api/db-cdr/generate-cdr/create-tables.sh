@@ -28,7 +28,19 @@ do
       bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
     fi
 
-    if [[ "$table_name" == 'cb_person' ]]
+    if [[ "$table_name" == 'domain_card' ]]
+    then
+      echo "Skipping domain_card"
+      continue
+    elif [[ "$table_name" == 'survey_module' ]]
+    then
+      echo "Skipping survey_module"
+      continue
+    elif [[ "$table_name" == 'cb_data_filter' ]]
+    then
+      echo "Skipping cb_data_filter"
+      continue
+    elif [[ "$table_name" == 'cb_person' ]]
     then
       echo "Skipping cb_person"
       continue
