@@ -60,6 +60,7 @@ const validateDemographicSurvey = (demographicSurvey) => {
     sexAtBirth: { presence: { allowEmpty: false } },
     ...yearOfBirth,
     education: { presence: { allowEmpty: false } },
+    disadvantaged: { presence: { allowEmpty: false } },
   };
   return validate(demographicSurvey, validationCheck);
 };
@@ -726,8 +727,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) => onUpdate('disabilityErrands', value)}
             style={{ marginBottom: '1rem' }}
           />
-          <FlexRow style={{ alignItems: 'center', gap: '1.75rem' }}>
-            <div style={{ ...styles.question, flex: 1 }}>
+          <FlexColumn>
+            <div
+              style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
+            >
               11. Do you have a physical, cognitive, and/or emotional condition
               that substantially limits one or more life activities not
               specified through the above questions, and want to share more?
@@ -736,9 +739,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <TextInput
               onChange={(value) => onUpdate('disabilityOtherText', value)}
               value={survey.disabilityOtherText || ''}
-              style={{ flex: 1 }}
+              style={{ width: '50%' }}
             />
-          </FlexRow>
+          </FlexColumn>
           <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
             Other Questions
           </SemiBoldHeader>
