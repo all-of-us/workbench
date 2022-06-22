@@ -106,7 +106,6 @@
     {
       "cdrVersionId": 7,
       "name": "All of Us Registered Tier Dataset v5",
-      "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-prod",
       "bigqueryDataset": "R2021Q3R5",
       "creationTime": "2021-08-10 00:00:00Z",
@@ -120,7 +119,6 @@
     {
       "cdrVersionId": 8,
       "name": "All of Us Controlled Tier Dataset v5",
-      "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-prod-ct",
       "bigqueryDataset": "C2021Q3R6",
       "wgsBigqueryDataset": "wgs_C2021Q3_beta",
@@ -137,6 +135,43 @@
       "wgsHailStoragePath": "wgs/hail.mt",
       "microarrayHailStoragePath": "microarray/hail.mt",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
+    },
+    {
+      "cdrVersionId": 9,
+      "name": "All of Us Registered Tier Dataset v6",
+      "isDefault": true,
+      "bigqueryProject": "fc-aou-cdr-prod",
+      "bigqueryDataset": "R2022Q2R2",
+      "creationTime": "2022-01-01 00:00:00Z",
+      "releaseNumber": 7,
+      "numParticipants": 369297,
+      "cdrDbName": "r_2022q2_3",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 10,
+      "name": "All of Us Controlled Tier Dataset v6",
+      "isDefault": true,
+      "bigqueryProject": "fc-aou-cdr-prod-ct",
+      "bigqueryDataset": "C2022Q2R2",
+      "wgsBigqueryDataset": "wgs_C2022Q2",
+      "wgsFilterSetName": "charlie",
+      "creationTime": "2022-01-01 00:00:00Z",
+      "releaseNumber": 8,
+      "numParticipants": 372397,
+      "cdrDbName": "c_2022q2_3",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "controlled",
+      "storageBasePath": "v6",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsHailStoragePath": "wgs/hail.mt",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
+      "microarrayHailStoragePath": "microarray/hail.mt",
+      "microarrayVcfManifestPath": "microarray/vcf/single_sample/manifest.csv",
+      "microarrayIdatManifestPath": "microarray/idat/manifest.csv"
     }
   ]
 }
