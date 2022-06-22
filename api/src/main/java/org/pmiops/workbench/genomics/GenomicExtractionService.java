@@ -66,7 +66,6 @@ public class GenomicExtractionService {
   // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
   private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
   // Scatter count boundaries for extraction. Affects number of works and numbers of shards.
-  private static final int MIN_EXTRACTION_SCATTER = 20;
   private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private final DataSetService dataSetService;
@@ -354,8 +353,9 @@ public class GenomicExtractionService {
 
     // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
     // keeping overhead low and limiting footprint on shared extraction quota.
-    int scatter =
-        Ints.constrainToRange(personIds.size() / 2, MIN_EXTRACTION_SCATTER, MAX_EXTRACTION_SCATTER);
+    int minScatter =
+        Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
+    int scatter = Ints.constrainToRange(personIds.size() / 2, minScatter, MAX_EXTRACTION_SCATTER);
 
     Map<String, String> maybeInputs = new HashMap<>();
     int methodLogicalVersion =
