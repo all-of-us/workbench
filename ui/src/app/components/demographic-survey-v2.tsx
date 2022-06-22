@@ -672,15 +672,18 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: SexAtBirthV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
-                  onUpdate(
-                    'sexAtBirth',
-                    checked ? [SexAtBirthV2.PREFERNOTTOANSWER] : []
-                  ),
               },
             ]}
             selected={survey.sexAtBirth}
-            onChange={(value) => onUpdate('sexAtBirth', value)}
+            onChange={(value) => {
+              if (
+                survey.sexAtBirth === SexAtBirthV2.OTHER &&
+                value !== SexAtBirthV2.OTHER
+              ) {
+                onUpdate('sexAtBirthOtherText', null);
+              }
+              onUpdate('sexAtBirth', value);
+            }}
           />
           <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
             Questions about disability status
