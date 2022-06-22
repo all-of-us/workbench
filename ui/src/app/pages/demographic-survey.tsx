@@ -116,7 +116,6 @@ export const DemographicSurvey = (props: DemographicSurveyProps) => {
         <Button
           disabled={!!errors || !changed}
           type='primary'
-          data-test-id={'submit-button'}
           onClick={handleSubmit}
           style={{ margin: '1rem 0rem' }}
         >

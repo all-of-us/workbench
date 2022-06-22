@@ -37,14 +37,10 @@ const Option = (props: Option) => {
         {multiple ? (
           <CheckBox
             {...{ id, disabled, checked, onChange }}
-            data-test-id='nothing-to-report'
             manageOwnState={false}
           />
         ) : (
-          <RadioButton
-            {...{ id, disabled, checked, onChange, value }}
-            data-test-id='nothing-to-report'
-          />
+          <RadioButton {...{ id, disabled, checked, onChange, value }} />
         )}
         <label htmlFor={id} style={styles.answer}>
           {label}

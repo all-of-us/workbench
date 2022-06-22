@@ -760,7 +760,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               style={{ width: '4rem' }}
             />
             <CheckBox
-              id='show-again-checkbox'
               checked={survey.yearOfBirthPreferNot}
               onChange={(value) => {
                 onUpdate('yearOfBirth', null);
