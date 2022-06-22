@@ -172,6 +172,7 @@ public class GenomicExtractionServiceTest {
         "operationalTerraWorkspaceNamespace";
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName =
         "operationalTerraWorkspaceName";
+    workbenchConfig.wgsCohortExtraction.minExtractionScatterTasks = 100;
 
     FirecloudWorkspaceDetails fcWorkspace =
         new FirecloudWorkspaceDetails().bucketName("user-bucket");
