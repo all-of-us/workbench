@@ -37,11 +37,28 @@ const validateDemographicSurvey = (demographicSurvey) => {
     v === true || v === false || v === null
       ? undefined
       : 'value must be selected';
+
+  const yearOfBirth = demographicSurvey.yearOfBirthPreferNot
+    ? {}
+    : {
+        yearOfBirth: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^You must either fill in your year of birth or check the corresponding "Prefer not to answer" checkbox',
+          },
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: minYear,
+            lessThanOrEqualTo: maxYear,
+          },
+        },
+      };
   const validationCheck = {
     ethnicCategories: { presence: { allowEmpty: false } },
     genderIdentities: { presence: { allowEmpty: false } },
     sexAtBirth: { presence: { allowEmpty: false } },
-    yearOfBirth: { presence: { allowEmpty: false } },
+    ...yearOfBirth,
     education: { presence: { allowEmpty: false } },
   };
   return validate(demographicSurvey, validationCheck);
@@ -81,23 +98,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
         ).length > 0
       );
     }, [survey.ethnicCategories]);
-
-    const handleYearOfBirthBlur = () => {
-      if (survey.yearOfBirth < minYear || survey.yearOfBirth > maxYear) {
-        onUpdate('yearOfBirth', null);
-      }
-    };
-
-    const handleYearOfBirthPreferNotChange = (value) => {
-      const newSurvey = {
-        ...survey,
-        yearOfBirth: value && null,
-        yearOfBirthPreferNot: value,
-      };
-      const errors = validateDemographicSurvey(survey);
-      const newProfile = { ...profile, demographicSurveyV2: newSurvey };
-      onUpdate(newProfile, errors);
-    };
 
     const disadvantagedBackgroundQuestion = (
       <div>
@@ -157,8 +157,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.AIANOTHER,
                     showInput: true,
                     otherText: survey.ethnicityAiAnOtherText,
-                    onChange: (value) => {
-                      if (!value) {
+                    onChange: (checked) => {
+                      if (!checked) {
                         onUpdate('ethnicityAiAnOtherText', null);
                       }
                     },
@@ -487,16 +487,22 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: EthnicCategory.PREFERNOTTOANSWER,
-                onChange: () =>
-                  onUpdate('ethnicCategories', [
-                    EthnicCategory.PREFERNOTTOANSWER,
-                  ]),
+                onChange: (checked) =>
+                  onUpdate(
+                    'ethnicCategories',
+                    checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
+                  ),
               },
             ]}
             multiple
             selected={survey.ethnicCategories}
             onChange={(value) => {
-              onUpdate('ethnicCategories', value);
+              onUpdate(
+                'ethnicCategories',
+                value.length > 1
+                  ? value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
+                  : value
+              );
             }}
             style={{ marginBottom: '1rem' }}
           />
@@ -550,15 +556,25 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: GenderIdentityV2.PREFERNOTTOANSWER,
-                onChange: () =>
-                  onUpdate('genderIdentities', [
-                    GenderIdentityV2.PREFERNOTTOANSWER,
-                  ]),
+                onChange: (checked) =>
+                  onUpdate(
+                    'genderIdentities',
+                    checked ? [GenderIdentityV2.PREFERNOTTOANSWER] : []
+                  ),
               },
             ]}
             multiple
             selected={survey.genderIdentities}
-            onChange={(value) => onUpdate('genderIdentities', value)}
+            onChange={(value) => {
+              onUpdate(
+                'genderIdentities',
+                value.length > 1
+                  ? value.filter(
+                      (v) => v !== GenderIdentityV2.PREFERNOTTOANSWER
+                    )
+                  : value
+              );
+            }}
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
@@ -611,15 +627,25 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: SexualOrientationV2.PREFERNOTTOANSWER,
-                onChange: () =>
-                  onUpdate('sexualOrientations', [
-                    SexualOrientationV2.PREFERNOTTOANSWER,
-                  ]),
+                onChange: (checked) =>
+                  onUpdate(
+                    'sexualOrientations',
+                    checked ? [SexualOrientationV2.PREFERNOTTOANSWER] : []
+                  ),
               },
             ]}
             multiple
             selected={survey.sexualOrientations}
-            onChange={(value) => onUpdate('sexualOrientations', value)}
+            onChange={(value) => {
+              onUpdate(
+                'sexualOrientations',
+                value.length > 1
+                  ? value.filter(
+                      (v) => v !== SexualOrientationV2.PREFERNOTTOANSWER
+                    )
+                  : value
+              );
+            }}
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
@@ -645,8 +671,11 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: SexAtBirthV2.PREFERNOTTOANSWER,
-                onChange: () =>
-                  onUpdate('sexAtBirth', [SexAtBirthV2.PREFERNOTTOANSWER]),
+                onChange: (checked) =>
+                  onUpdate(
+                    'sexAtBirth',
+                    checked ? [SexAtBirthV2.PREFERNOTTOANSWER] : []
+                  ),
               },
             ]}
             selected={survey.sexAtBirth}
@@ -718,7 +747,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
             <NumberInput
               onChange={(value) => onUpdate('yearOfBirth', value)}
-              onBlur={handleYearOfBirthBlur}
               disabled={survey.yearOfBirthPreferNot}
               min={minYear}
               max={maxYear}
@@ -728,7 +756,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <CheckBox
               id='show-again-checkbox'
               checked={survey.yearOfBirthPreferNot}
-              onChange={(value) => handleYearOfBirthPreferNotChange(value)}
+              onChange={(value) => {
+                onUpdate('yearOfBirth', null);
+                onUpdate('yearOfBirthPreferNot', value);
+              }}
               style={{ marginLeft: '1rem' }}
             />
             <label
