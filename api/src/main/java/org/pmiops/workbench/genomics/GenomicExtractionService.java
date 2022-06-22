@@ -66,7 +66,7 @@ public class GenomicExtractionService {
   // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
   private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
   // Scatter count boundaries for extraction. Affects number of works and numbers of shards.
-  private static final int MIN_EXTRACTION_SCATTER = 20;
+  private static final int MIN_EXTRACTION_SCATTER = 100;
   private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private final DataSetService dataSetService;
