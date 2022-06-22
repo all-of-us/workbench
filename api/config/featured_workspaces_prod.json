@@ -13,30 +13,6 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "How  to Work with All of Us Physical Measurements Data",
-      "namespace": "aou-rw-0beec6ae",
-      "id": "howtoworkwithallofusphysicalmeasurementsdatatier5",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Get Started with Registered Tier Data (tier 5)",
-      "namespace": "aou-rw-4a344d07",
-      "id": "howtogetstartedwithregisteredtierdatatier5",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Work with All of Us Survey Data (tier 5)",
-      "namespace": "aou-rw-141ad4f5",
-      "id": "howtoworkwithallofussurveydatatier5",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Work With Wearable Device Data (tier 5)",
-      "namespace": "aou-rw-7b4a3b1d",
-      "id": "howtoworkwithwearabledevicedatatier5",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
       "name": "How to run WDLs using Cromwell in Researcher Workbench",
       "namespace": "aou-rw-ec29d5cc",
       "id": "howtorunwdlsusingcromwellintheresearcherworkbench",
@@ -55,76 +31,10 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "How to Work with All of Us Genomic Data (Hail - Plink)",
-      "namespace": "aou-rw-87f97daa",
-      "id": "howtoworkwithallofusgenomicdatahailplink",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Work with All of Us COPE Survey Data",
-      "namespace": "aou-rw-a54183e5",
-      "id": "howtoworkwithallofussurveydata",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Get Started with Controlled Tier Data",
-      "namespace": "aou-rw-0e75c5a2",
-      "id": "howtogetstartedwithcontrolledtierdata",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
       "name": "How to Run Python Notebooks in the Background",
       "namespace": "aou-rw-7172272a",
       "id": "howtorunnotebooksinthebackground",
       "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "Phenotype - Breast Cancer (tier 5)",
-      "namespace": "aou-rw-c6574691",
-      "id": "phenotypebreastcancertier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Phenotype - Dementia (tier 5)",
-      "namespace": "aou-rw-1b3759b6",
-      "id": "phenotypedementiatier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Phenotype - Depression (tier 5)",
-      "namespace": "aou-rw-6ed35443",
-      "id": "phenotypedepressiontier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Phenotype - Ischemic Heart Disease (tier 5)",
-      "namespace": "aou-rw-5d0f62b5",
-      "id": "phenotypeischemicheartdiseasetier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Phenotype - Type 2 Diabetes (tier 5)",
-      "namespace": "aou-rw-8ec0c8fe",
-      "id": "phenotypetype2diabetestier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Type 2 Diabetes",
-      "namespace": "aou-rw-a7c214e2",
-      "id": "phenotypetype2diabetestier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Breast Cancer",
-      "namespace": "aou-rw-4d183553",
-      "id": "phenotypebreastcancertier5",
-      "category": "PHENOTYPE_LIBRARY"
-    },
-    {
-      "name": "Ischemic Heart Disease",
-      "namespace": "aou-rw-8d192a8e",
-      "id": "phenotypeischemicheartdiseasetier5",
-      "category": "PHENOTYPE_LIBRARY"
     },
     {
       "name": "Demo - Medication Sequencing",
@@ -173,6 +83,108 @@
       "namespace": "aou-rw-6ef5a3b8",
       "id": "siloedanalysisofallofusandukbiobankgenomicdata",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Work with All of Us Physical Measurements Data (v6)",
+      "namespace": "aou-rw-0e8e7aca",
+      "id": "workwithallofusphysicalmeasurementsdatav6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Get Started with Registered Tier Data (v6)",
+      "namespace": "aou-rw-06e28cde",
+      "id": "howtogetstartedwithregisteredtierdatav6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us Survey Data (v6)",
+      "namespace": "aou-rw-36b4a9c5",
+      "id": "howtoworkwithallofussurveydatav6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How To Work With All of Us COPE Survey Data (v6)",
+      "namespace": "aou-rw-723e056b",
+      "id": "howtoworkwithallofuscopesurveydatav6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work With Wearable Device Data (v6)",
+      "namespace": "aou-rw-d72fd583",
+      "id": "howtoworkwithwearabledevicedatav6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with Genomics Data (CRAM_Processing and IGV)",
+      "namespace": "aou-rw-79cba9d5",
+      "id": "howtoworkwithgenomicsdatacramprocessingandigv",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Get Started with Controlled Tier Data (v6)",
+      "namespace": "aou-rw-997f51be",
+      "id": "howtogetstartedwithcontrolledtierdatav6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Reproduce the All of Us SARS-CoV-2 Antibody Study (v5)",
+      "namespace": "aou-rw-75f04d80",
+      "id": "howtoreproducetheallofussarscov2antibodystudyv5",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us Genomic Data (Hail - Plink)(v6)",
+      "namespace": "aou-rw-61aae708",
+      "id": "duplicateofhowtoworkwithallofusgenomicdatahailplinkjunerefresh",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "Phenotype - Breast Cancer (v6)",
+      "namespace": "aou-rw-6e6a2ca5",
+      "id": "duplicateofphenotypebreastcancerv6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Breast Cancer (v6)",
+      "namespace": "aou-rw-05b8398c",
+      "id": "phenotypebreastcancerv6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Dementia (v6)",
+      "namespace": "aou-rw-11999dc9",
+      "id": "phenotypedementiav6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Depression (v6)",
+      "namespace": "aou-rw-f995b59f",
+      "id": "phenotypedepressionv6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Ischemic Heart Disease (v6)",
+      "namespace": "aou-rw-69bb1f9f",
+      "id": "phenotypeischemicheartdiseasev6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Ischemic Heart Disease (v6)",
+      "namespace": "aou-rw-cfaf0f75",
+      "id": "ischemicheartdiseasev6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Type 2 Diabetes (v6)",
+      "namespace": "aou-rw-6654da04",
+      "id": "phenotypetype2diabetesv6",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Type 2 Diabetes (v6)",
+      "namespace": "aou-rw-0e2ce67a",
+      "id": "phenotypetype2diabetesv6",
+      "category": "PHENOTYPE_LIBRARY"
     }
   ]
 }
