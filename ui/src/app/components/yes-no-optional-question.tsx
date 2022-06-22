@@ -5,12 +5,14 @@ import { YesNoPreferNot } from 'generated/fetch';
 
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 
-export const YesNoOptionalQuestion = (props: {
+interface YesNoOptionalQuestionProps {
   question: any;
-  selected: string;
+  selected: any;
   onChange: (any) => void;
   style?: CSSProperties;
-}) => {
+}
+
+export const YesNoOptionalQuestion = (props: YesNoOptionalQuestionProps) => {
   const { question, selected, onChange, style } = props;
 
   return (

@@ -5,17 +5,24 @@ import * as fp from 'lodash/fp';
 import { Button } from 'app/components/buttons';
 import DemographicSurveyV2 from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
-export const DemographicSurvey = (props) => {
+interface DemographicSurveyProps extends WithSpinnerOverlayProps {
+  returnAddress: string;
+}
+
+export const DemographicSurvey = (props: DemographicSurveyProps) => {
   const [errors, setErrors] = useState(null);
   const [changed, setChanged] = useState(false);
   const [initialSurvey, setInitialSurvey] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [, navigateByUrl] = useNavigation();
+
+  const { hideSpinner, showSpinner, returnAddress } = props;
 
   useEffect(() => {
     const profileStoreProfile = profileStore.get().profile;
@@ -44,7 +51,7 @@ export const DemographicSurvey = (props) => {
       yearOfBirthPreferNot: false,
     };
     setProfile({ ...profileStoreProfile, demographicSurveyV2: currentSurvey });
-    props.hideSpinner();
+    hideSpinner();
     setLoading(false);
   }, []);
 
@@ -53,11 +60,11 @@ export const DemographicSurvey = (props) => {
   }, [profile]);
 
   const handleSubmit = async () => {
-    props.showSpinner();
+    showSpinner();
     await profileApi().updateProfile(profile);
-    props.hideSpinner();
-    const returnAddress = props.returnAddress ?? '/profile';
-    navigateByUrl(returnAddress);
+    hideSpinner();
+    const returnAddressAdjusted = returnAddress ?? '/profile';
+    navigateByUrl(returnAddressAdjusted);
   };
 
   const handleUpdate = (updatedProfile) => {

@@ -14,7 +14,7 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
-const Option = (props: {
+interface Option {
   checked: boolean;
   value: any;
   label: string;
@@ -23,7 +23,9 @@ const Option = (props: {
   multiple?: boolean;
   disabled?: boolean;
   disabledText?: string;
-}) => {
+}
+
+const Option = (props: Option) => {
   const { checked, disabled, disabledText, label, multiple, onChange, value } =
     props;
   const id = useId();
@@ -68,15 +70,17 @@ interface MultipleChoiceOption {
   otherTextMaxLength?: number;
 }
 
-export const MultipleChoiceQuestion = (props: {
+interface MultipleChoiceQuestionProps {
   question: any;
   options: MultipleChoiceOption[];
-  selected: string | string[];
+  selected: any | any[];
   onChange: (any) => void;
   style?: CSSProperties;
   multiple?: boolean;
   horizontalOptions?: boolean;
-}) => {
+}
+
+export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
   const {
     horizontalOptions,
     options,
@@ -87,7 +91,6 @@ export const MultipleChoiceQuestion = (props: {
     style,
   } = props;
 
-  // TODO: Change variable names and/or split into two functions
   const handleQuestionChange = (
     e,
     label,
