@@ -13,7 +13,7 @@ import { AccountCreationSuccess } from 'app/pages/login/account-creation/account
 import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import LoginReactComponent from 'app/pages/login/login';
 
-import { createEmptyProfile, SignIn, SignInProps } from './sign-in';
+import { createEmptyProfile, SignIn, SignInImpl, SignInProps } from './sign-in';
 
 describe('SignInReact', () => {
   let props: SignInProps;
@@ -25,9 +25,7 @@ describe('SignInReact', () => {
       </MemoryRouter>
     );
 
-  // To correctly shallow-render this component wrapped by a HOC, we need to add an extra
-  // .shallow() call at the end.
-  const shallowComponent = () => shallow(<SignIn {...props} />).shallow();
+  const shallowComponent = () => shallow(<SignInImpl {...props} />);
 
   beforeEach(() => {
     window.scrollTo = () => {};
