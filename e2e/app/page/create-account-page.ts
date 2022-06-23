@@ -205,21 +205,4 @@ export default class CreateAccountPage extends BasePage {
     await this.getResearchBackgroundTextarea().type(faker.lorem.word());
     return newUserName;
   }
-
-  // Step 4: Fill out demographic survey information with default values
-  async fillOutDemographicSurvey(): Promise<void> {
-    await waitForText(this.page, 'Demographics Survey');
-    // Find and check on all checkboxes with same label: Prefer not to answer
-    const targetXpath =
-      '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]' +
-      '/input[@type="checkbox" or @type="radio"]';
-    await this.page.waitForXPath(targetXpath, { visible: true });
-    const checkboxes = await this.page.$x(targetXpath);
-    for (const ck of checkboxes) {
-      await ck.click();
-    }
-    await this.selectEthnicity('Prefer not to answer');
-    await this.selectYearOfBirth('1955');
-    await this.selectEducationLevel(EducationLevelValue.Doctorate);
-  }
 }
