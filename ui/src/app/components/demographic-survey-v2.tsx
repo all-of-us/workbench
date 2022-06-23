@@ -38,6 +38,10 @@ const validateDemographicSurvey = (demographicSurvey) => {
       ? undefined
       : 'value must be selected';
 
+  // Not well documented, but in Validate.JS, if your message is prefixed with a caret,
+  // the field name will not be included with the message:
+  // https://validatejs.org/docs/validate.html#section-47
+  // https://github.com/ansman/validate.js/issues/68
   const yearOfBirth = demographicSurvey.yearOfBirthPreferNot
     ? {}
     : {
