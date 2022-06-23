@@ -48,7 +48,7 @@
     "extractionMethodConfigurationVersion": 4,
     "extractionMethodLogicalVersion": 3,
     "extractionDestinationDataset": "fc-aou-cdr-prod-ct.wgs_extraction_destination",
-    "minExtractionScatterTasks": 100,
+    "minExtractionScatterTasks": 350,
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
