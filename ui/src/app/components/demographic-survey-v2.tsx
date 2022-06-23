@@ -65,6 +65,12 @@ const validateDemographicSurvey = (demographicSurvey) => {
     ...yearOfBirth,
     education: { presence: { allowEmpty: false } },
     disadvantaged: { presence: { allowEmpty: false } },
+    disabilityHearing: { presence: { allowEmpty: false } },
+    disabilitySeeing: { presence: { allowEmpty: false } },
+    disabilityConcentrating: { presence: { allowEmpty: false } },
+    disabilityWalking: { presence: { allowEmpty: false } },
+    disabilityDressing: { presence: { allowEmpty: false } },
+    disabilityErrands: { presence: { allowEmpty: false } },
   };
   return validate(demographicSurvey, validationCheck);
 };
