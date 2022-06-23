@@ -452,7 +452,7 @@ export const AttributesPage = fp.flow(
           value: AttrName[AttrName.ANY],
         });
         this.setState(
-          { formValid: true, isCOPEOrMinuteSurvey: true, options },
+          { formValid: true, isCOPEOrMinuteSurvey: false, options },
           () => this.getAttributes()
         );
       }
