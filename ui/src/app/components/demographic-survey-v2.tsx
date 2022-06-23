@@ -167,18 +167,13 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                         onUpdate('ethnicityAiAnOtherText', null);
                       }
                     },
-                    onChangeOtherText: (value) => {
-                      onUpdate('ethnicityAiAnOtherText', value);
-                    },
+                    onChangeOtherText: (value) =>
+                      onUpdate('ethnicityAiAnOtherText', value),
                   },
                 ],
                 showSubOptions: showAiAnOptions,
-                onChange: (value) => {
-                  setShowAiAnOptions(value);
-                },
-                onExpand: () => {
-                  setShowAiAnOptions(!showAiAnOptions);
-                },
+                onChange: (value) => setShowAiAnOptions(value),
+                onExpand: () => setShowAiAnOptions(!showAiAnOptions),
               },
 
               {
@@ -215,12 +210,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showAsianOptions,
-                onChange: (value) => {
-                  setShowAsianOptions(value);
-                },
-                onExpand: () => {
-                  setShowAsianOptions(!showAsianOptions);
-                },
+                onChange: (value) => setShowAsianOptions(value),
+                onExpand: () => setShowAsianOptions(!showAsianOptions),
               },
               {
                 label: 'Black, African American, or of African descent',
@@ -260,12 +251,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showBlackOptions,
-                onChange: (value) => {
-                  setShowBlackOptions(value);
-                },
-                onExpand: () => {
-                  setShowBlackOptions(!showBlackOptions);
-                },
+                onChange: (value) => setShowBlackOptions(value),
+                onExpand: () => setShowBlackOptions(!showBlackOptions),
               },
               {
                 label: 'Hispanic, Latino, or Spanish descent',
@@ -312,12 +299,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showHispanicOptions,
-                onChange: (value) => {
-                  setShowHispanicOptions(value);
-                },
-                onExpand: () => {
-                  setShowHispanicOptions(!showHispanicOptions);
-                },
+                onChange: (value) => setShowHispanicOptions(value),
+                onExpand: () => setShowHispanicOptions(!showHispanicOptions),
               },
               {
                 label: 'Middle Eastern or North African',
@@ -362,12 +345,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showMeNaOptions,
-                onChange: (value) => {
-                  setShowMeNaOptions(value);
-                },
-                onExpand: () => {
-                  setShowMeNaOptions(!showMeNaOptions);
-                },
+                onChange: (value) => setShowMeNaOptions(value),
+                onExpand: () => setShowMeNaOptions(!showMeNaOptions),
               },
               {
                 label: 'Native Hawaiian or other Pacific Islander',
@@ -414,12 +393,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showNhPiOptions,
-                onChange: (value) => {
-                  setShowNhPiOptions(value);
-                },
-                onExpand: () => {
-                  setShowNhPiOptions(!showNhPiOptions);
-                },
+                onChange: (value) => setShowNhPiOptions(value),
+                onExpand: () => setShowNhPiOptions(!showNhPiOptions),
               },
               {
                 label: 'White, or of European descent',
@@ -468,9 +443,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showWhiteOptions,
-                onChange: (value) => {
-                  setShowWhiteOptions(value);
-                },
+                onChange: (value) => setShowWhiteOptions(value),
                 onExpand: () => {
                   setShowWhiteOptions(!showWhiteOptions);
                 },
@@ -501,14 +474,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             multiple
             selected={survey.ethnicCategories}
-            onChange={(value) => {
+            onChange={(value) =>
               onUpdate(
                 'ethnicCategories',
                 value.length > 1
                   ? value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
                   : value
-              );
-            }}
+              )
+            }
             style={{ marginBottom: '1rem' }}
           />
           <SemiBoldHeader>Questions about gender</SemiBoldHeader>
@@ -570,7 +543,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             multiple
             selected={survey.genderIdentities}
-            onChange={(value) => {
+            onChange={(value) =>
               onUpdate(
                 'genderIdentities',
                 value.length > 1
@@ -578,8 +551,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                       (v) => v !== GenderIdentityV2.PREFERNOTTOANSWER
                     )
                   : value
-              );
-            }}
+              )
+            }
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
@@ -641,7 +614,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             multiple
             selected={survey.sexualOrientations}
-            onChange={(value) => {
+            onChange={(value) =>
               onUpdate(
                 'sexualOrientations',
                 value.length > 1
@@ -649,8 +622,8 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                       (v) => v !== SexualOrientationV2.PREFERNOTTOANSWER
                     )
                   : value
-              );
-            }}
+              )
+            }
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion

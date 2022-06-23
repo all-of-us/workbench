@@ -74,7 +74,7 @@ export const DemographicSurvey = (props: DemographicSurveyProps) => {
   };
 
   if (loading) {
-    return <></>;
+    return null;
   }
 
   return profile ? (
@@ -124,8 +124,6 @@ export const DemographicSurvey = (props: DemographicSurveyProps) => {
       </TooltipTrigger>
     </div>
   ) : (
-    <div style={{ marginTop: '1rem' }}>
-      Unfortunately, your profile did not load. Please try again later.
-    </div>
+    <div style={{ marginTop: '1rem' }}>Profile failed to load.</div>
   );
 };

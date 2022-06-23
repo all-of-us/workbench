@@ -38,9 +38,7 @@ describe('SignIn', () => {
       showSpinner: () => {},
     };
     serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-      },
+      config: defaultServerConfig,
     });
   });
 

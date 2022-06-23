@@ -336,9 +336,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       });
     };
     const handleUpdate = (updatedProfile) => {
-      this.setState((prevState) => {
-        return updatedProfile(prevState);
-      });
+      this.setState(updatedProfile);
     };
 
     switch (currentStep) {
@@ -405,7 +403,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             {...{ onComplete }}
             profile={this.state.profile}
             termsOfServiceVersion={this.state.termsOfServiceVersion}
-            onComplete={onComplete}
             onPreviousClick={onPrevious}
           />
         );
