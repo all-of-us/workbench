@@ -112,7 +112,7 @@
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": false,
     "enableMultiReview": false,
-    "enableUpdatedDemographicSurvey": true
+    "enableUpdatedDemographicSurvey": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

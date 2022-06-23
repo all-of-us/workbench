@@ -351,7 +351,11 @@ export const SignedInRoutes = () => {
           workspaceEditMode={WorkspaceEditMode.Create}
         />
       </AppRoute>
-      <AppRoute path='/workspaces/:ns/:wsid' exact>
+      <AppRoute
+        path='/workspaces/:ns/:wsid'
+        exact={false}
+        guards={[getAccessModuleGuard()]}
+      >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
       {serverConfigStore.get().config.enableUpdatedDemographicSurvey && (

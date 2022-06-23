@@ -386,7 +386,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           />
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
-        return serverConfigStore.get().config.enableUpdatedDemographicSurvey ? (
+        return serverConfigStore?.get().config
+          ?.enableUpdatedDemographicSurvey ? (
           <div
             style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}
           >
@@ -451,7 +452,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private renderNavigation(currentStep: SignInStep) {
     if (
-      serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
+      serverConfigStore?.get().config?.enableUpdatedDemographicSurvey &&
       currentStep === SignInStep.DEMOGRAPHIC_SURVEY
     ) {
       const { errors } = this.state;
