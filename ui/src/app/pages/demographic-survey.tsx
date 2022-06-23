@@ -62,6 +62,7 @@ export const DemographicSurvey = (props: DemographicSurveyProps) => {
   const handleSubmit = async () => {
     showSpinner();
     await profileApi().updateProfile(profile);
+    await profileStore.get().reload();
     hideSpinner();
     const returnAddressAdjusted = returnAddress ?? '/profile';
     navigateByUrl(returnAddressAdjusted);
