@@ -9,7 +9,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "test-AoU-RW",
     "timeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.13",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.5",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "workspaceLogsProject": "fc-aou-logs-test",
@@ -48,6 +48,7 @@
     "extractionMethodConfigurationVersion": 15,
     "extractionMethodLogicalVersion": 3,
     "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",
+    "minExtractionScatterTasks": 20,
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
@@ -124,7 +125,7 @@
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10,
-    "exportDemoSurveyV2": false
+    "exportDemoSurveyV2": true
   },
   "captcha": {
     "enableCaptcha": true,

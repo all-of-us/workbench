@@ -206,6 +206,7 @@ export const RenewalCardBody = (props: {
   setLoading: (boolean) => void;
   hide?: boolean;
   textStyle?: CSSProperties;
+  radioButtonStyle?: CSSProperties;
   showTimeEstimate?: boolean;
 }) => {
   const {
@@ -213,6 +214,7 @@ export const RenewalCardBody = (props: {
     setLoading,
     hide,
     textStyle,
+    radioButtonStyle,
     showTimeEstimate = false,
   } = props;
 
@@ -313,7 +315,7 @@ export const RenewalCardBody = (props: {
                   data-test-id='nothing-to-report'
                   id={noReportId}
                   disabled={isRenewalCompleteForModule(moduleStatus)}
-                  style={{ justifySelf: 'end' }}
+                  style={radioButtonStyle}
                   checked={publications === true}
                   onChange={() => setPublications(true)}
                 />
@@ -326,7 +328,7 @@ export const RenewalCardBody = (props: {
                   data-test-id='report-submitted'
                   id={reportId}
                   disabled={isRenewalCompleteForModule(moduleStatus)}
-                  style={{ justifySelf: 'end' }}
+                  style={radioButtonStyle}
                   checked={publications === false}
                   onChange={() => setPublications(false)}
                 />
@@ -570,6 +572,7 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
               )}
               setLoading={() => {}}
               textStyle={{ fontSize: '0.6rem' }}
+              radioButtonStyle={{ marginRight: '0.5em' }}
               hide={!showModule}
               showTimeEstimate={true}
             />
