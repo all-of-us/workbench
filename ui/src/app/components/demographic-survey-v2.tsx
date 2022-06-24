@@ -155,7 +155,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             question='1. Which races and/or ethnicities do you identify with? Please select all that apply.'
             options={[
               {
-                label: 'American Indian or Alaska Native',
+                label: 'American Indian or Alaska Native (AIAN)',
                 value: EthnicCategory.AIAN,
                 subOptions: [
                   {
@@ -186,11 +186,11 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'Asian',
                 value: EthnicCategory.ASIAN,
                 subOptions: [
+                  { label: 'Asian Indian', value: EthnicCategory.ASIANINDIAN },
                   { label: 'Cambodian', value: EthnicCategory.ASIANCAMBODIAN },
                   { label: 'Chinese', value: EthnicCategory.ASIANCHINESE },
                   { label: 'Filipino', value: EthnicCategory.ASIANFILIPINO },
                   { label: 'Hmong', value: EthnicCategory.ASIANHMONG },
-                  { label: 'Indian', value: EthnicCategory.ASIANINDIAN },
                   { label: 'Japanese', value: EthnicCategory.ASIANJAPANESE },
                   { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
                   { label: 'Lao', value: EthnicCategory.ASIANLAO },
@@ -220,7 +220,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 onExpand: () => setShowAsianOptions(!showAsianOptions),
               },
               {
-                label: 'Black, African American, or of African descent',
+                label: 'Black or African American',
                 value: EthnicCategory.BLACK,
                 subOptions: [
                   {
@@ -261,7 +261,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 onExpand: () => setShowBlackOptions(!showBlackOptions),
               },
               {
-                label: 'Hispanic, Latino, or Spanish descent',
+                label: 'Hispanic or Latino or Spanish Origin',
                 value: EthnicCategory.HISPANIC,
                 subOptions: [
                   {
@@ -278,7 +278,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.HISPANICECUADORIAN,
                   },
                   { label: 'Honduran', value: EthnicCategory.HISPANICHONDURAN },
-                  { label: 'Mexican', value: EthnicCategory.HISPANICMEXICAN },
+                  {
+                    label: 'Mexican or Mexican American',
+                    value: EthnicCategory.HISPANICMEXICAN,
+                  },
                   {
                     label: 'Puerto Rican',
                     value: EthnicCategory.HISPANICPUERTORICAN,
@@ -355,7 +358,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 onExpand: () => setShowMeNaOptions(!showMeNaOptions),
               },
               {
-                label: 'Native Hawaiian or other Pacific Islander',
+                label: 'Native Hawaiian or Other Pacific Islander',
                 value: EthnicCategory.NHPI,
                 subOptions: [
                   {
@@ -403,7 +406,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 onExpand: () => setShowNhPiOptions(!showNhPiOptions),
               },
               {
-                label: 'White, or of European descent',
+                label: 'White',
                 value: EthnicCategory.WHITE,
                 subOptions: [
                   {
