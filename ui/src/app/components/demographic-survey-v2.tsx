@@ -55,7 +55,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^You must either fill in your year of birth or check the corresponding "Prefer not to answer" checkbox',
+              '^You must either fill in your year of birth or check the corresponding ' +
+              '"Prefer not to answer" checkbox',
           },
           numericality: {
             onlyInteger: true,
@@ -73,7 +74,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting American Indian or Alaska Native (AIAN) "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting American Indian or Alaska Native (AIAN) ' +
+              '"None of these fully describe me, and I want to specify", please specify a value',
           },
         },
       }
@@ -87,7 +89,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting Asian "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting Asian "None of these fully describe me, and I want to specify", ' +
+              'please specify a value',
           },
         },
       }
@@ -101,7 +104,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting Black or African American "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting Black or African American "None of these fully describe me, ' +
+              'and I want to specify", please specify a value',
           },
         },
       }
@@ -115,7 +119,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting Hispanic or Latino or Spanish Origin "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting Hispanic or Latino or Spanish Origin ' +
+              '"None of these fully describe me, and I want to specify", please specify a value',
           },
         },
       }
@@ -129,7 +134,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting Middle Eastern or North African "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting Middle Eastern or North African ' +
+              '"None of these fully describe me, and I want to specify", please specify a value',
           },
         },
       }
@@ -143,7 +149,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting Native Hawaiian or Other Pacific Islander "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting Native Hawaiian or Other Pacific Islander ' +
+              '"None of these fully describe me, and I want to specify", please specify a value',
           },
         },
       }
@@ -157,7 +164,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting White "None of these fully describe me, and I want to specify", please specify a value ',
+              '^If selecting White "None of these fully describe me, and I want to specify", ' +
+              'please specify a value',
           },
         },
       }
@@ -171,7 +179,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting "None of these fully describe me, and I want to specify" for your Race(s) and/or Ethnicities, please specify a value ',
+              '^If selecting "None of these fully describe me, ' +
+              'and I want to specify" for your Race(s) and/or Ethnicities, please specify a value',
           },
         },
       }
@@ -185,7 +194,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting "None of these fully describe me, and I want to specify" for your Gender Identity/Identities, please specify a value ',
+              '^If selecting "None of these fully describe me, and I want to specify" for your ' +
+              'Gender Identity/Identities, please specify a value',
           },
         },
       }
@@ -198,7 +208,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
             presence: {
               allowEmpty: false,
               message:
-                '^If selecting "None of these fully describe me, and I want to specify" for your Sex Assigned at Birth, please specify a value ',
+                '^If selecting "None of these fully describe me, and I want to specify" ' +
+                'for your Sex Assigned at Birth, please specify a value',
             },
           },
         }
@@ -212,7 +223,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           presence: {
             allowEmpty: false,
             message:
-              '^If selecting "None of these fully describe me, and I want to specify" for your Sexual Orientation(s), please specify a value ',
+              '^If selecting "None of these fully describe me, and I want to specify" ' +
+              'for your Sexual Orientation(s), please specify a value',
           },
         },
       }
