@@ -110,13 +110,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
 
     const disadvantagedBackgroundQuestion = (
       <div>
-        14. Are you an individual from a disadvantaged background, as defined by
-        &nbsp;
+        14. Are you an individual from a disadvantaged background, as &nbsp;
         <a
           target='_blank'
           href='https://extramural-diversity.nih.gov/diversity-matters/disadvantaged-backgrounds'
         >
-          NIH Diversity in Extramural Programs?
+          defined by NIH Diversity in Extramural Programs?
         </a>
       </div>
     );
@@ -148,7 +147,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
         </div>
         <FlexColumn>
           <MultipleChoiceQuestion
-            question='1. Which races and/or ethnicities do you identify with? Please select all that apply.'
+            question='1. Which categories describe you?'
             options={[
               {
                 label: 'American Indian or Alaska Native (AIAN)',
@@ -559,7 +558,43 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
-            question='3. What terms best express how you describe your current sexual orientation?'
+            question='3. What was the sex assigned to you at birth, such as on your original birth certificate?'
+            options={[
+              { label: 'Female', value: SexAtBirthV2.FEMALE },
+              { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
+              { label: 'Male', value: SexAtBirthV2.MALE },
+              {
+                label: 'None of these fully describe me, and I want to specify',
+                value: SexAtBirthV2.OTHER,
+                showInput: true,
+                otherText: survey.sexAtBirthOtherText,
+                otherTextMaxLength: 200,
+                onChange: (value) => {
+                  if (!value) {
+                    onUpdate('sexAtBirthOtherText', null);
+                  }
+                },
+                onChangeOtherText: (value) =>
+                  onUpdate('sexAtBirthOtherText', value),
+              },
+              {
+                label: 'Prefer not to answer',
+                value: SexAtBirthV2.PREFERNOTTOANSWER,
+              },
+            ]}
+            selected={survey.sexAtBirth}
+            onChange={(value) => {
+              if (
+                survey.sexAtBirth === SexAtBirthV2.OTHER &&
+                value !== SexAtBirthV2.OTHER
+              ) {
+                onUpdate('sexAtBirthOtherText', null);
+              }
+              onUpdate('sexAtBirth', value);
+            }}
+          />
+          <MultipleChoiceQuestion
+            question='4. What terms best express how you describe your current sexual orientation?'
             options={[
               { label: 'Asexual', value: SexualOrientationV2.ASEXUAL },
               { label: 'Bisexual', value: SexualOrientationV2.BISEXUAL },
@@ -629,42 +664,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             }
             style={{ marginBottom: '1rem' }}
           />
-          <MultipleChoiceQuestion
-            question='4. What was the sex assigned to you at birth, such as on your original birth certificate?'
-            options={[
-              { label: 'Female', value: SexAtBirthV2.FEMALE },
-              { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
-              { label: 'Male', value: SexAtBirthV2.MALE },
-              {
-                label: 'None of these fully describe me, and I want to specify',
-                value: SexAtBirthV2.OTHER,
-                showInput: true,
-                otherText: survey.sexAtBirthOtherText,
-                otherTextMaxLength: 200,
-                onChange: (value) => {
-                  if (!value) {
-                    onUpdate('sexAtBirthOtherText', null);
-                  }
-                },
-                onChangeOtherText: (value) =>
-                  onUpdate('sexAtBirthOtherText', value),
-              },
-              {
-                label: 'Prefer not to answer',
-                value: SexAtBirthV2.PREFERNOTTOANSWER,
-              },
-            ]}
-            selected={survey.sexAtBirth}
-            onChange={(value) => {
-              if (
-                survey.sexAtBirth === SexAtBirthV2.OTHER &&
-                value !== SexAtBirthV2.OTHER
-              ) {
-                onUpdate('sexAtBirthOtherText', null);
-              }
-              onUpdate('sexAtBirth', value);
-            }}
-          />
           <YesNoOptionalQuestion
             question='5. Are you deaf or do you have serious difficulty hearing?'
             selected={survey.disabilityHearing}
@@ -700,8 +699,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           />
           <YesNoOptionalQuestion
             question="10. Because of a physical, mental, or emotional condition, do you have
-            difficulty doing errands alone such as visiting doctor's office or
-              shopping?"
+            difficulty doing errands alone such as visiting doctor's office or shopping?"
             selected={survey.disabilityErrands}
             onChange={(value) => onUpdate('disabilityErrands', value)}
             style={{ marginBottom: '1rem' }}
