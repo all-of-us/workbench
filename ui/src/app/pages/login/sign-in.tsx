@@ -1,26 +1,38 @@
 import * as React from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import * as fp from 'lodash/fp';
 
 import { Degree, Profile } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { FlexColumn } from 'app/components/flex';
+import { Button } from 'app/components/buttons';
+import { DemographicSurvey } from 'app/components/demographic-survey-v2';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
+import { TooltipTrigger } from 'app/components/popups';
 import { PUBLIC_HEADER_IMAGE } from 'app/components/public-layout';
 import { TermsOfService } from 'app/components/terms-of-service';
+import {
+  withProfileErrorModal,
+  WithProfileErrorModalProps,
+} from 'app/components/with-error-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
-import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import { LoginReactComponent } from 'app/pages/login/login';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { convertAPIError, reportError } from 'app/utils/errors';
+import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
 import landingBackgroundImage from 'assets/images/login-group.png';
 import landingSmallerBackgroundImage from 'assets/images/login-standing.png';
+
+import { AccountCreationSurvey } from './account-creation/account-creation-survey';
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
@@ -121,11 +133,16 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> =
     ],
   ]);
 
-export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
+export interface SignInProps
+  extends WindowSizeProps,
+    WithSpinnerOverlayProps,
+    WithProfileErrorModalProps {
   initialStep?: SignInStep;
 }
 
 interface SignInState {
+  captcha: boolean;
+  captchaToken: string;
   currentStep: SignInStep;
   profile: Profile;
   // Tracks the Terms of Service version that was viewed and acknowledged by the user.
@@ -133,6 +150,8 @@ interface SignInState {
   termsOfServiceVersion?: number;
   // Page has been loaded by clicking Previous Button
   isPreviousStep: boolean;
+  // Validation errors
+  errors: any;
 }
 
 export const createEmptyProfile = (): Profile => {
@@ -154,6 +173,29 @@ export const createEmptyProfile = (): Profile => {
       zipCode: '',
     },
     demographicSurvey: {},
+    demographicSurveyV2: {
+      education: null,
+      ethnicityAiAnOtherText: null,
+      ethnicityAsianOtherText: null,
+      ethnicCategories: [],
+      ethnicityOtherText: null,
+      disabilityConcentrating: null,
+      disabilityDressing: null,
+      disabilityErrands: null,
+      disabilityHearing: null,
+      disabilityOtherText: null,
+      disabilitySeeing: null,
+      disabilityWalking: null,
+      disadvantaged: null,
+      genderIdentities: [],
+      genderOtherText: null,
+      orientationOtherText: null,
+      sexAtBirth: null,
+      sexAtBirthOtherText: null,
+      sexualOrientations: [],
+      yearOfBirth: null,
+      yearOfBirthPreferNot: false,
+    },
     degrees: [] as Degree[],
   };
 
@@ -175,9 +217,12 @@ export const createEmptyProfile = (): Profile => {
  */
 
 export class SignInImpl extends React.Component<SignInProps, SignInState> {
+  private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: SignInProps) {
     super(props);
     this.state = {
+      captcha: false,
+      captchaToken: null,
       currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
@@ -185,6 +230,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       // data in its onComplete callback.
       profile: createEmptyProfile(),
       isPreviousStep: false,
+      errors: null,
     };
   }
 
@@ -237,6 +283,43 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     return steps[index - 1];
   }
 
+  // TODO: Move Previous, Next, and Submit buttons out of each of the
+  // steps and into this component
+  render() {
+    const showFooter =
+      environment.enableFooter &&
+      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
+    const backgroundImages = StepToImageConfig.get(this.state.currentStep);
+    return (
+      <FlexColumn
+        style={styles.signInContainer}
+        data-test-id='sign-in-container'
+      >
+        <FlexColumn
+          data-test-id='sign-in-page'
+          style={backgroundStyleTemplate(
+            this.props.windowSize,
+            backgroundImages
+          )}
+        >
+          <div>
+            <img
+              style={{
+                height: '1.75rem',
+                marginLeft: '1rem',
+                marginTop: '1rem',
+              }}
+              src={PUBLIC_HEADER_IMAGE}
+            />
+          </div>
+          {this.renderSignInStep(this.state.currentStep)}
+        </FlexColumn>
+        {this.renderNavigation(this.state.currentStep)}
+        {showFooter && <Footer type={FooterTypeEnum.Registration} />}
+      </FlexColumn>
+    );
+  }
+
   private renderSignInStep(currentStep: SignInStep) {
     const onComplete = (profile: Profile) => {
       this.setState({
@@ -251,6 +334,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         currentStep: this.getPreviousStep(currentStep),
         isPreviousStep: true,
       });
+    };
+    const handleUpdate = (updatedProfile) => {
+      this.setState(updatedProfile);
     };
 
     switch (currentStep) {
@@ -298,11 +384,25 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           />
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
-        return (
+        return serverConfigStore.get().config.enableUpdatedDemographicSurvey ? (
+          <div
+            style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}
+          >
+            <DemographicSurvey
+              onError={(value) => handleUpdate(fp.set(['errors'], value))}
+              onUpdate={(prop, value) =>
+                handleUpdate(
+                  fp.set(['profile', 'demographicSurveyV2', prop], value)
+                )
+              }
+              profile={this.state.profile}
+            />
+          </div>
+        ) : (
           <AccountCreationSurvey
+            {...{ onComplete }}
             profile={this.state.profile}
             termsOfServiceVersion={this.state.termsOfServiceVersion}
-            onComplete={onComplete}
             onPreviousClick={onPrevious}
           />
         );
@@ -313,39 +413,119 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
-  render() {
-    const showFooter =
-      environment.enableFooter &&
-      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
-    const backgroundImages = StepToImageConfig.get(this.state.currentStep);
-    return (
-      <FlexColumn
-        style={styles.signInContainer}
-        data-test-id='sign-in-container'
-      >
-        <FlexColumn
-          data-test-id='sign-in-page'
-          style={backgroundStyleTemplate(
-            this.props.windowSize,
-            backgroundImages
-          )}
+  private onSubmit = async () => {
+    this.props.showSpinner();
+
+    try {
+      const newProfile = await profileApi().createAccount({
+        profile: this.state.profile,
+        captchaVerificationToken: this.state.captchaToken,
+        termsOfServiceVersion: this.state.termsOfServiceVersion,
+      });
+
+      this.setState({
+        profile: newProfile,
+        currentStep: this.getNextStep(this.state.currentStep),
+        isPreviousStep: false,
+      });
+    } catch (error) {
+      reportError(error);
+      const { message } = await convertAPIError(error);
+      this.props.showProfileErrorModal(message);
+      if (environment.enableCaptcha) {
+        // Reset captcha
+        this.captchaRef.current.reset();
+        this.setState({ captchaToken: null, captcha: true });
+      }
+    }
+
+    this.props.hideSpinner();
+  };
+
+  private captureCaptchaResponse(token) {
+    this.setState({ captchaToken: token, captcha: true });
+  }
+
+  private renderNavigation(currentStep: SignInStep) {
+    if (
+      serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
+      currentStep === SignInStep.DEMOGRAPHIC_SURVEY
+    ) {
+      const { errors } = this.state;
+      return (
+        <div
+          style={{
+            marginTop: '2rem',
+            marginBottom: '1rem',
+            marginLeft: '1rem',
+          }}
         >
-          <div>
-            <img
-              style={{
-                height: '1.75rem',
-                marginLeft: '1rem',
-                marginTop: '1rem',
+          {environment.enableCaptcha && (
+            <div style={{ paddingBottom: '1rem' }}>
+              <ReCAPTCHA
+                sitekey={environment.captchaSiteKey}
+                ref={this.captchaRef}
+                onChange={(value) => this.captureCaptchaResponse(value)}
+              />
+            </div>
+          )}
+          <FlexRow>
+            <Button
+              type='secondary'
+              style={{ marginRight: '1rem' }}
+              onClick={() => {
+                this.setState({
+                  currentStep: this.getPreviousStep(currentStep),
+                  isPreviousStep: true,
+                });
               }}
-              src={PUBLIC_HEADER_IMAGE}
-            />
-          </div>
-          {this.renderSignInStep(this.state.currentStep)}
-        </FlexColumn>
-        {showFooter && <Footer type={FooterTypeEnum.Registration} />}
-      </FlexColumn>
-    );
+            >
+              Previous
+            </Button>
+            <TooltipTrigger
+              content={
+                (errors || !this.state.captcha) && (
+                  <>
+                    <div>Please review the following:</div>
+                    <ul>
+                      {errors && (
+                        <>
+                          {Object.keys(errors).map((key) => (
+                            <li key={errors[key][0]}>{errors[key][0]}</li>
+                          ))}
+                          <li>
+                            You may select "Prefer not to answer" for each
+                            unfilled item listed above to continue
+                          </li>
+                        </>
+                      )}
+                      {!this.state.captcha && (
+                        <li key='captcha'>Please fill out reCAPTCHA.</li>
+                      )}
+                    </ul>
+                  </>
+                )
+              }
+            >
+              <Button
+                disabled={!!errors || !this.state.captcha}
+                type='primary'
+                data-test-id={'submit-button'}
+                onClick={this.onSubmit}
+              >
+                Submit
+              </Button>
+            </TooltipTrigger>
+          </FlexRow>
+        </div>
+      );
+    }
+
+    return <></>;
   }
 }
 
-export const SignIn = fp.flow(withWindowSize())(SignInImpl);
+export const SignIn = fp.flow(
+  withWindowSize(),
+  withProfileErrorModal
+)(SignInImpl);

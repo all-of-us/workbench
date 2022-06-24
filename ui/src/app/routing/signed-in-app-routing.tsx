@@ -27,6 +27,7 @@ import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
+import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import {
@@ -43,6 +44,7 @@ import {
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
+import { serverConfigStore } from 'app/utils/stores';
 
 import { authorityGuard, getAccessModuleGuard } from './guards';
 
@@ -72,6 +74,10 @@ const DataUserCodeOfConductPage = fp.flow(
   withFullHeight,
   withRoutingSpinner
 )(DataUserCodeOfConduct);
+const DemographicSurveyPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(DemographicSurvey);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(
   withRouteData,
@@ -352,6 +358,15 @@ export const SignedInRoutes = () => {
       >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
+      {serverConfigStore.get().config.enableUpdatedDemographicSurvey && (
+        <AppRoute path='/demographic-survey' exact>
+          <DemographicSurveyPage
+            routeData={{
+              title: 'Demographic Survey',
+            }}
+          />
+        </AppRoute>
+      )}
       <AppRoute exact path='*'>
         <Redirect to={'/not-found'} />
       </AppRoute>

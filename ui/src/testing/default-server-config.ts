@@ -83,6 +83,7 @@ const defaultServerConfig: ConfigResponse = {
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
+  enableUpdatedDemographicSurvey: false,
 };
 
 export default defaultServerConfig;

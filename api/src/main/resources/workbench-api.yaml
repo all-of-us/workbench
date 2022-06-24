@@ -4446,6 +4446,10 @@ definitions:
         type: array
         items:
           type: integer
+      enableUpdatedDemographicSurvey:
+        type: boolean
+        default: false
+        description: Whether to enable demographic survey v2 in the UI.
 
   RuntimeImage:
     type: object

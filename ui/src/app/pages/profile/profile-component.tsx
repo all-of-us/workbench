@@ -43,6 +43,7 @@ import {
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -366,6 +367,17 @@ export const ProfileComponent = fp.flow(
         );
       };
 
+      const enableUpdatedDemographicSurvey =
+        serverConfigStore.get().config.enableUpdatedDemographicSurvey;
+
+      /* API returns completion time as a Date object but creates that Date object with a
+       * seconds representation instead of a milliseconds representation, so it needs to be adjusted
+       * */
+      const demographicSurveyV2CompletionTimeMillis = profile
+        ?.demographicSurveyV2?.completionTime
+        ? new Date(profile.demographicSurveyV2.completionTime).valueOf() * 1000
+        : null;
+
       return (
         <FadeBox style={styles.fadebox}>
           <div style={{ width: '95%' }}>
@@ -556,11 +568,15 @@ export const ProfileComponent = fp.flow(
                 />
                 <DemographicSurveyPanel
                   demographicSurveyCompletionTime={
-                    profile.demographicSurveyCompletionTime
+                    enableUpdatedDemographicSurvey
+                      ? demographicSurveyV2CompletionTimeMillis
+                      : profile.demographicSurveyCompletionTime
                   }
                   firstSignInTime={profile.firstSignInTime}
                   onClick={() =>
-                    this.setState({ showDemographicSurveyModal: true })
+                    enableUpdatedDemographicSurvey
+                      ? this.props.navigateByUrl('/demographic-survey')
+                      : this.setState({ showDemographicSurveyModal: true })
                   }
                 />
                 {canRenderSignedDucc(profile.duccSignedVersion) && (

@@ -301,6 +301,8 @@ public class WorkbenchConfig {
     public boolean enableUniversalSearch;
     // If true, enable Multiple Reviews for Cohort Review - both backend and UI
     public boolean enableMultiReview;
+    // If true, enable demographicSurveyV2 in the UI
+    public boolean enableUpdatedDemographicSurvey;
   }
 
   public static class ActionAuditConfig {
