@@ -113,7 +113,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
         updatedSelectedOptions.push(parentValue);
       }
 
-      // If unchecking a parent also uncheck all of its children
+      // If unchecking a parent, uncheck all of its children
       if (!e && childValues) {
         updatedSelectedOptions = updatedSelectedOptions.filter(
           (item) => !childValues.includes(item)

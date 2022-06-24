@@ -10,11 +10,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
-interface DemographicSurveyProps extends WithSpinnerOverlayProps {
-  returnAddress: string;
-}
-
-export const DemographicSurvey = (props: DemographicSurveyProps) => {
+export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [errors, setErrors] = useState(null);
   const [changed, setChanged] = useState(false);
   const [initialSurvey, setInitialSurvey] = useState(null);
@@ -22,7 +18,7 @@ export const DemographicSurvey = (props: DemographicSurveyProps) => {
   const [loading, setLoading] = useState(true);
   const [, navigateByUrl] = useNavigation();
 
-  const { hideSpinner, showSpinner, returnAddress } = props;
+  const { hideSpinner, showSpinner } = props;
 
   useEffect(() => {
     const profileStoreProfile = profileStore.get().profile;
@@ -64,8 +60,7 @@ export const DemographicSurvey = (props: DemographicSurveyProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    const returnAddressAdjusted = returnAddress ?? '/profile';
-    navigateByUrl(returnAddressAdjusted);
+    navigateByUrl('/profile');
   };
 
   const handleUpdate = (updatedProfile) => {
