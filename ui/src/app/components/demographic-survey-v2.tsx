@@ -64,6 +64,147 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
           },
         },
       };
+
+  const ethnicityAiAnOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.AIANOTHER
+  )
+    ? {
+        ethnicityAiAnOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting American Indian or Alaska Native (AIAN) "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityAsianOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.ASIANOTHER
+  )
+    ? {
+        ethnicityAsianOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting Asian "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityBlackOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.BLACKOTHER
+  )
+    ? {
+        ethnicityBlackOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting Black or African American "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityHispanicOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.HISPANICOTHER
+  )
+    ? {
+        ethnicityHispanicOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting Hispanic or Latino or Spanish Origin "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.HISPANICOTHER
+  )
+    ? {
+        ethnicityMeNaOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting Middle Eastern or North African "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityNhPiOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.NHPIOTHER
+  )
+    ? {
+        ethnicityNhPiOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting Native Hawaiian or Other Pacific Islander "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.OTHER
+  )
+    ? {
+        ethnicityOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting "None of these fully describe me, and I want to specify" for your Race(s) and/or Ethnicities, please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const genderOtherText = demographicSurvey.genderIdentities.some(
+    (ec) => ec === GenderIdentityV2.OTHER
+  )
+    ? {
+        genderOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting "None of these fully describe me, and I want to specify" for your Gender Identity/Identities, please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const sexAtBirthOtherText =
+    demographicSurvey.sexAtBirth === SexAtBirthV2.OTHER
+      ? {
+          sexAtBirthOtherText: {
+            presence: {
+              allowEmpty: false,
+              message:
+                '^If selecting "None of these fully describe me, and I want to specify" for your Sex Assigned at Birth, please specify a value ',
+            },
+          },
+        }
+      : {};
+
+  const orientationOtherText = demographicSurvey.sexualOrientations.some(
+    (ec) => ec === SexualOrientationV2.OTHER
+  )
+    ? {
+        orientationOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting "None of these fully describe me, and I want to specify" for your Sexual Orientation(s), please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  // TODO Look into if this can be done more efficiently
   const validationCheck = {
     ethnicCategories: { presence: { allowEmpty: false } },
     genderIdentities: { presence: { allowEmpty: false } },
@@ -78,7 +219,18 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     disabilityDressing: { presence: { allowEmpty: false } },
     disabilityErrands: { presence: { allowEmpty: false } },
     sexualOrientations: { presence: { allowEmpty: false } },
+    ...ethnicityAiAnOtherText,
+    ...ethnicityAsianOtherText,
+    ...ethnicityBlackOtherText,
+    ...ethnicityHispanicOtherText,
+    ...ethnicityMeNaOtherText,
+    ...ethnicityNhPiOtherText,
+    ...ethnicityOtherText,
+    ...genderOtherText,
+    ...sexAtBirthOtherText,
+    ...orientationOtherText,
   };
+
   return validate(demographicSurvey, validationCheck);
 };
 
