@@ -2,7 +2,8 @@ import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 
 describe('Account creation tests:', () => {
-  test('Can create a new account', async () => {
+  //TODO: Update test to include filling out the demographics survey and final account creation.
+  test('can complete steps 1-3 of account creation', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
