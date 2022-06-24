@@ -1,0 +1,14 @@
+.md
+.jpg
+.png
+.svg
+.mp4
+.log
+.pdf
+.gitignore
+.java
+.kt
+.rb
+.spec.tsx
+.git
+LICENSE.txt
