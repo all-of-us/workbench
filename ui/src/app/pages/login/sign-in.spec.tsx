@@ -12,9 +12,6 @@ import { AccountCreationInstitution } from 'app/pages/login/account-creation/acc
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
 import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import LoginReactComponent from 'app/pages/login/login';
-import { serverConfigStore } from 'app/utils/stores';
-
-import defaultServerConfig from 'testing/default-server-config';
 
 import { createEmptyProfile, SignIn, SignInImpl, SignInProps } from './sign-in';
 
@@ -37,9 +34,9 @@ describe('SignIn', () => {
       hideSpinner: () => {},
       showSpinner: () => {},
     };
-    serverConfigStore.set({
-      config: defaultServerConfig,
-    });
+    // serverConfigStore.set({
+    //   config: defaultServerConfig,
+    // });
   });
 
   it('should display login background image and directive by default', () => {

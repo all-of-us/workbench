@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import {
+  DemographicSurveyV2,
   EducationV2,
   EthnicCategory,
   GenderIdentityV2,
@@ -30,7 +31,7 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
-const validateDemographicSurvey = (demographicSurvey) => {
+const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
   validate.validators.nullBoolean = (v) =>
     v === true || v === false || v === null
       ? undefined

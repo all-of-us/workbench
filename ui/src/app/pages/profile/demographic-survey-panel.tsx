@@ -13,8 +13,7 @@ interface Props {
 }
 export const DemographicSurveyPanel = (props: Props) => {
   const { demographicSurveyCompletionTime, firstSignInTime, onClick } = props;
-  const enableUpdatedDemographicSurvey =
-    serverConfigStore.get().config.enableUpdatedDemographicSurvey;
+  const { enableUpdatedDemographicSurvey } = serverConfigStore.get().config;
 
   const surveyCompleted =
     (enableUpdatedDemographicSurvey &&
@@ -23,7 +22,7 @@ export const DemographicSurveyPanel = (props: Props) => {
 
   return (
     <div style={styles.panel}>
-      <div style={styles.title}>Optional Demographics Survey</div>
+      <div style={styles.title}>Demographics Survey</div>
       <hr style={{ ...styles.verticalLine }} />
       <div style={styles.panelBody}>
         {surveyCompleted ? (
@@ -31,9 +30,7 @@ export const DemographicSurveyPanel = (props: Props) => {
             <div>Survey Completed</div>
             <div>
               {displayDateWithoutHours(
-                demographicSurveyCompletionTime !== null
-                  ? demographicSurveyCompletionTime
-                  : firstSignInTime
+                demographicSurveyCompletionTime ?? firstSignInTime
               )}
             </div>
           </>
