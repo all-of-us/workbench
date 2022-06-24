@@ -13,12 +13,10 @@ import {
 } from 'generated/fetch';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { SemiBoldHeader } from 'app/components/headers';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { Divider } from './divider';
 import { CheckBox, NumberInput, TextInput } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { AoU } from './text-wrappers';
@@ -149,8 +147,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           </div>
         </div>
         <FlexColumn>
-          <SemiBoldHeader>Races and Ethnicities</SemiBoldHeader>
-          <Divider style={{ marginTop: '.25rem' }} />
           <MultipleChoiceQuestion
             question='1. Which races and/or ethnicities do you identify with? Please select all that apply.'
             options={[
@@ -493,8 +489,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             }
             style={{ marginBottom: '1rem' }}
           />
-          <SemiBoldHeader>Questions about gender</SemiBoldHeader>
-          <Divider style={{ marginTop: '.25rem' }} />
           <MultipleChoiceQuestion
             question='2. What terms best express how you describe your current gender identity?'
             options={[
@@ -671,10 +665,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               onUpdate('sexAtBirth', value);
             }}
           />
-          <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
-            Questions about disability status
-          </SemiBoldHeader>
-          <Divider style={{ marginTop: '.25rem' }} />
           <YesNoOptionalQuestion
             question='5. Are you deaf or do you have serious difficulty hearing?'
             selected={survey.disabilityHearing}
@@ -731,10 +721,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               style={{ width: '50%' }}
             />
           </FlexColumn>
-          <SemiBoldHeader style={{ marginBottom: '0.5rem' }}>
-            Other Questions
-          </SemiBoldHeader>
-          <Divider style={{ marginTop: '.25rem' }} />
           <div style={styles.question}>12. Year of birth</div>
           <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
             <NumberInput
