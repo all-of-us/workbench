@@ -494,13 +494,9 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             question='2. What terms best express how you describe your current gender identity?'
             label='Gender Identity/Identities'
             options={[
-              { label: 'Gender Queer', value: GenderIdentityV2.GENDERQUEER },
+              { label: 'Genderqueer', value: GenderIdentityV2.GENDERQUEER },
               { label: 'Man', value: GenderIdentityV2.MAN },
               { label: 'Non-binary', value: GenderIdentityV2.NONBINARY },
-              {
-                label: 'Questioning or unsure of my gender identity',
-                value: GenderIdentityV2.QUESTIONING,
-              },
               {
                 label: 'Trans man/Transgender man',
                 value: GenderIdentityV2.TRANSMAN,
@@ -523,6 +519,19 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: GenderIdentityV2.WOMAN,
               },
               {
+                label: 'Questioning or unsure of my gender identity',
+                value: GenderIdentityV2.QUESTIONING,
+              },
+              {
+                label: 'Prefer not to answer',
+                value: GenderIdentityV2.PREFERNOTTOANSWER,
+                onChange: (checked) =>
+                  onUpdate(
+                    'genderIdentities',
+                    checked ? [GenderIdentityV2.PREFERNOTTOANSWER] : []
+                  ),
+              },
+              {
                 label: 'None of these fully describe me, and I want to specify',
                 value: GenderIdentityV2.OTHER,
                 showInput: true,
@@ -535,15 +544,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 },
                 onChangeOtherText: (value) =>
                   onUpdate('genderOtherText', value),
-              },
-              {
-                label: 'Prefer not to answer',
-                value: GenderIdentityV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
-                  onUpdate(
-                    'genderIdentities',
-                    checked ? [GenderIdentityV2.PREFERNOTTOANSWER] : []
-                  ),
               },
             ]}
             multiple
@@ -568,6 +568,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
               { label: 'Male', value: SexAtBirthV2.MALE },
               {
+                label: 'Prefer not to answer',
+                value: SexAtBirthV2.PREFERNOTTOANSWER,
+              },
+              {
                 label: 'None of these fully describe me, and I want to specify',
                 value: SexAtBirthV2.OTHER,
                 showInput: true,
@@ -580,10 +584,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 },
                 onChangeOtherText: (value) =>
                   onUpdate('sexAtBirthOtherText', value),
-              },
-              {
-                label: 'Prefer not to answer',
-                value: SexAtBirthV2.PREFERNOTTOANSWER,
               },
             ]}
             selected={survey.sexAtBirth}
@@ -611,10 +611,6 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               { label: 'Queer', value: SexualOrientationV2.QUEER },
               {
-                label: 'Questioning or unsure of my sexual orientation',
-                value: SexualOrientationV2.QUESTIONING,
-              },
-              {
                 label: 'Same-gender loving',
                 value: SexualOrientationV2.SAMEGENDER,
               },
@@ -630,6 +626,10 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
                   'ancestry. If this applies to you, please update your selection in the ' +
                   '"Race and Ethnicities" section.',
+              },
+              {
+                label: 'Questioning or unsure of my sexual orientation',
+                value: SexualOrientationV2.QUESTIONING,
               },
               {
                 label: 'None of these fully describe me, and I want to specify',
@@ -757,11 +757,27 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             question={'13. Highest Level of Education'}
             label='Highest Level of Education Completed'
             options={[
-              { label: 'No Education', value: EducationV2.NOEDUCATION },
-              { label: 'Grades 1-12', value: EducationV2.GRADES112 },
-              { label: 'College Graduate', value: EducationV2.COLLEGEGRADUATE },
-              { label: 'Undergraduate', value: EducationV2.UNDERGRADUATE },
-              { label: "Master's", value: EducationV2.MASTER },
+              {
+                label: 'Never attended school/no formal education',
+                value: EducationV2.NOEDUCATION,
+              },
+              {
+                label:
+                  'Primary/Middle School/High School (Grades 1 through 12/GED)',
+                value: EducationV2.GRADES112,
+              },
+              {
+                label:
+                  'Some college, Associate Degree or Technical School (1 to 3 years) or current undergraduate student',
+                value: EducationV2.UNDERGRADUATE,
+              },
+              {
+                label:
+                  'College graduate (4 years or more) or current post-graduate traineee',
+                value: EducationV2.COLLEGEGRADUATE,
+              },
+
+              { label: 'Masters Degree', value: EducationV2.MASTER },
               { label: 'Doctorate', value: EducationV2.DOCTORATE },
               {
                 label: 'Prefer not to answer',
