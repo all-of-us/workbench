@@ -26,7 +26,7 @@ import { YesNoOptionalQuestion } from './yes-no-optional-question';
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
 const styles = reactStyles({
-  question: { fontWeight: 'bold', color: colors.primary },
+  question: { fontSize: 18, fontWeight: 'bold', color: colors.primary },
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
@@ -128,6 +128,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             padding: '1rem',
             borderRadius: '5px',
             color: colors.primary,
+            marginBottom: '1rem',
             marginTop: '1rem',
           }}
         >
@@ -148,6 +149,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
         <FlexColumn>
           <MultipleChoiceQuestion
             question='1. Which categories describe you?'
+            label='Race(s) and/or Ethnicities'
             options={[
               {
                 label: 'American Indian or Alaska Native (AIAN)',
@@ -490,6 +492,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           />
           <MultipleChoiceQuestion
             question='2. What terms best express how you describe your current gender identity?'
+            label='Gender Identity/Identities'
             options={[
               { label: 'Gender Queer', value: GenderIdentityV2.GENDERQUEER },
               { label: 'Man', value: GenderIdentityV2.MAN },
@@ -559,6 +562,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           />
           <MultipleChoiceQuestion
             question='3. What was the sex assigned to you at birth, such as on your original birth certificate?'
+            label='Sex Assigned at Birth'
             options={[
               { label: 'Female', value: SexAtBirthV2.FEMALE },
               { label: 'Intersex', value: SexAtBirthV2.INTERSEX },
@@ -595,6 +599,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           />
           <MultipleChoiceQuestion
             question='4. What terms best express how you describe your current sexual orientation?'
+            label='Sexual Orientation(s)'
             options={[
               { label: 'Asexual', value: SexualOrientationV2.ASEXUAL },
               { label: 'Bisexual', value: SexualOrientationV2.BISEXUAL },
@@ -704,7 +709,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) => onUpdate('disabilityErrands', value)}
             style={{ marginBottom: '1rem' }}
           />
-          <FlexColumn>
+          <FlexColumn style={{ marginBottom: '1rem' }}>
             <div
               style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
             >
@@ -750,6 +755,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
           </FlexRow>
           <MultipleChoiceQuestion
             question={'13. Highest Level of Education'}
+            label='Highest Level of Education Completed'
             options={[
               { label: 'No Education', value: EducationV2.NOEDUCATION },
               { label: 'Grades 1-12', value: EducationV2.GRADES112 },

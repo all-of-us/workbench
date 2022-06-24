@@ -10,7 +10,7 @@ import { reactStyles, useId } from 'app/utils';
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
-  question: { fontWeight: 'bold', color: colors.primary, fontSize: '14px' },
+  question: { fontWeight: 'bold', color: colors.primary, fontSize: '18px' },
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
@@ -68,6 +68,7 @@ interface MultipleChoiceOption {
 
 interface MultipleChoiceQuestionProps {
   question: any;
+  label?: any;
   options: MultipleChoiceOption[];
   selected: any | any[];
   onChange: (any) => void;
@@ -79,6 +80,7 @@ interface MultipleChoiceQuestionProps {
 export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
   const {
     horizontalOptions,
+    label: questionLabel,
     options,
     onChange,
     question,
@@ -215,6 +217,16 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
   return (
     <div {...{ style }}>
       <div style={{ ...styles.question }}>{question}</div>
+      {multiple && (
+        <div style={{ color: colors.primary }}>Select all that apply.</div>
+      )}
+      {questionLabel && (
+        <div
+          style={{ color: colors.primary, fontSize: 12, fontWeight: 'bold' }}
+        >
+          {questionLabel}
+        </div>
+      )}
       {horizontalOptions ? (
         <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
           {optionComponents}
