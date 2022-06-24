@@ -474,6 +474,23 @@ jobs:
           paths:
             - ui
 
+  e2etests:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    steps:
+      - run:
+          name: Checkout Code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+      - run:
+          name: Run Tests
+          command: |
+            cd e2ev2
+            ./src/circle-run.sh
+      - store_artifacts:
+          path: e2ev2/screenshots
+
   ui-deploy-to-test:
     executor: workbench-executor
     steps:
@@ -725,6 +742,10 @@ workflows:
             - wait_until_previous_workflow_done
           post-steps:
             - gcs-load-test-results
+
+  e2etests:
+    jobs:
+      - e2etests
 
   deploy-staging:
     jobs:
