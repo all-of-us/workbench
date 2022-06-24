@@ -122,7 +122,7 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     : {};
 
   const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.HISPANICOTHER
+    (ec) => ec === EthnicCategory.MENAOTHER
   )
     ? {
         ethnicityMeNaOtherText: {
@@ -144,6 +144,20 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
             allowEmpty: false,
             message:
               '^If selecting Native Hawaiian or Other Pacific Islander "None of these fully describe me, and I want to specify", please specify a value ',
+          },
+        },
+      }
+    : {};
+
+  const ethnicityWhiteOtherText = demographicSurvey.ethnicCategories.some(
+    (ec) => ec === EthnicCategory.WHITEOTHER
+  )
+    ? {
+        ethnicityWhiteOtherText: {
+          presence: {
+            allowEmpty: false,
+            message:
+              '^If selecting White "None of these fully describe me, and I want to specify", please specify a value ',
           },
         },
       }
@@ -225,6 +239,7 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     ...ethnicityHispanicOtherText,
     ...ethnicityMeNaOtherText,
     ...ethnicityNhPiOtherText,
+    ...ethnicityWhiteOtherText,
     ...ethnicityOtherText,
     ...genderOtherText,
     ...sexAtBirthOtherText,
