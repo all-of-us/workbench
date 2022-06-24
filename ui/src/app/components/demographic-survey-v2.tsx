@@ -596,6 +596,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
               }
               onUpdate('sexAtBirth', value);
             }}
+            style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
             question='4. What terms best express how you describe your current sexual orientation?'
