@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
 import { Button } from 'app/components/buttons';
-import DemographicSurveyV2 from 'app/components/demographic-survey-v2';
+import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
@@ -75,7 +75,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
 
   return profile ? (
     <div style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}>
-      <DemographicSurveyV2
+      <DemographicSurveyComponent
         profile={profile}
         onUpdate={(prop, value) =>
           handleUpdate(fp.set(['demographicSurveyV2', prop], value))

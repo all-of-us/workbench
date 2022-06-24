@@ -31,6 +31,13 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
+const NONE_FULLY_DESCRIBE =
+  'None of these fully describe me, and I want to specify';
+const TWO_SPIRIT_DISABLED_TEXT =
+  'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
+  'ancestry. If this applies to you, please update your selection in the ' +
+  '"Race and Ethnicities" section.';
+
 const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
   validate.validators.nullBoolean = (v) =>
     v === true || v === false || v === null
@@ -70,6 +77,7 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     disabilityWalking: { presence: { allowEmpty: false } },
     disabilityDressing: { presence: { allowEmpty: false } },
     disabilityErrands: { presence: { allowEmpty: false } },
+    sexualOrientations: { presence: { allowEmpty: false } },
   };
   return validate(demographicSurvey, validationCheck);
 };
@@ -80,7 +88,7 @@ interface DemographicSurveyProps extends WithSpinnerOverlayProps {
   profile: Profile;
 }
 
-const DemographicSurvey = fp.flow(withProfileErrorModal)(
+export const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (props: DemographicSurveyProps) => {
     const [isAian, setIsAian] = useState(false);
     const [showAsianOptions, setShowAsianOptions] = useState(false);
@@ -100,12 +108,12 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
 
     useEffect(() => {
       setIsAian(
-        survey.ethnicCategories.filter(
+        survey.ethnicCategories.some(
           (s) =>
             s === EthnicCategory.AIAN ||
             s === EthnicCategory.AIANCENTRALSOUTH ||
             s === EthnicCategory.AIANOTHER
-        ).length > 0
+        )
       );
     }, [survey.ethnicCategories]);
 
@@ -161,8 +169,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.AIANCENTRALSOUTH,
                   },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.AIANOTHER,
                     showInput: true,
                     otherText: survey.ethnicityAiAnOtherText,
@@ -239,8 +246,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.BLACKSOUTHAFRICAN,
                   },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.BLACKOTHER,
                     showInput: true,
                     otherText: survey.ethnicityBlackOtherText,
@@ -290,8 +296,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                   { label: 'Spanish', value: EthnicCategory.HISPANICSPANISH },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.HISPANICOTHER,
                     showInput: true,
                     otherText: survey.ethnicityHispanicOtherText,
@@ -336,8 +341,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   { label: 'Syrian', value: EthnicCategory.MENASYRIAN },
                   { label: 'Tunisian', value: EthnicCategory.MENATUNISIAN },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.MENAOTHER,
                     showInput: true,
                     otherText: survey.ethnicityMeNaOtherText,
@@ -384,8 +388,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                   { label: 'Tongan', value: EthnicCategory.NHPITONGAN },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.NHPIOTHER,
                     showInput: true,
                     otherText: survey.ethnicityNhPiOtherText,
@@ -434,8 +437,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   { label: 'Scottish', value: EthnicCategory.WHITESCOTTISH },
                   { label: 'Spanish', value: EthnicCategory.WHITESPANISH },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.WHITEOTHER,
                     showInput: true,
                     otherText: survey.ethnicityWhiteOtherText,
@@ -456,7 +458,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 },
               },
               {
-                label: 'None of these fully describe me, and I want to specify',
+                label: NONE_FULLY_DESCRIBE,
                 value: EthnicCategory.OTHER,
                 showInput: true,
                 otherText: survey.ethnicityOtherText,
@@ -510,10 +512,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'Two Spirit',
                 value: GenderIdentityV2.TWOSPIRIT,
                 disabled: !isAian,
-                disabledText:
-                  'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
-                  'ancestry. If this applies to you, please update your selection in the ' +
-                  '"Race and Ethnicities" section.',
+                disabledText: TWO_SPIRIT_DISABLED_TEXT,
               },
               {
                 label: 'Woman',
@@ -533,7 +532,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   ),
               },
               {
-                label: 'None of these fully describe me, and I want to specify',
+                label: NONE_FULLY_DESCRIBE,
                 value: GenderIdentityV2.OTHER,
                 showInput: true,
                 otherText: survey.genderOtherText,
@@ -573,7 +572,7 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: SexAtBirthV2.PREFERNOTTOANSWER,
               },
               {
-                label: 'None of these fully describe me, and I want to specify',
+                label: NONE_FULLY_DESCRIBE,
                 value: SexAtBirthV2.OTHER,
                 showInput: true,
                 otherText: survey.sexAtBirthOtherText,
@@ -624,17 +623,14 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'Two Spirit',
                 value: SexualOrientationV2.TWOSPIRIT,
                 disabled: !isAian,
-                disabledText:
-                  'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
-                  'ancestry. If this applies to you, please update your selection in the ' +
-                  '"Race and Ethnicities" section.',
+                disabledText: TWO_SPIRIT_DISABLED_TEXT,
               },
               {
                 label: 'Questioning or unsure of my sexual orientation',
                 value: SexualOrientationV2.QUESTIONING,
               },
               {
-                label: 'None of these fully describe me, and I want to specify',
+                label: NONE_FULLY_DESCRIBE,
                 value: SexualOrientationV2.OTHER,
                 showInput: true,
                 otherText: survey.orientationOtherText,
@@ -801,5 +797,3 @@ const DemographicSurvey = fp.flow(withProfileErrorModal)(
     );
   }
 );
-
-export default DemographicSurvey;

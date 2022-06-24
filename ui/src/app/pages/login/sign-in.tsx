@@ -6,7 +6,7 @@ import { Degree, Profile } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
-import DemographicSurvey from 'app/components/demographic-survey-v2';
+import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { TooltipTrigger } from 'app/components/popups';
