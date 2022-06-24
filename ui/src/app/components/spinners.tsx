@@ -7,7 +7,7 @@ import Color from 'color';
 const styles = reactStyles({
   overlay: {
     backgroundColor: new Color(colors.light).alpha(0).toString(),
-    position: 'fixed',
+    position: 'absolute',
     top: 0,
     left: 0,
     bottom: 0,
