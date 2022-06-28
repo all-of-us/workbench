@@ -34,8 +34,10 @@ public class ReportingServiceImpl implements ReportingService {
 
   @VisibleForTesting
   static final Set<String> BATCH_UPLOADED_TABLES =
-      ImmutableSet.of(CohortColumnValueExtractor.TABLE_NAME,
-          WorkspaceColumnValueExtractor.TABLE_NAME, UserColumnValueExtractor.TABLE_NAME);
+      ImmutableSet.of(
+          CohortColumnValueExtractor.TABLE_NAME,
+          WorkspaceColumnValueExtractor.TABLE_NAME,
+          UserColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,

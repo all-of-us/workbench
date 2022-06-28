@@ -14,7 +14,6 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.COHORT__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
@@ -42,7 +41,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -84,8 +82,6 @@ public class ReportingUploadServiceTest {
   @Autowired private ReportingUploadService reportingUploadService;
 
   @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
-
-  @Autowired private ReportingTestFixture<DbCohort, ReportingCohort> cohortFixture;
 
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
@@ -323,10 +319,8 @@ public class ReportingUploadServiceTest {
   public void testUploadBatch_cohort() {
     List<ReportingCohort> reportingCohorts =
         ImmutableList.of(
-            cohortFixture.createDto(),
-            new ReportingCohort().cohortname("ted@aou.biz").disabled(true).cohortId(202L),
-            new ReportingCohort().cohortname("socrates@aou.biz").disabled(false).cohortId(303L),
-            cohortFixture.createDto());
+            new ReportingCohort().cohortId(100L).name("name1"),
+            new ReportingCohort().cohortId(200L).name("name2"));
     final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
 
     doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();

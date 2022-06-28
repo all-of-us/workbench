@@ -1,6 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -8,10 +7,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
@@ -24,13 +21,18 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.pmiops.workbench.firecloud.ApiClient;
+
 /**
  * A tool that takes a Workspace namespace / Firecloud Project ID and returns details for any
  * workspaces found.
  */
 @Configuration
-@Import({FireCloudServiceImpl.class, FireCloudConfig.class, FirecloudApiClientFactory.class, CloudBillingClientImpl.class})
+@Import({
+  FireCloudServiceImpl.class,
+  FireCloudConfig.class,
+  FirecloudApiClientFactory.class,
+  CloudBillingClientImpl.class
+})
 public class FetchWorkspaceDetails {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());

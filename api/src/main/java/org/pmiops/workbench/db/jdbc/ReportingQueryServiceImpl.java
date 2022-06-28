@@ -70,19 +70,19 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   public List<ReportingCohort> getCohorts(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
-          "SELECT \n"
-            + "  cohort_id,\n"
-            + "  creation_time,\n"
-            + "  creator_id,\n"
-            + "  criteria,\n"
-            + "  description,\n"
-            + "  last_modified_time,\n"
-            + "  name,\n"
-            + "  workspace_id\n"
-            + "FROM cohort"
-            + "  LIMIT %d\n"
-            + "  OFFSET %d",
-        limit, offset),
+            "SELECT \n"
+                + "  cohort_id,\n"
+                + "  creation_time,\n"
+                + "  creator_id,\n"
+                + "  criteria,\n"
+                + "  description,\n"
+                + "  last_modified_time,\n"
+                + "  name,\n"
+                + "  workspace_id\n"
+                + "FROM cohort"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingCohort()
                 .cohortId(rs.getLong("cohort_id"))

@@ -446,7 +446,8 @@ public class ReportingQueryServiceTest {
   public void testCohortIterator_twoAndAHalfBatches() {
     createCohorts(5);
 
-    final Iterator<List<ReportingCohort>> iterator = reportingQueryService.getCohortsBatchIterator();
+    final Iterator<List<ReportingCohort>> iterator =
+        reportingQueryService.getCohortsBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingCohort> batch1 = iterator.next();
