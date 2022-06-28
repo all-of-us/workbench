@@ -290,6 +290,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         survey.ethnicCategories.some(
           (s) =>
             s === EthnicCategory.AIAN ||
+            s === EthnicCategory.AIANAIAN ||
             s === EthnicCategory.AIANCENTRALSOUTH ||
             s === EthnicCategory.AIANOTHER
         )
@@ -343,6 +344,10 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'American Indian or Alaska Native (AIAN)',
                 value: EthnicCategory.AIAN,
                 subOptions: [
+                  {
+                    label: 'American Indian or Alaska Native (AIAN)',
+                    value: EthnicCategory.AIANAIAN,
+                  },
                   {
                     label: 'Central or South American Indian',
                     value: EthnicCategory.AIANCENTRALSOUTH,
@@ -971,6 +976,21 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             selected={survey.disadvantaged}
             onChange={(value) => onUpdate('disadvantaged', value)}
           />
+
+          <FlexColumn style={{ marginTop: '1rem' }}>
+            <div
+              style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
+            >
+              15. Is there any aspect of your identity that we have not covered
+              in the preceding questions that we may want to consider including
+              in future surveys?
+            </div>
+            <TextInput
+              onChange={(value) => onUpdate('surveyComments', value)}
+              value={survey.surveyComments || ''}
+              style={{ width: '50%' }}
+            />
+          </FlexColumn>
         </FlexColumn>
       </FlexColumn>
     );
