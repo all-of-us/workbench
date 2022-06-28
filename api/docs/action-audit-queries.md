@@ -2,7 +2,7 @@
 
 ## Schema
 The Action Audit schema is a flattened schema where each row of the database represents
-an action taken by a user or a user-visisble action taken on their behalf by either an
+an action taken by a user or a user-visible action taken on their behalf by either an
 administrator, another standard user, or the system itself.
 
 ### Actions and Events
