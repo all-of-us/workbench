@@ -493,11 +493,27 @@ jobs:
           command: |
             git clone --branch="$CIRCLE_BRANCH" --depth=1 \
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+            (cd aou-utils/; git submodule update --init)
+      - run:
+          name: Change Directory
+          command: |
+            cd e2ev2
+      - run:
+          name: Decrypt SA Key
+          command: |
+            source src/circle-sa-key-json.sh
+      - run:
+          name: Build
+          command: |
+            ./src/circle-build-ui.sh
+      - run:
+          name: Deploy
+          command: |
+            ./src/circle-deploy-ui.sh
       - run:
           name: Run Tests
           command: |
-            cd e2ev2
-            ./src/circle-run.sh
+            ./src/circle-run-tests.sh
       - store_artifacts:
           path: e2ev2/screenshots
 
