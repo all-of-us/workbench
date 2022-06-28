@@ -44,7 +44,7 @@ export_({getSaBearerToken})
 if (require.main === module) {
   // assuming launched as `node script.js`
   const args = process.argv.slice(2)
-  if (args.length < 2) {
+  if (args.length < 1) {
     console.log('usage: node script.js service-account-key-json')
     process.exit(1)
   }
