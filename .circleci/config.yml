@@ -499,6 +499,7 @@ jobs:
           working_directory: e2ev2
           command: |
             source src/circle-sa-key-json.sh
+            export SA_KEY_JSON SA_EMAIL
       - run:
           name: Build
           working_directory: ui
