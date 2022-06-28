@@ -20,7 +20,7 @@ RUN npm install --global yarn n
 # Upgrade to Node 14, above installs 10.
 RUN n 14
 
-ENV CLOUD_SDK_VERSION 321.0.0
+ENV CLOUD_SDK_VERSION 392.0.0
 
 WORKDIR /root
 RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
