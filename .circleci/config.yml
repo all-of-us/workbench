@@ -499,6 +499,7 @@ jobs:
           working_directory: ui
           command: |
             source ../e2ev2/src/circle-sa-key-json.sh
+            export SA_KEY_JSON SA_EMAIL
             ../e2ev2/src/circle-build-ui.sh
       - run:
           name: Deploy
