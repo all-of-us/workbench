@@ -63,7 +63,6 @@ public class ReportingSnapshotServiceTest {
   public void testGetSnapshot_noEntries() {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI);
-    assertThat(snapshot.getCohorts()).isEmpty();
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
   }
@@ -71,16 +70,12 @@ public class ReportingSnapshotServiceTest {
   @Test
   public void testGetSnapshot() {
     mockWorkspaceFreeTierUsage();
-    mockCohorts();
     mockDatasets();
     mockDatasetCohorts();
     mockInstitutions();
 
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertTimeApprox(snapshot.getCaptureTimestamp(), NOW_INSTANT.toEpochMilli());
-
-    assertThat(snapshot.getCohorts()).hasSize(1);
-    assertCohortFields(snapshot.getCohorts().get(0));
 
     assertThat(snapshot.getDatasets()).hasSize(1);
     assertDatasetFields(snapshot.getDatasets().get(0));
@@ -99,11 +94,6 @@ public class ReportingSnapshotServiceTest {
     doReturn(ImmutableList.of(createDtoWorkspaceFreeTierUsage()))
         .when(mockReportingQueryService)
         .getWorkspaceFreeTierUsage();
-  }
-
-  private void mockCohorts() {
-    final ReportingCohort mockCohort = createReportingCohort();
-    doReturn(ImmutableList.of(mockCohort)).when(mockReportingQueryService).getCohorts();
   }
 
   private void mockDatasets() {

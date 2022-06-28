@@ -42,6 +42,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -49,6 +50,7 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
@@ -83,6 +85,8 @@ public class ReportingUploadServiceTest {
 
   @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
+  @Autowired private ReportingTestFixture<DbCohort, ReportingCohort> cohortFixture;
+
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
@@ -99,20 +103,12 @@ public class ReportingUploadServiceTest {
     reportingSnapshot =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .cohorts(
-                ImmutableList.of(
-                    createReportingCohort(), createReportingCohort(), createReportingCohort()))
             .datasets(ImmutableList.of(createReportingDataset()))
             .institutions(ImmutableList.of(createReportingInstitution()));
 
     snapshotWithNulls =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .cohorts(
-                ImmutableList.of(
-                    createReportingCohort().criteria(null),
-                    createReportingCohort().criteria(null),
-                    createReportingCohort().criteria(null)))
             .datasets(ImmutableList.of(createReportingDataset().description(null)))
             .institutions(ImmutableList.of(createReportingInstitution().displayName(null)));
 
@@ -321,5 +317,32 @@ public class ReportingUploadServiceTest {
         .isEqualTo(reportingUsers.get(0).getUserId());
     assertThat(userColumnValues.get(UserColumnValueExtractor.USERNAME.getParameterName()))
         .isEqualTo(reportingUsers.get(0).getUsername());
+  }
+
+  @Test
+  public void testUploadBatch_cohort() {
+    List<ReportingCohort> reportingCohorts =
+        ImmutableList.of(
+            cohortFixture.createDto(),
+            new ReportingCohort().cohortname("ted@aou.biz").disabled(true).cohortId(202L),
+            new ReportingCohort().cohortname("socrates@aou.biz").disabled(false).cohortId(303L),
+            cohortFixture.createDto());
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatchCohort(reportingCohorts, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingCohorts.size());
+    final Map<String, Object> cohortColumnValues = request.getRows().get(0).getContent();
+    assertThat(cohortColumnValues.get(CohortColumnValueExtractor.COHORT_ID.getParameterName()))
+        .isEqualTo(reportingCohorts.get(0).getCohortId());
+    assertThat(cohortColumnValues.get(CohortColumnValueExtractor.CREATOR_ID.getParameterName()))
+        .isEqualTo(reportingCohorts.get(0).getCreatorId());
   }
 }

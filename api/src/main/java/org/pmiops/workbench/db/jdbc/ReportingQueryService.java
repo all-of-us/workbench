@@ -20,8 +20,6 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 public interface ReportingQueryService {
   long getQueryBatchSize();
 
-  List<ReportingCohort> getCohorts();
-
   List<ReportingDataset> getDatasets();
 
   List<ReportingDatasetCohort> getDatasetCohorts();
@@ -49,6 +47,14 @@ public interface ReportingQueryService {
   }
 
   int getUserCount();
+
+  List<ReportingCohort> getCohorts(long limit, long offset);
+
+  default Stream<List<ReportingCohort>> getCohortsStream() {
+    return getStream(this::getCohorts);
+  }
+
+  int getCohortsCount();
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
     final long offset = getQueryBatchSize() * batchIndex;
@@ -107,6 +113,10 @@ public interface ReportingQueryService {
 
   default Iterator<List<ReportingUser>> getUserBatchIterator() {
     return getBatchIterator(this::getUsers);
+  }
+
+  default Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
+    return getBatchIterator(this::getCohorts);
   }
 
   /** Use the maximum batch to get in single batch */
