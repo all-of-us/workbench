@@ -117,7 +117,7 @@ public class ReportingVerificationServiceTest {
     assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
     String expectedUserLogPart = "user\t2\t2\t0 (0.000%)";
     assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
-    String expectedCohortLogPart = "Cohort\t2\t2\t0 (0.000%)";
+    String expectedCohortLogPart = "cohort\t2\t2\t0 (0.000%)";
     assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
   }
 

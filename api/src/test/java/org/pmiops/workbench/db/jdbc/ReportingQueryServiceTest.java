@@ -168,10 +168,8 @@ public class ReportingQueryServiceTest {
 
   @Transactional
   public DbCohort createCohort(DbUser user1, DbWorkspace workspace1) {
-    final DbCohort cohort1 = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
-    assertThat(cohortDao.count()).isEqualTo(1);
-    assertThat(reportingQueryService.getDatasetCohorts()).isEmpty();
-    return cohort1;
+    final DbCohort cohort = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
+    return cohort;
   }
 
   @Transactional
