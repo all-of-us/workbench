@@ -10,7 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.COHORT__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
@@ -29,7 +28,6 @@ import com.google.common.collect.Multimaps;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +47,6 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -151,24 +148,15 @@ public class ReportingUploadServiceTest {
         .insertAll(any(InsertAllRequest.class));
     reportingUploadService.uploadSnapshot(reportingSnapshot);
 
-    // Two for cohort because it is split into 2, one for institution, one for dataset.
-    verify(mockBigQueryService, times(4)).insertAll(insertAllRequestCaptor.capture());
+    // One for institution, one for dataset.
+    verify(mockBigQueryService, times(2)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
-    // assume we need at least one split collection
-    assertThat(requests.size()).isGreaterThan(countPopulatedTables(reportingSnapshot));
+    // Institution and dataset table
+    assertThat(requests.size()).isEqualTo(countPopulatedTables(reportingSnapshot));
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
-    final Collection<InsertAllRequest> cohortRequests = tableIdToInsertAllRequest.get("cohort");
-    assertThat(cohortRequests).isNotEmpty();
-
-    final List<RowToInsert> cohortRows = cohortRequests.stream().findFirst().get().getRows();
-    assertThat(cohortRows).hasSize(2); // batch size
-    assertThat(cohortRows.get(0).getId())
-        .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
-    final Map<String, Object> cohortColumnToValue = cohortRows.get(0).getContent();
-    assertThat((String) cohortColumnToValue.get("name")).isEqualTo(COHORT__NAME);
 
     final Optional<InsertAllRequest> institutionRequest =
         tableIdToInsertAllRequest.get("institution").stream().findFirst();
@@ -189,24 +177,15 @@ public class ReportingUploadServiceTest {
         .insertAll(any(InsertAllRequest.class));
     reportingUploadService.uploadSnapshot(snapshotWithNulls);
 
-    // Two for cohort because it is split into 2, one for institution, one for dataset.
-    verify(mockBigQueryService, times(4)).insertAll(insertAllRequestCaptor.capture());
+    // one for institution, one for dataset.
+    verify(mockBigQueryService, times(2)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
-    // assume we need at least one split collection
-    assertThat(requests.size()).isGreaterThan(countPopulatedTables(snapshotWithNulls));
+    // one for institution, one for dataset.
+    assertThat(requests.size()).isEqualTo(countPopulatedTables(snapshotWithNulls));
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
-    final Collection<InsertAllRequest> cohortRequests = tableIdToInsertAllRequest.get("cohort");
-    assertThat(cohortRequests).isNotEmpty();
-
-    final List<RowToInsert> cohortRows = cohortRequests.stream().findFirst().get().getRows();
-    assertThat(cohortRows).hasSize(2); // batch size
-    assertThat(cohortRows.get(0).getId())
-        .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
-    final Map<String, Object> cohortColumnToValue = cohortRows.get(0).getContent();
-    assertThat((String) cohortColumnToValue.get("name")).isEqualTo(COHORT__NAME);
 
     final Optional<InsertAllRequest> institutionRequest =
         tableIdToInsertAllRequest.get("institution").stream().findFirst();
@@ -224,24 +203,6 @@ public class ReportingUploadServiceTest {
   }
 
   @Test
-  public void testUploadSnapshot_nullEnum() {
-    final ReportingCohort cohort = new ReportingCohort();
-    cohort.setWorkspaceId(101L);
-    cohort.setCreatorId(null);
-    final ReportingSnapshot snapshot =
-        createEmptySnapshot().captureTimestamp(0L).cohorts(ImmutableList.of(cohort));
-    reportingUploadService.uploadSnapshot(snapshot);
-    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
-
-    final InsertAllRequest insertAllRequest = insertAllRequestCaptor.getValue();
-    assertThat(insertAllRequest.getRows()).hasSize(1);
-    final Map<String, Object> content = insertAllRequest.getRows().get(0).getContent();
-    assertThat(content).hasSize(2);
-    assertThat(content.getOrDefault("billing_status", BillingStatus.INACTIVE))
-        .isEqualTo(BillingStatus.INACTIVE);
-  }
-
-  @Test
   public void testUploadWithManyBatches() {
     final ReportingSnapshot largeSnapshot =
         createEmptySnapshot()
@@ -254,7 +215,7 @@ public class ReportingUploadServiceTest {
             .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
 
     reportingUploadService.uploadSnapshot(largeSnapshot);
-    verify(mockBigQueryService, times(13)).insertAll(insertAllRequestCaptor.capture());
+    verify(mockBigQueryService, times(12)).insertAll(insertAllRequestCaptor.capture());
   }
 
   @Test
@@ -338,5 +299,22 @@ public class ReportingUploadServiceTest {
         .isEqualTo(reportingCohorts.get(0).getCohortId());
     assertThat(cohortColumnValues.get(CohortColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(reportingCohorts.get(0).getCreatorId());
+  }
+
+  @Test
+  public void testUploadSnapshot_nullEnum() {
+    final ReportingCohort cohort = new ReportingCohort();
+    cohort.setWorkspaceId(101L);
+    cohort.setCreatorId(null);
+
+    reportingUploadService.uploadBatchCohort(ImmutableList.of(cohort), NOW.toEpochMilli());
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+
+    final InsertAllRequest insertAllRequest = insertAllRequestCaptor.getValue();
+    assertThat(insertAllRequest.getRows()).hasSize(1);
+    final Map<String, Object> content = insertAllRequest.getRows().get(0).getContent();
+    assertThat(content).hasSize(2);
+    assertThat(content.getOrDefault("billing_status", BillingStatus.INACTIVE))
+        .isEqualTo(BillingStatus.INACTIVE);
   }
 }

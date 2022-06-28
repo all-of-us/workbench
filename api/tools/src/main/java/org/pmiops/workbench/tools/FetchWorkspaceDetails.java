@@ -12,11 +12,9 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
-import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,12 +25,7 @@ import org.springframework.context.annotation.Import;
  * workspaces found.
  */
 @Configuration
-@Import({
-  FireCloudServiceImpl.class,
-  FireCloudConfig.class,
-  FirecloudApiClientFactory.class,
-  CloudBillingClientImpl.class
-})
+@Import({FireCloudServiceImpl.class, FireCloudConfig.class})
 public class FetchWorkspaceDetails {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());
