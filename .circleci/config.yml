@@ -474,6 +474,16 @@ jobs:
           paths:
             - ui
 
+  # Playground job. Re-run with ssh enabled to play with Circle's machine image.
+  playground:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    steps:
+      - run:
+          name: Echo
+          command: |
+            echo Hello Circle!
+
   e2etests:
     machine:
       image: ubuntu-2204:2022.04.1
@@ -743,6 +753,9 @@ workflows:
           post-steps:
             - gcs-load-test-results
 
+  playground:
+    jobs:
+      - playground
   e2etests:
     jobs:
       - e2etests
