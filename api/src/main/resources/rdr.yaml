@@ -534,12 +534,19 @@ definitions:
         description: >
           Are you an individual from a disadvantaged background,
           as defined by NIH Diversity in Extramural Programs?
+      surveyComments:
+        type: string
+        description: >
+          Is there any aspect of your identity that we have not covered in the
+          preceding questions that we may want to consider including in future
+          surveys?
 
   EthnicCategory:
     type: string
     description: 'Which categories describe you? (Select all that apply). Note, you may select more than one group.'
     enum:
       - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
+      - AI_AN_AI_AN           # American Indian or Alaska Native / American Indian or Alaska Native
       - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
       - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
 

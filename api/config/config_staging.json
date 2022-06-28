@@ -133,7 +133,7 @@
   },
   "reporting": {
     "dataset": "reporting_staging",
-    "maxRowsPerInsert": 2500
+    "maxRowsPerInsert": 1000
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",

@@ -127,7 +127,7 @@
   },
   "reporting": {
     "dataset": "reporting_preprod",
-    "maxRowsPerInsert": 2500
+    "maxRowsPerInsert": 1000
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",

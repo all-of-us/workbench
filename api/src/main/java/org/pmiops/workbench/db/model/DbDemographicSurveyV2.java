@@ -46,6 +46,7 @@ public class DbDemographicSurveyV2 {
   private String disabilityOtherText;
   private DbEducationV2 education;
   private DbYesNoPreferNot disadvantaged;
+  private String surveyComments;
 
   // singular names for these because Hibernate seems to require
   // that they match the column names in the join tables
@@ -373,8 +374,19 @@ public class DbDemographicSurveyV2 {
     return this;
   }
 
+  @Column(name = "survey_comments")
+  public String getSurveyComments() {
+    return surveyComments;
+  }
+
+  public DbDemographicSurveyV2 setSurveyComments(String surveyComments) {
+    this.surveyComments = surveyComments;
+    return this;
+  }
+
   public enum DbEthnicCategory {
     AI_AN,
+    AI_AN_AI_AN,
     AI_AN_CENTRAL_SOUTH,
     AI_AN_OTHER,
 
