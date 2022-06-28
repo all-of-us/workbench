@@ -495,23 +495,23 @@ jobs:
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
             (cd aou-utils/; git submodule update --init)
       - run:
-          name: Change Directory
-          command: |
-            cd e2ev2
-      - run:
           name: Decrypt SA Key
+          working_directory: e2ev2
           command: |
             source src/circle-sa-key-json.sh
       - run:
           name: Build
+          working_directory: ui
           command: |
-            ./src/circle-build-ui.sh
+            ../e2ev2/src/circle-build-ui.sh
       - run:
           name: Deploy
+          working_directory: ui
           command: |
-            ./src/circle-deploy-ui.sh
+            ../e2ev2/src/circle-deploy-ui.sh
       - run:
           name: Run Tests
+          working_directory: e2ev2
           command: |
             ./src/circle-run-tests.sh
       - store_artifacts:
