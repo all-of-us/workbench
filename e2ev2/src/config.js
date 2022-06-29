@@ -8,9 +8,7 @@ export_({projectName})
 const usernames = ['puppeteer-tester-6@fake-research-aou.org']
 export_({usernames})
 
-const urlRoot = () => {
-  assert(process.env.SHORT_HASH, 'SHORT_HASH is not defined')
-  return `https://pr-${process.env.SHORT_HASH}-dot-${projectName}.appspot.com`
-}
+const urlRoot = () => `https://${projectName}.appspot.com`
+
 export_({urlRoot})
 
