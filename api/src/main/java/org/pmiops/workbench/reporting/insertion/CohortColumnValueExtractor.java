@@ -17,7 +17,7 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  private static final String TABLE_NAME = "cohort";
+  public static final String TABLE_NAME = "cohort";
   private final String parameterName;
   private final Function<ReportingCohort, Object> objectValueFunction;
 

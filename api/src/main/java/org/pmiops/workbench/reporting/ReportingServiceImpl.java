@@ -8,6 +8,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,9 @@ public class ReportingServiceImpl implements ReportingService {
   @VisibleForTesting
   static final Set<String> BATCH_UPLOADED_TABLES =
       ImmutableSet.of(
-          WorkspaceColumnValueExtractor.TABLE_NAME, UserColumnValueExtractor.TABLE_NAME);
+          CohortColumnValueExtractor.TABLE_NAME,
+          WorkspaceColumnValueExtractor.TABLE_NAME,
+          UserColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,
@@ -65,6 +68,9 @@ public class ReportingServiceImpl implements ReportingService {
     reportingQueryService
         .getUserStream()
         .forEach(b -> reportingUploadService.uploadBatchUser(b, captureTimestamp));
+    reportingQueryService
+        .getCohortsStream()
+        .forEach(b -> reportingUploadService.uploadBatchCohort(b, captureTimestamp));
 
     // Third: Verify the count.
     boolean batchUploadSuccess =

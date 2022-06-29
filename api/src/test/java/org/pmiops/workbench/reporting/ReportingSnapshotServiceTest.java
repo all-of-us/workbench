@@ -2,11 +2,9 @@ package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertCohortFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertDatasetFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertInstitutionFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspaceFreeTierUsage;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
@@ -18,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
-import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
@@ -63,7 +60,6 @@ public class ReportingSnapshotServiceTest {
   public void testGetSnapshot_noEntries() {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI);
-    assertThat(snapshot.getCohorts()).isEmpty();
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
   }
@@ -71,16 +67,12 @@ public class ReportingSnapshotServiceTest {
   @Test
   public void testGetSnapshot() {
     mockWorkspaceFreeTierUsage();
-    mockCohorts();
     mockDatasets();
     mockDatasetCohorts();
     mockInstitutions();
 
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertTimeApprox(snapshot.getCaptureTimestamp(), NOW_INSTANT.toEpochMilli());
-
-    assertThat(snapshot.getCohorts()).hasSize(1);
-    assertCohortFields(snapshot.getCohorts().get(0));
 
     assertThat(snapshot.getDatasets()).hasSize(1);
     assertDatasetFields(snapshot.getDatasets().get(0));
@@ -99,11 +91,6 @@ public class ReportingSnapshotServiceTest {
     doReturn(ImmutableList.of(createDtoWorkspaceFreeTierUsage()))
         .when(mockReportingQueryService)
         .getWorkspaceFreeTierUsage();
-  }
-
-  private void mockCohorts() {
-    final ReportingCohort mockCohort = createReportingCohort();
-    doReturn(ImmutableList.of(mockCohort)).when(mockReportingQueryService).getCohorts();
   }
 
   private void mockDatasets() {

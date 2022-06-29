@@ -111,33 +111,35 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   /** Batch uploads {@link ReportingWorkspace}. */
   @Override
   public void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp) {
-    final Stopwatch stopwatch = stopwatchProvider.get();
-    final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
-        ImmutableMultimap.builder();
-    final StringBuilder performanceStringBuilder = new StringBuilder();
-    final InsertAllRequest insertAllRequest =
+    uploadBatchTable(
         workspaceRequestBuilder.build(
             getTableId(WorkspaceColumnValueExtractor.class),
             batch,
-            getFixedValues(captureTimestamp));
-    issueInsertAllRequest(
-        stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
-    log.info(performanceStringBuilder.toString());
-    // Check response and abort the process if any error happens. In this case, verify_snapshot
-    // won't have the 'successful' record, hence we know that is a "bad" dataset.
-    checkResponse(responseMapBuilder.build());
+            getFixedValues(captureTimestamp)));
   }
 
   /** Batch uploads {@link ReportingUser}. */
   @Override
   public void uploadBatchUser(List<ReportingUser> batch, long captureTimestamp) {
+    uploadBatchTable(
+        userRequestBuilder.build(
+            getTableId(UserColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
+  }
+
+  /** Batch uploads {@link ReportingCohort}. */
+  @Override
+  public void uploadBatchCohort(List<ReportingCohort> batch, long captureTimestamp) {
+    uploadBatchTable(
+        cohortRequestBuilder.build(
+            getTableId(CohortColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
+  }
+
+  /** Batch uploads a reporting table. */
+  private void uploadBatchTable(InsertAllRequest insertAllRequest) {
     final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMultimap.builder();
     final StringBuilder performanceStringBuilder = new StringBuilder();
-    final InsertAllRequest insertAllRequest =
-        userRequestBuilder.build(
-            getTableId(UserColumnValueExtractor.class), batch, getFixedValues(captureTimestamp));
     issueInsertAllRequest(
         stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
     log.info(performanceStringBuilder.toString());
@@ -209,12 +211,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
     final ImmutableList.Builder<InsertAllRequest> resultBuilder = ImmutableList.builder();
 
-    resultBuilder.addAll(
-        cohortRequestBuilder.buildBatchedRequests(
-            getTableId(CohortColumnValueExtractor.class),
-            reportingSnapshot.getCohorts(),
-            fixedValues,
-            batchSize));
     resultBuilder.addAll(
         datasetRequestBuilder.buildBatchedRequests(
             getTableId(DatasetColumnValueExtractor.class),

@@ -105,6 +105,17 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
         verified = false;
       }
     }
+    if (batchTables.contains(CohortColumnValueExtractor.TABLE_NAME)) {
+      int sourceCount = reportingQueryService.getCohortsCount();
+      if (!verifyCount(
+          CohortColumnValueExtractor.TABLE_NAME,
+          (long) sourceCount,
+          getActualRowCount(CohortColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
+          sb)) {
+        detailsLogLevel = Level.WARNING;
+        verified = false;
+      }
+    }
     logger.log(detailsLogLevel, sb.toString());
     return verified;
   }
@@ -123,8 +134,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                         snapshot,
                         WorkspaceFreeTierUsageColumnValueExtractor.class,
                         ReportingSnapshot::getWorkspaceFreeTierUsage),
-                    getUploadResult(
-                        snapshot, CohortColumnValueExtractor.class, ReportingSnapshot::getCohorts),
                     getUploadResult(
                         snapshot,
                         InstitutionColumnValueExtractor.class,

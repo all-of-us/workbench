@@ -67,18 +67,22 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingCohort> getCohorts() {
+  public List<ReportingCohort> getCohorts(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT \n"
-            + "  cohort_id,\n"
-            + "  creation_time,\n"
-            + "  creator_id,\n"
-            + "  criteria,\n"
-            + "  description,\n"
-            + "  last_modified_time,\n"
-            + "  name,\n"
-            + "  workspace_id\n"
-            + "FROM cohort",
+        String.format(
+            "SELECT \n"
+                + "  cohort_id,\n"
+                + "  creation_time,\n"
+                + "  creator_id,\n"
+                + "  criteria,\n"
+                + "  description,\n"
+                + "  last_modified_time,\n"
+                + "  name,\n"
+                + "  workspace_id\n"
+                + "FROM cohort"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingCohort()
                 .cohortId(rs.getLong("cohort_id"))
@@ -485,6 +489,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public int getUserCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
+  }
+
+  @Override
+  public int getCohortsCount() {
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM cohort", Integer.class);
   }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */

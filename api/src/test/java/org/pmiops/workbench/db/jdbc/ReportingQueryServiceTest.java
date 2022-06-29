@@ -55,6 +55,7 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
@@ -167,10 +168,8 @@ public class ReportingQueryServiceTest {
 
   @Transactional
   public DbCohort createCohort(DbUser user1, DbWorkspace workspace1) {
-    final DbCohort cohort1 = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
-    assertThat(cohortDao.count()).isEqualTo(1);
-    assertThat(reportingQueryService.getDatasetCohorts()).isEmpty();
-    return cohort1;
+    final DbCohort cohort = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
+    return cohort;
   }
 
   @Transactional
@@ -441,6 +440,43 @@ public class ReportingQueryServiceTest {
     assertThat(reportingQueryService.getUserCount()).isEqualTo(3);
   }
 
+  @Test
+  public void testCohortIterator_twoAndAHalfBatches() {
+    createCohorts(5);
+
+    final Iterator<List<ReportingCohort>> iterator =
+        reportingQueryService.getCohortsBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    final List<ReportingCohort> batch1 = iterator.next();
+    assertThat(batch1).hasSize(BATCH_SIZE);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingCohort> batch2 = iterator.next();
+    assertThat(batch2).hasSize(BATCH_SIZE);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingCohort> batch3 = iterator.next();
+    assertThat(batch3).hasSize(1);
+
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testCohortStream_twoAndAHalfBatches() {
+    createCohorts(5);
+
+    final List<List<ReportingCohort>> stream =
+        reportingQueryService.getCohortsStream().collect(Collectors.toList());
+    assertThat(stream.size()).isEqualTo(3);
+  }
+
+  @Test
+  public void testCohortsCount() {
+    createCohorts(3);
+    assertThat(reportingQueryService.getCohortsCount()).isEqualTo(3);
+  }
+
   private void createWorkspaces(int count) {
     final DbUser user = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
@@ -471,6 +507,17 @@ public class ReportingQueryServiceTest {
           duccModule,
           USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME,
           USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME);
+    }
+    entityManager.flush();
+  }
+
+  private void createCohorts(int count) {
+    final DbUser user = createDbUserWithInstitute();
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    final DbWorkspace dbWorkspace = createDbWorkspace(user, cdrVersion);
+
+    for (int i = 0; i < count; ++i) {
+      createCohort(user, dbWorkspace);
     }
     entityManager.flush();
   }

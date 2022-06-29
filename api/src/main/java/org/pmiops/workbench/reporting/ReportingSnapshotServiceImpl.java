@@ -36,7 +36,6 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .cohorts(reportingQueryService.getCohorts())
             .datasets(reportingQueryService.getDatasets())
             .datasetCohorts(reportingQueryService.getDatasetCohorts())
             .datasetConceptSets(reportingQueryService.getDatasetConceptSets())
