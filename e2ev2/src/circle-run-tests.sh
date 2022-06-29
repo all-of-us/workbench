@@ -12,6 +12,7 @@ mkdir screenshots
 
 yarn install
 
+export SHORT_HASH="$(git log -n 1 --pretty='format:%C(auto)%h')"
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 export JEST_SILENT_REPORTER_DOTS=true
 export JEST_SILENT_REPORTER_SHOW_PATHS=true

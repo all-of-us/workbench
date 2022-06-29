@@ -7,6 +7,11 @@ echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-fil
 
 set -v
 
+gcloud app versions list --service=default --project=all-of-us-workbench-test \
+  --sort-by=version.createTime --filter='id~pr-[a-z0-9]{7}' --format='value(id)' \
+  > deployed-pr-versions.txt
+
+
 SHORT_HASH="$(git log -n 1 --pretty='format:%C(auto)%h')"
 gcloud app deploy --project=all-of-us-workbench-test --version="pr-$SHORT_HASH" --no-promote
 
