@@ -2,7 +2,7 @@
 
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
-set -xv
+set -v
 
 # https://github.com/nodejs/node/discussions/43184?sort=new
 cat /etc/ssl/openssl.cnf | grep -v 'providers = provider_sect' > openssl.cnf
