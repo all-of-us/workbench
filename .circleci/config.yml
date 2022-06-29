@@ -230,7 +230,7 @@ commands:
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
-                command: REACT_APP_ENVIRONMENT=local yarn dev-up
+                command: yarn dev-up-local
                 background: true
       - unless:
           condition: << parameters.connect_local_api >>
@@ -240,7 +240,7 @@ commands:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
                 # Start local UI server that connects to "test" api server
-                command: yarn dev-up
+                command: yarn dev-up-test
                 background: true
       - run: sleep 10 # sleep for 10 seconds
       - run:
