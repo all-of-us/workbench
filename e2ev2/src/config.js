@@ -10,7 +10,7 @@ export_({usernames})
 
 const urlRoot = () => {
   assert(process.env.SHORT_HASH, 'SHORT_HASH is not defined')
-  `https://pr-${process.env.SHORT_HASH}-dot-${projectName}.appspot.com`
+  return `https://pr-${process.env.SHORT_HASH}-dot-${projectName}.appspot.com`
 }
 export_({urlRoot})
 
