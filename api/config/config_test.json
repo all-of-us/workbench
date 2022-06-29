@@ -133,7 +133,7 @@
   },
   "reporting": {
     "dataset": "reporting_test",
-    "maxRowsPerInsert": 1000
+    "maxRowsPerInsert": 500
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
