@@ -506,12 +506,14 @@ jobs:
           working_directory: ui
           command: |
             source ../e2ev2/src/circle-sa-key-json.sh
+            export SA_KEY_JSON SA_EMAIL
             ../e2ev2/src/circle-deploy-ui.sh
       - run:
           name: Run Tests
           working_directory: e2ev2
           command: |
             source src/circle-sa-key-json.sh
+            export SA_KEY_JSON SA_EMAIL
             ./src/circle-run-tests.sh
       - store_artifacts:
           path: e2ev2/screenshots
