@@ -13,6 +13,6 @@ mkdir screenshots
 yarn install
 
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
-JEST_SILENT_REPORTER_DOTS=true
-JEST_SILENT_REPORTER_SHOW_PATHS=true
+export JEST_SILENT_REPORTER_DOTS=true
+export JEST_SILENT_REPORTER_SHOW_PATHS=true
 yarn test --reporters=jest-silent-reporter

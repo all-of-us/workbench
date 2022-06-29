@@ -9,3 +9,6 @@ set -v
 
 SHORT_HASH="$(git log -n 1 --pretty='format:%C(auto)%h')"
 gcloud app deploy --project=all-of-us-workbench-test --version="$SHORT_HASH" --no-promote
+
+# Warm it up:
+curl https://"$SHORT_HASH"-dot-all-of-us-workbench-test.uc.r.appspot.com/
