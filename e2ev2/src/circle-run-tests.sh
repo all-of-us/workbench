@@ -10,6 +10,8 @@ sudo cp openssl.cnf /etc/ssl/openssl.cnf
 
 mkdir screenshots
 
+yarn install
+
 PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 JEST_SILENT_REPORTER_DOTS=true
 JEST_SILENT_REPORTER_SHOW_PATHS=true
