@@ -536,8 +536,8 @@ export const QueryReport = fp.flow(
                               }}
                             >
                               <ParticipantsCharts
+                                cohortId={cohortReview.cohortId}
                                 domain={domain}
-                                review={cohortReview}
                               />
                             </div>
                           ))}

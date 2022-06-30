@@ -1,43 +1,61 @@
 import * as React from 'react';
 import { useParams } from 'react-router';
-import * as fp from 'lodash/fp';
 
 const { useEffect, useState } = React;
 
-import { Domain } from 'generated/fetch';
+import { AgeType, Domain, GenderOrSexType } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
 import { ComboChart } from 'app/components/combo-chart.component';
 import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { ParticipantsCharts } from 'app/pages/data/cohort-review/participants-charts';
-import {
-  cohortBuilderApi,
-  cohortReviewApi,
-  cohortsApi,
-} from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { MatchParams } from 'app/utils/stores';
+
+import { ParticipantsCharts } from './participants-charts';
 
 const styles = reactStyles({
-  activeButton: {
-
-  },
   domainButton: {
     background: colors.accent,
+    border: 'none',
     borderRadius: '3px',
     color: colors.white,
-    height: '1rem',
-  }
+    cursor: 'pointer',
+    fontSize: '10px',
+    fontWeight: 600,
+    height: '1.25rem',
+    width: '5rem',
+  },
+  get activeButton() {
+    return {
+      ...this.domainButton,
+      background: colors.white,
+      border: `1px solid ${colors.accent}`,
+      color: colors.accent,
+    };
+  },
+  overviewContainer: {
+    borderRadius: '3px',
+    boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
+    marginBottom: '0.5rem',
+  },
+  overviewHeader: {
+    cursor: 'pointer',
+    fontWeight: 600,
+    lineHeight: '2rem',
+    margin: '0 0.5rem',
+  },
+  graphContainer: {
+    flex: '0 0 80%',
+    position: 'relative',
+  },
+  tabsContainer: {
+    flex: '0 0 20%',
+    marginTop: '-1rem',
+    padding: '2rem 0 0 1rem',
+  },
 });
-
-enum OverviewPanels {
-  DEMOGRAPHICS,
-  CONDITIONS,
-  PROCEDURES,
-  MEDICATIONS,
-  LABS,
-}
 
 const domainTabs = [
   {
@@ -63,25 +81,72 @@ const domainTabs = [
 ];
 
 export const CohortReviewOverview = ({ cohort }) => {
-  const [activeTab, setActiveTab] = useState(OverviewPanels.DEMOGRAPHICS);
+  const { ns, wsid } = useParams<MatchParams>();
+  const [activeTab, setActiveTab] = useState(domainTabs[0].domain);
+  const [demoChartData, setDemoChartData] = useState(undefined);
   const [loading, setLoading] = useState(true);
   const [panelOpen, setPanelOpen] = useState(false);
 
+  useEffect(() => {
+    cohortBuilderApi()
+      .findDemoChartInfo(
+        ns,
+        wsid,
+        GenderOrSexType[GenderOrSexType.GENDER],
+        AgeType[AgeType.AGE],
+        JSON.parse(cohort.criteria)
+      )
+      .then((demoChartInfo) => {
+        setDemoChartData(demoChartInfo.items);
+        setLoading(false);
+      });
+  }, []);
+
   return (
-    <div>
-      <div>
-        <h3>Overview</h3>
-        <ClrIcon shape='angle' direction={panelOpen ? 'up' : 'down'} />
-      </div>
+    <div style={styles.overviewContainer}>
+      <h3
+        style={styles.overviewHeader}
+        onClick={() => setPanelOpen((prevPanelOpen) => !prevPanelOpen)}
+      >
+        Overview
+        <ClrIcon
+          style={{ marginLeft: '0.5rem' }}
+          shape='angle'
+          dir={panelOpen ? 'up' : 'down'}
+        />
+      </h3>
       {panelOpen && (
-        <div>{loading ? <SpinnerOverlay /> : <div style={{ display: 'flex' }}>
-          <div style={{ flex: '0 0 20%', marginLeft: '0.25rem' }}>
-            {domainTabs.map((domainTab, index) => <div key={index}>
-              <Button type=
-            </div>)}
-          </div>
-          <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}></div>
-        </div>}</div>
+        <div>
+          {loading ? (
+            <SpinnerOverlay />
+          ) : (
+            <div style={{ display: 'flex' }}>
+              <div style={styles.tabsContainer}>
+                {domainTabs.map(({ displayText, domain }, index) => (
+                  <div key={index} style={{ marginBottom: '0.5rem' }}>
+                    <button
+                      style={
+                        activeTab === domain
+                          ? styles.activeButton
+                          : styles.domainButton
+                      }
+                      onClick={() => setActiveTab(domain)}
+                    >
+                      {displayText}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div style={styles.graphContainer}>
+                {activeTab === Domain.PERSON ? (
+                  <ComboChart mode={'stacked'} data={demoChartData} />
+                ) : (
+                  <ParticipantsCharts cohortId={cohort.id} domain={activeTab} />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
