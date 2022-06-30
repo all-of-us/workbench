@@ -386,7 +386,8 @@ public class DbDemographicSurveyV2 {
 
   public enum DbEthnicCategory {
     AI_AN,
-    AI_AN_AI_AN,
+    AI_AN_AMERICAN_INDIAN,
+    AI_AN_ALASKA_NATIVE,
     AI_AN_CENTRAL_SOUTH,
     AI_AN_OTHER,
 
