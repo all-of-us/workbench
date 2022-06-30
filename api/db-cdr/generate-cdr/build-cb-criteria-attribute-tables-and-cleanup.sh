@@ -393,3 +393,22 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
          AND subtype = 'TOPIC')
      GROUP BY parent_id)
  WHERE count = 0)"
+
+echo "CLEAN UP - remove any special characters ’ or … and replace with ' and ..."
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+    SELECT id, REPLACE (name, '’', '\'') AS name
+    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    WHERE name LIKE '%’%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, '…', '...') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%…%') cr2
+ WHERE cr1.id = cr2.id"
