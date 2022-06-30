@@ -290,7 +290,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         survey.ethnicCategories.some(
           (s) =>
             s === EthnicCategory.AIAN ||
-            s === EthnicCategory.AIANAIAN ||
+            s === EthnicCategory.AIANAMERICANINDIAN ||
+            s === EthnicCategory.AIANALASKANATIVE ||
             s === EthnicCategory.AIANCENTRALSOUTH ||
             s === EthnicCategory.AIANOTHER
         )
@@ -345,8 +346,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: EthnicCategory.AIAN,
                 subOptions: [
                   {
-                    label: 'American Indian or Alaska Native (AIAN)',
-                    value: EthnicCategory.AIANAIAN,
+                    label: 'American Indian',
+                    value: EthnicCategory.AIANAMERICANINDIAN,
+                  },
+                  {
+                    label: 'Alaska Native',
+                    value: EthnicCategory.AIANALASKANATIVE,
                   },
                   {
                     label: 'Central or South American Indian',

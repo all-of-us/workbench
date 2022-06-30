@@ -546,7 +546,8 @@ definitions:
     description: 'Which categories describe you? (Select all that apply). Note, you may select more than one group.'
     enum:
       - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
-      - AI_AN_AI_AN           # American Indian or Alaska Native / American Indian or Alaska Native
+      - AI_AN_AMERICAN_INDIAN # American Indian or Alaska Native / American Indian
+      - AI_AN_ALASKA_NATIVE   # American Indian or Alaska Native / Alaska Native
       - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
       - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
 
