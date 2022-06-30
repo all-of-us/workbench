@@ -338,8 +338,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         </div>
         <FlexColumn>
           <MultipleChoiceQuestion
-            question='1. Which categories describe you?'
-            label='Race(s) and/or Ethnicities'
+            question='1. Which Racial and Ethnic categories describe you?'
+            label='Racial and/or Ethnic Identity/Identities'
             options={[
               {
                 label: 'American Indian or Alaska Native (AIAN)',
