@@ -38,12 +38,15 @@ require_relative "../../../libproject/environments"
 # See the CDR playbook for more context on the overall publishing process:
 # https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
 
+PROD_BROAD_BUCKET = "gs://prod-drc-broad"
+OLD_ARRAYS_PATH_INFIX = "array_old_egt_files"
+
 CURATION_PROD_SOURCE_CONFIG = {
   # Optional: to speed up iteration with this script, download and run against a local directory instead.
-  :wgs_aw4_prefix => "gs://prod-drc-broad/AW4_wgs_manifest/AoU_DRCB_SEQ_",
+  :wgs_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_wgs_manifest/AoU_DRCB_SEQ_",
   # The array_old_egt_files should be removed, likely in late 2022. This contains older
   # AW4 manifests before reprocessing.
-  :microarray_aw4_prefix => "gs://prod-drc-broad/array_old_egt_files/AW4_array_manifest/AoU_DRCB_GEN_"
+  :microarray_aw4_prefix => "#{PROD_BROAD_BUCKET}/#{OLD_ARRAYS_PATH_INFIX}/AW4_array_manifest/AoU_DRCB_GEN_"
 }
 
 FILE_ENVIRONMENTS = {
@@ -189,6 +192,9 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
   if aw4_paths.empty?
     raise ArgumentError.new("failed to find any matching aw4 manifests @ #{aw4_prefix}")
   end
+
+  adjust_old_array_uris = aw4_prefix.include? OLD_ARRAYS_PATH_INFIX
+
   i = 0
   matching_aw4_rows = aw4_paths.flat_map do |f|
     common.status "processed #{i}/#{aw4_paths.length} AW4 manifests" if i % 10 == 0
@@ -211,6 +217,17 @@ def _read_aw4_rows_for_rids(aw4_prefix, rids)
     end
 
     aw4_rows.each do |row|
+      if adjust_old_array_uris
+        # The old AW4 array manifests still point to the "active" VCF directory, which contains
+        # an overlapping subset of reprocessed files. Adjust the URIs to point to this older directory
+        # This should be removed once we switch to the newer AW4 manifests in a future CDR release.
+        row.each do |k, v|
+          if v.include? PROD_BROAD_BUCKET and not v.include? OLD_ARRAYS_PATH_INFIX
+            row[k] = v.gsub(PROD_BROAD_BUCKET, File.join(PROD_BROAD_BUCKET, OLD_ARRAYS_PATH_INFIX))
+          end
+        end
+      end
+
       # Parse the filename for the effective datetime for downstream disambiguation.
       row["aw4_datetime"] = filename_date
     end
@@ -274,7 +291,6 @@ end
 
 def read_all_microarray_aw4s(project, rids)
   raise ArgumentError.new("manifest generation is unconfigured for #{project}") unless FILE_ENVIRONMENTS.key? project
-  # XXX: old_egt_files workaround...
   _read_aw4_rows_for_rids(FILE_ENVIRONMENTS[project][:source_config][:microarray_aw4_prefix], rids)
 end
 
@@ -352,6 +368,7 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
     output_manifest = []
   end
 
+  # XXX: need to include the output manifest as a line item in the copy manifest :/
   copy_manifest = aw4_rows.flat_map do |aw4_entry|
     unless output_manifest.nil?
       out_row = {"person_id" => aw4_entry["research_id"]}
@@ -510,7 +527,6 @@ end
 
 def _update_project_iam_object_viewer(sa_actor, sa_principal, project_id, add)
   Common.new.run_inline([
-    "echo", "skipping",
     "gcloud",
     "--impersonate-service-account",
     sa_actor,
@@ -533,23 +549,8 @@ def _update_bucket_storage_admin(sa_actor, sa_principal, bucket, add)
   )
 end
 
-# Stage files as specified in the given manifest. This copies files into the VPC-SC
-# ingest bucket to prepare them for publishing. This intermediate step is required
-# for publishing. For details, see:
-# https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
-#
-# IMPORTANT: custom storage classes should NOT be respected within the ingest staging
-# bucket; only STANDARD storage class should be used here. This file staging is transient
-# and therefore receives only penalties for colder storage.
-def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
-  common = Common.new
+def _maybe_update_preprod_access(project, all_tasks, add)
   deploy_account = must_get_env_value(project, :publisher_account)
-
-  all_tasks = CSV.read(manifest_path, headers: true, return_headers: false)
-
-  # For now, we support pulling specifically from a ct preprod workspace project as a source.
-  # This scenario is special-cased, since it's where we're doing operational prep of CDR assets.
-  # For publishing in lower environments, i.e. from an arbitrary bucket, just use a normal curationSource.
   preprod_appspot_account = "all-of-us-rw-preprod@appspot.gserviceaccount.com"
   preprod_deploy_account = must_get_env_value("all-of-us-rw-preprod", :publisher_account)
   preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
@@ -572,14 +573,40 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
 
   if needs_preprod_grant
     preprod_source_projects.each do |p|
-      _update_project_iam_object_viewer(preprod_appspot_account, preprod_deploy_account, p, true)
-      #common.status "Sleeping for 5m after IAM grant to mitigate consistency issues"
-      #sleep 300
+      _update_project_iam_object_viewer(preprod_appspot_account, preprod_deploy_account, p, add)
+      common.status "Sleeping for 1m after IAM grant to mitigate consistency issues"
+      sleep 60
     end
   end
   if needs_cross_env_grant
-    _update_bucket_storage_admin(preprod_deploy_account, deploy_account, preprod_ingest_bucket, true)
+    _update_bucket_storage_admin(preprod_deploy_account, deploy_account, preprod_ingest_bucket, add)
   end
+end
+
+def maybe_grant_preprod_access(project, all_tasks)
+  _maybe_update_preprod_access(project, all_tasks, true)
+end
+
+def maybe_revoke_preprod_access(project, all_tasks)
+  _maybe_update_preprod_access(project, all_tasks, false)
+end
+
+# Stage files as specified by the given manifest lines. This copies files into the VPC-SC
+# ingest bucket to prepare them for publishing. This intermediate step is required
+# for publishing. For details, see:
+# https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
+#
+# IMPORTANT: custom storage classes should NOT be respected within the ingest staging
+# bucket; only STANDARD storage class should be used here. This file staging is transient
+# and therefore receives only penalties for colder storage.
+def stage_files_by_manifest(project, all_tasks, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
+  common = Common.new
+
+  # For now, we support pulling specifically from a ct preprod workspace project as a source.
+  # This scenario is special-cased, since it's where we're doing operational prep of CDR assets.
+  # For publishing in lower environments, i.e. from an arbitrary bucket, just use a normal curationSource.
+  deploy_account = must_get_env_value(project, :publisher_account)
+  preprod_deploy_account = must_get_env_value("all-of-us-rw-preprod", :publisher_account)
 
   _process_files_by_manifest(
     all_tasks,
@@ -641,15 +668,6 @@ def stage_files_by_manifest(project, manifest_path, logs_dir, concurrency = GSUT
       ingest_path,
       :out => wout,
       :err => werr)]
-  end
-
-  if needs_preprod_grant
-    preprod_source_projects.each do |p|
-      _update_project_iam_object_viewer(preprod_appspot_account, preprod_deploy_account, p, false)
-    end
-  end
-  if needs_cross_env_grant
-    _update_bucket_storage_admin(preprod_deploy_account, deploy_account, preprod_ingest_bucket, false)
   end
 end
 

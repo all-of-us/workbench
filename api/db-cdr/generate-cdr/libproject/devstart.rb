@@ -492,10 +492,20 @@ def publish_cdr_files(cmd_name, args)
     end
   end
   if op.opts.tasks.include? "STAGE_INGEST"
+    copy_manifest_tasks_by_path = {}
+    all_tasks = []
     copy_manifest_files.each do |path|
-      common.status "Starting file staging for #{path}"
-      stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, File.basename(path, '.csv')))
+      tasks = CSV.read(manifest_path, headers: true, return_headers: false)
+      copy_manifest_tasks_by_path[path] = tasks
+      all_tasks += tasks
     end
+
+    maybe_grant_preprod_access(op.opts.project, all_tasks)
+    copy_manifest_task_by_path.each do |path, tasks|
+      common.status "Starting file staging for #{path}"
+      stage_files_by_manifest(op.opts.project, tasks, File.join(logs_dir, File.basename(path, '.csv')))
+    end
+    maybe_revoke_preprod_access(op.opts.project, all_tasks)
     common.status "Finished: all file staging"
   end
 
