@@ -145,7 +145,7 @@
       "creationTime": "2022-01-01 00:00:00Z",
       "releaseNumber": 7,
       "numParticipants": 369297,
-      "cdrDbName": "r_2022q2_3",
+      "cdrDbName": "r_2022q2_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -161,7 +161,7 @@
       "creationTime": "2022-01-01 00:00:00Z",
       "releaseNumber": 8,
       "numParticipants": 372397,
-      "cdrDbName": "c_2022q2_3",
+      "cdrDbName": "c_2022q2_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
