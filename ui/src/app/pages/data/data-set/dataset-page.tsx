@@ -1441,11 +1441,14 @@ export const DatasetPage = fp.flow(
     const getPreviewByDomain = async (domain: Domain) => {
       if (domain === Domain.WHOLEGENOMEVARIANT) {
         setPreviewList(
-          previewList.set(domain, {
-            isLoading: false,
-            errorText: null,
-            values: [],
-          })
+          (prevPreviewList) =>
+            new Map(
+              prevPreviewList.set(domain, {
+                isLoading: false,
+                errorText: null,
+                values: [],
+              })
+            )
         );
         return;
       }
@@ -1481,7 +1484,9 @@ export const DatasetPage = fp.flow(
           values: [],
         };
       }
-      setPreviewList(previewList.set(domain, newPreviewInformation));
+      setPreviewList(
+        (prevList) => new Map(prevList.set(domain, newPreviewInformation))
+      );
     };
 
     const getPreviewList = async () => {
@@ -1500,7 +1505,7 @@ export const DatasetPage = fp.flow(
       );
       setPreviewList(newPreviewList);
       setSelectedPreviewDomain(domains[0]);
-      domains.forEach(async (domain) => getPreviewByDomain(domain));
+      domains.forEach((domain) => getPreviewByDomain(domain));
     };
 
     const createDatasetRequest = (datasetName, desc): DataSetRequest => {
