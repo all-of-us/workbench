@@ -32,7 +32,12 @@ import { YesNoOptionalQuestion } from './yes-no-optional-question';
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
 const styles = reactStyles({
-  question: { fontSize: 18, fontWeight: 'bold', color: colors.primary },
+  question: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.primary,
+    lineHeight: '1.25rem',
+  },
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
@@ -1005,7 +1010,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               id='survey-comments'
               onChange={(value) => onUpdate('surveyComments', value)}
               initialText={survey.surveyComments || ''}
-              value={survey.surveyComments || ''}
               textBoxStyleOverrides={{ width: '100%' }}
               maxCharacters={1000}
             />
