@@ -8,7 +8,7 @@ export_({projectName})
 const usernames = ['puppeteer-tester-6@fake-research-aou.org']
 export_({usernames})
 
-const urlRoot = () => `https://${projectName}.appspot.com`
+const urlRoot = () => `https://${process.env.UI_HOSTNAME}`
 
 export_({urlRoot})
 

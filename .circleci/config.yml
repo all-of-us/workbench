@@ -487,6 +487,8 @@ jobs:
   e2etests:
     machine:
       image: ubuntu-2204:2022.04.1
+    environment:
+      PR_SITE_COUNT: 10
     steps:
       - run:
           name: Checkout Code

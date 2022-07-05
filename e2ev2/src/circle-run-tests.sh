@@ -12,14 +12,9 @@ mkdir screenshots
 
 yarn install
 
-# Override hostname to be an authorized origin for Google Sign-In.
-SHORT_HASH="$(git log -n 1 --pretty='format:%C(auto)%h')"
-PR_SITE_IP="$(ping -c 1 pr-"$SHORT_HASH"-dot-all-of-us-workbench-test.appspot.com \
-  | head -n 1 | perl -ne '/[(](.*?)[)]/ && print $1')"
-cp /etc/hosts hosts
-echo "$PR_SITE_IP" all-of-us-workbench-test.appspot.com >> hosts
-sudo mv hosts /etc/hosts
-
+PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne '/(\d+)$/; print $1')"
+PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+export UI_HOSTNAME=pr-"$PR_SITE_NUM"-dot-all-of-us-workbench-test.appspot.com
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 export JEST_SILENT_REPORTER_DOTS=true
 export JEST_SILENT_REPORTER_SHOW_PATHS=true
