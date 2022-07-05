@@ -18,7 +18,12 @@ import { withProfileErrorModal } from 'app/components/with-error-modal';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { CheckBox, NumberInput, TextInput } from './inputs';
+import {
+  CheckBox,
+  NumberInput,
+  TextAreaWithLengthValidationMessage,
+  TextInput,
+} from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { AoU } from './text-wrappers';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
@@ -245,6 +250,12 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     disabilityDressing: { presence: { allowEmpty: false } },
     disabilityErrands: { presence: { allowEmpty: false } },
     sexualOrientations: { presence: { allowEmpty: false } },
+    surveyComments: {
+      length: {
+        maximum: 1000,
+        tooLong: 'can have no more than %{count} characters.',
+      },
+    },
     ...ethnicityAiAnOtherText,
     ...ethnicityAsianOtherText,
     ...ethnicityBlackOtherText,
@@ -860,14 +871,14 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             question='5. Are you deaf or do you have serious difficulty hearing?'
             selected={survey.disabilityHearing}
             onChange={(value) => onUpdate('disabilityHearing', value)}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '0.3rem' }}
           />
           <YesNoOptionalQuestion
             question='6. Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
             selected={survey.disabilitySeeing}
             onChange={(value) => onUpdate('disabilitySeeing', value)}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '0.3rem' }}
           />
           <YesNoOptionalQuestion
             question='7. Because of a physical, cognitive, or emotional condition, do you
@@ -875,26 +886,26 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             decisions?'
             selected={survey.disabilityConcentrating}
             onChange={(value) => onUpdate('disabilityConcentrating', value)}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '0.3rem' }}
           />
           <YesNoOptionalQuestion
             question='8. Do you have serious difficulty walking or climbing stairs?'
             selected={survey.disabilityWalking}
             onChange={(value) => onUpdate('disabilityWalking', value)}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '0.3rem' }}
           />
           <YesNoOptionalQuestion
             question='9. Do you have difficulty dressing or bathing?'
             selected={survey.disabilityDressing}
             onChange={(value) => onUpdate('disabilityDressing', value)}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '0.3rem' }}
           />
           <YesNoOptionalQuestion
             question="10. Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or shopping?"
             selected={survey.disabilityErrands}
             onChange={(value) => onUpdate('disabilityErrands', value)}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '0.3rem' }}
           />
           <FlexColumn style={{ marginBottom: '1rem' }}>
             <div
@@ -990,10 +1001,13 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               in the preceding questions that we may want to consider including
               in future surveys?
             </div>
-            <TextInput
+            <TextAreaWithLengthValidationMessage
+              id='survey-comments'
               onChange={(value) => onUpdate('surveyComments', value)}
+              initialText={survey.surveyComments || ''}
               value={survey.surveyComments || ''}
-              style={{ width: '50%' }}
+              textBoxStyleOverrides={{ width: '100%' }}
+              maxCharacters={1000}
             />
           </FlexColumn>
         </FlexColumn>

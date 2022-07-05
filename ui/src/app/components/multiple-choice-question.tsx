@@ -10,7 +10,12 @@ import { reactStyles, useId } from 'app/utils';
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
-  question: { fontWeight: 'bold', color: colors.primary, fontSize: '18px' },
+  question: {
+    fontWeight: 'bold',
+    color: colors.primary,
+    fontSize: '18px',
+    lineHeight: '1.25rem',
+  },
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
