@@ -498,26 +498,24 @@ jobs:
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
             (cd aou-utils/; git submodule update --init)
       - run:
+          name: Decrypt SA Key
+          command: |
+            echo 'export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A -k "$GCLOUD_CREDENTIALS_KEY")"' \
+              >> "$BASH_ENV"
+            cat "$BASH_ENV"
+      - run:
           name: Build
           working_directory: ui
-          command: |
-            source ../e2ev2/src/circle-sa-key-json.sh
-            export SA_KEY_JSON SA_EMAIL
-            ../e2ev2/src/circle-build-ui.sh
+          command: ../e2ev2/src/circle-build-ui.sh
       - run:
           name: Deploy
           working_directory: ui
-          command: |
-            source ../e2ev2/src/circle-sa-key-json.sh
-            export SA_KEY_JSON SA_EMAIL
-            ../e2ev2/src/circle-deploy-ui.sh
+          command: ../e2ev2/src/circle-deploy-ui.sh
       - run:
           name: Run Tests
           working_directory: e2ev2
-          command: |
-            source src/circle-sa-key-json.sh
-            export SA_KEY_JSON SA_EMAIL
-            ./src/circle-run-tests.sh
+          command: ./src/circle-run-tests.sh
       - store_artifacts:
           path: e2ev2/screenshots
 
