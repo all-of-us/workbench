@@ -501,14 +501,18 @@ jobs:
           name: Set Environment
           command: |
             echo 'export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" \
-              | perl -ne "/(\d+)\$/; print $1")"' \
+              | perl -ne "/(\d+)\$/; print \$1")"' \
               >> "$BASH_ENV"
             echo 'export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"' >> "$BASH_ENV"
       - run:
           name: Decrypt SA Key
+          # Redirection here suppresses this warning:
+          #   *** WARNING : deprecated key derivation used.
+          #   Using -iter or -pbkdf2 would be better.
           command: |
             echo 'export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
-              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A -k "$GCLOUD_CREDENTIALS_KEY")"' \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"' \
               >> "$BASH_ENV"
       - run:
           name: Activate SA
