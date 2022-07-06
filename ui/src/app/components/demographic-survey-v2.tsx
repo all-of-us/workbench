@@ -269,6 +269,9 @@ interface DemographicSurveyProps extends WithSpinnerOverlayProps {
 
 export const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (props: DemographicSurveyProps) => {
+    const { onError, onUpdate, profile } = props;
+    const { demographicSurveyV2: survey } = profile;
+
     const [isAian, setIsAian] = useState(false);
     const [showAsianOptions, setShowAsianOptions] = useState(false);
     const [showAiAnOptions, setShowAiAnOptions] = useState(false);
@@ -278,24 +281,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [showNhPiOptions, setShowNhPiOptions] = useState(false);
     const [showWhiteOptions, setShowWhiteOptions] = useState(false);
 
-    const { onError, onUpdate, profile } = props;
-    const { demographicSurveyV2: survey } = profile;
-
     useEffect(() => {
       onError(validateDemographicSurvey(survey));
     }, [profile]);
 
     useEffect(() => {
-      setIsAian(
-        survey.ethnicCategories.some(
-          (s) =>
-            s === EthnicCategory.AIAN ||
-            s === EthnicCategory.AIANAMERICANINDIAN ||
-            s === EthnicCategory.AIANALASKANATIVE ||
-            s === EthnicCategory.AIANCENTRALSOUTH ||
-            s === EthnicCategory.AIANOTHER
-        )
-      );
+      setIsAian(survey.ethnicCategories.some((s) => s === EthnicCategory.AIAN));
     }, [survey.ethnicCategories]);
 
     const disadvantagedBackgroundQuestion = (
