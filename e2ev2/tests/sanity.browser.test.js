@@ -18,7 +18,7 @@ browserTest('view cookie policy page', async browser => {
   // click and wait need to happen simultaneously to avoid a race
   const [, target] = await Promise.all([
     cpLink.click(),
-    browser.waitForTarget(target => target.opener() === page.target())
+    browser.waitForTarget(target => target.opener() === page.target(), {timeout: 2e3})
   ])
   const cpPage = await target.page()
   cpPage.setDefaultTimeout(2000)
