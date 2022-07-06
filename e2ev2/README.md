@@ -34,3 +34,7 @@ Full suite:
 ```
 yarn test
 ```
+
+## Contributing Notes
+
+Jest's default test timeout is five seconds. If a test times out, it is a bug in the test. When a test fails because of a timeout, it should fail on a particular action, such as `page.waitForSelector`. In the common case, we expect these calls to return quickly. When we are expecting an operation to take some time, we set that timeout explicitly and give that particular test more time to finish. This convention provides higher granularity about why a test fails so that we can make the correct adjustments.
