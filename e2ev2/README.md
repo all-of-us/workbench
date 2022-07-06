@@ -18,6 +18,11 @@ Tell Puppeteer where your Chrome lives:
 export PUPPETEER_EXECUTABLE_PATH=/path/to/some/chromium/binary
 ```
 
+Set the hostname of the UI you are testing against:
+```
+export UI_HOSTNAME=all-of-us-workbench-test.appspot.com
+```
+
 Sanity checks:
 ```
 yarn test tests/sanity.browser.test.js
