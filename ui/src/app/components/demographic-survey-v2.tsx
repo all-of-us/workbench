@@ -273,13 +273,27 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const { demographicSurveyV2: survey } = profile;
 
     const [isAian, setIsAian] = useState(false);
-    const [showAsianOptions, setShowAsianOptions] = useState(false);
-    const [showAiAnOptions, setShowAiAnOptions] = useState(false);
-    const [showBlackOptions, setShowBlackOptions] = useState(false);
-    const [showHispanicOptions, setShowHispanicOptions] = useState(false);
-    const [showMeNaOptions, setShowMeNaOptions] = useState(false);
-    const [showNhPiOptions, setShowNhPiOptions] = useState(false);
-    const [showWhiteOptions, setShowWhiteOptions] = useState(false);
+    const [showAsianOptions, setShowAsianOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.ASIAN)
+    );
+    const [showAiAnOptions, setShowAiAnOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.AIAN)
+    );
+    const [showBlackOptions, setShowBlackOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.BLACK)
+    );
+    const [showHispanicOptions, setShowHispanicOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.HISPANIC)
+    );
+    const [showMeNaOptions, setShowMeNaOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.MENA)
+    );
+    const [showNhPiOptions, setShowNhPiOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.NHPI)
+    );
+    const [showWhiteOptions, setShowWhiteOptions] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.WHITE)
+    );
 
     useEffect(() => {
       onError(validateDemographicSurvey(survey));
