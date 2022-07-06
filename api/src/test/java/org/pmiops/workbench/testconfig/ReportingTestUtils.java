@@ -80,7 +80,6 @@ public class ReportingTestUtils {
   public static final Timestamp COHORT__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-06T00:00:00.00Z"));
   public static final Long COHORT__CREATOR_ID = 2L;
-  public static final String COHORT__CRITERIA = "foo_3";
   public static final String COHORT__DESCRIPTION = "foo_4";
   public static final Timestamp COHORT__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
@@ -202,23 +201,11 @@ public class ReportingTestUtils {
         .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
   }
 
-  public static void assertCohortFields(ReportingCohort cohort) {
-    assertThat(cohort.getCohortId()).isEqualTo(COHORT__COHORT_ID);
-    assertTimeApprox(cohort.getCreationTime(), COHORT__CREATION_TIME);
-    assertThat(cohort.getCreatorId()).isEqualTo(COHORT__CREATOR_ID);
-    assertThat(cohort.getCriteria()).isEqualTo(COHORT__CRITERIA);
-    assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
-    assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
-    assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
-    assertThat(cohort.getWorkspaceId()).isEqualTo(COHORT__WORKSPACE_ID);
-  }
-
   public static ReportingCohort createReportingCohort() {
     return new ReportingCohort()
         .cohortId(COHORT__COHORT_ID)
         .creationTime(offsetDateTimeUtc(COHORT__CREATION_TIME))
         .creatorId(COHORT__CREATOR_ID)
-        .criteria(COHORT__CRITERIA)
         .description(COHORT__DESCRIPTION)
         .lastModifiedTime(offsetDateTimeUtc(COHORT__LAST_MODIFIED_TIME))
         .name(COHORT__NAME)
@@ -230,7 +217,6 @@ public class ReportingTestUtils {
     cohort.setCohortId(COHORT__COHORT_ID);
     cohort.setCreationTime(COHORT__CREATION_TIME);
     cohort.setCreator(creator);
-    cohort.setCriteria(COHORT__CRITERIA);
     cohort.setDescription(COHORT__DESCRIPTION);
     cohort.setLastModifiedTime(COHORT__LAST_MODIFIED_TIME);
     cohort.setName(COHORT__NAME);
