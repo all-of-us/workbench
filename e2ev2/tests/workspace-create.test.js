@@ -21,7 +21,7 @@ browserTest('create a workspace', async browser => {
   const createButton = await page.waitForFunction(
     () => [...document.querySelectorAll('[role="button"]')]
       .filter(n => n.innerText.toLowerCase() === 'create workspace')[0])
-  expect(await createButton.evaluate(n => n.style.cursor)).toBe('not-allowed')
+  expect(createButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
   const wsName = `test-ws-share-${utils.denseDateTime()}`
   await page.type('[placeholder="Workspace Name"]', wsName)
   await page.type('#education-purpose', ' ') // ???!!!
