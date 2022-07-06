@@ -15,8 +15,11 @@ browserTest('view cookie policy page', async browser => {
   await page.goto(config.urlRoot()+'/login')
   const cpLink = await page.waitForSelector('a[href="/cookie-policy"]')
   expect(cpLink).toBeDefined()
-  await cpLink.click()
-  const target = await browser.waitForTarget(target => target.opener() === page.target())
+  // click and wait need to happen simultaneously to avoid a race
+  const [, target] = await Promise.all([
+    cpLink.click(),
+    browser.waitForTarget(target => target.opener() === page.target())
+  ])
   const cpPage = await target.page()
   cpPage.setDefaultTimeout(2000)
   const h3 = await cpPage.waitForSelector('h3')
