@@ -18,6 +18,7 @@ browserTest('view cookie policy page', async browser => {
   await cpLink.click()
   const target = await browser.waitForTarget(target => target.opener() === page.target())
   const cpPage = await target.page()
+  cpPage.setDefaultTimeout(2000)
   const h3 = await cpPage.waitForSelector('h3')
   expect(await h3.evaluate(n => n.innerText))
     .toBe('All of Us Research Program Cookie Policy')

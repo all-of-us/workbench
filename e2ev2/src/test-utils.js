@@ -59,12 +59,11 @@ const browserTest = testFilePath => (description, testFn, timeoutMs) =>
       await browser.pages().then(pages => Promise.all(pages.map((page, i) => {
         const ssBase = `${path.basename(testFilePath)}.${description.replace(/[/]/g, '|')}`
         const ssPath = path.join(ssDir, `${ssBase}${i > 0 ? ('.'+(i+1)) : ''}.png`)
-        return page.screenshot({path: ssPath, fullPage: true}).then(() =>
-          console.log('screenshot saved to: '+ssPath))
+        return page.screenshot({path: ssPath, fullPage: true})
       })))
       throw e
     } finally {
-      closeBrowser(browser)
+      await closeBrowser(browser)
     }
   }, timeoutMs)
 export_({browserTest})
