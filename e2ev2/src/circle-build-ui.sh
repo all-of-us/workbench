@@ -3,9 +3,6 @@
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 
-SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
-echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
-
 set -v
 
 gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .

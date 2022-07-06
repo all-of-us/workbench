@@ -12,8 +12,6 @@ mkdir screenshots
 
 yarn install
 
-PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne '/(\d+)$/; print $1')"
-PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
 export UI_HOSTNAME=pr-"$PR_SITE_NUM"-dot-all-of-us-workbench-test.appspot.com
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 export JEST_SILENT_REPORTER_DOTS=true

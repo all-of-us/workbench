@@ -498,12 +498,23 @@ jobs:
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
             (cd aou-utils/; git submodule update --init)
       - run:
+          name: Set Environment
+          command: |
+            echo 'export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" \
+              | perl -ne "/(\d+)\$/; print $1")"' \
+              >> "$BASH_ENV"
+            echo 'export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"' >> "$BASH_ENV"
+      - run:
           name: Decrypt SA Key
           command: |
             echo 'export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
               | openssl enc -d -md sha256 -aes-256-cbc -base64 -A -k "$GCLOUD_CREDENTIALS_KEY")"' \
               >> "$BASH_ENV"
-            cat "$BASH_ENV"
+      - run:
+          name: Activate SA
+          command: |
+            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
       - run:
           name: Build
           working_directory: ui
