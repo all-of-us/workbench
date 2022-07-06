@@ -487,25 +487,24 @@ jobs:
   e2etests:
     machine:
       image: ubuntu-2204:2022.04.1
-    resource_class: large
     environment:
       PR_SITE_COUNT: 10
     steps:
       - run:
-          name: Checkout Code
-          command: |
-            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
-              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
-            (cd aou-utils/; git submodule update --init)
-      - run:
-          name: Set Environment
+          name: Set additional environment variables
           command: |
             echo 'export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" \
               | perl -ne "/(\d+)\$/; print \$1")"' \
               >> "$BASH_ENV"
             echo 'export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"' >> "$BASH_ENV"
       - run:
-          name: Decrypt SA Key
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+            (cd aou-utils/; git submodule update --init)
+      - run:
+          name: Decrypt SA key
           # Redirection here suppresses this warning:
           #   *** WARNING : deprecated key derivation used.
           #   Using -iter or -pbkdf2 would be better.
@@ -528,7 +527,7 @@ jobs:
           working_directory: ui
           command: ../e2ev2/src/circle-deploy-ui.sh
       - run:
-          name: Run Tests
+          name: Run tests
           working_directory: e2ev2
           command: ./src/circle-run-tests.sh
       - store_artifacts:
