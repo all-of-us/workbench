@@ -25,8 +25,6 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 
-const COPE_SURVEY_ID = 1333342;
-const MINUTE_SURVEY_ID = 765936;
 export const COPE_SURVEY_GROUP_NAME =
   'COVID-19 Participant Experience (COPE) Survey';
 export const MINUTE_SURVEY_GROUP_NAME = 'COVID-19 Vaccine Survey';
@@ -124,6 +122,7 @@ interface TreeNodeProps {
   select: Function;
   selectedIds: Array<string>;
   setAttributes: Function;
+  versionedSurveyIds?: Array<number>;
 }
 
 interface TreeNodeState {
@@ -382,18 +381,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     setSidebarActiveIconStore.next('criteria');
   }
 
-  get isCOPEOrMinuteSurvey() {
-    const {
-      node: { conceptId, name, subtype },
-    } = this.props;
-    return (
-      (subtype === CriteriaSubType.SURVEY.toString() &&
-        conceptId === COPE_SURVEY_ID &&
-        name === COPE_SURVEY_GROUP_NAME) ||
-      (conceptId === MINUTE_SURVEY_ID && name === MINUTE_SURVEY_GROUP_NAME)
-    );
-  }
-
   get showCode() {
     const {
       node: { code, domainId, name },
@@ -446,6 +433,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       select,
       selectedIds,
       setAttributes,
+      versionedSurveyIds,
     } = this.props;
     const { children, error, expanded, hover, loading, searchMatch } =
       this.state;
@@ -525,7 +513,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                   style={searchMatch ? styles.searchMatch : {}}
                 >
                   {displayName}
-                  {this.isCOPEOrMinuteSurvey && (
+                  {versionedSurveyIds?.includes(id) && (
                     <span style={{ paddingRight: '0.1rem' }}>
                       {' '}
                       - <i> Versioned</i>{' '}
