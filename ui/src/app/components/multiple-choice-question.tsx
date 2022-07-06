@@ -10,13 +10,14 @@ import { reactStyles, useId } from 'app/utils';
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
+  answer: { margin: '0.0rem 0.25rem', color: colors.primary },
+  container: { marginBottom: '1.0rem' },
   question: {
     fontWeight: 'bold',
     color: colors.primary,
     fontSize: '18px',
     lineHeight: '1.25rem',
   },
-  answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
 interface Option {
@@ -220,7 +221,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
   const optionComponents = options.map((option) => renderOption(option, null));
 
   return (
-    <div {...{ style }}>
+    <div style={{ ...styles.container, ...style }}>
       <div style={{ ...styles.question }}>{question}</div>
       {multiple && (
         <div style={{ color: colors.primary }}>Select all that apply.</div>
