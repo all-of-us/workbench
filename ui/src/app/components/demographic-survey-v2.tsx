@@ -680,9 +680,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'ethnicCategories',
-                value.length > 1
-                  ? value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
-                  : value
+                value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
               )
             }
             style={{ marginBottom: '1rem' }}
@@ -745,11 +743,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'genderIdentities',
-                value.length > 1
-                  ? value.filter(
-                      (v) => v !== GenderIdentityV2.PREFERNOTTOANSWER
-                    )
-                  : value
+                value.filter((v) => v !== GenderIdentityV2.PREFERNOTTOANSWER)
               )
             }
             style={{ marginBottom: '1rem' }}
@@ -852,11 +846,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'sexualOrientations',
-                value.length > 1
-                  ? value.filter(
-                      (v) => v !== SexualOrientationV2.PREFERNOTTOANSWER
-                    )
-                  : value
+                value.filter((v) => v !== SexualOrientationV2.PREFERNOTTOANSWER)
               )
             }
             style={{ marginBottom: '1rem' }}
