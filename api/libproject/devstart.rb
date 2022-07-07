@@ -3304,3 +3304,56 @@ Common.register_command({
     :description => "Runs a genomic extraction workflow.  Requires a workspace in the Controlled Tier but can vary from what it specifies in its CDR Configuration.",
     :fn => ->(*args) {run_genomic_extraction(GENOMIC_EXTRACTION_CMD, *args)}
 })
+
+def orphaned_projects(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, p) { opts.project = p },
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+        '--organization [organization]',
+        String,
+        ->(opts, p) { opts.organization = p },
+        'The Google Organization to query for projects.  firecloud.org and test.firecloud.org are supported.')
+  op.opts.organization = 'test.firecloud.org'
+
+  op.add_option(
+    "--terra-admin-token [access-token]",
+    ->(opts, v) { opts.terra_admin_token = v },
+    "Access token to be used to query for google projects.")
+  op.add_validator ->(opts) { raise ArgumentError.new('--terra-admin-token is required') if opts.terra_admin_token.nil?}
+  op.parse.validate
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  gradle_args = ([
+      # rename this arg to avoid confusion with the projects this tool operates on
+      ["--environment", op.opts.project],
+      ["--organization", op.opts.organization],
+      ["--terra-admin-token", op.opts.terra_admin_token]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{./gradlew orphanedProjects -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+ORPHANED_PROJECTS_CMD = "orphaned-projects"
+
+Common.register_command({
+    :invocation => ORPHANED_PROJECTS_CMD,
+    :description => "Do something with orphaned projects I guess",
+    :fn => ->(*args) {orphaned_projects(ORPHANED_PROJECTS_CMD, *args)}
+})
