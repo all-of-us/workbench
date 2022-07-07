@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router';
 import * as fp from 'lodash/fp';
 
 import { Button } from 'app/components/buttons';
@@ -7,7 +8,6 @@ import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
 export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
@@ -16,7 +16,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [initialSurvey, setInitialSurvey] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [, navigateByUrl] = useNavigation();
+  const history = useHistory();
 
   const { hideSpinner, showSpinner } = props;
 
@@ -60,7 +60,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    navigateByUrl('/profile');
+    history.goBack();
   };
 
   const handleUpdate = (updatedProfile) => {

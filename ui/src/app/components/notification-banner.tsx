@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -63,10 +64,13 @@ const styles = reactStyles({
 
 interface NotificationProps {
   dataTestId: string;
-  text: string;
+  text: string | JSX.Element;
   buttonText: string;
   buttonPath: string;
   buttonDisabled: boolean;
+  boxStyle?: CSSProperties;
+  textStyle?: CSSProperties;
+  buttonStyle?: CSSProperties;
 }
 
 export const NotificationBanner = ({
@@ -75,14 +79,17 @@ export const NotificationBanner = ({
   buttonText,
   buttonPath,
   buttonDisabled,
+  boxStyle,
+  textStyle,
+  buttonStyle,
 }: NotificationProps) => {
   return (
-    <FlexRow data-test-id={dataTestId} style={styles.box}>
+    <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
       <AlarmExclamation style={styles.icon} />
-      <div style={styles.text}>{text}</div>
+      <div style={{ ...styles.text, ...textStyle }}>{text}</div>
       <Button
         type='primary'
-        style={styles.button}
+        style={{ ...styles.button, ...buttonStyle }}
         path={buttonPath}
         disabled={buttonDisabled}
       >
