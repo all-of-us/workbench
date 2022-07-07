@@ -10,8 +10,10 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { CohortBuilderServiceStub, VersionedSurveyStubVariables } from 'testing/stubs/cohort-builder-service-stub';
+import {
+  CohortBuilderServiceStub,
+  VersionedSurveyStubVariables,
+} from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { NodeProp, TreeNode } from './tree-node.component';
@@ -76,7 +78,7 @@ describe('TreeNode', () => {
         selectedIds={[]}
         setAttributes={() => {}}
         domain={Domain.SURVEY}
-        versionedSurveyIds={VersionedSurveyStubVariables.map(({id}) => id)}
+        versionedSurveyIds={VersionedSurveyStubVariables.map(({ id }) => id)}
       />
     );
     expect(wrapper).toBeTruthy();

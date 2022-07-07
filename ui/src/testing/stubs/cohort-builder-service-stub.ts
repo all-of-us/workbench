@@ -506,6 +506,8 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   findVersionedSurveys(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>((resolve) => resolve({items: VersionedSurveyStubVariables}));
+    return new Promise<CriteriaListResponse>((resolve) =>
+      resolve({ items: VersionedSurveyStubVariables })
+    );
   }
 }
