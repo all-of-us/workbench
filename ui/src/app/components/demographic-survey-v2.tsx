@@ -668,11 +668,19 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: EthnicCategory.PREFERNOTTOANSWER,
-                onChange: (checked) =>
+                onChange: (checked) => {
                   onUpdate(
                     'ethnicCategories',
                     checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
-                  ),
+                  );
+                  setShowAiAnOptions(!checked);
+                  setShowAsianOptions(!checked);
+                  setShowBlackOptions(!checked);
+                  setShowHispanicOptions(!checked);
+                  setShowMeNaOptions(!checked);
+                  setShowNhPiOptions(!checked);
+                  setShowWhiteOptions(!checked);
+                },
               },
             ]}
             multiple
