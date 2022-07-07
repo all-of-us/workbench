@@ -484,19 +484,12 @@ jobs:
           command: |
             echo Hello Circle!
 
-  e2etests:
+  e2etests-deploy:
     machine:
       image: ubuntu-2204:2022.04.1
     environment:
       PR_SITE_COUNT: 10
     steps:
-      - run:
-          name: Set additional environment variables
-          command: |
-            echo 'export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" \
-              | perl -ne "/(\d+)\$/; print \$1")"' \
-              >> "$BASH_ENV"
-            echo 'export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"' >> "$BASH_ENV"
       - run:
           name: Checkout code
           command: |
@@ -504,32 +497,63 @@ jobs:
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
             (cd aou-utils/; git submodule update --init)
       - run:
-          name: Decrypt SA key
-          # Redirection here suppresses this warning:
-          #   *** WARNING : deprecated key derivation used.
-          #   Using -iter or -pbkdf2 would be better.
-          command: |
-            echo 'export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
-              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
-              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"' \
-              >> "$BASH_ENV"
-      - run:
-          name: Activate SA
-          command: |
-            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
-            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
-      - run:
           name: Build
           working_directory: ui
-          command: ../e2ev2/src/circle-build-ui.sh
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+
+            ../e2ev2/src/circle-build-ui.sh
       - run:
           name: Deploy
           working_directory: ui
-          command: ../e2ev2/src/circle-deploy-ui.sh
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+
+            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
+            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+
+            ../e2ev2/src/circle-deploy-ui.sh
+  e2etests-run:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    environment:
+      PR_SITE_COUNT: 10
+    steps:
+      - run:
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+            (cd aou-utils/; git submodule update --init)
       - run:
           name: Run tests
           working_directory: e2ev2
-          command: ./src/circle-run-tests.sh
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+
+            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
+            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+
+            ./src/circle-run-tests.sh
       - store_artifacts:
           path: e2ev2/screenshots
 
@@ -790,7 +814,10 @@ workflows:
       - playground
   e2etests:
     jobs:
-      - e2etests
+      - e2etests-deploy
+      - e2etests-run:
+          requires:
+            - e2etests-deploy
 
   deploy-staging:
     jobs:
