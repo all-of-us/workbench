@@ -61,12 +61,14 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
      Time Left to complete the survey : ` +
     timeLeftDisplayStr;
 
-  const showTakeDemographicV2Banner =
-    !!profile.demographicSurveyV2 && showBanner;
+  const surveyV2Taken = !!profile.demographicSurveyV2;
+  const featureFlag =
+    serverConfigStore.get().config.enableUpdatedDemographicSurvey;
 
   return (
-    serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
-    showTakeDemographicV2Banner && (
+    featureFlag &&
+    showBanner &&
+    !surveyV2Taken && (
       <NotificationBanner
         dataTestId={'take-survey-notification'}
         text={notificationText}
