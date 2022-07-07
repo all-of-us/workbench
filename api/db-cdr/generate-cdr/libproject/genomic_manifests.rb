@@ -357,7 +357,7 @@ def _build_copy_manifest_row(
   }
 end
 
-def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows)
+def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows, output_manifest_path)
   # TODO(RW-8269): handle delta directories
   path_prefix = "pooled/#{input_section["pooledDestPathInfix"]}/#{display_version_id}_base"
   ingest_base_path = File.join(ingest_bucket, path_prefix)
@@ -368,7 +368,6 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
     output_manifest = []
   end
 
-  # XXX: need to include the output manifest as a line item in the copy manifest :/
   copy_manifest = aw4_rows.flat_map do |aw4_entry|
     unless output_manifest.nil?
       out_row = {"person_id" => aw4_entry["research_id"]}
@@ -384,6 +383,17 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
     source_paths.map do |source_path|
       _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, aw4_entry["research_id"])
     end
+  end
+
+  unless output_manifest.nil?
+    unpooled_prefix = "#{display_version_id}/#{input_section["pooledDestPathInfix"]}"
+    unpooled_ingest_base_path = File.join(ingest_bucket, unpooled_prefix)
+    unpooled_destination = File.join(dest_bucket, unpooled_prefix)
+    copy_manifest.push(_build_copy_manifest_row(
+                         output_manifest_path, unpooled_ingest_base_path, unpooled_destination, {
+                           "filenameMatch" => File.basename(output_manifest_path),
+                           "filenameReplace" => "manifest.csv",
+                         }))
   end
 
   return [copy_manifest, output_manifest]
@@ -600,8 +610,6 @@ end
 # bucket; only STANDARD storage class should be used here. This file staging is transient
 # and therefore receives only penalties for colder storage.
 def stage_files_by_manifest(project, all_tasks, logs_dir, concurrency = GSUTIL_TASK_CONCURRENCY)
-  common = Common.new
-
   # For now, we support pulling specifically from a ct preprod workspace project as a source.
   # This scenario is special-cased, since it's where we're doing operational prep of CDR assets.
   # For publishing in lower environments, i.e. from an arbitrary bucket, just use a normal curationSource.

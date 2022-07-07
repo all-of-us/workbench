@@ -400,6 +400,9 @@ def publish_cdr_files(cmd_name, args)
     common.status "Starting: copy manifest creation"
     copy_manifests = {}
     output_manifests = {}
+    def output_manifest_path(working_dir, source_name)
+      "#{working_dir}/#{source_name}_output_manifest.csv"
+    end
 
     input_manifest = parse_input_manifest(op.opts.input_manifest_file)
 
@@ -413,7 +416,7 @@ def publish_cdr_files(cmd_name, args)
       aw4_microarray_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
         copy, output = build_manifests_for_aw4_section(
-          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows)
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows, output_manifest_path(working_dir, source_name))
         key_name = "aw4_microarray_" + source_name
         copy_manifests[key_name] = copy
         unless output.nil?
@@ -432,7 +435,7 @@ def publish_cdr_files(cmd_name, args)
       aw4_wgs_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
         copy, output = build_manifests_for_aw4_section(
-          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows)
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows, output_manifest_path(working_dir, source_name))
         key_name = "aw4_wgs_" + source_name
         copy_manifests[key_name] = copy
         unless output.nil?
@@ -470,7 +473,7 @@ def publish_cdr_files(cmd_name, args)
       copy_manifest_files.push(path)
     end
     output_manifests.each do |source_name, output_manifest|
-      path = "#{working_dir}/#{source_name}_output_manifest.csv"
+      path = output_manifest_path(working_dir, source_name)
       CSV.open(path, 'wb') do |f|
         f << output_manifest.first.keys
         output_manifest.each { |c| f << c.values }
