@@ -41,6 +41,7 @@ import {
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
+import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
@@ -575,7 +576,7 @@ export const ProfileComponent = fp.flow(
                   firstSignInTime={profile.firstSignInTime}
                   onClick={() =>
                     enableUpdatedDemographicSurvey
-                      ? this.props.navigateByUrl('/demographic-survey')
+                      ? this.props.navigateByUrl(DEMOGRAPHIC_SURVEY_V2_PATH)
                       : this.setState({ showDemographicSurveyModal: true })
                   }
                 />

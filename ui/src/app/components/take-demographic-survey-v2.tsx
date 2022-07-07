@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
+import {
+  DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
+  DEMOGRAPHIC_SURVEY_V2_PATH,
+} from 'app/utils/constants';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 import { NotificationBanner } from './notification-banner';
@@ -8,12 +12,10 @@ import { NotificationBanner } from './notification-banner';
 export const TakeDemographicSurveyV2BannerMaybe = () => {
   const { profile } = useStore(profileStore);
   const [showBanner, setShowBanner] = useState(true);
-  const demographicSurveyV2Path = '/demographic-survey';
-
-  const surveyEndDate = '7/26/2022';
 
   const calculateTimeLeft = () => {
-    const difference = +new Date(surveyEndDate) - +new Date();
+    const difference =
+      +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) - +new Date();
     let timeLeft = {};
 
     if (showBanner && difference <= 0) {
@@ -47,21 +49,24 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
     if (!timeLeft[interval]) {
       return;
     }
-    timeLeftDisplayStr = timeLeftDisplayStr + '  ' + timeLeft[interval] + ' ' + interval;
+    timeLeftDisplayStr =
+      timeLeftDisplayStr + '  ' + timeLeft[interval] + ' ' + interval;
   });
 
   const notificationText =
     `We have a new version of demographic survey question to better understand the diversity of the 
-     research community. Please complete the survey by `+ surveyEndDate +`, this will only take 2 minutes. 
-     Time Left to complete the survey : ` + timeLeftDisplayStr;
+     research community. Please complete the survey by ` +
+    DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE +
+    `, this will only take 2 minutes. 
+     Time Left to complete the survey : ` +
+    timeLeftDisplayStr;
 
-  const demographicV2Submitted =
-    serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
-    !!profile.demographicSurveyV2;
+  const showTakeDemographicV2Banner =
+    !!profile.demographicSurveyV2 && showBanner;
 
   return (
-    !demographicV2Submitted &&
-    showBanner && (
+    serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
+    showTakeDemographicV2Banner && (
       <NotificationBanner
         dataTestId={'take-survey-notification'}
         text={notificationText}
@@ -69,7 +74,7 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
         textStyle={{ width: '1000px' }}
         buttonStyle={{ width: '140px' }}
         buttonText='Take the Survey'
-        buttonPath={demographicSurveyV2Path}
+        buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH}
         buttonDisabled={false}
       />
     )
