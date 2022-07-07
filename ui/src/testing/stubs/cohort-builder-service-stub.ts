@@ -338,6 +338,51 @@ export const RootSurveyStubVariables: Criteria[] = [
   },
 ];
 
+export const VersionedSurveyStubVariables: Criteria[] = [
+  {
+    childCount: 0,
+    code: 'cope',
+    conceptId: 1333342,
+    count: 76826,
+    domainId: Domain.SURVEY.toString(),
+    group: true,
+    hasAncestorData: false,
+    hasAttributes: false,
+    hasHierarchy: true,
+    id: 331390,
+    isStandard: false,
+    name: 'COVID-19 Participant Experience (COPE) Survey',
+    parentCount: 76826,
+    parentId: 0,
+    path: '331390',
+    selectable: true,
+    subtype: CriteriaSubType.SURVEY.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: '',
+  },
+  {
+    childCount: 0,
+    code: 'cope_vaccine3',
+    conceptId: 765936,
+    count: 316,
+    domainId: 'SURVEY',
+    group: true,
+    hasAncestorData: false,
+    hasAttributes: false,
+    hasHierarchy: true,
+    id: 3000005924,
+    isStandard: false,
+    name: 'COVID-19 Vaccine Survey',
+    parentCount: 316,
+    parentId: 0,
+    path: '3000005924',
+    selectable: true,
+    subtype: 'SURVEY',
+    type: 'PPI',
+    value: '',
+  },
+];
+
 export const SurveyQuestionStubVariables = {
   328047: {
     conceptId: 1585889,
@@ -458,5 +503,9 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   findUniversalDomainCounts(): Promise<CardCountResponse> {
     return new Promise<CardCountResponse>((resolve) => resolve({ items: [] }));
+  }
+
+  findVersionedSurveys(): Promise<CriteriaListResponse> {
+    return new Promise<CriteriaListResponse>((resolve) => resolve({items: VersionedSurveyStubVariables}));
   }
 }

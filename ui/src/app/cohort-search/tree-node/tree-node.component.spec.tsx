@@ -10,7 +10,8 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 
-import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { CohortBuilderServiceStub, VersionedSurveyStubVariables } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { NodeProp, TreeNode } from './tree-node.component';
@@ -33,20 +34,8 @@ const treeNodeStub = {
 } as NodeProp;
 
 const surveyCOPETreeNodeStub = {
+  ...VersionedSurveyStubVariables[0],
   children: [],
-  code: '',
-  conceptId: 1333342,
-  count: 0,
-  domainId: Domain.SURVEY.toString(),
-  group: true,
-  hasAttributes: false,
-  id: 328232,
-  name: 'COVID-19 Participant Experience (COPE) Survey',
-  parentId: 0,
-  predefinedAttributes: null,
-  selectable: true,
-  subtype: 'SURVEY',
-  type: 'PM',
 } as NodeProp;
 describe('TreeNode', () => {
   beforeEach(() => {
@@ -75,7 +64,7 @@ describe('TreeNode', () => {
     );
     expect(wrapper).toBeTruthy();
   });
-  it('should display Versioned if SURVEY is COPE', () => {
+  it('should display Versioned if SURVEY is COPE', async () => {
     const wrapper = mount(
       <TreeNode
         autocompleteSelection={undefined}
@@ -86,7 +75,8 @@ describe('TreeNode', () => {
         select={() => {}}
         selectedIds={[]}
         setAttributes={() => {}}
-        domain={Domain.OBSERVATION}
+        domain={Domain.SURVEY}
+        versionedSurveyIds={VersionedSurveyStubVariables.map(({id}) => id)}
       />
     );
     expect(wrapper).toBeTruthy();
