@@ -740,12 +740,16 @@ export const ListSearch = fp.flow(
           <td
             style={{ ...columnBodyStyle, width: '10%', paddingRight: '0.5rem' }}
           >
-            <StyledExternalLink
-              href={this.getConceptLink(row.conceptId)}
-              target='_blank'
-            >
-              {row.conceptId}
-            </StyledExternalLink>
+            {row.domainId === Domain.DEVICE ? (
+              row.conceptId
+            ) : (
+              <StyledExternalLink
+                href={this.getConceptLink(row.conceptId)}
+                target='_blank'
+              >
+                {row.conceptId}
+              </StyledExternalLink>
+            )}
           </td>
           <td
             style={{ ...columnBodyStyle, width: '10%', paddingRight: '0.5rem' }}
