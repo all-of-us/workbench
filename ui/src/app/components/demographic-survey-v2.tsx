@@ -272,7 +272,9 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const { onError, onUpdate, profile } = props;
     const { demographicSurveyV2: survey } = profile;
 
-    const [isAian, setIsAian] = useState(false);
+    const [isAian, setIsAian] = useState(
+      survey.ethnicCategories.some((s) => s === EthnicCategory.AIAN)
+    );
     const [showAsianOptions, setShowAsianOptions] = useState(
       survey.ethnicCategories.some((s) => s === EthnicCategory.ASIAN)
     );

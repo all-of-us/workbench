@@ -45,5 +45,6 @@ public interface DemographicSurveyMapper {
   @Mapping(source = "sexualOrientations", target = "sexualOrientation")
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "user", ignore = true)
+  @Mapping(target = "completionTime", ignore = true)
   DbDemographicSurveyV2 toDbDemographicSurveyV2(DemographicSurveyV2 demographicSurvey);
 }
