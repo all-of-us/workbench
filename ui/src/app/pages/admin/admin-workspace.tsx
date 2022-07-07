@@ -514,6 +514,9 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               <WorkspaceInfoField labelText='Workspace Namespace'>
                 {workspace.namespace}
               </WorkspaceInfoField>
+              <WorkspaceInfoField labelText='Access Tier'>
+                {workspace.accessTierShortName?.toUpperCase()}
+              </WorkspaceInfoField>
               <WorkspaceInfoField labelText='Google Project Id'>
                 {workspace.googleProject}
               </WorkspaceInfoField>
