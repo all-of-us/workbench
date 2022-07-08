@@ -526,7 +526,7 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_many() throws ApiException {
     final List<String> largePersonIdList =
-        LongStream.range(1, 3_001).boxed().map(id -> id.toString()).collect(Collectors.toList());
+        LongStream.range(1, 376).boxed().map(id -> id.toString()).collect(Collectors.toList());
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
 
