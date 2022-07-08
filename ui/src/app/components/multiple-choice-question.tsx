@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
+import { CSSProperties, MutableRefObject } from 'react';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CheckBox, RadioButton } from 'app/components/inputs';
@@ -81,6 +81,7 @@ interface MultipleChoiceQuestionProps {
   style?: CSSProperties;
   multiple?: boolean;
   horizontalOptions?: boolean;
+  refProp?: MutableRefObject<any>;
 }
 
 export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
