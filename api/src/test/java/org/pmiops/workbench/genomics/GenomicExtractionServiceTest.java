@@ -166,7 +166,7 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket = "terraBucket";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName = "methodName";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace = "methodNamespace";
-    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 2;
+    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 3;
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationVersion = 1;
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace =
         "operationalTerraWorkspaceNamespace";

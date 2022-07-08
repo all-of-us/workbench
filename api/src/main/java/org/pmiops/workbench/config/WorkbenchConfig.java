@@ -178,9 +178,6 @@ public class WorkbenchConfig {
     public Integer extractionMethodLogicalVersion;
     @Deprecated public String extractionCohortsDataset;
     public String extractionDestinationDataset;
-    @Deprecated public String extractionTempTablesDataset;
-    // TODO(RW-8265): rm on following release
-    @Deprecated public String extractionFilterSetName;
     // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
     public int minExtractionScatterTasks;
     public float extractionScatterTasksPerSample;
