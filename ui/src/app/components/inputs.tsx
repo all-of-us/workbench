@@ -148,7 +148,6 @@ interface TextAreaWithLengthValidationMessageProps {
   id: string;
   initialText: string;
   maxCharacters: number;
-  tooLongWarningCharacters: number;
   onChange: (s: string) => void;
   tooShortWarningCharacters?: number;
   tooShortWarning?: string;
