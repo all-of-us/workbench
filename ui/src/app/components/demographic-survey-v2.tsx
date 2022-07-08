@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
@@ -311,7 +311,16 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [showWhiteOptions, setShowWhiteOptions] = useState(
       survey.ethnicCategories.includes(EthnicCategory.WHITE)
     );
-    const raceEthnicityRef = useRef(null);
+
+    const setShowOptionsFunctionList = [
+      setShowAsianOptions,
+      setShowAiAnOptions,
+      setShowBlackOptions,
+      setShowHispanicOptions,
+      setShowMeNaOptions,
+      setShowNhPiOptions,
+      setShowWhiteOptions,
+    ];
 
     useEffect(() => {
       onError(validateDemographicSurvey(survey));
@@ -691,16 +700,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     'ethnicCategories',
                     checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
                   );
-                  if (checked) {
-                    setShowAiAnOptions(false);
-                    setShowAsianOptions(false);
-                    setShowBlackOptions(false);
-                    setShowHispanicOptions(false);
-                    setShowMeNaOptions(false);
-                    setShowNhPiOptions(false);
-                    setShowWhiteOptions(false);
-                    raceEthnicityRef.current.scrollIntoView();
-                  }
                 },
               },
             ]}
@@ -712,7 +711,13 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
               )
             }
-            refProp={raceEthnicityRef}
+            enableExpansionControls
+            onCollapseAll={() =>
+              setShowOptionsFunctionList.forEach((fn) => fn(false))
+            }
+            onExpandAll={() =>
+              setShowOptionsFunctionList.forEach((fn) => fn(true))
+            }
           />
           <MultipleChoiceQuestion
             question='2. What terms best express how you describe your current gender identity?'
