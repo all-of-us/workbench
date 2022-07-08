@@ -60,6 +60,7 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
                   isSignedIn: nextIsSignedIn,
                 });
               });
+            resolve(gapi.auth2);
           },
           // onError
           ({ error, details }) => {
@@ -68,7 +69,6 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
             reject(authError);
           }
         );
-      resolve(gapi.auth2);
     });
   });
 };

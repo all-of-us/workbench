@@ -474,6 +474,89 @@ jobs:
           paths:
             - ui
 
+  # Playground job. Re-run with ssh enabled to play with Circle's machine image.
+  playground:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    steps:
+      - run:
+          name: Echo
+          command: |
+            echo Hello Circle!
+
+  e2etests-deploy:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    environment:
+      PR_SITE_COUNT: 10
+    steps:
+      - run:
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+            (cd aou-utils/; git submodule update --init)
+      - run:
+          name: Build
+          working_directory: ui
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+
+            ../e2ev2/src/circle-build-ui.sh
+      - run:
+          name: Deploy
+          working_directory: ui
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+
+            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
+            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+
+            ../e2ev2/src/circle-deploy-ui.sh
+  e2etests-run:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    environment:
+      PR_SITE_COUNT: 10
+    steps:
+      - run:
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+            (cd aou-utils/; git submodule update --init)
+      - run:
+          name: Run tests
+          working_directory: e2ev2
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+
+            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
+            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+
+            ./src/circle-run-tests.sh
+      - store_artifacts:
+          path: e2ev2/screenshots
+
   ui-deploy-to-test:
     executor: workbench-executor
     steps:
@@ -725,6 +808,16 @@ workflows:
             - wait_until_previous_workflow_done
           post-steps:
             - gcs-load-test-results
+
+  playground:
+    jobs:
+      - playground
+  e2etests:
+    jobs:
+      - e2etests-deploy
+      - e2etests-run:
+          requires:
+            - e2etests-deploy
 
   deploy-staging:
     jobs:
