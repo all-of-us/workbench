@@ -66,8 +66,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         },
       };
 
-  const ethnicityAiAnOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.AIANOTHER
+  const ethnicityAiAnOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.AIANOTHER
   )
     ? {
         ethnicityAiAnOtherText: {
@@ -81,8 +81,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityAsianOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.ASIANOTHER
+  const ethnicityAsianOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.ASIANOTHER
   )
     ? {
         ethnicityAsianOtherText: {
@@ -96,8 +96,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityBlackOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.BLACKOTHER
+  const ethnicityBlackOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.BLACKOTHER
   )
     ? {
         ethnicityBlackOtherText: {
@@ -111,23 +111,22 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityHispanicOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.HISPANICOTHER
-  )
-    ? {
-        ethnicityHispanicOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting Hispanic or Latino or Spanish Origin ' +
-              '"None of these fully describe me, and I want to specify", please specify a value',
+  const ethnicityHispanicOtherText =
+    demographicSurvey.ethnicCategories.includes(EthnicCategory.HISPANICOTHER)
+      ? {
+          ethnicityHispanicOtherText: {
+            presence: {
+              allowEmpty: false,
+              message:
+                '^If selecting Hispanic or Latino or Spanish Origin ' +
+                '"None of these fully describe me, and I want to specify", please specify a value',
+            },
           },
-        },
-      }
-    : {};
+        }
+      : {};
 
-  const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.MENAOTHER
+  const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.MENAOTHER
   )
     ? {
         ethnicityMeNaOtherText: {
@@ -141,8 +140,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityNhPiOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.NHPIOTHER
+  const ethnicityNhPiOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.NHPIOTHER
   )
     ? {
         ethnicityNhPiOtherText: {
@@ -156,8 +155,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityWhiteOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.WHITEOTHER
+  const ethnicityWhiteOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.WHITEOTHER
   )
     ? {
         ethnicityWhiteOtherText: {
@@ -171,8 +170,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.OTHER
+  const ethnicityOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.OTHER
   )
     ? {
         ethnicityOtherText: {
@@ -186,8 +185,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const genderOtherText = demographicSurvey.genderIdentities.some(
-    (ec) => ec === GenderIdentityV2.OTHER
+  const genderOtherText = demographicSurvey.genderIdentities.includes(
+    GenderIdentityV2.OTHER
   )
     ? {
         genderOtherText: {
@@ -215,8 +214,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         }
       : {};
 
-  const orientationOtherText = demographicSurvey.sexualOrientations.some(
-    (ec) => ec === SexualOrientationV2.OTHER
+  const orientationOtherText = demographicSurvey.sexualOrientations.includes(
+    SexualOrientationV2.OTHER
   )
     ? {
         orientationOtherText: {
@@ -273,28 +272,28 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const { demographicSurveyV2: survey } = profile;
 
     const [isAian, setIsAian] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.AIAN)
+      survey.ethnicCategories.includes(EthnicCategory.AIAN)
     );
     const [showAsianOptions, setShowAsianOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.ASIAN)
+      survey.ethnicCategories.includes(EthnicCategory.ASIAN)
     );
     const [showAiAnOptions, setShowAiAnOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.AIAN)
+      survey.ethnicCategories.includes(EthnicCategory.AIAN)
     );
     const [showBlackOptions, setShowBlackOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.BLACK)
+      survey.ethnicCategories.includes(EthnicCategory.BLACK)
     );
     const [showHispanicOptions, setShowHispanicOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.HISPANIC)
+      survey.ethnicCategories.includes(EthnicCategory.HISPANIC)
     );
     const [showMeNaOptions, setShowMeNaOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.MENA)
+      survey.ethnicCategories.includes(EthnicCategory.MENA)
     );
     const [showNhPiOptions, setShowNhPiOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.NHPI)
+      survey.ethnicCategories.includes(EthnicCategory.NHPI)
     );
     const [showWhiteOptions, setShowWhiteOptions] = useState(
-      survey.ethnicCategories.some((s) => s === EthnicCategory.WHITE)
+      survey.ethnicCategories.includes(EthnicCategory.WHITE)
     );
     const raceEthnicityRef = useRef(null);
 
@@ -303,7 +302,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     }, [profile]);
 
     useEffect(() => {
-      setIsAian(survey.ethnicCategories.some((s) => s === EthnicCategory.AIAN));
+      setIsAian(survey.ethnicCategories.includes(EthnicCategory.AIAN));
     }, [survey.ethnicCategories]);
 
     const disadvantagedBackgroundQuestion = (
@@ -676,14 +675,16 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     'ethnicCategories',
                     checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
                   );
-                  setShowAiAnOptions(!checked);
-                  setShowAsianOptions(!checked);
-                  setShowBlackOptions(!checked);
-                  setShowHispanicOptions(!checked);
-                  setShowMeNaOptions(!checked);
-                  setShowNhPiOptions(!checked);
-                  setShowWhiteOptions(!checked);
-                  raceEthnicityRef.current.scrollIntoView();
+                  if (checked) {
+                    setShowAiAnOptions(false);
+                    setShowAsianOptions(false);
+                    setShowBlackOptions(false);
+                    setShowHispanicOptions(false);
+                    setShowMeNaOptions(false);
+                    setShowNhPiOptions(false);
+                    setShowWhiteOptions(false);
+                    raceEthnicityRef.current.scrollIntoView();
+                  }
                 },
               },
             ]}
