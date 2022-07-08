@@ -86,6 +86,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
     question,
     selected,
     multiple,
+    refProp,
     style,
   } = props;
 
@@ -215,7 +216,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
   const optionComponents = options.map((option) => renderOption(option, null));
 
   return (
-    <div {...{ style }}>
+    <div {...{ style }} ref={refProp}>
       <div style={{ ...styles.question }}>{question}</div>
       {multiple && (
         <div style={{ color: colors.primary }}>Select all that apply.</div>

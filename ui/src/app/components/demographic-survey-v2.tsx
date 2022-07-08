@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
@@ -296,6 +296,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const [showWhiteOptions, setShowWhiteOptions] = useState(
       survey.ethnicCategories.some((s) => s === EthnicCategory.WHITE)
     );
+    const raceEthnicityRef = useRef(null);
 
     useEffect(() => {
       onError(validateDemographicSurvey(survey));
@@ -682,6 +683,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   setShowMeNaOptions(!checked);
                   setShowNhPiOptions(!checked);
                   setShowWhiteOptions(!checked);
+                  raceEthnicityRef.current.scrollIntoView();
                 },
               },
             ]}
@@ -694,6 +696,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               )
             }
             style={{ marginBottom: '1rem' }}
+            refProp={raceEthnicityRef}
           />
           <MultipleChoiceQuestion
             question='2. What terms best express how you describe your current gender identity?'
