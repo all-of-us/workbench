@@ -174,6 +174,7 @@ public class GenomicExtractionServiceTest {
         "operationalTerraWorkspaceName";
     workbenchConfig.wgsCohortExtraction.minExtractionScatterTasks = 100;
     workbenchConfig.wgsCohortExtraction.extractionScatterTasksPerSample = 4;
+    workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
 
     FirecloudWorkspaceDetails fcWorkspace =
         new FirecloudWorkspaceDetails().bucketName("user-bucket");
@@ -472,40 +473,6 @@ public class GenomicExtractionServiceTest {
     assertThat(dbSubmissions.get(0).getSampleCount()).isEqualTo(3);
     assertThat(dbSubmissions.get(0).getTerraSubmissionDate())
         .isEqualTo(new Timestamp(CLOCK.instant().toEpochMilli()));
-  }
-
-  @Test
-  public void submitExtractionJob_v1_params() throws ApiException {
-    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 1;
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
-        .thenReturn(ImmutableList.of("1", "2", "3"));
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
-
-    ArgumentCaptor<FirecloudMethodConfiguration> methodConfig =
-        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
-    verify(methodConfigurationsApi)
-        .createWorkspaceMethodConfig(methodConfig.capture(), anyString(), anyString());
-    assertThat(methodConfig.getValue().getInputs())
-        .containsKey("GvsExtractCohortFromSampleNames.cohort_sample_names");
-    assertThat(methodConfig.getValue().getInputs())
-        .doesNotContainKey("GvsExtractCohortFromSampleNames.cohort_table_prefix");
-  }
-
-  @Test
-  public void submitExtractionJob_v2_params() throws ApiException {
-    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 2;
-    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
-        .thenReturn(ImmutableList.of("1", "2", "3"));
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
-
-    ArgumentCaptor<FirecloudMethodConfiguration> methodConfig =
-        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
-    verify(methodConfigurationsApi)
-        .createWorkspaceMethodConfig(methodConfig.capture(), anyString(), anyString());
-    assertThat(methodConfig.getValue().getInputs())
-        .containsKey("GvsExtractCohortFromSampleNames.cohort_sample_names");
-    assertThat(methodConfig.getValue().getInputs())
-        .containsKey("GvsExtractCohortFromSampleNames.cohort_table_prefix");
   }
 
   @Test
