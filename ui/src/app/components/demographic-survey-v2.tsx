@@ -327,8 +327,29 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     }, [profile]);
 
     useEffect(() => {
-      setIsAian(survey.ethnicCategories.includes(EthnicCategory.AIAN));
-    }, [survey.ethnicCategories]);
+      const includesAiAN = survey.ethnicCategories.includes(
+        EthnicCategory.AIAN
+      );
+      const isAiAnChanged = includesAiAN !== isAian;
+
+      if (isAiAnChanged && !includesAiAN) {
+        onUpdate(
+          'sexualOrientations',
+          survey.sexualOrientations.filter(
+            (so) => so !== SexualOrientationV2.TWOSPIRIT
+          )
+        );
+        onUpdate(
+          'genderIdentities',
+          survey.genderIdentities.filter(
+            (so) => so !== GenderIdentityV2.TWOSPIRIT
+          )
+        );
+      }
+      if (isAiAnChanged) {
+        setIsAian(includesAiAN);
+      }
+    }, [survey, isAian]);
 
     const disadvantagedBackgroundQuestion = (
       <div>
