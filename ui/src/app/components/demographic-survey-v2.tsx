@@ -712,7 +712,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
               )
             }
-            style={{ marginBottom: '1rem' }}
             refProp={raceEthnicityRef}
           />
           <MultipleChoiceQuestion
