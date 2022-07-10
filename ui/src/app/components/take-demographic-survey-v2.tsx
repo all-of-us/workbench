@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import {
   DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
   DEMOGRAPHIC_SURVEY_V2_PATH,
+  DEMOGRAPHIC_SURVEY_V2_PATH_WITH_PARAM,
 } from 'app/utils/constants';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
@@ -100,7 +101,7 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
         textStyle={{ width: '1000px' }}
         buttonStyle={{ width: '180px' }}
         buttonText='Take the Survey'
-        buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH}
+        buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH_WITH_PARAM}
         buttonDisabled={location.pathname === DEMOGRAPHIC_SURVEY_V2_PATH}
       />
     )

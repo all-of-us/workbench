@@ -8,6 +8,8 @@ import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
+import { DEMOGRAPHIC_SURVEY_QUERY } from 'app/utils/constants';
+import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
 export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
@@ -17,6 +19,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const history = useHistory();
+  const [, navigateByUrl] = useNavigation();
 
   const { hideSpinner, showSpinner } = props;
 
@@ -60,7 +63,12 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    history.goBack();
+    const queryParam = history.location.search;
+    if (queryParam === DEMOGRAPHIC_SURVEY_QUERY) {
+      history.goBack();
+    } else {
+      navigateByUrl('profile');
+    }
   };
 
   const handleUpdate = (updatedProfile) => {
