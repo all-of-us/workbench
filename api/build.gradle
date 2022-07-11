@@ -21,6 +21,7 @@ buildscript {
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.3.12.RELEASE'
+        SPRING_FRAMEWORK_VERSION = '5.2.22.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.34'
     }
@@ -389,7 +390,14 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.12.0'
     compile 'org.apache.commons:commons-text:1.9'
     compile "org.apache.httpcomponents:httpclient:4.5.13"
-    compile 'org.springframework.boot:spring-boot-starter-validation'
+    compile "org.springframework.boot:spring-boot:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-autoconfigure:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-starter:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-starter-aop:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-starter-json:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-starter-logging:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
+    compile "org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION"
     compile "commons-codec:commons-codec:1.15"
     compile 'com.auth0:java-jwt:3.19.2'
     compile 'io.netty:netty-common:4.1.77.Final'
@@ -427,18 +435,18 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
 
     compile('org.apache.tomcat:tomcat-jdbc:10.0.20')
-    compile("org.springframework.boot:spring-boot-starter-tomcat")
-    compile("org.springframework.boot:spring-boot-starter-jdbc") {
+    compile("org.springframework.boot:spring-boot-starter-tomcat:$project.ext.SPRING_BOOT_VERSION")
+    compile("org.springframework.boot:spring-boot-starter-jdbc:$project.ext.SPRING_BOOT_VERSION") {
         exclude group: 'com.zaxxer', module: 'HikariCP'
     }
 
-    compile("org.springframework.boot:spring-boot-starter-data-jpa") {
+    compile("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
         exclude module: 'spring-boot-starter-tomcat'
         exclude group: 'com.zaxxer', module: 'HikariCP'
         exclude group: 'org.slf4j', module: 'jul-to-slf4j'
     }
 
-    compile("org.springframework.boot:spring-boot-starter-web") {
+    compile("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION") {
         exclude module: 'spring-boot-starter-tomcat'
         exclude group: 'org.slf4j', module: 'jul-to-slf4j'
     }
@@ -451,7 +459,19 @@ dependencies {
 
     // https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-2841508
     compile 'org.bouncycastle:bcprov-jdk15on:1.70'
-
+    // https://spring.io/blog/2022/03/31/spring-framework-rce-early-announcement
+    compile "org.springframework:spring-aop:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-aspects:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-beans:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-context:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-core:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-expression:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-jcl:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-jdbc:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-orm:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-tx:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-web:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
@@ -459,10 +479,10 @@ dependencies {
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
     // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
-    generatedCompile "org.springframework.boot:spring-boot-starter-data-rest"
+    generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
     generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
     generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
-    generatedCompile 'org.springframework.boot:spring-boot-starter-validation'
+    generatedCompile "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
@@ -502,7 +522,7 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
 
     // Test deps
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'com.vaadin.external.google', module: 'android-json'
     }
