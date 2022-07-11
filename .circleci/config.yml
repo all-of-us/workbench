@@ -814,7 +814,8 @@ workflows:
       - playground
   e2etests:
     jobs:
-      - e2etests-deploy
+      - e2etests-deploy:
+          <<: *filter-pr-branch
       - e2etests-run:
           requires:
             - e2etests-deploy
