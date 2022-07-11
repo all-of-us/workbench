@@ -186,6 +186,7 @@ public class WorkbenchConfig {
     @Deprecated public String extractionFilterSetName;
     // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
     public int minExtractionScatterTasks;
+    public float extractionScatterTasksPerSample;
     public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
   }
