@@ -166,7 +166,7 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket = "terraBucket";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName = "methodName";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace = "methodNamespace";
-    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 3;
+    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 2;
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationVersion = 1;
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace =
         "operationalTerraWorkspaceNamespace";
@@ -476,6 +476,40 @@ public class GenomicExtractionServiceTest {
   }
 
   @Test
+  public void submitExtractionJob_v1_params() throws ApiException {
+    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 1;
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(ImmutableList.of("1", "2", "3"));
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    ArgumentCaptor<FirecloudMethodConfiguration> methodConfig =
+        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+    verify(methodConfigurationsApi)
+        .createWorkspaceMethodConfig(methodConfig.capture(), anyString(), anyString());
+    assertThat(methodConfig.getValue().getInputs())
+        .containsKey("GvsExtractCohortFromSampleNames.cohort_sample_names");
+    assertThat(methodConfig.getValue().getInputs())
+        .doesNotContainKey("GvsExtractCohortFromSampleNames.cohort_table_prefix");
+  }
+
+  @Test
+  public void submitExtractionJob_v2_params() throws ApiException {
+    workbenchConfig.wgsCohortExtraction.extractionMethodLogicalVersion = 2;
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(ImmutableList.of("1", "2", "3"));
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    ArgumentCaptor<FirecloudMethodConfiguration> methodConfig =
+        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+    verify(methodConfigurationsApi)
+        .createWorkspaceMethodConfig(methodConfig.capture(), anyString(), anyString());
+    assertThat(methodConfig.getValue().getInputs())
+        .containsKey("GvsExtractCohortFromSampleNames.cohort_sample_names");
+    assertThat(methodConfig.getValue().getInputs())
+        .containsKey("GvsExtractCohortFromSampleNames.cohort_table_prefix");
+  }
+
+  @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
@@ -494,7 +528,7 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_many() throws ApiException {
     final List<String> largePersonIdList =
-        LongStream.range(1, 376).boxed().map(id -> id.toString()).collect(Collectors.toList());
+        LongStream.range(1, 3_001).boxed().map(id -> id.toString()).collect(Collectors.toList());
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
 
