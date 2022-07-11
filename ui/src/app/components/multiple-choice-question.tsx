@@ -7,11 +7,16 @@ import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles, useId } from 'app/utils';
 
+import { LinkButton } from './buttons';
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
   container: { marginBottom: '1.0rem' },
+  expansionButton: {
+    fontSize: 12,
+    textDecoration: 'underline',
+  },
   question: {
     fontWeight: 'bold',
     color: colors.primary,
@@ -81,17 +86,23 @@ interface MultipleChoiceQuestionProps {
   style?: CSSProperties;
   multiple?: boolean;
   horizontalOptions?: boolean;
+  enableExpansionControls?: boolean;
+  onCollapseAll?: () => void;
+  onExpandAll?: () => void;
 }
 
 export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
   const {
+    enableExpansionControls,
     horizontalOptions,
     label: questionLabel,
-    options,
+    multiple,
     onChange,
+    onCollapseAll,
+    onExpandAll,
+    options,
     question,
     selected,
-    multiple,
     style,
   } = props;
 
@@ -226,13 +237,39 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
       {multiple && (
         <div style={{ color: colors.primary }}>Select all that apply.</div>
       )}
-      {questionLabel && (
-        <div
-          style={{ color: colors.primary, fontSize: 12, fontWeight: 'bold' }}
-        >
-          {questionLabel}
-        </div>
-      )}
+      <FlexRow style={{ columnGap: 8 }}>
+        {questionLabel && (
+          <div
+            style={{
+              color: colors.primary,
+              fontSize: 12,
+              fontWeight: 'bold',
+              display: 'inline',
+            }}
+          >
+            {questionLabel}
+          </div>
+        )}
+        {enableExpansionControls && (
+          <FlexRow style={{ columnGap: 8 }}>
+            <LinkButton
+              style={styles.expansionButton}
+              onClick={onExpandAll}
+              href='#'
+            >
+              Expand all
+            </LinkButton>
+            <LinkButton
+              style={styles.expansionButton}
+              onClick={onCollapseAll}
+              href='#'
+            >
+              Collapse all
+            </LinkButton>
+          </FlexRow>
+        )}
+      </FlexRow>
+
       {horizontalOptions ? (
         <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
           {optionComponents}
