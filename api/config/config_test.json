@@ -113,7 +113,8 @@
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": true,
-    "enableMultiReview": false
+    "enableMultiReview": false,
+    "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -133,7 +134,7 @@
   },
   "reporting": {
     "dataset": "reporting_test",
-    "maxRowsPerInsert": 2500
+    "maxRowsPerInsert": 500
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
