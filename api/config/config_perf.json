@@ -113,7 +113,8 @@
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": false,
     "enableMultiReview": false,
-    "enableUpdatedDemographicSurvey": true
+    "enableUpdatedDemographicSurvey": true,
+    "enableDrugWildcardSearch": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
