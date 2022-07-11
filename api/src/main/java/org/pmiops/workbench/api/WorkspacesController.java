@@ -51,6 +51,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
@@ -873,7 +874,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResources(
       String workspaceNamespace,
       String workspaceId,
-      WorkspaceResourcesRequest workspaceResourcesRequest) {
+      WorkspaceResourcesRequest wrr) {
+    return getWorkspaceResourcesV2(workspaceNamespace, workspaceId, wrr.getTypesToFetch());
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesV2(String workspaceNamespace,
+        String workspaceId,
+        List<ResourceType> resourceTypesToFetch) {
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceAuthService.enforceWorkspaceAccessLevel(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -885,7 +893,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
         workspaceResourcesService.getWorkspaceResources(
-            dbWorkspace, workspaceAccessLevel, workspaceResourcesRequest.getTypesToFetch()));
+            dbWorkspace, workspaceAccessLevel, resourceTypesToFetch));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
