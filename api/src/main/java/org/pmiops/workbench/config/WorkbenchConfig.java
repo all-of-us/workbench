@@ -104,6 +104,9 @@ public class WorkbenchConfig {
     public List<Double> freeTierCostAlertThresholds;
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
+
+    // The batch size used by the cron job to process users
+    public Integer freeTierCronUserBatchSize;
   }
 
   public static class FireCloudConfig {
