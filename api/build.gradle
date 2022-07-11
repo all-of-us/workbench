@@ -390,14 +390,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.12.0'
     compile 'org.apache.commons:commons-text:1.9'
     compile "org.apache.httpcomponents:httpclient:4.5.13"
-    compile "org.springframework.boot:spring-boot:$project.ext.SPRING_BOOT_VERSION"
-    compile "org.springframework.boot:spring-boot-autoconfigure:$project.ext.SPRING_BOOT_VERSION"
-    compile "org.springframework.boot:spring-boot-starter:$project.ext.SPRING_BOOT_VERSION"
-    compile "org.springframework.boot:spring-boot-starter-aop:$project.ext.SPRING_BOOT_VERSION"
-    compile "org.springframework.boot:spring-boot-starter-json:$project.ext.SPRING_BOOT_VERSION"
-    compile "org.springframework.boot:spring-boot-starter-logging:$project.ext.SPRING_BOOT_VERSION"
     compile "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
-    compile "org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION"
     compile "commons-codec:commons-codec:1.15"
     compile 'com.auth0:java-jwt:3.19.2'
     compile 'io.netty:netty-common:4.1.77.Final'
