@@ -104,7 +104,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     // Workaround RW-5289 by omitting all LOGIN events from the result set. Otherwise
     // they crowd out all the real events.
     final String whereClausePrefix =
-        "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
+        "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type IN ('USER', 'PROFILE')) OR\n"
             + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
             + "  jsonPayload.action_type != 'LOGIN'";
     final String queryString =
