@@ -65,7 +65,7 @@ public class GenomicExtractionService {
   public static final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
   // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
   private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
-  // Scatter count boundaries for extraction. Affects number of works and numbers of shards.
+  // Scatter count maximum for extraction. Affects number of workers and numbers of shards.
   private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private final DataSetService dataSetService;
@@ -355,7 +355,11 @@ public class GenomicExtractionService {
     // keeping overhead low and limiting footprint on shared extraction quota.
     int minScatter =
         Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
-    int scatter = Ints.constrainToRange(personIds.size() / 2, minScatter, MAX_EXTRACTION_SCATTER);
+    int scatter =
+        Ints.constrainToRange(
+            Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample),
+            minScatter,
+            MAX_EXTRACTION_SCATTER);
 
     Map<String, String> maybeInputs = new HashMap<>();
     int methodLogicalVersion =
