@@ -67,8 +67,6 @@ public class GenomicExtractionService {
   private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
   // Scatter count maximum for extraction. Affects number of workers and numbers of shards.
   private static final int MAX_EXTRACTION_SCATTER = 2_000;
-  // Scatter scaling factor for extraction, in terms of number of requested samples.
-  private static final float EXTRACTION_SCATTER_FACTOR = 4;
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
@@ -359,7 +357,7 @@ public class GenomicExtractionService {
         Math.min(cohortExtractionConfig.minExtractionScatterTasks, MAX_EXTRACTION_SCATTER);
     int scatter =
         Ints.constrainToRange(
-            Math.round(personIds.size() * EXTRACTION_SCATTER_FACTOR),
+            Math.round(personIds.size() * cohortExtractionConfig.extractionScatterTasksPerSample),
             minScatter,
             MAX_EXTRACTION_SCATTER);
 

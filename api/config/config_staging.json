@@ -9,7 +9,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "staging-AoU-RW",
     "timeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.5",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.13",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-staging",
@@ -49,6 +49,7 @@
     "extractionMethodLogicalVersion": 3,
     "extractionDestinationDataset": "fc-aou-cdr-staging-ct.wgs_extraction_destination",
     "minExtractionScatterTasks": 20,
+    "extractionScatterTasksPerSample": 4,
     "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
@@ -112,8 +113,7 @@
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": false,
-    "enableMultiReview": false,
-    "enableUpdatedDemographicSurvey": true
+    "enableMultiReview": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -133,7 +133,7 @@
   },
   "reporting": {
     "dataset": "reporting_staging",
-    "maxRowsPerInsert": 500
+    "maxRowsPerInsert": 2500
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
