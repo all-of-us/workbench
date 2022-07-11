@@ -51,8 +51,8 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
-      String workspace, String workspaceName, String notebookName) {
-    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+      String workspace, String workspaceId, String notebookName) {
+    notebooksService.deleteNotebook(workspace, workspaceId, notebookName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -89,10 +89,10 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
-      String workspace, String workspaceName, String notebookName) {
+      String workspace, String workspaceId, String notebookName) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
+      fileDetail = notebooksService.cloneNotebook(workspace, workspaceId, notebookName);
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -102,22 +102,21 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceId, String notebookName) {
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
-            .html(
-                notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName));
+            .html(notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceId, notebookName));
     return ResponseEntity.ok(response);
   }
 
   @Override
   public ResponseEntity<FileDetail> renameNotebook(
-      String workspace, String workspaceName, NotebookRename rename) {
+      String workspace, String workspaceId, NotebookRename rename) {
     FileDetail fileDetail;
     try {
       fileDetail =
           notebooksService.renameNotebook(
-              workspace, workspaceName, rename.getName(), rename.getNewName());
+              workspace, workspaceId, rename.getName(), rename.getNewName());
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -127,24 +126,23 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
-      String workspace, String workspaceName, String notebookName) {
+      String workspace, String workspaceId, String notebookName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspace, workspaceName, WorkspaceAccessLevel.READER);
+        workspace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
         new KernelTypeResponse()
-            .kernelType(
-                notebooksService.getNotebookKernel(workspace, workspaceName, notebookName)));
+            .kernelType(notebooksService.getNotebookKernel(workspace, workspaceId, notebookName)));
   }
 
   @Override
   public ResponseEntity<NotebookLockingMetadataResponse> getNotebookLockingMetadata(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceId, String notebookName) {
 
     // Retrieving the workspace is done first, which acts as an access check.
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, workspaceId)
             .getWorkspace()
             .getBucketName();
 
@@ -175,7 +173,7 @@ public class NotebooksController implements NotebooksApiDelegate {
 
         Set<String> workspaceUsers =
             workspaceAuthService
-                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
+                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceId)
                 .keySet();
 
         response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
