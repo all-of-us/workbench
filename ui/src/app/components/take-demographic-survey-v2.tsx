@@ -57,8 +57,10 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   // However if its just 1 minute and  4 seconds show: 1 minutes and 4 seconds
   Object.keys(timeLeft).forEach((interval, index) => {
     if (!timeLeft[interval]) {
-      // Skip the entry, if there are no intervals before existing one:
-      // E.g Skip hours if there are 0 days. Or Skip minutes if there are no hours and no days left
+      // If the interval value is 0, skip it only if there are no intervals before existing one:
+      // E.g If hours are 0 , skip if there are 0 days.
+      // Or if there are 0 minute, skip if there are no hours and no days left
+      // Do not skip 0 minutes if interval is 1 day 0 hours 0 minutes 3 seconds
       let intervalIndex = index - 1;
       let removeInterval = true;
       while (intervalIndex >= 0) {
