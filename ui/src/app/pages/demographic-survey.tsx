@@ -16,6 +16,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [initialSurvey, setInitialSurvey] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [, navigateByUrl] = useNavigation();
 
   const { hideSpinner, showSpinner } = props;
@@ -56,10 +57,12 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   }, [profile]);
 
   const handleSubmit = async () => {
+    setSubmitting(true);
     showSpinner();
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
+    setSubmitting(false);
     navigateByUrl('/profile');
   };
 
@@ -110,7 +113,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
         }
       >
         <Button
-          disabled={!!errors || !changed}
+          disabled={!!errors || !changed || submitting}
           type='primary'
           onClick={handleSubmit}
           style={{ margin: '1rem 0rem' }}
