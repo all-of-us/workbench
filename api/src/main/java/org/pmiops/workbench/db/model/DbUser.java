@@ -26,6 +26,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.annotation.CreatedDate;
@@ -448,5 +451,30 @@ public class DbUser {
             .toString()
             .substring(0, PD_UUID_SUFFIX_SIZE);
     return getUserPDNamePrefix() + "-" + randomString;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+
+    if (!(o instanceof DbUser)) return false;
+
+    DbUser dbUser = (DbUser) o;
+
+    return new EqualsBuilder().append(userId, dbUser.userId)
+            .append(disabled, dbUser.disabled)
+            .append(username, dbUser.username)
+            .append(contactEmail, dbUser.contactEmail)
+            .append(freeTierCreditsLimitDollarsOverride, dbUser.freeTierCreditsLimitDollarsOverride)
+            .append(firstSignInTime, dbUser.firstSignInTime)
+            .append(creationTime, dbUser.creationTime)
+            .append(givenName, dbUser.givenName)
+            .append(familyName, dbUser.familyName)
+            .append(address, dbUser.address).isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder(17, 37).append(userId).append(username).append(contactEmail).append(freeTierCreditsLimitDollarsOverride).append(firstSignInTime).append(disabled).append(creationTime).append(givenName).append(familyName).append(address).toHashCode();
   }
 }

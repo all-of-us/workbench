@@ -3,15 +3,16 @@ package org.pmiops.workbench.billing;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,8 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.pmiops.workbench.db.dao.WorkspaceDao.*;
 
@@ -49,8 +52,6 @@ public class FreeTierBillingService {
   private static final double COST_COMPARISON_TOLERANCE = 0.000001;
   private static final double COST_FRACTION_TOLERANCE = 0.000001;
 
-  private static final int MIN_USERS_BATCH = 10;
-  private static final int MAX_USERS_BATCH = 999;
 
 
   @Autowired
@@ -80,29 +81,14 @@ public class FreeTierBillingService {
     return dbWorkspaceFreeTierUsage.getCost();
   }
 
-  /**
-   * 1- Get users who have active free tier workspaces
-   * 2- Iterate over these users in batches of X
-   *    and find the cost of their workspaces before/after
-   */
-  public void checkFreeTierBillingUsage() {
-    logger.info("Checking Free Tier Billing usage - start");
 
-    Iterable<DbUser> freeTierActiveWorkspaceCreators = userDao.findAll();
-
-    for (List<DbUser> usersPartition : Iterables.partition(freeTierActiveWorkspaceCreators, getFreeTierCronUserBatchSize())) {
-      logger.info(String.format("Processing users batch of size: %d", usersPartition.size()));
-      checkFreeTierBillingUsageForUsers(new HashSet<>(usersPartition));
-    }
-
-    logger.info("Checking Free Tier Billing usage - finish");
-  }
 
   /**
    * Check whether usersPartition have incurred sufficient cost in their workspaces to trigger alerts due to
    * passing thresholds or exceeding limits
    */
-  private void checkFreeTierBillingUsageForUsers(Set<DbUser> usersPartition) {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void checkFreeTierBillingUsageForUsers(Set<DbUser> usersPartition) {
 
     // Current cost in DB
     final List<WorkspaceCostView> costInDB = workspaceDao.getWorkspaceCostViews(usersPartition);
@@ -205,8 +191,18 @@ public class FreeTierBillingService {
                             Collectors.toList());
 
     final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
+    Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages = workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
+
+    // Prepare cache of workspace ID to the free tier use entity
+    Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsage =
+            StreamSupport
+                    .stream(workspaceFreeTierUsages.spliterator(), false)
+                    .collect(
+                            Collectors
+                                    .toMap(wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
+
     workspaceList.forEach(
-            w -> workspaceFreeTierUsageDao.updateCost(w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
+            w -> workspaceFreeTierUsageDao.updateCost(workspaceIdToFreeTierUsage, w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
 
     logger.info(
             String.format(
@@ -248,8 +244,7 @@ public class FreeTierBillingService {
             .forEach(id -> workspaceDao.updateBillingStatus(id, status));
   }
 
-  private void sendAlertsForCostThresholds(
-          Map<Long, Double> previousUserCosts,
+  private void sendAlertsForCostThresholds(Map<Long, Double> previousUserCosts,
           Map<Long, Double> userCosts) {
 
     final List<Double> costThresholdsInDescOrder =
@@ -467,12 +462,6 @@ public class FreeTierBillingService {
     return Math.max(creatorFreeCreditsRemaining, 0);
   }
 
-  private int getFreeTierCronUserBatchSize() {
-    Integer freeTierCronUserBatchSize = workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
-    logger.info(String.format("freeTierCronUserBatchSize is %d", freeTierCronUserBatchSize));
-    return Math.min(
-            MAX_USERS_BATCH, freeTierCronUserBatchSize == null || freeTierCronUserBatchSize <= 0 ? MIN_USERS_BATCH : freeTierCronUserBatchSize
-    );
-  }
+
 
 }
