@@ -1042,6 +1042,7 @@ paths:
       operationId: getWorkspaceResources
       responses:
         200:
+          description: OK
           schema:
             "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v2/workspaces/{workspaceNamespace}/{workspaceId}/resources":
@@ -1052,17 +1053,18 @@ paths:
       parameters:
         - in: query
           name: resourceTypesToFetch
-          type: array
-          items:
-            "$ref": "#/definitions/ResourceType"
           description: Types of workspace resources to fetch. Currently only supports
             Cohorts, Cohort Reviews, Concept Sets, and Datasets
+          type: array
+          items:
+            type: string
       tags:
       - workspaces
       description: Gets a user defined selection of objects contained within a workspace
       operationId: getWorkspaceResourcesV2
       responses:
         200:
+          description: OK
           schema:
             "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
