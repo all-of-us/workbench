@@ -364,42 +364,9 @@ public class GenomicExtractionService {
     Map<String, String> maybeInputs = new HashMap<>();
     int methodLogicalVersion =
         Optional.ofNullable(cohortExtractionConfig.extractionMethodLogicalVersion).orElse(0);
-    if (methodLogicalVersion >= 2) {
-      // Added in https://github.com/broadinstitute/gatk/pull/7698
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix", "\"" + extractionUuid + "\"");
-    }
     if (methodLogicalVersion < 3) {
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_destination_dataset",
-          "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"");
-      maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".do_not_filter_override", "true");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".wgs_intervals",
-          "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".reference",
-          "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".reference_index",
-          "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai\"");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".reference_dict",
-          "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_temp_tables_dataset",
-          "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"");
-    } else {
-      String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
-      if (destinationParts.length != 2) {
-        log.severe(
-            "bad config value for destination BigQuery dataset: "
-                + cohortExtractionConfig.extractionDestinationDataset);
-        throw new ServerErrorException();
-      }
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".destination_project_id", "\"" + destinationParts[0] + "\"");
-      maybeInputs.put(
-          EXTRACT_WORKFLOW_NAME + ".destination_dataset_name", "\"" + destinationParts[1] + "\"");
+      log.severe("unsupported GVS extract method version: " + methodLogicalVersion);
+      throw new ServerErrorException();
     }
 
     String filterSetName = workspace.getCdrVersion().getWgsFilterSetName();
@@ -409,6 +376,15 @@ public class GenomicExtractionService {
       // Typically, we will want to specify a filter set.
       maybeInputs.put(EXTRACT_WORKFLOW_NAME + ".filter_set_name", "\"" + filterSetName + "\"");
     }
+
+    String[] destinationParts = cohortExtractionConfig.extractionDestinationDataset.split("\\.");
+    if (destinationParts.length != 2) {
+      log.severe(
+          "bad config value for destination BigQuery dataset: "
+              + cohortExtractionConfig.extractionDestinationDataset);
+      throw new ServerErrorException();
+    }
+
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
             .get()
@@ -426,6 +402,16 @@ public class GenomicExtractionService {
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".query_project",
                                 "\"" + workspace.getGoogleProject() + "\"")
+                            // Added in https://github.com/broadinstitute/gatk/pull/7698
+                            .put(
+                                EXTRACT_WORKFLOW_NAME + ".cohort_table_prefix",
+                                "\"" + extractionUuid + "\"")
+                            .put(
+                                EXTRACT_WORKFLOW_NAME + ".destination_project_id",
+                                "\"" + destinationParts[0] + "\"")
+                            .put(
+                                EXTRACT_WORKFLOW_NAME + ".destination_dataset_name",
+                                "\"" + destinationParts[1] + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".extraction_uuid",
                                 "\"" + extractionUuid + "\"")
