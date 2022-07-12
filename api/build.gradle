@@ -462,6 +462,7 @@ dependencies {
     compile "org.springframework:spring-jcl:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-jdbc:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-orm:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile "org.springframework:spring-test:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-tx:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-web:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
