@@ -35,9 +35,7 @@
     - We can grant the permission to the proxy group which is available from Step 3.
         - the pet SA account will also work, but the proxy group is more permissive and will apply to all workspaces created by the wgs service account  
     - These are the names I used in test but they can be anything. (configField - datasetName)
-    - extractionCohortsDataset - wgs_extraction_cohorts
     - extractionDestinationDataset - wgs_extracted_cohorts
-    - extractionTempTablesDataset - wgs_extraction_temp_tables
     - `./project.rb create-wgs-extraction-dataset  --project all-of-us-workbench-test --bq-dataset wgs_extraction_temp_tables`
 
 7. Publish the WGS dataset and grant read permissions to the cohort extraction service account's proxy group

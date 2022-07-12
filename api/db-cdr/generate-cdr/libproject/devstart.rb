@@ -509,9 +509,7 @@ def create_wgs_extraction_datasets(cmd_name, args)
 
   extract_config = get_config(op.opts.project).fetch("wgsCohortExtraction", {})
   fq_datasets = [
-    "extractionCohortsDataset",
     "extractionDestinationDataset",
-    "extractionTempTablesDataset"
   ].map do |key|
     fq_ds = extract_config.fetch(key)
     raise ArgumentError.new("missing config value for #{key} in project #{op.opts.project}") unless fq_ds
