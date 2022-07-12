@@ -28,7 +28,6 @@ export const WorkspaceResearchSummary = (props: Props) => {
         initialText={props.researchValue}
         maxCharacters={1000}
         onChange={(s: string) => props.onChange(s)}
-        tooLongWarningCharacters={950}
         tooShortWarningCharacters={100}
         tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
       />

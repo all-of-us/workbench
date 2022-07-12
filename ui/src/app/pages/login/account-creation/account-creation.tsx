@@ -672,7 +672,6 @@ export class AccountCreation extends React.Component<
                   this.updateProfileObject('areaOfResearch', s)
                 }
                 textBoxStyleOverrides={styles.textAreaStyleOverride}
-                tooLongWarningCharacters={1900}
                 tooShortWarningCharacters={100}
                 tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
               />

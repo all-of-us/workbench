@@ -74,7 +74,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  cohort_id,\n"
                 + "  creation_time,\n"
                 + "  creator_id,\n"
-                + "  criteria,\n"
                 + "  description,\n"
                 + "  last_modified_time,\n"
                 + "  name,\n"
@@ -88,7 +87,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .cohortId(rs.getLong("cohort_id"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .creatorId(rs.getLong("creator_id"))
-                .criteria(rs.getString("criteria"))
                 .description(rs.getString("description"))
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))

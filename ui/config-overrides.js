@@ -15,9 +15,8 @@ const removeCssMinimizer = (original) => {
 
 module.exports = {
   webpack: function(config, env) {
-    let environmentFilePath = 'environment.localtest.ts'
-    if (process.env.REACT_APP_ENVIRONMENT) {
-      environmentFilePath = `environment.${process.env.REACT_APP_ENVIRONMENT}.ts`
+    if (!process.env.REACT_APP_ENVIRONMENT) {
+      throw new Error(`REACT_APP_ENVIRONMENT is not set. It must be set in order to use yarn start or dev-up. For example REACT_APP_ENVIRONMENT=local yarn dev-up`);
     }
 
     if (!config.plugins) {
@@ -26,10 +25,11 @@ module.exports = {
     config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
             /src\/environments\/environment\.ts/,
-            environmentFilePath
+            `environment.${process.env.REACT_APP_ENVIRONMENT}.ts`
         )
     );
-   config.optimization.minimizer = removeCssMinimizer(config.optimization.minimizer);
+    
+    config.optimization.minimizer = removeCssMinimizer(config.optimization.minimizer);
 
     return config;
   },

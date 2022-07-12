@@ -61,7 +61,7 @@ public class EmployeeModel {
 ```
 
 Additionally, we have a (nearly) corresponding entity in the database. ORM bindings are omitted for
-this efxample.
+this example.
 ```java
 // ORM details omitted.
 public class EmployeeDbEntity {
@@ -163,7 +163,7 @@ public class EmployeeMapperImpl implements EmployeeMapper {
     }
 }
 ```
-Notice as well that MapStruct's default policty for `null` refernces is to assume any input
+Notice as well that MapStruct's default policy for `null` references is to assume any input
 parameter or property could be `null` and to happily return `null` for the output. (It may
 actually help to annotate the mapper method with `@Nullable` as a reminder.)
 

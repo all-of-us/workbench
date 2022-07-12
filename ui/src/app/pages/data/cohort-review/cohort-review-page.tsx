@@ -20,6 +20,7 @@ import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
 import { CohortReviewListItem } from 'app/pages/data/cohort-review/cohort-review-list-item';
+import { CohortReviewOverview } from 'app/pages/data/cohort-review/cohort-review-overview';
 import { CohortReviewParticipantsTable } from 'app/pages/data/cohort-review/cohort-review-participants-table';
 import { CreateCohortReviewModal } from 'app/pages/data/cohort-review/create-cohort-review-modal';
 import { visitsFilterOptions } from 'app/services/review-state.service';
@@ -251,6 +252,9 @@ export const CohortReviewPage = fp.flow(
               </Button>
             </h4>
             <div style={styles.description}>{cohort.description}</div>
+          </div>
+          <div>
+            <CohortReviewOverview cohort={cohort} />
           </div>
           <div style={{ display: 'flex' }}>
             <div style={styles.reviewList}>

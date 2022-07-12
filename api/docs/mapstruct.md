@@ -34,7 +34,7 @@ proceed one property at a time until all the warnings are gone.
 First, you should *always* look at the generated code and step through it in the debugger. This is
 because, while the codegen should be deterministic, most of us don't go around with its order of
 operator precedence in our head. Particularly if you have many input parameters with multiple fields
-with common names, you may find that `foo.id` is getting used instead of `bar.id` becase one's a 
+with common names, you may find that `foo.id` is getting used instead of `bar.id` because one's a 
 `long` and the other an `int`. Or something. 
 
 In general, the library gives very reasonable error
@@ -88,15 +88,15 @@ If the type of the target property has a reasonable default (such as zero), and 
 state for it, then using `NullValuePropertyMappingStrategy.SET_TO_DEFAULT` is an option.
 
 #### Use Cases for `ignore = true`
-The following sitations are some places where ignoring the target property in a mapping annotation
+The following situations are some places where ignoring the target property in a mapping annotation
 may be appropriate:
-* the property will be mapped in an `@AfterMapping`-annotated method, and inclded in the generated
+* the property will be mapped in an `@AfterMapping`-annotated method, and included in the generated
 code
 * the property is not intended to be written by any outside callers (for example, an automatically
 incremented database column property such as a primary key or `@Transient` entity property)
 * read-only fields on an API model class, assuming the target of the mapper method represents
 a model input to a CREATE method. For mapping to the response's version of a created object, these
-fields should be populated (and thse not ignored). So if an `OctopusModel` passed into a 
+fields should be populated (and these are not ignored). So if an `OctopusModel` passed into a 
 `createOctopus` API only has one leg as `required` and seven legs `readOnly`, we may need separate
 methods `OctoppusModel toCreateOctopusRequestModel(Tentalcle t);` and a
 `OctoppusModel toHydratedOctopusRequest(Tentalcle t1, Tentacle T2, ..., Tentacle T8);`
@@ -104,7 +104,7 @@ methods `OctoppusModel toCreateOctopusRequestModel(Tentalcle t);` and a
 defaults, the `NullValuePropertyMappingStrategy.DEFAULT` annotation may be used).
 ## Handling Default Values
 
-### Handling database defalts
+### Handling database defaults
 If the target class is a Hibernate model, and one or more fields have defaults
 defined in the database schema, we do not want to overwrite that field with `null`
 or any default value listed in the mapper's annotations. To get around this, we need
@@ -175,4 +175,4 @@ want. For example, we spun our own Sql Timestamps to String mapper
 - *Semantic Coupling* If the designer of a class somehow tacitly assumes that property A will be set
 before property B is set, and there are side effect(s) to setting these properties (for example
 with an observer or ORM magic), then MapStruct will likely violate that expected order. The solution
-is to carefully document and test this kind of class, or to elimiate this kind of coupling altogether.
+is to carefully document and test this kind of class, or to eliminate this kind of coupling altogether.

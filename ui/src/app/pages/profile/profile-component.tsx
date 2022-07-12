@@ -329,7 +329,6 @@ export const ProfileComponent = fp.flow(
           invalid: !!errorText,
           style: props.style,
           maxCharacters: props.maxCharacters,
-          tooLongWarningCharacters: props.tooLongWarningCharacters,
           ...props,
         };
         const id = props.id || valueKey;
@@ -344,7 +343,6 @@ export const ProfileComponent = fp.flow(
                 heightOverride={styles.longInputHeightStyle}
                 initialText={inputProps.value}
                 maxCharacters={inputProps.maxCharacters}
-                tooLongWarningCharacters={inputProps.tooLongWarningCharacters}
                 {...inputProps}
                 textBoxStyleOverrides={{
                   ...styles.longInputContainerStyle,
@@ -494,7 +492,6 @@ export const ProfileComponent = fp.flow(
                       </FlexColumn>
                     ),
                     maxCharacters: 2000,
-                    tooLongWarningCharacters: 1900,
                     valueKey: 'areaOfResearch',
                     isLong: true,
                     style: { width: '26rem' },

@@ -18,7 +18,12 @@ import { withProfileErrorModal } from 'app/components/with-error-modal';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { CheckBox, NumberInput, TextInput } from './inputs';
+import {
+  CheckBox,
+  NumberInput,
+  TextAreaWithLengthValidationMessage,
+  TextInput,
+} from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { AoU } from './text-wrappers';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
@@ -27,7 +32,12 @@ import { YesNoOptionalQuestion } from './yes-no-optional-question';
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
 const styles = reactStyles({
-  question: { fontSize: 18, fontWeight: 'bold', color: colors.primary },
+  question: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.primary,
+    lineHeight: '1.25rem',
+  },
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
@@ -66,8 +76,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         },
       };
 
-  const ethnicityAiAnOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.AIANOTHER
+  const ethnicityAiAnOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.AIANOTHER
   )
     ? {
         ethnicityAiAnOtherText: {
@@ -81,8 +91,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityAsianOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.ASIANOTHER
+  const ethnicityAsianOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.ASIANOTHER
   )
     ? {
         ethnicityAsianOtherText: {
@@ -96,8 +106,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityBlackOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.BLACKOTHER
+  const ethnicityBlackOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.BLACKOTHER
   )
     ? {
         ethnicityBlackOtherText: {
@@ -111,23 +121,22 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityHispanicOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.HISPANICOTHER
-  )
-    ? {
-        ethnicityHispanicOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting Hispanic or Latino or Spanish Origin ' +
-              '"None of these fully describe me, and I want to specify", please specify a value',
+  const ethnicityHispanicOtherText =
+    demographicSurvey.ethnicCategories.includes(EthnicCategory.HISPANICOTHER)
+      ? {
+          ethnicityHispanicOtherText: {
+            presence: {
+              allowEmpty: false,
+              message:
+                '^If selecting Hispanic or Latino or Spanish Origin ' +
+                '"None of these fully describe me, and I want to specify", please specify a value',
+            },
           },
-        },
-      }
-    : {};
+        }
+      : {};
 
-  const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.MENAOTHER
+  const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.MENAOTHER
   )
     ? {
         ethnicityMeNaOtherText: {
@@ -141,8 +150,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityNhPiOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.NHPIOTHER
+  const ethnicityNhPiOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.NHPIOTHER
   )
     ? {
         ethnicityNhPiOtherText: {
@@ -156,8 +165,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityWhiteOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.WHITEOTHER
+  const ethnicityWhiteOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.WHITEOTHER
   )
     ? {
         ethnicityWhiteOtherText: {
@@ -171,8 +180,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const ethnicityOtherText = demographicSurvey.ethnicCategories.some(
-    (ec) => ec === EthnicCategory.OTHER
+  const ethnicityOtherText = demographicSurvey.ethnicCategories.includes(
+    EthnicCategory.OTHER
   )
     ? {
         ethnicityOtherText: {
@@ -186,8 +195,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       }
     : {};
 
-  const genderOtherText = demographicSurvey.genderIdentities.some(
-    (ec) => ec === GenderIdentityV2.OTHER
+  const genderOtherText = demographicSurvey.genderIdentities.includes(
+    GenderIdentityV2.OTHER
   )
     ? {
         genderOtherText: {
@@ -215,8 +224,8 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         }
       : {};
 
-  const orientationOtherText = demographicSurvey.sexualOrientations.some(
-    (ec) => ec === SexualOrientationV2.OTHER
+  const orientationOtherText = demographicSurvey.sexualOrientations.includes(
+    SexualOrientationV2.OTHER
   )
     ? {
         orientationOtherText: {
@@ -245,6 +254,12 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     disabilityDressing: { presence: { allowEmpty: false } },
     disabilityErrands: { presence: { allowEmpty: false } },
     sexualOrientations: { presence: { allowEmpty: false } },
+    surveyComments: {
+      length: {
+        maximum: 1000,
+        tooLong: 'can have no more than %{count} characters.',
+      },
+    },
     ...ethnicityAiAnOtherText,
     ...ethnicityAsianOtherText,
     ...ethnicityBlackOtherText,
@@ -269,33 +284,72 @@ interface DemographicSurveyProps extends WithSpinnerOverlayProps {
 
 export const DemographicSurvey = fp.flow(withProfileErrorModal)(
   (props: DemographicSurveyProps) => {
-    const [isAian, setIsAian] = useState(false);
-    const [showAsianOptions, setShowAsianOptions] = useState(false);
-    const [showAiAnOptions, setShowAiAnOptions] = useState(false);
-    const [showBlackOptions, setShowBlackOptions] = useState(false);
-    const [showHispanicOptions, setShowHispanicOptions] = useState(false);
-    const [showMeNaOptions, setShowMeNaOptions] = useState(false);
-    const [showNhPiOptions, setShowNhPiOptions] = useState(false);
-    const [showWhiteOptions, setShowWhiteOptions] = useState(false);
-
     const { onError, onUpdate, profile } = props;
     const { demographicSurveyV2: survey } = profile;
+
+    const [isAian, setIsAian] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.AIAN)
+    );
+    const [showAsianOptions, setShowAsianOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.ASIAN)
+    );
+    const [showAiAnOptions, setShowAiAnOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.AIAN)
+    );
+    const [showBlackOptions, setShowBlackOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.BLACK)
+    );
+    const [showHispanicOptions, setShowHispanicOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.HISPANIC)
+    );
+    const [showMeNaOptions, setShowMeNaOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.MENA)
+    );
+    const [showNhPiOptions, setShowNhPiOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.NHPI)
+    );
+    const [showWhiteOptions, setShowWhiteOptions] = useState(
+      survey.ethnicCategories.includes(EthnicCategory.WHITE)
+    );
+
+    const setShowOptionsFunctionList = [
+      setShowAsianOptions,
+      setShowAiAnOptions,
+      setShowBlackOptions,
+      setShowHispanicOptions,
+      setShowMeNaOptions,
+      setShowNhPiOptions,
+      setShowWhiteOptions,
+    ];
 
     useEffect(() => {
       onError(validateDemographicSurvey(survey));
     }, [profile]);
 
     useEffect(() => {
-      setIsAian(
-        survey.ethnicCategories.some(
-          (s) =>
-            s === EthnicCategory.AIAN ||
-            s === EthnicCategory.AIANAIAN ||
-            s === EthnicCategory.AIANCENTRALSOUTH ||
-            s === EthnicCategory.AIANOTHER
-        )
+      const includesAiAN = survey.ethnicCategories.includes(
+        EthnicCategory.AIAN
       );
-    }, [survey.ethnicCategories]);
+      const isAiAnChanged = includesAiAN !== isAian;
+
+      if (isAiAnChanged && !includesAiAN) {
+        onUpdate(
+          'sexualOrientations',
+          survey.sexualOrientations.filter(
+            (so) => so !== SexualOrientationV2.TWOSPIRIT
+          )
+        );
+        onUpdate(
+          'genderIdentities',
+          survey.genderIdentities.filter(
+            (so) => so !== GenderIdentityV2.TWOSPIRIT
+          )
+        );
+      }
+      if (isAiAnChanged) {
+        setIsAian(includesAiAN);
+      }
+    }, [survey, isAian]);
 
     const disadvantagedBackgroundQuestion = (
       <div>
@@ -337,16 +391,20 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         </div>
         <FlexColumn>
           <MultipleChoiceQuestion
-            question='1. Which categories describe you?'
-            label='Race(s) and/or Ethnicities'
+            question='1. Which Racial and Ethnic categories describe you?'
+            label='Racial and/or Ethnic Identity/Identities'
             options={[
               {
                 label: 'American Indian or Alaska Native (AIAN)',
                 value: EthnicCategory.AIAN,
                 subOptions: [
                   {
-                    label: 'American Indian or Alaska Native (AIAN)',
-                    value: EthnicCategory.AIANAIAN,
+                    label: 'American Indian',
+                    value: EthnicCategory.AIANAMERICANINDIAN,
+                  },
+                  {
+                    label: 'Alaska Native',
+                    value: EthnicCategory.AIANALASKANATIVE,
                   },
                   {
                     label: 'Central or South American Indian',
@@ -658,11 +716,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: EthnicCategory.PREFERNOTTOANSWER,
-                onChange: (checked) =>
+                onChange: (checked) => {
                   onUpdate(
                     'ethnicCategories',
                     checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
-                  ),
+                  );
+                },
               },
             ]}
             multiple
@@ -670,12 +729,16 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'ethnicCategories',
-                value.length > 1
-                  ? value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
-                  : value
+                value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
               )
             }
-            style={{ marginBottom: '1rem' }}
+            enableExpansionControls
+            onCollapseAll={() =>
+              setShowOptionsFunctionList.forEach((fn) => fn(false))
+            }
+            onExpandAll={() =>
+              setShowOptionsFunctionList.forEach((fn) => fn(true))
+            }
           />
           <MultipleChoiceQuestion
             question='2. What terms best express how you describe your current gender identity?'
@@ -735,14 +798,9 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'genderIdentities',
-                value.length > 1
-                  ? value.filter(
-                      (v) => v !== GenderIdentityV2.PREFERNOTTOANSWER
-                    )
-                  : value
+                value.filter((v) => v !== GenderIdentityV2.PREFERNOTTOANSWER)
               )
             }
-            style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
             question='3. What was the sex assigned to you at birth, such as on your original birth certificate?'
@@ -780,7 +838,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               }
               onUpdate('sexAtBirth', value);
             }}
-            style={{ marginBottom: '1rem' }}
           />
           <MultipleChoiceQuestion
             question='4. What terms best express how you describe your current sexual orientation?'
@@ -842,27 +899,20 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'sexualOrientations',
-                value.length > 1
-                  ? value.filter(
-                      (v) => v !== SexualOrientationV2.PREFERNOTTOANSWER
-                    )
-                  : value
+                value.filter((v) => v !== SexualOrientationV2.PREFERNOTTOANSWER)
               )
             }
-            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='5. Are you deaf or do you have serious difficulty hearing?'
             selected={survey.disabilityHearing}
             onChange={(value) => onUpdate('disabilityHearing', value)}
-            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='6. Are you blind or do you have serious difficulty seeing, even when
             wearing glasses?'
             selected={survey.disabilitySeeing}
             onChange={(value) => onUpdate('disabilitySeeing', value)}
-            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='7. Because of a physical, cognitive, or emotional condition, do you
@@ -870,26 +920,22 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             decisions?'
             selected={survey.disabilityConcentrating}
             onChange={(value) => onUpdate('disabilityConcentrating', value)}
-            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='8. Do you have serious difficulty walking or climbing stairs?'
             selected={survey.disabilityWalking}
             onChange={(value) => onUpdate('disabilityWalking', value)}
-            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question='9. Do you have difficulty dressing or bathing?'
             selected={survey.disabilityDressing}
             onChange={(value) => onUpdate('disabilityDressing', value)}
-            style={{ marginBottom: '1rem' }}
           />
           <YesNoOptionalQuestion
             question="10. Because of a physical, mental, or emotional condition, do you have
             difficulty doing errands alone such as visiting doctor's office or shopping?"
             selected={survey.disabilityErrands}
             onChange={(value) => onUpdate('disabilityErrands', value)}
-            style={{ marginBottom: '1rem' }}
           />
           <FlexColumn style={{ marginBottom: '1rem' }}>
             <div
@@ -968,7 +1014,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             ]}
             selected={survey.education}
             onChange={(value) => onUpdate('education', value)}
-            style={{ marginBottom: '1rem' }}
           />
 
           <YesNoOptionalQuestion
@@ -985,10 +1030,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               in the preceding questions that we may want to consider including
               in future surveys?
             </div>
-            <TextInput
+            <TextAreaWithLengthValidationMessage
+              id='survey-comments'
               onChange={(value) => onUpdate('surveyComments', value)}
-              value={survey.surveyComments || ''}
-              style={{ width: '50%' }}
+              initialText={survey.surveyComments || ''}
+              textBoxStyleOverrides={{ width: '100%' }}
+              maxCharacters={1000}
             />
           </FlexColumn>
         </FlexColumn>

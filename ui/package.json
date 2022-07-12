@@ -5,6 +5,8 @@
   "scripts": {
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
     "dev-up": "yarn && yarn run codegen && yarn start",
+    "dev-up-test": "yarn && yarn run codegen && REACT_APP_ENVIRONMENT=localtest yarn start",
+    "dev-up-local": "yarn && yarn run codegen && REACT_APP_ENVIRONMENT=local yarn start",
     "build": "react-app-rewired build",
     "test:debug": "react-app-rewired --inspect-brk test --watchAll=false --run-in-band",
     "test": "react-app-rewired test --watchAll=false",
@@ -46,7 +48,7 @@
     "highcharts-react-official": "3.0.0",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "ngx-popper": "^5.1.7",
     "nouislider": "^14.1.1",
     "nouislider-react": "^3.3.7",

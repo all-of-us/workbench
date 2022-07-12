@@ -108,7 +108,6 @@ export const AdminLockRequest = (props: Props) => {
               setApiError(false);
               setRequestReason(s);
             }}
-            tooLongWarningCharacters={MAX_REASON}
             tooShortWarningCharacters={MIN_REASON}
             tooShortWarning={`Locking Request Reason should be at least ${MIN_REASON} characters long`}
           />
