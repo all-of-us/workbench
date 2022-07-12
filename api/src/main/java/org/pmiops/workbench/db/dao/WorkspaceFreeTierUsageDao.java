@@ -1,7 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -15,9 +17,11 @@ import org.springframework.stereotype.Repository;
 public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFreeTierUsage, Long> {
 
   DbWorkspaceFreeTierUsage findOneByWorkspace(DbWorkspace workspace);
+  Iterable<DbWorkspaceFreeTierUsage> findAllByWorkspaceIn(Iterable<DbWorkspace> workspaceList);
 
-  default void updateCost(DbWorkspace workspace, double cost) {
-    DbWorkspaceFreeTierUsage usage = findOneByWorkspace(workspace);
+  default void updateCost(
+          Map<Long, DbWorkspaceFreeTierUsage> cache, DbWorkspace workspace, double cost) {
+    DbWorkspaceFreeTierUsage usage = cache.get(workspace.getWorkspaceId());
     if (usage == null) {
       usage = new DbWorkspaceFreeTierUsage(workspace);
     }

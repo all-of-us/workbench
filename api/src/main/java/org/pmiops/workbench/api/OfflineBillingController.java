@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
 
-  private final FreeTierBillingService freeTierBillingService;
+  private final FreeTierBillingBatchUpdateService freeTierBillingService;
 
   @Autowired
-  OfflineBillingController(FreeTierBillingService freeTierBillingService) {
+  OfflineBillingController(FreeTierBillingBatchUpdateService freeTierBillingService) {
     this.freeTierBillingService = freeTierBillingService;
   }
 
