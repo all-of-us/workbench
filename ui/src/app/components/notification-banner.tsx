@@ -4,7 +4,7 @@ import { CSSProperties } from 'react';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { ButtonWithLocationState } from './buttons';
+import { Button, ButtonWithLocationState } from './buttons';
 import { FlexRow } from './flex';
 import { AlarmExclamation } from './icons';
 
@@ -69,6 +69,7 @@ interface NotificationProps {
   buttonText: string;
   buttonPath: string;
   buttonDisabled: boolean;
+  useLocationLink?: boolean;
   boxStyle?: CSSProperties;
   textStyle?: CSSProperties;
   buttonStyle?: CSSProperties;
@@ -80,6 +81,7 @@ export const NotificationBanner = ({
   buttonText,
   buttonPath,
   buttonDisabled,
+  useLocationLink,
   boxStyle,
   textStyle,
   buttonStyle,
@@ -88,14 +90,25 @@ export const NotificationBanner = ({
     <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
       <AlarmExclamation style={styles.icon} />
       <div style={{ ...styles.text, ...textStyle }}>{text}</div>
-      <ButtonWithLocationState
-        type='primary'
-        style={{ ...styles.button, ...buttonStyle }}
-        path={buttonPath}
-        disabled={buttonDisabled}
-      >
-        <div style={styles.buttonText}>{buttonText}</div>
-      </ButtonWithLocationState>
+      {useLocationLink ? (
+        <ButtonWithLocationState
+          type='primary'
+          style={{ ...styles.button, ...buttonStyle }}
+          path={buttonPath}
+          disabled={buttonDisabled}
+        >
+          <div style={styles.buttonText}>{buttonText}</div>
+        </ButtonWithLocationState>
+      ) : (
+        <Button
+          type='primary'
+          style={styles.button}
+          path={buttonPath}
+          disabled={buttonDisabled}
+        >
+          <div style={styles.buttonText}>{buttonText}</div>
+        </Button>
+      )}
     </FlexRow>
   );
 };

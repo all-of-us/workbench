@@ -123,6 +123,7 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
         text={notificationText}
         boxStyle={styles.bannerBox}
         textStyle={styles.bannerText}
+        useLocationLink={true}
         buttonStyle={styles.bannerButton}
         buttonText='Take Survey'
         buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH}
