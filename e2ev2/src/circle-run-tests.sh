@@ -16,4 +16,9 @@ export UI_HOSTNAME=pr-"$PR_SITE_NUM"-dot-all-of-us-workbench-test.appspot.com
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 export JEST_SILENT_REPORTER_DOTS=true
 export JEST_SILENT_REPORTER_SHOW_PATHS=true
-yarn test --reporters=jest-silent-reporter
+
+if [[ -e failed-tests.txt ]]; then
+  yarn test $(<test-failures.txt) --reporters=./src/failure-reporter.js
+else
+  yarn test --reporters=./src/failure-reporter.js
+fi
