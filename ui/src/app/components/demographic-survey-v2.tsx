@@ -42,11 +42,15 @@ const styles = reactStyles({
 });
 
 const NONE_FULLY_DESCRIBE =
-  'None of these fully describe me, and I want to specify';
+  'None of these fully describe me. I want to specify (optional).';
+const NONE_FULLY_DESCRIBE_MAX_LENGTH = 200;
+const NONE_FULLY_DESCRIBE_PLACEHOLDER = 'Please specify (optional)';
 const TWO_SPIRIT_DISABLED_TEXT =
   'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
   'ancestry. If this applies to you, please update your selection in the ' +
   '"Race and Ethnicities" section.';
+const MAX_CHARACTERS_VALIDATION_MESSAGE =
+  'can have no more than %{count} characters.';
 
 const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
   validate.validators.nullBoolean = (v) =>
@@ -76,170 +80,6 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         },
       };
 
-  const ethnicityAiAnOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.AIANOTHER
-  )
-    ? {
-        ethnicityAiAnOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting American Indian or Alaska Native (AIAN) ' +
-              '"None of these fully describe me, and I want to specify", please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const ethnicityAsianOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.ASIANOTHER
-  )
-    ? {
-        ethnicityAsianOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting Asian "None of these fully describe me, and I want to specify", ' +
-              'please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const ethnicityBlackOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.BLACKOTHER
-  )
-    ? {
-        ethnicityBlackOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting Black or African American "None of these fully describe me, ' +
-              'and I want to specify", please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const ethnicityHispanicOtherText =
-    demographicSurvey.ethnicCategories.includes(EthnicCategory.HISPANICOTHER)
-      ? {
-          ethnicityHispanicOtherText: {
-            presence: {
-              allowEmpty: false,
-              message:
-                '^If selecting Hispanic or Latino or Spanish Origin ' +
-                '"None of these fully describe me, and I want to specify", please specify a value',
-            },
-          },
-        }
-      : {};
-
-  const ethnicityMeNaOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.MENAOTHER
-  )
-    ? {
-        ethnicityMeNaOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting Middle Eastern or North African ' +
-              '"None of these fully describe me, and I want to specify", please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const ethnicityNhPiOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.NHPIOTHER
-  )
-    ? {
-        ethnicityNhPiOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting Native Hawaiian or Other Pacific Islander ' +
-              '"None of these fully describe me, and I want to specify", please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const ethnicityWhiteOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.WHITEOTHER
-  )
-    ? {
-        ethnicityWhiteOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting White "None of these fully describe me, and I want to specify", ' +
-              'please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const ethnicityOtherText = demographicSurvey.ethnicCategories.includes(
-    EthnicCategory.OTHER
-  )
-    ? {
-        ethnicityOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting "None of these fully describe me, ' +
-              'and I want to specify" for your Race(s) and/or Ethnicities, please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const genderOtherText = demographicSurvey.genderIdentities.includes(
-    GenderIdentityV2.OTHER
-  )
-    ? {
-        genderOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting "None of these fully describe me, and I want to specify" for your ' +
-              'Gender Identity/Identities, please specify a value',
-          },
-        },
-      }
-    : {};
-
-  const sexAtBirthOtherText =
-    demographicSurvey.sexAtBirth === SexAtBirthV2.OTHER
-      ? {
-          sexAtBirthOtherText: {
-            presence: {
-              allowEmpty: false,
-              message:
-                '^If selecting "None of these fully describe me, and I want to specify" ' +
-                'for your Sex Assigned at Birth, please specify a value',
-            },
-          },
-        }
-      : {};
-
-  const orientationOtherText = demographicSurvey.sexualOrientations.includes(
-    SexualOrientationV2.OTHER
-  )
-    ? {
-        orientationOtherText: {
-          presence: {
-            allowEmpty: false,
-            message:
-              '^If selecting "None of these fully describe me, and I want to specify" ' +
-              'for your Sexual Orientation(s), please specify a value',
-          },
-        },
-      }
-    : {};
-
-  // TODO Look into if this can be done more efficiently
   const validationCheck = {
     ethnicCategories: { presence: { allowEmpty: false } },
     genderIdentities: { presence: { allowEmpty: false } },
@@ -257,20 +97,75 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     surveyComments: {
       length: {
         maximum: 1000,
-        tooLong: 'can have no more than %{count} characters.',
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
       },
     },
-    ...ethnicityAiAnOtherText,
-    ...ethnicityAsianOtherText,
-    ...ethnicityBlackOtherText,
-    ...ethnicityHispanicOtherText,
-    ...ethnicityMeNaOtherText,
-    ...ethnicityNhPiOtherText,
-    ...ethnicityWhiteOtherText,
-    ...ethnicityOtherText,
-    ...genderOtherText,
-    ...sexAtBirthOtherText,
-    ...orientationOtherText,
+    ethnicityAiAnOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityAsianOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityBlackOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityHispanicOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityMeNaOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityNhPiOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityWhiteOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    ethnicityOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    genderOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    sexAtBirthOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
+    orientationOtherText: {
+      length: {
+        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
   };
 
   return validate(demographicSurvey, validationCheck);
@@ -415,6 +310,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.AIANOTHER,
                     showInput: true,
                     otherText: survey.ethnicityAiAnOtherText,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (checked) => {
                       if (!checked) {
                         onUpdate('ethnicityAiAnOtherText', null);
@@ -447,12 +343,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.ASIANVIETNAMESE,
                   },
                   {
-                    label:
-                      'None of these fully describe me, and I want to specify.',
+                    label: NONE_FULLY_DESCRIBE,
                     value: EthnicCategory.ASIANOTHER,
                     showInput: true,
                     otherText: survey.ethnicityAsianOtherText,
-                    otherTextMaxLength: 200,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (value) => {
                       if (!value) {
                         onUpdate('ethnicityAsianOtherText', null);
@@ -492,7 +388,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.BLACKOTHER,
                     showInput: true,
                     otherText: survey.ethnicityBlackOtherText,
-                    otherTextMaxLength: 200,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (value) => {
                       if (!value) {
                         onUpdate('ethnicityBlackOtherText', null);
@@ -542,7 +439,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.HISPANICOTHER,
                     showInput: true,
                     otherText: survey.ethnicityHispanicOtherText,
-                    otherTextMaxLength: 200,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (value) => {
                       if (!value) {
                         onUpdate('ethnicityHispanicOtherText', null);
@@ -587,7 +485,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.MENAOTHER,
                     showInput: true,
                     otherText: survey.ethnicityMeNaOtherText,
-                    otherTextMaxLength: 200,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (value) => {
                       if (!value) {
                         onUpdate('ethnicityMeNaOtherText', null);
@@ -634,7 +533,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.NHPIOTHER,
                     showInput: true,
                     otherText: survey.ethnicityNhPiOtherText,
-                    otherTextMaxLength: 200,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (value) => {
                       if (!value) {
                         onUpdate('ethnicityNhPiOtherText', null);
@@ -683,7 +583,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.WHITEOTHER,
                     showInput: true,
                     otherText: survey.ethnicityWhiteOtherText,
-                    otherTextMaxLength: 200,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                    otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (value) => {
                       if (!value) {
                         onUpdate('ethnicityWhiteOtherText', null);
@@ -704,7 +605,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: EthnicCategory.OTHER,
                 showInput: true,
                 otherText: survey.ethnicityOtherText,
-                otherTextMaxLength: 200,
+                otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                 onChange: (value) => {
                   if (!value) {
                     onUpdate('ethnicityOtherText', null);
@@ -783,7 +685,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: GenderIdentityV2.OTHER,
                 showInput: true,
                 otherText: survey.genderOtherText,
-                otherTextMaxLength: 200,
+                otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                 onChange: (value) => {
                   if (!value) {
                     onUpdate('genderOtherText', null);
@@ -818,7 +721,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: SexAtBirthV2.OTHER,
                 showInput: true,
                 otherText: survey.sexAtBirthOtherText,
-                otherTextMaxLength: 200,
+                otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                 onChange: (value) => {
                   if (!value) {
                     onUpdate('sexAtBirthOtherText', null);
@@ -875,7 +779,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: SexualOrientationV2.OTHER,
                 showInput: true,
                 otherText: survey.orientationOtherText,
-                otherTextMaxLength: 200,
+                otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+                otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                 onChange: (value) => {
                   if (!value) {
                     onUpdate('orientationOtherText', null);
