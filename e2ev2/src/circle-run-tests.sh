@@ -20,14 +20,17 @@ export JEST_SILENT_REPORTER_SHOW_PATHS=true
 BKT_ROOT=gs://all-of-us-workbench-test.appspot.com/circle-failed-tests
 gsutil cp $BKT_ROOT/\*.$CIRCLE_SHA1.txt failed-tests.txt || true
 
+function save-failures {
+  gsutil cp failed-tests.txt $BKT_ROOT/$CIRCLE_BUILD_NUM.$CIRCLE_SHA1.txt || true
+
+  # Collect garbage
+  gsutil ls $BKT_ROOT | tail -n 10 > latest.txt
+  gsutil ls $BKT_ROOT | grep -v -F -f latest.txt | gsutil rm || true
+}
+trap save-failures EXIT
+
 if [[ -e failed-tests.txt ]]; then
   yarn test $(<failed-tests.txt) --reporters=./src/failure-reporter.js
 else
   yarn test --reporters=./src/failure-reporter.js
 fi
-
-gsutil cp failed-tests.txt $BKT_ROOT/$CIRCLE_BUILD_NUM.$CIRCLE_SHA1.txt || true
-
-# Collect garbage
-gsutil ls $BKT_ROOT | tail -n 10 > latest.txt
-gsutil ls $BKT_ROOT | grep -v -F -f latest.txt | gsutil rm || true
