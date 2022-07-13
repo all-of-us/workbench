@@ -95,6 +95,9 @@ public class FreeTierBillingService {
 
     logger.info(String.format("Retrieved %d workspaces from the DB", costInDB.size()));
 
+    // No need to call BigQuery since there's nothing to update anyway
+    if(costInDB.isEmpty()) return;
+
     // Live cost in BQ
     final Map<Long, Double> liveCostsInBQ = getFreeTierWorkspaceCostsFromBQ(costInDB);
 
