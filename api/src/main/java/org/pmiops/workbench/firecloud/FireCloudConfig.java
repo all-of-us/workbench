@@ -52,8 +52,6 @@ public class FireCloudConfig {
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
   public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API = "lenientTimeoutWorkspacesApi";
-  public static final String SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API =
-      "serviceAccountStaticNotebooksApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
   public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
   public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
@@ -181,15 +179,6 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public StaticNotebooksApi endUserStaticNotebooksApi(
       @Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    StaticNotebooksApi api = new StaticNotebooksApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public StaticNotebooksApi serviceAccountStaticNotebooksApi(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     StaticNotebooksApi api = new StaticNotebooksApi();
     api.setApiClient(apiClient);
     return api;
