@@ -580,8 +580,8 @@ jobs:
             git clone --branch="$CIRCLE_BRANCH" --depth=1 \
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
             (cd aou-utils/; git submodule update --init)
-      - attach_workspace:
-          at: .
+      - restore_cache:
+          key: failed-tests-{{ .Revision }}
       - run:
           name: Run tests
           working_directory: e2ev2
@@ -597,8 +597,8 @@ jobs:
             export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
 
             ./src/circle-run-tests.sh
-      - persist_to_workspace:
-          root: .
+      - save_cache:
+          key: failed-tests-{{ .Revision }}
           paths:
             - e2ev2/failed-tests.txt
       - store_artifacts:
