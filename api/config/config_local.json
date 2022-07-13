@@ -113,7 +113,7 @@
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
-    "enableMultiReview": false,
+    "enableMultiReview": true,
     "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
