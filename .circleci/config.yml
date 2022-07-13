@@ -598,6 +598,7 @@ jobs:
 
             ./src/circle-run-tests.sh
       - save_cache:
+          when: on_fail
           key: failed-tests-{{ .Revision }}
           paths:
             - e2ev2/failed-tests.txt
@@ -858,7 +859,8 @@ workflows:
 
   playground:
     jobs:
-      - playground
+      - playground:
+          <<: *filter-pr-branch
   e2etests:
     jobs:
       - e2etests-deploy-ui:
