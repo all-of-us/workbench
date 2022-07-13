@@ -878,15 +878,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesV2(
-        String ns, String id, List<String> rtStrings) {
-    return getWorkspaceResourcesImpl(ns, id,
-      rtStrings.stream().map(ResourceType::fromValue).collect(Collectors.toList()));
+      String ns, String id, List<String> rtStrings) {
+    return getWorkspaceResourcesImpl(
+        ns, id, rtStrings.stream().map(ResourceType::fromValue).collect(Collectors.toList()));
   }
 
-  ResponseEntity<WorkspaceResourceResponse>
-      getWorkspaceResourcesImpl(
-        String workspaceNamespace, String workspaceId,
-        List<ResourceType> resourceTypesToFetch) {
+  ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesImpl(
+      String workspaceNamespace, String workspaceId, List<ResourceType> resourceTypesToFetch) {
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceAuthService.enforceWorkspaceAccessLevel(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
