@@ -618,17 +618,21 @@ export const HelpSidebar = fp.flow(
             style={styles.statusIconContainer}
           >
             {(() => {
-              const errIcon = (<FontAwesomeIcon
-                icon={faCircle}
-                style={{
-                  ...styles.asyncOperationStatusIcon,
-                  ...styles.runtimeStatusIconOutline,
-                  color: colors.asyncOperationStatus.error,
-                }}
-              />);
+              const errIcon = (
+                <FontAwesomeIcon
+                  icon={faCircle}
+                  style={{
+                    ...styles.asyncOperationStatusIcon,
+                    ...styles.runtimeStatusIconOutline,
+                    color: colors.asyncOperationStatus.error,
+                  }}
+                />
+              );
 
               if (store.loadingError) {
-                if (store.loadingError instanceof ComputeSecuritySuspendedError) {
+                if (
+                  store.loadingError instanceof ComputeSecuritySuspendedError
+                ) {
                   return (
                     <FontAwesomeIcon
                       icon={faLock}

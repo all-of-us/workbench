@@ -380,17 +380,15 @@ describe('HelpSidebar', () => {
     runtimeStub.runtime = null;
     runtimeStub.getRuntime = () =>
       Promise.reject(
-        new Response(
-          '', {
-            status: 500,
-          }
-        )
+        new Response('', {
+          status: 500,
+        })
       );
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
       runtime: undefined,
       runtimeLoaded: false,
-      loadingError: new Error('???')
+      loadingError: new Error('???'),
     });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
