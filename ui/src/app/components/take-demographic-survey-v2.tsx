@@ -2,10 +2,10 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { reactStyles } from 'app/utils';
 import {
   DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
   DEMOGRAPHIC_SURVEY_V2_PATH,
-  DEMOGRAPHIC_SURVEY_V2_PATH_WITH_PARAM,
 } from 'app/utils/constants';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
@@ -13,12 +13,29 @@ import { NotificationBanner } from './notification-banner';
 
 const identifierIndex = ['days', 'hours', 'minutes', 'seconds'];
 
+const styles = reactStyles({
+  bannerText: {
+    width: '880px',
+    lineHeight: '1',
+    marginBottom: '0.5rem',
+    alignItems: 'top',
+  },
+  bannerBox: {
+    width: '45rem',
+    height: '3rem',
+  },
+  bannerButton: {
+    width: '120px',
+    alignSelf: 'center',
+  },
+});
+
 export const TakeDemographicSurveyV2BannerMaybe = () => {
   const { profile } = useStore(profileStore);
   const location = useLocation();
 
-  let notificationText = `We have a new version of demographic survey question to better understand the diversity of the 
-     research community. Please complete the survey by `;
+  let notificationText = `The All of Us Research Program is dedicated to cultivating a diverse 
+  research community and building an inclusive platform.`;
 
   const calculateTimeLeft = () => {
     const difference =
@@ -84,12 +101,15 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   if (timeLeftDisplayStr === '') {
     notificationText += ' This will only take few minutes';
   } else {
-    notificationText =
-      notificationText +
+    notificationText +=
+      ` Please complete the updated Researcher
+    Demographic Survey before ` +
       DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE +
-      `, this will only take 2 minutes. 
-     Time Left to complete the survey : ` +
-      timeLeftDisplayStr;
+      `(` +
+      timeLeftDisplayStr +
+      ` remaining). The survey will
+    take approximately 2 minutes to complete. 
+    Your answers to these questions will help us learn more about who is using the platform.`;
   }
 
   const featureFlag =
@@ -101,11 +121,11 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
       <NotificationBanner
         dataTestId={'take-survey-notification'}
         text={notificationText}
-        boxStyle={{ width: '1980px' }}
-        textStyle={{ width: '1000px' }}
-        buttonStyle={{ width: '180px' }}
-        buttonText='Take the Survey'
-        buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH_WITH_PARAM}
+        boxStyle={styles.bannerBox}
+        textStyle={styles.bannerText}
+        buttonStyle={styles.bannerButton}
+        buttonText='Take Survey'
+        buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH}
         buttonDisabled={location.pathname === DEMOGRAPHIC_SURVEY_V2_PATH}
       />
     )

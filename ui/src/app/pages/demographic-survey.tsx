@@ -8,7 +8,7 @@ import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import { DEMOGRAPHIC_SURVEY_QUERY } from 'app/utils/constants';
+import { LOCATION_STATE_WITHIN_WORKBENCH_JSON } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
@@ -63,8 +63,11 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    const queryParam = history.location.search;
-    if (queryParam === DEMOGRAPHIC_SURVEY_QUERY) {
+    const locationState = history.location.state;
+    if (
+      !!locationState &&
+      locationState === LOCATION_STATE_WITHIN_WORKBENCH_JSON
+    ) {
       history.goBack();
     } else {
       navigateByUrl('profile');

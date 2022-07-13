@@ -9,6 +9,7 @@ import { ClrIcon, SnowmanIcon } from 'app/components/icons';
 import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { LOCATION_STATE_WITHIN_WORKBENCH_JSON } from 'app/utils/constants';
 import { reactStyles } from 'app/utils/index';
 
 import { RouteLink } from './app-router';
@@ -280,6 +281,38 @@ export const Button = ({
     <Clickable disabled={disabled} {...computedStyle} {...childProps}>
       {children}
     </Clickable>
+  );
+};
+
+export const ButtonWithLocationState = ({
+  children,
+  path = '',
+  type = 'primary',
+  style = {},
+  disabled = false,
+  propagateDataTestId = false,
+  ...props
+}) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId
+    ? props
+    : fp.omit(['data-test-id'], props);
+  const computedStyle = fp.merge(
+    computeStyle(buttonVariants[type], { disabled }),
+    { style }
+  );
+  return (
+    <Link
+      to={{
+        pathname: path,
+        state: LOCATION_STATE_WITHIN_WORKBENCH_JSON,
+      }}
+      {...computedStyle}
+    >
+      <Clickable disabled={disabled} {...childProps}>
+        {children}
+      </Clickable>
+    </Link>
   );
 };
 

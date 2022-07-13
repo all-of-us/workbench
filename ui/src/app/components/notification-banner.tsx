@@ -4,7 +4,7 @@ import { CSSProperties } from 'react';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { Button } from './buttons';
+import { ButtonWithLocationState } from './buttons';
 import { FlexRow } from './flex';
 import { AlarmExclamation } from './icons';
 
@@ -29,6 +29,7 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '25px',
     marginLeft: 'auto',
+    alignItems: 'center',
   },
   text: {
     height: '40px',
@@ -87,14 +88,14 @@ export const NotificationBanner = ({
     <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
       <AlarmExclamation style={styles.icon} />
       <div style={{ ...styles.text, ...textStyle }}>{text}</div>
-      <Button
+      <ButtonWithLocationState
         type='primary'
         style={{ ...styles.button, ...buttonStyle }}
         path={buttonPath}
         disabled={buttonDisabled}
       >
         <div style={styles.buttonText}>{buttonText}</div>
-      </Button>
+      </ButtonWithLocationState>
     </FlexRow>
   );
 };
