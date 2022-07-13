@@ -618,16 +618,28 @@ export const HelpSidebar = fp.flow(
             style={styles.statusIconContainer}
           >
             {(() => {
+              const errIcon = (<FontAwesomeIcon
+                icon={faCircle}
+                style={{
+                  ...styles.asyncOperationStatusIcon,
+                  ...styles.runtimeStatusIconOutline,
+                  color: colors.asyncOperationStatus.error,
+                }}
+              />);
+
               if (store.loadingError) {
-                return (
-                  <FontAwesomeIcon
-                    icon={faLock}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.stopped,
-                    }}
-                  />
-                );
+                if (store.loadingError instanceof ComputeSecuritySuspendedError) {
+                  return (
+                    <FontAwesomeIcon
+                      icon={faLock}
+                      style={{
+                        ...styles.asyncOperationStatusIcon,
+                        color: colors.asyncOperationStatus.stopped,
+                      }}
+                    />
+                  );
+                }
+                return errIcon;
               }
               switch (status) {
                 case RuntimeStatus.Creating:
@@ -678,16 +690,7 @@ export const HelpSidebar = fp.flow(
                     />
                   );
                 case RuntimeStatus.Error:
-                  return (
-                    <FontAwesomeIcon
-                      icon={faCircle}
-                      style={{
-                        ...styles.asyncOperationStatusIcon,
-                        ...styles.runtimeStatusIconOutline,
-                        color: colors.asyncOperationStatus.error,
-                      }}
-                    />
-                  );
+                  return errIcon;
               }
             })()}
           </FlexRow>
