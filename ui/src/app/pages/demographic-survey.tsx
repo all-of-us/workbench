@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useLocation } from 'react-router';
 import * as fp from 'lodash/fp';
 
 import { Button } from 'app/components/buttons';
@@ -18,7 +18,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [initialSurvey, setInitialSurvey] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const history = useHistory();
+  const location = useLocation();
   const [, navigateByUrl] = useNavigation();
 
   const { hideSpinner, showSpinner } = props;
@@ -63,8 +63,11 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    const prevLocationState = history.location.state + '';
-    if (!!prevLocationState && prevLocationState.includes(NAVIGATING_FROM_WORKBENCH)) {
+    const prevLocationState = location.state + '';
+    if (
+      !!prevLocationState &&
+      prevLocationState.includes(NAVIGATING_FROM_WORKBENCH)
+    ) {
       const returnPath = prevLocationState.split(NAVIGATING_FROM_WORKBENCH)[1];
       navigateByUrl(returnPath);
     } else {
