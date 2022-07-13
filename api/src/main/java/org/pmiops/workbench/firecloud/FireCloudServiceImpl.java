@@ -76,9 +76,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   // and others with the app's Service Account credentials
 
   private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
-  private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
 
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
+  private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
   private final FirecloudApiClientFactory firecloudApiClientFactory;
 
@@ -121,14 +121,14 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<NihApi> nihApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
           Provider<WorkspacesApi> endUserWorkspacesApiProvider,
+      @Qualifier(FireCloudConfig.END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
+          Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
       Provider<TermsOfServiceApi> termsOfServiceApiProvider,
       @Qualifier(FireCloudConfig.END_USER_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
-          Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
       @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
@@ -142,11 +142,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
+    this.endUserLenientTimeoutWorkspacesApiProvider = endUserLenientTimeoutWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.termsOfServiceApiProvider = termsOfServiceApiProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
-    this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.firecloudApiClientFactory = firecloudApiClientFactory;
     this.retryHandler = retryHandler;
@@ -326,7 +326,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public FirecloudWorkspaceDetails createWorkspace(
       String workspaceNamespace, String workspaceName, String authDomainName) {
-    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserLenientTimeoutWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(workspaceNamespace)
@@ -345,7 +345,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       String toWorkspaceNamespace,
       String toFirecloudName,
       String authDomainName) {
-    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserLenientTimeoutWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
             .namespace(toWorkspaceNamespace)

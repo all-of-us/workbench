@@ -8,6 +8,7 @@ import com.google.protobuf.Duration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -43,14 +44,14 @@ public class FireCloudConfig {
   // Some groups of FireCloud APIs will use one, while some will use the other.
   //
   public static final String END_USER_API_CLIENT = "endUserApiClient";
+  public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT = "endUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
   public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT =
       "wgsCohortExtractionServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
-  public static final String SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API =
-      "serviceAccountStaticNotebooksApi";
+  public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API = "lenientTimeoutWorkspacesApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
   public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
   public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
@@ -61,6 +62,20 @@ public class FireCloudConfig {
       UserAuthentication userAuthentication, FirecloudApiClientFactory factory) {
     ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
+    return apiClient;
+  }
+
+  @Bean(name = END_USER_LENIENT_TIMEOUT_API_CLIENT)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ApiClient endUserLenientTimeoutApiClient(
+      UserAuthentication userAuthentication,
+      FirecloudApiClientFactory factory,
+      WorkbenchConfig config) {
+    ApiClient apiClient = factory.newApiClient();
+    apiClient.setAccessToken(userAuthentication.getCredentials());
+    apiClient
+        .getHttpClient()
+        .setReadTimeout(config.firecloud.lenientTimeoutInSeconds, TimeUnit.SECONDS);
     return apiClient;
   }
 
@@ -142,6 +157,15 @@ public class FireCloudConfig {
     return api;
   }
 
+  @Bean(name = END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi lenientTimeoutWorkspacesApi(
+      @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
   @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApiAcls(
@@ -155,15 +179,6 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public StaticNotebooksApi endUserStaticNotebooksApi(
       @Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    StaticNotebooksApi api = new StaticNotebooksApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public StaticNotebooksApi serviceAccountStaticNotebooksApi(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     StaticNotebooksApi api = new StaticNotebooksApi();
     api.setApiClient(apiClient);
     return api;
