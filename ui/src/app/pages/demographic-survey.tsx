@@ -8,7 +8,7 @@ import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import { LOCATION_STATE_WITHIN_WORKBENCH_JSON } from 'app/utils/constants';
+import { NAVIGATING_FROM_WORKBENCH } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
@@ -63,12 +63,10 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    const locationState = history.location.state;
-    if (
-      !!locationState &&
-      locationState === LOCATION_STATE_WITHIN_WORKBENCH_JSON
-    ) {
-      history.goBack();
+    const prevLocationState = history.location.state + '';
+    if (!!prevLocationState && prevLocationState.includes(NAVIGATING_FROM_WORKBENCH)) {
+      const returnPath = prevLocationState.split(NAVIGATING_FROM_WORKBENCH)[1];
+      navigateByUrl(returnPath);
     } else {
       navigateByUrl('profile');
     }

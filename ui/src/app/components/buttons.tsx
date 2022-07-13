@@ -9,7 +9,7 @@ import { ClrIcon, SnowmanIcon } from 'app/components/icons';
 import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { LOCATION_STATE_WITHIN_WORKBENCH_JSON } from 'app/utils/constants';
+import { NAVIGATING_FROM_WORKBENCH } from 'app/utils/constants';
 import { reactStyles } from 'app/utils/index';
 
 import { RouteLink } from './app-router';
@@ -305,7 +305,7 @@ export const ButtonWithLocationState = ({
     <Link
       to={{
         pathname: path,
-        state: LOCATION_STATE_WITHIN_WORKBENCH_JSON,
+        state: NAVIGATING_FROM_WORKBENCH + location.pathname,
       }}
       {...computedStyle}
     >
