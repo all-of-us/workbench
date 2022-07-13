@@ -41,16 +41,22 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
+const MAX_CHARACTERS_VALIDATION_MESSAGE =
+  'can have no more than %{count} characters.';
 const NONE_FULLY_DESCRIBE =
   'None of these fully describe me. I want to specify (optional).';
 const NONE_FULLY_DESCRIBE_MAX_LENGTH = 200;
+const NONE_FULLY_DESCRIBE_VALIDATION = {
+  length: {
+    maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
+    tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+  },
+};
 const NONE_FULLY_DESCRIBE_PLACEHOLDER = 'Please specify (optional)';
 const TWO_SPIRIT_DISABLED_TEXT =
   'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
   'ancestry. If this applies to you, please update your selection in the ' +
   '"Race and Ethnicities" section.';
-const MAX_CHARACTERS_VALIDATION_MESSAGE =
-  'can have no more than %{count} characters.';
 
 const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
   validate.validators.nullBoolean = (v) =>
@@ -100,74 +106,23 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
       },
     },
-    ethnicityAiAnOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityAsianOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityBlackOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityHispanicOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityMeNaOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityNhPiOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityWhiteOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    ethnicityOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    genderOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    sexAtBirthOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
-    orientationOtherText: {
-      length: {
-        maximum: NONE_FULLY_DESCRIBE_MAX_LENGTH,
-        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
-      },
-    },
+    ...[
+      'ethnicityAiAnOtherText',
+      'ethnicityAsianOtherText',
+      'ethnicityBlackOtherText',
+      'ethnicityHispanicOtherText',
+      'ethnicityMeNaOtherText',
+      'ethnicityNhPiOtherText',
+      'ethnicityWhiteOtherText',
+      'ethnicityOtherText',
+      'genderOtherText',
+      'sexAtBirthOtherText',
+      'orientationOtherText',
+    ].reduce((previousValue, currentValue) => {
+      previousValue[currentValue] = NONE_FULLY_DESCRIBE_VALIDATION;
+      return previousValue;
+    }, {}),
   };
-
   return validate(demographicSurvey, validationCheck);
 };
 
@@ -310,6 +265,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     value: EthnicCategory.AIANOTHER,
                     showInput: true,
                     otherText: survey.ethnicityAiAnOtherText,
+                    otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
                     otherTextPlaceholder: NONE_FULLY_DESCRIBE_PLACEHOLDER,
                     onChange: (checked) => {
                       if (!checked) {

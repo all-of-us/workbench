@@ -201,7 +201,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
               value={otherText || ''}
               maxLength={otherTextMaxLength}
               onChange={(e) => onChangeOtherText?.(e.target.value)}
-              placeholder={otherTextPlaceholder || ''}
+              placeholder={otherTextPlaceholder}
             />
           )}
         {showSubOptions &&
