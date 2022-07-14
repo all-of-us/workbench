@@ -77,7 +77,10 @@ describe('Cohort review set tests', () => {
 
     // Verify Cohort Review card exists
     const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findCard({ name: cohortReview1Name, cardType: ResourceCard.CohortReview });
+    const reviewCohortCard = await resourceCard.findCard({
+      name: cohortReview1Name,
+      cardType: ResourceCard.CohortReview
+    });
     expect(reviewCohortCard).toBeTruthy();
 
     await dataPage.deleteResource(cohortReview1Name, ResourceCard.CohortReview);
