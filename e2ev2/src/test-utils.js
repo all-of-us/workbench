@@ -78,6 +78,6 @@ const impersonateUser = async (page, username) => {
       .map(x => x.access_token)
       .toPromise()
   await page.evaluate(t => setTestAccessTokenOverride(t), bearerToken)
-  expect(await page.waitForSelector('[data-test-id="signed-in"]', 4e3)).toBeDefined()
+  expect(await page.waitForSelector('[data-test-id="signed-in"]', {timeout: 4e3})).toBeDefined()
 }
 export_({impersonateUser})
