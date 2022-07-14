@@ -856,15 +856,14 @@ workflows:
       - playground
   e2etests:
     jobs:
-# TODO: Enable these before merge!
-#      - e2etests-deploy-ui:
-#          <<: *filter-pr-branch
+      - e2etests-deploy-ui:
+          <<: *filter-pr-branch
       - e2etests-deploy-api:
           <<: *filter-pr-branch
-#      - e2etests-run:
-#          requires:
-#            - e2etests-deploy-ui
-#            - e2etests-deploy-api
+      - e2etests-run:
+          requires:
+            - e2etests-deploy-ui
+            - e2etests-deploy-api
 
   deploy-staging:
     jobs:
