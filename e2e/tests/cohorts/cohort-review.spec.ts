@@ -23,6 +23,8 @@ describe('Cohort review set tests', () => {
 
   const workspaceName = 'e2eCohortReviewTest';
   const cohortName = makeRandomName('auotest', { includeHyphen: false });
+  const cohortReview1Name = makeRandomName('auotest', { includeHyphen: false });
+  const cohortReview2Name = makeRandomName('auotest', { includeHyphen: false });
 
   const reviewSetNumberOfParticipants_1 = 50;
   const reviewSetNumberOfParticipants_2 = 100;
@@ -39,16 +41,20 @@ describe('Cohort review set tests', () => {
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
 
-    const modal = new CohortReviewModal(page);
-    await modal.waitForLoad();
-
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
-    await modal.clickButton(LinkText.CreateSet, { waitForClose: true });
-
     const cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();
 
     await waitForText(page, `Review Sets for ${cohortName}`);
+
+    const createReviewIcon = cohortReviewPage.getCreateCohortReviewIcon();
+    await createReviewIcon.click();
+
+    const modal = new CohortReviewModal(page);
+    await modal.waitForLoad();
+
+    await modal.fillInNameOfReview(cohortReview1Name);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
+    await modal.clickButton(LinkText.CreateSet, { waitForClose: true });
 
     // Verify table pagination records count.
     const participantsTable = cohortReviewPage.getDataTable();
@@ -71,10 +77,13 @@ describe('Cohort review set tests', () => {
 
     // Verify Cohort Review card exists
     const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findCard({ name: cohortName, cardType: ResourceCard.CohortReview });
+    const reviewCohortCard = await resourceCard.findCard({
+      name: cohortReview1Name,
+      cardType: ResourceCard.CohortReview
+    });
     expect(reviewCohortCard).toBeTruthy();
 
-    await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
+    await dataPage.deleteResource(cohortReview1Name, ResourceCard.CohortReview);
   });
 
   /**
@@ -92,15 +101,20 @@ describe('Cohort review set tests', () => {
 
     const cohortCard = await findOrCreateCohortCard(page, cohortName);
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
-    const modal = new CohortReviewModal(page);
-    await modal.waitForLoad();
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
-    await modal.clickButton(LinkText.CreateSet);
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
 
     let cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();
     await waitForText(page, `Review Sets for ${cohortName}`);
+
+    const createReviewIcon = cohortReviewPage.getCreateCohortReviewIcon();
+    await createReviewIcon.click();
+
+    const modal = new CohortReviewModal(page);
+    await modal.waitForLoad();
+    await modal.fillInNameOfReview(cohortReview2Name);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
+    await modal.clickButton(LinkText.CreateSet);
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
 
     // Verify table pagination records count.
     let participantsTable = cohortReviewPage.getDataTable();
@@ -258,7 +272,7 @@ describe('Cohort review set tests', () => {
 
     // Rename Cohort Review
     const newCohortReviewName = makeRandomName();
-    await dataPage.renameResource(cohortName, newCohortReviewName, ResourceCard.CohortReview);
+    await dataPage.renameResource(cohortReview2Name, newCohortReviewName, ResourceCard.CohortReview);
 
     // Verify Rename Cohort Review is successful.
     expect(await new DataResourceCard(page).findCard({ name: newCohortReviewName })).toBeTruthy();
