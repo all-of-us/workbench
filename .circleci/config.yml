@@ -556,12 +556,12 @@ jobs:
             SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
               | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
               -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
-            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
-            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account \
+              "$(echo "$SA_KEY_JSON" | jq -r .client_email)" --key-file=-
 
             sudo apt install openjdk-8-jdk
             PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:"$PATH"
-            gsutil cp gs://all-of-us-workbench-test-creds/vars.env db
+            gsutil cp gs://all-of-us-workbench-test-credentials/vars.env db
             set -a; source db/local-vars.env; source db/vars.env; set +a
             ./gradlew :appengineStage
 
@@ -856,14 +856,15 @@ workflows:
       - playground
   e2etests:
     jobs:
-      - e2etests-deploy-ui:
-          <<: *filter-pr-branch
+# TODO: Enable these before merge!
+#      - e2etests-deploy-ui:
+#          <<: *filter-pr-branch
       - e2etests-deploy-api:
           <<: *filter-pr-branch
-      - e2etests-run:
-          requires:
-            - e2etests-deploy-ui
-            - e2etests-deploy-api
+#      - e2etests-run:
+#          requires:
+#            - e2etests-deploy-ui
+#            - e2etests-deploy-api
 
   deploy-staging:
     jobs:
