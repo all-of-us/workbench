@@ -6,13 +6,8 @@ const fileExists = p => {
 }
 
 class FailureReporter {
-  constructor(globalConfig, options = {}) {
-    this._globalConfig = globalConfig;
-  }
-
   onRunStart() {
     if (fileExists(logFileName)) {
-      console.log('\n', fs.readFileSync(logFileName, 'utf8'))
       fs.rmSync(logFileName)
     }
   }
@@ -23,14 +18,6 @@ class FailureReporter {
 
       if (hasFailures) {
         fs.writeFileSync(logFileName, test.path.slice(process.env.PWD.length+1)+'\n', {flag: 'a'})
-      }
-      if (testResult.failureMessage)
-        console.log('\n', testResult.failureMessage);
-      if (testResult.console) {
-        testResult.console
-          .filter(entry => ['error', 'warn'].includes(entry.type) && entry.message)
-          .map(entry => entry.message)
-          .forEach(console.log);
       }
     }
   }

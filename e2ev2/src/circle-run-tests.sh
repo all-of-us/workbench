@@ -23,9 +23,10 @@ gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 
 set +e
 if [[ -e failed-tests.txt ]]; then
-  yarn test $(<failed-tests.txt) --reporters=./src/failure-reporter.js
+  yarn test $(<failed-tests.txt) \
+    --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
 else
-  yarn test --reporters=./src/failure-reporter.js
+  yarn test --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
 fi
 TESTS_EXIT_CODE=$?
 set -e
