@@ -41,6 +41,11 @@ require_relative "../../../libproject/environments"
 PROD_BROAD_BUCKET = "gs://prod-drc-broad"
 OLD_ARRAYS_PATH_INFIX = "array_old_egt_files"
 
+
+CURATION_SYNTHETIC_SOURCE_CONFIG = {
+  :wgs_aw4_prefix => "gs://all-of-us-workbench-test-genomics/aw4_wgs/"
+}
+
 CURATION_PROD_SOURCE_CONFIG = {
   # Optional: to speed up iteration with this script, download and run against a local directory instead.
   :wgs_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_wgs_manifest/AoU_DRCB_SEQ_",
@@ -50,6 +55,18 @@ CURATION_PROD_SOURCE_CONFIG = {
 }
 
 FILE_ENVIRONMENTS = {
+  "all-of-us-workbench-test" => {
+    :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
+  },
+  "all-of-us-rw-perf" => {
+    :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
+  },
+  "all-of-us-rw-staging" => {
+    :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
+  },
+  "all-of-us-rw-stable" => {
+    :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
+  },
   "all-of-us-rw-preprod" => {
     :source_config => CURATION_PROD_SOURCE_CONFIG,
   },
