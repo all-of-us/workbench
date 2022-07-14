@@ -516,7 +516,6 @@ jobs:
             yarn install
             yarn codegen
             REACT_APP_ENVIRONMENT=pr-site-$PR_SITE_NUM yarn run build --aot --no-watch --no-progress
-            ../e2ev2/src/circle-build-ui.sh
       - run:
           name: Deploy
           working_directory: ui
