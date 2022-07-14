@@ -21,17 +21,21 @@ BKT_ROOT=gs://all-of-us-workbench-test.appspot.com/circle-failed-tests
 gsutil cp $BKT_ROOT/\*.$CIRCLE_SHA1.txt failed-tests.txt || true
 gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 
-function save-failures {
-  gsutil cp failed-tests.txt $BKT_ROOT/$CIRCLE_BUILD_NUM.$CIRCLE_SHA1.txt || true
-
-  # Collect garbage
-  gsutil ls $BKT_ROOT | tail -n 10 > latest.txt
-  gsutil ls $BKT_ROOT | grep -v -F -f latest.txt | gsutil rm || true
-}
-trap save-failures EXIT
-
+set +e
 if [[ -e failed-tests.txt ]]; then
   yarn test $(<failed-tests.txt) --reporters=./src/failure-reporter.js
 else
   yarn test --reporters=./src/failure-reporter.js
 fi
+TESTS_EXIT_CODE=$?
+set -e
+
+if [[ $TESTS_EXIT_CODE -ne 0 ]]; then
+  gsutil cp failed-tests.txt $BKT_ROOT/$CIRCLE_BUILD_NUM.$CIRCLE_SHA1.txt || true
+
+  # Collect garbage
+  gsutil ls $BKT_ROOT | tail -n 10 > latest.txt
+  gsutil ls $BKT_ROOT | grep -v -F -f latest.txt | gsutil rm || true
+fi
+
+exit $TESTS_EXIT_CODE
