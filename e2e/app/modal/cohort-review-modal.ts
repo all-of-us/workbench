@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import { waitForText } from 'utils/waits-utils';
 import InputNumber from 'app/element/input-number';
+import Textbox from 'app/element/textbox';
 import Modal from './modal';
 
 const title = 'Create Review Set';
@@ -13,6 +14,11 @@ export default class CohortReviewModal extends Modal {
   async isLoaded(): Promise<boolean> {
     await waitForText(this.page, title, { container: this });
     return true;
+  }
+
+  async fillInNameOfReview(nameOfReview: string): Promise<void> {
+    const input = Textbox.findByName(this.page, { name: 'COHORT REVIEW NAME' }, this);
+    await input.type(nameOfReview);
   }
 
   async fillInNumberOfParticipants(numOfparticipants: number): Promise<void> {

@@ -2,6 +2,7 @@ import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
+import ClrIconLink from 'app/element/clr-icon-link';
 import { LinkText } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
@@ -22,6 +23,10 @@ export default class CohortReviewPage extends AuthenticatedPage {
 
   getDataTable(): DataTable {
     return new DataTable(this.page);
+  }
+
+  getCreateCohortReviewIcon(): ClrIconLink {
+    return ClrIconLink.findByName(this.page, { iconShape: 'plus-circle' });
   }
 
   getBackToCohortButton(): Button {
