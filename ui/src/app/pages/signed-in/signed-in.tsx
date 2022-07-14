@@ -124,9 +124,9 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
   const enableUpdatedDemographicSurvey =
     serverConfigStore.get().config.enableUpdatedDemographicSurvey;
 
-  // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session, if the user selects Maybe Later Button on Demographic Survey Page
-  // and is cleared out on signOut.
-  // If this key exist, it means user should not be redirected to demographic survey page.
+  // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
+  // Demographic Survey Page and is cleared out on signOut.
+  // So, if this key exist, it means user should not be redirected to demographic survey page.
   const demographicSurveySessionKeyExist = sessionStorage.getItem(
     DEMOGRAPHIC_SURVEY_SESSION_KEY
   );
