@@ -1,6 +1,7 @@
 require_relative "genomic_manifests"
 require_relative "../../../../aou-utils/serviceaccounts"
 require_relative "../../../../aou-utils/utils/common"
+require_relative "../../../libproject/affirm"
 require_relative "../../../libproject/gcloudcontext"
 require_relative "../../../libproject/environments"
 require_relative "../../../libproject/wboptionsparser"
@@ -348,6 +349,11 @@ def publish_cdr_files(cmd_name, args)
     "Directory for intermediate manifest files and logs."
   )
   op.add_option(
+    "--jira-ticket [RW-XXX]",
+    ->(opts, v) { opts.jira_ticket = v },
+    "Optional RW jira ticket associated with this publish; used for provenance."
+  )
+  op.add_option(
     "--display-version-id [version]",
     ->(opts, v) { opts.display_version_id = v },
     "A version 'id' suitable for display in the published GCS directory. Conventionally " +
@@ -369,8 +375,8 @@ def publish_cdr_files(cmd_name, args)
     "The access tier associated with this CDR, e.g. controlled." +
       "Default is controlled (WGS only exists in controlled tier, for the foreseeable future)."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.input_manifest_file }
-  op.add_validator ->(opts) { raise ArgumentError.new("--display-version-id is required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and not opts.display_version_id }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("--input-manifest-file,--display-version-id are required for the CREATE_COPY_MANIFESTS task") if opts.tasks.include? "CREATE_COPY_MANIFESTS" and (not opts.display_version_id or not opts.input_manifest_file ) }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tasks: #{opts.tasks}") unless (opts.tasks - supported_tasks).empty? }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
@@ -381,19 +387,22 @@ def publish_cdr_files(cmd_name, args)
 
   common = Common.new
 
-  work_dir = op.opts.work_dir
-  if work_dir.nil?
-    work_dir = Dir.mktmpdir("cdr-file-publish")
+  working_dir = op.opts.working_dir
+  if working_dir.nil?
+    working_dir = Dir.mktmpdir("cdr-file-publish")
   else
-    FileUtils.makedirs(work_dir)
+    FileUtils.makedirs(working_dir)
   end
-  common.status("local working directory: '#{work_dir}'")
+  common.status("local working directory: '#{working_dir}'")
 
-  input_manifest = parse_input_manifest(op.opts.input_manifest_file)
-  copy_manifest_files = {}
+  copy_manifest_files = []
   if op.opts.tasks.include? "CREATE_COPY_MANIFESTS"
     common.status "Starting: copy manifest creation"
     copy_manifests = {}
+    output_manifests = {}
+    output_manifest_path = -> (source_name) { "#{working_dir}/#{source_name}_output_manifest.csv" }
+
+    input_manifest = parse_input_manifest(op.opts.input_manifest_file)
 
     aw4_microarray_sources = input_manifest["aw4MicroarraySources"]
     unless aw4_microarray_sources.nil? or aw4_microarray_sources.empty?
@@ -404,8 +413,13 @@ def publish_cdr_files(cmd_name, args)
 
       aw4_microarray_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
-        copy_manifests["aw4_microarray_" + source_name] = build_copy_manifest_for_aw4_section(
-          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows)
+        copy, output = build_manifests_for_aw4_section(
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, microarray_aw4_rows, output_manifest_path.call(source_name))
+        key_name = "aw4_microarray_" + source_name
+        copy_manifests[key_name] = copy
+        unless output.nil?
+          output_manifests[key_name] = output
+        end
       end
     end
 
@@ -418,8 +432,13 @@ def publish_cdr_files(cmd_name, args)
 
       aw4_wgs_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
-        copy_manifests["aw4_wgs_" + source_name] = build_copy_manifest_for_aw4_section(
-          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows)
+        copy, output = build_manifests_for_aw4_section(
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows, output_manifest_path(working_dir, source_name))
+        key_name = "aw4_wgs_" + source_name
+        copy_manifests[key_name] = copy
+        unless output.nil?
+          output_manifests[key_name] = output
+        end
       end
     end
 
@@ -444,28 +463,68 @@ def publish_cdr_files(cmd_name, args)
     end
 
     copy_manifests.each do |source_name, copy_manifest|
-      path = "#{work_dir}/#{source_name}_copy_manifest.csv"
+      path = "#{working_dir}/#{source_name}_copy_manifest.csv"
       CSV.open(path, 'wb') do |f|
         f << copy_manifest.first.keys
         copy_manifest.each { |c| f << c.values }
       end
-      copy_manifest_files[source_name] = path
+      copy_manifest_files.push(path)
+    end
+    output_manifests.each do |source_name, output_manifest|
+      path = output_manifest_path.call(source_name)
+      CSV.open(path, 'wb') do |f|
+        f << output_manifest.first.keys
+        output_manifest.each { |c| f << c.values }
+      end
     end
     common.status "Finished: manifests created"
   end
 
-  logs_dir = FileUtils.makedirs(File.join(work_dir, "logs"))
+  logs_dir = FileUtils.makedirs(File.join(working_dir, "logs"))
   common.status "Writing logs to #{logs_dir}"
 
+  if copy_manifest_files.empty?
+    copy_manifest_files = Dir.glob(working_dir + "/*_copy_manifest.csv")
+    if copy_manifest_files.empty?
+      raise ArgumentError.new(
+              "no copy manifests generated or found in the working dir #{working_dir}; if you " +
+              "are running PUBLISH without CREATE_COPY_MANIFESTS, be sure to " +
+              "specify an existing --working-dir which contains copy manifest CSV files")
+    end
+  end
   if op.opts.tasks.include? "STAGE_INGEST"
-    common.status "Starting: file staging to ingest bucket"
-    copy_manifest_files.each { |name, path| stage_files_by_manifest(op.opts.project, path, File.join(logs_dir, name)) }
-    common.status "Finished: file staging"
+    copy_manifest_tasks_by_path = {}
+    all_tasks = []
+    copy_manifest_files.each do |path|
+      tasks = CSV.read(manifest_path, headers: true, return_headers: false)
+      copy_manifest_tasks_by_path[path] = tasks
+      all_tasks += tasks
+    end
+
+    maybe_grant_preprod_access(op.opts.project, all_tasks)
+    copy_manifest_task_by_path.each do |path, tasks|
+      common.status "Starting file staging for #{path}"
+      stage_files_by_manifest(op.opts.project, tasks, File.join(logs_dir, File.basename(path, '.csv')))
+    end
+    maybe_revoke_preprod_access(op.opts.project, all_tasks)
+    common.status "Finished: all file staging"
   end
 
   if op.opts.tasks.include? "PUBLISH"
-    common.status "Starting: publishing to CDR bucket"
-    publish_files_by_manifests(op.opts.project, manifest_paths)
+    configs = build_publish_configs(copy_manifest_files)
+    configs.each_index do |i|
+      config = configs[i]
+      with_storage_class = config[:storage_class].to_s.empty? ? "" : " (with storage class #{config[:storage_class]})"
+      get_user_confirmation(
+        "About to create transfer job#{with_storage_class}:\n" +
+        "#{config[:source]} ->\n#{config[:dest]}\n\nAre you sure?")
+
+      job_name = "publish-cdr-files_#{i+1}-of-#{configs.length}"
+      unless op.opts.jira_ticket.to_s.empty?
+        job_name = "#{op.opts.jira_ticket}_#{job_name}"
+      end
+      publish(op.opts.project, config, job_name)
+    end
     common.status "Finished: publishing"
   end
 end
