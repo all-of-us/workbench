@@ -18,6 +18,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const [submitting, setSubmitting] = useState(false);
   const [, navigateByUrl] = useNavigation();
 
   const { hideSpinner, showSpinner } = props;
@@ -58,10 +59,12 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   }, [profile]);
 
   const handleSubmit = async () => {
+    setSubmitting(true);
     showSpinner();
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
+    setSubmitting(false);
     const prevLocationState = location.state as LinkLocationState;
     if (prevLocationState?.pathname) {
       navigateByUrl(prevLocationState.pathname);
@@ -117,7 +120,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
         }
       >
         <Button
-          disabled={!!errors || !changed}
+          disabled={!!errors || !changed || submitting}
           type='primary'
           onClick={handleSubmit}
           style={{ margin: '1rem 0rem' }}

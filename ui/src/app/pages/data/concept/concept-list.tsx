@@ -13,8 +13,12 @@ import { domainToTitle } from 'app/cohort-search/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow, FlexRowWrap } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
+import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { ConceptAddModal } from 'app/pages/data/concept/concept-add-modal';
+import {
+  CONCEPT_SET_CONCEPT_LIMIT,
+  ConceptAddModal,
+} from 'app/pages/data/concept/concept-add-modal';
 import { LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS } from 'app/pages/data/criteria-search';
 import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -201,6 +205,7 @@ export const ConceptListPage = fp.flow(
         updating ||
         !concept ||
         concept.length === 0 ||
+        concept.length > CONCEPT_SET_CONCEPT_LIMIT ||
         (!!conceptSet &&
           JSON.stringify(conceptSet.criteriums.sort()) ===
             JSON.stringify(concept.sort()))
@@ -291,14 +296,24 @@ export const ConceptListPage = fp.flow(
           <FlexRowWrap
             style={{ flexDirection: 'row-reverse', marginTop: '1rem' }}
           >
-            <Button
-              type='primary'
-              style={styles.saveButton}
-              disabled={this.disableSaveConceptButton}
-              onClick={() => this.onSaveConceptSetClick()}
+            <TooltipTrigger
+              content={
+                <div>
+                  Concept count cannot exceed{' '}
+                  {CONCEPT_SET_CONCEPT_LIMIT.toLocaleString()}
+                </div>
+              }
+              disabled={concept.length <= CONCEPT_SET_CONCEPT_LIMIT}
             >
-              Save Concept Set
-            </Button>
+              <Button
+                type='primary'
+                style={styles.saveButton}
+                disabled={this.disableSaveConceptButton}
+                onClick={() => this.onSaveConceptSetClick()}
+              >
+                Save Concept Set
+              </Button>
+            </TooltipTrigger>
             <Button
               type='link'
               style={{ color: colors.primary, left: 0 }}

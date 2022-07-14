@@ -45,7 +45,7 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
     : concepts;
 };
 
-const CONCEPT_SET_CONCEPT_LIMIT = 1000;
+export const CONCEPT_SET_CONCEPT_LIMIT = 1000;
 
 export const ConceptAddModal = withCurrentWorkspace()(
   class extends React.Component<

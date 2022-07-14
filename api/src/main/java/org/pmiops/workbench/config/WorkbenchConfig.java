@@ -117,10 +117,13 @@ public class WorkbenchConfig {
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
     public String xAppIdValue;
-    // The name of the VPC service perimeter to create our Terra GCP projects inside,
-    // if enabled.
-    // The length of our API HTTP client timeouts to firecloud
+    // The length of our API HTTP client timeouts to firecloud.
     public Integer timeoutInSeconds;
+    // The length of our API HTTP client timeouts to firecloud for slow endpoints where we are
+    // willing to tolerate a higher latency, e.g. CreateWorkspace, CloneWorkspace (as of 2022). This
+    // value should be >= timeoutInSeconds. Intended for use with offline jobs only (crons, cloud
+    // tasks) where we are not subject to the 60s GAE request deadline.
+    public Integer lenientTimeoutInSeconds;
     // The docker image that we use for our jupyter images
     public String jupyterDockerImage;
     // Base URL for the Shibboleth API server, e.g.
@@ -178,9 +181,6 @@ public class WorkbenchConfig {
     public Integer extractionMethodLogicalVersion;
     @Deprecated public String extractionCohortsDataset;
     public String extractionDestinationDataset;
-    @Deprecated public String extractionTempTablesDataset;
-    // TODO(RW-8265): rm on following release
-    @Deprecated public String extractionFilterSetName;
     // This should not exceed the value of GenomicExtractionService.MAX_EXTRACTION_SCATTER.
     public int minExtractionScatterTasks;
     public float extractionScatterTasksPerSample;
