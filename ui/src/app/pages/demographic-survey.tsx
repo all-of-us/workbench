@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import * as fp from 'lodash/fp';
 
-import { Button } from 'app/components/buttons';
+import { Button, LinkLocationState } from 'app/components/buttons';
 import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-import { NAVIGATING_FROM_WORKBENCH } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore } from 'app/utils/stores';
 
@@ -63,13 +62,9 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileApi().updateProfile(profile);
     await profileStore.get().reload();
     hideSpinner();
-    const prevLocationState = location.state + '';
-    if (
-      !!prevLocationState &&
-      prevLocationState.includes(NAVIGATING_FROM_WORKBENCH)
-    ) {
-      const returnPath = prevLocationState.split(NAVIGATING_FROM_WORKBENCH)[1];
-      navigateByUrl(returnPath);
+    const prevLocationState = location.state as LinkLocationState;
+    if (prevLocationState?.pathname) {
+      navigateByUrl(prevLocationState.pathname);
     } else {
       navigateByUrl('profile');
     }
