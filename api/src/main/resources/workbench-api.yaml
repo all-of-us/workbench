@@ -1042,7 +1042,29 @@ paths:
       operationId: getWorkspaceResources
       responses:
         200:
-          description: Returns all objects that describe a section of the CDR in a workspace.
+          description: OK
+          schema:
+            "$ref": "#/definitions/WorkspaceResourceResponse"
+  "/v2/workspaces/{workspaceNamespace}/{workspaceId}/resources":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      parameters:
+        - in: query
+          name: resourceTypesToFetch
+          description: Types of workspace resources to fetch. Currently only supports
+            Cohorts, Cohort Reviews, Concept Sets, and Datasets
+          type: array
+          items:
+            type: string
+      tags:
+      - workspaces
+      description: Gets a user defined selection of objects contained within a workspace
+      operationId: getWorkspaceResourcesV2
+      responses:
+        200:
+          description: OK
           schema:
             "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
