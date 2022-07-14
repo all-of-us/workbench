@@ -1,11 +1,15 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
+import { withRouteData } from 'app/components/app-router';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
+import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { ZendeskWidget } from 'app/components/zendesk-widget';
+import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
 import { NavBar } from 'app/pages/signed-in/nav-bar';
 import { SignedInRoutes } from 'app/routing/signed-in-app-routing';
@@ -13,6 +17,10 @@ import { cdrVersionsApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
+import {
+  DEMOGRAPHIC_SURVEY_SESSION_KEY,
+  DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
+} from 'app/utils/constants';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -49,6 +57,11 @@ const checkOpsBeforeUnload = (e) => {
     e.returnValue = '';
   }
 };
+
+const DemographicSurveyPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(DemographicSurvey);
 
 export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
@@ -108,6 +121,19 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
+  const enableUpdatedDemographicSurvey =
+    serverConfigStore.get().config.enableUpdatedDemographicSurvey;
+
+  // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session, if the user selects Maybe Later Button on Demographic Survey Page
+  // and is cleared out on signOut.
+  // If this key exist, it means user should not be redirected to demographic survey page.
+  const demographicSurveySessionKeyExist = sessionStorage.getItem(
+    DEMOGRAPHIC_SURVEY_SESSION_KEY
+  );
+
+  const pastSurveyDueDate =
+    +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) - +new Date() < 0;
+
   return (
     <FlexColumn
       style={{
@@ -133,7 +159,16 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              <SignedInRoutes />
+              {enableUpdatedDemographicSurvey &&
+              pastSurveyDueDate &&
+              !profileState.profile.demographicSurveyV2 &&
+              !demographicSurveySessionKeyExist ? (
+                <DemographicSurveyPage
+                  routeData={{ title: 'Demographic Page' }}
+                />
+              ) : (
+                <SignedInRoutes />
+              )}
             </div>
           )}
       </FlexRow>
