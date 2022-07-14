@@ -62,10 +62,10 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     setChanged(!fp.isEqual(initialSurvey, profile?.demographicSurveyV2));
   }, [profile]);
 
-  // If the user is redirected on sign in after 30 days are up, the location will not be
-  // demographic survey
-  // For all other scenarios i.e from Banner or from Profile link, user will be redirected to this
-  // page so location will be DEMOGRAPHIC_SURVEY_V2_PATH
+  // Users, who still have not filled survey v2 after 30days, will be shown the survey page after every sign in
+  // In such scenarios the location pathname will be different from DEMOGRAPHIC_SURVEY_V2_PATH
+  // In All other scenarios, i.e From Demographic Survey Banner or Profile page, the location page name will be
+  // DEMOGRAPHIC_SURVEY_V2_PATH
   const redirectedFromSignIn = location.pathname !== DEMOGRAPHIC_SURVEY_V2_PATH;
 
   const handleSubmit = async () => {
@@ -76,7 +76,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     hideSpinner();
     setSubmitting(false);
 
-    // This logic should be cleaned up sometime in future when all existing users have submitted
+    // This logic should be cleaned up sometime in future, when all existing users have submitted
     // the latest demographic survey version
     if (redirectedFromSignIn) {
       navigateByUrl(location.pathname);
