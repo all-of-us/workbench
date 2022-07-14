@@ -151,6 +151,7 @@ interface State {
   hasAnyPM: boolean;
   ingredients: any;
   loading: boolean;
+  versionedSurveyIds: Array<number>;
 }
 
 export const CriteriaTree = fp.flow(
@@ -168,6 +169,7 @@ export const CriteriaTree = fp.flow(
         hasAnyPM: false,
         ingredients: undefined,
         loading: true,
+        versionedSurveyIds: undefined,
       };
     }
 
@@ -227,17 +229,15 @@ export const CriteriaTree = fp.flow(
         } = currentWorkspaceStore.getValue();
         const criteriaType =
           domain === Domain.DRUG ? CriteriaType.ATC.toString() : type;
-        const promises = this.sendOnlyCriteriaType(domain)
-          ? [
-              cohortBuilderApi().findCriteriaBy(
+        const promises = [
+          this.sendOnlyCriteriaType(domain)
+            ? cohortBuilderApi().findCriteriaBy(
                 namespace,
                 workspaceId,
                 domain.toString(),
                 criteriaType
-              ),
-            ]
-          : [
-              cohortBuilderApi().findCriteriaBy(
+              )
+            : cohortBuilderApi().findCriteriaBy(
                 namespace,
                 workspaceId,
                 domain.toString(),
@@ -245,30 +245,38 @@ export const CriteriaTree = fp.flow(
                 isStandard,
                 id
               ),
-            ];
-        if (this.criteriaLookupNeeded) {
-          const criteriaRequest = {
-            sourceConceptIds: currentCohortCriteriaStore
-              .getValue()
-              .filter((s) => !s.isStandard)
-              .map((s) => s.conceptId),
-            standardConceptIds: currentCohortCriteriaStore
-              .getValue()
-              .filter((s) => s.isStandard)
-              .map((s) => s.conceptId),
-          };
-          promises.push(
-            cohortBuilderApi().findCriteriaForCohortEdit(
-              namespace,
-              workspaceId,
-              domain.toString(),
-              criteriaRequest
-            )
-          );
-        }
-        const [rootNodes, criteriaLookup] = await Promise.all(promises);
+          this.criteriaLookupNeeded
+            ? cohortBuilderApi().findCriteriaForCohortEdit(
+                namespace,
+                workspaceId,
+                domain.toString(),
+                {
+                  sourceConceptIds: currentCohortCriteriaStore
+                    .getValue()
+                    .filter((s) => !s.isStandard)
+                    .map((s) => s.conceptId),
+                  standardConceptIds: currentCohortCriteriaStore
+                    .getValue()
+                    .filter((s) => s.isStandard)
+                    .map((s) => s.conceptId),
+                }
+              )
+            : Promise.resolve(null),
+          domain === Domain.SURVEY
+            ? cohortBuilderApi().findVersionedSurveys(namespace, workspaceId)
+            : Promise.resolve(null),
+        ];
+        const [rootNodes, criteriaLookup, versionedSurveyLookup] =
+          await Promise.all(promises);
         if (criteriaLookup) {
           this.updateCriteriaSelectionStore(criteriaLookup.items);
+        }
+        if (versionedSurveyLookup?.items.length > 0) {
+          this.setState({
+            versionedSurveyIds: versionedSurveyLookup.items.map(
+              (criterion) => criterion.id
+            ),
+          });
         }
         if (domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT) {
           let children = [];
@@ -450,7 +458,14 @@ export const CriteriaTree = fp.flow(
         setSearchTerms,
         source,
       } = this.props;
-      const { children, error, hasAnyPM, ingredients, loading } = this.state;
+      const {
+        children,
+        error,
+        hasAnyPM,
+        ingredients,
+        loading,
+        versionedSurveyIds,
+      } = this.state;
       return (
         <React.Fragment>
           <style>{scrollbarCSS}</style>
@@ -554,6 +569,7 @@ export const CriteriaTree = fp.flow(
                           selectedIds={selectedIds}
                           setAttributes={setAttributes}
                           source={source}
+                          versionedSurveyIds={versionedSurveyIds}
                         />
                       )
                   )}
