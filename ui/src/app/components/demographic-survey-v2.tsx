@@ -43,8 +43,7 @@ const styles = reactStyles({
 
 const MAX_CHARACTERS_VALIDATION_MESSAGE =
   'can have no more than %{count} characters.';
-const NONE_FULLY_DESCRIBE =
-  'None of these fully describe me. I want to specify (optional).';
+const NONE_FULLY_DESCRIBE = 'None of these fully describe me';
 const NONE_FULLY_DESCRIBE_MAX_LENGTH = 200;
 const NONE_FULLY_DESCRIBE_VALIDATION = {
   length: {
@@ -118,10 +117,13 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       'genderOtherText',
       'sexAtBirthOtherText',
       'orientationOtherText',
-    ].reduce((previousValue, currentValue) => {
-      previousValue[currentValue] = NONE_FULLY_DESCRIBE_VALIDATION;
-      return previousValue;
-    }, {}),
+    ].reduce(
+      (otherTextValidations, k) => ({
+        ...otherTextValidations,
+        [k]: NONE_FULLY_DESCRIBE_VALIDATION,
+      }),
+      {}
+    ),
   };
   return validate(demographicSurvey, validationCheck);
 };
