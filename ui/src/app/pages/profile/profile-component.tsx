@@ -571,9 +571,7 @@ export const ProfileComponent = fp.flow(
                   }
                   firstSignInTime={profile.firstSignInTime}
                   onClick={() =>
-                    enableUpdatedDemographicSurvey
-                      ? this.props.navigateByUrl('/demographic-survey')
-                      : this.setState({ showDemographicSurveyModal: true })
+                    this.setState({ showDemographicSurveyModal: true })
                   }
                 />
                 {canRenderSignedDucc(profile.duccSignedVersion) && (

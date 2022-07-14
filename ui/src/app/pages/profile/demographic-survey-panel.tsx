@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, ButtonWithLocationState } from 'app/components/buttons';
+import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -37,14 +38,25 @@ export const DemographicSurveyPanel = (props: Props) => {
         ) : (
           <div>Survey Incomplete</div>
         )}
-        <Button
-          {...{ onClick }}
-          type={'link'}
-          style={styles.updateSurveyButton}
-          data-test-id={'demographics-survey-button'}
-        >
-          {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
-        </Button>
+        {enableUpdatedDemographicSurvey ? (
+          <ButtonWithLocationState
+            path={DEMOGRAPHIC_SURVEY_V2_PATH}
+            type={'link'}
+            style={styles.updateSurveyButton}
+            data-test-id={'demographics-survey-button'}
+          >
+            {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
+          </ButtonWithLocationState>
+        ) : (
+          <Button
+            {...{ onClick }}
+            type={'link'}
+            style={styles.updateSurveyButton}
+            data-test-id={'demographics-survey-button'}
+          >
+            {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
+          </Button>
+        )}
       </div>
     </div>
   );
