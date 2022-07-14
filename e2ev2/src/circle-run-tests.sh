@@ -19,6 +19,7 @@ export JEST_SILENT_REPORTER_SHOW_PATHS=true
 
 BKT_ROOT=gs://all-of-us-workbench-test.appspot.com/circle-failed-tests
 gsutil cp $BKT_ROOT/\*.$CIRCLE_SHA1.txt failed-tests.txt || true
+gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 
 function save-failures {
   gsutil cp failed-tests.txt $BKT_ROOT/$CIRCLE_BUILD_NUM.$CIRCLE_SHA1.txt || true
