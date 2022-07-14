@@ -144,6 +144,7 @@ interface SignInState {
   captcha: boolean;
   captchaToken: string;
   currentStep: SignInStep;
+  loading: boolean;
   profile: Profile;
   // Tracks the Terms of Service version that was viewed and acknowledged by the user.
   // This is an optional parameter in the createUser API call.
@@ -224,6 +225,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       captcha: false,
       captchaToken: null,
       currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
+      loading: false,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
       // step component as a prop. When each sub-step completes, it will pass the updated Profile
@@ -414,6 +416,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private onSubmit = async () => {
+    this.setState({
+      loading: true,
+    });
     this.props.showSpinner();
 
     try {
@@ -426,6 +431,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       this.setState({
         profile: newProfile,
         currentStep: this.getNextStep(this.state.currentStep),
+        loading: false,
         isPreviousStep: false,
       });
     } catch (error) {
@@ -435,7 +441,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       if (environment.enableCaptcha) {
         // Reset captcha
         this.captchaRef.current.reset();
-        this.setState({ captchaToken: null, captcha: true });
+        this.setState({ captchaToken: null, captcha: true, loading: false });
       }
     }
 
@@ -451,7 +457,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
       currentStep === SignInStep.DEMOGRAPHIC_SURVEY
     ) {
-      const { errors } = this.state;
+      const { errors, loading } = this.state;
       return (
         <div
           style={{
@@ -508,7 +514,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
               }
             >
               <Button
-                disabled={!!errors || !this.state.captcha}
+                disabled={!!errors || !this.state.captcha || loading}
                 type='primary'
                 data-test-id={'submit-button'}
                 onClick={this.onSubmit}
