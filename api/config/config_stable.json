@@ -114,7 +114,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableDSCREntryInRecentModified": false,
-    "enableUniversalSearch": false,
+    "enableUniversalSearch": true,
     "enableMultiReview": false,
     "enableUpdatedDemographicSurvey": false
   },
