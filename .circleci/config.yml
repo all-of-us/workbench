@@ -563,11 +563,11 @@ jobs:
             PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:"$PATH"
             gsutil cp gs://all-of-us-workbench-test-credentials/vars.env db
             set -a; source db/local-vars.env; source db/vars.env; set +a
-            ./gradlew :appengineStage
+            ./gradlew --no-daemon :appengineStage
 
             PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
             PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
-            gcloud app deploy build/staged-app/app.yaml --project=all-of-us-workbench-test \
+            gcloud app deploy build/staged-app/app.yaml -q --project=all-of-us-workbench-test \
               --no-promote --version=pr-$PR_SITE_NUM
   e2etests-run:
     machine:
