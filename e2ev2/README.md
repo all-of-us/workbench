@@ -10,7 +10,7 @@ export SA_KEY_JSON="$(<sa-key.json)"
 
 Make sure impersonation works:
 ```
-node src/impersonate.js "$SA_KEY_JSON" all-of-us-workbench-test puppeteer-tester-6@fake-research-aou.org
+node src/impersonate.js "$SA_KEY_JSON" all-of-us-workbench-test puppeteer-tester-7@fake-research-aou.org
 ```
 
 Tell Puppeteer where your Chrome lives:
