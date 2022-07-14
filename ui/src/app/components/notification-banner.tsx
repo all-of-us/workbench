@@ -1,9 +1,10 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { Button } from './buttons';
+import { Button, ButtonWithLocationState } from './buttons';
 import { FlexRow } from './flex';
 import { AlarmExclamation } from './icons';
 
@@ -28,6 +29,7 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '25px',
     marginLeft: 'auto',
+    alignItems: 'center',
   },
   text: {
     height: '40px',
@@ -67,6 +69,10 @@ interface NotificationProps {
   buttonText: string;
   buttonPath: string;
   buttonDisabled: boolean;
+  useLocationLink?: boolean;
+  boxStyle?: CSSProperties;
+  textStyle?: CSSProperties;
+  buttonStyle?: CSSProperties;
 }
 
 export const NotificationBanner = ({
@@ -75,19 +81,34 @@ export const NotificationBanner = ({
   buttonText,
   buttonPath,
   buttonDisabled,
+  useLocationLink,
+  boxStyle,
+  textStyle,
+  buttonStyle,
 }: NotificationProps) => {
   return (
-    <FlexRow data-test-id={dataTestId} style={styles.box}>
+    <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
       <AlarmExclamation style={styles.icon} />
-      <div style={styles.text}>{text}</div>
-      <Button
-        type='primary'
-        style={styles.button}
-        path={buttonPath}
-        disabled={buttonDisabled}
-      >
-        <div style={styles.buttonText}>{buttonText}</div>
-      </Button>
+      <div style={{ ...styles.text, ...textStyle }}>{text}</div>
+      {useLocationLink ? (
+        <ButtonWithLocationState
+          type='primary'
+          style={{ ...styles.button, ...buttonStyle }}
+          path={buttonPath}
+          disabled={buttonDisabled}
+        >
+          <div style={styles.buttonText}>{buttonText}</div>
+        </ButtonWithLocationState>
+      ) : (
+        <Button
+          type='primary'
+          style={styles.button}
+          path={buttonPath}
+          disabled={buttonDisabled}
+        >
+          <div style={styles.buttonText}>{buttonText}</div>
+        </Button>
+      )}
     </FlexRow>
   );
 };

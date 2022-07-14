@@ -13,6 +13,10 @@ import { reactStyles } from 'app/utils/index';
 
 import { RouteLink } from './app-router';
 
+export interface LinkLocationState {
+  pathname: string;
+}
+
 export const styles = reactStyles({
   baseNew: {
     display: 'inline-flex',
@@ -280,6 +284,38 @@ export const Button = ({
     <Clickable disabled={disabled} {...computedStyle} {...childProps}>
       {children}
     </Clickable>
+  );
+};
+
+export const ButtonWithLocationState = ({
+  children,
+  path = '',
+  type = 'primary',
+  style = {},
+  disabled = false,
+  propagateDataTestId = false,
+  ...props
+}) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId
+    ? props
+    : fp.omit(['data-test-id'], props);
+  const computedStyle = fp.merge(
+    computeStyle(buttonVariants[type], { disabled }),
+    { style }
+  );
+  return (
+    <Link
+      to={{
+        pathname: path,
+        state: { pathname: location.pathname } as LinkLocationState,
+      }}
+      {...computedStyle}
+    >
+      <Clickable disabled={disabled} {...childProps}>
+        {children}
+      </Clickable>
+    </Link>
   );
 };
 

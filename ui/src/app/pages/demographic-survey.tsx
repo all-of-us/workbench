@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import * as fp from 'lodash/fp';
 
-import { Button } from 'app/components/buttons';
+import { Button, LinkLocationState } from 'app/components/buttons';
 import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/demographic-survey-v2';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -16,6 +17,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   const [initialSurvey, setInitialSurvey] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
   const [, navigateByUrl] = useNavigation();
 
@@ -63,7 +65,12 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     await profileStore.get().reload();
     hideSpinner();
     setSubmitting(false);
-    navigateByUrl('/profile');
+    const prevLocationState = location.state as LinkLocationState;
+    if (prevLocationState?.pathname) {
+      navigateByUrl(prevLocationState.pathname);
+    } else {
+      navigateByUrl('profile');
+    }
   };
 
   const handleUpdate = (updatedProfile) => {

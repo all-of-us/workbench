@@ -7,6 +7,7 @@ import { Breadcrumb } from 'app/components/breadcrumb';
 import { ClrIcon } from 'app/components/icons';
 import { SideNav } from 'app/components/side-nav';
 import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
+import { TakeDemographicSurveyV2BannerMaybe } from 'app/components/take-demographic-survey-v2';
 import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -134,6 +135,7 @@ export const NavBar = () => {
       <Breadcrumb />
       <AccessRenewalNotificationMaybe />
       <StatusAlertBannerMaybe />
+      <TakeDemographicSurveyV2BannerMaybe />
       <CTAvailableBannerMaybe />
       {showSideNav && (
         <SideNav
