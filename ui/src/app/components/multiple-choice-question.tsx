@@ -64,17 +64,18 @@ const Option = (props: Option) => {
 interface MultipleChoiceOption {
   label: string;
   value: any;
-  otherText?: string;
-  showInput?: boolean;
+  disabled?: boolean;
+  disabledText?: string;
   onChange?: (any) => void;
   onChangeOtherText?: (any) => void;
   onClick?: (any) => void;
   onExpand?: () => void;
-  disabled?: boolean;
-  disabledText?: string;
-  subOptions?: MultipleChoiceOption[];
-  showSubOptions?: boolean;
+  otherText?: string;
   otherTextMaxLength?: number;
+  otherTextPlaceholder?: string;
+  showInput?: boolean;
+  showSubOptions?: boolean;
+  subOptions?: MultipleChoiceOption[];
 }
 
 interface MultipleChoiceQuestionProps {
@@ -152,6 +153,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
       onExpand,
       otherText,
       otherTextMaxLength,
+      otherTextPlaceholder,
       showInput,
       showSubOptions,
       subOptions,
@@ -199,6 +201,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
               value={otherText || ''}
               maxLength={otherTextMaxLength}
               onChange={(e) => onChangeOtherText?.(e.target.value)}
+              placeholder={otherTextPlaceholder}
             />
           )}
         {showSubOptions &&
