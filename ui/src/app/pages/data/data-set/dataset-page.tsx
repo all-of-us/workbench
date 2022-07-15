@@ -370,48 +370,49 @@ interface DataDictionaryPopupProps {
   dataDictionaryEntry: DataDictionaryEntry;
 }
 
-const DataDictionaryDescription: React.FunctionComponent<
-  DataDictionaryPopupProps
-> = ({ dataDictionaryEntry }) => {
-  return (
-    <div
-      style={{
-        width: '100%',
-        borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`,
-      }}
-    >
-      {dataDictionaryEntry ? (
-        <FlexColumn style={{ padding: '0.5rem' }}>
-          <div style={{ ...styles.dataDictionarySubheader, paddingTop: 0 }}>
-            Description
+const DataDictionaryDescription: React.FunctionComponent<DataDictionaryPopupProps> =
+  ({ dataDictionaryEntry }) => {
+    return (
+      <div
+        style={{
+          width: '100%',
+          borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`,
+        }}
+      >
+        {dataDictionaryEntry ? (
+          <FlexColumn style={{ padding: '0.5rem' }}>
+            <div style={{ ...styles.dataDictionarySubheader, paddingTop: 0 }}>
+              Description
+            </div>
+            <div style={styles.dataDictionaryText}>
+              {dataDictionaryEntry.description}
+            </div>
+            <div style={styles.dataDictionarySubheader}>
+              Relevant OMOP Table
+            </div>
+            <div style={styles.dataDictionaryText}>
+              {dataDictionaryEntry.relevantOmopTable}
+            </div>
+            <div style={styles.dataDictionarySubheader}>Type</div>
+            <div style={styles.dataDictionaryText}>
+              {dataDictionaryEntry.fieldType}
+            </div>
+            <div style={styles.dataDictionarySubheader}>Data Provenance</div>
+            <div style={styles.dataDictionaryText}>
+              {dataDictionaryEntry.dataProvenance}
+              {dataDictionaryEntry.dataProvenance.includes('PPI')
+                ? `: ${dataDictionaryEntry.sourcePpiModule}`
+                : null}
+            </div>
+          </FlexColumn>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Spinner style={{ height: 36, width: 36, margin: '0.5rem' }} />
           </div>
-          <div style={styles.dataDictionaryText}>
-            {dataDictionaryEntry.description}
-          </div>
-          <div style={styles.dataDictionarySubheader}>Relevant OMOP Table</div>
-          <div style={styles.dataDictionaryText}>
-            {dataDictionaryEntry.relevantOmopTable}
-          </div>
-          <div style={styles.dataDictionarySubheader}>Type</div>
-          <div style={styles.dataDictionaryText}>
-            {dataDictionaryEntry.fieldType}
-          </div>
-          <div style={styles.dataDictionarySubheader}>Data Provenance</div>
-          <div style={styles.dataDictionaryText}>
-            {dataDictionaryEntry.dataProvenance}
-            {dataDictionaryEntry.dataProvenance.includes('PPI')
-              ? `: ${dataDictionaryEntry.sourcePpiModule}`
-              : null}
-          </div>
-        </FlexColumn>
-      ) : (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <Spinner style={{ height: 36, width: 36, margin: '0.5rem' }} />
-        </div>
-      )}
-    </div>
-  );
-};
+        )}
+      </div>
+    );
+  };
 
 interface ValueListItemProps {
   checked: boolean;
