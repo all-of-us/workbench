@@ -376,6 +376,28 @@ describe('HelpSidebar', () => {
     );
   });
 
+  it('should display error on unknown error', async () => {
+    runtimeStub.runtime = null;
+    runtimeStub.getRuntime = () =>
+      Promise.reject(
+        new Response('', {
+          status: 500,
+        })
+      );
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+      loadingError: new Error('???'),
+    });
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
+      colors.asyncOperationStatus.error
+    );
+  });
+
   it('should display "running" icon when extract currently running', async () => {
     dataSetStub.extractionJobs = [
       {
