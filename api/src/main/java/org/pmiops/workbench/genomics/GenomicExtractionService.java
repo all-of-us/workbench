@@ -448,7 +448,7 @@ public class GenomicExtractionService {
             .get()
             .createSubmission(
                 new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(false)
+                    .deleteIntermediateOutputFiles(true)
                     .methodConfigurationNamespace(methodConfig.getNamespace())
                     .methodConfigurationName(methodConfig.getName())
                     .useCallCache(false),
