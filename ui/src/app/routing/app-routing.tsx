@@ -185,7 +185,7 @@ const useOverriddenApiUrl = () => {
         };
         console.log(
           'To override the API URLs, try:\n' +
-            "setAllOfUsApiUrl('https://host.example.com:1234')"
+          "setAllOfUsApiUrl('https://host.example.com:1234')"
         );
       } catch (err) {
         console.log('Error setting urls: ' + err);
@@ -196,166 +196,167 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
-export const AppRoutingComponent: React.FunctionComponent<RoutingProps> =
-  () => {
-    const config = useServerConfig();
-    const { authLoaded, authError } = useAuthentication();
-    const isUserDisabledInDb = useIsUserDisabled();
-    const overriddenUrl = useOverriddenApiUrl();
+export const AppRoutingComponent: React.FunctionComponent<
+  RoutingProps
+  > = () => {
+  const config = useServerConfig();
+  const { authLoaded, authError } = useAuthentication();
+  const isUserDisabledInDb = useIsUserDisabled();
+  const overriddenUrl = useOverriddenApiUrl();
 
-    const loadLocalStorageAccessToken = () => {
-      // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
-      // an infinite loop
-      // Enable test access token override via local storage. Intended to support
-      // Puppeteer testing flows. This is handled in the server config callback
-      // for signin timing consistency. Normally we cannot sign in until we've
-      // loaded the oauth client ID from the config service.
-      if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
-        const localStorageTestAccessToken = window.localStorage.getItem(
-          LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
-        );
-        if (localStorageTestAccessToken) {
-          // The client has already configured an access token override. Skip the normal oauth flow.
-          authStore.set({
-            ...authStore.get(),
-            authLoaded: true,
-            isSignedIn: true,
-          });
-        }
+  const loadLocalStorageAccessToken = () => {
+    // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
+    // an infinite loop
+    // Enable test access token override via local storage. Intended to support
+    // Puppeteer testing flows. This is handled in the server config callback
+    // for signin timing consistency. Normally we cannot sign in until we've
+    // loaded the oauth client ID from the config service.
+    if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
+      const localStorageTestAccessToken = window.localStorage.getItem(
+        LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
+      );
+      if (localStorageTestAccessToken) {
+        // The client has already configured an access token override. Skip the normal oauth flow.
+        authStore.set({
+          ...authStore.get(),
+          authLoaded: true,
+          isSignedIn: true,
+        });
       }
-    };
-    const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
+    }
+  };
+  const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
 
-    useEffect(() => {
-      if (config) {
-        // Bootstrapping that requires server config
-        bindClients();
-        loadErrorReporter();
-        initializeAnalytics();
-        loadLocalStorageAccessToken();
-      }
-    }, [config]);
+  useEffect(() => {
+    if (config) {
+      // Bootstrapping that requires server config
+      bindClients();
+      loadErrorReporter();
+      initializeAnalytics();
+      loadLocalStorageAccessToken();
+    }
+  }, [config]);
 
-    const firstPartyCookiesEnabled = cookiesEnabled();
-    const thirdPartyCookiesEnabled = !(
-      authError &&
-      authError.length > 0 &&
-      authError.includes('Cookies')
-    );
+  const firstPartyCookiesEnabled = cookiesEnabled();
+  const thirdPartyCookiesEnabled = !(
+    authError &&
+    authError.length > 0 &&
+    authError.includes('Cookies')
+  );
 
-    return (
-      <React.Fragment>
-        {/* for outdated-browser-rework https://www.npmjs.com/package/outdated-browser-rework*/}
-        {/* Check checkBrowserSupport() function defined in index.ts and implemented in setup.ts*/}
-        {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
-        <div id='outdated' />
-        {authLoaded && isUserDisabledInDb !== undefined && (
-          <React.Fragment>
-            {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
-            <NotificationModal />
-            {firstPartyCookiesEnabled && thirdPartyCookiesEnabled && (
-              <AppRouter>
-                <ScrollToTop />
-                {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
-                {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
-                {/* It should be noted that the reason this is currently working is because Switch only */}
-                {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
-                {/* that they are a Route or a subclass of Route. */}
-                <Switch>
-                  <AppRoute exact path='/cookie-policy'>
-                    <CookiePolicyPage routeData={{ title: 'Cookie Policy' }} />
-                  </AppRoute>
-                  <AppRoute exact path='/login'>
-                    <SignInPage routeData={{ title: 'Sign In' }} />
-                  </AppRoute>
-                  <AppRoute exact path='/session-expired'>
-                    <SessionExpiredPage
-                      routeData={{ title: 'You have been signed out' }}
-                    />
-                  </AppRoute>
-                  <AppRoute exact path='/sign-in-again'>
-                    <SignInAgainPage
-                      routeData={{ title: 'You have been signed out' }}
-                    />
-                  </AppRoute>
-                  <AppRoute
-                    exact
-                    path='/user-disabled'
-                    guards={[userDisabledPageGuard(isUserDisabledInDb)]}
-                  >
-                    <UserDisabledPage routeData={{ title: 'Disabled' }} />
-                  </AppRoute>
-                  <AppRoute exact path='/not-found'>
-                    <NotFoundPage routeData={{ title: 'Not Found' }} />
-                  </AppRoute>
-                  <AppRoute
-                    path=''
-                    exact={false}
-                    guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
-                  >
-                    {!doesUserNeedToAcceptTOS && (
-                      <SignedInPage intermediaryRoute={true} routeData={{}} />
-                    )}
-                  </AppRoute>
-                </Switch>
-              </AppRouter>
-            )}
-            {doesUserNeedToAcceptTOS && (
-              <TermsOfService
-                showReAcceptNotification={true}
-                onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
-                filePath={'/aou-tos.html'}
-                afterPrev={false}
-                style={{ height: '36rem' }}
-              />
-            )}
-            {overriddenUrl && (
-              <div style={{ position: 'absolute', top: 0, left: '1rem' }}>
-                <span style={{ fontSize: '80%', color: 'darkred' }}>
-                  API URL: {overriddenUrl}
-                </span>
+  return (
+    <React.Fragment>
+      {/* for outdated-browser-rework https://www.npmjs.com/package/outdated-browser-rework*/}
+      {/* Check checkBrowserSupport() function defined in index.ts and implemented in setup.ts*/}
+      {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
+      <div id='outdated' />
+      {authLoaded && isUserDisabledInDb !== undefined && (
+        <React.Fragment>
+          {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
+          <NotificationModal />
+          {firstPartyCookiesEnabled && thirdPartyCookiesEnabled && (
+            <AppRouter>
+              <ScrollToTop />
+              {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+              {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+              {/* It should be noted that the reason this is currently working is because Switch only */}
+              {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+              {/* that they are a Route or a subclass of Route. */}
+              <Switch>
+                <AppRoute exact path='/cookie-policy'>
+                  <CookiePolicyPage routeData={{ title: 'Cookie Policy' }} />
+                </AppRoute>
+                <AppRoute exact path='/login'>
+                  <SignInPage routeData={{ title: 'Sign In' }} />
+                </AppRoute>
+                <AppRoute exact path='/session-expired'>
+                  <SessionExpiredPage
+                    routeData={{ title: 'You have been signed out' }}
+                  />
+                </AppRoute>
+                <AppRoute exact path='/sign-in-again'>
+                  <SignInAgainPage
+                    routeData={{ title: 'You have been signed out' }}
+                  />
+                </AppRoute>
+                <AppRoute
+                  exact
+                  path='/user-disabled'
+                  guards={[userDisabledPageGuard(isUserDisabledInDb)]}
+                >
+                  <UserDisabledPage routeData={{ title: 'Disabled' }} />
+                </AppRoute>
+                <AppRoute exact path='/not-found'>
+                  <NotFoundPage routeData={{ title: 'Not Found' }} />
+                </AppRoute>
+                <AppRoute
+                  path=''
+                  exact={false}
+                  guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
+                >
+                  {!doesUserNeedToAcceptTOS && (
+                    <SignedInPage intermediaryRoute={true} routeData={{}} />
+                  )}
+                </AppRoute>
+              </Switch>
+            </AppRouter>
+          )}
+          {doesUserNeedToAcceptTOS && (
+            <TermsOfService
+              showReAcceptNotification={true}
+              onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
+              filePath={'/aou-tos.html'}
+              afterPrev={false}
+              style={{ height: '36rem' }}
+            />
+          )}
+          {overriddenUrl && (
+            <div style={{ position: 'absolute', top: 0, left: '1rem' }}>
+              <span style={{ fontSize: '80%', color: 'darkred' }}>
+                API URL: {overriddenUrl}
+              </span>
+            </div>
+          )}
+        </React.Fragment>
+      )}
+      {!firstPartyCookiesEnabled ||
+        (!thirdPartyCookiesEnabled && (
+          <div>
+            <div
+              style={{
+                maxWidth: '500px',
+                margin: '1rem',
+                fontFamily: 'Montserrat',
+              }}
+            >
+              <div>
+                <img alt='logo' src={logo} width='155px' />
               </div>
-            )}
-          </React.Fragment>
-        )}
-        {!firstPartyCookiesEnabled ||
-          (!thirdPartyCookiesEnabled && (
-            <div>
               <div
                 style={{
-                  maxWidth: '500px',
-                  margin: '1rem',
-                  fontFamily: 'Montserrat',
+                  fontSize: '20pt',
+                  color: '#2F2E7E',
+                  padding: '1rem 0 1rem 0',
                 }}
               >
-                <div>
-                  <img alt='logo' src={logo} width='155px' />
-                </div>
-                <div
-                  style={{
-                    fontSize: '20pt',
-                    color: '#2F2E7E',
-                    padding: '1rem 0 1rem 0',
-                  }}
+                Cookies are Disabled
+              </div>
+              <div style={{ fontSize: '14pt', color: '#000000' }}>
+                For full functionality of this site it is necessary to enable
+                cookies. Here are the{' '}
+                <a
+                  href='https://support.google.com/accounts/answer/61416'
+                  style={{ color: '#2691D0' }}
+                  target='_blank'
+                  rel='noopener noreferrer'
                 >
-                  Cookies are Disabled
-                </div>
-                <div style={{ fontSize: '14pt', color: '#000000' }}>
-                  For full functionality of this site it is necessary to enable
-                  cookies. Here are the{' '}
-                  <a
-                    href='https://support.google.com/accounts/answer/61416'
-                    style={{ color: '#2691D0' }}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    instructions how to enable cookies in your web browser
-                  </a>
-                  .
-                </div>
+                  instructions how to enable cookies in your web browser
+                </a>
+                .
               </div>
             </div>
-          ))}
-      </React.Fragment>
-    );
-  };
+          </div>
+        ))}
+    </React.Fragment>
+  );
+};
