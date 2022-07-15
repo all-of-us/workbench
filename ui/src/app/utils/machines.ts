@@ -188,6 +188,13 @@ const machineBases: Machine[] = [
     price: 3.402,
     preemptiblePrice: 0.72,
   },
+  {
+    name: 'n2-highmem-64',
+    cpu: 64,
+    memory: 512,
+    price: 4.19,
+    preemptiblePrice: 1.01,
+  },
 ];
 
 // As of June 21, 2021:
