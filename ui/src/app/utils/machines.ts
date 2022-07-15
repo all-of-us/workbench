@@ -363,19 +363,13 @@ export const allMachineTypes: Machine[] = fp.map(
   machineBases
 ); // adding prices for ephemeral IP's, per https://cloud.google.com/compute/network-pricing#ipaddress
 
-// Initial price restriction to limit against larger machines being used with free tier.
-// This can be reevaluated later, if researchers really want to use very large machines
-// with their own billing accounts.
-const maxMachinePrice = 1.6;
-
 // Following constraints follow findings on RW-5763, last tested 11/19/20. Using
 // machine types below this limit results in either an immediate ERROR status,
 // or a delayed ERROR status after the runtime times out in the CREATING state.
 // See also https://broadworkbench.atlassian.net/browse/SATURN-1337, where the
 // determination was made for Dataproc master machines only.
-const validPricedTypes = allMachineTypes.filter(
-  ({ price }) => price < maxMachinePrice
-);
+const validPricedTypes = allMachineTypes
+
 export const validLeoGceMachineTypes = validPricedTypes.filter(
   ({ memory }) => memory >= 2
 );
