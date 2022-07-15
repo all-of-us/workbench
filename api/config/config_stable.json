@@ -116,7 +116,7 @@
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": true,
     "enableMultiReview": false,
-    "enableUpdatedDemographicSurvey": false
+    "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
@@ -128,7 +128,7 @@
     "host": "all-of-us-rdr-stable.appspot.com",
     "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10,
-    "exportDemoSurveyV2": false
+    "exportDemoSurveyV2": true
   },
   "captcha": {
     "enableCaptcha": true,
