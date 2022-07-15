@@ -121,18 +121,17 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
-  const enableUpdatedDemographicSurvey =
-    serverConfigStore.get().config.enableUpdatedDemographicSurvey;
+  const { enableUpdatedDemographicSurvey } = serverConfigStore.get().config;
 
   // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
   // Demographic Survey Page and is cleared out on signOut.
   // So, if this key exist, it means user should not be redirected to demographic survey page.
-  const demographicSurveySessionKeyExist = sessionStorage.getItem(
+  const hasDismissedDemographicSurvey = sessionStorage.getItem(
     DEMOGRAPHIC_SURVEY_SESSION_KEY
   );
 
   const pastSurveyDueDate =
-    +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) - +new Date() < 0;
+    +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) < +new Date();
 
   return (
     <FlexColumn
@@ -162,7 +161,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
               {enableUpdatedDemographicSurvey &&
               pastSurveyDueDate &&
               !profileState.profile.demographicSurveyV2 &&
-              !demographicSurveySessionKeyExist ? (
+              !hasDismissedDemographicSurvey ? (
                 <DemographicSurveyPage
                   routeData={{ title: 'Demographic Page' }}
                 />

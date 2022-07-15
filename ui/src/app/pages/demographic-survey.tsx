@@ -91,7 +91,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
     }
   };
 
-  const handleMaybeLater = async () => {
+  const dismissAndContinue = async () => {
     sessionStorage.setItem(
       DEMOGRAPHIC_SURVEY_SESSION_KEY,
       new Date().toDateString()
@@ -157,7 +157,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
       {redirectedFromSignIn && (
         <Button
           type='secondary'
-          onClick={handleMaybeLater}
+          onClick={dismissAndContinue}
           style={{ marginLeft: '2rem' }}
         >
           Maybe Later

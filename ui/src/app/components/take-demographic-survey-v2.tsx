@@ -96,7 +96,7 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   // If the time is up, update the text message rather than hide the banner
   if (timeLeftDisplayStr === '') {
     notificationText +=
-      'Please complete the updated Researcher Demographic Survey ' +
+      'Please complete the updated Researcher Demographic Survey. ' +
       'It will take approximately 2 minutes to complete. Your answers to ' +
       'these questions will help us learn more about who is using the platform.';
   } else {
