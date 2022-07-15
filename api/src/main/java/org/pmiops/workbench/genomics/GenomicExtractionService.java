@@ -302,7 +302,10 @@ public class GenomicExtractionService {
                 "\nWorkflow failure messages:\n%s",
                 getFailureCauses(firecloudSubmission).stream()
                     .map(m -> "* " + m + "\n")
-                    .collect(Collectors.joining()))));
+                    .collect(Collectors.joining()))),
+        JiraContent.text("Oncall playbook entry for genomic extraction failures: "),
+        JiraContent.link(
+            "https://docs.google.com/document/d/1hbYNWzdxuRybTfW3M70hWZfr_TXRVd5rOMR9kZtwAFY/edit#bookmark=id.oqhwv09r19fk"));
   }
 
   private List<String> getFailureCauses(FirecloudSubmission firecloudSubmission) {
