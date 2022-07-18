@@ -80,11 +80,11 @@ const descriptions = {
   cohorts: 'A cohort is a group of participants based on specific criteria.',
 };
 
-const resourceTypesToFetch = [
-  ResourceType.COHORT,
-  ResourceType.COHORTREVIEW,
-  ResourceType.CONCEPTSET,
-  ResourceType.DATASET,
+const resourceTypesStrToFetch = [
+  ResourceType.COHORT.toString(),
+  ResourceType.COHORTREVIEW.toString(),
+  ResourceType.CONCEPTSET.toString(),
+  ResourceType.DATASET.toString(),
 ];
 
 interface Props extends WithSpinnerOverlayProps {
@@ -109,10 +109,10 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     try {
       setIsLoading(true);
       setResourceList(
-        await workspacesApi().getWorkspaceResources(
+        await workspacesApi().getWorkspaceResourcesV2(
           workspace.namespace,
           workspace.id,
-          { typesToFetch: resourceTypesToFetch }
+          resourceTypesStrToFetch
         )
       );
     } catch (error) {
