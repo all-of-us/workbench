@@ -279,7 +279,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showAiAnOptions,
-                onChange: (value) => setShowAiAnOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityAiAnOtherText', null);
+                  }
+                  setShowAiAnOptions(checked);
+                },
                 onExpand: () => setShowAiAnOptions(!showAiAnOptions),
               },
 
@@ -317,7 +322,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showAsianOptions,
-                onChange: (value) => setShowAsianOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityAsianOtherText', null);
+                  }
+                  setShowAsianOptions(checked);
+                },
                 onExpand: () => setShowAsianOptions(!showAsianOptions),
               },
               {
@@ -358,7 +368,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showBlackOptions,
-                onChange: (value) => setShowBlackOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityBlackOtherText', null);
+                  }
+                  setShowBlackOptions(checked);
+                },
                 onExpand: () => setShowBlackOptions(!showBlackOptions),
               },
               {
@@ -409,7 +424,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showHispanicOptions,
-                onChange: (value) => setShowHispanicOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityHispanicOtherText', null);
+                  }
+                  setShowHispanicOptions(checked);
+                },
                 onExpand: () => setShowHispanicOptions(!showHispanicOptions),
               },
               {
@@ -455,7 +475,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showMeNaOptions,
-                onChange: (value) => setShowMeNaOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityMeNaOtherText', null);
+                  }
+                  setShowMeNaOptions(checked);
+                },
                 onExpand: () => setShowMeNaOptions(!showMeNaOptions),
               },
               {
@@ -503,7 +528,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showNhPiOptions,
-                onChange: (value) => setShowNhPiOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityNhPiOtherText', null);
+                  }
+                  setShowNhPiOptions(checked);
+                },
                 onExpand: () => setShowNhPiOptions(!showNhPiOptions),
               },
               {
@@ -553,7 +583,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                 ],
                 showSubOptions: showWhiteOptions,
-                onChange: (value) => setShowWhiteOptions(value),
+                onChange: (checked) => {
+                  if (!checked) {
+                    onUpdate('ethnicityWhiteOtherText', null);
+                  }
+                  setShowWhiteOptions(checked);
+                },
                 onExpand: () => {
                   setShowWhiteOptions(!showWhiteOptions);
                 },
