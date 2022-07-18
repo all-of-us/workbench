@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import java.util.Collection;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.springframework.data.repository.CrudRepository;
@@ -8,12 +7,11 @@ import org.springframework.data.repository.CrudRepository;
 public interface UserRecentlyModifiedResourceDao
     extends CrudRepository<DbUserRecentlyModifiedResource, Long> {
 
-  long countDbUserRecentResourcesIdsByUserId(long userId);
+  long countByUserId(long userId);
 
   DbUserRecentlyModifiedResource findTopByUserIdOrderByLastAccessDate(long userId);
 
-  void deleteByUserIdAndWorkspaceIdIn(long userId, Collection<Long> ids);
-
+  // Use getResource() as a shorter equivalent to this magic-JPA-named method
   DbUserRecentlyModifiedResource
       findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
           long userId,
@@ -21,7 +19,9 @@ public interface UserRecentlyModifiedResourceDao
           DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
           String resourceId);
 
-  default DbUserRecentlyModifiedResource findDbUserRecentResources(
+  // convenience method with a shorter name, for
+  // findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId()
+  default DbUserRecentlyModifiedResource getResource(
       long userId,
       long workspaceId,
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
@@ -30,10 +30,13 @@ public interface UserRecentlyModifiedResourceDao
         userId, workspaceId, resourceType, resourceId);
   }
 
+  // Use getAllForUser() as a shorter equivalent to this magic-JPA-named method
   List<DbUserRecentlyModifiedResource>
       findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc(long userId);
 
-  default List<DbUserRecentlyModifiedResource> findDbUserRecentResourcesByUserId(long userId) {
+  // convenience method with a shorter name, for
+  // findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc()
+  default List<DbUserRecentlyModifiedResource> getAllForUser(long userId) {
     return this.findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc(userId);
   }
 }
