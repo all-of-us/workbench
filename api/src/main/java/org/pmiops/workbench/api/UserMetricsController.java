@@ -24,7 +24,6 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -115,12 +114,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // resources in the backend
     // Because we don't store notebooks in our database the way we do other resources.
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    final DbUserRecentResource recentResource =
+    final DbUserRecentlyModifiedResource recentResource =
         userRecentResourceService.updateNotebookEntry(
             dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebookPath);
 
-    return ResponseEntity.ok(
-        workspaceResourceMapper.fromDbUserRecentResource(recentResource, fcWorkspace, dbWorkspace));
+    return ResponseEntity.ok(toWorkspaceResource(recentResource, fcWorkspace, dbWorkspace));
   }
 
   @Override
@@ -257,15 +255,27 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     }
   }
 
+  // TODO: move these to WorkspaceResourceMapper or UserRecentResourceService ?
+
   private WorkspaceResource toWorkspaceResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
-    return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
+    return toWorkspaceResource(
         dbUserRecentlyModifiedResource,
         idToFcWorkspaceResponse.get(workspaceId),
-        idToDbWorkspace.get(workspaceId),
+        idToDbWorkspace.get(workspaceId));
+  }
+
+  private WorkspaceResource toWorkspaceResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
+      FirecloudWorkspaceResponse fcWorkspaceResponse,
+      DbWorkspace dbWorkspace) {
+    return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
+        dbUserRecentlyModifiedResource,
+        fcWorkspaceResponse,
+        dbWorkspace,
         cohortService,
         cohortReviewService,
         conceptSetService,
