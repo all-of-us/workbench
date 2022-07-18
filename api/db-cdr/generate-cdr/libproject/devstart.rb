@@ -433,7 +433,7 @@ def publish_cdr_files(cmd_name, args)
       aw4_wgs_sources.each do |source_name, section|
         common.status("building manifest for '#{source_name}'")
         copy, output = build_manifests_for_aw4_section(
-          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows, output_manifest_path(working_dir, source_name))
+          section, tier[:ingest_cdr_bucket], tier[:dest_cdr_bucket], op.opts.display_version_id, wgs_aw4_rows, output_manifest_path.call(source_name))
         key_name = "aw4_wgs_" + source_name
         copy_manifests[key_name] = copy
         unless output.nil?
@@ -496,13 +496,14 @@ def publish_cdr_files(cmd_name, args)
     copy_manifest_tasks_by_path = {}
     all_tasks = []
     copy_manifest_files.each do |path|
-      tasks = CSV.read(manifest_path, headers: true, return_headers: false)
+      tasks = CSV.read(path, headers: true, return_headers: false)
       copy_manifest_tasks_by_path[path] = tasks
-      all_tasks += tasks
+      tasks_a = tasks.each.to_a.shift
+      all_tasks += tasks_a
     end
 
     maybe_grant_preprod_access(op.opts.project, all_tasks)
-    copy_manifest_task_by_path.each do |path, tasks|
+    copy_manifest_tasks_by_path.each do |path, tasks|
       common.status "Starting file staging for #{path}"
       stage_files_by_manifest(op.opts.project, tasks, File.join(logs_dir, File.basename(path, '.csv')))
     end

@@ -43,7 +43,7 @@ OLD_ARRAYS_PATH_INFIX = "array_old_egt_files"
 
 
 CURATION_SYNTHETIC_SOURCE_CONFIG = {
-  :wgs_aw4_prefix => "gs://all-of-us-workbench-test-genomics/aw4_wgs/"
+  :wgs_aw4_prefix => "gs://all-of-us-workbench-test-genomics/aw4_wgs/test_aw4.csv"
 }
 
 CURATION_PROD_SOURCE_CONFIG = {
@@ -582,6 +582,10 @@ def _maybe_update_preprod_access(project, all_tasks, add)
   preprod_deploy_account = must_get_env_value("all-of-us-rw-preprod", :publisher_account)
   preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
 
+  if(project == "all-of-us-workbench-test")
+    return
+  end
+
   needs_cross_env_grant = false
   preprod_source_projects = (
     all_tasks
@@ -731,10 +735,19 @@ def build_publish_configs(manifest_paths)
   manifest_paths.each do |path|
     CSV.foreach(path, headers: true, return_headers: false) do |row|
       ingest_dir = File.dirname(row["ingest_path"])
+      dest_dir = row["destination_dir"];
+      unless ingest_dir.end_with?("/")
+        printf("ingest_dir doesn't end with /, adding it")
+        ingest_dir+="/";
+      end
+      unless dest_dir.end_with?("/")
+        printf("destination_dir doesn't end with /, adding it")
+        dest_dir+="/";
+      end
       unless config_by_source_dir.key? ingest_dir
         config_by_source_dir[ingest_dir] = {
           :source => ingest_dir,
-          :dest => row["destination_dir"],
+          :dest => dest_dir,
           :storage_class => row["dest_storage_class"],
         }
       end
