@@ -80,7 +80,7 @@ const descriptions = {
   cohorts: 'A cohort is a group of participants based on specific criteria.',
 };
 
-const resourceTypesStrToFetch = [
+const resourceTypesToFetch = [
   ResourceType.COHORT.toString(),
   ResourceType.COHORTREVIEW.toString(),
   ResourceType.CONCEPTSET.toString(),
@@ -112,7 +112,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         await workspacesApi().getWorkspaceResourcesV2(
           workspace.namespace,
           workspace.id,
-          resourceTypesStrToFetch
+          resourceTypesToFetch
         )
       );
     } catch (error) {
