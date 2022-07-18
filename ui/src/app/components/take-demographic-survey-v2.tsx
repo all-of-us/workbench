@@ -42,10 +42,6 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
       +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) - +new Date();
     let timeLeft = {};
 
-    // Update the text as part of nudge story part 2
-    if (difference <= 0) {
-      notificationText = 'Please fill the demographic survey now!! ';
-    }
     if (difference > 0) {
       timeLeft = {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -99,7 +95,10 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   // Users will continue to see the banner, until they have taken the survey
   // If the time is up, update the text message rather than hide the banner
   if (timeLeftDisplayStr === '') {
-    notificationText += ' This will only take few minutes';
+    notificationText +=
+      'Please complete the updated Researcher Demographic Survey. ' +
+      'It will take approximately 2 minutes to complete. Your answers to ' +
+      'these questions will help us learn more about who is using the platform.';
   } else {
     notificationText +=
       ` Please complete the updated Researcher
