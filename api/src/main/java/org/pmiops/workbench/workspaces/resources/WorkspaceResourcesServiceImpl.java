@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cdrselector;
+package org.pmiops.workbench.workspaces.resources;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -18,7 +18,6 @@ import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
-import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
