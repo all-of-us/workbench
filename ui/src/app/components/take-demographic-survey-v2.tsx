@@ -28,10 +28,9 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   const { profile } = useStore(profileStore);
   const location = useLocation();
 
-  // Delete this const once we reach the deadline
+  // Delete this const once we reach the deadline DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE
   const notificationText = (
     <span>
-      {' '}
       Please take 5 minutes to complete the updated Researcher Demographic
       Survey before {DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE}. Your response
       will help <AoU /> grow our platform community{' '}
