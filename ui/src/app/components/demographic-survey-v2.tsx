@@ -594,6 +594,16 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 },
               },
               {
+                label: 'Prefer not to answer',
+                value: EthnicCategory.PREFERNOTTOANSWER,
+                onChange: (checked) => {
+                  onUpdate(
+                    'ethnicCategories',
+                    checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
+                  );
+                },
+              },
+              {
                 label: NONE_FULLY_DESCRIBE,
                 value: EthnicCategory.OTHER,
                 showInput: true,
@@ -607,16 +617,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 },
                 onChangeOtherText: (value) =>
                   onUpdate('ethnicityOtherText', value),
-              },
-              {
-                label: 'Prefer not to answer',
-                value: EthnicCategory.PREFERNOTTOANSWER,
-                onChange: (checked) => {
-                  onUpdate(
-                    'ethnicCategories',
-                    checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
-                  );
-                },
               },
             ]}
             multiple
@@ -768,6 +768,15 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: SexualOrientationV2.QUESTIONING,
               },
               {
+                label: 'Prefer not to answer',
+                value: SexualOrientationV2.PREFERNOTTOANSWER,
+                onChange: (checked) =>
+                  onUpdate(
+                    'sexualOrientations',
+                    checked ? [SexualOrientationV2.PREFERNOTTOANSWER] : []
+                  ),
+              },
+              {
                 label: NONE_FULLY_DESCRIBE,
                 value: SexualOrientationV2.OTHER,
                 showInput: true,
@@ -781,15 +790,6 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 },
                 onChangeOtherText: (value) =>
                   onUpdate('orientationOtherText', value),
-              },
-              {
-                label: 'Prefer not to answer',
-                value: SexualOrientationV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
-                  onUpdate(
-                    'sexualOrientations',
-                    checked ? [SexualOrientationV2.PREFERNOTTOANSWER] : []
-                  ),
               },
             ]}
             multiple
