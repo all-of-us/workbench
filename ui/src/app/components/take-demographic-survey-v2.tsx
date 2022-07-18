@@ -39,7 +39,6 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
 
   const notificationTextAfterDeadline = (
     <span>
-      {' '}
       Please take 5 minutes to complete the updated Researcher Demographic
       Survey. Your response will help <AoU /> grow our platform community{' '}
     </span>
