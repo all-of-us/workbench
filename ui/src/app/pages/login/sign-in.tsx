@@ -261,6 +261,16 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     ];
   }
 
+  triggerAnalyticalEvent = () => {
+    switch (this.state.currentStep) {
+      case SignInStep.INSTITUTIONAL_AFFILIATION:
+        AnalyticsTracker.Registration.InstitutionPage();
+        break;
+      default:
+        throw new Error('Unknown analytical event: ' + this.state.currentStep);
+    }
+  };
+
   private getNextStep(currentStep: SignInStep) {
     const steps = this.getAccountCreationSteps();
     const index = steps.indexOf(currentStep);
@@ -337,8 +347,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         isPreviousStep: true,
       });
     };
-    const handleUpdate = (updatedProfile) => {
-      this.setState(updatedProfile);
+    const handleUpdate = (updatedState) => {
+      this.setState(updatedState);
     };
 
     switch (currentStep) {
@@ -374,6 +384,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           <AccountCreationInstitution
             profile={this.state.profile}
             onComplete={onComplete}
+            onError={(value) => handleUpdate(fp.set(['errors'], value))}
             onPreviousClick={onPrevious}
           />
         );
@@ -454,8 +465,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private renderNavigation(currentStep: SignInStep) {
     if (
-      serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
-      currentStep === SignInStep.DEMOGRAPHIC_SURVEY
+      (serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
+        currentStep === SignInStep.DEMOGRAPHIC_SURVEY) ||
+      currentStep === SignInStep.INSTITUTIONAL_AFFILIATION
     ) {
       const { errors, loading } = this.state;
       return (
@@ -466,15 +478,16 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             marginLeft: '1rem',
           }}
         >
-          {environment.enableCaptcha && (
-            <div style={{ paddingBottom: '1rem' }}>
-              <ReCAPTCHA
-                sitekey={environment.captchaSiteKey}
-                ref={this.captchaRef}
-                onChange={(value) => this.captureCaptchaResponse(value)}
-              />
-            </div>
-          )}
+          {environment.enableCaptcha &&
+            currentStep === SignInStep.DEMOGRAPHIC_SURVEY && (
+              <div style={{ paddingBottom: '1rem' }}>
+                <ReCAPTCHA
+                  sitekey={environment.captchaSiteKey}
+                  ref={this.captchaRef}
+                  onChange={(value) => this.captureCaptchaResponse(value)}
+                />
+              </div>
+            )}
           <FlexRow>
             <Button
               type='secondary'
@@ -488,40 +501,75 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             >
               Previous
             </Button>
-            <TooltipTrigger
-              content={
-                (errors || !this.state.captcha) && (
-                  <>
-                    <div>Please review the following:</div>
-                    <ul>
-                      {errors && (
+            {currentStep !== SignInStep.DEMOGRAPHIC_SURVEY && (
+              <TooltipTrigger
+                content={
+                  errors && (
+                    <>
+                      <div>Please review the following:</div>
+                      <ul>
                         <>
                           {Object.keys(errors).map((key) => (
                             <li key={errors[key][0]}>{errors[key][0]}</li>
                           ))}
-                          <li>
-                            You may select "Prefer not to answer" for each
-                            unfilled item listed above to continue
-                          </li>
                         </>
-                      )}
-                      {!this.state.captcha && (
-                        <li key='captcha'>Please fill out reCAPTCHA.</li>
-                      )}
-                    </ul>
-                  </>
-                )
-              }
-            >
-              <Button
-                disabled={!!errors || !this.state.captcha || loading}
-                type='primary'
-                data-test-id={'submit-button'}
-                onClick={this.onSubmit}
+                      </ul>
+                    </>
+                  )
+                }
               >
-                Submit
-              </Button>
-            </TooltipTrigger>
+                <Button
+                  disabled={!!errors || loading}
+                  type='primary'
+                  onClick={() => {
+                    // Add Analytics here.
+                    this.triggerAnalyticalEvent();
+                    this.setState({
+                      currentStep: this.getNextStep(currentStep),
+                      isPreviousStep: false,
+                    });
+                  }}
+                >
+                  Next
+                </Button>
+              </TooltipTrigger>
+            )}
+            {currentStep === SignInStep.DEMOGRAPHIC_SURVEY && (
+              <TooltipTrigger
+                content={
+                  (errors || !this.state.captcha) && (
+                    <>
+                      <div>Please review the following:</div>
+                      <ul>
+                        {errors && (
+                          <>
+                            {Object.keys(errors).map((key) => (
+                              <li key={errors[key][0]}>{errors[key][0]}</li>
+                            ))}
+                            <li>
+                              You may select "Prefer not to answer" for each
+                              unfilled item listed above to continue
+                            </li>
+                          </>
+                        )}
+                        {!this.state.captcha && (
+                          <li key='captcha'>Please fill out reCAPTCHA.</li>
+                        )}
+                      </ul>
+                    </>
+                  )
+                }
+              >
+                <Button
+                  disabled={!!errors || !this.state.captcha || loading}
+                  type='primary'
+                  data-test-id={'submit-button'}
+                  onClick={this.onSubmit}
+                >
+                  Submit
+                </Button>
+              </TooltipTrigger>
+            )}
           </FlexRow>
         </div>
       );

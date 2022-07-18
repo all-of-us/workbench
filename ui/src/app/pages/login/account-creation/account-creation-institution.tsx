@@ -10,17 +10,13 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { FormSection } from 'app/components/forms';
 import { ValidationIcon } from 'app/components/icons';
 import {
   Error as ErrorDiv,
   styles as inputStyles,
   TextInputWithLabel,
 } from 'app/components/inputs';
-import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { SupportMailto } from 'app/components/support';
 import { AouTitle } from 'app/components/text-wrappers';
@@ -81,6 +77,7 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
 export interface AccountCreationInstitutionProps {
   profile: Profile;
   onComplete: (profile: Profile) => void;
+  onError: (any) => void;
   onPreviousClick: (profile: Profile) => void;
 }
 
@@ -126,6 +123,7 @@ export class AccountCreationInstitution extends React.Component<
       if (this.props.profile?.contactEmail) {
         this.checkEmail();
       }
+      this.props.onError(this.validate());
     } catch (e) {
       this.setState({
         loadingInstitutions: false,
@@ -153,6 +151,9 @@ export class AccountCreationInstitution extends React.Component<
       // Trigger an email-verification check, in case the user has entered or changed their email and
       // such a check hasn't yet been sent.
       this.checkEmail();
+      const errors = this.validate();
+      console.log('What are my errors? ', errors);
+      this.props.onError(errors);
     });
   }
 
@@ -189,11 +190,21 @@ export class AccountCreationInstitution extends React.Component<
         institutionShortName,
         this.aborter
       );
-      this.setState({ checkEmailResponse: result });
-    } catch (e) {
-      this.setState({
-        checkEmailError: true,
+      this.setState({ checkEmailResponse: result }, () => {
+        this.props.onError(this.validate());
       });
+    } catch (e) {
+      this.setState(
+        {
+          checkEmailError: true,
+        },
+        () => {
+          // Trigger an email-verification check, in case the user has entered or changed their email and
+          // such a check hasn't yet been sent.
+          this.checkEmail();
+          this.props.onError(this.validate());
+        }
+      );
     }
   }
 
@@ -226,7 +237,12 @@ export class AccountCreationInstitution extends React.Component<
   }
 
   updateContactEmail(contactEmail: string) {
-    this.setState(fp.set(['profile', 'contactEmail'], contactEmail.trim()));
+    this.setState(
+      fp.set(['profile', 'contactEmail'], contactEmail.trim()),
+      () => {
+        this.props.onError(this.validate());
+      }
+    );
   }
 
   /**
@@ -333,7 +349,10 @@ export class AccountCreationInstitution extends React.Component<
 
   updateAffiliationValue(attribute: string, value) {
     this.setState(
-      fp.set(['profile', 'verifiedInstitutionalAffiliation', attribute], value)
+      fp.set(['profile', 'verifiedInstitutionalAffiliation', attribute], value),
+      () => {
+        this.props.onError(this.validate());
+      }
     );
   }
 
@@ -350,8 +369,6 @@ export class AccountCreationInstitution extends React.Component<
         },
       },
     } = this.state;
-
-    const errors = this.validate();
 
     return (
       <div
@@ -509,41 +526,6 @@ export class AccountCreationInstitution extends React.Component<
                 )}
               </div>
             )}
-            <FormSection style={{ paddingBottom: '1rem' }}>
-              <Button
-                type='secondary'
-                style={{ marginRight: '1rem' }}
-                onClick={() => this.props.onPreviousClick(this.state.profile)}
-              >
-                Previous
-              </Button>
-              <TooltipTrigger
-                content={
-                  errors && (
-                    <div data-test-id='validation-errors'>
-                      <div>Please review the following: </div>
-                      <BulletAlignedUnorderedList>
-                        {Object.keys(errors).map((key) => (
-                          <li key={errors[key][0]}>{errors[key][0]}</li>
-                        ))}
-                      </BulletAlignedUnorderedList>
-                    </div>
-                  )
-                }
-                disabled={!errors}
-              >
-                <Button
-                  data-test-id='submit-button'
-                  disabled={loadingInstitutions || errors != null}
-                  onClick={() => {
-                    AnalyticsTracker.Registration.InstitutionPage();
-                    this.props.onComplete(this.state.profile);
-                  }}
-                >
-                  Next
-                </Button>
-              </TooltipTrigger>
-            </FormSection>
           </FlexColumn>
           <FlexColumn>
             <FlexColumn style={styles.asideContainer}>
