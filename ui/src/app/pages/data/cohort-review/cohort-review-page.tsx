@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useParams } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 const { useEffect, useState } = React;
@@ -118,7 +119,8 @@ export const CohortReviewPage = fp.flow(
   withCurrentWorkspace(),
   withSpinnerOverlay()
 )(({ hideSpinner, showSpinner, workspace }) => {
-  const { ns, wsid, cid } = useParams<MatchParams>();
+  const history = useHistory();
+  const { ns, wsid, cid, crid } = useParams<MatchParams>();
   const [navigate, navigateByUrl] = useNavigation();
   const [cohort, setCohort] = useState(undefined);
   const [cohortReviews, setCohortReviews] = useState(undefined);
@@ -153,6 +155,12 @@ export const CohortReviewPage = fp.flow(
       });
   };
 
+  // sets the cohort review id as a url param
+  const updateUrlWithCohortReviewId = (cohortReviewId: number) =>
+    history.push(
+      `/workspaces/${ns}/${wsid}/data/cohorts/${cid}/reviews/${cohortReviewId}`
+    );
+
   const loadCohortAndReviews = async () => {
     const [cohortResponse, cohortReviewResponse, participantCountResponse] =
       await Promise.all([
@@ -164,8 +172,16 @@ export const CohortReviewPage = fp.flow(
     setCohortReviews(cohortReviewResponse.items);
     setParticipantCount(participantCountResponse);
     if (cohortReviewResponse.items.length > 0) {
-      setActiveReview(cohortReviewResponse.items[0]);
-      getParticipantData(cohortReviewResponse.items[0].cohortReviewId);
+      let selectedReview = cohortReviewResponse.items[0];
+      if (crid) {
+        selectedReview = cohortReviewResponse.items.find(
+          (cr) => cr.cohortReviewId === +crid
+        );
+      } else {
+        updateUrlWithCohortReviewId(selectedReview.cohortReviewId);
+      }
+      setActiveReview(selectedReview);
+      getParticipantData(selectedReview.cohortReviewId);
     } else {
       hideSpinner();
     }
@@ -198,12 +214,14 @@ export const CohortReviewPage = fp.flow(
   }, []);
 
   const onReviewCreate = (review: CohortReview) => {
+    updateUrlWithCohortReviewId(review.cohortReviewId);
     setCohortReviews((prevCohortReviews) => [...prevCohortReviews, review]);
     setActiveReview(review);
     setShowCreateModal(false);
   };
 
   const onReviewSelect = (review: CohortReview) => {
+    updateUrlWithCohortReviewId(review.cohortReviewId);
     if (review.participantCohortStatuses?.length) {
       setActiveReview(review);
     } else {

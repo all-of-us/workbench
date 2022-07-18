@@ -86,7 +86,7 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isCohortReview,
       (r) => ({
-        url: `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/review`,
+        url: `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
       }),
     ],
     [
