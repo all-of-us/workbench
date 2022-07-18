@@ -1,7 +1,6 @@
 package org.pmiops.workbench.workspaces.resources;
 
 import java.util.List;
-import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +9,7 @@ public interface UserRecentResourceService {
 
   int USER_ENTRY_COUNT = 10;
 
-  DbUserRecentResource updateNotebookEntry(
+  DbUserRecentlyModifiedResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath);
 
   void updateCohortEntry(long workspaceId, long userId, long cohortId);
@@ -30,9 +29,6 @@ public interface UserRecentResourceService {
   void deleteDataSetEntry(long workspaceId, long userId, long dataSetId);
 
   void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
-
-  @Deprecated
-  List<DbUserRecentResource> findAllResourcesByUser(long userId);
 
   List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId);
 }

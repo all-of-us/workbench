@@ -15,6 +15,8 @@ import {
 } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 
+import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from './constants';
+
 declare const gapi: any;
 
 // for e2e tests: provide your own oauth token to obviate Google's oauth UI
@@ -87,6 +89,7 @@ export const signIn = (): void => {
 
 export const signOut = async (continuePath: string = '/login') => {
   authStore.set({ ...authStore.get(), isSignedIn: false });
+  sessionStorage.removeItem(DEMOGRAPHIC_SURVEY_SESSION_KEY);
   try {
     await userApi().signOut();
   } catch (ex) {
