@@ -131,13 +131,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         notebookPath);
   }
 
-  /** Deletes cohort entry from user_recently_modified_resource */
   /**
    * Deleting Cohort resource in workbench, deletes all the cohort reviews that is using the cohort
-   * as well mark the DataSet using the deleted cohort as INVALID. Therefore, as part of
-   * deleteCohortEntry method, delete not just the Cohort entry from
-   * user_recently_modified_resource, but also all the cohort review/dataSet that references the
-   * deleted cohort
+   * as well mark the DataSet using the deleted cohort as INVALID. As part of deleteCohortEntry
+   * method : 1) Delete Cohort entry from user_recently_modified_resource, 2) Also all the cohort
+   * review/dataSet that references the deleted cohort
    */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
@@ -172,12 +170,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Deletes concept set entry from user_recently_modified_resource
-   *
-   * <p>Deleting ConceptSet from database will mark the dataSet, using the concept Set, as invalid
-   * which removes the dataset from the user resources list So as part of deleteConceptSetEntry,
-   * apart from deleting the concept set entry check all the dataSet using the concept set and
-   * delete them as well so they do not appear in user recent resource list
+   * Deleting ConceptSet from database will mark the dataSet, using the concept Set, as invalid
+   * which removes the dataset from the user resources list. For deleteConceptSetEntry: 1) Deleting
+   * the concept set entry from userRecentResource table 2) Delete all the dataSet using the concept
+   * Set from userRecentResource table as well so they do not appear in user recent resource list in
+   * UI
    */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
