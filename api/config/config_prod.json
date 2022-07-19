@@ -112,7 +112,7 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": false,
     "ccSupportWhenAdminLocking": true,
-    "enableDSCREntryInRecentModified": false,
+    "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
     "enableMultiReview": false,
     "enableUpdatedDemographicSurvey": true,
