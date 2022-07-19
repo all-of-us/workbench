@@ -39,7 +39,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public DbUserRecentlyModifiedResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath) {
-    handleUserLimit(userId);
     return updateUserRecentlyModifiedResourceEntry(
         workspaceId,
         userId,
@@ -102,6 +101,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     DbUserRecentlyModifiedResource recentResource =
         userRecentlyModifiedResourceDao.getResource(userId, workspaceId, resourceType, resourceId);
     if (recentResource == null) {
+      handleUserLimit(userId);
       recentResource =
           new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
     } else {
