@@ -103,6 +103,46 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select c "
               + "from DbCriteria c "
               + "where standard=:standard "
+              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "and upper(c.name) like upper(:endsWith) "
+              + "order by c.count desc, c.name asc")
+  Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
+      @Param("domain") String domain,
+      @Param("standard") Boolean standard,
+      @Param("endsWith") String endsWith,
+      Pageable page);
+
+  //  @Query(
+  //      value =
+  //          "select * from cb_criteria c "
+  //              + "inner join ( "
+  //              + "select distinct cr.concept_id_2 from cb_criteria_relationship cr "
+  //              + "join cb_criteria c1 on (cr.concept_id_2 = c1.concept_id "
+  //              + "and cr.concept_id_1 = :conceptId "
+  //              + "and c1.domain_id = 'DRUG') ) cr1 on c.concept_id = cr1.concept_id_2 "
+  //              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(full_text)
+  // against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
+  //      nativeQuery = true)
+  @Query(
+      value =
+          "select c "
+              + "from DbCriteria c "
+              + "where standard=:standard "
+              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "and upper(c.name) like upper(:endsWith) "
+              + "order by c.count desc, c.name asc")
+  Page<DbCriteria> findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
+      @Param("domain") String domain,
+      @Param("standard") Boolean standard,
+      @Param("term") String term,
+      @Param("endsWith") String endsWith,
+      Pageable page);
+
+  @Query(
+      value =
+          "select c "
+              + "from DbCriteria c "
+              + "where standard=:standard "
               + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandard(
