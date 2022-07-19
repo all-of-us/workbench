@@ -39,6 +39,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public DbUserRecentlyModifiedResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath) {
+    handleUserLimit(userId);
     return updateUserRecentlyModifiedResourceEntry(
         workspaceId,
         userId,
@@ -188,6 +189,19 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     } catch (InterruptedException e) {
       throw new ServerErrorException(
           "Unable to find Recently Modified Resources for user" + userId);
+    }
+  }
+
+  /**
+   * Check number of entries in user_recently_modified_resource for user, If it exceeds or equals
+   * USER_ENTRY_COUNT, delete the one with earliest lastAccessTime
+   */
+  private void handleUserLimit(long userId) {
+    long count = userRecentlyModifiedResourceDao.countByUserId(userId);
+    while (count-- >= USER_ENTRY_COUNT) {
+      DbUserRecentlyModifiedResource resourceById =
+          userRecentlyModifiedResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
+      userRecentlyModifiedResourceDao.delete(resourceById);
     }
   }
 }

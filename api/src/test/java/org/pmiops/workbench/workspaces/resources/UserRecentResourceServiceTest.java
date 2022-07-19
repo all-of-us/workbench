@@ -232,7 +232,6 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testUpdateNotebookAccessTime() {
-
     userRecentResourceService.updateNotebookEntry(
         workspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory/notebooks/notebook1");
     long rowsCount = userRecentlyModifiedResourceDao.count();
@@ -250,11 +249,15 @@ public class UserRecentResourceServiceTest {
     newWorkspace.setWorkspaceId(2L);
     workspaceDao.save(newWorkspace);
 
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+
     // record 3 recent resources
 
     int initialEntryCount = 3;
+    String firstNotebook = "gs://someDirectory1/notebooks/notebook";
     userRecentResourceService.updateNotebookEntry(
-        newWorkspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory1/notebooks/notebook");
+        newWorkspace.getWorkspaceId(), user.getUserId(), firstNotebook);
 
     CLOCK.increment(2000);
 
@@ -265,17 +268,17 @@ public class UserRecentResourceServiceTest {
 
     // record enough recent resources to fill up the table
 
-    int count = UserRecentResourceService.USER_ENTRY_COUNT - initialEntryCount;
-    while (count-- >= 0) {
+    int toAdd = UserRecentResourceService.USER_ENTRY_COUNT - initialEntryCount;
+    while (toAdd-- > 0) {
       CLOCK.increment(2000);
       userRecentResourceService.updateNotebookEntry(
           newWorkspace.getWorkspaceId(),
           user.getUserId(),
-          "gs://someDirectory1/notebooks/notebook" + count);
+          "gs://someDirectory1/notebooks/notebook" + toAdd);
     }
 
     CLOCK.increment(2000);
-    long rowsCount = userRecentlyModifiedResourceDao.count();
+    rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
 
     // add another and observe that it does not increase in size...
@@ -294,7 +297,7 @@ public class UserRecentResourceServiceTest {
             newWorkspace.getWorkspaceId(),
             user.getUserId(),
             DbUserRecentlyModifiedResourceType.NOTEBOOK,
-            "gs://someDirectory1/notebooks/notebook");
+            firstNotebook);
 
     assertThat(cache).isNull();
   }
