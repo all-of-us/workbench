@@ -65,7 +65,7 @@ const styles = reactStyles({
 
 interface NotificationProps {
   dataTestId: string;
-  text: string;
+  text: string | JSX.Element;
   buttonText: string;
   buttonPath: string;
   buttonDisabled: boolean;
