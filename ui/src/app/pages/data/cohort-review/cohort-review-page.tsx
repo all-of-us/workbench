@@ -33,7 +33,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { datatableStyles } from 'app/styles/datatable';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { useNavigation } from 'app/utils/navigation';
+import { currentCohortReviewStore, useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
@@ -150,6 +150,7 @@ export const CohortReviewPage = fp.flow(
           }
           return prevCohortReviews;
         });
+        currentCohortReviewStore.next(cohortReview);
         setActiveReview(cohortReview);
         hideSpinner();
       });
@@ -180,6 +181,7 @@ export const CohortReviewPage = fp.flow(
       } else {
         updateUrlWithCohortReviewId(selectedReview.cohortReviewId);
       }
+      currentCohortReviewStore.next(selectedReview);
       setActiveReview(selectedReview);
       getParticipantData(selectedReview.cohortReviewId);
     } else {
@@ -215,6 +217,7 @@ export const CohortReviewPage = fp.flow(
 
   const onReviewCreate = (review: CohortReview) => {
     updateUrlWithCohortReviewId(review.cohortReviewId);
+    currentCohortReviewStore.next(review);
     setCohortReviews((prevCohortReviews) => [...prevCohortReviews, review]);
     setActiveReview(review);
     setShowCreateModal(false);
@@ -223,6 +226,7 @@ export const CohortReviewPage = fp.flow(
   const onReviewSelect = (review: CohortReview) => {
     updateUrlWithCohortReviewId(review.cohortReviewId);
     if (review.participantCohortStatuses?.length) {
+      currentCohortReviewStore.next(review);
       setActiveReview(review);
     } else {
       getParticipantData(review.cohortReviewId);

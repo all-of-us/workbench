@@ -199,7 +199,7 @@ const mapData = (participant: ParticipantCohortStatus) => {
 };
 
 export const CohortReviewParticipantsTable = ({ cohortReview }) => {
-  const { ns, wsid, cid } = useParams<MatchParams>();
+  const { ns, wsid, cid, crid } = useParams<MatchParams>();
   const [navigate] = useNavigation();
   const [apiError, setApiError] = useState(false);
   const [data, setData] = useState(null);
@@ -453,7 +453,8 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       'data',
       'cohorts',
       cid,
-      'review',
+      'reviews',
+      crid,
       'participants',
       event.data.participantId,
     ]);

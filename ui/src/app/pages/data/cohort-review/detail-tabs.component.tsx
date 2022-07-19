@@ -18,7 +18,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -445,7 +445,7 @@ export const DetailTabs = fp.flow(
     }
 
     loadParticipantChartData() {
-      const { ns, wsid, pid } = this.props.match.params;
+      const { ns, wsid, pid, crid } = this.props.match.params;
       fp.map(async (domainName: string) => {
         this.setState((prevState) => ({
           chartData: {
@@ -460,7 +460,9 @@ export const DetailTabs = fp.flow(
         const { items } = await cohortReviewApi().getParticipantChartData(
           ns,
           wsid,
-          this.props.cohortReview.cohortReviewId,
+          serverConfigStore.get().config.enableMultiReview
+            ? +crid
+            : this.props.cohortReview.cohortReviewId,
           +pid,
           domainName,
           10
