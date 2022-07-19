@@ -247,15 +247,25 @@ public class UserRecentResourceServiceTest {
   @Test
   public void testUserLimit() {
     DbWorkspace newWorkspace = new DbWorkspace();
-    newWorkspace.setWorkspaceId(2l);
+    newWorkspace.setWorkspaceId(2L);
     workspaceDao.save(newWorkspace);
+
+    // record 3 recent resources
+
+    int initialEntryCount = 3;
     userRecentResourceService.updateNotebookEntry(
         newWorkspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory1/notebooks/notebook");
+
     CLOCK.increment(2000);
-    userRecentResourceService.updateNotebookEntry(2l, user.getUserId(), "notebooks");
+
+    userRecentResourceService.updateNotebookEntry(
+        newWorkspace.getWorkspaceId(), user.getUserId(), "notebooks");
     userRecentResourceService.updateCohortEntry(
         newWorkspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
-    int count = UserRecentResourceService.USER_ENTRY_COUNT - 3;
+
+    // record enough recent resources to fill up the table
+
+    int count = UserRecentResourceService.USER_ENTRY_COUNT - initialEntryCount;
     while (count-- >= 0) {
       CLOCK.increment(2000);
       userRecentResourceService.updateNotebookEntry(
@@ -268,12 +278,17 @@ public class UserRecentResourceServiceTest {
     long rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
 
+    // add another and observe that it does not increase in size...
+
     userRecentResourceService.updateNotebookEntry(
         newWorkspace.getWorkspaceId(),
         user.getUserId(),
         "gs://someDirectory/notebooks/notebookExtra");
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
+
+    // ...because the first entry is removed
+
     DbUserRecentlyModifiedResource cache =
         userRecentlyModifiedResourceDao.getResource(
             newWorkspace.getWorkspaceId(),
