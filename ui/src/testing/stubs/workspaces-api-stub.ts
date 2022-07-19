@@ -323,7 +323,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getWorkspaceResources(
+  getWorkspaceResourcesV2(
     workspaceNamespace: string,
     workspaceId: string
   ): Promise<WorkspaceResourceResponse> {
