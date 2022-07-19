@@ -21,12 +21,12 @@ describe('Cohort review set tests', () => {
     await signInWithAccessToken(page);
   });
 
-  const stagingRun = process.env.WORKBENCH_ENV === 'staging';
+  const multiReviewDisabled = process.env.WORKBENCH_ENV === 'staging';
 
   const workspaceName = 'e2eCohortReviewTest';
   const cohortName = makeRandomName('auotest', { includeHyphen: false });
-  const cohortReview1Name = stagingRun ? makeRandomName('auotest', { includeHyphen: false }) : cohortName;
-  const cohortReview2Name = stagingRun ? makeRandomName('auotest', { includeHyphen: false }) : cohortName;
+  const cohortReview1Name = multiReviewDisabled ? makeRandomName('auotest', { includeHyphen: false }) : cohortName;
+  const cohortReview2Name = multiReviewDisabled ? makeRandomName('auotest', { includeHyphen: false }) : cohortName;
 
   const reviewSetNumberOfParticipants_1 = 50;
   const reviewSetNumberOfParticipants_2 = 100;
@@ -43,7 +43,7 @@ describe('Cohort review set tests', () => {
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
     let cohortReviewPage;
-    if (stagingRun) {
+    if (multiReviewDisabled) {
       const modal = new CohortReviewModal(page);
       await modal.waitForLoad();
 
@@ -118,7 +118,7 @@ describe('Cohort review set tests', () => {
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
 
     let cohortReviewPage;
-    if (stagingRun) {
+    if (multiReviewDisabled) {
       const modal = new CohortReviewModal(page);
       await modal.waitForLoad();
       await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
