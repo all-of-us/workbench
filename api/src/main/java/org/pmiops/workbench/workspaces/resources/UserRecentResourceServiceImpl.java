@@ -5,16 +5,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +17,16 @@ import org.springframework.stereotype.Service;
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
 
   private Clock clock;
-  private CohortDao cohortDao;
-  private ConceptSetDao conceptSetDao;
-  private UserRecentResourceDao userRecentResourceDao;
   private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public UserRecentResourceServiceImpl(
       Clock clock,
-      CohortDao cohortDao,
-      ConceptSetDao conceptSetDao,
       UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
-      UserRecentResourceDao userRecentResourceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
-    this.cohortDao = cohortDao;
-    this.conceptSetDao = conceptSetDao;
     this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
-    this.userRecentResourceDao = userRecentResourceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -55,17 +39,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public DbUserRecentlyModifiedResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
-    DbUserRecentResource recentResource =
-        userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
-            userId, workspaceId, notebookNameWithPath);
-    if (recentResource == null) {
-      handleUserLimit(userId);
-      recentResource = new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, now);
-    }
-    userRecentResourceDao.save(recentResource.setLastAccessDate(now));
-
     return updateUserRecentlyModifiedResourceEntry(
         workspaceId,
         userId,
@@ -81,18 +54,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    */
   @Override
   public void updateCohortEntry(long workspaceId, long userId, long cohortId) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
-    DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
-    DbUserRecentResource resource =
-        userRecentResourceDao.findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
-    if (resource == null) {
-      handleUserLimit(userId);
-      resource = new DbUserRecentResource(workspaceId, userId, now);
-      resource.setCohort(cohort);
-    }
-    resource.setLastAccessDate(now);
-    userRecentResourceDao.save(resource);
     updateUserRecentlyModifiedResourceEntry(
         workspaceId,
         userId,
@@ -102,10 +63,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   @Override
   public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
-    final DbConceptSet conceptSet = conceptSetDao.findById(conceptSetId).orElse(null);
-    userRecentResourceDao.save(makeUserRecentResource(workspaceId, userId, now, conceptSet));
     updateUserRecentlyModifiedResourceEntry(
         workspaceId,
         userId,
@@ -135,21 +92,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     }
   }
 
-  @NotNull
-  private DbUserRecentResource makeUserRecentResource(
-      long workspaceId, long userId, Timestamp now, DbConceptSet conceptSet) {
-    DbUserRecentResource resource =
-        userRecentResourceDao.findByUserIdAndWorkspaceIdAndConceptSet(
-            userId, workspaceId, conceptSet);
-    if (resource == null) {
-      handleUserLimit(userId);
-      resource = new DbUserRecentResource(workspaceId, userId, now);
-      resource.setConceptSet(conceptSet);
-    }
-    resource.setLastAccessDate(now);
-    return resource;
-  }
-
   private DbUserRecentlyModifiedResource updateUserRecentlyModifiedResourceEntry(
       long workspaceId,
       long userId,
@@ -159,6 +101,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     DbUserRecentlyModifiedResource recentResource =
         userRecentlyModifiedResourceDao.getResource(userId, workspaceId, resourceType, resourceId);
     if (recentResource == null) {
+      handleUserLimit(userId);
       recentResource =
           new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
     } else {
@@ -170,12 +113,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   /** Deletes notebook entry from user_recent_resource and user_recently_modified_resource */
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
-    DbUserRecentResource resource =
-        userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
-            userId, workspaceId, notebookPath);
-    if (resource != null) {
-      userRecentResourceDao.delete(resource);
-    }
     deleteUserRecentlyModifiedResourceEntry(
         userId,
         workspaceId,
@@ -256,16 +193,12 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Check number of entries in user_recently_modified_resource for user, If it exceeds
+   * Check number of entries in user_recently_modified_resource for user, If it exceeds or equals
    * USER_ENTRY_COUNT, delete the one with earliest lastAccessTime
    */
   private void handleUserLimit(long userId) {
     long count = userRecentlyModifiedResourceDao.countByUserId(userId);
     while (count-- >= USER_ENTRY_COUNT) {
-      DbUserRecentResource resource =
-          userRecentResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
-      userRecentResourceDao.delete(resource);
-
       DbUserRecentlyModifiedResource resourceById =
           userRecentlyModifiedResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
       userRecentlyModifiedResourceDao.delete(resourceById);
