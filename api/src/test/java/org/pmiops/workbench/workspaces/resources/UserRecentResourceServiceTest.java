@@ -232,7 +232,6 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testUpdateNotebookAccessTime() {
-
     userRecentResourceService.updateNotebookEntry(
         workspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory/notebooks/notebook1");
     long rowsCount = userRecentlyModifiedResourceDao.count();
@@ -247,26 +246,42 @@ public class UserRecentResourceServiceTest {
   @Test
   public void testUserLimit() {
     DbWorkspace newWorkspace = new DbWorkspace();
-    newWorkspace.setWorkspaceId(2l);
+    newWorkspace.setWorkspaceId(2L);
     workspaceDao.save(newWorkspace);
+
+    long rowsCount = userRecentlyModifiedResourceDao.count();
+    assertThat(rowsCount).isEqualTo(0);
+
+    // record 3 recent resources
+
+    int initialEntryCount = 3;
+    String firstNotebook = "gs://someDirectory1/notebooks/notebook";
     userRecentResourceService.updateNotebookEntry(
-        newWorkspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory1/notebooks/notebook");
+        newWorkspace.getWorkspaceId(), user.getUserId(), firstNotebook);
+
     CLOCK.increment(2000);
-    userRecentResourceService.updateNotebookEntry(2l, user.getUserId(), "notebooks");
+
+    userRecentResourceService.updateNotebookEntry(
+        newWorkspace.getWorkspaceId(), user.getUserId(), "notebooks");
     userRecentResourceService.updateCohortEntry(
         newWorkspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
-    int count = UserRecentResourceService.USER_ENTRY_COUNT - 3;
-    while (count-- >= 0) {
+
+    // record enough recent resources to fill up the table
+
+    int toAdd = UserRecentResourceService.USER_ENTRY_COUNT - initialEntryCount;
+    while (toAdd-- > 0) {
       CLOCK.increment(2000);
       userRecentResourceService.updateNotebookEntry(
           newWorkspace.getWorkspaceId(),
           user.getUserId(),
-          "gs://someDirectory1/notebooks/notebook" + count);
+          "gs://someDirectory1/notebooks/notebook" + toAdd);
     }
 
     CLOCK.increment(2000);
-    long rowsCount = userRecentlyModifiedResourceDao.count();
+    rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
+
+    // add another and observe that it does not increase in size...
 
     userRecentResourceService.updateNotebookEntry(
         newWorkspace.getWorkspaceId(),
@@ -274,12 +289,15 @@ public class UserRecentResourceServiceTest {
         "gs://someDirectory/notebooks/notebookExtra");
     rowsCount = userRecentlyModifiedResourceDao.count();
     assertThat(rowsCount).isEqualTo(UserRecentResourceService.USER_ENTRY_COUNT);
+
+    // ...because the first entry is removed
+
     DbUserRecentlyModifiedResource cache =
         userRecentlyModifiedResourceDao.getResource(
             newWorkspace.getWorkspaceId(),
             user.getUserId(),
             DbUserRecentlyModifiedResourceType.NOTEBOOK,
-            "gs://someDirectory1/notebooks/notebook");
+            firstNotebook);
 
     assertThat(cache).isNull();
   }
