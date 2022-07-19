@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -42,30 +43,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageConfig;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.AttrName;
-import org.pmiops.workbench.model.Attribute;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaRequest;
-import org.pmiops.workbench.model.CriteriaSubType;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.DemoChartInfoListResponse;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EthnicityInfo;
-import org.pmiops.workbench.model.EthnicityInfoListResponse;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.Modifier;
-import org.pmiops.workbench.model.ModifierType;
-import org.pmiops.workbench.model.Operator;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.TemporalMention;
-import org.pmiops.workbench.model.TemporalTime;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -166,6 +144,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "death",
         "cb_search_person",
         "cb_search_all_events",
+        "cb_review_all_events",
         "cb_criteria",
         "cb_criteria_ancestor");
   }
@@ -880,6 +859,132 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .addAncestorData(false)
         .addConceptId("1")
         .build();
+  }
+
+  @Test
+  public void getCohortChartDataBadLimit() {
+    try {
+      controller.getCohortChartData(
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), -1, new SearchRequest());
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      // Success
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getCohortChartDataBadLimitOverHundred() {
+    try {
+      controller.getCohortChartData(
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), 101, new SearchRequest());
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      // Success
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getCohortChartDataLab() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.LAB.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    assertThat(response.getItems().size()).isEqualTo(3);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataLabWithEHRData() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.LAB.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    assertThat(response.getItems().size()).isEqualTo(3);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataDrug() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.DRUG.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    assertThat(response.getItems().size()).isEqualTo(1);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name11").conceptId(1L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataCondition() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataProcedure() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.PROCEDURE.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+
+    assertThat(response.getItems().size()).isEqualTo(3);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
   }
 
   @Test

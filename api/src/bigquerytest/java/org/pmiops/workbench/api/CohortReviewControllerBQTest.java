@@ -58,8 +58,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
-import org.pmiops.workbench.model.CohortChartData;
-import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Filter;
@@ -643,109 +641,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       assertThat(bre.getMessage())
           .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
     }
-  }
-
-  @Test
-  public void getCohortChartDataBadLimit() {
-    try {
-      controller.getCohortChartData(
-          NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.CONDITION.name(), -1);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
-  public void getCohortChartDataBadLimitOverHundred() {
-    try {
-      controller.getCohortChartData(
-          NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.CONDITION.name(), 101);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
-  public void getCohortChartDataLab() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.LAB.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataLabWithEHRData() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithEHRData.getCohortId(), Domain.LAB.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataDrug() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.DRUG.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(1);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name11").conceptId(1L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataCondition() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.CONDITION.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataProcedure() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.PROCEDURE.name(), 10)
-            .getBody();
-
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
   }
 
   @Test

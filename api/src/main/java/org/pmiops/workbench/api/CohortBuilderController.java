@@ -3,32 +3,14 @@ package org.pmiops.workbench.api;
 import com.google.apphosting.api.DeadlineExceededException;
 import com.google.gson.Gson;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.AgeTypeCountListResponse;
-import org.pmiops.workbench.model.CardCountResponse;
-import org.pmiops.workbench.model.CriteriaAttributeListResponse;
-import org.pmiops.workbench.model.CriteriaListResponse;
-import org.pmiops.workbench.model.CriteriaListWithCountResponse;
-import org.pmiops.workbench.model.CriteriaMenuListResponse;
-import org.pmiops.workbench.model.CriteriaRequest;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFiltersResponse;
-import org.pmiops.workbench.model.DemoChartInfoListResponse;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainCardResponse;
-import org.pmiops.workbench.model.EthnicityInfoListResponse;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SurveyVersionListResponse;
-import org.pmiops.workbench.model.SurveysResponse;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
+  public static final Integer MIN_LIMIT = 1;
+  public static final Integer MAX_LIMIT = 20;
+  public static final Integer DEFAULT_LIMIT = 5;
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
@@ -321,6 +306,33 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .items(
                 cohortBuilderService.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
                     questionConceptId, answerConceptId)));
+  }
+
+  @Override
+  public ResponseEntity<CohortChartDataListResponse> getCohortChartData(
+      String workspaceNamespace,
+      String workspaceId,
+      String domain,
+      Integer limit,
+      SearchRequest request) {
+    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
+      throw new BadRequestException(
+          String.format(
+              "Bad Request: Please provide a chart limit between %d and %d.",
+              MIN_LIMIT, MAX_LIMIT));
+    }
+
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    long count = cohortBuilderService.countParticipants(request);
+
+    return ResponseEntity.ok(
+        new CohortChartDataListResponse()
+            .count(count)
+            .items(
+                cohortBuilderService.findCohortChartData(
+                    request, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
   }
 
   protected void validateDomain(String domain) {
