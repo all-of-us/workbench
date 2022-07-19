@@ -2137,11 +2137,12 @@ export const DatasetPage = fp.flow(
               <CreateModal
                 entityName='Dataset'
                 getExistingNames={async () => {
-                  const resources = await workspacesApi().getWorkspaceResources(
-                    namespace,
-                    id,
-                    { typesToFetch: [ResourceType.DATASET] }
-                  );
+                  const resources =
+                    await workspacesApi().getWorkspaceResourcesV2(
+                      namespace,
+                      id,
+                      [ResourceType.DATASET.toString()]
+                    );
                   return resources.map((resource) => resource.dataSet.name);
                 }}
                 save={(name, desc) => createDataset(name, desc)}
