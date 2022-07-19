@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,11 +106,11 @@ public class UserRecentResourceServiceTest {
 
     dataset = new DbDataset();
     dataset.setName("Mock Data Set");
-    dataset.setCohortIds(Arrays.asList(cohort.getCohortId()));
-    dataset.setConceptSetIds(Arrays.asList(conceptSet.getConceptSetId()));
-    dataset.setValues(Arrays.asList(dbDatasetValue));
+    dataset.setCohortIds(Collections.singletonList(cohort.getCohortId()));
+    dataset.setConceptSetIds(Collections.singletonList(conceptSet.getConceptSetId()));
+    dataset.setValues(Collections.singletonList(dbDatasetValue));
     dataset.setWorkspaceId(workspace.getWorkspaceId());
-    datasetDao.save(dataset);
+    dataset = datasetDao.save(dataset);
   }
 
   @Test
