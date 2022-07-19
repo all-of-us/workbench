@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -31,12 +30,10 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
@@ -68,14 +65,6 @@ public class UserRecentResourceServiceTest {
     @Bean
     public Clock clock() {
       return CLOCK;
-    }
-
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public WorkbenchConfig getWorkbenchConfig() {
-      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-      config.featureFlags.enableDSCREntryInRecentModified = true;
-      return config;
     }
   }
 
