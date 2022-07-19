@@ -142,10 +142,10 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       cohortReviewIds.forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
     }
 
-      List<Long> datasetIds =
-          datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
-              .map(DbDataset::getDataSetId)
-              .collect(Collectors.toList());
+    List<Long> datasetIds =
+        datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
+            .map(DbDataset::getDataSetId)
+            .collect(Collectors.toList());
 
     if (datasetIds.size() > 0) {
       datasetIds.forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
