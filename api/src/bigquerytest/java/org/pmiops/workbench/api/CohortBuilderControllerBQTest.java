@@ -14,6 +14,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Provider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,7 +125,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private DbCriteria snomedStandard;
   private DbCriteria cpt4;
   private DbCriteria temporalParent1;
-  private DbCriteria temportalChild1;
+  private DbCriteria temporalChild1;
   private DbCriteria procedureParent1;
   private DbCriteria procedureChild1;
   private DbCriteria surveyNode;
@@ -246,10 +247,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .addStandard(false)
                 .addSynonyms("+[CONDITION_rank1]")
                 .build());
-    temportalChild1 =
+    temporalChild1 =
         saveCriteriaWithPath(
             temporalParent1.getPath(),
-            temportalChild1 =
+            temporalChild1 =
                 DbCriteria.builder()
                     .addParentId(temporalParent1.getId())
                     .addAncestorData(false)
@@ -372,7 +373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         snomedStandard,
         cpt4,
         temporalParent1,
-        temportalChild1,
+            temporalChild1,
         procedureParent1,
         procedureChild1,
         surveyNode,
@@ -899,33 +900,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 createSearchRequests(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(3);
+    assertThat(items.get(0))
         .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(1))
+    assertThat(items.get(1))
         .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataLabWithEHRData() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                WORKSPACE_NAMESPACE,
-                WORKSPACE_ID,
-                Domain.LAB.name(),
-                10,
-                createSearchRequests(
-                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(response.getItems().get(2))
+    assertThat(items.get(2))
         .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
   }
 
@@ -941,8 +922,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 createSearchRequests(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
-    assertThat(response.getItems().size()).isEqualTo(1);
-    assertThat(response.getItems().get(0))
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(1);
+    assertThat(items.get(0))
         .isEqualTo(new CohortChartData().name("name11").conceptId(1L).count(1L));
   }
 
@@ -958,10 +940,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 createSearchRequests(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
-    assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(response.getItems().get(0))
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(2);
+    assertThat(items.get(0))
         .isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
-    assertThat(response.getItems().get(1))
+    assertThat(items.get(1))
         .isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
   }
 
@@ -978,19 +961,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
 
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(3);
+    assertThat(items.get(0))
         .isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
-    assertThat(response.getItems().get(1))
+    assertThat(items.get(1))
         .isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
-    assertThat(response.getItems().get(2))
+    assertThat(items.get(2))
         .isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
   }
 
   @Test
   public void findDataFilters() {
     List<DataFilter> filters =
-        controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+        Objects.requireNonNull(controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody()).getItems();
     assertThat(
             filters.contains(
                 new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")))
@@ -1376,7 +1360,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate() {
+  public void countSubjectsICD9ConditionChildAgeAtEventAndOccurrencesAndEventDate() {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.CONDITION.toString(),
@@ -2131,10 +2115,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
                 .operands(ImmutableList.of("7")));
-    SearchParameter ppiValueAsNumer = surveyAnswer().attributes(attributes);
+    SearchParameter ppiValueAsNumber = surveyAnswer().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            ppiValueAsNumer.getDomain(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
+            ppiValueAsNumber.getDomain(), ImmutableList.of(ppiValueAsNumber), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
@@ -2156,7 +2140,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE.toString(),
                 searchRequest)
             .getBody();
-    assertDemographics(response);
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2168,7 +2152,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     EthnicityInfoListResponse response =
         controller.findEthnicityInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest).getBody();
-    assertEthnicity(response);
+    assertEthnicity(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2188,7 +2172,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE_AT_CONSENT.toString(),
                 searchRequest)
             .getBody();
-    assertDemographics(response);
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2207,7 +2191,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE_AT_CDR.toString(),
                 searchRequest)
             .getBody();
-    assertDemographics(response);
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2219,10 +2203,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .sourceConceptIds(sourceConceptIds)
             .standardConceptIds(standardConceptIds);
     List<Criteria> criteriaList =
-        controller
-            .findCriteriaForCohortEdit(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
-            .getBody()
+        Objects.requireNonNull(controller
+                        .findCriteriaForCohortEdit(
+                                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
+                        .getBody())
             .getItems();
     assertThat(criteriaList).hasSize(2);
     assertThat(criteriaList.get(0).getId()).isEqualTo(icd9.getId());
