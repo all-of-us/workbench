@@ -78,9 +78,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     // conceptSetId and workspaceId
     ConceptSet conceptSet =
         conceptSetService.getConceptSet(dbWorkspace.getWorkspaceId(), conceptSetId);
-    conceptSetService.delete(conceptSet.getId());
     userRecentResourceService.deleteConceptSetEntry(
         dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSetId);
+    conceptSetService.delete(conceptSet.getId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 

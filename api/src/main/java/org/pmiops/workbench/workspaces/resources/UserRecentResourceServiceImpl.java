@@ -4,10 +4,15 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +22,21 @@ import org.springframework.stereotype.Service;
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
 
   private Clock clock;
+  private CohortReviewDao cohortReviewDao;
+  private DataSetDao datasetDao;
   private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public UserRecentResourceServiceImpl(
       Clock clock,
+      CohortReviewDao cohortReviewDao,
+      DataSetDao datasetDao,
       UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
+    this.cohortReviewDao = cohortReviewDao;
+    this.datasetDao = datasetDao;
     this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -121,8 +132,31 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /** Deletes cohort entry from user_recently_modified_resource */
+  /**
+   * Since user_recently_modified_resource does not hold FK constraints, hence we have to explicitly
+   * delete COHORT REVIEWs and DATA SETs that are using the deleted cohort id
+   */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
+    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      List<Long> cohortReviewIds =
+          cohortReviewDao.findAllByCohortId(cohortId).stream()
+              .map(DbCohortReview::getCohortReviewId)
+              .collect(Collectors.toList());
+
+      if (cohortReviewIds.size() > 0) {
+        cohortReviewIds.stream().forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
+      }
+
+      List<Long> datasetIds =
+          datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
+              .map(DbDataset::getDataSetId)
+              .collect(Collectors.toList());
+
+      if (datasetIds.size() > 0) {
+        datasetIds.stream().forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
+      }
+    }
     deleteUserRecentlyModifiedResourceEntry(
         userId,
         workspaceId,
@@ -131,8 +165,23 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /** Deletes concept set entry from user_recently_modified_resource */
+  /**
+   * Since user_recently_modified_resource does not hold FK hence we have to explicitly delete
+   * DATA_SET using the deleted concept set id Since this is the case only for the new table, the
+   * logic will be behind the feature flag
+   */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
+    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      List<Long> datasetIds =
+          datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
+              .map(DbDataset::getDataSetId)
+              .collect(Collectors.toList());
+
+      if (datasetIds.size() > 0) {
+        datasetIds.stream().forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
+      }
+    }
     deleteUserRecentlyModifiedResourceEntry(
         userId,
         workspaceId,
