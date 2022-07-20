@@ -107,6 +107,9 @@ public class WorkbenchConfig {
 
     // The batch size used by the cron job to process users
     public Integer freeTierCronUserBatchSize;
+
+    // The number of minutes elapsed after the last cron run to update the free tier billing information
+    public Integer minutesBeforeLastFreeTierJob;
   }
 
   public static class FireCloudConfig {

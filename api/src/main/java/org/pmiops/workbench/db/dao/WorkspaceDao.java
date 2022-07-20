@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -170,13 +171,16 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     Long getCreatorId();
 
     Double getFreeTierCost();
+
+    Timestamp getLastUpdated();
   }
 
   @Query(
           "SELECT w.workspaceId AS workspaceId, "
                   + "w.googleProject AS googleProject, "
                   + "w.creator.id AS creatorId, "
-                  + "f.cost AS freeTierCost "
+                  + "f.cost AS freeTierCost, "
+                  + "f.lastUpdateTime AS lastUpdated "
                   + "FROM DbWorkspace w "
                   + "LEFT JOIN DbWorkspaceFreeTierUsage f ON w.workspaceId = f.workspace.id "
                   // Billing migration status 1 = NEW
