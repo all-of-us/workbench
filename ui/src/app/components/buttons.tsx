@@ -305,8 +305,9 @@ export const ButtonWithLocationState = ({
     { style }
   );
   return (
-    <Link
-      to={{
+    <RouteLink
+      disabled={disabled}
+      path={{
         pathname: path,
         state: { pathname: location.pathname } as LinkLocationState,
       }}
@@ -315,7 +316,7 @@ export const ButtonWithLocationState = ({
       <Clickable disabled={disabled} {...childProps}>
         {children}
       </Clickable>
-    </Link>
+    </RouteLink>
   );
 };
 
