@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -378,7 +377,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .matchedParticipantCount(reviewWithoutEHRData.getMatchedParticipantCount())
             .reviewedCount(reviewWithoutEHRData.getReviewedCount())
             .etag(Etags.fromVersion(reviewWithoutEHRData.getVersion()));
-    assertThat(Objects.requireNonNull(controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody()).getItems().get(0))
+    assertThat(
+            Objects.requireNonNull(
+                    controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody())
+                .getItems()
+                .get(0))
         .isEqualTo(expectedReview);
   }
 
@@ -397,7 +400,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedCondition1(), expectedCondition2()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition1(), expectedCondition2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -411,7 +416,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedCondition2(), expectedCondition1()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition2(), expectedCondition1()));
   }
 
   @Test
@@ -461,7 +468,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedCondition1(), expectedCondition2()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition1(), expectedCondition2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -475,7 +484,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedCondition2(), expectedCondition1()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition2(), expectedCondition1()));
   }
 
   @Test
@@ -560,7 +571,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -574,7 +587,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()));
   }
 
   @Test

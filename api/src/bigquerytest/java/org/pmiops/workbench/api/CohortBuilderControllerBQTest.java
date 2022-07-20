@@ -373,7 +373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         snomedStandard,
         cpt4,
         temporalParent1,
-            temporalChild1,
+        temporalChild1,
         procedureParent1,
         procedureChild1,
         surveyNode,
@@ -904,10 +904,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThat(items.size()).isEqualTo(3);
     assertThat(items.get(0))
         .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(items.get(1))
-        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(items.get(2))
-        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
+    assertThat(items.get(1)).isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
+    assertThat(items.get(2)).isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
   }
 
   @Test
@@ -942,10 +940,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .getBody();
     List<CohortChartData> items = Objects.requireNonNull(response).getItems();
     assertThat(items.size()).isEqualTo(2);
-    assertThat(items.get(0))
-        .isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
-    assertThat(items.get(1))
-        .isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
+    assertThat(items.get(0)).isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
+    assertThat(items.get(1)).isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
   }
 
   @Test
@@ -963,18 +959,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     List<CohortChartData> items = Objects.requireNonNull(response).getItems();
     assertThat(items.size()).isEqualTo(3);
-    assertThat(items.get(0))
-        .isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
-    assertThat(items.get(1))
-        .isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
-    assertThat(items.get(2))
-        .isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
+    assertThat(items.get(0)).isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
+    assertThat(items.get(1)).isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
+    assertThat(items.get(2)).isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
   }
 
   @Test
   public void findDataFilters() {
     List<DataFilter> filters =
-        Objects.requireNonNull(controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody()).getItems();
+        Objects.requireNonNull(
+                controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody())
+            .getItems();
     assertThat(
             filters.contains(
                 new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")))
@@ -2203,10 +2198,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .sourceConceptIds(sourceConceptIds)
             .standardConceptIds(standardConceptIds);
     List<Criteria> criteriaList =
-        Objects.requireNonNull(controller
-                        .findCriteriaForCohortEdit(
-                                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
-                        .getBody())
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaForCohortEdit(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
+                    .getBody())
             .getItems();
     assertThat(criteriaList).hasSize(2);
     assertThat(criteriaList.get(0).getId()).isEqualTo(icd9.getId());
