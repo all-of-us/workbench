@@ -80,7 +80,7 @@ const domainTabs = [
   },
 ];
 
-export const CohortReviewOverview = ({ cohort }) => {
+export const CohortReviewOverview = ({ cohortReview }) => {
   const { ns, wsid } = useParams<MatchParams>();
   const [activeTab, setActiveTab] = useState(domainTabs[0].domain);
   const [demoChartData, setDemoChartData] = useState(undefined);
@@ -94,7 +94,7 @@ export const CohortReviewOverview = ({ cohort }) => {
         wsid,
         GenderOrSexType[GenderOrSexType.GENDER],
         AgeType[AgeType.AGE],
-        JSON.parse(cohort.criteria)
+        JSON.parse(cohortReview.cohortDefinition)
       )
       .then((demoChartInfo) => {
         setDemoChartData(demoChartInfo.items);
@@ -141,7 +141,7 @@ export const CohortReviewOverview = ({ cohort }) => {
                 {activeTab === Domain.PERSON ? (
                   <ComboChart mode={'stacked'} data={demoChartData} />
                 ) : (
-                  <ParticipantsCharts cohortId={cohort.id} domain={activeTab} />
+                  <ParticipantsCharts domain={activeTab} searchRequest={JSON.parse(cohortReview.cohortDefinition)} />
                 )}
               </div>
             </div>

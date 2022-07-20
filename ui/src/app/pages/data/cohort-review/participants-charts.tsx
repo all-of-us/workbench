@@ -1,8 +1,10 @@
 import * as React from 'react';
 
+import { SearchRequest } from 'generated/fetch';
+
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
+import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -100,8 +102,8 @@ const styles = reactStyles({
 });
 
 export interface ParticipantsChartsProps {
-  cohortId: number;
   domain: string;
+  searchRequest: SearchRequest;
   workspace: WorkspaceData;
 }
 
@@ -140,12 +142,12 @@ export const ParticipantsCharts = withCurrentWorkspace()(
 
     getChartData() {
       const {
-        cohortId,
         domain,
+        searchRequest,
         workspace: { id, namespace },
       } = this.props;
-      cohortReviewApi()
-        .getCohortChartData(namespace, id, cohortId, domain, 10)
+      cohortBuilderApi()
+        .getCohortChartData(namespace, id, domain, 10, searchRequest)
         .then((resp) => {
           const data = resp.items.map((item) => {
             this.nameRefs.push(React.createRef());

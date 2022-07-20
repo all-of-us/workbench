@@ -254,7 +254,7 @@ export const CohortReviewPage = fp.flow(
             <div style={styles.description}>{cohort.description}</div>
           </div>
           <div>
-            <CohortReviewOverview cohort={cohort} />
+            <CohortReviewOverview cohortReview={activeReview} />
           </div>
           <div style={{ display: 'flex' }}>
             <div style={styles.reviewList}>
