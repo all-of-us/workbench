@@ -141,7 +141,10 @@ export const CohortReviewOverview = ({ cohortReview }) => {
                 {activeTab === Domain.PERSON ? (
                   <ComboChart mode={'stacked'} data={demoChartData} />
                 ) : (
-                  <ParticipantsCharts domain={activeTab} searchRequest={JSON.parse(cohortReview.cohortDefinition)} />
+                  <ParticipantsCharts
+                    domain={activeTab}
+                    searchRequest={JSON.parse(cohortReview.cohortDefinition)}
+                  />
                 )}
               </div>
             </div>
