@@ -313,7 +313,11 @@ export const ButtonWithLocationState = ({
       }}
       {...computedStyle}
     >
-      <Clickable disabled={disabled} {...childProps}>
+      <Clickable
+        style={disabled ? { cursor: 'not-allowed' } : {}}
+        disabled={disabled}
+        {...childProps}
+      >
         {children}
       </Clickable>
     </RouteLink>
