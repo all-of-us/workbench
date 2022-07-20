@@ -1745,7 +1745,10 @@ const RuntimePanel = fp.flow(
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const initialPanelContent = fp.cond([
-      [([b, ,]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
+      [
+        ([b, _, _2]) => b === BillingStatus.INACTIVE,
+        () => PanelContent.Disabled,
+      ],
       // If there's a pendingRuntime, this means there's already a create/update
       // in progress, even if the runtime store doesn't actively reflect this yet.
       // Show the customize panel in this event.
@@ -1756,7 +1759,7 @@ const RuntimePanel = fp.flow(
         () => PanelContent.Create,
       ],
       [
-        ([, r]) =>
+        ([, r, _]) =>
           r.status === RuntimeStatus.Deleted &&
           [
             RuntimeConfigurationType.GeneralAnalysis,
