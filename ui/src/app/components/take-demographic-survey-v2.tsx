@@ -13,10 +13,10 @@ import { AoU } from './text-wrappers';
 
 const styles = reactStyles({
   bannerText: {
-    width: '25rem',
+    width: '26rem',
   },
   bannerBox: {
-    width: '35rem',
+    width: '36rem',
   },
   bannerButton: {
     width: '120px',
@@ -33,14 +33,14 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
     <span>
       Please take 5 minutes to complete the updated Researcher Demographic
       Survey before {DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE}. Your response
-      will help <AoU /> grow our platform community.
+      will help <AoU /> grow our platform and community.
     </span>
   );
 
   const notificationTextAfterDeadline = (
     <span>
       Please take 5 minutes to complete the updated Researcher Demographic
-      Survey. Your response will help <AoU /> grow our platform community.
+      Survey. Your response will help <AoU /> grow our platform and community.
     </span>
   );
 
