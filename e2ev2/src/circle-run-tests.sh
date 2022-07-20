@@ -18,12 +18,12 @@ export JEST_SILENT_REPORTER_DOTS=true
 export JEST_SILENT_REPORTER_SHOW_PATHS=true
 
 BKT_ROOT=gs://all-of-us-workbench-test.appspot.com/circle-failed-tests
-gsutil cp $BKT_ROOT/\*.$CIRCLE_SHA1.txt failed-tests.txt || true
+FAILED_TESTS=$(gsutil cat $BKT_ROOT/\*.$CIRCLE_SHA1.txt || echo -n)
 gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 
 set +e
-if [[ -e failed-tests.txt ]]; then
-  yarn test $(<failed-tests.txt) \
+if [[ -z $FAILED_TESTS ]]; then
+  yarn test $FAILED_TESTS \
     --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
 else
   yarn test --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
