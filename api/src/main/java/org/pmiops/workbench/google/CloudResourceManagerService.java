@@ -1,7 +1,7 @@
 package org.pmiops.workbench.google;
 
-import com.google.api.services.cloudresourcemanager.model.Policy;
-import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.v3.model.Policy;
+import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbUser;
