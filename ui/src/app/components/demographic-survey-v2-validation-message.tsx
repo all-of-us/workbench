@@ -18,13 +18,14 @@ const showPreferNotToAnswerMessage = (errors) =>
   Object.keys(errors).some((error) =>
     possiblePreferNotToAnswerErrors.includes(error)
   );
-
 export const DemographicSurveyValidationMessage = fp.flow(
   withProfileErrorModal
 )((props: DemographicSurveyValidationMessageProps) => {
   const { captcha, changed, errors, isAccountCreation } = props;
   return (
-    (errors || (isAccountCreation && !captcha)) && (
+    (errors ||
+      (isAccountCreation && !captcha) ||
+      (!isAccountCreation && !changed)) && (
       <>
         <div>Please review the following:</div>
         <ul>

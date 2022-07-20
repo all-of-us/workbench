@@ -42,7 +42,6 @@ export const possiblePreferNotToAnswerErrors = [
   'genderIdentities',
   'sexAtBirth',
   'sexualOrientations',
-  'yearOfBirth',
 ];
 
 const maxYear = new Date().getFullYear();
