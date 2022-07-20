@@ -9,6 +9,7 @@ import {
 } from 'generated/fetch';
 
 import { serverConfigStore } from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
