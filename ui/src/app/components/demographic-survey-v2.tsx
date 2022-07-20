@@ -68,10 +68,17 @@ const NONE_FULLY_DESCRIBE_VALIDATION = {
   },
 };
 const NONE_FULLY_DESCRIBE_PLACEHOLDER = 'Please specify (optional)';
+
 const TWO_SPIRIT_DISABLED_TEXT =
-  'Two Spirit is an identity unique to people of American Indian and Alaska Native ' +
+  'unique to people of American Indian and Alaska Native ' +
   'ancestry. If this applies to you, please update your selection in the ' +
-  '"Race and Ethnicities" section.';
+  '"Racial and Ethnic" section.';
+
+const TWO_SPIRIT_IDENTITY_DISABLED_TEXT =
+  'Two Spirit is an identity ' + TWO_SPIRIT_DISABLED_TEXT;
+
+const TWO_SPIRIT_SEXUAL_ORIENTATION_DISABLED_TEXT =
+  'Two Spirit is an orientation ' + TWO_SPIRIT_DISABLED_TEXT;
 
 const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
   validate.validators.nullBoolean = (v) =>
@@ -221,7 +228,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
 
     const disadvantagedBackgroundQuestion = (
       <div>
-        14. Are you an individual from a disadvantaged background, as &nbsp;
+        14. Are you an individual from a disadvantaged background, as&nbsp;
         <a
           target='_blank'
           href='https://extramural-diversity.nih.gov/diversity-matters/disadvantaged-backgrounds'
@@ -617,6 +624,18 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     'ethnicCategories',
                     checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
                   );
+                  if (checked) {
+                    [
+                      'ethnicityAiAnOtherText',
+                      'ethnicityAsianOtherText',
+                      'ethnicityBlackOtherText',
+                      'ethnicityHispanicOtherText',
+                      'ethnicityMeNaOtherText',
+                      'ethnicityNhPiOtherText',
+                      'ethnicityWhiteOtherText',
+                      'ethnicityOtherText',
+                    ].map((fieldName) => onUpdate(fieldName, null));
+                  }
                 },
               },
               {
@@ -670,7 +689,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'Two Spirit',
                 value: GenderIdentityV2.TWOSPIRIT,
                 disabled: !isAian,
-                disabledText: TWO_SPIRIT_DISABLED_TEXT,
+                disabledText: TWO_SPIRIT_IDENTITY_DISABLED_TEXT,
               },
               {
                 label: 'Woman',
@@ -683,11 +702,15 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: GenderIdentityV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
+                onChange: (checked) => {
                   onUpdate(
                     'genderIdentities',
                     checked ? [GenderIdentityV2.PREFERNOTTOANSWER] : []
-                  ),
+                  );
+                  if (checked) {
+                    onUpdate('genderOtherText', null);
+                  }
+                },
               },
               {
                 label: NONE_FULLY_DESCRIBE,
@@ -777,7 +800,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'Two Spirit',
                 value: SexualOrientationV2.TWOSPIRIT,
                 disabled: !isAian,
-                disabledText: TWO_SPIRIT_DISABLED_TEXT,
+                disabledText: TWO_SPIRIT_SEXUAL_ORIENTATION_DISABLED_TEXT,
               },
               {
                 label: 'Questioning or unsure of my sexual orientation',
@@ -786,11 +809,15 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: SexualOrientationV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
+                onChange: (checked) => {
                   onUpdate(
                     'sexualOrientations',
                     checked ? [SexualOrientationV2.PREFERNOTTOANSWER] : []
-                  ),
+                  );
+                  if (checked) {
+                    onUpdate('orientationOtherText', null);
+                  }
+                },
               },
               {
                 label: NONE_FULLY_DESCRIBE,
