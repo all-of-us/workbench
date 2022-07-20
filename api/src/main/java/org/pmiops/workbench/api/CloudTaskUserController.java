@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.api.services.cloudresourcemanager.model.ResourceId;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.util.List;
@@ -79,17 +78,17 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
                 .filter(
                     project ->
                         project.getParent() == null
-                            || !(ALLOWED_PARENT_IDS.contains(project.getParent().getId())))
+                            || !(ALLOWED_PARENT_IDS.contains(getId(project.getParent()))))
                 .map(
                     project ->
                         String.format(
                             "%s in %s %s",
                             project.getName(),
                             Optional.ofNullable(project.getParent())
-                                .map(ResourceId::getType)
+                                .map(this::getType)
                                 .orElse("[type unknown]"),
                             Optional.ofNullable(project.getParent())
-                                .map(ResourceId::getId)
+                                .map(this::getId)
                                 .orElse("[id unknown]")))
                 .collect(Collectors.toList());
         if (unauthorizedLogs.size() > 0) {
@@ -154,5 +153,16 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
     }
     log.info(String.format("successfully synchronized %d users", request.getUserIds().size()));
     return ResponseEntity.noContent().build();
+  }
+
+  // v1 cloudresourcemanager project.getParent() returned a ResourceId with type and id fields
+  // v3 returns a string instead, in the format type/id
+
+  private String getType(String typeAndId) {
+    return typeAndId.split("/")[0];
+  }
+
+  private String getId(String typeAndId) {
+    return typeAndId.split("/")[1];
   }
 }
