@@ -6,6 +6,6 @@ export const environment: Environment = {
   ...testEnvironmentBase,
   allOfUsApiUrl:
     'https://pr-0-dot-api-dot-all-of-us-workbench-test.appspot.com',
-  displayTag: 'Test',
+  displayTag: 'PR Site 0',
   debug: false,
 };
