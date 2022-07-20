@@ -506,8 +506,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                             possiblePreferNotToAnswerErrors.includes(error)
                           ) && (
                             <li>
-                              You may select "Prefer not to answer" for each
-                              unfilled item listed above to continue
+                              You may select "Prefer not to answer" for many
+                              items in this survey
                             </li>
                           )}
                         </>
