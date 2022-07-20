@@ -125,9 +125,11 @@ export const RouteLink = ({
 }): React.ReactElement => {
   const linkStyles = { textDecoration: 'none', color: 'unset' };
   return disabled ? (
-    <span style={{ ...linkStyles, ...style }}>{children}</span>
+    <span style={{ ...linkStyles, ...style, cursor: 'not-allowed' }}>
+      {children}
+    </span>
   ) : (
-    <Link style={{ ...linkStyles, ...style, cursor: 'not-allowed' }} to={path}>
+    <Link style={{ ...linkStyles, ...style }} to={path}>
       {children}
     </Link>
   );
