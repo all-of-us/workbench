@@ -454,6 +454,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.IN)
                 .property(FilterColumns.STANDARD_VOCABULARY)
                 .values(ImmutableList.of("ICD9CM", "SNOMED")));
+
     PageFilterRequest testFilter =
         new PageFilterRequest().domain(Domain.CONDITION).filters(new FilterList().items(filters));
 
