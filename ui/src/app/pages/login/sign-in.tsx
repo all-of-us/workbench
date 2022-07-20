@@ -6,7 +6,10 @@ import { Degree, Profile } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
-import { DemographicSurvey } from 'app/components/demographic-survey-v2';
+import {
+  DemographicSurvey,
+  possiblePreferNotToAnswerErrors,
+} from 'app/components/demographic-survey-v2';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { TooltipTrigger } from 'app/components/popups';
@@ -499,10 +502,14 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                           {Object.keys(errors).map((key) => (
                             <li key={errors[key][0]}>{errors[key][0]}</li>
                           ))}
-                          <li>
-                            You may select "Prefer not to answer" for each
-                            unfilled item listed above to continue
-                          </li>
+                          {Object.keys(errors).some((error) =>
+                            possiblePreferNotToAnswerErrors.includes(error)
+                          ) && (
+                            <li>
+                              You may select "Prefer not to answer" for each
+                              unfilled item listed above to continue
+                            </li>
+                          )}
                         </>
                       )}
                       {!this.state.captcha && (
