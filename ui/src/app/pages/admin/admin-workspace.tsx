@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { ReactFragment, useState } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
-import * as fp from 'lodash/fp';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Column } from 'primereact/column';
@@ -28,7 +27,7 @@ import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { hasNewValidProps, reactStyles } from 'app/utils';
+import { cond, hasNewValidProps, reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 import {
   getSelectedPopulations,
@@ -167,21 +166,20 @@ const NameCell = (props: NameCellProps) => {
   );
 
   // remove first check after RW-5626
-  const isNotebook = () =>
+  const isNotebook =
     NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
     filename.endsWith(NOTEBOOKS_SUFFIX);
-  const isTooLargeNotebook = () =>
-    isNotebook() && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
+  const isTooLargeNotebook =
+    isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
 
   // if (tooLarge()) fileTooLarge();
   // else if (isNotebook()) fileWithPreviewButton();
   // else filenameSpan();
-  const requiredDummyParameter = undefined;
-  return fp.cond([
+  return cond(
     [isTooLargeNotebook, fileTooLarge],
     [isNotebook, fileWithPreviewButton],
-    [fp.stubTrue, filenameSpan],
-  ])(requiredDummyParameter);
+    filenameSpan
+  );
 };
 
 interface FileDetailsProps {
