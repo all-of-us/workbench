@@ -6,6 +6,11 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -81,8 +86,6 @@ public class FreeTierBillingService {
     return dbWorkspaceFreeTierUsage.getCost();
   }
 
-
-
   /**
    * Check whether usersPartition have incurred sufficient cost in their workspaces to trigger alerts due to
    * passing thresholds or exceeding limits
@@ -91,9 +94,22 @@ public class FreeTierBillingService {
   public void checkFreeTierBillingUsageForUsers(Set<DbUser> usersPartition) {
 
     // Current cost in DB
-    final List<WorkspaceCostView> costInDB = workspaceDao.getWorkspaceCostViews(usersPartition);
+    List<WorkspaceCostView> costInDB = workspaceDao.getWorkspaceCostViews(usersPartition);
+    Timestamp minusMinutes = Timestamp.valueOf(
+            LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
 
     logger.info(String.format("Retrieved %d workspaces from the DB", costInDB.size()));
+
+    costInDB =
+        costInDB.stream()
+            .filter(
+                c ->
+                    c.getLastUpdated() == null
+                            || c.getLastUpdated().before(minusMinutes)
+            )
+            .collect(Collectors.toList());
+
+    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", costInDB.size()));
 
     // No need to call BigQuery since there's nothing to update anyway
     if(costInDB.isEmpty()) return;
@@ -460,6 +476,10 @@ public class FreeTierBillingService {
                     ? creatorFreeTierDollarLimit
                     : creatorFreeTierDollarLimit - creatorCachedFreeTierUsage;
     return Math.max(creatorFreeCreditsRemaining, 0);
+  }
+
+  private Integer getMinutesBeforeLastFreeTierJob() {
+    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob).orElse(60);
   }
 
 

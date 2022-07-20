@@ -108,6 +108,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
+    workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
 
     // by default we have 0 spend
     doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
