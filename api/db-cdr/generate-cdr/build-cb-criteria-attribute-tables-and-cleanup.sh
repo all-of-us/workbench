@@ -382,17 +382,22 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "DELETE
  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
  WHERE id in (
-   SELECT parent_id
-   FROM (
-     SELECT parent_id, COUNT(*) AS count
-     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-     WHERE parent_id IN (
-       SELECT id
-       FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-       WHERE domain_id = 'SURVEY'
-         AND subtype = 'TOPIC')
-     GROUP BY parent_id)
- WHERE count = 0)"
+  SELECT id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q2R2.cb_criteria\`
+        WHERE domain_id = 'SURVEY'
+          AND subtype = 'TOPIC'
+ EXCEPT DISTINCT
+ SELECT parent_id as id
+    FROM (
+      SELECT parent_id, COUNT(*) AS count
+      FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+      WHERE parent_id IN (
+        SELECT id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE domain_id = 'SURVEY'
+          AND subtype = 'TOPIC')
+      GROUP BY parent_id)
+ )"
 
 echo "CLEAN UP - remove any special characters ’ or … and replace with ' and ..."
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
