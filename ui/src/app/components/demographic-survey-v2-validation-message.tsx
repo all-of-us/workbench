@@ -23,33 +23,29 @@ export const DemographicSurveyValidationMessage = fp.flow(
 )((props: DemographicSurveyValidationMessageProps) => {
   const { captcha, changed, errors, isAccountCreation } = props;
   return (
-    (errors ||
-      (isAccountCreation && !captcha) ||
-      (!isAccountCreation && !changed)) && (
-      <>
-        <div>Please review the following:</div>
-        <ul>
-          {errors && (
-            <>
-              {Object.keys(errors).map((key) => (
-                <li key={errors[key][0]}>{errors[key][0]}</li>
-              ))}
-              {showPreferNotToAnswerMessage(errors) && (
-                <li>
-                  You may select "Prefer not to answer" for many items in this
-                  survey
-                </li>
-              )}
-            </>
-          )}
-          {isAccountCreation && !captcha && (
-            <li key='captcha'>Please fill out reCAPTCHA.</li>
-          )}
-          {!isAccountCreation && !changed && (
-            <li>Your survey has not changed since your last submission.</li>
-          )}
-        </ul>
-      </>
-    )
+    <>
+      <div>Please review the following:</div>
+      <ul>
+        {errors && (
+          <>
+            {Object.keys(errors).map((key) => (
+              <li key={errors[key][0]}>{errors[key][0]}</li>
+            ))}
+            {showPreferNotToAnswerMessage(errors) && (
+              <li>
+                You may select "Prefer not to answer" for many items in this
+                survey
+              </li>
+            )}
+          </>
+        )}
+        {isAccountCreation && !captcha && (
+          <li key='captcha'>Please fill out reCAPTCHA.</li>
+        )}
+        {!isAccountCreation && !changed && (
+          <li>Your survey has not changed since your last submission.</li>
+        )}
+      </ul>
+    </>
   );
 });

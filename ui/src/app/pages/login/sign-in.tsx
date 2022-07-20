@@ -491,10 +491,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             </Button>
             <TooltipTrigger
               content={
-                <DemographicSurveyValidationMessage
-                  {...{ captcha, errors }}
-                  isAccountCreation
-                />
+                (errors || !captcha) && (
+                  <DemographicSurveyValidationMessage
+                    {...{ captcha, errors }}
+                    isAccountCreation
+                  />
+                )
               }
             >
               <Button

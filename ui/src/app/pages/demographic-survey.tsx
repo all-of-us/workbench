@@ -121,10 +121,12 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
       />
       <TooltipTrigger
         content={
-          <DemographicSurveyValidationMessage
-            {...{ changed, errors }}
-            isAccountCreation={false}
-          />
+          (errors || !changed) && (
+            <DemographicSurveyValidationMessage
+              {...{ changed, errors }}
+              isAccountCreation={false}
+            />
+          )
         }
       >
         <Button
