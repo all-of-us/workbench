@@ -601,6 +601,18 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                     'ethnicCategories',
                     checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
                   );
+                  if (checked) {
+                    [
+                      'ethnicityAiAnOtherText',
+                      'ethnicityAsianOtherText',
+                      'ethnicityBlackOtherText',
+                      'ethnicityHispanicOtherText',
+                      'ethnicityMeNaOtherText',
+                      'ethnicityNhPiOtherText',
+                      'ethnicityWhiteOtherText',
+                      'ethnicityOtherText',
+                    ].map((fieldName) => onUpdate(fieldName, null));
+                  }
                 },
               },
               {
@@ -667,11 +679,15 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: GenderIdentityV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
+                onChange: (checked) => {
                   onUpdate(
                     'genderIdentities',
                     checked ? [GenderIdentityV2.PREFERNOTTOANSWER] : []
-                  ),
+                  );
+                  if (checked) {
+                    onUpdate('genderOtherText', null);
+                  }
+                },
               },
               {
                 label: NONE_FULLY_DESCRIBE,
@@ -770,11 +786,15 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label: 'Prefer not to answer',
                 value: SexualOrientationV2.PREFERNOTTOANSWER,
-                onChange: (checked) =>
+                onChange: (checked) => {
                   onUpdate(
                     'sexualOrientations',
                     checked ? [SexualOrientationV2.PREFERNOTTOANSWER] : []
-                  ),
+                  );
+                  if (checked) {
+                    onUpdate('orientationOtherText', null);
+                  }
+                },
               },
               {
                 label: NONE_FULLY_DESCRIBE,
