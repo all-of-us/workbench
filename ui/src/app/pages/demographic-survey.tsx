@@ -4,10 +4,8 @@ import { useLocation } from 'react-router';
 import * as fp from 'lodash/fp';
 
 import { Button, LinkLocationState } from 'app/components/buttons';
-import {
-  DemographicSurvey as DemographicSurveyComponent,
-  possiblePreferNotToAnswerErrors,
-} from 'app/components/demographic-survey-v2';
+import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/demographic-survey-v2';
+import { DemographicSurveyValidationMessage } from 'app/components/demographic-survey-v2-validation-message';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
@@ -123,33 +121,10 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
       />
       <TooltipTrigger
         content={
-          (errors || !changed) && (
-            <>
-              <div>Please review the following:</div>
-              <ul>
-                {errors && (
-                  <>
-                    {Object.keys(errors).map((key) => (
-                      <li key={errors[key][0]}>{errors[key][0]}</li>
-                    ))}
-                    {Object.keys(errors).some((error) =>
-                      possiblePreferNotToAnswerErrors.includes(error)
-                    ) && (
-                      <li>
-                        You may select "Prefer not to answer" for many items in
-                        this survey
-                      </li>
-                    )}
-                  </>
-                )}
-                {!changed && (
-                  <li>
-                    Your survey has not changed since your last submission.
-                  </li>
-                )}
-              </ul>
-            </>
-          )
+          <DemographicSurveyValidationMessage
+            {...{ changed, errors }}
+            isAccountCreation={false}
+          />
         }
       >
         <Button
