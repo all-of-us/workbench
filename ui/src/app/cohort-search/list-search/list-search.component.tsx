@@ -29,6 +29,7 @@ import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
+  updateCriteriaSelectionStore,
   validateInputForMySQL,
   withCdrVersions,
   withCurrentCohortCriteria,
@@ -39,6 +40,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   attributesSelectionStore,
+  currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
@@ -334,12 +336,12 @@ export const ListSearch = fp.flow(
         totalCount: null,
       };
     }
-    componentDidMount(): void {
+    async componentDidMount() {
       const {
         cdrVersionTiersResponse,
         searchTerms,
-        searchContext: { source },
-        workspace: { cdrVersionId },
+        searchContext: { domain, source },
+        workspace: { cdrVersionId, id, namespace },
       } = this.props;
       this.setState({
         cdrVersion: findCdrVersion(cdrVersionId, cdrVersionTiersResponse),
@@ -347,6 +349,23 @@ export const ListSearch = fp.flow(
       if (source === 'conceptSetDetails') {
         this.setState({ data: this.props.concept });
       } else {
+        if (this.criteriaLookupNeeded) {
+          this.setState({ loading: true });
+          await cohortBuilderApi()
+            .findCriteriaForCohortEdit(namespace, id, domain.toString(), {
+              sourceConceptIds: currentCohortCriteriaStore
+                .getValue()
+                .filter((s) => !s.isStandard)
+                .map((s) => s.conceptId),
+              standardConceptIds: currentCohortCriteriaStore
+                .getValue()
+                .filter((s) => s.isStandard)
+                .map((s) => s.conceptId),
+            })
+            .then((response) =>
+              updateCriteriaSelectionStore(response.items, domain)
+            );
+        }
         const searchString = searchTerms || '';
         this.getResultsBySourceOrStandard(searchString);
       }
@@ -640,6 +659,16 @@ export const ListSearch = fp.flow(
       this.setState(
         (state) => ({ searchSource: !state.searchSource }),
         () => this.getResultsBySourceOrStandard(this.state.searchTerms || '')
+      );
+    }
+
+    get criteriaLookupNeeded() {
+      return (
+        this.props.searchContext.source === 'cohort' &&
+        ![Domain.PHYSICALMEASUREMENT, Domain.VISIT].includes(
+          this.props.searchContext.domain
+        ) &&
+        currentCohortCriteriaStore.getValue().some((crit) => !crit.id)
       );
     }
 

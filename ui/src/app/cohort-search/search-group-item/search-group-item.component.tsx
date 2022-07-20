@@ -30,7 +30,10 @@ import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { currentWorkspaceStore } from 'app/utils/navigation';
+import {
+  currentCohortCriteriaStore,
+  currentWorkspaceStore,
+} from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -339,6 +342,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
         } Criteria - ${domainToTitle(domain)}${
           domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
         }`;
+        currentCohortCriteriaStore.next(
+          JSON.parse(JSON.stringify(searchParameters))
+        );
         AnalyticsTracker.CohortBuilder.LaunchSearch(label);
         const context = {
           item: _item,
