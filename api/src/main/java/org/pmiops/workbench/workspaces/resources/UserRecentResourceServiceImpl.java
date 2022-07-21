@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
@@ -117,7 +116,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     return userRecentlyModifiedResourceDao.save(recentResource);
   }
 
-  /** Deletes notebook entry from user_recent_resource and user_recently_modified_resource */
+  /** Deletes notebook entry from user_recently_modified_resource */
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
     deleteUserRecentlyModifiedResourceEntry(
@@ -128,28 +127,18 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * When a Cohort recent-resource is deleted, we also delete those of all Cohort Reviews and
-   * Datasets which reference the Cohort
+   * When a Cohort recent-resource is deleted, delete all Cohort Reviews and Datasets which
+   * reference the Cohort as well
    */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
-    List<Long> cohortReviewIds =
-        cohortReviewDao.findAllByCohortId(cohortId).stream()
-            .map(DbCohortReview::getCohortReviewId)
-            .collect(Collectors.toList());
+    cohortReviewDao.findAllByCohortId(cohortId).stream()
+        .map(DbCohortReview::getCohortReviewId)
+        .forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
 
-    if (cohortReviewIds.size() > 0) {
-      cohortReviewIds.forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
-    }
-
-    List<Long> datasetIds =
-        datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
-            .map(DbDataset::getDataSetId)
-            .collect(Collectors.toList());
-
-    if (datasetIds.size() > 0) {
-      datasetIds.forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
-    }
+    datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
+        .map(DbDataset::getDataSetId)
+        .forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
 
     deleteUserRecentlyModifiedResourceEntry(
         userId,
@@ -159,19 +148,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * When a Concept Set recent-resource is deleted, we also delete those of all Datasets which
-   * reference the Cohort
+   * When a Concept Set recent-resource is deleted, delete all Datasets which reference the Cohort
+   * as well
    */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
-    List<Long> datasetIds =
-        datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
-            .map(DbDataset::getDataSetId)
-            .collect(Collectors.toList());
-
-    if (datasetIds.size() > 0) {
-      datasetIds.forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
-    }
+    datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
+        .map(DbDataset::getDataSetId)
+        .forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
 
     deleteUserRecentlyModifiedResourceEntry(
         userId,
