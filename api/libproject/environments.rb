@@ -34,6 +34,7 @@ ENVIRONMENTS = {
       },
       "controlled" => {
         :ingest_cdr_project => "fc-aou-cdr-ingest-test-2",
+        :ingest_cdr_bucket => "gs://fc-aou-test-datasets-controlled-ingest",
         :dest_cdr_project => "fc-aou-cdr-synth-test-2",
         :auth_domain_group_email => "all-of-us-controlled-local@dev.test.firecloud.org"
       }
@@ -54,7 +55,9 @@ ENVIRONMENTS = {
       },
       "controlled" => {
         :ingest_cdr_project => "fc-aou-cdr-ingest-test-2",
+        :ingest_cdr_bucket => "gs://fc-aou-test-datasets-controlled-ingest",
         :dest_cdr_project => "fc-aou-cdr-synth-test-2",
+        :dest_cdr_bucket => "gs://fc-aou-test-datasets-controlled",
         :auth_domain_group_email => "all-of-us-test-prototype-3@dev.test.firecloud.org",
       }
     }
