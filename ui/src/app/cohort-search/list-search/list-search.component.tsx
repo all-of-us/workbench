@@ -668,7 +668,7 @@ export const ListSearch = fp.flow(
         ![Domain.PHYSICALMEASUREMENT, Domain.VISIT].includes(
           this.props.searchContext.domain
         ) &&
-        currentCohortCriteriaStore.getValue().some((crit) => !crit.id)
+        currentCohortCriteriaStore.getValue()?.some((crit) => !crit.id)
       );
     }
 
