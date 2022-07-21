@@ -172,7 +172,11 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
     Double getFreeTierCost();
 
-    Timestamp getLastUpdated();
+    Timestamp getFreeTierLastUpdated();
+
+    Timestamp getWorkspaceLastUpdated();
+
+    Short getActiveStatus();
   }
 
   @Query(
@@ -180,7 +184,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
                   + "w.googleProject AS googleProject, "
                   + "w.creator.id AS creatorId, "
                   + "f.cost AS freeTierCost, "
-                  + "f.lastUpdateTime AS lastUpdated "
+                  + "f.lastUpdateTime AS freeTierLastUpdated, "
+                  + "w.lastModifiedTime AS workspaceLastUpdated, "
+                  + "w.activeStatus AS activeStatus "
                   + "FROM DbWorkspace w "
                   + "LEFT JOIN DbWorkspaceFreeTierUsage f ON w.workspaceId = f.workspace.id "
                   // Billing migration status 1 = NEW
