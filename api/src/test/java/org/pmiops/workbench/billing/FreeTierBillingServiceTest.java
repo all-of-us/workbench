@@ -18,7 +18,6 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Doubles;
 import java.sql.Timestamp;
@@ -29,8 +28,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 
-import org.apache.commons.collections4.IterableUtils;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,11 +52,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.transaction.TestTransaction;
 
 @DataJpaTest
-@DirtiesContext
 public class FreeTierBillingServiceTest {
 
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
@@ -76,6 +71,7 @@ public class FreeTierBillingServiceTest {
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  @Autowired WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -83,7 +79,7 @@ public class FreeTierBillingServiceTest {
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
   @TestConfiguration
-  @Import({FreeTierBillingService.class})
+  @Import({FreeTierBillingService.class, WorkspaceFreeTierUsageService.class})
   @MockBean({BigQueryService.class, MailService.class})
   static class Configuration {
     @Bean
