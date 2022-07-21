@@ -1945,7 +1945,7 @@ public class CohortReviewControllerTest {
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
-        .updateCohortEntry(anyLong(), anyLong(), anyLong());
+        .updateCohortReviewEntry(anyLong(), anyLong(), anyLong());
     assertCohortReviewParticipantCohortStatuses(
         actualReview, expectedReview, filterColumns, sortOrder);
   }
@@ -1975,7 +1975,7 @@ public class CohortReviewControllerTest {
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
-        .updateCohortEntry(anyLong(), anyLong(), anyLong());
+        .updateCohortReviewEntry(anyLong(), anyLong(), anyLong());
     // PageFilterRequest defaults to participantId, ascending (if not given)
     assertCohortReviewParticipantCohortStatuses(
         actualReview, expectedReview, FilterColumns.PARTICIPANTID, SortOrder.ASC);
@@ -2072,7 +2072,7 @@ public class CohortReviewControllerTest {
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
-        .updateCohortEntry(anyLong(), anyLong(), anyLong());
+        .updateCohortReviewEntry(anyLong(), anyLong(), anyLong());
     assertCohortReviewParticipantCohortStatuses(
         actualReview, expectedReview, filterColumns, sortOrder);
   }
@@ -2103,7 +2103,7 @@ public class CohortReviewControllerTest {
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
-        .updateCohortEntry(anyLong(), anyLong(), anyLong());
+        .updateCohortReviewEntry(anyLong(), anyLong(), anyLong());
     // PageFilterRequest defaults to participantId, ascending (if not given)
     assertCohortReviewParticipantCohortStatuses(
         actualReview, expectedReview, FilterColumns.PARTICIPANTID, SortOrder.ASC);
