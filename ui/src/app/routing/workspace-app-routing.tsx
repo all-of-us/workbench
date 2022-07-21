@@ -299,7 +299,7 @@ export const WorkspaceRoutes = () => {
         <ParticipantsTablePage
           routeData={{
             title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
+            breadcrumb: BreadcrumbType.CohortReview,
             workspaceNavBarTab: 'data',
             pageKey: 'reviewParticipants',
           }}
@@ -369,7 +369,7 @@ export const WorkspaceRoutes = () => {
         <CohortReviewPagePage
           routeData={{
             title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
+            breadcrumb: BreadcrumbType.CohortReview,
             workspaceNavBarTab: 'data',
             pageKey: 'reviewParticipants',
           }}
