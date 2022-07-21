@@ -22,12 +22,10 @@ FAILED_TESTS=$(gsutil cat $BKT_ROOT/\*.$CIRCLE_SHA1.txt || echo -n)
 gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 
 set +e
-if [[ -z $FAILED_TESTS ]]; then
-  yarn test $FAILED_TESTS \
-    --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
-else
-  yarn test --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
-fi
+# This should do the right thing. If $FAILED_TESTS is empty, nothing is specified, so Jest runs
+# all tests.
+yarn test $FAILED_TESTS \
+  --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
 TESTS_EXIT_CODE=$?
 set -e
 
