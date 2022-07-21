@@ -29,6 +29,21 @@ import { AoU } from './text-wrappers';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
 
+export const possiblePreferNotToAnswerErrors = [
+  'education',
+  'ethnicCategories',
+  'disabilityConcentrating',
+  'disabilityDressing',
+  'disabilityErrands',
+  'disabilityHearing',
+  'disabilitySeeing',
+  'disabilityWalking',
+  'disadvantaged',
+  'genderIdentities',
+  'sexAtBirth',
+  'sexualOrientations',
+];
+
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
 const styles = reactStyles({

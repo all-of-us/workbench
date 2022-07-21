@@ -5,6 +5,7 @@ import * as fp from 'lodash/fp';
 
 import { Button, LinkLocationState } from 'app/components/buttons';
 import { DemographicSurvey as DemographicSurveyComponent } from 'app/components/demographic-survey-v2';
+import { DemographicSurveyValidationMessage } from 'app/components/demographic-survey-v2-validation-message';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
@@ -121,27 +122,10 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
       <TooltipTrigger
         content={
           (errors || !changed) && (
-            <>
-              <div>Please review the following:</div>
-              <ul>
-                {errors && (
-                  <>
-                    {Object.keys(errors).map((key) => (
-                      <li key={errors[key][0]}>{errors[key][0]}</li>
-                    ))}
-                    <li>
-                      You may select "Prefer not to answer" for each unfilled
-                      item listed above to continue
-                    </li>
-                  </>
-                )}
-                {!changed && (
-                  <li>
-                    Your survey has not changed since your last submission.
-                  </li>
-                )}
-              </ul>
-            </>
+            <DemographicSurveyValidationMessage
+              {...{ changed, errors }}
+              isAccountCreation={false}
+            />
           )
         }
       >
