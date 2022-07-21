@@ -47,6 +47,7 @@ public class FreeTierBillingService {
   private final UserServiceAuditor userServiceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
 
   private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
 
@@ -64,7 +65,8 @@ public class FreeTierBillingService {
           UserDao userDao,
           UserServiceAuditor userServiceAuditor,
           WorkspaceDao workspaceDao,
-          WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
+          WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
+          WorkspaceFreeTierUsageService workspaceFreeTierUsageService) {
     this.bigQueryService = bigQueryService;
     this.mailService = mailService;
     this.userDao = userDao;
@@ -72,6 +74,7 @@ public class FreeTierBillingService {
     this.userServiceAuditor = userServiceAuditor;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
+    this.workspaceFreeTierUsageService = workspaceFreeTierUsageService;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -228,7 +231,7 @@ public class FreeTierBillingService {
                                     .toMap(wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
 
     workspaceList.forEach(
-            w -> workspaceFreeTierUsageDao.updateCost(workspaceIdToFreeTierUsage, w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
+            w -> workspaceFreeTierUsageService.updateCost(workspaceIdToFreeTierUsage, w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
 
     logger.info(
             String.format(
@@ -280,7 +283,7 @@ public class FreeTierBillingService {
     userCosts.forEach(
             (userId, currentCost) -> {
               final double previousCost = previousUserCosts.getOrDefault(userId, 0.0);
-              maybeAlertOnCostThresholds(userDao.findUserByUserId(userId), currentCost, previousCost, costThresholdsInDescOrder);
+              maybeAlertOnCostThresholds(userDao.findUserByUserId(userId), Math.max(currentCost, previousCost), previousCost, costThresholdsInDescOrder);
             });
   }
 
