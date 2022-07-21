@@ -484,7 +484,7 @@ jobs:
           command: |
             echo Hello Circle!
 
-  e2etests-deploy:
+  e2etests-deploy-ui:
     machine:
       image: ubuntu-2204:2022.04.1
     environment:
@@ -509,7 +509,13 @@ jobs:
             SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
             echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
 
-            ../e2ev2/src/circle-build-ui.sh
+            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
+            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+
+            gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+            yarn install
+            yarn codegen
+            REACT_APP_ENVIRONMENT=pr-site-$PR_SITE_NUM yarn run build --aot --no-watch --no-progress
       - run:
           name: Deploy
           working_directory: ui
@@ -527,6 +533,41 @@ jobs:
             export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
 
             ../e2ev2/src/circle-deploy-ui.sh
+  e2etests-deploy-api:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    environment:
+      PR_SITE_COUNT: 10
+    steps:
+      - run:
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+            (cd aou-utils/; git submodule update --init)
+      - run:
+          name: Build
+          working_directory: api
+          command: |
+            # Redirection here suppresses this warning:
+            #   *** WARNING : deprecated key derivation used.
+            #   Using -iter or -pbkdf2 would be better.
+            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
+              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
+              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account \
+              "$(echo "$SA_KEY_JSON" | jq -r .client_email)" --key-file=-
+
+            sudo apt install openjdk-8-jdk
+            PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:"$PATH"
+            gsutil cp gs://all-of-us-workbench-test-credentials/vars.env db
+            set -a; source db/local-vars.env; source db/vars.env; set +a
+            ./gradlew --no-daemon :appengineStage
+
+            PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
+            PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+            gcloud app deploy build/staged-app/app.yaml -q --project=all-of-us-workbench-test \
+              --no-promote --version=pr-$PR_SITE_NUM
   e2etests-run:
     machine:
       image: ubuntu-2204:2022.04.1
@@ -814,11 +855,14 @@ workflows:
       - playground
   e2etests:
     jobs:
-      - e2etests-deploy:
+      - e2etests-deploy-ui:
+          <<: *filter-pr-branch
+      - e2etests-deploy-api:
           <<: *filter-pr-branch
       - e2etests-run:
           requires:
-            - e2etests-deploy
+            - e2etests-deploy-ui
+            - e2etests-deploy-api
 
   deploy-staging:
     jobs:
