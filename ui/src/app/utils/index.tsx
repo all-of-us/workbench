@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { Domain } from 'generated/fetch';
+import { Criteria, CriteriaSubType, Domain } from 'generated/fetch';
 
 import { colorWithWhiteness } from 'app/styles/colors';
 import {
@@ -596,3 +596,24 @@ export const usernameWithoutDomain = (username: string) => {
 
 export const capStringWithEllipsis = (value: string, maxLength: number) =>
   value?.length > maxLength ? value.slice(0, maxLength) + '...' : value;
+
+export const updateCriteriaSelectionStore = (
+  criteriaLookupItems: Criteria[],
+  domain: Domain
+) => {
+  const updatedSelections = currentCohortCriteriaStore.getValue().map((sel) => {
+    const criteriaMatch = criteriaLookupItems.find(
+      (item) =>
+        item.conceptId === sel.conceptId &&
+        item.isStandard === sel.isStandard &&
+        (domain !== Domain.SURVEY || item.subtype === sel.subtype) &&
+        (sel.subtype !== CriteriaSubType.ANSWER.toString() ||
+          item.value === sel.code)
+    );
+    if (criteriaMatch) {
+      sel.id = criteriaMatch.id;
+    }
+    return sel;
+  });
+  currentCohortCriteriaStore.next(updatedSelections);
+};
