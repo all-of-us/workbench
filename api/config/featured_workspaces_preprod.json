@@ -31,6 +31,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "Skills Assessment Training Notebooks For Users",
+      "namespace": "aou-rw-preprod-41ec4ae3",
+      "id": "duplicateofskillsassessment",
+      "category": "DEMO_PROJECTS"
+    },
+    {
       "name": "Phenotype - Dementia",
       "namespace": "aou-rw-preprod-3d427a93",
       "id": "phenotypedementia",
