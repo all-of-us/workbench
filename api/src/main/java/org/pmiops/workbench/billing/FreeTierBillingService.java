@@ -3,18 +3,16 @@ package org.pmiops.workbench.billing;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.math.DoubleMath;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +27,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,11 +49,6 @@ public class FreeTierBillingService {
   private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
 
   private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
-
-  // somewhat arbitrary - 1 per million
-  private static final double COST_COMPARISON_TOLERANCE = 0.000001;
-  private static final double COST_FRACTION_TOLERANCE = 0.000001;
-
 
 
   @Autowired
@@ -125,13 +119,16 @@ public class FreeTierBillingService {
 
     // No need to call BigQuery since there's nothing to update anyway
     if(allCostsInDbForUsers.isEmpty()) return;
+    final Map<Long, Double> liveCostsInBQ = new HashMap<>();
 
-    // Live cost in BQ
-    final Map<Long, Double> liveCostsInBQ = getFreeTierWorkspaceCostsFromBQ(workspacesThatRequireUpdate);
 
-    logger.info(String.format("Retrieved %d workspaces from BQ", liveCostsInBQ.size()));
-
-    updateWorkspaceFreeTierUsageInDB(allCostsInDbForUsers, liveCostsInBQ);
+    for(List<WorkspaceCostView> workspacesPartition: Lists.partition(workspacesThatRequireUpdate, 1000)) {
+      // Live cost in BQ
+      liveCostsInBQ.putAll(getFreeTierWorkspaceCostsFromBQ(workspacesPartition));
+      logger.info(String.format("Retrieved %d workspaces from BQ", liveCostsInBQ.size()));
+      workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
+              allCostsInDbForUsers, liveCostsInBQ);
+    }
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
@@ -160,7 +157,7 @@ public class FreeTierBillingService {
     // Find users with changed costs only
     final Set<Long> usersWithChangedCosts =
             liveCostByCreator.keySet().stream()
-                    .filter(u -> compareCosts(dbCostByCreator.get(u), liveCostByCreator.get(u)) != 0)
+                    .filter(u -> CostComparisonUtils.compareCosts(dbCostByCreator.get(u), liveCostByCreator.get(u)) != 0)
                     .collect(Collectors.toSet());
 
     logger.info(String.format("Found %d users with changed costs.", usersWithChangedCosts.size()));
@@ -202,59 +199,8 @@ public class FreeTierBillingService {
     }
   }
 
-  private void updateWorkspaceFreeTierUsageInDB(
-          List<WorkspaceCostView> dbCost, Map<Long, Double> liveCostByWorkspace) {
-    final Map<Long, Double> dbCostByWorkspace =
-            dbCost.stream()
-                    .collect(
-                            Collectors.toMap(
-                                    WorkspaceCostView::getWorkspaceId,
-                                    v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
-
-    final List<Long> workspacesIdsToUpdate =
-            liveCostByWorkspace.keySet()
-                    .stream()
-                    .filter(currentId ->
-                            compareCosts(dbCostByWorkspace.get(currentId), liveCostByWorkspace.get(currentId)) != 0)
-                    .collect(
-                            Collectors.toList());
-
-    final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
-    final Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages = workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
-
-    // Prepare cache of workspace ID to the free tier use entity
-    Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsage =
-            StreamSupport
-                    .stream(workspaceFreeTierUsages.spliterator(), false)
-                    .collect(
-                            Collectors
-                                    .toMap(wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
-
-    workspaceList.forEach(
-            w -> workspaceFreeTierUsageService.updateCost(workspaceIdToFreeTierUsage, w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
-
-    logger.info(
-            String.format(
-                    "found changed cost information for %d/%d workspaces",
-                    workspacesIdsToUpdate.size(), dbCostByWorkspace.size()));
-  }
-
-
-
-  private int compareCosts(final double a, final double b) {
-    return DoubleMath.fuzzyCompare(a, b, COST_COMPARISON_TOLERANCE);
-  }
-
-  private int compareCostFractions(final double a, final double b) {
-    return DoubleMath.fuzzyCompare(a, b, COST_FRACTION_TOLERANCE);
-  }
-
   private boolean costAboveLimit(final DbUser user, final double currentCost) {
-    return compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
-  }
-
-  private boolean costsDiffer(final double a, final double b) {
-    return compareCosts(a, b) != 0;
+    return CostComparisonUtils.compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
   }
 
   // TODO: move to DbWorkspace?  RW-5107
@@ -316,7 +262,7 @@ public class FreeTierBillingService {
 
     // this shouldn't happen, but it did (RW-4678)
     // alert if it happens again
-    if (compareCosts(currentCost, previousCost) < 0) {
+    if (CostComparisonUtils.compareCosts(currentCost, previousCost) < 0) {
       String msg =
               String.format(
                       "User %s (%s) has %f in total free tier spending in BigQuery, "
@@ -332,9 +278,9 @@ public class FreeTierBillingService {
     final double previousFraction = previousCost / limit;
 
     for (final double threshold : thresholdsInDescOrder) {
-      if (compareCostFractions(currentFraction, threshold) > 0) {
+      if (CostComparisonUtils.compareCostFractions(currentFraction, threshold) > 0) {
         // only alert if we have not done so previously
-        if (compareCostFractions(previousFraction, threshold) <= 0) {
+        if (CostComparisonUtils.compareCostFractions(previousFraction, threshold) <= 0) {
           try {
             mailService.alertUserFreeTierDollarThreshold(
                     user, threshold, currentCost, remainingBalance);
@@ -454,7 +400,7 @@ public class FreeTierBillingService {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
 
     if (previousLimitMaybe != null
-            || costsDiffer(
+            || CostComparisonUtils.costsDiffer(
             newDollarLimit, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit)) {
 
       // TODO: prevent setting this limit directly except in this method?
