@@ -6,11 +6,8 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -94,36 +91,48 @@ public class FreeTierBillingService {
   public void checkFreeTierBillingUsageForUsers(Set<DbUser> usersPartition) {
 
     // Current cost in DB
-    List<WorkspaceCostView> costInDB = workspaceDao.getWorkspaceCostViews(usersPartition);
+    List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(usersPartition);
     Timestamp minusMinutes = Timestamp.valueOf(
             LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
 
-    logger.info(String.format("Retrieved %d workspaces from the DB", costInDB.size()));
+    logger.info(String.format("Retrieved %d workspaces from the DB", allCostsInDbForUsers.size()));
 
-    costInDB =
-        costInDB.stream()
+    allCostsInDbForUsers =
+        allCostsInDbForUsers.stream()
             .filter(
                 c ->
-                    c.getLastUpdated() == null
-                            || c.getLastUpdated().before(minusMinutes)
+                    c.getFreeTierLastUpdated() == null
+                            || c.getFreeTierLastUpdated().before(minusMinutes)
             )
             .collect(Collectors.toList());
 
-    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", costInDB.size()));
+    List<WorkspaceCostView> workspacesThatRequireUpdate =
+        allCostsInDbForUsers.stream()
+            .filter(
+                c ->
+                    (c.getActiveStatus() == 0)
+                        || (c.getActiveStatus() == 1
+                            && (c.getFreeTierLastUpdated() == null
+                                || c.getWorkspaceLastUpdated() == null
+                                || c.getFreeTierLastUpdated().before(c.getWorkspaceLastUpdated()))))
+            .collect(Collectors.toList());
+
+    logger.info(String.format("workspacesThatRequireUpdate %d", workspacesThatRequireUpdate.size()));
+    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", allCostsInDbForUsers.size()));
 
     // No need to call BigQuery since there's nothing to update anyway
-    if(costInDB.isEmpty()) return;
+    if(allCostsInDbForUsers.isEmpty()) return;
 
     // Live cost in BQ
-    final Map<Long, Double> liveCostsInBQ = getFreeTierWorkspaceCostsFromBQ(costInDB);
+    final Map<Long, Double> liveCostsInBQ = getFreeTierWorkspaceCostsFromBQ(workspacesThatRequireUpdate);
 
     logger.info(String.format("Retrieved %d workspaces from BQ", liveCostsInBQ.size()));
 
-    updateWorkspaceFreeTierUsageInDB(costInDB, liveCostsInBQ);
+    updateWorkspaceFreeTierUsageInDB(allCostsInDbForUsers, liveCostsInBQ);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
-            costInDB.stream()
+            allCostsInDbForUsers.stream()
                     .collect(
                             Collectors.groupingBy(
                                     WorkspaceCostView::getCreatorId,
@@ -132,7 +141,7 @@ public class FreeTierBillingService {
 
     // check cost thresholds for the relevant usersPartition
     final Map<Long, Long> creatorByWorkspace =
-            costInDB.stream()
+            allCostsInDbForUsers.stream()
                     .collect(
                             Collectors.toMap(
                                     WorkspaceCostView::getWorkspaceId, WorkspaceCostView::getCreatorId));
@@ -158,21 +167,22 @@ public class FreeTierBillingService {
             .findAllById(usersWithChangedCosts)
             .forEach(user -> dbUsersWithChangedCosts.put(user.getUserId(), user));
 
-    updateWorkspaceStatusToInactiveForNewlyExpiredUsers(usersPartition, dbUsersWithChangedCosts, liveCostByCreator);
+    updateWorkspaceStatusToInactiveForNewlyExpiredUsers(usersPartition, dbUsersWithChangedCosts, dbCostByCreator, liveCostByCreator);
 
     sendAlertsForCostThresholds(dbCostByCreator, liveCostByCreator);
 
   }
 
   private void updateWorkspaceStatusToInactiveForNewlyExpiredUsers(final Set<DbUser> allUsers,
-                                                                   Map<Long, DbUser> dbUsersWithChangedCosts, Map<Long, Double> liveCostByCreator) {
+                                                                   Map<Long, DbUser> dbUsersWithChangedCosts, Map<Long, Double> costByCreator, Map<Long, Double> liveCostByCreator) {
 
     Set<DbUser> freeTierUsers = getFreeTierActiveWorkspaceCreatorsIn(allUsers);
 
     // Find users who exceeded their free tier limit
     final Set<DbUser> expiredUsers =
             dbUsersWithChangedCosts.entrySet().stream()
-                    .filter(e -> costAboveLimit(e.getValue(), liveCostByCreator.get(e.getKey())))
+                    .filter(e -> costAboveLimit(e.getValue(), Math.max(costByCreator.get(e.getKey()),
+                            liveCostByCreator.get(e.getKey()))))
                     .map(Entry::getValue)
                     .collect(Collectors.toSet());
 
@@ -207,7 +217,7 @@ public class FreeTierBillingService {
                             Collectors.toList());
 
     final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
-    Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages = workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
+    final Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages = workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
 
     // Prepare cache of workspace ID to the free tier use entity
     Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsage =
@@ -479,7 +489,7 @@ public class FreeTierBillingService {
   }
 
   private Integer getMinutesBeforeLastFreeTierJob() {
-    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob).orElse(60);
+    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob).orElse(120);
   }
 
 

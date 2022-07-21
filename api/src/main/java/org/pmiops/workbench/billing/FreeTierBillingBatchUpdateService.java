@@ -22,7 +22,7 @@ public class FreeTierBillingBatchUpdateService {
     private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
 
-    private static final int MIN_USERS_BATCH = 10;
+    private static final int MIN_USERS_BATCH = 5;
     private static final int MAX_USERS_BATCH = 999;
 
     @Autowired
