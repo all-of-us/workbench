@@ -38,7 +38,7 @@ import {
   currentCohortReviewStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
@@ -291,17 +291,28 @@ export const DetailHeader = fp.flow(
     };
 
     backToTable() {
-      const { ns, wsid, cid } = this.props.match.params;
-      this.props.navigate([
-        'workspaces',
-        ns,
-        wsid,
-        'data',
-        'cohorts',
-        cid,
-        'review',
-        'participants',
-      ]);
+      const { ns, wsid, cid, crid } = this.props.match.params;
+      serverConfigStore.get().config.enableMultiReview
+        ? this.props.navigate([
+            'workspaces',
+            ns,
+            wsid,
+            'data',
+            'cohorts',
+            cid,
+            'reviews',
+            crid,
+          ])
+        : this.props.navigate([
+            'workspaces',
+            ns,
+            wsid,
+            'data',
+            'cohorts',
+            cid,
+            'review',
+            'participants',
+          ]);
     }
 
     previous = () => {
@@ -325,38 +336,63 @@ export const DetailHeader = fp.flow(
           left ? statuses[statuses.length - 1] : statuses[0];
 
         const { page, pageSize } = reviewPaginationStore.getValue();
-        const { ns, wsid, cid } = this.props.match.params;
+        const { ns, wsid, cid, crid } = this.props.match.params;
         const request = {
           page: left ? page - 1 : page + 1,
           pageSize: pageSize,
           sortOrder: SortOrder.Asc,
           filters: { items: this.getRequestFilters() },
         } as PageFilterRequest;
-        cohortReviewApi()
-          .getParticipantCohortStatusesOld(ns, wsid, +cid, request)
-          .then((response) => {
-            currentCohortReviewStore.next(response.cohortReview);
-            const status = statusGetter(
-              response.cohortReview.participantCohortStatuses
+        const getCohortReview = serverConfigStore.get().config.enableMultiReview
+          ? cohortReviewApi().getParticipantCohortStatuses(
+              ns,
+              wsid,
+              +cid,
+              +crid,
+              request
+            )
+          : cohortReviewApi().getParticipantCohortStatusesOld(
+              ns,
+              wsid,
+              +cid,
+              request
             );
-            this.navigateById(status.participantId);
-          });
+        getCohortReview.then((response) => {
+          currentCohortReviewStore.next(response.cohortReview);
+          const status = statusGetter(
+            response.cohortReview.participantCohortStatuses
+          );
+          this.navigateById(status.participantId);
+        });
       }
     };
 
     navigateById = (id: number): void => {
-      const { ns, wsid, cid } = this.props.match.params;
-      this.props.navigate([
-        'workspaces',
-        ns,
-        wsid,
-        'data',
-        'cohorts',
-        cid,
-        'review',
-        'participants',
-        id,
-      ]);
+      const { ns, wsid, cid, crid } = this.props.match.params;
+      serverConfigStore.get().config.enableMultiReview
+        ? this.props.navigate([
+            'workspaces',
+            ns,
+            wsid,
+            'data',
+            'cohorts',
+            cid,
+            'reviews',
+            crid,
+            'participants',
+            id,
+          ])
+        : this.props.navigate([
+            'workspaces',
+            ns,
+            wsid,
+            'data',
+            'cohorts',
+            cid,
+            'review',
+            'participants',
+            id,
+          ]);
     };
 
     getRequestFilters = () => {
@@ -479,6 +515,7 @@ export const DetailHeader = fp.flow(
             onClick={() => this.backToTable()}
           >
             Back to review set
+            {serverConfigStore.get().config.enableMultiReview ? 's' : ''}
           </button>
           <h4 style={styles.title}>{cohortName}</h4>
           <div style={styles.description}>{description}</div>

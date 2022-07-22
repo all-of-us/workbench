@@ -299,7 +299,7 @@ export const WorkspaceRoutes = () => {
         <ParticipantsTablePage
           routeData={{
             title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
+            breadcrumb: BreadcrumbType.CohortReview,
             workspaceNavBarTab: 'data',
             pageKey: 'reviewParticipants',
           }}
@@ -358,6 +358,34 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Cohort,
             workspaceNavBarTab: 'data',
             pageKey: 'reviewParticipants',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/data/cohorts/:cid/reviews/:crid`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <CohortReviewPagePage
+          routeData={{
+            title: 'Review Cohort Participants',
+            breadcrumb: BreadcrumbType.CohortReview,
+            workspaceNavBarTab: 'data',
+            pageKey: 'reviewParticipants',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/data/cohorts/:cid/reviews/:crid/participants/:pid`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <DetailPagePage
+          routeData={{
+            title: 'Participant Detail',
+            breadcrumb: BreadcrumbType.Participant,
+            workspaceNavBarTab: 'data',
+            pageKey: 'reviewParticipantDetail',
           }}
         />
       </AppRoute>
