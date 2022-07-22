@@ -612,13 +612,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return Domain.SURVEY.equals(Domain.fromValue(domain));
   }
 
-  protected Map<String,String> modifyTermMatchUseEndsWith(String term){
-    Map<String,String> searchTerms = new HashMap<>();
-    term = removeStopWords(term);
-
-    return searchTerms;
-  }
-
   protected String modifyTermMatch(String term) {
     term = removeStopWords(term);
     if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
@@ -643,6 +636,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             })
         .collect(Collectors.joining());
   }
+
+
+  protected Map<String,String> modifyTermMatchUseEndsWith(String term){
+    Map<String,String> searchTerms = new HashMap<>();
+    term = removeStopWords(term);
+
+    return searchTerms;
+  }
+
 
   @NotNull
   private String removeStopWords(String term) {
