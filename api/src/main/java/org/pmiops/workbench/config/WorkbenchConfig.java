@@ -304,6 +304,8 @@ public class WorkbenchConfig {
     public boolean enableMultiReview;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
+    // If true, enable wild card search for drug  for Cohort Builder - both backend and UI
+    public boolean enableDrugWildcardSearch;
   }
 
   public static class ActionAuditConfig {

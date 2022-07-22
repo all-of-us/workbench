@@ -81,5 +81,8 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableUpdatedDemographicSurvey",
       source = "config.featureFlags.enableUpdatedDemographicSurvey")
+  @Mapping(
+      target = "enableDrugWildcardSearch",
+      source = "config.featureFlags.enableDrugWildcardSearch")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
