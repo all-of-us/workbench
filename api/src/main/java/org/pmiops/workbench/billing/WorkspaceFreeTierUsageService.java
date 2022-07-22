@@ -53,7 +53,7 @@ public class WorkspaceFreeTierUsageService {
         final Iterable<DbWorkspaceFreeTierUsage> workspaceFreeTierUsages = workspaceFreeTierUsageDao.findAllByWorkspaceIn(workspaceList);
 
         // Prepare cache of workspace ID to the free tier use entity
-        Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsage =
+        Map<Long, DbWorkspaceFreeTierUsage> workspaceIdToFreeTierUsageCache =
                 StreamSupport
                         .stream(workspaceFreeTierUsages.spliterator(), false)
                         .collect(
@@ -61,7 +61,7 @@ public class WorkspaceFreeTierUsageService {
                                         .toMap(wftu -> wftu.getWorkspace().getWorkspaceId(), Function.identity()));
 
         workspaceList.forEach(
-                w -> workspaceFreeTierUsageDao.updateCost(workspaceIdToFreeTierUsage, w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
+                w -> workspaceFreeTierUsageDao.updateCost(workspaceIdToFreeTierUsageCache, w, liveCostByWorkspace.get(w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be optimized by getting all needed workspaces in one query
 
         logger.info(
                 String.format(

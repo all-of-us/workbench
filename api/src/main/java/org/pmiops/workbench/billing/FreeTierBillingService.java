@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
@@ -39,6 +41,7 @@ import static org.pmiops.workbench.db.dao.WorkspaceDao.*;
 @Service
 public class FreeTierBillingService {
 
+  public static final Long TWO_DAYS = 172_800_000l;
   private final BigQueryService bigQueryService;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -81,54 +84,25 @@ public class FreeTierBillingService {
   }
 
   /**
-   * Check whether usersPartition have incurred sufficient cost in their workspaces to trigger alerts due to
-   * passing thresholds or exceeding limits
+   * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
+   * passing thresholds or exceeding limits.
+   *
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void checkFreeTierBillingUsageForUsers(Set<DbUser> usersPartition) {
+  public void checkFreeTierBillingUsageForUsers(Set<DbUser> users) {
 
     // Current cost in DB
-    List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(usersPartition);
-    Timestamp minusMinutes = Timestamp.valueOf(
-            LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
-
+    List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(users);
     logger.info(String.format("Retrieved %d workspaces from the DB", allCostsInDbForUsers.size()));
 
-    allCostsInDbForUsers =
-        allCostsInDbForUsers.stream()
-            .filter(
-                c ->
-                    c.getFreeTierLastUpdated() == null
-                            || c.getFreeTierLastUpdated().before(minusMinutes)
-            )
-            .collect(Collectors.toList());
+    allCostsInDbForUsers = findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
 
-    List<WorkspaceCostView> workspacesThatRequireUpdate =
-        allCostsInDbForUsers.stream()
-            .filter(
-                c ->
-                    (c.getActiveStatus() == 0)
-                        || (c.getActiveStatus() == 1
-                            && (c.getFreeTierLastUpdated() == null
-                                || c.getWorkspaceLastUpdated() == null
-                                || c.getFreeTierLastUpdated().before(c.getWorkspaceLastUpdated()))))
-            .collect(Collectors.toList());
-
-    logger.info(String.format("workspacesThatRequireUpdate %d", workspacesThatRequireUpdate.size()));
-    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", allCostsInDbForUsers.size()));
-
-    // No need to call BigQuery since there's nothing to update anyway
+    // No need to proceed since there's nothing to update anyway
     if(allCostsInDbForUsers.isEmpty()) return;
-    final Map<Long, Double> liveCostsInBQ = new HashMap<>();
 
+    List<WorkspaceCostView> workspacesThatRequireUpdate = findActiveOrDeletedWorkspacesThatRequireUpdates(allCostsInDbForUsers);
 
-    for(List<WorkspaceCostView> workspacesPartition: Lists.partition(workspacesThatRequireUpdate, 1000)) {
-      // Live cost in BQ
-      liveCostsInBQ.putAll(getFreeTierWorkspaceCostsFromBQ(workspacesPartition));
-      logger.info(String.format("Retrieved %d workspaces from BQ", liveCostsInBQ.size()));
-      workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
-              allCostsInDbForUsers, liveCostsInBQ);
-    }
+    final Map<Long, Double> liveCostsInBQ = updateFreeTierUsageInBatches(allCostsInDbForUsers, workspacesThatRequireUpdate);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
@@ -139,7 +113,7 @@ public class FreeTierBillingService {
                                     Collectors.summingDouble(
                                             v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
 
-    // check cost thresholds for the relevant usersPartition
+    // check cost thresholds for the relevant users
     final Map<Long, Long> creatorByWorkspace =
             allCostsInDbForUsers.stream()
                     .collect(
@@ -155,52 +129,40 @@ public class FreeTierBillingService {
                                     Collectors.summingDouble(Entry::getValue)));
 
     // Find users with changed costs only
-    final Set<Long> usersWithChangedCosts =
-            liveCostByCreator.keySet().stream()
-                    .filter(u -> CostComparisonUtils.compareCosts(dbCostByCreator.get(u), liveCostByCreator.get(u)) != 0)
-                    .collect(Collectors.toSet());
+    final Map<Long, DbUser> dbUsersWithChangedCosts = findDbUsersWithChangedCosts(dbCostByCreator, liveCostByCreator);
 
-    logger.info(String.format("Found %d users with changed costs.", usersWithChangedCosts.size()));
-
-    final Map<Long, DbUser> dbUsersWithChangedCosts = new HashMap<>();
-    userDao
-            .findAllById(usersWithChangedCosts)
-            .forEach(user -> dbUsersWithChangedCosts.put(user.getUserId(), user));
-
-    updateWorkspaceStatusToInactiveForNewlyExpiredUsers(usersPartition, dbUsersWithChangedCosts, dbCostByCreator, liveCostByCreator);
+    updateWorkspaceStatusToInactiveForNewlyExpiredUsers(users, dbUsersWithChangedCosts, dbCostByCreator, liveCostByCreator);
 
     sendAlertsForCostThresholds(dbCostByCreator, liveCostByCreator);
 
   }
 
-  private void updateWorkspaceStatusToInactiveForNewlyExpiredUsers(final Set<DbUser> allUsers,
-                                                                   Map<Long, DbUser> dbUsersWithChangedCosts, Map<Long, Double> costByCreator, Map<Long, Double> liveCostByCreator) {
+  /**
+   * Get only the workspaces that their free tier were updated before the configured time. This
+   * insures that we don't calculate the costs unnecessarily again if we run the job manually to
+   * clear up the backlog
+   *
+   * @param allCostsInDbForUsers
+   * @return
+   */
+  @NotNull
+  private List<WorkspaceCostView> findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(
+      List<WorkspaceCostView> allCostsInDbForUsers) {
+    Timestamp minusMinutes = Timestamp.valueOf(
+            LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
 
-    Set<DbUser> freeTierUsers = getFreeTierActiveWorkspaceCreatorsIn(allUsers);
+    allCostsInDbForUsers =
+        allCostsInDbForUsers.stream()
+            .filter(
+                c ->
+                    c.getFreeTierLastUpdated() == null
+                            || c.getFreeTierLastUpdated().before(minusMinutes)
+            )
+            .collect(Collectors.toList());
 
-    // Find users who exceeded their free tier limit
-    final Set<DbUser> expiredUsers =
-            dbUsersWithChangedCosts.entrySet().stream()
-                    .filter(e -> costAboveLimit(e.getValue(), Math.max(costByCreator.get(e.getKey()),
-                            liveCostByCreator.get(e.getKey()))))
-                    .map(Entry::getValue)
-                    .collect(Collectors.toSet());
+    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", allCostsInDbForUsers.size()));
 
-
-    final Set<DbUser> newlyExpiredFreeTierUsers = Sets.intersection(expiredUsers, freeTierUsers);
-
-    logger.info(
-            String.format(
-                    "Found %d users exceeding their free tier limit, out of which, %d are new",
-                    expiredUsers.size(), newlyExpiredFreeTierUsers.size()));
-
-    for (final DbUser user : newlyExpiredFreeTierUsers) {
-      updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);  //Not optimal, should run 1 update statement
-    }
-  }
-
-  private boolean costAboveLimit(final DbUser user, final double currentCost) {
-    return CostComparisonUtils.compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
+    return allCostsInDbForUsers;
   }
 
   // TODO: move to DbWorkspace?  RW-5107
@@ -212,136 +174,7 @@ public class FreeTierBillingService {
             .contains(workspace.getBillingAccountName());
   }
 
-  private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
-    workspaceDao.findAllByCreator(user).stream()
-            .filter(this::isFreeTier)
-            .map(DbWorkspace::getWorkspaceId)
-            .forEach(id -> workspaceDao.updateBillingStatus(id, status));
-  }
 
-  private void sendAlertsForCostThresholds(Map<Long, Double> previousUserCosts,
-          Map<Long, Double> userCosts) {
-
-    final List<Double> costThresholdsInDescOrder =
-            workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
-    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
-
-    userCosts.forEach(
-            (userId, currentCost) -> {
-              final double previousCost = previousUserCosts.getOrDefault(userId, 0.0);
-              maybeAlertOnCostThresholds(userDao.findUserByUserId(userId), Math.max(currentCost, previousCost), previousCost, costThresholdsInDescOrder);
-            });
-  }
-
-  /**
-   * Has this user passed a cost threshold between this check and the previous run?
-   *
-   * <p>Compare this user's total cost with that of the previous run, and trigger an alert if this
-   * is the run which pushed it over a free credits threshold.
-   *
-   * @param user The user to check
-   * @param currentCost The current total cost incurred by this user, according to BigQuery
-   * @param previousCost The total cost incurred by this user at the time of the previous check, as
-   *     stored in the database
-   * @param thresholdsInDescOrder the cost alerting thresholds, in descending order
-   */
-  private void maybeAlertOnCostThresholds(
-          DbUser user, double currentCost, double previousCost, List<Double> thresholdsInDescOrder) {
-    final double limit = getUserFreeTierDollarLimit(user);
-    final double remainingBalance = limit - currentCost;
-    final double previousRemainingBalance = limit - previousCost;
-
-    if (remainingBalance < 0 && previousRemainingBalance > 0) {
-      try {
-        mailService.alertUserFreeTierExpiration(user);
-      } catch (MessagingException e) {
-        logger.log(Level.WARNING, "failed to mail free tier expiration email", e);
-      }
-      return;
-    }
-
-    // this shouldn't happen, but it did (RW-4678)
-    // alert if it happens again
-    if (CostComparisonUtils.compareCosts(currentCost, previousCost) < 0) {
-      String msg =
-              String.format(
-                      "User %s (%s) has %f in total free tier spending in BigQuery, "
-                              + "which is less than the %f previous spending we have recorded in the DB",
-                      user.getUsername(),
-                      Optional.ofNullable(user.getContactEmail()).orElse("NULL"),
-                      currentCost,
-                      previousCost);
-      logger.warning(msg);
-    }
-
-    final double currentFraction = currentCost / limit;
-    final double previousFraction = previousCost / limit;
-
-    for (final double threshold : thresholdsInDescOrder) {
-      if (CostComparisonUtils.compareCostFractions(currentFraction, threshold) > 0) {
-        // only alert if we have not done so previously
-        if (CostComparisonUtils.compareCostFractions(previousFraction, threshold) <= 0) {
-          try {
-            mailService.alertUserFreeTierDollarThreshold(
-                    user, threshold, currentCost, remainingBalance);
-          } catch (final MessagingException e) {
-            logger.log(Level.WARNING, "failed to mail threshold email", e);
-          }
-        }
-
-        // break out here to ensure we don't alert for lower thresholds
-        break;
-      }
-    }
-  }
-
-  // Helper to identify candidate users with workspaces that may need deactivation, if those users'
-  // initial credits have expired.
-  private Set<DbUser> getFreeTierActiveWorkspaceCreators() {
-    return workspaceDao.findAllCreatorsByBillingStatusAndBillingAccountNameIn(
-            BillingStatus.ACTIVE,
-            new ArrayList<String>(workbenchConfigProvider.get().billing.freeTierBillingAccountNames()));
-  }
-
-  private Set<DbUser> getFreeTierActiveWorkspaceCreatorsIn(Set<DbUser> users) {
-    return workspaceDao.findCreatorsByBillingStatusAndBillingAccountNameIn(
-            BillingStatus.ACTIVE,
-            new ArrayList<String>(workbenchConfigProvider.get().billing.freeTierBillingAccountNames()),
-            users);
-  }
-
-  private Map<Long, Double>  getFreeTierWorkspaceCostsFromBQ(List<WorkspaceCostView> costInDB) {
-    final Map<String, Long> workspaceByProject =
-            costInDB.stream()
-                    .collect(
-                            Collectors.toMap(
-                                    WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
-
-    final QueryJobConfiguration queryConfig =
-            QueryJobConfiguration.newBuilder(
-                            "SELECT project.id, SUM(cost) cost FROM `"
-                                    + workbenchConfigProvider.get().billing.exportBigQueryTable
-                                    + "` WHERE project.id IS NOT NULL "
-                                    + " AND project.id IN UNNEST(@projects) "
-                                    + "GROUP BY project.id ORDER BY cost desc;")
-                    .addNamedParameter("projects",
-                            QueryParameterValue.array(workspaceByProject.keySet().toArray
-                                    (new String[workspaceByProject.size()]), String.class))
-                    .build();
-
-    final Map<Long, Double> liveCostByWorkspace = new HashMap<>();
-    for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
-      final String googleProject = tableRow.get("id").getStringValue();
-      if (workspaceByProject.containsKey(googleProject)) {
-        liveCostByWorkspace.put(
-                workspaceByProject.get(googleProject),
-                tableRow.get("cost").getDoubleValue());
-      }
-    }
-
-    return liveCostByWorkspace;
-
-  }
 
   /**
    * Retrieve the user's total free tier usage from the DB by summing across the Workspaces they
@@ -437,8 +270,262 @@ public class FreeTierBillingService {
     return Math.max(creatorFreeCreditsRemaining, 0);
   }
 
+
+  private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
+    workspaceDao.findAllByCreator(user).stream()
+            .filter(this::isFreeTier)
+            .map(DbWorkspace::getWorkspaceId)
+            .forEach(id -> workspaceDao.updateBillingStatus(id, status));
+  }
+
+  private void sendAlertsForCostThresholds(Map<Long, Double> previousUserCosts,
+                                           Map<Long, Double> userCosts) {
+
+    final List<Double> costThresholdsInDescOrder =
+            workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
+    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
+
+    userCosts.forEach(
+            (userId, currentCost) -> {
+              final double previousCost = previousUserCosts.getOrDefault(userId, 0.0);
+              maybeAlertOnCostThresholds(userDao.findUserByUserId(userId), Math.max(currentCost, previousCost), previousCost, costThresholdsInDescOrder);
+            });
+  }
+
+  /**
+   * Has this user passed a cost threshold between this check and the previous run?
+   *
+   * <p>Compare this user's total cost with that of the previous run, and trigger an alert if this
+   * is the run which pushed it over a free credits threshold.
+   *
+   * @param user The user to check
+   * @param currentCost The current total cost incurred by this user, according to BigQuery
+   * @param previousCost The total cost incurred by this user at the time of the previous check, as
+   *     stored in the database
+   * @param thresholdsInDescOrder the cost alerting thresholds, in descending order
+   */
+  private void maybeAlertOnCostThresholds(
+          DbUser user, double currentCost, double previousCost, List<Double> thresholdsInDescOrder) {
+    final double limit = getUserFreeTierDollarLimit(user);
+    final double remainingBalance = limit - currentCost;
+    final double previousRemainingBalance = limit - previousCost;
+
+    if (remainingBalance < 0 && previousRemainingBalance > 0) {
+      try {
+        mailService.alertUserFreeTierExpiration(user);
+      } catch (MessagingException e) {
+        logger.log(Level.WARNING, "failed to mail free tier expiration email", e);
+      }
+      return;
+    }
+
+    // this shouldn't happen, but it did (RW-4678)
+    // alert if it happens again
+    if (CostComparisonUtils.compareCosts(currentCost, previousCost) < 0) {
+      String msg =
+              String.format(
+                      "User %s (%s) has %f in total free tier spending in BigQuery, "
+                              + "which is less than the %f previous spending we have recorded in the DB",
+                      user.getUsername(),
+                      Optional.ofNullable(user.getContactEmail()).orElse("NULL"),
+                      currentCost,
+                      previousCost);
+      logger.warning(msg);
+    }
+
+    final double currentFraction = currentCost / limit;
+    final double previousFraction = previousCost / limit;
+
+    for (final double threshold : thresholdsInDescOrder) {
+      if (CostComparisonUtils.compareCostFractions(currentFraction, threshold) > 0) {
+        // only alert if we have not done so previously
+        if (CostComparisonUtils.compareCostFractions(previousFraction, threshold) <= 0) {
+          try {
+            mailService.alertUserFreeTierDollarThreshold(
+                    user, threshold, currentCost, remainingBalance);
+          } catch (final MessagingException e) {
+            logger.log(Level.WARNING, "failed to mail threshold email", e);
+          }
+        }
+
+        // break out here to ensure we don't alert for lower thresholds
+        break;
+      }
+    }
+  }
+
+
+  private Set<DbUser> getFreeTierActiveWorkspaceCreatorsIn(Set<DbUser> users) {
+    return workspaceDao.findCreatorsByBillingStatusAndBillingAccountNameIn(
+            BillingStatus.ACTIVE,
+            new ArrayList<>(workbenchConfigProvider.get().billing.freeTierBillingAccountNames()),
+            users);
+  }
+
+  private Map<Long, Double>  getFreeTierWorkspaceCostsFromBQ(List<WorkspaceCostView> costInDB) {
+    final Map<String, Long> workspaceByProject =
+            costInDB.stream()
+                    .collect(
+                            Collectors.toMap(
+                                    WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
+
+    final QueryJobConfiguration queryConfig =
+            QueryJobConfiguration.newBuilder(
+                            "SELECT project.id, SUM(cost) cost FROM `"
+                                    + workbenchConfigProvider.get().billing.exportBigQueryTable
+                                    + "` WHERE project.id IS NOT NULL "
+                                    + " AND project.id IN UNNEST(@projects) "
+                                    + "GROUP BY project.id ORDER BY cost desc;")
+                    .addNamedParameter("projects",
+                            QueryParameterValue.array(workspaceByProject.keySet().toArray
+                                    (new String[workspaceByProject.size()]), String.class))
+                    .build();
+
+    final Map<Long, Double> liveCostByWorkspace = new HashMap<>();
+    for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
+      final String googleProject = tableRow.get("id").getStringValue();
+      if (workspaceByProject.containsKey(googleProject)) {
+        liveCostByWorkspace.put(
+                workspaceByProject.get(googleProject),
+                tableRow.get("cost").getDoubleValue());
+      }
+    }
+
+    return liveCostByWorkspace;
+
+  }
+
+
+  /**
+   * Filter the costs further by getting the workspaces that are active, or deleted but their
+   * free tier last updated time is before the workspace last updated time.
+   * This filtration ensures that BQ will not be queried unnecessarily for the costs of deleted workspaces that we already
+   * have their latest costs
+   * The method will return the workspace in 1 of these cases:
+   * 1. The workspace is active
+   * 2. The workspace is deleted and either of the following is true
+   *    2.1.  Free Tier Usage last updated time is null. This means that it wasn't calculated before
+   *    2.2.  Workspace last updated time is null. This means we don't have enough info about the workspace, so we need to get its cost
+   *    2.3.  Free Tier Usage time is before the Workspace last updated time. This means that the workspace got changed some time after
+   *          our last calculation, so we need to recalculate it
+   *    2.4.  Free Tier Usage time is after the Workspace last updated time, but the difference is smaller than a certain
+   *          value. This case to account for charges that may occur after the workspace gets deleted and after the last cron had ran
+   *
+   * @param allCostsInDbForUsers
+   * @return a {@link java.util.List} of the workspaces that require updates only
+   */
+  @NotNull
+  private List<WorkspaceCostView> findActiveOrDeletedWorkspacesThatRequireUpdates(
+          List<WorkspaceCostView> allCostsInDbForUsers) {
+
+    List<WorkspaceCostView> workspacesThatRequireUpdate =
+        allCostsInDbForUsers.stream()
+            .filter(
+                c ->
+                    (c.getActiveStatus() == 0)
+                        || (c.getActiveStatus() == 1
+                            && (c.getFreeTierLastUpdated() == null
+                                || c.getWorkspaceLastUpdated() == null
+                                || c.getFreeTierLastUpdated().before(c.getWorkspaceLastUpdated())
+                                || (c.getFreeTierLastUpdated().after(c.getWorkspaceLastUpdated())
+                                    && c.getFreeTierLastUpdated().getTime()
+                                            - c.getWorkspaceLastUpdated().getTime()
+                                        < getNumberOfDaysToConsiderForFreeTierUsageUpdate()))))
+            .collect(Collectors.toList());
+
+    logger.info(String.format("Workspaces that require update %d", workspacesThatRequireUpdate.size()));
+
+    return workspacesThatRequireUpdate;
+  }
+
+  private Map<Long, Double> updateFreeTierUsageInBatches(List<WorkspaceCostView> allCostsInDbForUsers, List<WorkspaceCostView> workspacesThatRequireUpdate) {
+    final Map<Long, Double> liveCostsInBQ = new HashMap<>();
+    for(List<WorkspaceCostView> workspacesPartition: Lists.partition(workspacesThatRequireUpdate, 1000)) {
+      // Live cost in BQ
+      liveCostsInBQ.putAll(getFreeTierWorkspaceCostsFromBQ(workspacesPartition));
+      logger.info(String.format("Retrieved %d workspaces from BQ", liveCostsInBQ.size()));
+      workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
+              allCostsInDbForUsers, liveCostsInBQ);
+    }
+    return liveCostsInBQ;
+  }
+
+  /**
+   * Find the users with db costs different from the live costs
+   *
+   * @param dbCostByCreator Map of userId->dbCost
+   * @param liveCostByCreator Map of userId->liveCost
+   * @return a {@link Map} of user Ids to their DbUsers
+   */
+  @NotNull
+  private Map<Long, DbUser> findDbUsersWithChangedCosts(Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
+    final Set<Long> usersWithChangedCosts =
+            liveCostByCreator.keySet().stream()
+                    .filter(u -> CostComparisonUtils.compareCosts(dbCostByCreator.get(u), liveCostByCreator.get(u)) != 0)
+                    .collect(Collectors.toSet());
+
+    logger.info(String.format("Found %d users with changed costs.", usersWithChangedCosts.size()));
+
+    final Map<Long, DbUser> dbUsersWithChangedCosts = new HashMap<>();
+    userDao
+            .findAllById(usersWithChangedCosts)
+            .forEach(user -> dbUsersWithChangedCosts.put(user.getUserId(), user));
+    return dbUsersWithChangedCosts;
+  }
+
+  /**
+   *
+   * Get the list of newly expired users (who exceeded their free tier limit) and mark all their workspaces as inactive
+   *
+   * @param allUsers set of all users to filter them whether they have active free tier workspace
+   * @param dbUsersWithChangedCosts The map of users with changed costs, to calculate which of them exceeded their free tier limit
+   * @param costByCreator Map of userId->dbCost
+   * @param liveCostByCreator Map of userId->liveCost
+   */
+  private void updateWorkspaceStatusToInactiveForNewlyExpiredUsers(final Set<DbUser> allUsers,
+                                                                   Map<Long, DbUser> dbUsersWithChangedCosts, Map<Long, Double> costByCreator, Map<Long, Double> liveCostByCreator) {
+
+    Set<DbUser> freeTierUsers = getFreeTierActiveWorkspaceCreatorsIn(allUsers);
+
+    // Find users who exceeded their free tier limit
+    // Here costs in liveCostByCreator could be outdated because we're filtering on active  or recently deleted workspaces
+    // in previous steps. However, costByCreator will contain the up-to-date costs for all the other workspaces.
+    // This is why Math.max is used
+    final Set<DbUser> expiredUsers =
+            dbUsersWithChangedCosts.entrySet().stream()
+                    .filter(e -> costAboveLimit(e.getValue(), Math.max(costByCreator.get(e.getKey()),
+                            liveCostByCreator.get(e.getKey()))))
+                    .map(Entry::getValue)
+                    .collect(Collectors.toSet());
+
+    final Set<DbUser> newlyExpiredFreeTierUsers = Sets.intersection(expiredUsers, freeTierUsers);
+
+    logger.info(
+            String.format(
+                    "Found %d users exceeding their free tier limit, out of which, %d are new",
+                    expiredUsers.size(), newlyExpiredFreeTierUsers.size()));
+
+    for (final DbUser user : newlyExpiredFreeTierUsers) {
+      updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);  //Not optimal, should run 1 update statement
+    }
+  }
+
+  private boolean costAboveLimit(final DbUser user, final double currentCost) {
+    return CostComparisonUtils.compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
+  }
+
+
   private Integer getMinutesBeforeLastFreeTierJob() {
     return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob).orElse(120);
+  }
+
+  private Long getNumberOfDaysToConsiderForFreeTierUsageUpdate() {
+    Long numOfDays = workbenchConfigProvider.get().billing.numberOfDaysToConsiderForFreeTierUsageUpdate;
+    if(numOfDays == null)
+      return TWO_DAYS;
+    if(numOfDays > 60)
+      numOfDays = 60l;
+    return numOfDays * 86_400_000;
   }
 
 

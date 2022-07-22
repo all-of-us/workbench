@@ -738,6 +738,32 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
+  public void test_deletedWorkspaceUsageIsConsidered_whenChargeIsPostedAfterCron() throws MessagingException {
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    commitTransaction();
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(50.0)).when(bigQueryService).executeQuery(any());
+
+    TestTransaction.start();
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
+    workspaceDao.save(workspace);
+    commitTransaction();
+
+    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
+    verifyZeroInteractions(mailService);
+
+    doReturn(mockBQTableSingleResult(100.1)).when(bigQueryService).executeQuery(any());
+
+    freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
+
+  }
+
+  @Test
   public void test_deletedWorkspaceUsageIsConsidered_whenAnotherWorkspaceExceedsLimitAfterCron() throws MessagingException {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -757,12 +783,12 @@ public class FreeTierBillingServiceTest {
     verifyZeroInteractions(mailService);
 
     TestTransaction.start();
-    DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT+"4");
     commitTransaction();
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 50);
 
-    doReturn(mockBQTableSingleResult(100.1)).when(bigQueryService).executeQuery(any());
+    doReturn(mockBQTableSingleResult(SINGLE_WORKSPACE_TEST_PROJECT+"4", 100.1)).when(bigQueryService).executeQuery(any());
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
     verify(mailService).alertUserFreeTierExpiration(eq(user));
@@ -790,8 +816,12 @@ public class FreeTierBillingServiceTest {
     return new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 
+  private TableResult mockBQTableSingleResult(final String project, final Double cost) {
+    return mockBQTableResult(ImmutableMap.of(project, cost));
+  }
+
   private TableResult mockBQTableSingleResult(final Double cost) {
-    return mockBQTableResult(ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, cost));
+    return mockBQTableSingleResult(SINGLE_WORKSPACE_TEST_PROJECT, cost);
   }
 
   private void assertSingleWorkspaceTestDbState(

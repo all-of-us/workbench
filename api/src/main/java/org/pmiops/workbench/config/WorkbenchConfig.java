@@ -79,6 +79,7 @@ public class WorkbenchConfig {
     // Null if not set in Config.
     @Nullable public String legacyAccountId;
 
+
     public String freeTierBillingAccountName() {
       return "billingAccounts/" + accountId;
     }
@@ -110,6 +111,8 @@ public class WorkbenchConfig {
 
     // The number of minutes elapsed after the last cron run to update the free tier billing information
     public Integer minutesBeforeLastFreeTierJob;
+
+    public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
   }
 
   public static class FireCloudConfig {
