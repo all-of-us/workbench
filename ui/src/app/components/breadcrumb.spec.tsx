@@ -3,7 +3,9 @@ import { WorkspacesApi } from 'generated/fetch';
 import { getTrail } from 'app/components/breadcrumb';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { cohortReviewStubs } from 'testing/stubs/cohort-review-service-stub';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
@@ -16,6 +18,12 @@ describe('getTrail', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableMultiReview: true,
+      },
+    });
   });
 
   it('works', () => {
@@ -25,7 +33,7 @@ describe('getTrail', () => {
       exampleCohortStubs[0],
       cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
-      { ns: 'testns', wsid: 'testwsid', cid: '88', pid: '77' }
+      { ns: 'testns', wsid: 'testwsid', cid: '88', crid: '99', pid: '77' }
     );
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
@@ -34,7 +42,7 @@ describe('getTrail', () => {
       'Participant 77',
     ]);
     expect(trail[3].url).toEqual(
-      '/workspaces/testns/testwsid/data/cohorts/88/review/participants/77'
+      '/workspaces/testns/testwsid/data/cohorts/88/reviews/99/participants/77'
     );
   });
 
