@@ -151,18 +151,17 @@ public class FreeTierBillingService {
     Timestamp minusMinutes = Timestamp.valueOf(
             LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
 
-    allCostsInDbForUsers =
+    List<WorkspaceCostView> filteredCostsInDbForUsers =
         allCostsInDbForUsers.stream()
             .filter(
                 c ->
                     c.getFreeTierLastUpdated() == null
-                            || c.getFreeTierLastUpdated().before(minusMinutes)
-            )
+                        || c.getFreeTierLastUpdated().before(minusMinutes))
             .collect(Collectors.toList());
 
-    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", allCostsInDbForUsers.size()));
+    logger.info(String.format("Retrieved %d workspaces from the DB eligible for updates", filteredCostsInDbForUsers.size()));
 
-    return allCostsInDbForUsers;
+    return filteredCostsInDbForUsers;
   }
 
   // TODO: move to DbWorkspace?  RW-5107

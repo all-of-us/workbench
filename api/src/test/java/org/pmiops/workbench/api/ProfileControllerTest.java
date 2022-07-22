@@ -46,6 +46,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
@@ -206,6 +207,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
+    WorkspaceFreeTierUsageService.class,
   })
   @MockBean({BigQueryService.class})
   static class Configuration {
