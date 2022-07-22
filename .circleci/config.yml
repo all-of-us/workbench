@@ -590,6 +590,8 @@ jobs:
             export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
               | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
               -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
+            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
+            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
 
             export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
             export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
@@ -852,7 +854,8 @@ workflows:
 
   playground:
     jobs:
-      - playground
+      - playground:
+          <<: *filter-pr-branch
   e2etests:
     jobs:
       - e2etests-deploy-ui:
