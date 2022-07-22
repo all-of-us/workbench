@@ -25,8 +25,8 @@ describe('Cohort review set tests', () => {
 
   const workspaceName = 'e2eCohortReviewTest';
   const cohortName = makeRandomName('auotest', { includeHyphen: false });
-  const cohortReview1Name = multiReviewDisabled ? makeRandomName('auotest', { includeHyphen: false }) : cohortName;
-  const cohortReview2Name = multiReviewDisabled ? makeRandomName('auotest', { includeHyphen: false }) : cohortName;
+  const cohortReview1Name = multiReviewDisabled ? cohortName : makeRandomName('auotest', { includeHyphen: false });
+  const cohortReview2Name = multiReviewDisabled ? cohortName : makeRandomName('auotest', { includeHyphen: false });
 
   const reviewSetNumberOfParticipants_1 = 50;
   const reviewSetNumberOfParticipants_2 = 100;
