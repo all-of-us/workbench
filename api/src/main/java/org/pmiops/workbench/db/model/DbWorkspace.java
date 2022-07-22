@@ -21,7 +21,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.model.BillingStatus;
@@ -760,11 +759,33 @@ public class DbWorkspace {
 
     DbWorkspace workspace = (DbWorkspace) o;
 
-    return new EqualsBuilder().append(billingMigrationStatus, workspace.billingMigrationStatus).append(workspaceId, workspace.workspaceId).append(name, workspace.name).append(workspaceNamespace, workspace.workspaceNamespace).append(cdrVersion, workspace.cdrVersion).append(creator, workspace.creator).append(creationTime, workspace.creationTime).append(activeStatus, workspace.activeStatus).append(billingAccountName, workspace.billingAccountName).append(googleProject, workspace.googleProject).isEquals();
+    return new EqualsBuilder()
+        .append(billingMigrationStatus, workspace.billingMigrationStatus)
+        .append(workspaceId, workspace.workspaceId)
+        .append(name, workspace.name)
+        .append(workspaceNamespace, workspace.workspaceNamespace)
+        .append(cdrVersion, workspace.cdrVersion)
+        .append(creator, workspace.creator)
+        .append(creationTime, workspace.creationTime)
+        .append(activeStatus, workspace.activeStatus)
+        .append(billingAccountName, workspace.billingAccountName)
+        .append(googleProject, workspace.googleProject)
+        .isEquals();
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(billingMigrationStatus).append(workspaceId).append(name).append(workspaceNamespace).append(cdrVersion).append(creator).append(creationTime).append(activeStatus).append(billingAccountName).append(googleProject).toHashCode();
+    return new HashCodeBuilder(17, 37)
+        .append(billingMigrationStatus)
+        .append(workspaceId)
+        .append(name)
+        .append(workspaceNamespace)
+        .append(cdrVersion)
+        .append(creator)
+        .append(creationTime)
+        .append(activeStatus)
+        .append(billingAccountName)
+        .append(googleProject)
+        .toHashCode();
   }
 }

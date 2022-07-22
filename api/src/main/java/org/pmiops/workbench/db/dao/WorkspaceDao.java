@@ -134,12 +134,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       @Param("billingAccountNames") List<String> billingAccountNames);
 
   @Query(
-          "SELECT w.creator FROM DbWorkspace w "
-                  + "WHERE w.billingStatus = (:status) AND w.billingAccountName in (:billingAccountNames) AND w.creator in (:creators)")
+      "SELECT w.creator FROM DbWorkspace w "
+          + "WHERE w.billingStatus = (:status) AND w.billingAccountName in (:billingAccountNames) AND w.creator in (:creators)")
   Set<DbUser> findCreatorsByBillingStatusAndBillingAccountNameIn(
-          @Param("status") BillingStatus status,
-          @Param("billingAccountNames") List<String> billingAccountNames,
-          @Param("creators") Set<DbUser> creators);
+      @Param("status") BillingStatus status,
+      @Param("billingAccountNames") List<String> billingAccountNames,
+      @Param("creators") Set<DbUser> creators);
 
   @Query(
       "SELECT COUNT(workspace.workspaceId) AS workspaceCount, workspace.activeStatus AS activeStatus, tier AS tier "
@@ -149,7 +149,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "GROUP BY workspace.activeStatus, tier "
           + "ORDER BY workspace.activeStatus, tier")
   List<WorkspaceCountByActiveStatusAndTier> getWorkspaceCountGaugeData();
-
 
   interface WorkspaceCountByActiveStatusAndTier {
     Long getWorkspaceCount();
@@ -180,17 +179,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   }
 
   @Query(
-          "SELECT w.workspaceId AS workspaceId, "
-                  + "w.googleProject AS googleProject, "
-                  + "w.creator.id AS creatorId, "
-                  + "f.cost AS freeTierCost, "
-                  + "f.lastUpdateTime AS freeTierLastUpdated, "
-                  + "w.lastModifiedTime AS workspaceLastUpdated, "
-                  + "w.activeStatus AS activeStatus "
-                  + "FROM DbWorkspace w "
-                  + "LEFT JOIN DbWorkspaceFreeTierUsage f ON w.workspaceId = f.workspace.id "
-                  // Billing migration status 1 = NEW
-                  + "WHERE w.billingMigrationStatus = 1 AND w.creator IS NOT NULL "
-                  + "AND w.creator in (:creators)")
+      "SELECT w.workspaceId AS workspaceId, "
+          + "w.googleProject AS googleProject, "
+          + "w.creator.id AS creatorId, "
+          + "f.cost AS freeTierCost, "
+          + "f.lastUpdateTime AS freeTierLastUpdated, "
+          + "w.lastModifiedTime AS workspaceLastUpdated, "
+          + "w.activeStatus AS activeStatus "
+          + "FROM DbWorkspace w "
+          + "LEFT JOIN DbWorkspaceFreeTierUsage f ON w.workspaceId = f.workspace.id "
+          // Billing migration status 1 = NEW
+          + "WHERE w.billingMigrationStatus = 1 AND w.creator IS NOT NULL "
+          + "AND w.creator in (:creators)")
   List<WorkspaceCostView> getWorkspaceCostViews(@Param("creators") Set<DbUser> creators);
 }

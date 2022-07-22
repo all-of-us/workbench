@@ -15,10 +15,11 @@ import org.springframework.stereotype.Repository;
 public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFreeTierUsage, Long> {
 
   DbWorkspaceFreeTierUsage findOneByWorkspace(DbWorkspace workspace);
+
   Iterable<DbWorkspaceFreeTierUsage> findAllByWorkspaceIn(Iterable<DbWorkspace> workspaceList);
 
   default void updateCost(
-          Map<Long, DbWorkspaceFreeTierUsage> cache, DbWorkspace workspace, double cost) {
+      Map<Long, DbWorkspaceFreeTierUsage> cache, DbWorkspace workspace, double cost) {
     DbWorkspaceFreeTierUsage usage = cache.get(workspace.getWorkspaceId());
     if (usage == null) {
       usage = new DbWorkspaceFreeTierUsage(workspace);
