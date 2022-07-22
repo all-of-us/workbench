@@ -28,6 +28,7 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -56,6 +57,7 @@ class CohortBuilderServiceImplTest {
   @Autowired private SurveyModuleDao surveyModuleDao;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
+  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
@@ -79,7 +81,8 @@ class CohortBuilderServiceImplTest {
             personDao,
             surveyModuleDao,
             cohortBuilderMapper,
-            mySQLStopWordsProvider);
+            mySQLStopWordsProvider,
+            workbenchConfigProvider);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(getStopWords());
     when(mySQLStopWordsProvider.get()).thenReturn(mySQLStopWords);

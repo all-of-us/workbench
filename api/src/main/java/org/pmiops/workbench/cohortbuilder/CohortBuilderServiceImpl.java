@@ -39,6 +39,7 @@ import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
@@ -100,6 +101,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final SurveyModuleDao surveyModuleDao;
   private final CohortBuilderMapper cohortBuilderMapper;
   private final Provider<MySQLStopWords> mySQLStopWordsProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public CohortBuilderServiceImpl(
@@ -113,7 +115,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       PersonDao personDao,
       SurveyModuleDao surveyModuleDao,
       CohortBuilderMapper cohortBuilderMapper,
-      Provider<MySQLStopWords> mySQLStopWordsProvider) {
+      Provider<MySQLStopWords> mySQLStopWordsProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
@@ -125,6 +128,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.surveyModuleDao = surveyModuleDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
     this.mySQLStopWordsProvider = mySQLStopWordsProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -279,8 +283,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     if (isTopCountsSearch(term)) {
       return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
     }
+    String modifiedSearchTerm = "";
+    List<String> endsWithTerms = new ArrayList<>();
+    // TODO split terms that start with a '*'
+    //if (workbenchConfigProvider.get().featureFlags.)
 
-    String modifiedSearchTerm = modifyTermMatch(term);
+    modifiedSearchTerm = modifyTermMatch(term);
     // if the modified search term is empty return an empty result
     if (modifiedSearchTerm.isEmpty()) {
       return new CriteriaListWithCountResponse().totalCount(0L);
