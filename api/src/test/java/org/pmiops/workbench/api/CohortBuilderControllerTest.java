@@ -88,8 +88,8 @@ public class CohortBuilderControllerTest {
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private WorkspaceAuthService workspaceAuthService;
-  @Mock private Provider<WorkbenchConfig> configProvider;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
+  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
@@ -114,9 +114,9 @@ public class CohortBuilderControllerTest {
             personDao,
             surveyModuleDao,
             cohortBuilderMapper,
-            mySQLStopWordsProvider);
-    controller =
-        new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
+            mySQLStopWordsProvider,
+            workbenchConfigProvider);
+    controller = new CohortBuilderController(cohortBuilderService, workspaceAuthService);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();

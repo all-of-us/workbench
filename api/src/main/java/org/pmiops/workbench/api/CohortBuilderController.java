@@ -5,9 +5,7 @@ import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
@@ -41,16 +39,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
-  private final Provider<WorkbenchConfig> configProvider;
   private final CohortBuilderService cohortBuilderService;
   private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   CohortBuilderController(
-      Provider<WorkbenchConfig> configProvider,
-      CohortBuilderService cohortBuilderService,
-      WorkspaceAuthService workspaceAuthService) {
-    this.configProvider = configProvider;
+      CohortBuilderService cohortBuilderService, WorkspaceAuthService workspaceAuthService) {
     this.cohortBuilderService = cohortBuilderService;
     this.workspaceAuthService = workspaceAuthService;
   }
