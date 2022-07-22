@@ -91,6 +91,12 @@
       "category": "DEMO_PROJECTS"
     },
     {
+      "name": "Data Quality Reports - June 2022 CDR Release",
+      "namespace": "aou-rw-410a6b71",
+      "id": "dataqualityreportsjune2022cdrrelease",
+      "category": "DEMO_PROJECTS"
+    },
+    {
       "name": "Work with All of Us Physical Measurements Data (v6)",
       "namespace": "aou-rw-0e8e7aca",
       "id": "workwithallofusphysicalmeasurementsdatav6",
