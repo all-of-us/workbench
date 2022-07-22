@@ -99,7 +99,6 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
@@ -2233,52 +2232,6 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getCohortReviewsByCohortId(
                     workspace.getNamespace(), workspace.getId(), cohort.getCohortId()));
-
-    assertForbiddenException(exception);
-  }
-
-  ////////// getCohortChartData - See CohortReviewControllerBQTest   //////////
-  @ParameterizedTest(name = "getCohortChartDataAllowedAccessLevel WorkspaceAccessLevel={0}")
-  @EnumSource(
-      value = WorkspaceAccessLevel.class,
-      names = {"OWNER", "WRITER", "READER"})
-  public void getCohortChartDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-    stubBigQueryCohortCalls();
-
-    List<CohortChartData> actual =
-        cohortReviewController
-            .getCohortChartData(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortId(),
-                Domain.CONDITION.toString(),
-                1)
-            .getBody()
-            .getItems();
-
-    assertThat(actual.size()).isEqualTo(1);
-  }
-
-  @ParameterizedTest(name = "getCohortChartDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
-  @EnumSource(
-      value = WorkspaceAccessLevel.class,
-      names = {"NO_ACCESS"})
-  public void getCohortChartDataForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.getCohortChartData(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    Domain.CONDITION.toString(),
-                    1));
 
     assertForbiddenException(exception);
   }

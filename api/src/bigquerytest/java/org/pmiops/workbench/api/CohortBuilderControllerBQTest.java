@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -13,6 +14,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Provider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,30 +44,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageConfig;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.AttrName;
-import org.pmiops.workbench.model.Attribute;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaRequest;
-import org.pmiops.workbench.model.CriteriaSubType;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.DemoChartInfoListResponse;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EthnicityInfo;
-import org.pmiops.workbench.model.EthnicityInfoListResponse;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.Modifier;
-import org.pmiops.workbench.model.ModifierType;
-import org.pmiops.workbench.model.Operator;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.TemporalMention;
-import org.pmiops.workbench.model.TemporalTime;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -146,7 +125,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private DbCriteria snomedStandard;
   private DbCriteria cpt4;
   private DbCriteria temporalParent1;
-  private DbCriteria temportalChild1;
+  private DbCriteria temporalChild1;
   private DbCriteria procedureParent1;
   private DbCriteria procedureChild1;
   private DbCriteria surveyNode;
@@ -166,6 +145,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "death",
         "cb_search_person",
         "cb_search_all_events",
+        "cb_review_all_events",
         "cb_criteria",
         "cb_criteria_ancestor");
   }
@@ -267,10 +247,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .addStandard(false)
                 .addSynonyms("+[CONDITION_rank1]")
                 .build());
-    temportalChild1 =
+    temporalChild1 =
         saveCriteriaWithPath(
             temporalParent1.getPath(),
-            temportalChild1 =
+            temporalChild1 =
                 DbCriteria.builder()
                     .addParentId(temporalParent1.getId())
                     .addAncestorData(false)
@@ -393,7 +373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         snomedStandard,
         cpt4,
         temporalParent1,
-        temportalChild1,
+        temporalChild1,
         procedureParent1,
         procedureChild1,
         surveyNode,
@@ -883,9 +863,113 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void getCohortChartDataBadLimit() {
+    try {
+      controller.getCohortChartData(
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), -1, new SearchRequest());
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      // Success
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getCohortChartDataBadLimitOverHundred() {
+    try {
+      controller.getCohortChartData(
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), 101, new SearchRequest());
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      // Success
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getCohortChartDataLab() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.LAB.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(3);
+    assertThat(items.get(0))
+        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
+    assertThat(items.get(1)).isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
+    assertThat(items.get(2)).isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataDrug() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.DRUG.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(1);
+    assertThat(items.get(0))
+        .isEqualTo(new CohortChartData().name("name11").conceptId(1L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataCondition() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(2);
+    assertThat(items.get(0)).isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
+    assertThat(items.get(1)).isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
+  }
+
+  @Test
+  public void getCohortChartDataProcedure() {
+    CohortChartDataListResponse response =
+        controller
+            .getCohortChartData(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.PROCEDURE.name(),
+                10,
+                createSearchRequests(
+                    Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
+            .getBody();
+
+    List<CohortChartData> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(3);
+    assertThat(items.get(0)).isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
+    assertThat(items.get(1)).isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
+    assertThat(items.get(2)).isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
+  }
+
+  @Test
   public void findDataFilters() {
     List<DataFilter> filters =
-        controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+        Objects.requireNonNull(
+                controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody())
+            .getItems();
     assertThat(
             filters.contains(
                 new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")))
@@ -1271,7 +1355,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate() {
+  public void countSubjectsICD9ConditionChildAgeAtEventAndOccurrencesAndEventDate() {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.CONDITION.toString(),
@@ -2026,10 +2110,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
                 .operands(ImmutableList.of("7")));
-    SearchParameter ppiValueAsNumer = surveyAnswer().attributes(attributes);
+    SearchParameter ppiValueAsNumber = surveyAnswer().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            ppiValueAsNumer.getDomain(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
+            ppiValueAsNumber.getDomain(), ImmutableList.of(ppiValueAsNumber), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
@@ -2051,7 +2135,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE.toString(),
                 searchRequest)
             .getBody();
-    assertDemographics(response);
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2063,7 +2147,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     EthnicityInfoListResponse response =
         controller.findEthnicityInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest).getBody();
-    assertEthnicity(response);
+    assertEthnicity(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2083,7 +2167,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE_AT_CONSENT.toString(),
                 searchRequest)
             .getBody();
-    assertDemographics(response);
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2102,7 +2186,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE_AT_CDR.toString(),
                 searchRequest)
             .getBody();
-    assertDemographics(response);
+    assertDemographics(Objects.requireNonNull(response));
   }
 
   @Test
@@ -2114,10 +2198,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .sourceConceptIds(sourceConceptIds)
             .standardConceptIds(standardConceptIds);
     List<Criteria> criteriaList =
-        controller
-            .findCriteriaForCohortEdit(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
-            .getBody()
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaForCohortEdit(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
+                    .getBody())
             .getItems();
     assertThat(criteriaList).hasSize(2);
     assertThat(criteriaList.get(0).getId()).isEqualTo(icd9.getId());

@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,8 +59,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
-import org.pmiops.workbench.model.CohortChartData;
-import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Filter;
@@ -378,7 +377,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .matchedParticipantCount(reviewWithoutEHRData.getMatchedParticipantCount())
             .reviewedCount(reviewWithoutEHRData.getReviewedCount())
             .etag(Etags.fromVersion(reviewWithoutEHRData.getVersion()));
-    assertThat(controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0))
+    assertThat(
+            Objects.requireNonNull(
+                    controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody())
+                .getItems()
+                .get(0))
         .isEqualTo(expectedReview);
   }
 
@@ -397,7 +400,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition1(), expectedCondition2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -411,7 +416,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition2(), expectedCondition1()));
   }
 
   @Test
@@ -428,7 +435,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 PARTICIPANT_ID,
                 testFilter)
             .getBody();
-    assertThat(response.getCount()).isEqualTo(2);
+    assertThat(Objects.requireNonNull(response).getCount()).isEqualTo(2);
   }
 
   @Test
@@ -447,6 +454,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.IN)
                 .property(FilterColumns.STANDARD_VOCABULARY)
                 .values(ImmutableList.of("ICD9CM", "SNOMED")));
+
     PageFilterRequest testFilter =
         new PageFilterRequest().domain(Domain.CONDITION).filters(new FilterList().items(filters));
 
@@ -461,7 +469,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition1(), expectedCondition2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -475,7 +485,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedCondition2(), expectedCondition1()));
   }
 
   @Test
@@ -496,7 +508,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition1()));
+    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedCondition1()));
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -509,7 +521,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 PARTICIPANT_ID,
                 testFilter)
             .getBody();
-    assertResponse(response, ImmutableList.of(expectedCondition2()));
+    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedCondition2()));
   }
 
   @Test
@@ -528,7 +540,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents1()));
+    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedAllEvents1()));
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -542,7 +554,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents2()));
+    assertResponse(Objects.requireNonNull(response), ImmutableList.of(expectedAllEvents2()));
   }
 
   @Test
@@ -560,7 +572,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -574,7 +588,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()));
+    assertResponse(
+        Objects.requireNonNull(response),
+        ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()));
   }
 
   @Test
@@ -604,7 +620,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .standardName("Typhoid and paratyphoid fevers")
             .standardVocabulary("SNOMED")
             .startDate("2008-08-01");
-    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(Objects.requireNonNull(response).getItems().size()).isEqualTo(2);
     assertThat(expectedData1).isIn(response.getItems());
     assertThat(expectedData2).isIn(response.getItems());
   }
@@ -646,120 +662,18 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataBadLimit() {
-    try {
-      controller.getCohortChartData(
-          NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.CONDITION.name(), -1);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
-  public void getCohortChartDataBadLimitOverHundred() {
-    try {
-      controller.getCohortChartData(
-          NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.CONDITION.name(), 101);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
-  public void getCohortChartDataLab() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.LAB.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataLabWithEHRData() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithEHRData.getCohortId(), Domain.LAB.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataDrug() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.DRUG.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(1);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name11").conceptId(1L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataCondition() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.CONDITION.name(), 10)
-            .getBody();
-    assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
-  }
-
-  @Test
-  public void getCohortChartDataProcedure() {
-    CohortChartDataListResponse response =
-        controller
-            .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.PROCEDURE.name(), 10)
-            .getBody();
-
-    assertThat(response.getItems().size()).isEqualTo(3);
-    assertThat(response.getItems().get(0))
-        .isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
-    assertThat(response.getItems().get(1))
-        .isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
-    assertThat(response.getItems().get(2))
-        .isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
-  }
-
-  @Test
   public void getVocabularies() {
     VocabularyListResponse response =
         controller
             .getVocabularies(NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId())
             .getBody();
-    assertThat(response.getItems().size()).isEqualTo(20);
-    assertThat(response.getItems().get(0))
+    List<Vocabulary> items = Objects.requireNonNull(response).getItems();
+    assertThat(items.size()).isEqualTo(20);
+    assertThat(items.get(0))
         .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("CPT4"));
-    assertThat(response.getItems().get(1))
+    assertThat(items.get(1))
         .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD10CM"));
-    assertThat(response.getItems().get(2))
+    assertThat(items.get(2))
         .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"));
   }
 

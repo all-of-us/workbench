@@ -16,13 +16,11 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortReviewWithCountResponse;
@@ -48,7 +46,6 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -237,37 +234,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         annotationId, cohortReview.getCohortReviewId(), participantId);
 
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @Transactional
-  public ResponseEntity<CohortChartDataListResponse> getCohortChartData(
-      String workspaceNamespace, String workspaceId, Long cohortId, String domain, Integer limit) {
-    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Please provide a chart limit between %d and %d.",
-              MIN_LIMIT, MAX_LIMIT));
-    }
-
-    DbWorkspace dbWorkspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
-
-    Optional<DbCohortReview> dbCohortReview = dbCohort.getCohortReviews().stream().findFirst();
-    long count =
-        dbCohortReview
-            .map(DbCohortReview::getMatchedParticipantCount)
-            .orElseGet(() -> cohortReviewService.participationCount(dbCohort));
-
-    return ResponseEntity.ok(
-        new CohortChartDataListResponse()
-            .count(count)
-            .items(
-                cohortReviewService.findCohortChartData(
-                    dbCohort, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
   }
 
   @Override
