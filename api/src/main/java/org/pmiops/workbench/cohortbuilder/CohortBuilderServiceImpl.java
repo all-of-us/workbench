@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -285,10 +286,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     }
     String modifiedSearchTerm = "";
     List<String> endsWithTerms = new ArrayList<>();
-    // TODO split terms that start with a '*'
-    //if (workbenchConfigProvider.get().featureFlags.)
 
-    modifiedSearchTerm = modifyTermMatch(term);
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch){
+      // TODO split terms that start with a '*'
+    } else {
+      modifiedSearchTerm = modifyTermMatch(term);
+    }
     // if the modified search term is empty return an empty result
     if (modifiedSearchTerm.isEmpty()) {
       return new CriteriaListWithCountResponse().totalCount(0L);
@@ -310,6 +313,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
               domain, modifiedSearchTerm, standard, pageRequest);
     }
+
+
+
+
+
+
+
     return new CriteriaListWithCountResponse()
         .items(
             dbCriteriaPage.getContent().stream()
@@ -600,6 +610,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private boolean isSurveyDomain(String domain) {
     return Domain.SURVEY.equals(Domain.fromValue(domain));
+  }
+
+  protected Map<String,String> modifyTermMatchUseEndsWith(String term){
+    Map<String,String> searchTerms = new HashMap<>();
+    term = removeStopWords(term);
+
+    return searchTerms;
   }
 
   protected String modifyTermMatch(String term) {

@@ -301,6 +301,8 @@ public class WorkbenchConfig {
     // If true, enable Universal Search for Cohort Builder - both backend and UI
     public boolean enableUniversalSearch;
     // If true, enable Multiple Reviews for Cohort Review - both backend and UI
+    public boolean enableDrugWildcardSearch;
+    // If true, enable Drug Wildcard Search for Cohort Builder - backend
     public boolean enableMultiReview;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
