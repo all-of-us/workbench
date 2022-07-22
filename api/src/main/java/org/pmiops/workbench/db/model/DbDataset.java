@@ -31,6 +31,7 @@ public class DbDataset {
   private String description;
   private long creatorId;
   private Timestamp creationTime;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private Boolean invalid;
   private Boolean includesAllParticipants;
@@ -144,6 +145,14 @@ public class DbDataset {
   public DbDataset setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
     return this;
+  }
+
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public void setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
   }
 
   @Column(name = "last_modified_time")

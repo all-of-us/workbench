@@ -52,7 +52,8 @@ public class ConceptSetMapperTest {
             1,
             creator,
             now,
-            now);
+            now,
+            "brian");
     dbConceptSet.setConceptSetId(1);
   }
 

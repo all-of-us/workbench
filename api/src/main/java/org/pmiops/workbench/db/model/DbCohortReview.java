@@ -28,6 +28,7 @@ public class DbCohortReview {
   private String cohortDefinition;
   private String cohortName;
   private String description;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private long matchedParticipantCount;
   private long reviewSize;
@@ -149,6 +150,14 @@ public class DbCohortReview {
   public DbCohortReview creationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
     return this;
+  }
+
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public void setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
   }
 
   @Column(name = "last_modified_time")

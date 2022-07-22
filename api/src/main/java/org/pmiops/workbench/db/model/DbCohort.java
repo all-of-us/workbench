@@ -28,6 +28,7 @@ public class DbCohort {
   private String criteria;
   private DbUser creator;
   private Timestamp creationTime;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private Set<DbCohortReview> cohortReviews;
 
@@ -41,6 +42,7 @@ public class DbCohort {
     setCreator(c.getCreator());
     setWorkspaceId(c.getWorkspaceId());
     setCreationTime(c.getCreationTime());
+    setLastModifiedBy(c.getLastModifiedBy());
     setLastModifiedTime(c.getLastModifiedTime());
   }
 
@@ -137,6 +139,14 @@ public class DbCohort {
   public DbCohort setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
     return this;
+  }
+
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public void setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
   }
 
   @Column(name = "last_modified_time")

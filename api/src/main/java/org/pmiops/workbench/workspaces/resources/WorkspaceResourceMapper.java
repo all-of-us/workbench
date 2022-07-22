@@ -85,6 +85,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "lastModifiedBy", ignore = true)
   ResourceFields fromNotebookNameAndLastModified(
       String notebook, Timestamp lastModifiedEpochMillis);
 

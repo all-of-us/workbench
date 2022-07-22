@@ -160,6 +160,7 @@ export function convertToResource(
       resourceType === ResourceType.NOTEBOOK
         ? (inputResource as FileDetail)
         : null,
+    lastModifiedBy: inputResource.lastModifiedBy,
     lastModifiedEpochMillis: inputResource.lastModifiedTime,
     adminLocked,
   };

@@ -73,6 +73,7 @@ public interface ConceptSetMapper {
   @Mapping(target = "domainEnum", source = "conceptSet.domain")
   @Mapping(target = "name", source = "conceptSet.name")
   @Mapping(target = "description", source = "conceptSet.description")
+  @Mapping(target = "lastModifiedBy", source = "conceptSet.lastModifiedBy")
   @Mapping(
       target = "creationTime",
       source = "conceptSet.creationTime",

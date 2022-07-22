@@ -17,6 +17,7 @@ class ResourceFields {
   private FileDetail notebook;
   private ConceptSet conceptSet;
   private DataSet dataSet;
+  private String lastModifiedBy;
   private Long lastModifiedEpochMillis;
 
   public Cohort getCohort() {
@@ -71,5 +72,13 @@ class ResourceFields {
   public ResourceFields setLastModifiedEpochMillis(@Nullable Long lastModifiedEpochMillis) {
     this.lastModifiedEpochMillis = lastModifiedEpochMillis;
     return this;
+  }
+
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public void setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
   }
 }
