@@ -41,8 +41,10 @@ public abstract class ResponseCodeRetryPolicy extends SimpleRetryPolicy {
   }
 
   protected boolean canRetry(int code) {
-    // Retry om 500, 502, 503 error.
-    return ExceptionUtils.isServiceUnavailable(code) || ExceptionUtils.isInternalServerError(code);
+    // Retry om 500, 502, 503, 504 error.
+    return ExceptionUtils.isServiceUnavailable(code)
+        || ExceptionUtils.isInternalServerError(code)
+        || ExceptionUtils.isGatewayTimeoutServerError(code);
   }
 
   protected void logRetry(int retryCount, Throwable t) {

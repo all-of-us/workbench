@@ -44,7 +44,7 @@ import {
   currentCohortReviewStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -395,7 +395,7 @@ export const ParticipantsTable = fp.flow(
       const { page, sortField, sortOrder } = this.state;
       const {
         match: {
-          params: { ns, wsid, cid },
+          params: { ns, wsid, cid, crid },
         },
       } = this.props;
       const filters = this.mapFilters();
@@ -409,12 +409,20 @@ export const ParticipantsTable = fp.flow(
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           filters: { items: filters },
         } as Request;
-        return cohortReviewApi().getParticipantCohortStatusesOld(
-          ns,
-          wsid,
-          +cid,
-          query
-        );
+        return serverConfigStore.get().config.enableMultiReview
+          ? cohortReviewApi().getParticipantCohortStatuses(
+              ns,
+              wsid,
+              +cid,
+              +crid,
+              query
+            )
+          : cohortReviewApi().getParticipantCohortStatusesOld(
+              ns,
+              wsid,
+              +cid,
+              query
+            );
       }
     }
 

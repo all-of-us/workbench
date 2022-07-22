@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -28,7 +29,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
-import { WorkspaceData } from 'app/utils/workspace-data';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import moment from 'moment';
 
 const styles = reactStyles({
@@ -255,12 +256,11 @@ class NameContainer extends React.Component<
   }
 }
 
-interface Props {
+interface Props extends RouteComponentProps<MatchParams> {
   tabName: string;
   cohortReview: CohortReview;
   columns: Array<any>;
   domain: Domain;
-  workspace: WorkspaceData;
   filterState: any;
   participantId: number;
   getFilteredData: Function;
@@ -289,7 +289,8 @@ interface State {
 
 export const DetailTabTable = fp.flow(
   withCurrentCohortReview(),
-  withCurrentWorkspace()
+  withCurrentWorkspace(),
+  withRouter
 )(
   class extends React.Component<Props, State> {
     codeInputChange: Function;
@@ -514,15 +515,19 @@ export const DetailTabTable = fp.flow(
       const {
         cohortReview: { cohortReviewId },
         domain,
+        match: {
+          params: { ns, wsid, crid },
+        },
         participantId,
-        workspace: { id, namespace },
       } = this.props;
       let data = [];
       await cohortReviewApi()
         .getParticipantData(
-          namespace,
-          id,
-          cohortReviewId,
+          ns,
+          wsid,
+          serverConfigStore.get().config.enableMultiReview
+            ? +crid
+            : cohortReviewId,
           participantId,
           request,
           { signal: this.dataAborter.signal }
@@ -550,15 +555,19 @@ export const DetailTabTable = fp.flow(
     async callCountApi(request: PageFilterRequest) {
       const {
         cohortReview: { cohortReviewId },
+        match: {
+          params: { ns, wsid, crid },
+        },
         participantId,
-        workspace: { id, namespace },
       } = this.props;
       let count = null;
       await cohortReviewApi()
         .getParticipantCount(
-          namespace,
-          id,
-          cohortReviewId,
+          ns,
+          wsid,
+          serverConfigStore.get().config.enableMultiReview
+            ? +crid
+            : cohortReviewId,
           participantId,
           request,
           { signal: this.countAborter.signal }
@@ -638,7 +647,6 @@ export const DetailTabTable = fp.flow(
       if (lazyLoad) {
         const rangeStart = Math.floor(start / lazyLoadSize) * lazyLoadSize;
         const range = [rangeStart, rangeStart + lazyLoadSize - 1];
-        console.log(range);
         this.setState({ loading: true, range }, () =>
           this.getParticipantData(false)
         );

@@ -24,7 +24,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { currentCohortReviewStore } from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 interface Props
@@ -57,19 +57,32 @@ export const DetailPage = fp.flow(
       } = this.props;
       hideSpinner();
       let { cohortReview } = this.props;
-      const { ns, wsid, cid } = this.props.match.params;
+      const { ns, wsid, cid, crid } = this.props.match.params;
       if (!cohortReview) {
-        await cohortReviewApi()
-          .getParticipantCohortStatusesOld(ns, wsid, +cid, {
-            page: 0,
-            pageSize: 25,
-            sortOrder: SortOrder.Asc,
-            filters: { items: [] },
-          })
-          .then((response) => {
-            cohortReview = response.cohortReview;
-            currentCohortReviewStore.next(cohortReview);
-          });
+        const request = {
+          page: 0,
+          pageSize: 25,
+          sortOrder: SortOrder.Asc,
+          filters: { items: [] },
+        };
+        const getCohortReview = serverConfigStore.get().config.enableMultiReview
+          ? cohortReviewApi().getParticipantCohortStatuses(
+              ns,
+              wsid,
+              +cid,
+              +crid,
+              request
+            )
+          : cohortReviewApi().getParticipantCohortStatusesOld(
+              ns,
+              wsid,
+              +cid,
+              request
+            );
+        await getCohortReview.then((response) => {
+          cohortReview = response.cohortReview;
+          currentCohortReviewStore.next(cohortReview);
+        });
       }
       if (!vocabOptions.getValue()) {
         getVocabOptions(namespace, id, cohortReview.cohortReviewId);
@@ -93,12 +106,14 @@ export const DetailPage = fp.flow(
     }
 
     async updateParticipantStore() {
-      const { ns, wsid, pid } = this.props.match.params;
+      const { ns, wsid, pid, crid } = this.props.match.params;
       const participantCohortStatus =
         await cohortReviewApi().getParticipantCohortStatus(
           ns,
           wsid,
-          this.props.cohortReview.cohortReviewId,
+          serverConfigStore.get().config.enableMultiReview
+            ? +crid
+            : this.props.cohortReview.cohortReviewId,
           +pid
         );
       participantStore.next(participantCohortStatus);

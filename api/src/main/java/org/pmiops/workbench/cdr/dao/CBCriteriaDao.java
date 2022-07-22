@@ -358,7 +358,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       value =
           "select distinct cr.* "
               + "from cb_criteria cr "
-              + "join cb_survey_version sv on cr.concept_id = sv.survey_concept_id",
+              + "join cb_survey_version sv on cr.concept_id = sv.survey_concept_id "
+              + "where domain_id = 'SURVEY'",
       nativeQuery = true)
   List<DbCriteria> findVersionedSurveys();
 

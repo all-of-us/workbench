@@ -8,6 +8,9 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { serverConfigStore } from 'app/utils/stores';
+
+import defaultServerConfig from 'testing/default-server-config';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
@@ -92,6 +95,15 @@ const testNotebook = {
 } as WorkspaceResource;
 
 describe('resources.tsx', () => {
+  beforeEach(() => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableMultiReview: true,
+      },
+    });
+  });
+
   it('should identify resource types', () => {
     expect(isCohort(testCohort)).toBeTruthy();
     expect(getType(testCohort)).toEqual(ResourceType.COHORT);
@@ -183,7 +195,7 @@ describe('resources.tsx', () => {
       WorkspaceStubVariables;
     const WORKSPACE_URL_PREFIX = `/workspaces/${DEFAULT_WORKSPACE_NS}/${DEFAULT_WORKSPACE_ID}`;
     const EXPECTED_COHORT_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/build?cohortId=${COHORT_ID}`;
-    const EXPECTED_COHORT_REVIEW_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/${COHORT_REVIEW_COHORT_ID}/review`;
+    const EXPECTED_COHORT_REVIEW_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/${COHORT_REVIEW_COHORT_ID}/reviews/${COHORT_REVIEW_ID}`;
     const EXPECTED_CONCEPT_SET_URL = `${WORKSPACE_URL_PREFIX}/data/concepts/sets/${CONCEPT_SET_ID}`;
     const EXPECTED_DATA_SET_URL = `${WORKSPACE_URL_PREFIX}/data/data-sets/${DATA_SET_ID}`;
     const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/notebooks/preview/${NOTEBOOK_NAME}`;

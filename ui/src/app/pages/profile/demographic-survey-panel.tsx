@@ -36,7 +36,7 @@ export const DemographicSurveyPanel = (props: Props) => {
             </div>
           </>
         ) : (
-          <div>Survey Incomplete</div>
+          <div>Updated Survey Incomplete</div>
         )}
         {enableUpdatedDemographicSurvey ? (
           <ButtonWithLocationState

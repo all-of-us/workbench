@@ -115,8 +115,8 @@
     "enableDSCREntryInRecentModified": false,
     "enableUniversalSearch": true,
     "enableMultiReview": false,
-    "enableDrugWildcardSearch": false,
-    "enableUpdatedDemographicSurvey": false
+    "enableUpdatedDemographicSurvey": true,
+    "enableDrugWildcardSearch": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
@@ -128,7 +128,7 @@
     "host": "all-of-us-rdr-prod.appspot.com",
     "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10,
-    "exportDemoSurveyV2": false
+    "exportDemoSurveyV2": true
   },
   "captcha": {
     "enableCaptcha": true,

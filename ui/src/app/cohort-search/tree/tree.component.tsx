@@ -19,6 +19,7 @@ import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
+  updateCriteriaSelectionStore,
   withCdrVersions,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -269,7 +270,7 @@ export const CriteriaTree = fp.flow(
         const [rootNodes, criteriaLookup, versionedSurveyLookup] =
           await Promise.all(promises);
         if (criteriaLookup) {
-          this.updateCriteriaSelectionStore(criteriaLookup.items);
+          updateCriteriaSelectionStore(criteriaLookup.items, domain);
         }
         if (versionedSurveyLookup?.items.length > 0) {
           this.setState({
@@ -341,27 +342,6 @@ export const CriteriaTree = fp.flow(
         ) &&
         currentCohortCriteriaStore.getValue().some((crit) => !crit.id)
       );
-    }
-
-    updateCriteriaSelectionStore(criteriaLookupItems: Criteria[]) {
-      const { domain } = this.props;
-      const updatedSelections = currentCohortCriteriaStore
-        .getValue()
-        .map((sel) => {
-          const criteriaMatch = criteriaLookupItems.find(
-            (item) =>
-              item.conceptId === sel.conceptId &&
-              item.isStandard === sel.isStandard &&
-              (domain !== Domain.SURVEY || item.subtype === sel.subtype) &&
-              (sel.subtype !== CriteriaSubType.ANSWER.toString() ||
-                item.value === sel.code)
-          );
-          if (criteriaMatch) {
-            sel.id = criteriaMatch.id;
-          }
-          return sel;
-        });
-      currentCohortCriteriaStore.next(updatedSelections);
     }
 
     updatePpiSurveys(resp, selectedSurveyChild) {

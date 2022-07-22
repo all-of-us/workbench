@@ -7,8 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.cloudresourcemanager.model.ResourceId;
+import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,11 +67,7 @@ public class CloudTaskUserControllerTest {
   @Test
   public void testBulkProjectAudit() throws Exception {
     doReturn(ImmutableList.of()).when(mockCloudResourceManagerService).getAllProjectsForUser(userA);
-    doReturn(
-            ImmutableList.of(
-                new Project()
-                    .setName("aou-rw-test-123")
-                    .setParent(new ResourceId().setType("folder").setId("123"))))
+    doReturn(ImmutableList.of(new Project().setName("aou-rw-test-123").setParent("folder/123")))
         .when(mockCloudResourceManagerService)
         .getAllProjectsForUser(userB);
     controller.auditProjectAccess(

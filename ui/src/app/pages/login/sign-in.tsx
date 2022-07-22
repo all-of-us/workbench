@@ -7,6 +7,7 @@ import { Degree, Profile } from 'generated/fetch';
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { DemographicSurvey } from 'app/components/demographic-survey-v2';
+import { DemographicSurveyValidationMessage } from 'app/components/demographic-survey-v2-validation-message';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { TooltipTrigger } from 'app/components/popups';
@@ -457,7 +458,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
       currentStep === SignInStep.DEMOGRAPHIC_SURVEY
     ) {
-      const { errors, loading } = this.state;
+      const { captcha, errors, loading } = this.state;
       return (
         <div
           style={{
@@ -490,26 +491,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             </Button>
             <TooltipTrigger
               content={
-                (errors || !this.state.captcha) && (
-                  <>
-                    <div>Please review the following:</div>
-                    <ul>
-                      {errors && (
-                        <>
-                          {Object.keys(errors).map((key) => (
-                            <li key={errors[key][0]}>{errors[key][0]}</li>
-                          ))}
-                          <li>
-                            You may select "Prefer not to answer" for each
-                            unfilled item listed above to continue
-                          </li>
-                        </>
-                      )}
-                      {!this.state.captcha && (
-                        <li key='captcha'>Please fill out reCAPTCHA.</li>
-                      )}
-                    </ul>
-                  </>
+                (errors || !captcha) && (
+                  <DemographicSurveyValidationMessage
+                    {...{ captcha, errors }}
+                    isAccountCreation
+                  />
                 )
               }
             >

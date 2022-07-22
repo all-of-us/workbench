@@ -42,26 +42,7 @@ import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.AgeTypeCount;
-import org.pmiops.workbench.model.CardCount;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaAttribute;
-import org.pmiops.workbench.model.CriteriaListWithCountResponse;
-import org.pmiops.workbench.model.CriteriaMenu;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.EthnicityInfo;
-import org.pmiops.workbench.model.FilterColumns;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SurveyModule;
-import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -221,6 +202,27 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return personDao.findAgeTypeCounts().stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<CohortChartData> findCohortChartData(
+      SearchRequest searchRequest, Domain domain, int limit) {
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(
+                cohortQueryBuilder.buildDomainChartInfoCounterQuery(
+                    new ParticipantCriteria(searchRequest), domain, limit)));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<CohortChartData> cohortChartData = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      cohortChartData.add(
+          new CohortChartData()
+              .name(bigQueryService.getString(row, rm.get("name")))
+              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return cohortChartData;
   }
 
   @Override
