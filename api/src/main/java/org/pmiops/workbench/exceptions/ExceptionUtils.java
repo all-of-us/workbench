@@ -90,6 +90,10 @@ public class ExceptionUtils {
     return code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
   }
 
+  public static boolean isGatewayTimeoutServerError(int code) {
+    return code == HttpServletResponse.SC_GATEWAY_TIMEOUT;
+  }
+
   public static RuntimeException codeToException(int code) {
 
     if (code == HttpStatus.NOT_FOUND.value()) {
