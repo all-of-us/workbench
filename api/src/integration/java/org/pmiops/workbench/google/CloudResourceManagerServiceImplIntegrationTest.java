@@ -2,7 +2,7 @@ package org.pmiops.workbench.google;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.api.services.cloudresourcemanager.v3.model.Project;
+import com.google.api.services.cloudresourcemanager.model.Project;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.BaseIntegrationTest;

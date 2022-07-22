@@ -4,20 +4,20 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_RESOURCE_MANAGER;
 
 import com.google.api.client.http.HttpTransport;
-import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager;
-import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager.Builder;
-import com.google.api.services.cloudresourcemanager.v3.CloudResourceManagerScopes;
-import com.google.api.services.cloudresourcemanager.v3.model.GetIamPolicyRequest;
-import com.google.api.services.cloudresourcemanager.v3.model.Policy;
-import com.google.api.services.cloudresourcemanager.v3.model.Project;
-import com.google.api.services.cloudresourcemanager.v3.model.SearchProjectsResponse;
-import com.google.api.services.cloudresourcemanager.v3.model.SetIamPolicyRequest;
+import com.google.api.services.cloudresourcemanager.CloudResourceManager;
+import com.google.api.services.cloudresourcemanager.CloudResourceManager.Builder;
+import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
+import com.google.api.services.cloudresourcemanager.model.GetIamPolicyRequest;
+import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
+import com.google.api.services.cloudresourcemanager.model.Policy;
+import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.model.SetIamPolicyRequest;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -37,7 +37,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   public static final String ADMIN_SERVICE_ACCOUNT_NAME = "cloud-resource-admin";
 
   public static final List<String> SCOPES =
-      Collections.singletonList(CloudResourceManagerScopes.CLOUD_PLATFORM);
+      Arrays.asList(CloudResourceManagerScopes.CLOUD_PLATFORM_READ_ONLY);
 
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
@@ -85,10 +85,10 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
           List<Project> projects = new ArrayList<>();
           Optional<String> pageToken = Optional.empty();
           do {
-            SearchProjectsResponse resp =
+            ListProjectsResponse resp =
                 getCloudResourceManagerServiceWithImpersonation(user)
                     .projects()
-                    .search()
+                    .list()
                     .setPageToken(pageToken.orElse(null))
                     .execute();
             if (resp.getProjects() != null) {
