@@ -158,12 +158,12 @@ public class IamServiceImpl implements IamService {
 
   /** Grants life science runner role to list of service accounts. */
   private void grantLifeScienceRunnerRole(String googleProject, List<String> petServiceAccounts) {
-    com.google.api.services.cloudresourcemanager.v3.model.Policy policy =
+    com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
-    List<com.google.api.services.cloudresourcemanager.v3.model.Binding> bindingList =
+    List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
         Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
     bindingList.add(
-        new com.google.api.services.cloudresourcemanager.v3.model.Binding()
+        new com.google.api.services.cloudresourcemanager.model.Binding()
             .setRole(LIFESCIENCE_RUNNER_ROLE)
             .setMembers(
                 petServiceAccounts.stream()
@@ -175,16 +175,16 @@ public class IamServiceImpl implements IamService {
   /** Revokes life science runner role to list of service accounts. */
   private void revokeLifeScienceRunnerRole(
       String googleProject, List<String> petServiceAccountsLostAccess) {
-    com.google.api.services.cloudresourcemanager.v3.model.Policy policy =
+    com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
-    List<com.google.api.services.cloudresourcemanager.v3.model.Binding> bindingList =
+    List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
         Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
-    com.google.api.services.cloudresourcemanager.v3.model.Binding binding =
+    com.google.api.services.cloudresourcemanager.model.Binding binding =
         bindingList.stream()
             .filter(b -> LIFESCIENCE_RUNNER_ROLE.equals(b.getRole()))
             .findFirst()
             .orElse(
-                new com.google.api.services.cloudresourcemanager.v3.model.Binding()
+                new com.google.api.services.cloudresourcemanager.model.Binding()
                     .setRole(LIFESCIENCE_RUNNER_ROLE)
                     .setMembers(new ArrayList<>()));
 
