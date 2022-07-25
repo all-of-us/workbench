@@ -146,8 +146,9 @@ public class DbCohort {
     return lastModifiedBy;
   }
 
-  public void setLastModifiedBy(String lastModifiedBy) {
+  public DbCohort setLastModifiedBy(String lastModifiedBy) {
     this.lastModifiedBy = lastModifiedBy;
+    return this;
   }
 
   @Column(name = "last_modified_time")

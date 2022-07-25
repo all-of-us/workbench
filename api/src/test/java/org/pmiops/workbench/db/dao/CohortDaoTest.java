@@ -58,6 +58,7 @@ public class CohortDaoTest {
     dbCohort.setName("name");
     dbCohort.setCreator(dbUser);
     dbCohort.setCriteria(cohortJson);
+    dbCohort.setLastModifiedBy("example@test.com");
     dbCohort = cohortDao.save(dbCohort);
   }
 

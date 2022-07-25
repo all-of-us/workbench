@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -171,7 +172,8 @@ public class WorkspaceAdminServiceTest {
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
 
     // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
+        .thenCallRealMethod();
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
@@ -243,7 +245,8 @@ public class WorkspaceAdminServiceTest {
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
                 .storageBucketPath("gs://bucket"));
-    verify(mockNotebooksService, atLeastOnce()).getNotebooksAsService(any());
+    verify(mockNotebooksService, atLeastOnce())
+        .getNotebooksAsService(any(), anyString(), anyString());
 
     // Regression check: the admin service should never call the end-user variants of these methods.
     verify(mockNotebooksService, never()).getNotebooks(any(), any());

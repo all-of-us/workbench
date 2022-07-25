@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -125,7 +126,8 @@ public class NotebooksControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
+        .thenCallRealMethod();
   }
 
   @AfterEach
