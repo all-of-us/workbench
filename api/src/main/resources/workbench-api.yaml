@@ -4444,6 +4444,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable Multiple Cohort Review feature in Cohort Review
+      enableDrugWildcardSearch:
+        type: boolean
+        default: false
+        description: Whether to enable Drug wildcard search (endsWith search) feature in Cohort Builder
       rasHost:
         type: string
         description: The RAS base host name.
