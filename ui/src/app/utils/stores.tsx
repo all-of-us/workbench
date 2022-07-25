@@ -208,6 +208,7 @@ export const serverConfigStore = atom<ServerConfigStore>({});
 // If you want to add a new route param, you will need to define it here as well.
 export interface MatchParams {
   cid?: string;
+  crid?: string;
   csid?: string;
   dataSetId?: string;
   domain?: string;

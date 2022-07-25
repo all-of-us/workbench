@@ -3240,33 +3240,6 @@ paths:
           description: The Participant Chart data
           schema:
             "$ref": "#/definitions/ParticipantChartDataListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/charts/{domain}":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    - "$ref": "#/parameters/cohortId"
-    get:
-      tags:
-      - cohortReview
-      description: Returns a collection of CohortChartData for UI charting in cohort
-        review.
-      operationId: getCohortChartData
-      parameters:
-      - in: path
-        name: domain
-        type: string
-        required: true
-        description: specifies which domain the CohortChartData should belong to.
-      - in: query
-        name: limit
-        type: integer
-        required: false
-        description: the limit search results to
-      responses:
-        200:
-          description: A collection of CohortChartData
-          schema:
-            "$ref": "#/definitions/CohortChartDataListResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3977,6 +3950,39 @@ paths:
           description: A collection of ethnicity and counts
           schema:
             "$ref": "#/definitions/EthnicityInfoListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{domain}/{limit}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - cohortBuilder
+      consumes:
+      - application/json
+      description: Returns a collection of CohortChartData for UI charting in cohort.
+      operationId: getCohortChartData
+      parameters:
+      - in: path
+        name: domain
+        type: string
+        required: true
+        description: represents gender or sex at birth
+      - in: path
+        name: limit
+        type: integer
+        required: true
+        description: represents age, age at consent or age at cdr
+      - in: body
+        name: request
+        description: the cohort
+        schema:
+          "$ref": "#/definitions/SearchRequest"
+        required: true
+      responses:
+        200:
+          description: A collection of CohortChartData
+          schema:
+            "$ref": "#/definitions/CohortChartDataListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/demographics":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4438,6 +4444,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable Multiple Cohort Review feature in Cohort Review
+      enableDrugWildcardSearch:
+        type: boolean
+        default: false
+        description: Whether to enable wildcard search for Durgs in Cohort Builder
       rasHost:
         type: string
         description: The RAS base host name.

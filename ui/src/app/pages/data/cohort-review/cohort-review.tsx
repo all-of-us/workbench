@@ -31,7 +31,7 @@ import {
   currentCohortReviewStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -75,20 +75,7 @@ export const CohortReview = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
-      if (serverConfigStore.get().config.enableMultiReview) {
-        const { ns, wsid, cid } = this.props.match.params;
-        this.props.navigate([
-          'workspaces',
-          ns,
-          wsid,
-          'data',
-          'cohorts',
-          cid,
-          'reviews',
-        ]);
-      } else {
-        this.loadCohort();
-      }
+      this.loadCohort();
     }
 
     loadCohort() {

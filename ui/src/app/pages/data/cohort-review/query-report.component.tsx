@@ -6,13 +6,11 @@ import {
   AgeType,
   CdrVersionTiersResponse,
   Cohort,
-  CohortReview,
   DemoChartInfo,
   Domain,
   EthnicityInfo,
   GenderOrSexType,
   SearchRequest,
-  SortOrder,
 } from 'generated/fetch';
 
 import { ComboChart } from 'app/components/combo-chart.component';
@@ -22,22 +20,18 @@ import { CohortDefinition } from 'app/pages/data/cohort-review/cohort-definition
 import { ParticipantsCharts } from 'app/pages/data/cohort-review/participants-charts';
 import {
   cohortBuilderApi,
-  cohortReviewApi,
   cohortsApi,
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
   withCdrVersions,
-  withCurrentCohortReview,
+  withCurrentCohort,
   withCurrentWorkspace,
 } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
-import {
-  currentCohortReviewStore,
-  NavigationProps,
-} from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { currentCohortStore, NavigationProps } from 'app/utils/navigation';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
@@ -210,21 +204,21 @@ export interface QueryReportProps
     NavigationProps,
     RouteComponentProps<MatchParams> {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
-  cohortReview: CohortReview;
+  cohort: Cohort;
   workspace: WorkspaceData;
 }
 export interface QueryReportState {
   cdrName: string;
-  cohort: Cohort;
   data: DemoChartInfo[];
   groupedData: any;
   chartsLoading: boolean;
-  reviewLoading: boolean;
+  cohortLoading: boolean;
+  participantCount: number;
 }
 
 export const QueryReport = fp.flow(
   withCdrVersions(),
-  withCurrentCohortReview(),
+  withCurrentCohort(),
   withCurrentWorkspace(),
   withNavigation,
   withRouter
@@ -234,60 +228,60 @@ export const QueryReport = fp.flow(
       super(props);
       this.state = {
         cdrName: null,
-        cohort: undefined,
         data: null,
         groupedData: null,
         chartsLoading: true,
-        reviewLoading: true,
+        cohortLoading: true,
+        participantCount: null,
       };
     }
 
     async componentDidMount() {
       const {
         cdrVersionTiersResponse,
-        cohortReview,
+        cohort,
         workspace: { cdrVersionId },
         hideSpinner,
       } = this.props;
       hideSpinner();
       const { ns, wsid, cid } = this.props.match.params;
       let request: SearchRequest;
-      if (cohortReview) {
-        this.setState({ reviewLoading: false });
-        request = JSON.parse(cohortReview.cohortDefinition);
+      if (cohort?.id === +cid) {
+        this.setState({ cohortLoading: false });
+        request = JSON.parse(cohort.criteria);
       } else {
-        await cohortReviewApi()
-          .getParticipantCohortStatusesOld(ns, wsid, +cid, {
-            page: 0,
-            pageSize: 25,
-            sortOrder: SortOrder.Asc,
-          })
-          .then(({ cohortReview: review }) => {
-            request = JSON.parse(review.cohortDefinition);
-            this.setState({ reviewLoading: false });
-            currentCohortReviewStore.next(review);
+        await cohortsApi()
+          .getCohort(ns, wsid, +cid)
+          .then((cohortResponse) => {
+            currentCohortStore.next(cohortResponse);
+            request = JSON.parse(cohortResponse.criteria);
+            this.setState({ cohortLoading: false });
           });
       }
-      cohortsApi()
-        .getCohort(ns, wsid, +cid)
-        .then((cohort) => this.setState({ cohort }));
+
       const cdrName = findCdrVersion(
         cdrVersionId,
         cdrVersionTiersResponse
       ).name;
       this.setState({ cdrName });
-      const [demoChartInfo, ethnicityInfo] = await Promise.all([
-        cohortBuilderApi().findDemoChartInfo(
-          ns,
-          wsid,
-          GenderOrSexType[GenderOrSexType.GENDER],
-          AgeType[AgeType.AGE],
-          request
-        ),
-        cohortBuilderApi().findEthnicityInfo(ns, wsid, request),
-      ]);
+      const [demoChartInfo, ethnicityInfo, participantCount] =
+        await Promise.all([
+          cohortBuilderApi().findDemoChartInfo(
+            ns,
+            wsid,
+            GenderOrSexType[GenderOrSexType.GENDER],
+            AgeType[AgeType.AGE],
+            request
+          ),
+          cohortBuilderApi().findEthnicityInfo(ns, wsid, request),
+          cohortBuilderApi().countParticipants(ns, wsid, request),
+        ]);
       this.groupChartData([...demoChartInfo.items, ...ethnicityInfo.items]);
-      this.setState({ data: demoChartInfo.items, chartsLoading: false });
+      this.setState({
+        data: demoChartInfo.items,
+        chartsLoading: false,
+        participantCount,
+      });
     }
 
     groupChartData(data: Array<DemoChartInfo | EthnicityInfo>) {
@@ -323,28 +317,32 @@ export const QueryReport = fp.flow(
     }
 
     goBack() {
-      const { ns, wsid, cid } = this.props.match.params;
-      this.props.navigate([
-        'workspaces',
-        ns,
-        wsid,
-        'data',
-        'cohorts',
-        cid,
-        'review',
-        'participants',
-      ]);
+      const { ns, wsid, cid, crid } = this.props.match.params;
+      this.props.navigate(
+        serverConfigStore.get().config.enableMultiReview
+          ? ['workspaces', ns, wsid, 'data', 'cohorts', cid, 'reviews', crid]
+          : [
+              'workspaces',
+              ns,
+              wsid,
+              'data',
+              'cohorts',
+              cid,
+              'review',
+              'participants',
+            ]
+      );
     }
 
     render() {
-      const { cohortReview } = this.props;
+      const { cohort } = this.props;
       const {
         cdrName,
-        cohort,
         data,
         groupedData,
         chartsLoading,
-        reviewLoading,
+        cohortLoading,
+        participantCount,
       } = this.state;
       // TODO can we use the creation time from the review instead of the cohort here?
       const created = !!cohort
@@ -353,17 +351,18 @@ export const QueryReport = fp.flow(
       return (
         <React.Fragment>
           <style>{css}</style>
-          {cohortReview?.cohortReviewId && (
+          {cohort && (
             <button
               style={styles.backBtn}
               type='button'
               onClick={() => this.goBack()}
             >
               Back to review set
+              {serverConfigStore.get().config.enableMultiReview ? 's' : ''}
             </button>
           )}
-          {reviewLoading && <SpinnerOverlay />}
-          {cohortReview && (
+          {cohortLoading && <SpinnerOverlay />}
+          {cohort && (
             <div style={styles.reportBackground}>
               <div style={styles.container}>
                 <div style={styles.row}>
@@ -372,9 +371,7 @@ export const QueryReport = fp.flow(
                       <div style={styles.row}>
                         <div style={columns.col6}>
                           <div style={styles.queryTitle}>Cohort Name</div>
-                          <div style={styles.queryContent}>
-                            {cohortReview.cohortName}
-                          </div>
+                          <div style={styles.queryContent}>{cohort.name}</div>
                           <div style={styles.queryTitle}>Created By</div>
                           <div style={styles.queryContent}>
                             {!!cohort ? cohort.creator : ''}
@@ -387,7 +384,7 @@ export const QueryReport = fp.flow(
                           <div style={styles.queryContent}>{cdrName}</div>
                         </div>
                         <div style={columns.col12}>
-                          <CohortDefinition review={cohortReview} />
+                          <CohortDefinition cohort={cohort} />
                         </div>
                       </div>
                     </div>
@@ -465,7 +462,7 @@ export const QueryReport = fp.flow(
                                 <div style={columns.col3}>
                                   {Math.round(
                                     (groupedData[group][row].count /
-                                      cohortReview.matchedParticipantCount) *
+                                      participantCount) *
                                       100
                                   )}
                                   %
@@ -527,20 +524,21 @@ export const QueryReport = fp.flow(
                             maxWidth: '83.33333%',
                           }}
                         >
-                          {domains.map((domain, i) => (
-                            <div
-                              key={i}
-                              style={{
-                                minHeight: '10rem',
-                                position: 'relative',
-                              }}
-                            >
-                              <ParticipantsCharts
-                                cohortId={cohortReview.cohortId}
-                                domain={domain}
-                              />
-                            </div>
-                          ))}
+                          {!!cohort &&
+                            domains.map((domain, i) => (
+                              <div
+                                key={i}
+                                style={{
+                                  minHeight: '10rem',
+                                  position: 'relative',
+                                }}
+                              >
+                                <ParticipantsCharts
+                                  domain={domain}
+                                  searchRequest={JSON.parse(cohort.criteria)}
+                                />
+                              </div>
+                            ))}
                         </div>
                       </div>
                     </div>

@@ -27,7 +27,6 @@ import {
   currentCohortReviewStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -115,21 +114,17 @@ export const CreateReviewModal = fp.flow(
           currentCohortReviewStore.next(response);
           queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
           this.setState({ creating: false });
-          if (serverConfigStore.get().config.enableMultiReview) {
-            this.props.created(response);
-          } else {
-            this.props.created(true);
-            this.props.navigate([
-              'workspaces',
-              namespace,
-              id,
-              'data',
-              'cohorts',
-              cohort.id,
-              'review',
-              'participants',
-            ]);
-          }
+          this.props.created(true);
+          this.props.navigate([
+            'workspaces',
+            namespace,
+            id,
+            'data',
+            'cohorts',
+            cohort.id,
+            'review',
+            'participants',
+          ]);
         });
     }
 

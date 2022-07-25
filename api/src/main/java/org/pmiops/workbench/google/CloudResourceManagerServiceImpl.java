@@ -111,7 +111,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
           return serviceCloudResouceManager
               .get()
               .projects()
-              .getIamPolicy(googleProject, new GetIamPolicyRequest())
+              .getIamPolicy("projects/" + googleProject, new GetIamPolicyRequest())
               .execute();
         });
   }
@@ -123,7 +123,8 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
           return serviceCloudResouceManager
               .get()
               .projects()
-              .setIamPolicy(googleProject, new SetIamPolicyRequest().setPolicy(policy))
+              .setIamPolicy(
+                  "projects/" + googleProject, new SetIamPolicyRequest().setPolicy(policy))
               .execute();
         });
   }
