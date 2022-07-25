@@ -187,6 +187,9 @@ class ResourceCard extends React.Component<Props, {}> {
             Last Modified:{' '}
             {displayDateWithoutHours(resource.lastModifiedEpochMillis)}
           </div>
+          <div style={styles.lastModified} data-test-id='last-modified-by'>
+            Last Modified By: {resource.lastModifiedBy}
+          </div>
           <StyledResourceType resource={resource} />
         </div>
       </ResourceCardBase>

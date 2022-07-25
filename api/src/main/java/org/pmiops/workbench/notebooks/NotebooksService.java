@@ -24,7 +24,8 @@ public interface NotebooksService {
    * app engine service account, so authorization must be performed before calling this and the
    * input value should be trusted.
    */
-  List<FileDetail> getNotebooksAsService(String bucketName);
+  List<FileDetail> getNotebooksAsService(
+      String bucketName, String workspaceNamespace, String workspaceName);
 
   boolean isNotebookBlob(Blob blob);
 
