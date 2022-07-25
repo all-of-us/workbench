@@ -347,7 +347,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     List<DbCriteria> dbCriteriaList = new ArrayList<>();
     // find a match on concept code
-    dbCriteriaList.addAll(cbCriteriaDao
+    dbCriteriaList.addAll(
+        cbCriteriaDao
             .findCriteriaByDomainAndTypeAndCodeAndStandard(
                 domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest)
             .getContent());
