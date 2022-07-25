@@ -115,7 +115,7 @@
     "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
     "enableMultiReview": true,
-    "enableDrugWildcardSearch": true,
+    "enableDrugWildcardSearch": false,
     "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
