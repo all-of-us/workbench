@@ -82,7 +82,10 @@ public class FreeTierBillingService {
 
   /**
    * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
-   * passing thresholds or exceeding limits.
+   * passing thresholds or exceeding limits. RW-6280 - REQUIRES_NEW transactional mode was added to
+   * make the call to this method create a new transaction with each set of users. In order to
+   * commit the transaction after the call. However, if the user has many workspaces, this method
+   * may still timeout. See {@link #updateFreeTierUsageInBatches(List, List)}
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void checkFreeTierBillingUsageForUsers(Set<DbUser> users) {
@@ -401,15 +404,16 @@ public class FreeTierBillingService {
    * Filter the costs further by getting the workspaces that are active, or deleted but their free
    * tier last updated time is before the workspace last updated time. This filtration ensures that
    * BQ will not be queried unnecessarily for the costs of deleted workspaces that we already have
-   * their latest costs The method will return the workspace in 1 of these cases: 1. The workspace
-   * is active 2. The workspace is deleted and either of the following is true 2.1. Free Tier Usage
-   * last updated time is null. This means that it wasn't calculated before 2.2. Workspace last
-   * updated time is null. This means we don't have enough info about the workspace, so we need to
-   * get its cost 2.3. Free Tier Usage time is before the Workspace last updated time. This means
-   * that the workspace got changed some time after our last calculation, so we need to recalculate
-   * it 2.4. Free Tier Usage time is after the Workspace last updated time, but the difference is
-   * smaller than a certain value. This case to account for charges that may occur after the
-   * workspace gets deleted and after the last cron had ran
+   * their latest costs The method will return the workspace in 1 of these cases:
+   *
+   * <p>1. The workspace is active 2. The workspace is deleted and either of the following is true
+   * 2.1. Free Tier Usage last updated time is null. This means that it wasn't calculated before
+   * 2.2. Workspace last updated time is null. This means we don't have enough info about the
+   * workspace, so we need to get its cost 2.3. Free Tier Usage time is before the Workspace last
+   * updated time. This means that the workspace got changed some time after our last calculation,
+   * so we need to recalculate it 2.4. Free Tier Usage time is after the Workspace last updated
+   * time, but the difference is smaller than a certain value. This case to account for charges that
+   * may occur after the workspace gets deleted and after the last cron had run.
    *
    * @param allCostsInDbForUsers
    * @return a {@link java.util.List} of the workspaces that require updates only
@@ -439,6 +443,13 @@ public class FreeTierBillingService {
     return workspacesThatRequireUpdate;
   }
 
+  /**
+   * Requesting live costs from BQ in batches then updating it in a transactional method.
+   *
+   * @param allCostsInDbForUsers
+   * @param workspacesThatRequireUpdate
+   * @return a Map of all live costs.
+   */
   private Map<Long, Double> updateFreeTierUsageInBatches(
       List<WorkspaceCostView> allCostsInDbForUsers,
       List<WorkspaceCostView> workspacesThatRequireUpdate) {

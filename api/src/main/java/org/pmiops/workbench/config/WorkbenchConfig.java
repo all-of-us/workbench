@@ -112,6 +112,11 @@ public class WorkbenchConfig {
     // information
     public Integer minutesBeforeLastFreeTierJob;
 
+    // A value that defines the number of days to consider between the last update of the Free tier
+    // usage in the database and the last workspace update when calculating the eligibility of a
+    // workspace free
+    // tier usage to be updated. To account for charges that may occur after the workspace gets
+    // deleted and after the last cron had run
     public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
   }
 

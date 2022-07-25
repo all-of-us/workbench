@@ -9,8 +9,14 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * Class to call the {@link FreeTierBillingService} with batches of users. This ensures that
+ * FreeTierBillingService will commit the transaction for a smaller batch of users instead of
+ * processing all users in one transaction and eventually timing out. See RW-6280
+ */
 @Service
 public class FreeTierBillingBatchUpdateService {
 
@@ -42,10 +48,14 @@ public class FreeTierBillingBatchUpdateService {
     logger.info("Checking Free Tier Billing usage - start");
 
     Iterable<DbUser> freeTierActiveWorkspaceCreators = userDao.findAll();
+    long numberOfUsers =
+        StreamUtils.createStreamFromIterator(freeTierActiveWorkspaceCreators.iterator()).count();
 
     for (List<DbUser> usersPartition :
         Iterables.partition(freeTierActiveWorkspaceCreators, getFreeTierCronUserBatchSize())) {
-      logger.info(String.format("Processing users batch of size: %d", usersPartition.size()));
+      logger.info(
+          String.format(
+              "Processing users batch of size/total: %d/%d", usersPartition.size(), numberOfUsers));
       freeTierBillingService.checkFreeTierBillingUsageForUsers(new HashSet<>(usersPartition));
     }
 

@@ -32,7 +32,8 @@
     ],
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "freeTierCronUserBatchSize": 10,
-    "minutesBeforeLastFreeTierJob": 60
+    "minutesBeforeLastFreeTierJob": 60,
+    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2
   },
   "auth": {
     "serviceAccountApiUsers": [

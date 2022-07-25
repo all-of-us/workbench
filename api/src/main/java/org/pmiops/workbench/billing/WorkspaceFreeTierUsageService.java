@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+/** A service to update the workspace free tier usage in the database. */
 @Service
 public class WorkspaceFreeTierUsageService {
 
@@ -32,6 +33,14 @@ public class WorkspaceFreeTierUsageService {
     this.workspaceDao = workspaceDao;
   }
 
+  /**
+   * This method is called in batches from {@link FreeTierBillingService} to update the cost in the
+   * database. The method is transactional to make sure that we do incremental changes to the
+   * database.
+   *
+   * @param dbCost
+   * @param liveCostByWorkspace
+   */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateWorkspaceFreeTierUsageInDB(
       List<WorkspaceDao.WorkspaceCostView> dbCost, Map<Long, Double> liveCostByWorkspace) {
