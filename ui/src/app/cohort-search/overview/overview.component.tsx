@@ -625,7 +625,7 @@ export const ListOverview = fp.flow(
                 </TooltipTrigger>
                 {!!cohort.id && (
                   <TooltipTrigger
-                    content={<div>Clear current cohort selections</div>}
+                    content={<div>Discard current cohort changes</div>}
                   >
                     <Clickable
                       style={
