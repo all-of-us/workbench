@@ -4447,7 +4447,7 @@ definitions:
       enableDrugWildcardSearch:
         type: boolean
         default: false
-        description: Whether to enable Drug wildcard search (endsWith search) feature in Cohort Builder
+        description: Whether to enable wildcard search for Durgs in Cohort Builder
       rasHost:
         type: string
         description: The RAS base host name.
