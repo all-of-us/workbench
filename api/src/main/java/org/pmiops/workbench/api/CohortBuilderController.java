@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -26,12 +28,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   private final CohortBuilderService cohortBuilderService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   CohortBuilderController(
-      CohortBuilderService cohortBuilderService, WorkspaceAuthService workspaceAuthService) {
+      CohortBuilderService cohortBuilderService,
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortBuilderService = cohortBuilderService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -113,8 +119,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain, surveyName);
-    return ResponseEntity.ok(
-        cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          cohortBuilderService.findCriteriaByDomainV2(domain, term, surveyName, standard, limit));
+    } else {
+      return ResponseEntity.ok(
+          cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
+    }
   }
 
   @Override

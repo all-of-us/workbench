@@ -114,9 +114,11 @@ public class CohortBuilderControllerTest {
             personDao,
             surveyModuleDao,
             cohortBuilderMapper,
-            mySQLStopWordsProvider,
-            workbenchConfigProvider);
-    controller = new CohortBuilderController(cohortBuilderService, workspaceAuthService);
+            mySQLStopWordsProvider);
+
+    controller =
+        new CohortBuilderController(
+            cohortBuilderService, workspaceAuthService, workbenchConfigProvider);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
