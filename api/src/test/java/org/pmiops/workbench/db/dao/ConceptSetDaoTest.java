@@ -59,6 +59,7 @@ public class ConceptSetDaoTest {
             now,
             "brian");
     dbConceptSet.setConceptSetConceptIds(conceptSetConceptIds);
+    dbConceptSet.setLastModifiedBy("example@test.com");
     this.dbConceptSet = conceptSetDao.save(dbConceptSet);
   }
 
