@@ -345,12 +345,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return findSurveyCriteriaBySearchTerm(surveyName, pageRequest, modifiedSearchTerm);
     }
 
+    List<DbCriteria> dbCriteriaList = new ArrayList<>();
     // find a match on concept code
-    List<DbCriteria> dbCriteriaList =
-        cbCriteriaDao
+    dbCriteriaList.addAll(cbCriteriaDao
             .findCriteriaByDomainAndTypeAndCodeAndStandard(
                 domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest)
-            .getContent();
+            .getContent());
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaList.isEmpty() && !term.contains(".")) {
@@ -743,7 +743,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       modifiedTerms.remove(0);
     }
     // create strings for endsWithTerms and modifiedTerms
-    retMap.put(ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")));
+    retMap.put(
+        ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")).replaceAll("\\*", "%"));
     retMap.put(
         MODIFIED_TERMS,
         modifiedTerms.stream()
