@@ -89,15 +89,15 @@ public class CohortBuilderControllerTest {
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private WorkspaceAuthService workspaceAuthService;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
-  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  private static final String WORKSPACE_ID = "workspaceId";
+  private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
   @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
-
-  private static final String WORKSPACE_ID = "workspaceId";
-  private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
   @BeforeEach
   public void setUp() {
@@ -122,6 +122,11 @@ public class CohortBuilderControllerTest {
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
+
+    WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.featureFlags.enableDrugWildcardSearch = false;
+    doReturn(workbenchConfig).when(workbenchConfigProvider).get();
+
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     DbWorkspace dbWorkspace = new DbWorkspace();
