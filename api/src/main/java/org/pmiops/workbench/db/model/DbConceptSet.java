@@ -193,6 +193,7 @@ public class DbConceptSet {
     return this;
   }
 
+  @Column(name = "last_modified_by")
   public String getLastModifiedBy() {
     return lastModifiedBy;
   }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="evrii" id="changelog-202-last-modified-by">
+    <addColumn tableName="cohort">
+      <column name="last_modified_by" type="text"/>
+    </addColumn>
+    <addColumn tableName="cohort_review">
+      <column name="last_modified_by" type="text"/>
+    </addColumn>
+    <addColumn tableName="concept_set">
+      <column name="last_modified_by" type="text"/>
+    </addColumn>
+    <addColumn tableName="data_set">
+      <column name="last_modified_by" type="text"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>
