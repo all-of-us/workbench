@@ -342,7 +342,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return findSurveyCriteriaBySearchTerm(surveyName, pageRequest, modifiedSearchTerm);
     }
 
-    List<DbCriteria> dbCriteriaList = new ArrayList<>();
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
