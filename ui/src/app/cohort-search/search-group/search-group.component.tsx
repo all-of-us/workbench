@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Menu } from 'primereact/menu';
-import { TieredMenu } from 'primereact/tieredmenu';
 
 import {
   Domain,
@@ -34,7 +33,6 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -150,25 +148,6 @@ const css = `
   .p-inputswitch.p-disabled > .p-inputswitch-slider {
     cursor: not-allowed;
   }
-  body .p-menuitem > .p-menuitem-link {
-    height: 1.25rem;
-    line-height: 1.25rem;
-    padding: 0 1rem;
-  }
-  body .p-menuitem.menuitem-header > .p-menuitem-link {
-    font-size: 12px;
-    font-weight: 600;
-    height: auto;
-    line-height: 0.75rem;
-    padding-left: 0.5rem;
-  }
-  body .p-tieredmenu .p-menu-separator {
-    margin: 0.25rem 0;
-  }
-  body .p-tieredmenu .p-submenu-list {
-    padding: 0.5rem 0;
-    width: 10rem;
-  }
 `;
 
 const temporalMentions = [
@@ -239,11 +218,9 @@ interface State {
 export const SearchGroup = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
-    private criteriaMenu: any;
     private deleteTimeout: NodeJS.Timeout;
     private groupMenu: any;
     private mentionMenu: any;
-    private temporalCriteriaMenu: any;
     private timeMenu: any;
 
     constructor(props: any) {
@@ -435,9 +412,6 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     launchSearch(criteria: any, temporalGroup: number, searchTerms?: string) {
-      if (this.criteriaMenu) {
-        this.criteriaMenu.hide();
-      }
       const { group, setSearchContext, role } = this.props;
       const { domain, type, standard } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
@@ -538,49 +512,6 @@ export const SearchGroup = withCurrentWorkspace()(
         time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
         isNaN(parseInt(timeValue, 10));
       return counts.includes(0) || inputError;
-    }
-
-    mapCriteriaMenuItem(domain: any, temporalGroup: number) {
-      if (!!domain.children) {
-        return {
-          label: domain.name,
-          items: domain.children.map((dt) =>
-            this.mapCriteriaMenuItem(dt, temporalGroup)
-          ),
-        };
-      }
-      return {
-        label: domain.name,
-        command: () => this.launchSearch(domain, temporalGroup),
-      };
-    }
-
-    criteriaMenuItems(temporalGroup: number) {
-      const { criteriaMenuOptions } = this.state;
-      let menuItems = [];
-      criteriaMenuOptions
-        .filter(
-          (optionList) =>
-            !this.props.group.temporal ||
-            optionList[0].category !== 'Program Data'
-        )
-        .forEach((options, index) => {
-          menuItems = [
-            ...menuItems,
-            { label: options[0].category, className: 'menuitem-header' },
-            ...options.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup)),
-          ];
-          if (index < criteriaMenuOptions.length - 1) {
-            menuItems.push({ separator: true });
-          }
-        });
-      return menuItems;
-    }
-
-    get temporalCriteriaMenuItems() {
-      return this.state.criteriaMenuOptions
-        .filter((optionList) => optionList[0].category !== 'Program Data')
-        .map((dt) => this.mapCriteriaMenuItem(dt, 1));
     }
 
     get mentionMenuItems() {
@@ -716,32 +647,14 @@ export const SearchGroup = withCurrentWorkspace()(
               </div>
             ))}
             {/* Criteria menu for main search item list/temporal group 0 items */}
-            {serverConfigStore.get().config.enableUniversalSearch ? (
-              <CohortCriteriaMenu
-                launchSearch={(criteria, temporalGroup, searchTerms) =>
-                  this.launchSearch(criteria, temporalGroup, searchTerms)
-                }
-                menuOptions={criteriaMenuOptions}
-                temporalGroup={0}
-                isTemporal={temporal}
-              />
-            ) : (
-              <div style={styles.cardBlock}>
-                <TieredMenu
-                  style={{ ...styles.menu, padding: '0.5rem 0' }}
-                  appendTo={document.body}
-                  model={this.criteriaMenuItems(0)}
-                  popup
-                  ref={(el) => (this.criteriaMenu = el)}
-                />
-                <button
-                  style={styles.menuButton}
-                  onClick={(e) => this.criteriaMenu.toggle(e)}
-                >
-                  Add Criteria <ClrIcon shape='caret down' size={12} />
-                </button>
-              </div>
-            )}
+            <CohortCriteriaMenu
+              launchSearch={(criteria, temporalGroup, searchTerms) =>
+                this.launchSearch(criteria, temporalGroup, searchTerms)
+              }
+              menuOptions={criteriaMenuOptions}
+              temporalGroup={0}
+              isTemporal={temporal}
+            />
             {temporal && (
               <React.Fragment>
                 {/* Temporal time dropdown */}
@@ -795,32 +708,14 @@ export const SearchGroup = withCurrentWorkspace()(
                   </div>
                 ))}
                 {/* Criteria menu for temporal group 1 items */}
-                {serverConfigStore.get().config.enableUniversalSearch ? (
-                  <CohortCriteriaMenu
-                    launchSearch={(criteria, temporalGroup, searchTerms) =>
-                      this.launchSearch(criteria, temporalGroup, searchTerms)
-                    }
-                    menuOptions={criteriaMenuOptions}
-                    temporalGroup={1}
-                    isTemporal={temporal}
-                  />
-                ) : (
-                  <div style={styles.cardBlock}>
-                    <Menu
-                      style={styles.menu}
-                      appendTo={document.body}
-                      model={this.criteriaMenuItems(1)}
-                      popup
-                      ref={(el) => (this.temporalCriteriaMenu = el)}
-                    />
-                    <button
-                      style={styles.menuButton}
-                      onClick={(e) => this.temporalCriteriaMenu.toggle(e)}
-                    >
-                      Add Criteria <ClrIcon shape='caret down' size={12} />
-                    </button>
-                  </div>
-                )}
+                <CohortCriteriaMenu
+                  launchSearch={(criteria, temporalGroup, searchTerms) =>
+                    this.launchSearch(criteria, temporalGroup, searchTerms)
+                  }
+                  menuOptions={criteriaMenuOptions}
+                  temporalGroup={1}
+                  isTemporal={temporal}
+                />
               </React.Fragment>
             )}
             {/* Group footer */}
