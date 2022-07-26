@@ -88,16 +88,16 @@ public class CohortBuilderControllerTest {
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private WorkspaceAuthService workspaceAuthService;
-  @Mock private Provider<WorkbenchConfig> configProvider;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
+  @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  private static final String WORKSPACE_ID = "workspaceId";
+  private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
   @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
-
-  private static final String WORKSPACE_ID = "workspaceId";
-  private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
   @BeforeEach
   public void setUp() {
@@ -115,11 +115,18 @@ public class CohortBuilderControllerTest {
             surveyModuleDao,
             cohortBuilderMapper,
             mySQLStopWordsProvider);
+
     controller =
-        new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
+        new CohortBuilderController(
+            cohortBuilderService, workspaceAuthService, workbenchConfigProvider);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
+
+    WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.featureFlags.enableDrugWildcardSearch = false;
+    doReturn(workbenchConfig).when(workbenchConfigProvider).get();
+
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     DbWorkspace dbWorkspace = new DbWorkspace();

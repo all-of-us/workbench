@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -9,6 +10,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,7 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -87,13 +90,66 @@ class CohortBuilderServiceImplTest {
 
   private static List<String> testCases = new ArrayList<>();
 
-  @ParameterizedTest(name = "modifyTermMatch: {0}->{1}")
+  @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
+  @MethodSource("getModifyTermMatchEndsWithParameters")
+  void modifyTermMatchUseEndsWith(String testInput, String term, String expected) {
+    Map<String, String> actual = cohortBuilderService.modifyTermMatchUseEndsWithTerms(term);
+    assertWithMessage(testInput).that(actual.get("modifiedTerms")).isEqualTo(expected);
+  }
+
+  @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
+  @MethodSource("getModifyTermMatchEndsWithInvalidParameters")
+  void modifyTermMatchUseEndsWithInvalidTerm(String testInput, String term) {
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> cohortBuilderService.modifyTermMatchUseEndsWithTerms(term));
+    assertThat(exception).hasMessageThat().containsMatch("Bad Request: Search term is invalid");
+  }
+
+  @ParameterizedTest(name = "modifyTermMatch: {0} {1}=>{2}")
   @MethodSource("getModifyTermMatchParameters")
   void modifyTermMatch(String testInput, String term, String expected) {
     // modifyTermMatch() not called for numeric arguments like "001" or "001.1".
     assertWithMessage(testInput)
         .that(cohortBuilderService.modifyTermMatch(term))
         .isEqualTo(expected);
+  }
+
+  private static Stream<Arguments> getModifyTermMatchEndsWithInvalidParameters() {
+
+    return Stream.of(
+        // special chars are filtered by the UI-except ("\"", "+", "-", "*")
+        Arguments.of("Search term: ", "-pita", "one term starts with -"),
+        Arguments.of("Search term: ", "*statin -pita", "two term starts with - and *"),
+        Arguments.of("Search term: ", "*statin *pita", "two terms starts *"),
+        Arguments.of("Search term: ", "*statin other *pita", "two terms starts *"),
+        Arguments.of("Search term: ", "*statin other *pita -minus", "two terms starts *"));
+  }
+
+  private static Stream<Arguments> getModifyTermMatchEndsWithParameters() {
+
+    return Stream.of(
+        // special chars are filtered by the UI-except ("\"", "+", "-", "*")
+        Arguments.of("Search term: ", "lung", "+lung*"),
+        Arguments.of("Search term: ", "+lung", "+lung*"),
+        Arguments.of("Search term: ", "lung cancer", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "lung cancer", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "lung* cancer", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "lung cancer*", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "lung* cancer*", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "+lung cancer", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "lung +cancer", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "+lung +cancer", "+lung*+cancer*"),
+        Arguments.of("Search term: ", "lung -cancer", "+lung*-cancer"),
+        Arguments.of("Search term: ", "+lung -cancer", "+lung*-cancer"),
+        Arguments.of("Search term: ", "lung* -cancer", "+lung*-cancer"),
+        Arguments.of("Search term: ", "\"lung cancer\"", "+\"lung cancer\""),
+        Arguments.of("Search term: ", "covid-19", "+\"covid-19\""),
+        Arguments.of("Search term: ", "type-2-diabetes", "+\"type-2-diabetes\""),
+        Arguments.of("Search term: ", "*statin pita", "+pita*"),
+        Arguments.of("Search term: ", "*statin +pita", "+pita*"),
+        Arguments.of("Search term: ", "-pita brea", "-pita+brea*"));
   }
 
   private static Stream<Arguments> getModifyTermMatchParameters() {
@@ -103,7 +159,7 @@ class CohortBuilderServiceImplTest {
         // starts with special chars
         Arguments.of("Starts with special char '\"'", "\"lung can\"", "\"lung can\""),
         Arguments.of("Starts with special char '+'", "+lung can", "+lung can"),
-        Arguments.of("Starts with special char '-''", "-lung can\"", "-lung can\""),
+        Arguments.of("Starts with special char '-'", "-lung can", "-lung can"),
         Arguments.of("Starts with special char '*''", "*lung can\"", "*lung can\""),
         // does not start with special-char but contains special char
         Arguments.of(
@@ -117,9 +173,8 @@ class CohortBuilderServiceImplTest {
         Arguments.of("No special char in term 1 word", "lun", "+lun*"),
         Arguments.of("No special char in term 2 words", "lung can", "+\"lung\"+can*"),
         Arguments.of(
-            "No special char in term >2 words",
-            "heart attack rate",
-            "+\"heart\"+\"attack\"+rate*"));
+            "No special char in term >2 words", "heart attack rate", "+\"heart\"+\"attack\"+rate*"),
+        Arguments.of("Search term: ", "covid-19", "+\"covid-19\""));
   }
 
   private static List<String> getStopWords() {

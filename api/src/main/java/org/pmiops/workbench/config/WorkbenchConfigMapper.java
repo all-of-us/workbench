@@ -73,6 +73,9 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enablePersistentDisk", source = "config.featureFlags.enablePersistentDisk")
   @Mapping(target = "enableUniversalSearch", source = "config.featureFlags.enableUniversalSearch")
   @Mapping(target = "enableMultiReview", source = "config.featureFlags.enableMultiReview")
+  @Mapping(
+      target = "enableDrugWildcardSearch",
+      source = "config.featureFlags.enableDrugWildcardSearch")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
@@ -81,8 +84,5 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableUpdatedDemographicSurvey",
       source = "config.featureFlags.enableUpdatedDemographicSurvey")
-  @Mapping(
-      target = "enableDrugWildcardSearch",
-      source = "config.featureFlags.enableDrugWildcardSearch")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
