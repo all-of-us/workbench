@@ -13,6 +13,10 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import {
+  CreateNewCohortModal,
+  DiscardCohortChangesModal,
+} from 'app/cohort-search/clear-cohort-modals';
 import { GenderChart } from 'app/cohort-search/gender-chart/gender-chart.component';
 import { searchRequestStore } from 'app/cohort-search/search-state.service';
 import {
@@ -70,7 +74,7 @@ const styles = reactStyles({
   },
   actionIcon: {
     float: 'right',
-    margin: '0 1rem 0 0',
+    margin: '0 0.7rem 0 0',
     minWidth: 0,
     padding: 0,
     color: colors.primary,
@@ -132,6 +136,8 @@ const styles = reactStyles({
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
+  onCreateNewCohort: Function;
+  onDiscardCohortChanges: Function;
   searchRequest: any;
   updateCount: any;
   updating: Function;
@@ -155,6 +161,8 @@ interface State {
   refreshing: boolean;
   saveModalOpen: boolean;
   saving: boolean;
+  showCreateNewCohortModal: boolean;
+  showDiscardCohortChangesModal: boolean;
   stackChart: boolean;
   total: number;
 }
@@ -188,6 +196,8 @@ export const ListOverview = fp.flow(
         refreshing: false,
         saveModalOpen: false,
         saving: false,
+        showCreateNewCohortModal: false,
+        showDiscardCohortChangesModal: false,
         stackChart: true,
         total: undefined,
       };
@@ -524,7 +534,12 @@ export const ListOverview = fp.flow(
     }
 
     render() {
-      const { cohort } = this.props;
+      const {
+        cohort,
+        cohortChanged,
+        onCreateNewCohort,
+        onDiscardCohortChanges,
+      } = this.props;
       const {
         ageType,
         apiError,
@@ -535,6 +550,8 @@ export const ListOverview = fp.flow(
         loading,
         refreshing,
         saveModalOpen,
+        showCreateNewCohortModal,
+        showDiscardCohortChangesModal,
         stackChart,
         total,
       } = this.state;
@@ -604,6 +621,46 @@ export const ListOverview = fp.flow(
                     onClick={() => this.navigateTo('review')}
                   >
                     <ClrIcon shape='copy' className='is-solid' size={30} />
+                  </Clickable>
+                </TooltipTrigger>
+                {!!cohort.id && (
+                  <TooltipTrigger
+                    content={<div>Discard current cohort changes</div>}
+                  >
+                    <Clickable
+                      style={
+                        loading || !cohortChanged
+                          ? { ...styles.actionIcon, ...styles.disabled }
+                          : styles.actionIcon
+                      }
+                      onClick={() =>
+                        this.setState({ showDiscardCohortChangesModal: true })
+                      }
+                    >
+                      <ClrIcon shape='undo' className='is-solid' size={26} />
+                    </Clickable>
+                  </TooltipTrigger>
+                )}
+                <TooltipTrigger content={<div>Create new cohort</div>}>
+                  <Clickable
+                    style={
+                      loading
+                        ? { ...styles.actionIcon, ...styles.disabled }
+                        : styles.actionIcon
+                    }
+                    onClick={() => {
+                      if (!cohortChanged) {
+                        onCreateNewCohort();
+                      } else {
+                        this.setState({ showCreateNewCohortModal: true });
+                      }
+                    }}
+                  >
+                    <ClrIcon
+                      shape='plus-circle'
+                      className='is-solid'
+                      size={26}
+                    />
                   </Clickable>
                 </TooltipTrigger>
               </div>
@@ -751,6 +808,23 @@ export const ListOverview = fp.flow(
               resourceType={ResourceType.COHORT}
               receiveDelete={this.delete}
               resourceName={cohort.name}
+            />
+          )}
+          {showCreateNewCohortModal && (
+            <CreateNewCohortModal
+              onClear={() => onCreateNewCohort()}
+              onClose={() => this.setState({ showCreateNewCohortModal: false })}
+            />
+          )}
+          {showDiscardCohortChangesModal && (
+            <DiscardCohortChangesModal
+              onClose={() =>
+                this.setState({ showDiscardCohortChangesModal: false })
+              }
+              onDiscard={() => {
+                this.setState({ showDiscardCohortChangesModal: false });
+                onDiscardCohortChanges();
+              }}
             />
           )}
         </React.Fragment>
