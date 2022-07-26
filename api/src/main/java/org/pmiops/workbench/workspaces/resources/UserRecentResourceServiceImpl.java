@@ -127,8 +127,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * When a Cohort recent-resource is deleted, delete all Cohort Reviews and Datasets which
-   * reference the Cohort as well
+   * When a Cohort recent-resource is deleted, delete all the entries of Cohort Reviews and Datasets
+   * which reference the Cohort as well from recent_resource
    */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
@@ -148,8 +148,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * When a Concept Set recent-resource is deleted, delete all Datasets which reference the Cohort
-   * as well
+   * When a Concept Set recent-resource is deleted, delete all the entries of Datasets which
+   * reference the Cohort as well from recent_resource
    */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
