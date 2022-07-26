@@ -652,7 +652,7 @@ export const ListOverview = fp.flow(
                       if (!cohortChanged) {
                         onCreateNewCohort();
                       } else {
-                        this.setState({showCreateNewCohortModal: true});
+                        this.setState({ showCreateNewCohortModal: true });
                       }
                     }}
                   >
