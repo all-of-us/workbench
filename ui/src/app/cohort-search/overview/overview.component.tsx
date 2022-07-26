@@ -74,7 +74,7 @@ const styles = reactStyles({
   },
   actionIcon: {
     float: 'right',
-    margin: '0 1rem 0 0',
+    margin: '0 0.7rem 0 0',
     minWidth: 0,
     padding: 0,
     color: colors.primary,
@@ -648,9 +648,13 @@ export const ListOverview = fp.flow(
                         ? { ...styles.actionIcon, ...styles.disabled }
                         : styles.actionIcon
                     }
-                    onClick={() =>
-                      this.setState({ showCreateNewCohortModal: true })
-                    }
+                    onClick={() => {
+                      if (!cohortChanged) {
+                        onCreateNewCohort();
+                      } else {
+                        this.setState({showCreateNewCohortModal: true});
+                      }
+                    }}
                   >
                     <ClrIcon
                       shape='plus-circle'
