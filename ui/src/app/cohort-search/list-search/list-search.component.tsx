@@ -681,12 +681,9 @@ export const ListSearch = fp.flow(
         brand ||
         (this.props.searchContext.source === 'cohort' &&
           row.subtype === CriteriaSubType.QUESTION);
-      // Only show child nodes of selected parents as selected when enableUniversalSearch enabled for now
-      const parentSelected =
-        serverConfigStore.get().config.enableUniversalSearch &&
-        this.props.criteria?.find(({ id }) =>
-          row.path.split('.').includes(id.toString())
-        );
+      const parentSelected = this.props.criteria?.find(({ id }) =>
+        row.path.split('.').includes(id.toString())
+      );
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected =
         !attributes && !brand && (this.isSelected(row) || parentSelected);
