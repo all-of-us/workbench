@@ -43,6 +43,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -330,13 +331,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     Map<String, String> parsedTerms = modifyTermMatchUseEndsWithTerms(term);
     String modifiedSearchTerm = parsedTerms.get(MODIFIED_TERMS);
-    List<String> endsWithTerms = new ArrayList<>();
-    if (parsedTerms.get(ENDS_WITH_TERMS).length() > 0) {
-      endsWithTerms.addAll(Arrays.asList(parsedTerms.get(ENDS_WITH_TERMS).split(",")));
-    }
-
+    String endsWithTerm = parsedTerms.get(ENDS_WITH_TERMS);
     // if the modified search term is empty and endsWithTerms is empty return an empty result
-    if (modifiedSearchTerm.length() == 0 && endsWithTerms.isEmpty()) {
+    if (modifiedSearchTerm.isEmpty() && endsWithTerm.isEmpty()) {
       return new CriteriaListWithCountResponse().totalCount(0L);
     }
 
@@ -347,52 +344,36 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     List<DbCriteria> dbCriteriaList = new ArrayList<>();
     // find a match on concept code
-    dbCriteriaList.addAll(
-        cbCriteriaDao
-            .findCriteriaByDomainAndTypeAndCodeAndStandard(
-                domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest)
-            .getContent());
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
+            domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
 
     // if no match is found on concept code then find match on full text index by term
-    if (dbCriteriaList.isEmpty() && !term.contains(".")) {
-      if (endsWithTerms.isEmpty()) {
+    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+      if (endsWithTerm.isEmpty()) {
         // regular search with modified terms, no endsWithTerms
-        dbCriteriaList.addAll(
-            cbCriteriaDao
-                .findCriteriaByDomainAndFullTextAndStandard(
-                    domain, modifiedSearchTerm, standard, pageRequest)
-                .getContent());
-      } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() == 0) {
+        dbCriteriaPage =
+            cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
+                domain, modifiedSearchTerm, standard, pageRequest);
+      } else if (!endsWithTerm.isEmpty() && modifiedSearchTerm.isEmpty()) {
         // search only endsWithTerms for each endsWithTerm
-        endsWithTerms.stream()
-            .forEach(
-                endsTerm -> {
-                  dbCriteriaList.addAll(
-                      cbCriteriaDao
-                          .findCriteriaByDomainAndStandardAndNameEndsWith(
-                              domain, standard, endsTerm, pageRequest)
-                          .getContent());
-                });
-      } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
+        dbCriteriaPage =
+            cbCriteriaDao.findCriteriaByDomainAndStandardAndNameEndsWith(
+                domain, standard, endsWithTerm, pageRequest);
+      } else if (!endsWithTerm.isEmpty() && modifiedSearchTerm.length() > 0) {
         // search for eachEndsWithTerm and modifiedSearchTerm
-        endsWithTerms.stream()
-            .forEach(
-                endsTerm -> {
-                  dbCriteriaList.addAll(
-                      cbCriteriaDao
-                          .findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-                              domain, standard, modifiedSearchTerm, endsTerm, pageRequest)
-                          .getContent());
-                });
+        dbCriteriaPage =
+            cbCriteriaDao.findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
+                domain, standard, modifiedSearchTerm, endsWithTerm, pageRequest);
       }
     }
 
     return new CriteriaListWithCountResponse()
         .items(
-            dbCriteriaList.stream()
+            dbCriteriaPage.getContent().stream()
                 .map(cohortBuilderMapper::dbModelToClient)
                 .collect(Collectors.toList()))
-        .totalCount(Long.valueOf(dbCriteriaList.size()));
+        .totalCount(dbCriteriaPage.getTotalElements());
   }
 
   @Override
@@ -706,27 +687,24 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   protected Map<String, String> modifyTermMatchUseEndsWithTerms(String term) {
     Map<String, String> retMap = new HashMap<>();
-
     List<String> modifiedTerms = new ArrayList<>();
-
+    // add quoted pattern to the list of modifiedTerms
     String quotedPattern = "\\\"((\\w+)\\s?)+\\\"";
     Pattern pattern = Pattern.compile(quotedPattern);
     Matcher matcher = pattern.matcher(term);
     while (matcher.find()) {
-      // modifiedTerms.add("+" + matcher.group());
-      modifiedTerms.add(matcher.group());
+      modifiedTerms.add("+" + matcher.group());
     }
-
+    // remove the quoted phrase/pattern
     List<String> words =
         new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
-
+    // process endsWith words
     List<String> endsWith =
         words.stream()
             .filter(word -> word.startsWith("*") && word.length() >= 4)
             .collect(Collectors.toList());
-
+    // now process non-endsWith words
     words.removeAll(endsWith);
-
     words.stream()
         .filter(word -> word.length() >= 2 && !word.startsWith("*"))
         .forEach(
@@ -739,9 +717,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 modifiedTerms.add("+" + word + "*");
               }
             });
-    // if there is single terms which starts with "-" then delete it
-    if (modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-")) {
-      modifiedTerms.remove(0);
+
+    // validate here?
+    if ((modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-"))
+        || (endsWith.size() > 1)) {
+      throw new BadRequestException(String.format("Bad Request: Search term is invalid: %s", term));
     }
     // create strings for endsWithTerms and modifiedTerms
     retMap.put(

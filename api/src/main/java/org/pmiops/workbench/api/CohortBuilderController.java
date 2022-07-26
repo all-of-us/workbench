@@ -371,6 +371,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (term == null || term.trim().isEmpty()) {
       throw new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "search term", term));
     }
+    // term has double-quoted phrase ["my word"] and more than 1 [*word]
+    // term has one word AND is [-word]
+    // term has 2 words AND has [*word and -word]
+    // term has 2 or more words AND has [*word and *word2]
   }
 
   protected AgeType validateAgeType(String age) {
