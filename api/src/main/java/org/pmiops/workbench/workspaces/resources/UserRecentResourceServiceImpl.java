@@ -7,7 +7,11 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +21,21 @@ import org.springframework.stereotype.Service;
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
 
   private Clock clock;
+  private CohortReviewDao cohortReviewDao;
+  private DataSetDao datasetDao;
   private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public UserRecentResourceServiceImpl(
       Clock clock,
+      CohortReviewDao cohortReviewDao,
+      DataSetDao datasetDao,
       UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
+    this.cohortReviewDao = cohortReviewDao;
+    this.datasetDao = datasetDao;
     this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -72,24 +82,20 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   @Override
   public void updateDataSetEntry(long workspaceId, long userId, long dataSetId) {
-    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
-      updateUserRecentlyModifiedResourceEntry(
-          workspaceId,
-          userId,
-          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.DATA_SET,
-          String.valueOf(dataSetId));
-    }
+    updateUserRecentlyModifiedResourceEntry(
+        workspaceId,
+        userId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.DATA_SET,
+        String.valueOf(dataSetId));
   }
 
   @Override
   public void updateCohortReviewEntry(long workspaceId, long userId, long cohortReviewId) {
-    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
-      updateUserRecentlyModifiedResourceEntry(
-          workspaceId,
-          userId,
-          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT_REVIEW,
-          String.valueOf(cohortReviewId));
-    }
+    updateUserRecentlyModifiedResourceEntry(
+        workspaceId,
+        userId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT_REVIEW,
+        String.valueOf(cohortReviewId));
   }
 
   private DbUserRecentlyModifiedResource updateUserRecentlyModifiedResourceEntry(
@@ -110,7 +116,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     return userRecentlyModifiedResourceDao.save(recentResource);
   }
 
-  /** Deletes notebook entry from user_recent_resource and user_recently_modified_resource */
+  /** Deletes notebook entry from user_recently_modified_resource */
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
     deleteUserRecentlyModifiedResourceEntry(
@@ -120,9 +126,20 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         notebookPath);
   }
 
-  /** Deletes cohort entry from user_recently_modified_resource */
+  /**
+   * When a Cohort recent-resource is deleted, delete all the entries of Cohort Reviews and Datasets
+   * which reference the Cohort as well from recent_resource
+   */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
+    cohortReviewDao.findAllByCohortId(cohortId).stream()
+        .map(DbCohortReview::getCohortReviewId)
+        .forEach(id -> deleteCohortReviewEntry(workspaceId, userId, id));
+
+    datasetDao.findDbDataSetsByCohortIdsAndWorkspaceId(cohortId, workspaceId).stream()
+        .map(DbDataset::getDataSetId)
+        .forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
+
     deleteUserRecentlyModifiedResourceEntry(
         userId,
         workspaceId,
@@ -130,9 +147,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         String.valueOf(cohortId));
   }
 
-  /** Deletes concept set entry from user_recently_modified_resource */
+  /**
+   * When a Concept Set recent-resource is deleted, delete all the entries of Datasets which
+   * reference the Cohort as well from recent_resource
+   */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
+    datasetDao.findDbDatasetsByConceptSetIdsAndWorkspaceId(conceptSetId, workspaceId).stream()
+        .map(DbDataset::getDataSetId)
+        .forEach(id -> deleteDataSetEntry(workspaceId, userId, id));
+
     deleteUserRecentlyModifiedResourceEntry(
         userId,
         workspaceId,
@@ -142,24 +166,20 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   @Override
   public void deleteDataSetEntry(long workspaceId, long userId, long dataSetId) {
-    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
-      deleteUserRecentlyModifiedResourceEntry(
-          userId,
-          workspaceId,
-          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.DATA_SET,
-          String.valueOf(dataSetId));
-    }
+    deleteUserRecentlyModifiedResourceEntry(
+        userId,
+        workspaceId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.DATA_SET,
+        String.valueOf(dataSetId));
   }
 
   @Override
   public void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId) {
-    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
-      deleteUserRecentlyModifiedResourceEntry(
-          userId,
-          workspaceId,
-          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT_REVIEW,
-          String.valueOf(cohortReviewId));
-    }
+    deleteUserRecentlyModifiedResourceEntry(
+        userId,
+        workspaceId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT_REVIEW,
+        String.valueOf(cohortReviewId));
   }
 
   private void deleteUserRecentlyModifiedResourceEntry(

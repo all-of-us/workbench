@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,12 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -97,7 +100,15 @@ public class UserRecentResourceServiceTest {
     conceptSet.setConceptSetConceptIds(ImmutableSet.of(dbConceptSetConceptId));
     conceptSet = conceptSetDao.save(conceptSet);
 
+    DbDatasetValue dbDatasetValue = new DbDatasetValue();
+    dbDatasetValue.setDomainId(Domain.OBSERVATION.toString());
+    dbDatasetValue.setValue("Mock Value");
+
     dataset = new DbDataset();
+    dataset.setName("Mock Data Set");
+    dataset.setCohortIds(Collections.singletonList(cohort.getCohortId()));
+    dataset.setConceptSetIds(Collections.singletonList(conceptSet.getConceptSetId()));
+    dataset.setValues(Collections.singletonList(dbDatasetValue));
     dataset.setWorkspaceId(workspace.getWorkspaceId());
     dataset = datasetDao.save(dataset);
   }
@@ -439,5 +450,87 @@ public class UserRecentResourceServiceTest {
     assertThat(Long.parseLong(resources.get(2).getResourceId())).isEqualTo(cohort.getCohortId());
     assertThat(resources.get(3).getResourceId())
         .isEqualTo("gs://someDirectory1/notebooks/notebook1");
+  }
+
+  @Test
+  public void testDeleteDependentCohortReviewOnDeletingCohort() {
+    // Confirm the table has no recent modified resources
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+
+    // Add the following entry in user_recently_modified_resource:
+    // 1) Cohort
+    // 2) Cohort Review that is using the Cohort
+    userRecentResourceService.updateCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+    userRecentResourceService.updateCohortReviewEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohortReview.getCohortReviewId());
+
+    // Deleting Cohort should delete the Cohort Review using it
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    assertThat(resources.size()).isEqualTo(2);
+
+    userRecentResourceService.deleteCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteDependentDataSetOnDeletingCohort() {
+    // Confirm the table has no recent modified resources
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+
+    // Add the following entry in user_recently_modified_resource:
+    // 1) Cohort
+    // 2) Data Set that is using the Cohort
+    userRecentResourceService.updateCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
+
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    assertThat(resources.size()).isEqualTo(2);
+
+    // Deleting Cohort should delete the dataSet using it
+    userRecentResourceService.deleteCohortEntry(
+        workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
+
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    assertThat(resources.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void testDeleteDependentDataSetOnDeletingConceptSet() {
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+
+    assertThat(resources.size()).isEqualTo(0);
+
+    // Add the following entry in user_recently_modified_resource:
+    // 1) Concept Set
+    // 2) Data Set that is using the Concept Set
+    userRecentResourceService.updateConceptSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+
+    userRecentResourceService.updateDataSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), dataset.getDataSetId());
+
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    assertThat(resources.size()).isEqualTo(2);
+
+    // Deleting Concept Set should also delete the data Set entry that is using the Concept Set
+    userRecentResourceService.deleteConceptSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+
+    resources = userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
+    assertThat(resources.size()).isEqualTo(0);
   }
 }
