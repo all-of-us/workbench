@@ -111,6 +111,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudMe;
+import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
@@ -124,7 +126,6 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -408,6 +409,12 @@ public class WorkspacesControllerTest {
 
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
+
+    FirecloudUserInfo fcUserInfo = new FirecloudUserInfo();
+    fcUserInfo.setUserEmail("bob@domain.org");
+    FirecloudMe me = new FirecloudMe();
+    me.setUserInfo(fcUserInfo);
+    when(fireCloudService.getMe()).thenReturn(me);
   }
 
   private DbUser createUser(String email) {
@@ -1040,6 +1047,7 @@ public class WorkspacesControllerTest {
     Workspace updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
+    ws.setLastModifiedBy(fireCloudService.getMe().getUserInfo().getUserEmail());
     assertThat(updated).isEqualTo(ws);
 
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
@@ -1056,95 +1064,6 @@ public class WorkspacesControllerTest {
     Workspace got =
         workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
-  }
-
-  @Test
-  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    doReturn(false)
-        .when(mockFreeTierBillingService)
-        .userHasRemainingFreeTierCredits(
-            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
-
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    request.setWorkspace(workspace);
-    Workspace response =
-        workspacesController
-            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
-            .getBody();
-
-    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-  }
-
-  @Test
-  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getId(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
-    doReturn(true)
-        .when(mockFreeTierBillingService)
-        .userHasRemainingFreeTierCredits(
-            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
-
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    workspace.setEtag("\"1\"");
-    request.setWorkspace(workspace);
-    Workspace response =
-        workspacesController
-            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
-            .getBody();
-
-    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
-  }
-
-  @Test
-  public void testUpdateWorkspaceResearchPurpose() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ResearchPurpose rp =
-        new ResearchPurpose()
-            .diseaseFocusedResearch(false)
-            .diseaseOfFocus(null)
-            .methodsDevelopment(false)
-            .controlSet(false)
-            .ancestry(false)
-            .commercialPurpose(false)
-            .populationHealth(false)
-            .socialBehavioral(false)
-            .drugDevelopment(false)
-            .additionalNotes(null)
-            .reviewRequested(false);
-    ws.setResearchPurpose(rp);
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    ResearchPurpose updatedRp =
-        workspacesController
-            .updateWorkspace(ws.getNamespace(), ws.getId(), request)
-            .getBody()
-            .getResearchPurpose();
-
-    assertThat(updatedRp.getDiseaseFocusedResearch()).isFalse();
-    assertThat(updatedRp.getDiseaseOfFocus()).isNull();
-    assertThat(updatedRp.getMethodsDevelopment()).isFalse();
-    assertThat(updatedRp.getControlSet()).isFalse();
-    assertThat(updatedRp.getAncestry()).isFalse();
-    assertThat(updatedRp.getCommercialPurpose()).isFalse();
-    assertThat(updatedRp.getPopulationHealth()).isFalse();
-    assertThat(updatedRp.getSocialBehavioral()).isFalse();
-    assertThat(updatedRp.getDrugDevelopment()).isFalse();
-    assertThat(updatedRp.getAdditionalNotes()).isNull();
-    assertThat(updatedRp.getReviewRequested()).isFalse();
   }
 
   @Test
