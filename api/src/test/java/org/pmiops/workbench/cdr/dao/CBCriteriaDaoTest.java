@@ -314,6 +314,13 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
+  public void findCriteriaByDomainAndStandardAndNameEndsWith() {
+    PageRequest page = PageRequest.of(2, 10);
+    cbCriteriaDao.findCriteriaByDomainAndStandardAndNameEndsWith(
+        Domain.CONDITION.toString(), Boolean.TRUE, Arrays.asList("%statin", "%brian"), page);
+  }
+
+  @Test
   public void findCriteriaTopCountsByStandard() {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> conditions =

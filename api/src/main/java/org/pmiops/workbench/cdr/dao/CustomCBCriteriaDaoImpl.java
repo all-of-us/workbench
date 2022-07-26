@@ -3,7 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
 import org.jetbrains.annotations.NotNull;
@@ -67,27 +67,30 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
       String domain, Boolean standard, List<String> endsWithList, Pageable page) {
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(ENDS_WITH_WITHOUT_TERM, domain, standard, Optional.empty(), endsWithList);
+        generateQueryAndParameters(ENDS_WITH_WITHOUT_TERM, domain, standard, null, endsWithList);
     return new PageImpl<>(
-        queryForPaginatedList(page, queryAndParameters), page, count(queryAndParameters));
+        queryForPaginatedList(page, queryAndParameters),
+        page,
+        Objects.requireNonNull(count(queryAndParameters)));
   }
 
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
       String domain, Boolean standard, String term, List<String> endsWithList, Pageable page) {
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(
-            ENDS_WITH_WITH_TERM, domain, standard, Optional.of(term), endsWithList);
+        generateQueryAndParameters(ENDS_WITH_WITH_TERM, domain, standard, term, endsWithList);
     return new PageImpl<>(
-        queryForPaginatedList(page, queryAndParameters), page, count(queryAndParameters));
+        queryForPaginatedList(page, queryAndParameters),
+        page,
+        Objects.requireNonNull(count(queryAndParameters)));
   }
 
   protected QueryAndParameters generateQueryAndParameters(
-      String sql, String domain, Boolean standard, Optional term, List<String> endsWithList) {
+      String sql, String domain, Boolean standard, String term, List<String> endsWithList) {
     MapSqlParameterSource parameters = new MapSqlParameterSource();
     parameters.addValue("domain", domain).addValue("standard", standard);
-    if (term.isPresent()) {
-      parameters.addValue("term", term.get());
+    if (term != null) {
+      parameters.addValue("term", term);
     }
     StringJoiner joiner = new StringJoiner(OR);
 
@@ -106,26 +109,24 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @NotNull
   private List<DbCriteria> queryForPaginatedList(
       Pageable page, QueryAndParameters queryAndParameters) {
-    List<DbCriteria> dbCriteriaList =
-        namedParameterJdbcTemplate.query(
-            queryAndParameters.getQuery()
-                + String.format(LIMIT_OFFSET, page.getPageSize(), page.getOffset()),
-            queryAndParameters.getParameters(),
-            new DBCriteriaRowMapper());
-    return dbCriteriaList;
+    return namedParameterJdbcTemplate.query(
+        queryAndParameters.getQuery()
+            + String.format(LIMIT_OFFSET, page.getPageSize(), page.getOffset()),
+        queryAndParameters.getParameters(),
+        new DBCriteriaRowMapper());
   }
 
   @Nullable
-  private Integer count(QueryAndParameters queryAndParameters) {
+  private Long count(QueryAndParameters queryAndParameters) {
     return namedParameterJdbcTemplate.queryForObject(
         queryAndParameters.getQuery().replace("*", "count(*)"),
         queryAndParameters.getParameters(),
-        Integer.class);
+        Long.class);
   }
 
-  private class DBCriteriaRowMapper implements RowMapper<DbCriteria> {
+  private static class DBCriteriaRowMapper implements RowMapper<DbCriteria> {
     @Override
-    public DbCriteria mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public DbCriteria mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
       return (new BeanPropertyRowMapper<>(DbCriteria.class)).mapRow(rs, rowNum);
     }
   }
