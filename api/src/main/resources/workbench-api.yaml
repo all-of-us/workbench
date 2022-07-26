@@ -4671,6 +4671,7 @@ definitions:
       etag: "\"1\""
       googleBucketName: "gcs-bucket-AAAAAAAA-BBBBB"
       id: "mynewestworkspace"
+      lastModifiedBy: "user@aou-domain.org"
       lastModifiedTime: 1588097211621
       name: "my newest workspace"
       namespace: "aou-rw-test-11112222"
@@ -4742,6 +4743,9 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      lastModifiedBy:
+        type: string
+        description: the username of the user to last update a workspace
       lastModifiedTime:
         type: integer
         format: int64

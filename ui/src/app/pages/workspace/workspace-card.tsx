@@ -337,6 +337,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     </div>
                     <div style={{ fontSize: 12 }}>
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
+                      Last Changed By: {workspace.lastModifiedBy}
                     </div>
                   </FlexColumn>
                   <FlexColumn

@@ -17,5 +17,8 @@
     <addColumn tableName="data_set">
       <column name="last_modified_by" type="text"/>
     </addColumn>
+    <addColumn tableName="workspace">
+      <column name="last_modified_by" type="text"/>
+    </addColumn>
   </changeSet>
 </databaseChangeLog>

@@ -87,6 +87,7 @@ public class DbWorkspace {
   private DbCdrVersion cdrVersion;
   private DbUser creator;
   private Timestamp creationTime;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private Timestamp lastAccessedTime;
   private Set<DbCohort> cohorts = new HashSet<>();
@@ -222,6 +223,16 @@ public class DbWorkspace {
 
   public DbWorkspace setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
+  }
+
+  @Column(name = "last_modified_by")
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public DbWorkspace setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
     return this;
   }
 
