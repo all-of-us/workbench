@@ -103,35 +103,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
           "select c "
               + "from DbCriteria c "
               + "where standard=:standard "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
-              + "and upper(c.name) like upper(:endsWith) "
-              + "order by c.count desc, c.name asc")
-  Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard,
-      @Param("endsWith") String endsWith,
-      Pageable page);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where standard=:standard "
-              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
-              + "and upper(c.name) like upper(:endsWith) "
-              + "order by c.count desc, c.name asc")
-  Page<DbCriteria> findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard,
-      @Param("term") String term,
-      @Param("endsWith") String endsWith,
-      Pageable page);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where standard=:standard "
               + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandard(

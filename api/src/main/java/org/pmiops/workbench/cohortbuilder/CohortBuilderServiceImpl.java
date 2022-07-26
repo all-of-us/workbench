@@ -331,9 +331,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     Map<String, String> parsedTerms = modifyTermMatchUseEndsWithTerms(term);
     String modifiedSearchTerm = parsedTerms.get(MODIFIED_TERMS);
-    String endsWithTerm = parsedTerms.get(ENDS_WITH_TERMS);
+    List<String> endsWithTerms = new ArrayList<>();
+    if (parsedTerms.get(ENDS_WITH_TERMS).length() > 0) {
+      endsWithTerms.addAll(Arrays.asList(parsedTerms.get(ENDS_WITH_TERMS).split(",")));
+    }
     // if the modified search term is empty and endsWithTerms is empty return an empty result
-    if (modifiedSearchTerm.isEmpty() && endsWithTerm.isEmpty()) {
+    if (modifiedSearchTerm.isEmpty() && endsWithTerms.isEmpty()) {
       return new CriteriaListWithCountResponse().totalCount(0L);
     }
 
@@ -349,21 +352,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
-      if (endsWithTerm.isEmpty()) {
+      if (endsWithTerms.isEmpty()) {
         // regular search with modified terms, no endsWithTerms
         dbCriteriaPage =
             cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
                 domain, modifiedSearchTerm, standard, pageRequest);
-      } else if (!endsWithTerm.isEmpty() && modifiedSearchTerm.isEmpty()) {
+      } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.isEmpty()) {
         // search only endsWithTerms for each endsWithTerm
         dbCriteriaPage =
             cbCriteriaDao.findCriteriaByDomainAndStandardAndNameEndsWith(
-                domain, standard, endsWithTerm, pageRequest);
-      } else if (!endsWithTerm.isEmpty() && modifiedSearchTerm.length() > 0) {
+                domain, standard, endsWithTerms, pageRequest);
+      } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
         // search for eachEndsWithTerm and modifiedSearchTerm
         dbCriteriaPage =
             cbCriteriaDao.findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-                domain, standard, modifiedSearchTerm, endsWithTerm, pageRequest);
+                domain, standard, modifiedSearchTerm, endsWithTerms, pageRequest);
       }
     }
 
@@ -718,13 +721,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             });
 
     // validate here?
-    if ((modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-"))
-        || (endsWith.size() > 1)) {
+    if ((modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-"))) {
       throw new BadRequestException(String.format("Bad Request: Search term is invalid: %s", term));
     }
     // create strings for endsWithTerms and modifiedTerms
-    retMap.put(
-        ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")).replaceAll("\\*", "%"));
+    retMap.put(ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")));
     retMap.put(
         MODIFIED_TERMS,
         modifiedTerms.stream()
