@@ -24,6 +24,7 @@ import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +78,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -111,6 +113,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -143,7 +146,8 @@ public class WorkspaceAdminServiceTest {
     LeonardoNotebooksClient.class,
     UserMapper.class,
     UserService.class,
-    WorkspaceService.class
+    WorkspaceService.class,
+    WorkspaceAuthService.class,
   })
   static class Configuration {
     @Bean
@@ -170,10 +174,6 @@ public class WorkspaceAdminServiceTest {
 
     when(mockFirecloudService.getGroup(anyString()))
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
-
-    // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
-        .thenCallRealMethod();
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
@@ -304,6 +304,9 @@ public class WorkspaceAdminServiceTest {
             mockBlob("bucket", "notebooks/hidden/sneaky.ipynb", 1000L * 1000L));
     when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
 
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
+        .thenReturn(new HashMap<>());
+
     final List<FileDetail> expectedFiles =
         ImmutableList.of(
             new FileDetail()
@@ -326,6 +329,10 @@ public class WorkspaceAdminServiceTest {
                 .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
+
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
+        .thenReturn(
+            expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
 
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
     assertThat(files).containsExactlyElementsIn(expectedFiles);
