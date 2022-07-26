@@ -61,7 +61,7 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
   },
   searchInput: {
-    width: '90%',
+    width: '94%',
     height: '1.5rem',
     marginLeft: '0.25rem',
     padding: '0',
@@ -267,6 +267,28 @@ const sourceStandardTooltip = (
     recommend most users use the standardized items in defining their dataset.
     However, if you do not wish to rely on this standardization, you may select
     concepts as coded in the source data.
+  </span>
+);
+const searchTooltip = (
+  <span>
+    The following operators can be used when searching EHR data domains:
+    <ul>
+      <li>
+        (*) is the wildcard operator. Ex: ceph* (starts with) or *statin (ends
+        with - note: when searching for ends with it will only match with end of
+        concept name)
+      </li>
+      <li>
+        (-) indicates that this word must <b>not</b> be present. Ex: lung
+        -cancer
+      </li>
+      <li>
+        (") a phrase that is enclosed within double quote (") characters matches
+        only rows that contain the phrase literally, as it was typed. Ex: "lung
+        cancer"
+      </li>
+      <li>Combining operators Ex: brain tum* -neoplasm</li>
+    </ul>
   </span>
 );
 
@@ -892,6 +914,15 @@ export const ListSearch = fp.flow(
                 onChange={(e) => this.setState({ searchTerms: e })}
                 onKeyPress={this.handleInput}
               />
+              {serverConfigStore.get().config.enableUniversalSearch && (
+                <TooltipTrigger side='top' content={<div>{searchTooltip}</div>}>
+                  <ClrIcon
+                    style={styles.infoIcon}
+                    className='is-solid'
+                    shape='info-standard'
+                  />
+                </TooltipTrigger>
+              )}
               {source === 'conceptSetDetails' && searching && (
                 <Clickable
                   style={styles.clearSearchIcon}
