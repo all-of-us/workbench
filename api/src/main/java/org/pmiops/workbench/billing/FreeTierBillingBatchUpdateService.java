@@ -1,6 +1,8 @@
 package org.pmiops.workbench.billing;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Range;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -9,7 +11,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,6 +30,8 @@ public class FreeTierBillingBatchUpdateService {
 
   private static final int MIN_USERS_BATCH = 5;
   private static final int MAX_USERS_BATCH = 999;
+  public static final Range<Integer> batchSizeRange =
+      Range.closed(MIN_USERS_BATCH, MAX_USERS_BATCH);
 
   @Autowired
   public FreeTierBillingBatchUpdateService(
@@ -48,28 +51,40 @@ public class FreeTierBillingBatchUpdateService {
     logger.info("Checking Free Tier Billing usage - start");
 
     Iterable<DbUser> freeTierActiveWorkspaceCreators = userDao.findAll();
-    long numberOfUsers =
-        StreamUtils.createStreamFromIterator(freeTierActiveWorkspaceCreators.iterator()).count();
+    long numberOfUsers = Iterators.size(freeTierActiveWorkspaceCreators.iterator());
+    int count = 0;
 
     for (List<DbUser> usersPartition :
-        Iterables.partition(freeTierActiveWorkspaceCreators, getFreeTierCronUserBatchSize())) {
+        Iterables.partition(
+            freeTierActiveWorkspaceCreators, freeTierCronUserBatchSizeFromConfig())) {
       logger.info(
           String.format(
-              "Processing users batch of size/total: %d/%d", usersPartition.size(), numberOfUsers));
+              "Processing users batch of size/total: %d/%d. Current iteration is: %d",
+              usersPartition.size(), numberOfUsers, count++));
       freeTierBillingService.checkFreeTierBillingUsageForUsers(new HashSet<>(usersPartition));
     }
 
     logger.info("Checking Free Tier Billing usage - finish");
   }
 
-  private int getFreeTierCronUserBatchSize() {
+  private int freeTierCronUserBatchSizeFromConfig() {
     Integer freeTierCronUserBatchSize =
         workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
     logger.info(String.format("freeTierCronUserBatchSize is %d", freeTierCronUserBatchSize));
-    return Math.min(
-        MAX_USERS_BATCH,
-        freeTierCronUserBatchSize == null || freeTierCronUserBatchSize <= 0
-            ? MIN_USERS_BATCH
-            : freeTierCronUserBatchSize);
+    // If the batch size is somehow not configured or incorrectly configured, return the minimum
+    // batch size
+    if (freeTierCronUserBatchSize == null || freeTierCronUserBatchSize <= 0) {
+      return batchSizeRange.lowerEndpoint();
+    }
+    // If it's configured correctly within range, then just return it
+    if (batchSizeRange.contains(freeTierCronUserBatchSize)) {
+      return freeTierCronUserBatchSize;
+    } else {
+      // Otherwise, check if it's lower than the min, then take the min, or if it's higher, then
+      // take the max
+      return freeTierCronUserBatchSize < batchSizeRange.lowerEndpoint()
+          ? batchSizeRange.lowerEndpoint()
+          : batchSizeRange.upperEndpoint();
+    }
   }
 }

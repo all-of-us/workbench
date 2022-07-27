@@ -2,7 +2,6 @@ package org.pmiops.workbench.billing;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -38,18 +37,12 @@ public class WorkspaceFreeTierUsageService {
    * database. The method is transactional to make sure that we do incremental changes to the
    * database.
    *
-   * @param dbCost
-   * @param liveCostByWorkspace
+   * @param dbCostByWorkspace Map that acts as a cache for all workspaces and their costs in the DB
+   * @param liveCostByWorkspace Map that links a workspace ID to its live cost in BQ.
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateWorkspaceFreeTierUsageInDB(
-      List<WorkspaceDao.WorkspaceCostView> dbCost, Map<Long, Double> liveCostByWorkspace) {
-    final Map<Long, Double> dbCostByWorkspace =
-        dbCost.stream()
-            .collect(
-                Collectors.toMap(
-                    WorkspaceDao.WorkspaceCostView::getWorkspaceId,
-                    v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
+      Map<Long, Double> dbCostByWorkspace, Map<Long, Double> liveCostByWorkspace) {
 
     final List<Long> workspacesIdsToUpdate =
         liveCostByWorkspace.keySet().stream()

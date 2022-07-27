@@ -1,6 +1,6 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.db.dao.WorkspaceDao.*;
+import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -9,8 +9,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FreeTierBillingService {
 
   public static final Long TWO_DAYS = 172_800_000l;
+  public static final int WORKSPACES_BATCH_SIZE = 1000;
   private final BigQueryService bigQueryService;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -98,10 +105,12 @@ public class FreeTierBillingService {
         findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
 
     // No need to proceed since there's nothing to update anyway
-    if (allCostsInDbForUsers.isEmpty()) return;
+    if (allCostsInDbForUsers.isEmpty()) {
+      return;
+    }
 
     List<WorkspaceCostView> workspacesThatRequireUpdate =
-        findActiveOrDeletedWorkspacesThatRequireUpdates(allCostsInDbForUsers);
+        findWorkspacesThatRequireUpdates(allCostsInDbForUsers);
 
     final Map<Long, Double> liveCostsInBQ =
         updateFreeTierUsageInBatches(allCostsInDbForUsers, workspacesThatRequireUpdate);
@@ -419,7 +428,7 @@ public class FreeTierBillingService {
    * @return a {@link java.util.List} of the workspaces that require updates only
    */
   @NotNull
-  private List<WorkspaceCostView> findActiveOrDeletedWorkspacesThatRequireUpdates(
+  private List<WorkspaceCostView> findWorkspacesThatRequireUpdates(
       List<WorkspaceCostView> allCostsInDbForUsers) {
 
     List<WorkspaceCostView> workspacesThatRequireUpdate =
@@ -446,21 +455,30 @@ public class FreeTierBillingService {
   /**
    * Requesting live costs from BQ in batches then updating it in a transactional method.
    *
-   * @param allCostsInDbForUsers
-   * @param workspacesThatRequireUpdate
+   * @param allCostsInDbForUsers List of {@link WorkspaceCostView} containing all workspaces for the
+   *     current batch of users
+   * @param workspacesThatRequireUpdate List of {@link WorkspaceCostView} containing only the
+   *     workspaces that need to be updated
    * @return a Map of all live costs.
    */
   private Map<Long, Double> updateFreeTierUsageInBatches(
       List<WorkspaceCostView> allCostsInDbForUsers,
       List<WorkspaceCostView> workspacesThatRequireUpdate) {
     final Map<Long, Double> liveCostsInBQ = new HashMap<>();
+
+    final Map<Long, Double> dbCostByWorkspace =
+        allCostsInDbForUsers.stream()
+            .collect(
+                Collectors.toMap(
+                    WorkspaceCostView::getWorkspaceId,
+                    v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
+
     for (List<WorkspaceCostView> workspacesPartition :
-        Lists.partition(workspacesThatRequireUpdate, 1000)) {
+        Lists.partition(workspacesThatRequireUpdate, WORKSPACES_BATCH_SIZE)) {
       // Live cost in BQ
       liveCostsInBQ.putAll(getFreeTierWorkspaceCostsFromBQ(workspacesPartition));
-      logger.info(String.format("Retrieved %d workspaces from BQ", liveCostsInBQ.size()));
       workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
-          allCostsInDbForUsers, liveCostsInBQ);
+          dbCostByWorkspace, liveCostsInBQ);
     }
     return liveCostsInBQ;
   }
