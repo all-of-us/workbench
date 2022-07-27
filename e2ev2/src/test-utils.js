@@ -46,7 +46,7 @@ const browserTest = testFilePath => (description, testFn, timeoutMs) =>
     await fsp.access(ssDir, fs.constants.R_OK | fs.constants.W_OK).catch(e => fsp.mkdir(ssDir))
     const browser = await launch()
     browser.initialPage = await browser.pages().then(pages => pages[0])
-    // Stolen from a recent Chrome version.
+    // Stolen from a recent Chrome version. Avoids browser warning.
     const uaString = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
       +' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
     await browser.initialPage.setUserAgent(uaString)

@@ -10,6 +10,7 @@ const workspaceCreationTimeoutMs = 30e3
 const workspaceDeletionTimeoutMs = 10e3
 browserTest('create a workspace', async browser => {
   const page = browser.initialPage
+  await page.goto(config.urlRoot(), {waitUtil: ['domcontentloaded']})
   await page.goto(config.urlRoot())
   await tu.impersonateUser(page, config.usernames[0])
   const createWorkspaceLink = await page.waitForSelector('clr-icon[shape="plus-circle"]')
