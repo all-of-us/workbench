@@ -16,6 +16,7 @@ import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
 import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
+import { userIsEnabled } from 'app/routing/guards';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -402,9 +403,14 @@ export const useNeedsToAcceptTOS = () => {
       // before checking term of service status
       (async () => {
         try {
-          const userHasAcceptedLatestTOS =
-            await profileApi().getUserTermsOfServiceStatus();
-          setUserRequiredToAcceptTOS(!userHasAcceptedLatestTOS);
+          // Do not show terms of service page, if the user is disabled or not eligible for RT
+          if (!userIsEnabled(profile.disabled)) {
+            setUserRequiredToAcceptTOS(false);
+          } else {
+            const userHasAcceptedLatestTOS =
+              await profileApi().getUserTermsOfServiceStatus();
+            setUserRequiredToAcceptTOS(!userHasAcceptedLatestTOS);
+          }
         } catch (e) {
           console.log('Error while getting user terms of service status');
         }

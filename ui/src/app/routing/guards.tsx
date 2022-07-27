@@ -29,7 +29,7 @@ export const signInGuard: Guard = {
   redirectPath: '/login',
 };
 
-const userIsEnabled = (userDisabledInDb: boolean) =>
+export const userIsEnabled = (userDisabledInDb: boolean) =>
   !userDisabledInDb &&
   eligibleForTier(profileStore.get().profile, AccessTierShortNames.Registered);
 
