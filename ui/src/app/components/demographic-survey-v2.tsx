@@ -60,19 +60,19 @@ export const possiblePreferNotToAnswerErrors = [
 ];
 
 export const questionsIndex = {
-  ethnicCategories: 1,
-  genderIdentities: 2,
-  sexAtBirth: 3,
-  sexualOrientations: 4,
-  disabilityHearing: 5,
-  disabilitySeeing: 6,
-  disabilityConcentrating: 7,
-  disabilityWalking: 8,
-  disabilityDressing: 9,
-  disabilityErrands: 10,
-  yearOfBirth: 12,
-  education: 13,
-  disadvantaged: 14,
+  [ETHNIC_CATEGORIES]: 1,
+  [GENDER_IDENTITIES]: 2,
+  [SEX_AT_BIRTH]: 3,
+  [SEXUAL_ORIENTATIONS]: 4,
+  [DISABILITY_HEARING]: 5,
+  [DISABILITY_SEEING]: 6,
+  [DISABILITY_CONCENTRATING]: 7,
+  [DISABILITY_WALKING]: 8,
+  [DISABILITY_DRESSING]: 9,
+  [DISABILITY_ERRANDS]: 10,
+  [YEAR_OF_BIRTH]: 12,
+  [EDUCATION]: 13,
+  [DISADVANTAGED]: 14,
 };
 
 const maxYear = new Date().getFullYear();
@@ -142,16 +142,21 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     ethnicCategories: { presence: { allowEmpty: false } },
     genderIdentities: { presence: { allowEmpty: false } },
     sexAtBirth: { presence: { allowEmpty: false } },
-    ...yearOfBirth,
-    education: { presence: { allowEmpty: false } },
-    disadvantaged: { presence: { allowEmpty: false } },
+    sexualOrientations: { presence: { allowEmpty: false } },
     disabilityHearing: { presence: { allowEmpty: false } },
     disabilitySeeing: { presence: { allowEmpty: false } },
     disabilityConcentrating: { presence: { allowEmpty: false } },
     disabilityWalking: { presence: { allowEmpty: false } },
     disabilityDressing: { presence: { allowEmpty: false } },
-    disabilityErrands: { presence: { allowEmpty: false } },
-    sexualOrientations: { presence: { allowEmpty: false } },
+    disabilityErrands: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty doing errands can't be empty",
+      },
+    },
+    ...yearOfBirth,
+    education: { presence: { allowEmpty: false } },
+    disadvantaged: { presence: { allowEmpty: false } },
     surveyComments: {
       length: {
         maximum: 1000,

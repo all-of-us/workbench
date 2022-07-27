@@ -5,14 +5,11 @@ export const DEMOGRAPHIC_SURVEY_V2_PATH = '/demographic-survey';
 export const DEMOGRAPHIC_SURVEY_SESSION_KEY =
   'demographic-survey-banner-dismissed';
 
+// Demographic survey Questions Key
 export const ETHNIC_CATEGORIES = 'ethnicCategories';
-
 export const GENDER_IDENTITIES = 'genderIdentities';
-
 export const SEX_AT_BIRTH = 'sexAtBirth';
-
 export const SEXUAL_ORIENTATIONS = 'sexualOrientations';
-
 export const DISABILITY_HEARING = 'disabilityHearing';
 export const DISABILITY_SEEING = 'disabilitySeeing';
 export const DISABILITY_CONCENTRATING = 'disabilityConcentrating';
