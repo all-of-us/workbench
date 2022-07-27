@@ -32,7 +32,7 @@
     "@fortawesome/react-fontawesome": "^0.1.16",
     "@types/color": "^3.0.2",
     "@types/enzyme": "^3.10.10",
-    "@types/jest": "^26.0.21",
+    "@types/jest": "^27.5.1",
     "@types/js-cookie": "^2.2.2",
     "@types/lodash": "^4.14.179",
     "@types/node": "^10.12.11",
