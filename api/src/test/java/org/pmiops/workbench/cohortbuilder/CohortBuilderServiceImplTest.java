@@ -121,10 +121,7 @@ class CohortBuilderServiceImplTest {
     return Stream.of(
         // special chars are filtered by the UI-except ("\"", "+", "-", "*")
         Arguments.of("Search term: ", "-pita", "one term starts with -"),
-        Arguments.of("Search term: ", "*statin -pita", "two term starts with - and *"),
-        Arguments.of("Search term: ", "*statin *pita", "two terms starts *"),
-        Arguments.of("Search term: ", "*statin other *pita", "two terms starts *"),
-        Arguments.of("Search term: ", "*statin other *pita -minus", "two terms starts *"));
+        Arguments.of("Search term: ", "*statin -pita", "two term starts with - and *"));
   }
 
   private static Stream<Arguments> getModifyTermMatchEndsWithParameters() {
