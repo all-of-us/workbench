@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.cdr.CdrDbConfig;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -20,9 +21,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
@@ -71,8 +69,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
@@ -105,8 +102,11 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     }
     StringJoiner joiner = new StringJoiner(OR);
 
-
-    String tablePrefix = cdrVersionDao.findById(CdrVersionContext.getCdrVersion().getCdrVersionId()).get().getCdrDbName();
+    String tablePrefix =
+        cdrVersionDao
+            .findById(CdrVersionContext.getCdrVersion().getCdrVersionId())
+            .get()
+            .getCdrDbName();
 
     IntStream.range(0, endsWithList.size())
         .forEach(

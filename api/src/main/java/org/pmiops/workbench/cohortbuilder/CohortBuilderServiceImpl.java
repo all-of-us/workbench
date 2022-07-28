@@ -43,7 +43,6 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -720,10 +719,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               }
             });
 
-    // validate here?
-//    if ((modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-"))) {
-//      throw new BadRequestException(String.format("Bad Request: Search term is invalid: %s", term));
-//    }
     // create strings for endsWithTerms and modifiedTerms
     retMap.put(ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")));
     retMap.put(
