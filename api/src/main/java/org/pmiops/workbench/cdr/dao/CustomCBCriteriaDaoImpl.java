@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -143,27 +142,28 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static class DBCriteriaRowMapper implements RowMapper<DbCriteria> {
     @Override
     public DbCriteria mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
-      return DbCriteria.builder().addId(rs.getLong("id"))
-              .addParentId(rs.getLong("parent_id"))
-              .addDomainId(rs.getString("domain_id"))
-              .addStandard(rs.getBoolean("is_standard"))
-              .addType(rs.getString("type"))
-              .addSubtype(rs.getString("subtype"))
-              .addConceptId(rs.getString("concept_id"))
-              .addCode(rs.getString("code"))
-              .addName(rs.getString("name"))
-              .addValue(rs.getString("value"))
-              .addCount(rs.getLong("est_count"))
-              .addGroup(rs.getBoolean("is_group"))
-              .addSelectable(rs.getBoolean("is_selectable"))
-              .addAttribute(rs.getBoolean("has_attribute"))
-              .addHierarchy(rs.getBoolean("has_hierarchy"))
-              .addAncestorData(rs.getBoolean("has_ancestor_data"))
-              .addPath(rs.getString("path"))
-              .addParentCount(rs.getLong("rollup_count"))
-              .addChildCount(rs.getLong("item_count"))
-              .addSynonyms(rs.getString("display_synonyms"))
-              .build();
+      return DbCriteria.builder()
+          .addId(rs.getLong("id"))
+          .addParentId(rs.getLong("parent_id"))
+          .addDomainId(rs.getString("domain_id"))
+          .addStandard(rs.getBoolean("is_standard"))
+          .addType(rs.getString("type"))
+          .addSubtype(rs.getString("subtype"))
+          .addConceptId(rs.getString("concept_id"))
+          .addCode(rs.getString("code"))
+          .addName(rs.getString("name"))
+          .addValue(rs.getString("value"))
+          .addCount(rs.getLong("est_count"))
+          .addGroup(rs.getBoolean("is_group"))
+          .addSelectable(rs.getBoolean("is_selectable"))
+          .addAttribute(rs.getBoolean("has_attribute"))
+          .addHierarchy(rs.getBoolean("has_hierarchy"))
+          .addAncestorData(rs.getBoolean("has_ancestor_data"))
+          .addPath(rs.getString("path"))
+          .addParentCount(rs.getLong("rollup_count"))
+          .addChildCount(rs.getLong("item_count"))
+          .addSynonyms(rs.getString("display_synonyms"))
+          .build();
     }
   }
 }
