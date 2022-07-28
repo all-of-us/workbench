@@ -4,15 +4,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,8 +70,6 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  @PersistenceContext private EntityManager entityManager;
-
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
       String domain, Boolean standard, List<String> endsWithList, Pageable page) {
@@ -102,11 +101,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     }
     StringJoiner joiner = new StringJoiner(OR);
 
-    String tablePrefix =
-        cdrVersionDao
-            .findById(CdrVersionContext.getCdrVersion().getCdrVersionId())
-            .get()
-            .getCdrDbName();
+    long cdrVersionId = CdrVersionContext.getCdrVersion().getCdrVersionId();
+    Optional<DbCdrVersion> cdrVersionOptional = cdrVersionDao.findById(cdrVersionId);
+    DbCdrVersion dbCdrVersion =
+        cdrVersionOptional.orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format("CDR version with ID %s not found", cdrVersionId)));
 
     IntStream.range(0, endsWithList.size())
         .forEach(
@@ -117,7 +118,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
               joiner.add(String.format(DYNAMIC_SQL, ":" + parameterName));
             });
 
-    return new QueryAndParameters(String.format(sql, tablePrefix, joiner), parameters);
+    return new QueryAndParameters(
+        String.format(sql, dbCdrVersion.getCdrDbName(), joiner), parameters);
   }
 
   @NotNull
