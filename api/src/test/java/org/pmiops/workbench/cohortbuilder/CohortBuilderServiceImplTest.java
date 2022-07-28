@@ -97,16 +97,6 @@ class CohortBuilderServiceImplTest {
     assertWithMessage(testInput).that(actual.get("modifiedTerms")).isEqualTo(expected);
   }
 
-  @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
-  @MethodSource("getModifyTermMatchEndsWithInvalidParameters")
-  void modifyTermMatchUseEndsWithInvalidTerm(String testInput, String term) {
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> cohortBuilderService.modifyTermMatchUseEndsWithTerms(term));
-    assertThat(exception).hasMessageThat().containsMatch("Bad Request: Search term is invalid");
-  }
-
   @ParameterizedTest(name = "modifyTermMatch: {0} {1}=>{2}")
   @MethodSource("getModifyTermMatchParameters")
   void modifyTermMatch(String testInput, String term, String expected) {
