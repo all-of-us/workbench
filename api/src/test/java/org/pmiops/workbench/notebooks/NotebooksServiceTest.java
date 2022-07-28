@@ -137,6 +137,12 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testIsNotebookBlob() {
+    when(mockBlob.getName()).thenReturn("notebooks/test.txt");
+    assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  }
+
+  @Test
   public void testGetReadOnlyHtml_tooBig() {
     when(mockBlob.getSize()).thenReturn(50L * 1000 * 1000); // 50MB
     stubNotebookToJson();
