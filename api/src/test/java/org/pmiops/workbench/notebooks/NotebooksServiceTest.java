@@ -3,6 +3,7 @@ package org.pmiops.workbench.notebooks;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -10,7 +11,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
+import com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.util.HashMap;
+import java.util.List;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +28,11 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
@@ -63,6 +69,8 @@ public class NotebooksServiceTest {
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private WorkspaceDao workspaceDao;
+  @MockBean private UserRecentResourceService mockUserRecentResourceService;
+  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -72,7 +80,6 @@ public class NotebooksServiceTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class})
-  @MockBean({UserRecentResourceService.class, WorkspaceAuthService.class})
   static class Configuration {
 
     @Bean
@@ -101,6 +108,33 @@ public class NotebooksServiceTest {
   }
 
   @Mock private Blob mockBlob;
+
+  @Test
+  public void testGetNotebooks() {
+    String workspaceNamespace = "sampleNamespace";
+    String workspaceName = "sampleNamespace";
+    String bucketName = "sampleBucket";
+    HashMap<String, FirecloudWorkspaceAccessEntry> workspaceUserMap = new HashMap<>();
+    FirecloudWorkspaceResponse response = new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
+    FileDetail fileDetail = new FileDetail();
+    List<Blob> blobs = ImmutableList.of(mockBlob);
+    firecloudWorkspaceDetails.setBucketName(bucketName);
+    response.setWorkspace(firecloudWorkspaceDetails);
+
+    when(mockFirecloudService.getWorkspace(anyString(), anyString())).thenReturn(response);
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
+        .thenReturn(workspaceUserMap);
+    when(mockBlob.getName()).thenReturn("notebooks/test.ipynb");
+    when(mockCloudStorageClient.getBlobPageForPrefix(anyString(), anyString())).thenReturn(blobs);
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
+        .thenReturn(fileDetail);
+
+    List<FileDetail> fileDetails = notebooksService.getNotebooks(workspaceNamespace, workspaceName);
+
+    assertThat(fileDetails.size()).isEqualTo(1);
+    assertThat(fileDetails.get(0)).isEqualTo(fileDetail);
+  }
 
   @Test
   public void testGetReadOnlyHtml_tooBig() {
