@@ -41,10 +41,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Checks if notebook for given workspace and user is already in table user_recent_resource if
-   * yes, update the lastAccessDateTime only If no, check the number of resource entries for given
-   * user if it is above config userEntrycount, delete the row(s) with least lastAccessTime and add
-   * a new entry
+   * Create a Notebook recent-resource entry in the DB if none exists, reducing the table size to
+   * USER_ENTRY_COUNT per-user if necessary. Update the last accessed time if it does exist.
    */
   @Override
   public DbUserRecentlyModifiedResource updateNotebookEntry(
@@ -57,10 +55,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Checks if cohort for given workspace and user is already in table user_recent_resource if yes,
-   * update the lastAccessDateTime only If no, check the number of resource entries for given user
-   * if it is above config userEntrycount, delete the row(s) with least lastAccessTime and add a new
-   * entry
+   * Create a Cohort recent-resource entry in the DB if none exists, reducing the table size to
+   * USER_ENTRY_COUNT per-user if necessary. Update the last accessed time if it does exist.
    */
   @Override
   public void updateCohortEntry(long workspaceId, long userId, long cohortId) {
@@ -71,6 +67,10 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         String.valueOf(cohortId));
   }
 
+  /**
+   * Create a Concept Set recent-resource entry in the DB if none exists, reducing the table size to
+   * USER_ENTRY_COUNT per-user if necessary. Update the last accessed time if it does exist.
+   */
   @Override
   public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
     updateUserRecentlyModifiedResourceEntry(
@@ -80,6 +80,10 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         String.valueOf(conceptSetId));
   }
 
+  /**
+   * Create a Dataset recent-resource entry in the DB if none exists, reducing the table size to
+   * USER_ENTRY_COUNT per-user if necessary. Update the last accessed time if it does exist.
+   */
   @Override
   public void updateDataSetEntry(long workspaceId, long userId, long dataSetId) {
     updateUserRecentlyModifiedResourceEntry(
@@ -89,6 +93,10 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         String.valueOf(dataSetId));
   }
 
+  /**
+   * Create a Cohort Review recent-resource entry in the DB if none exists, reducing the table size
+   * to USER_ENTRY_COUNT per-user if necessary. Update the last accessed time if it does exist.
+   */
   @Override
   public void updateCohortReviewEntry(long workspaceId, long userId, long cohortReviewId) {
     updateUserRecentlyModifiedResourceEntry(
