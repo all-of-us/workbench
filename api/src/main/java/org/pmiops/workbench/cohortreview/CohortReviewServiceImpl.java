@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -112,6 +113,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   private ParticipantCohortStatusMapper participantCohortStatusMapper;
   private ReviewQueryBuilder reviewQueryBuilder;
   private Clock clock;
+  private Provider<DbUser> userProvider;
 
   @Autowired
   public CohortReviewServiceImpl(
@@ -127,7 +129,8 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
       ParticipantCohortStatusDao participantCohortStatusDao,
       ParticipantCohortStatusMapper participantCohortStatusMapper,
       ReviewQueryBuilder reviewQueryBuilder,
-      Clock clock) {
+      Clock clock,
+      Provider<DbUser> userProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortAnnotationDefinitionDao = cohortAnnotationDefinitionDao;
     this.cohortBuilderService = cohortBuilderService;
@@ -141,6 +144,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     this.participantCohortStatusMapper = participantCohortStatusMapper;
     this.reviewQueryBuilder = reviewQueryBuilder;
     this.clock = clock;
+    this.userProvider = userProvider;
   }
 
   public CohortReviewServiceImpl() {}
@@ -218,6 +222,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public CohortReview saveCohortReview(CohortReview cohortReview, DbUser creator) {
+    cohortReview.lastModifiedBy(userProvider.get().getUsername());
     return cohortReviewMapper.dbModelToClient(
         cohortReviewDao.save(cohortReviewMapper.clientToDbModel(cohortReview, creator)));
   }
@@ -226,6 +231,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Transactional
   public void saveFullCohortReview(
       CohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses) {
+    cohortReview.setLastModifiedBy(userProvider.get().getUsername());
     cohortReviewDao.save(cohortReviewMapper.clientToDbModel(cohortReview));
     participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
   }
@@ -247,6 +253,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
       dbCohortReview.setDescription(cohortReview.getDescription());
     }
     dbCohortReview.setLastModifiedTime(lastModified);
+    dbCohortReview.setLastModifiedBy(userProvider.get().getUsername());
     try {
       return cohortReviewMapper.dbModelToClient(cohortReviewDao.save(dbCohortReview));
     } catch (OptimisticLockException e) {
@@ -260,6 +267,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     DbCohortReview dbCohortReview = findDbCohortReview(cohortReviewId);
     dbCohortReview.lastModifiedTime(lastModified);
     dbCohortReview.incrementReviewedCount();
+    dbCohortReview.setLastModifiedBy(userProvider.get().getUsername());
     cohortReviewDao.save(dbCohortReview);
 
     DbParticipantCohortStatus dbParticipantCohortStatus =
