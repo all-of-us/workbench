@@ -390,35 +390,27 @@ export const useIsUserDisabled = () => {
   return disabled;
 };
 
-export const useShowTOS = () => {
+export const useShowTOS = (): boolean => {
   const { authLoaded, isSignedIn } = useStore(authStore);
-  const profile = profileStore.get().profile;
-  const [userRequiredToAcceptTOS, setUserRequiredToAcceptTOS] =
-    useState<boolean>(false);
-  useEffect(() => {
-    if (!authLoaded || !isSignedIn) {
-      setUserRequiredToAcceptTOS(false);
-    } else if (profile) {
-      // wait for profile to load, to  ensure user initialization happens
-      // before checking term of service status
-      (async () => {
-        try {
-          // Do not show terms of service page, if the user is disabled or not eligible for RT
-          if (userIsDisabled(profile.disabled)) {
-            setUserRequiredToAcceptTOS(false);
-          } else {
-            const userHasAcceptedLatestTOS =
-              await profileApi().getUserTermsOfServiceStatus();
-            setUserRequiredToAcceptTOS(!userHasAcceptedLatestTOS);
-          }
-        } catch (e) {
-          console.log('Error while getting user terms of service status');
-        }
-      })();
-    }
-    return () => {};
-  }, [authLoaded, isSignedIn, profile]);
-  return userRequiredToAcceptTOS;
+  const { profile } = profileStore.get();
+
+  if (
+    authLoaded &&
+    isSignedIn &&
+    profile &&
+    !userIsDisabled(profile.disabled)
+  ) {
+    (async () => {
+      try {
+        const compliant = await profileApi().getUserTermsOfServiceStatus();
+        return !compliant;
+      } catch (e) {
+        console.log('Error while getting user terms of service status');
+      }
+    })();
+  }
+
+  return false;
 };
 
 export const acceptTermsOfService = (tosVersion) => {
