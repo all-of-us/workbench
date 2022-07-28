@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -30,7 +29,6 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -136,7 +134,11 @@ class CohortBuilderServiceImplTest {
         Arguments.of("Search term: ", "type-2-diabetes", "+\"type-2-diabetes\""),
         Arguments.of("Search term: ", "*statin pita", "+pita*"),
         Arguments.of("Search term: ", "*statin +pita", "+pita*"),
-        Arguments.of("Search term: ", "-pita brea", "-pita+brea*"));
+        Arguments.of("Search term: ", "-pita brea", "-pita+brea*"),
+        Arguments.of("Search term: ", "*statin -pita", "-pita"),
+        Arguments.of("Search term: ", "*statin *pita", ""),
+        Arguments.of("Search term: ", "*statin other *pita", "+other*"),
+        Arguments.of("Search term: ", "*statin other *pita -minus", "+other*-minus"));
   }
 
   private static Stream<Arguments> getModifyTermMatchParameters() {
