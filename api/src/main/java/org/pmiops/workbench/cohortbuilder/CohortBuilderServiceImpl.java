@@ -721,9 +721,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             });
 
     // validate here?
-    if ((modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-"))) {
-      throw new BadRequestException(String.format("Bad Request: Search term is invalid: %s", term));
-    }
+//    if ((modifiedTerms.size() == 1 && modifiedTerms.get(0).startsWith("-"))) {
+//      throw new BadRequestException(String.format("Bad Request: Search term is invalid: %s", term));
+//    }
     // create strings for endsWithTerms and modifiedTerms
     retMap.put(ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")));
     retMap.put(

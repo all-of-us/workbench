@@ -8,7 +8,10 @@ import java.util.StringJoiner;
 import java.util.stream.IntStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.pmiops.workbench.cdr.CdrDbConfig;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,6 +20,9 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
@@ -41,7 +47,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   private static final String ENDS_WITH_WITHOUT_TERM =
       "select *\n"
-          + "from cb_criteria\n"
+          + "from %s.cb_criteria\n"
           + "where is_standard = :standard\n"
           + "and match(full_text) against(concat('+[', :domain, '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
@@ -49,7 +55,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   private static final String ENDS_WITH_WITH_TERM =
       "select *\n"
-          + "from cb_criteria\n"
+          + "from %s.cb_criteria\n"
           + "where is_standard = :standard\n"
           + "and match(full_text) against(concat(:term, '+[', :domain, '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
@@ -62,6 +68,11 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String OR = "\nor\n";
 
   @Autowired private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+  @Autowired private CdrVersionDao cdrVersionDao;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
@@ -94,16 +105,19 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     }
     StringJoiner joiner = new StringJoiner(OR);
 
+
+    String tablePrefix = cdrVersionDao.findById(CdrVersionContext.getCdrVersion().getCdrVersionId()).get().getCdrDbName();
+
     IntStream.range(0, endsWithList.size())
         .forEach(
             idx -> {
-              String endsWith = endsWithList.get(idx);
+              String endsWith = endsWithList.get(idx).replace("*", "%");
               String parameterName = "endsWith" + idx;
               parameters.addValue(parameterName, endsWith);
               joiner.add(String.format(DYNAMIC_SQL, ":" + parameterName));
             });
 
-    return new QueryAndParameters(String.format(sql, joiner), parameters);
+    return new QueryAndParameters(String.format(sql, tablePrefix, joiner), parameters);
   }
 
   @NotNull
