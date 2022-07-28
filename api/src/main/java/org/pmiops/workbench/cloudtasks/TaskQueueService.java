@@ -11,9 +11,11 @@ import com.google.protobuf.ByteString;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
@@ -38,6 +40,8 @@ public class TaskQueueService {
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
   private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
   private static final String DUPLICATE_WORKSPACE_QUEUE_NAME = "duplicateWorkspaceQueue";
+
+  private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
   private WorkbenchLocationConfigService locationConfigService;
   private Provider<CloudTasksClient> cloudTasksClientProvider;
@@ -64,28 +68,38 @@ public class TaskQueueService {
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds, boolean backfill) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    RdrExportConfig rdrConfig = workbenchConfigProvider.get().rdrExport;
+    if (rdrConfig == null) {
+      LOGGER.info("RDR export is not configured for this environment.  Exiting.");
+      return;
+    }
+
     List<List<Long>> groups =
-        CloudTasksUtils.partitionList(workspaceIds, workbenchConfig.rdrExport.exportObjectsPerTask);
+        CloudTasksUtils.partitionList(workspaceIds, rdrConfig.exportObjectsPerTask);
     String path = EXPORT_WORKSPACE_PATH;
     if (backfill) {
       path += "?backfill=true";
     }
     for (List<Long> group : groups) {
-      createAndPushTask(workbenchConfig.rdrExport.queueName, path, group);
+      createAndPushTask(rdrConfig.queueName, path, group);
     }
   }
 
   public void groupAndPushRdrResearcherTasks(List<Long> userIds, boolean backfill) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    RdrExportConfig rdrConfig = workbenchConfigProvider.get().rdrExport;
+    if (rdrConfig == null) {
+      LOGGER.info("RDR export is not configured for this environment.  Exiting.");
+      return;
+    }
+
     List<List<Long>> groups =
-        CloudTasksUtils.partitionList(userIds, workbenchConfig.rdrExport.exportObjectsPerTask);
+        CloudTasksUtils.partitionList(userIds, rdrConfig.exportObjectsPerTask);
     String path = EXPORT_RESEARCHER_PATH;
     if (backfill) {
       path += "?backfill=true";
     }
     for (List<Long> group : groups) {
-      createAndPushTask(workbenchConfig.rdrExport.queueName, path, group);
+      createAndPushTask(rdrConfig.queueName, path, group);
     }
   }
 

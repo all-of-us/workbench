@@ -124,12 +124,6 @@
     "bigQueryTable": "workbench_action_audit_perf",
     "partitionColumn": "_PARTITIONTIME"
   },
-  "rdrExport": {
-    "host": "pmi-drc-api-test.appspot.com",
-    "queueName": "rdrExportQueue",
-    "exportObjectsPerTask": 10,
-    "exportDemoSurveyV2": true
-  },
   "captcha": {
     "enableCaptcha": true,
     "useTestCaptcha": true

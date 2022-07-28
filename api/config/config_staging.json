@@ -124,12 +124,6 @@
     "bigQueryTable": "workbench_action_audit_staging",
     "partitionColumn": "_PARTITIONTIME"
   },
-  "rdrExport": {
-    "host": "all-of-us-rdr-staging.appspot.com",
-    "queueName": "rdrExportQueue",
-    "exportObjectsPerTask": 10,
-    "exportDemoSurveyV2": true
-  },
   "captcha": {
     "enableCaptcha": true,
     "useTestCaptcha": true
