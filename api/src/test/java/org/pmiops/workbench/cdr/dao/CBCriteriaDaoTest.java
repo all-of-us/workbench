@@ -274,29 +274,6 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndStandardAndTermAndNameEndsWith() {
-    PageRequest page = PageRequest.of(0, 10);
-    List<DbCriteria> actual =
-        cbCriteriaDao
-            .findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-                Domain.DRUG.toString(), true, "AdultAspirin", "%Aspirin", page)
-            .getContent();
-    assertThat(actual).containsExactly(drugCriteria2);
-  }
-
-  @Test
-  public void findCriteriaByDomainAndStandardAndNameEndsWith() {
-    PageRequest page = PageRequest.of(0, 10);
-    List<DbCriteria> actual =
-        cbCriteriaDao
-            .findCriteriaByDomainAndStandardAndNameEndsWith(
-                Domain.DRUG.toString(), true, "%aspirin", page)
-            .getContent();
-    assertThat(actual)
-        .containsExactlyElementsIn(ImmutableList.of(drugCriteria, drugCriteria2, drugCriteria3));
-  }
-
-  @Test
   public void findCriteriaByDomainAndFullTextAndStandard() {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> measurements =

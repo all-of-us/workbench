@@ -20,7 +20,7 @@ import org.springframework.data.repository.query.Param;
  * matches in the tree for a specific concept_id. This allows us to use the full text index and
  * makes the query much faster.
  */
-public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
+public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomCBCriteriaDao {
 
   @Query(
       value =
@@ -96,35 +96,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("domain") String domain,
       @Param("term") String term,
       @Param("standard") Boolean standard,
-      Pageable page);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where standard=:standard "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
-              + "and upper(c.name) like upper(:endsWith) "
-              + "order by c.count desc, c.name asc")
-  Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard,
-      @Param("endsWith") String endsWith,
-      Pageable page);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where standard=:standard "
-              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
-              + "and upper(c.name) like upper(:endsWith) "
-              + "order by c.count desc, c.name asc")
-  Page<DbCriteria> findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-      @Param("domain") String domain,
-      @Param("standard") Boolean standard,
-      @Param("term") String term,
-      @Param("endsWith") String endsWith,
       Pageable page);
 
   @Query(

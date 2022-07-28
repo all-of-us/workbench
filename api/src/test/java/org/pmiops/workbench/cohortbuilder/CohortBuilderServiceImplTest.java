@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -30,7 +29,6 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -97,16 +95,6 @@ class CohortBuilderServiceImplTest {
     assertWithMessage(testInput).that(actual.get("modifiedTerms")).isEqualTo(expected);
   }
 
-  @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
-  @MethodSource("getModifyTermMatchEndsWithInvalidParameters")
-  void modifyTermMatchUseEndsWithInvalidTerm(String testInput, String term) {
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> cohortBuilderService.modifyTermMatchUseEndsWithTerms(term));
-    assertThat(exception).hasMessageThat().containsMatch("Bad Request: Search term is invalid");
-  }
-
   @ParameterizedTest(name = "modifyTermMatch: {0} {1}=>{2}")
   @MethodSource("getModifyTermMatchParameters")
   void modifyTermMatch(String testInput, String term, String expected) {
@@ -121,10 +109,7 @@ class CohortBuilderServiceImplTest {
     return Stream.of(
         // special chars are filtered by the UI-except ("\"", "+", "-", "*")
         Arguments.of("Search term: ", "-pita", "one term starts with -"),
-        Arguments.of("Search term: ", "*statin -pita", "two term starts with - and *"),
-        Arguments.of("Search term: ", "*statin *pita", "two terms starts *"),
-        Arguments.of("Search term: ", "*statin other *pita", "two terms starts *"),
-        Arguments.of("Search term: ", "*statin other *pita -minus", "two terms starts *"));
+        Arguments.of("Search term: ", "*statin -pita", "two term starts with - and *"));
   }
 
   private static Stream<Arguments> getModifyTermMatchEndsWithParameters() {
@@ -149,7 +134,11 @@ class CohortBuilderServiceImplTest {
         Arguments.of("Search term: ", "type-2-diabetes", "+\"type-2-diabetes\""),
         Arguments.of("Search term: ", "*statin pita", "+pita*"),
         Arguments.of("Search term: ", "*statin +pita", "+pita*"),
-        Arguments.of("Search term: ", "-pita brea", "-pita+brea*"));
+        Arguments.of("Search term: ", "-pita brea", "-pita+brea*"),
+        Arguments.of("Search term: ", "*statin -pita", "-pita"),
+        Arguments.of("Search term: ", "*statin *pita", ""),
+        Arguments.of("Search term: ", "*statin other *pita", "+other*"),
+        Arguments.of("Search term: ", "*statin other *pita -minus", "+other*-minus"));
   }
 
   private static Stream<Arguments> getModifyTermMatchParameters() {
