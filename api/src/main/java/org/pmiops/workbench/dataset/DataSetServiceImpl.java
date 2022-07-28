@@ -60,13 +60,13 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CriteriaType;
@@ -238,12 +238,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DSLinkingDao dsLinkingDao;
   private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
-  private final FireCloudService fireCloudService;
   private final WgsExtractCromwellSubmissionDao submissionDao;
   private final Provider<String> prefixProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final Clock clock;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   @VisibleForTesting
@@ -264,7 +264,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock,
-      FireCloudService fireCloudService) {
+      Provider<DbUser> userProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortDao = cohortDao;
     this.cohortService = cohortService;
@@ -281,7 +281,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.userRecentResourceService = userRecentResourceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
-    this.fireCloudService = fireCloudService;
+    this.userProvider = userProvider;
   }
 
   @Override
@@ -294,7 +294,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataSet saveDataSet(DbDataset dataset) {
     try {
-      dataset.setLastModifiedBy(fireCloudService.getMe().getUserInfo().getUserEmail());
+      dataset.setLastModifiedBy(userProvider.get().getUsername());
       dataset = dataSetDao.save(dataset);
       userRecentResourceService.updateDataSetEntry(
           dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());

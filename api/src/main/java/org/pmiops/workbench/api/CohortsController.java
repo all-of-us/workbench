@@ -24,7 +24,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
@@ -53,7 +52,6 @@ public class CohortsController implements CohortsApiDelegate {
   private final Provider<DbUser> userProvider;
   private final Clock clock;
   private final UserRecentResourceService userRecentResourceService;
-  private final FireCloudService fireCloudService;
 
   @Autowired
   CohortsController(
@@ -64,8 +62,7 @@ public class CohortsController implements CohortsApiDelegate {
       CohortMapper cohortMapper,
       Provider<DbUser> userProvider,
       Clock clock,
-      UserRecentResourceService userRecentResourceService,
-      FireCloudService fireCloudService) {
+      UserRecentResourceService userRecentResourceService) {
     this.workspaceDao = workspaceDao;
     this.workspaceAuthService = workspaceAuthService;
     this.cohortDao = cohortDao;
@@ -74,7 +71,6 @@ public class CohortsController implements CohortsApiDelegate {
     this.userProvider = userProvider;
     this.clock = clock;
     this.userRecentResourceService = userRecentResourceService;
-    this.fireCloudService = fireCloudService;
   }
 
   private void checkForDuplicateCohortNameException(String newCohortName, DbWorkspace workspace) {
@@ -230,7 +226,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbCohort.setLastModifiedTime(now);
-    dbCohort.setLastModifiedBy(fireCloudService.getMe().getUserInfo().getUserEmail());
+    dbCohort.setLastModifiedBy(userProvider.get().getUsername());
     try {
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.

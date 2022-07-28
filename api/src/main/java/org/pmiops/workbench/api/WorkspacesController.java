@@ -505,7 +505,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     try {
-      dbWorkspace.setLastModifiedBy(fireCloudService.getMe().getUserInfo().getUserEmail());
+      dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
       dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
