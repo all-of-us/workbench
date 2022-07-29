@@ -104,18 +104,9 @@ class CohortBuilderServiceImplTest {
         .isEqualTo(expected);
   }
 
-  private static Stream<Arguments> getModifyTermMatchEndsWithInvalidParameters() {
-
-    return Stream.of(
-        // special chars are filtered by the UI-except ("\"", "+", "-", "*")
-        Arguments.of("Search term: ", "-pita", "one term starts with -"),
-        Arguments.of("Search term: ", "*statin -pita", "two term starts with - and *"));
-  }
-
   private static Stream<Arguments> getModifyTermMatchEndsWithParameters() {
 
     return Stream.of(
-        // special chars are filtered by the UI-except ("\"", "+", "-", "*")
         Arguments.of("Search term: ", "lung", "+lung*"),
         Arguments.of("Search term: ", "+lung", "+lung*"),
         Arguments.of("Search term: ", "lung cancer", "+lung*+cancer*"),
@@ -138,7 +129,21 @@ class CohortBuilderServiceImplTest {
         Arguments.of("Search term: ", "*statin -pita", "-pita"),
         Arguments.of("Search term: ", "*statin *pita", ""),
         Arguments.of("Search term: ", "*statin other *pita", "+other*"),
-        Arguments.of("Search term: ", "*statin other *pita -minus", "+other*-minus"));
+        Arguments.of("Search term: ", "*statin other *pita -minus", "+other*-minus"),
+        Arguments.of("Search term: ", "-\"my first phrase\"", "-\"my first phrase\""),
+        Arguments.of("Search term: ", "+\"my second phrase\"", "+\"my second phrase\""),
+        Arguments.of("Search term: ", "\"my second phrase\"", "+\"my second phrase\""),
+        Arguments.of(
+            "Search term: ", "-covid-19 -type-2-diabetes", "-\"covid-19\"-\"type-2-diabetes\""),
+        Arguments.of(
+            "Search term: ", "+covid-19 +type-2-diabetes", "+\"covid-19\"+\"type-2-diabetes\""),
+        Arguments.of(
+            "Search term: ", "covid-19 type-2-diabetes", "+\"covid-19\"+\"type-2-diabetes\""),
+        Arguments.of("Search term: ", "-diabet", "-diabet"),
+        Arguments.of("Search term: ", "+diabet", "+diabet*"),
+        Arguments.of("Search term: ", "diabet", "+diabet*"),
+        Arguments.of("Search term: ", "+++diabet", "+diabet*"),
+        Arguments.of("Search term: ", "---diabet", "-diabet"));
   }
 
   private static Stream<Arguments> getModifyTermMatchParameters() {

@@ -690,11 +690,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Map<String, String> retMap = new HashMap<>();
     List<String> modifiedTerms = new ArrayList<>();
     // add quoted pattern to the list of modifiedTerms
-    String quotedPattern = "\\\"((\\w+)\\s?)+\\\"";
+    String quotedPattern = "([+|-]?\\\"((\\w+)\\s?)+\\\")";
     Pattern pattern = Pattern.compile(quotedPattern);
     Matcher matcher = pattern.matcher(term);
     while (matcher.find()) {
-      modifiedTerms.add("+" + matcher.group());
+      modifiedTerms.add(
+          matcher.group().matches("^[+|-].*") ? matcher.group() : "+" + matcher.group());
     }
     // remove the quoted phrase/pattern
     List<String> words =
@@ -710,11 +711,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .filter(word -> word.length() >= 2 && !word.startsWith("*"))
         .forEach(
             word -> {
-              if (word.startsWith("-")) {
-                modifiedTerms.add(word);
+              if (word.matches("-\\w+(-\\w+)+")) {
+                // -covid-19 -type-2-diabetes => -"covid-19" -"type-2-diabetes"
+                modifiedTerms.add("-\"" + word.substring(1) + "\"");
+              } else if (word.matches("\\+\\w+(-\\w+)+")) {
+                // +covid-19 +type-2-diabetes => +"covid-19" +"type-2-diabetes"
+                modifiedTerms.add("+\"" + word.substring(1) + "\"");
               } else if (word.matches("\\w+(-\\w+)+")) {
-                modifiedTerms.add("+\"" + word + "\""); // covid-19 type-2-diabetes
+                // covid-19 type-2-diabetes => +"covid-19" +"type-2-diabetes"
+                modifiedTerms.add("+\"" + word + "\"");
+              } else if (word.startsWith("-")) {
+                // -diabet => -diabet
+                modifiedTerms.add(word);
+              } else if (word.startsWith("+")) {
+                // +diabet => +diabet*
+                modifiedTerms.add(word + "*");
               } else {
+                // diabet => +diabet*
                 modifiedTerms.add("+" + word + "*");
               }
             });
@@ -725,8 +738,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         MODIFIED_TERMS,
         modifiedTerms.stream()
             .collect(Collectors.joining(""))
-            .replaceAll("\\+\\+", "\\+")
-            .replaceAll("\\*\\*", "\\*"));
+            .replaceAll("\\+{2,}", "\\+")
+            .replaceAll("\\-{2,}", "\\-")
+            .replaceAll("\\*{2,}", "\\*"));
 
     return retMap;
   }
