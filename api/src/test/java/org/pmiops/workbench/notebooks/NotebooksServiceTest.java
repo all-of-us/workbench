@@ -39,6 +39,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -282,6 +283,61 @@ public class NotebooksServiceTest {
       // expected
     }
     verify(mockFirecloudService, never()).staticNotebooksConvert(any());
+  }
+
+  @Test
+  public void testGetNotebookKernelR() {
+    JSONObject notebookFile = new JSONObject();
+    JSONObject kernelSpec = new JSONObject();
+    JSONObject language = new JSONObject();
+
+    language.put("language", "R");
+    kernelSpec.put("kernelspec", language);
+    notebookFile.put("metadata", kernelSpec);
+
+    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    assertThat(kernelType).isEqualTo(KernelTypeEnum.R);
+  }
+
+  @Test
+  public void testGetNotebookKernelPython() {
+    JSONObject notebookFile = new JSONObject();
+    JSONObject kernelSpec = new JSONObject();
+    JSONObject language = new JSONObject();
+
+    language.put("language", "Python");
+    kernelSpec.put("kernelspec", language);
+    notebookFile.put("metadata", kernelSpec);
+
+    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
+  }
+
+  @Test
+  public void testGetNotebookKernelException() {
+    JSONObject notebookFile = new JSONObject();
+    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
+  }
+
+  @Test
+  public void testGetNotebookKernelFromBucket() {
+    JSONObject notebookFile = new JSONObject();
+
+    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
+    firecloudWorkspaceDetails.setBucketName("bucketName");
+
+    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
+    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
+    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+        .thenReturn(firecloudWorkspaceResponse);
+    when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(notebookFile);
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1l);
+
+    KernelTypeEnum kernelType =
+        notebooksService.getNotebookKernel("workspaceNamespace", "workspaceName", "notebookName");
+    assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
   }
 
   @Test
