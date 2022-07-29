@@ -55,6 +55,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+// TODO Stub out getting notebook. Adjust naming of tests. Organize.
 
 @DataJpaTest
 public class NotebooksServiceTest {
@@ -326,7 +327,6 @@ public class NotebooksServiceTest {
 
     FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
     firecloudWorkspaceDetails.setBucketName("bucketName");
-
     FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
     firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
     when(mockFirecloudService.getWorkspace(anyString(), anyString()))
@@ -338,6 +338,27 @@ public class NotebooksServiceTest {
     KernelTypeEnum kernelType =
         notebooksService.getNotebookKernel("workspaceNamespace", "workspaceName", "notebookName");
     assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
+  }
+
+  @Test
+  public void testAdminGetReadOnlyHtml() {
+    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
+    firecloudWorkspaceDetails.setBucketName("bucketName");
+    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
+    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
+    String htmlDocument = "<body><div>test</div></body>";
+    when(mockFirecloudService.getWorkspaceAsService(anyString(), anyString()))
+        .thenReturn(firecloudWorkspaceResponse);
+
+    when(mockFirecloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
+
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getContent()).thenReturn(new byte[10]);
+    String actualResult =
+        notebooksService.adminGetReadOnlyHtml(
+            "workspaceNamespace", "workspaceName", "notebookName");
+    assertThat(actualResult).isEqualTo(htmlDocument);
   }
 
   @Test
