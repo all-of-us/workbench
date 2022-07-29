@@ -1,6 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -11,9 +12,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +27,11 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -33,6 +39,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
@@ -137,9 +144,103 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testIsNotebookBlob() {
+  public void testIsNotNotebookBlob() {
     when(mockBlob.getName()).thenReturn("notebooks/test.txt");
     assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  }
+
+  @Test
+  public void testCopyNotebookFromDifferentTiers() {
+    DbWorkspace fromWorkSpace = new DbWorkspace();
+    DbWorkspace toWorkSpace = new DbWorkspace();
+    DbCdrVersion fromCDRVersion = new DbCdrVersion();
+    DbCdrVersion toCDRVersion = new DbCdrVersion();
+    DbAccessTier fromAccessTier = new DbAccessTier();
+    DbAccessTier toAccessTier = new DbAccessTier();
+    String fromWorkspaceNamespace = "fromWorkspaceNamespace";
+    String fromWorkspaceFirecloudName = "fromWorkspaceFirecloudName";
+    String fromNotebookName = "fromNotebookName";
+    String toWorkspaceNamespace = "toWorkspaceNamespace";
+    String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
+    String newNotebookName = "newNotebookName";
+
+    fromAccessTier.setDisplayName("A Tier");
+    toAccessTier.setDisplayName("B Tier");
+    fromCDRVersion.setAccessTier(fromAccessTier);
+    toCDRVersion.setAccessTier(toAccessTier);
+    fromWorkSpace.setCdrVersion(fromCDRVersion);
+    toWorkSpace.setCdrVersion(toCDRVersion);
+
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
+        .thenReturn(WorkspaceAccessLevel.OWNER);
+
+    when(workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName))
+        .thenReturn(fromWorkSpace);
+    when(workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceFirecloudName))
+        .thenReturn(toWorkSpace);
+
+    Exception exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                notebooksService.copyNotebook(
+                    fromWorkspaceNamespace,
+                    fromWorkspaceFirecloudName,
+                    fromNotebookName,
+                    toWorkspaceNamespace,
+                    toWorkspaceFirecloudName,
+                    newNotebookName));
+    assertThat(exception.getMessage())
+        .isEqualTo("Cannot copy between access tiers (attempted copy from A Tier to B Tier)");
+  }
+
+  @Test
+  public void testCopyNotebookThatAlreadyExists() {
+    DbWorkspace fromWorkSpace = new DbWorkspace();
+    DbWorkspace toWorkSpace = new DbWorkspace();
+    DbCdrVersion fromCDRVersion = new DbCdrVersion();
+    DbCdrVersion toCDRVersion = new DbCdrVersion();
+    DbAccessTier fromAccessTier = new DbAccessTier();
+    DbAccessTier toAccessTier = new DbAccessTier();
+    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
+    String fromWorkspaceNamespace = "fromWorkspaceNamespace";
+    String fromWorkspaceFirecloudName = "fromWorkspaceFirecloudName";
+    String fromNotebookName = "fromNotebookName";
+    String toWorkspaceNamespace = "toWorkspaceNamespace";
+    String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
+    String newNotebookName = "newNotebookName";
+    HashSet<BlobId> existingBlobIds = new HashSet<>();
+
+    fromCDRVersion.setAccessTier(fromAccessTier);
+    toCDRVersion.setAccessTier(toAccessTier);
+    fromWorkSpace.setCdrVersion(fromCDRVersion);
+    toWorkSpace.setCdrVersion(toCDRVersion);
+    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
+    firecloudWorkspaceDetails.setBucketName("the_bucket");
+    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
+    existingBlobIds.add(mockBlob.getBlobId());
+
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
+        .thenReturn(WorkspaceAccessLevel.OWNER);
+
+    when(workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName))
+        .thenReturn(fromWorkSpace);
+    when(workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceFirecloudName))
+        .thenReturn(toWorkSpace);
+    when(mockFirecloudService.getWorkspace(any(), any())).thenReturn(firecloudWorkspaceResponse);
+
+    when(mockCloudStorageClient.getExistingBlobIdsIn(any())).thenReturn(existingBlobIds);
+
+    assertThrows(
+        BlobAlreadyExistsException.class,
+        () ->
+            notebooksService.copyNotebook(
+                fromWorkspaceNamespace,
+                fromWorkspaceFirecloudName,
+                fromNotebookName,
+                toWorkspaceNamespace,
+                toWorkspaceFirecloudName,
+                newNotebookName));
   }
 
   @Test
