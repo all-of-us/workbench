@@ -118,41 +118,47 @@ public class NotebooksServiceTest {
 
   @Mock private Blob mockBlob;
 
+  private void stubNotebookToJson() {
+    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+        .thenReturn(
+            new FirecloudWorkspaceResponse()
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt ")));
+    when(mockBlob.getContent()).thenReturn("{}".getBytes());
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+  }
+
   @Test
-  public void testGetNotebooks() {
-    String workspaceNamespace = "sampleNamespace";
-    String workspaceName = "sampleNamespace";
-    String bucketName = "sampleBucket";
-    HashMap<String, FirecloudWorkspaceAccessEntry> workspaceUserMap = new HashMap<>();
-    FirecloudWorkspaceResponse response = new FirecloudWorkspaceResponse();
+  public void testAdminGetReadOnlyHtml() {
     FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
-    FileDetail fileDetail = new FileDetail();
-    List<Blob> blobs = ImmutableList.of(mockBlob);
-    firecloudWorkspaceDetails.setBucketName(bucketName);
-    response.setWorkspace(firecloudWorkspaceDetails);
+    firecloudWorkspaceDetails.setBucketName("bucketName");
+    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
+    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
+    String htmlDocument = "<body><div>test</div></body>";
+    when(mockFirecloudService.getWorkspaceAsService(anyString(), anyString()))
+        .thenReturn(firecloudWorkspaceResponse);
 
-    when(mockFirecloudService.getWorkspace(anyString(), anyString())).thenReturn(response);
-    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
-        .thenReturn(workspaceUserMap);
-    when(mockBlob.getName()).thenReturn("notebooks/test.ipynb");
-    when(mockCloudStorageClient.getBlobPageForPrefix(anyString(), anyString())).thenReturn(blobs);
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
-        .thenReturn(fileDetail);
+    when(mockFirecloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
 
-    List<FileDetail> fileDetails = notebooksService.getNotebooks(workspaceNamespace, workspaceName);
-
-    assertThat(fileDetails.size()).isEqualTo(1);
-    assertThat(fileDetails.get(0)).isEqualTo(fileDetail);
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getContent()).thenReturn(new byte[10]);
+    String actualResult =
+        notebooksService.adminGetReadOnlyHtml(
+            "workspaceNamespace", "workspaceName", "notebookName");
+    assertThat(actualResult).isEqualTo(htmlDocument);
   }
 
   @Test
-  public void testIsNotNotebookBlob() {
-    when(mockBlob.getName()).thenReturn("notebooks/test.txt");
-    assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  public void testCloneNotebook_firesMetric() {
+    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
+
+    notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);
   }
 
   @Test
-  public void testCopyNotebookFromDifferentTiers() {
+  public void testCopyNotebook_fromDifferentTiers() {
     DbWorkspace fromWorkSpace = new DbWorkspace();
     DbWorkspace toWorkSpace = new DbWorkspace();
     DbCdrVersion fromCDRVersion = new DbCdrVersion();
@@ -197,7 +203,7 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testCopyNotebookThatAlreadyExists() {
+  public void testCopyNotebook_alreadyExists() {
     DbWorkspace fromWorkSpace = new DbWorkspace();
     DbWorkspace toWorkSpace = new DbWorkspace();
     DbCdrVersion fromCDRVersion = new DbCdrVersion();
@@ -246,6 +252,15 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testDeleteNotebook_firesMetric() {
+    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
+
+    notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
+  }
+
+  @Test
   public void testGetNotebookContents() {
     JSONObject expectedResult = new JSONObject();
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
@@ -257,7 +272,7 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testGetNotebookContentsTooBig() {
+  public void testGetNotebookContents_tooBig() {
     JSONObject expectedResult = new JSONObject();
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
     // The current max notebook read size in bytes is 5e6 or 5mb.
@@ -273,56 +288,14 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testGetReadOnlyHtml_tooBig() {
-    when(mockBlob.getSize()).thenReturn(50L * 1000 * 1000); // 50MB
-    stubNotebookToJson();
-
-    try {
-      notebooksService.getReadOnlyHtml("", "", "").getBytes();
-      fail("expected 412 exception");
-    } catch (FailedPreconditionException e) {
-      // expected
-    }
-    verify(mockFirecloudService, never()).staticNotebooksConvert(any());
-  }
-
-  @Test
-  public void testGetNotebookKernelR() {
-    JSONObject notebookFile = new JSONObject();
-    JSONObject kernelSpec = new JSONObject();
-    JSONObject language = new JSONObject();
-
-    language.put("language", "R");
-    kernelSpec.put("kernelspec", language);
-    notebookFile.put("metadata", kernelSpec);
-
-    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
-    assertThat(kernelType).isEqualTo(KernelTypeEnum.R);
-  }
-
-  @Test
-  public void testGetNotebookKernelPython() {
-    JSONObject notebookFile = new JSONObject();
-    JSONObject kernelSpec = new JSONObject();
-    JSONObject language = new JSONObject();
-
-    language.put("language", "Python");
-    kernelSpec.put("kernelspec", language);
-    notebookFile.put("metadata", kernelSpec);
-
-    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
-    assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
-  }
-
-  @Test
-  public void testGetNotebookKernelException() {
+  public void testGetNotebookKernel_exception() {
     JSONObject notebookFile = new JSONObject();
     KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
     assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
   }
 
   @Test
-  public void testGetNotebookKernelFromBucket() {
+  public void testGetNotebookKernel_fromBucket() {
     JSONObject notebookFile = new JSONObject();
 
     FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
@@ -341,24 +314,69 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testAdminGetReadOnlyHtml() {
+  public void testGetNotebookKernel_python() {
+    JSONObject notebookFile = new JSONObject();
+    JSONObject kernelSpec = new JSONObject();
+    JSONObject language = new JSONObject();
+
+    language.put("language", "Python");
+    kernelSpec.put("kernelspec", language);
+    notebookFile.put("metadata", kernelSpec);
+
+    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
+  }
+
+  @Test
+  public void testGetNotebookKernel_r() {
+    JSONObject notebookFile = new JSONObject();
+    JSONObject kernelSpec = new JSONObject();
+    JSONObject language = new JSONObject();
+
+    language.put("language", "R");
+    kernelSpec.put("kernelspec", language);
+    notebookFile.put("metadata", kernelSpec);
+
+    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    assertThat(kernelType).isEqualTo(KernelTypeEnum.R);
+  }
+
+  @Test
+  public void testGetNotebooks() {
+    String workspaceNamespace = "sampleNamespace";
+    String workspaceName = "sampleNamespace";
+    String bucketName = "sampleBucket";
+    HashMap<String, FirecloudWorkspaceAccessEntry> workspaceUserMap = new HashMap<>();
+    FirecloudWorkspaceResponse response = new FirecloudWorkspaceResponse();
     FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
-    firecloudWorkspaceDetails.setBucketName("bucketName");
-    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
-    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
-    String htmlDocument = "<body><div>test</div></body>";
-    when(mockFirecloudService.getWorkspaceAsService(anyString(), anyString()))
-        .thenReturn(firecloudWorkspaceResponse);
+    FileDetail fileDetail = new FileDetail();
+    List<Blob> blobs = ImmutableList.of(mockBlob);
+    firecloudWorkspaceDetails.setBucketName(bucketName);
+    response.setWorkspace(firecloudWorkspaceDetails);
 
-    when(mockFirecloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
+    when(mockFirecloudService.getWorkspace(anyString(), anyString())).thenReturn(response);
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
+        .thenReturn(workspaceUserMap);
+    when(mockBlob.getName()).thenReturn("notebooks/test.ipynb");
+    when(mockCloudStorageClient.getBlobPageForPrefix(anyString(), anyString())).thenReturn(blobs);
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
+        .thenReturn(fileDetail);
 
-    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1l);
-    when(mockBlob.getContent()).thenReturn(new byte[10]);
-    String actualResult =
-        notebooksService.adminGetReadOnlyHtml(
-            "workspaceNamespace", "workspaceName", "notebookName");
-    assertThat(actualResult).isEqualTo(htmlDocument);
+    List<FileDetail> fileDetails = notebooksService.getNotebooks(workspaceNamespace, workspaceName);
+
+    assertThat(fileDetails.size()).isEqualTo(1);
+    assertThat(fileDetails.get(0)).isEqualTo(fileDetail);
+  }
+
+  @Test
+  public void testGetReadOnlyHtml_allowsDataImage() {
+    stubNotebookToJson();
+    String dataUri = "data:image/png;base64,MTIz";
+    when(mockFirecloudService.staticNotebooksConvert(any()))
+        .thenReturn("<img src=\"" + dataUri + "\" />\n");
+
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    assertThat(html).contains(dataUri);
   }
 
   @Test
@@ -370,6 +388,16 @@ public class NotebooksServiceTest {
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).contains("div");
     assertThat(html).contains("asdf");
+  }
+
+  @Test
+  public void testGetReadOnlyHtml_disallowsRemoteImage() {
+    stubNotebookToJson();
+    when(mockFirecloudService.staticNotebooksConvert(any()))
+        .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
+
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    assertThat(html).doesNotContain("eviltrackingpixel.com");
   }
 
   @Test
@@ -401,56 +429,28 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testGetReadOnlyHtml_allowsDataImage() {
+  public void testGetReadOnlyHtml_tooBig() {
+    when(mockBlob.getSize()).thenReturn(50L * 1000 * 1000); // 50MB
     stubNotebookToJson();
-    String dataUri = "data:image/png;base64,MTIz";
-    when(mockFirecloudService.staticNotebooksConvert(any()))
-        .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
-    assertThat(html).contains(dataUri);
+    try {
+      notebooksService.getReadOnlyHtml("", "", "").getBytes();
+      fail("expected 412 exception");
+    } catch (FailedPreconditionException e) {
+      // expected
+    }
+    verify(mockFirecloudService, never()).staticNotebooksConvert(any());
   }
 
   @Test
-  public void testGetReadOnlyHtml_disallowsRemoteImage() {
-    stubNotebookToJson();
-    when(mockFirecloudService.staticNotebooksConvert(any()))
-        .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
-
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
-    assertThat(html).doesNotContain("eviltrackingpixel.com");
+  public void testIsNotebookBlob_negative() {
+    when(mockBlob.getName()).thenReturn("notebooks/test.txt");
+    assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
   }
 
   @Test
   public void testSaveNotebook_firesMetric() {
     notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_SAVE);
-  }
-
-  @Test
-  public void testDeleteNotebook_firesMetric() {
-    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
-    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
-
-    notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
-    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
-  }
-
-  @Test
-  public void testCloneNotebook_firesMetric() {
-    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
-    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
-
-    notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);
-  }
-
-  private void stubNotebookToJson() {
-    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt ")));
-    when(mockBlob.getContent()).thenReturn("{}".getBytes());
-    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
 }
