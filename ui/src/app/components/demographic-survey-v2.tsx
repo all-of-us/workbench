@@ -143,15 +143,40 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     genderIdentities: { presence: { allowEmpty: false } },
     sexAtBirth: { presence: { allowEmpty: false } },
     sexualOrientations: { presence: { allowEmpty: false } },
-    disabilityHearing: { presence: { allowEmpty: false } },
-    disabilitySeeing: { presence: { allowEmpty: false } },
-    disabilityConcentrating: { presence: { allowEmpty: false } },
-    disabilityWalking: { presence: { allowEmpty: false } },
-    disabilityDressing: { presence: { allowEmpty: false } },
+    disabilityHearing: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty hearing can't be blank",
+      },
+    },
+    disabilitySeeing: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty seeing can't be blank",
+      },
+    },
+    disabilityConcentrating: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty concentrating can't be blank",
+      },
+    },
+    disabilityWalking: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty walking can't be blank",
+      },
+    },
+    disabilityDressing: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty dressing can't be blank",
+      },
+    },
     disabilityErrands: {
       presence: {
         allowEmpty: false,
-        message: "^ Difficulty doing errands can't be empty",
+        message: "^ Difficulty doing errands can't be blank",
       },
     },
     ...yearOfBirth,
