@@ -122,7 +122,7 @@ public class NotebooksServiceTest {
     when(mockFirecloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt ")));
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
@@ -204,8 +204,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testCopyNotebook_alreadyExists() {
-    DbWorkspace fromWorkSpace = new DbWorkspace();
-    DbWorkspace toWorkSpace = new DbWorkspace();
     DbCdrVersion fromCDRVersion = new DbCdrVersion();
     DbCdrVersion toCDRVersion = new DbCdrVersion();
     DbAccessTier fromAccessTier = new DbAccessTier();
@@ -221,20 +219,19 @@ public class NotebooksServiceTest {
 
     fromCDRVersion.setAccessTier(fromAccessTier);
     toCDRVersion.setAccessTier(toAccessTier);
-    fromWorkSpace.setCdrVersion(fromCDRVersion);
-    toWorkSpace.setCdrVersion(toCDRVersion);
     FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
     firecloudWorkspaceDetails.setBucketName("the_bucket");
     firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
     existingBlobIds.add(mockBlob.getBlobId());
 
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
         .thenReturn(WorkspaceAccessLevel.OWNER);
 
     when(workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName))
-        .thenReturn(fromWorkSpace);
+        .thenReturn(dbWorkspace);
     when(workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceFirecloudName))
-        .thenReturn(toWorkSpace);
+        .thenReturn(dbWorkspace);
     when(mockFirecloudService.getWorkspace(any(), any())).thenReturn(firecloudWorkspaceResponse);
 
     when(mockCloudStorageClient.getExistingBlobIdsIn(any())).thenReturn(existingBlobIds);
@@ -446,6 +443,51 @@ public class NotebooksServiceTest {
   public void testIsNotebookBlob_negative() {
     when(mockBlob.getName()).thenReturn("notebooks/test.txt");
     assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  }
+
+  @Test
+  public void testRenameNotebook() {
+
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
+        .thenReturn(WorkspaceAccessLevel.OWNER);
+
+    when(workspaceDao.getRequired(anyString(), anyString())).thenReturn(dbWorkspace);
+
+    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+        .thenReturn(
+            new FirecloudWorkspaceResponse()
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
+
+    FileDetail actualResult =
+        notebooksService.renameNotebook(
+            "fromWorkspaceNamespace",
+            "fromWorkspaceFirecloudName",
+            NotebooksService.withNotebookExtension("oldName"),
+            NotebooksService.withNotebookExtension("newName"));
+
+    assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
+    assertThat(actualResult.getPath()).isEqualTo("gs://bkt/notebooks/newName.ipynb");
+  }
+
+  @Test
+  public void testRenameNotebook_withOutExtension() {
+
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
+        .thenReturn(WorkspaceAccessLevel.OWNER);
+
+    when(workspaceDao.getRequired(anyString(), anyString())).thenReturn(dbWorkspace);
+
+    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+        .thenReturn(
+            new FirecloudWorkspaceResponse()
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
+
+    FileDetail actualResult =
+        notebooksService.renameNotebook(
+            "fromWorkspaceNamespace", "fromWorkspaceFirecloudName", "oldName", "newName");
+
+    assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
+    assertThat(actualResult.getPath()).isEqualTo("gs://bkt/notebooks/newName.ipynb");
   }
 
   @Test
