@@ -171,7 +171,7 @@ public class UpdateCdrConfig {
           && StringUtils.isAnyEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)) {
         throw new IllegalArgumentException(
             String.format(
-                "Both wgsBigqueryDataset and wgsFilterSetName have to be defined. Current values are: wgsBigqueryDataset: %s / wgsFilterSetName: %s",
+                "If either of wgsBigqueryDataset and wgsFilterSetName is defined, the other has to be defined too. Current values are: wgsBigqueryDataset: %s / wgsFilterSetName: %s",
                 v.wgsBigqueryDataset, v.wgsFilterSetName));
       }
     }
