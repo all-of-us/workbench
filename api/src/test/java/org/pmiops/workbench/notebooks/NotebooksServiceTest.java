@@ -244,6 +244,33 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testGetNotebookContents() {
+    JSONObject expectedResult = new JSONObject();
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(expectedResult);
+
+    JSONObject actualResult = notebooksService.getNotebookContents("bucketName", "notebookName");
+    assertThat(actualResult).isEqualTo(expectedResult);
+  }
+
+  @Test
+  public void testGetNotebookContentsTooBig() {
+    JSONObject expectedResult = new JSONObject();
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    // The current max notebook read size in bytes is 5e6 or 5mb.
+    when(mockBlob.getSize()).thenReturn((long) 5e6);
+    when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(expectedResult);
+
+    Exception exception =
+        assertThrows(
+            FailedPreconditionException.class,
+            () -> notebooksService.getNotebookContents("bucketName", "notebookName"));
+    assertThat(exception.getMessage())
+        .isEqualTo("target notebook is too large to process @ 5.00MB");
+  }
+
+  @Test
   public void testGetReadOnlyHtml_tooBig() {
     when(mockBlob.getSize()).thenReturn(50L * 1000 * 1000); // 50MB
     stubNotebookToJson();
