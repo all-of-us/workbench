@@ -61,7 +61,6 @@ import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
 import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
-import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
@@ -868,12 +867,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
-  }
-
-  @Override
-  public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResources(
-      String ns, String id, WorkspaceResourcesRequest wrr) {
-    return getWorkspaceResourcesImpl(ns, id, wrr.getTypesToFetch());
   }
 
   @Override
