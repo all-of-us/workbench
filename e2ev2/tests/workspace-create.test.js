@@ -10,7 +10,8 @@ const workspaceCreationTimeoutMs = 30e3
 const workspaceDeletionTimeoutMs = 10e3
 browserTest('create a workspace', async browser => {
   const page = browser.initialPage
-  await page.goto(config.urlRoot()+'/workspaces', {waitUntil: 'networkidle0'})
+  // I've rarely seen this page load in under two seconds.
+  await page.goto(config.urlRoot()+'/workspaces', {waitUntil: 'networkidle0', timeout: 5e3})
   await tu.impersonateUser(page, config.usernames[0])
   const createWorkspaceLink = await page.waitForSelector('clr-icon[shape="plus-circle"]')
   await createWorkspaceLink.click()
