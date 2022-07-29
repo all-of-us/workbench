@@ -1,0 +1,35 @@
+{
+  "accessTiers": [
+    {
+      "accessTierId": 2,
+      "shortName": "controlled",
+      "displayName": "Controlled Tier",
+      "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
+      "authDomainName": "all-of-us-controlled-local",
+      "authDomainGroupEmail": "all-of-us-controlled-local@dev.test.firecloud.org",
+      "datasetsBucket": "gs://fc-aou-test-datasets-controlled/",
+      "enableUserWorkflows": true
+    }
+  ],
+  "cdrVersions": [
+    {
+      "cdrVersionId": 5,
+      "isDefault": true,
+      "accessTier": "controlled",
+      "name": "Synthetic Dataset in the Controlled Tier",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
+      "bigqueryDataset": "test_R2019q4r3",
+      "wgsFilterSetName": "example",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "storageBasePath": "5",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
+    }
+  ]
+}
