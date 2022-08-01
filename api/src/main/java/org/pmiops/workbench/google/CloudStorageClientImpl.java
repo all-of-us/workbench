@@ -187,17 +187,11 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   public FileDetail blobToFileDetail(Blob blob, String bucketName, Set<String> workspaceUsers) {
     FileDetail fileDetail = blobToFileDetail(blob, bucketName);
-    Map<String, String> x = blob.getMetadata();
-    if (null != x) {
-      String hash = x.getOrDefault("lastLockedBy", null);
+    Map<String, String> fileMetadata = blob.getMetadata();
+    if (null != fileMetadata) {
+      String hash = fileMetadata.getOrDefault("lastLockedBy", null);
       if (hash != null) {
-        //        Set<String> workspaceUsers =
-        //            workspaceAuthService
-        //                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
-        //                .keySet();
         String userName = findHashedUser(bucketName, workspaceUsers, hash);
-        // Could I look up the user by their email address?
-        // UserServiceImpl.java has a getByUsername
         fileDetail.setLastModifiedBy(userName);
       }
     }
