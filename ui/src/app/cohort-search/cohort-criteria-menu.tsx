@@ -5,10 +5,12 @@ const { useEffect, useRef, useState } = React;
 import { AlertDanger } from 'app/components/alert';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
+import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   cardBlock: {
@@ -155,7 +157,38 @@ const styles = reactStyles({
     textDecoration: 'none',
     width: '100%',
   },
+  infoIcon: {
+    color: colorWithWhiteness(colors.accent, 0.1),
+    marginLeft: '0.25rem',
+  },
 });
+
+const searchTooltip = (
+  <span>
+    The following special operators can be used to augment search terms:
+    <ul>
+      <li>
+        (*) is the wildcard operator. This operator can be used with a prefix or
+        suffix. For example: ceph* (starts with) or *statin (ends with - NOTE:
+        when searching for ends with it will only match with end of concept
+        name)
+      </li>
+      <li>
+        (-) indicates that this word must <b>not</b> be present. For example:
+        lung -cancer
+      </li>
+      <li>
+        (") a phrase that is enclosed within double quote (") characters matches
+        only rows that contain the phrase literally, as it was typed. For
+        example: "lung cancer"
+      </li>
+      <li>
+        These operators can be combined to produce more complex search
+        operations. For example: brain tum* -neoplasm
+      </li>
+    </ul>
+  </span>
+);
 
 export const CohortCriteriaMenu = withCurrentWorkspace()(
   ({ launchSearch, menuOptions, workspace, temporalGroup, isTemporal }) => {
@@ -266,6 +299,18 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
             <div style={styles.searchContainer}>
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
+                {serverConfigStore.get().config.enableUniversalSearch && (
+                  <TooltipTrigger
+                    side='top'
+                    content={<div>{searchTooltip}</div>}
+                  >
+                    <ClrIcon
+                      style={styles.infoIcon}
+                      className='is-solid'
+                      shape='info-standard'
+                    />
+                  </TooltipTrigger>
+                )}
               </span>
               <div style={styles.searchBar}>
                 {domainCountsLoading ? (

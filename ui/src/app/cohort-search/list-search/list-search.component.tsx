@@ -44,6 +44,7 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
@@ -271,23 +272,27 @@ const sourceStandardTooltip = (
 );
 const searchTooltip = (
   <span>
-    The following operators can be used when searching EHR data domains:
+    The following special operators can be used to augment search terms:
     <ul>
       <li>
-        (*) is the wildcard operator. Ex: ceph* (starts with) or *statin (ends
-        with - note: when searching for ends with it will only match with end of
-        concept name)
+        (*) is the wildcard operator. This operator can be used with a prefix or
+        suffix. For example: ceph* (starts with) or *statin (ends with - NOTE:
+        when searching for ends with it will only match with end of concept
+        name)
       </li>
       <li>
-        (-) indicates that this word must <b>not</b> be present. Ex: lung
-        -cancer
+        (-) indicates that this word must <b>not</b> be present. For example:
+        lung -cancer
       </li>
       <li>
         (") a phrase that is enclosed within double quote (") characters matches
-        only rows that contain the phrase literally, as it was typed. Ex: "lung
-        cancer"
+        only rows that contain the phrase literally, as it was typed. For
+        example: "lung cancer"
       </li>
-      <li>Combining operators Ex: brain tum* -neoplasm</li>
+      <li>
+        These operators can be combined to produce more complex search
+        operations. For example: brain tum* -neoplasm
+      </li>
     </ul>
   </span>
 );
@@ -914,7 +919,7 @@ export const ListSearch = fp.flow(
                 onChange={(e) => this.setState({ searchTerms: e })}
                 onKeyPress={this.handleInput}
               />
-              {serverConfigStore.get().config.enableUniversalSearch && (
+              {serverConfigStore.get().config.enableDrugWildcardSearch && (
                 <TooltipTrigger side='top' content={<div>{searchTooltip}</div>}>
                   <ClrIcon
                     style={styles.infoIcon}
