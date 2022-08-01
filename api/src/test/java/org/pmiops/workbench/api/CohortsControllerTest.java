@@ -407,6 +407,7 @@ public class CohortsControllerTest {
     assertThat(saved.getCreator()).isEqualTo(CREATOR_EMAIL);
     assertThat(saved.getCreationTime()).isNotNull();
     assertThat(saved.getCreationTime()).isEqualTo(saved.getLastModifiedTime());
+    assertThat(saved.getLastModifiedBy()).isEqualTo(CREATOR_EMAIL);
   }
 
   @Test
@@ -418,6 +419,7 @@ public class CohortsControllerTest {
             .getBody();
     assertThat(saved.getCriteria()).isEqualTo(createDefaultCohort().getCriteria());
     assertThat(saved.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(saved.getLastModifiedBy()).isEqualTo(CREATOR_EMAIL);
     assertThat(saved.getCreationTime()).isNotNull();
     assertThat(saved.getCreationTime()).isEqualTo(saved.getLastModifiedTime());
   }
@@ -483,6 +485,7 @@ public class CohortsControllerTest {
     assertThat(updated.getCriteria()).isEqualTo(saved.getCriteria());
     assertThat(updated.getCreationTime()).isEqualTo(saved.getCreationTime());
     assertThat(updated.getLastModifiedTime()).isGreaterThan(saved.getLastModifiedTime());
+    assertThat(saved.getLastModifiedBy()).isEqualTo(CREATOR_EMAIL);
   }
 
   @Test
@@ -509,6 +512,7 @@ public class CohortsControllerTest {
     assertThat(updated.getCriteria()).isEqualTo(saved.getCriteria());
     assertThat(updated.getCreationTime()).isEqualTo(saved.getCreationTime());
     assertThat(updated.getLastModifiedTime()).isGreaterThan(saved.getLastModifiedTime());
+    assertThat(saved.getLastModifiedBy()).isEqualTo(CREATOR_EMAIL);
   }
 
   @Test
@@ -643,6 +647,7 @@ public class CohortsControllerTest {
             .duplicateCohort(workspace.getNamespace(), workspace.getId(), duplicateCohortRequest)
             .getBody();
     assertDuplicatedCohort(original, duplicated);
+    assertThat(duplicated.getLastModifiedBy()).isEqualTo(CREATOR_EMAIL);
   }
 
   @Test
