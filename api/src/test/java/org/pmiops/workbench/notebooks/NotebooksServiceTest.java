@@ -75,7 +75,6 @@ public class NotebooksServiceTest {
 
   private static DbUser dbUser;
   private static DbWorkspace dbWorkspace;
-  private DbCdrVersion cdrVersion;
 
   @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
 
@@ -119,12 +118,6 @@ public class NotebooksServiceTest {
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setCdrVersion(
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao));
-
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
-    cdrVersion.setName("1");
-    cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(TestMockFactory.createRegisteredTierForTests(accessTierDao));
-    cdrVersion = cdrVersionDao.save(cdrVersion);
   }
 
   @Mock private Blob mockBlob;
@@ -387,6 +380,15 @@ public class NotebooksServiceTest {
 
     assertThat(fileDetails.size()).isEqualTo(1);
     assertThat(fileDetails.get(0)).isEqualTo(fileDetail);
+  }
+
+  @Test
+  public void testGetNotebooks_notFound() {
+    when(mockFirecloudService.getWorkspace("mockProject", "mockWorkspace"))
+        .thenThrow(new org.pmiops.workbench.exceptions.NotFoundException());
+    assertThrows(
+        org.pmiops.workbench.exceptions.NotFoundException.class,
+        () -> notebooksService.getNotebooks("mockProject", "mockWorkspace"));
   }
 
   @Test
