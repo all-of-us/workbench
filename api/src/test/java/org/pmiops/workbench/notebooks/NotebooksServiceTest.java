@@ -4,9 +4,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +20,7 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +75,7 @@ public class NotebooksServiceTest {
 
   private static DbUser dbUser;
   private static DbWorkspace dbWorkspace;
+  private DbCdrVersion cdrVersion;
 
   @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
 
@@ -105,6 +109,7 @@ public class NotebooksServiceTest {
 
   @BeforeEach
   public void setup() {
+
     dbUser = new DbUser();
     dbUser.setUserId(101L);
     dbUser.setUsername("panic@thedis.co");
@@ -114,9 +119,28 @@ public class NotebooksServiceTest {
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setCdrVersion(
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao));
+
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
+    cdrVersion.setName("1");
+    cdrVersion.setCdrDbName("");
+    cdrVersion.setAccessTier(TestMockFactory.createRegisteredTierForTests(accessTierDao));
+    cdrVersion = cdrVersionDao.save(cdrVersion);
   }
 
   @Mock private Blob mockBlob;
+
+  private void stubGetWorkspace(DbWorkspace workspace, WorkspaceAccessLevel access) {
+    when(mockFirecloudService.getWorkspace(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+        .thenReturn(
+            new FirecloudWorkspaceResponse()
+                .accessLevel(access.toString())
+                .workspace(
+                    new FirecloudWorkspaceDetails()
+                        .namespace(workspace.getWorkspaceNamespace())
+                        .name(workspace.getFirecloudName())
+                        .bucketName(TestMockFactory.WORKSPACE_BUCKET_NAME)));
+  }
 
   private void stubNotebookToJson() {
     when(mockFirecloudService.getWorkspace(anyString(), anyString()))
@@ -366,6 +390,40 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testGetNotebooks_omitsExtraDirectories() {
+    HashMap<String, FirecloudWorkspaceAccessEntry> workspaceUserMap = new HashMap<>();
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    FileDetail fileDetail1 = mock(FileDetail.class);
+    FileDetail fileDetail2 = mock(FileDetail.class);
+
+    stubGetWorkspace(dbWorkspace, WorkspaceAccessLevel.OWNER);
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(any(), any()))
+        .thenReturn(workspaceUserMap);
+    when(mockBlob1.getName())
+        .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
+    when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+            TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
+        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
+    when(mockCloudStorageClient.blobToFileDetail(
+            mockBlob1, TestMockFactory.WORKSPACE_BUCKET_NAME, workspaceUserMap.keySet()))
+        .thenReturn(fileDetail1);
+    when(mockCloudStorageClient.blobToFileDetail(
+            mockBlob2, TestMockFactory.WORKSPACE_BUCKET_NAME, workspaceUserMap.keySet()))
+        .thenReturn(fileDetail2);
+    when(fileDetail1.getName()).thenReturn("nope.ipynb");
+    when(fileDetail2.getName()).thenReturn("foo.ipynb");
+
+    List<FileDetail> body =
+        notebooksService.getNotebooks(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
+
+    assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
+  }
+
+  @Test
   public void testGetReadOnlyHtml_allowsDataImage() {
     stubNotebookToJson();
     String dataUri = "data:image/png;base64,MTIz";
@@ -465,6 +523,8 @@ public class NotebooksServiceTest {
             NotebooksService.withNotebookExtension("oldName"),
             NotebooksService.withNotebookExtension("newName"));
 
+    verify(mockCloudStorageClient).deleteBlob(any());
+    verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath()).isEqualTo("gs://bkt/notebooks/newName.ipynb");
   }
