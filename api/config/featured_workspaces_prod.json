@@ -13,21 +13,21 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "How to run WDLs using Cromwell in Researcher Workbench",
-      "namespace": "aou-rw-ec29d5cc",
-      "id": "howtorunwdlsusingcromwellintheresearcherworkbench",
+      "name": "How to run WDLs using Cromwell in the Researcher Workbench (v6)",
+      "namespace": "aou-rw-ac2440c7",
+      "id": "howtorunwdlsusingcromwellintheresearcherworkbenchv6",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "How to use dsub in the Researcher Workbench",
-      "namespace": "aou-rw-64c07d34",
-      "id": "howtousedsubintheresearcherworkbench",
+      "name": "How to use dsub in the Researcher Workbench (v6)",
+      "namespace": "aou-rw-8ea7b935",
+      "id": "howtousedsubintheresearcherworkbenchv6",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "How to use Nextflow in the Researcher Workbench",
-      "namespace": "aou-rw-753ae8a4",
-      "id": "howtousenextflowintheresearcherworkbench",
+      "name": "How to use Nextflow in the Researcher Workbench (v6)",
+      "namespace": "aou-rw-edd5d321",
+      "id": "howtousenextflowintheresearcherworkbenchv6",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
