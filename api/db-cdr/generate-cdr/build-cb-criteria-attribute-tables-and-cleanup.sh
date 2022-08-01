@@ -383,7 +383,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
  WHERE id in (
   SELECT id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q2R2.cb_criteria\`
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         WHERE domain_id = 'SURVEY'
           AND subtype = 'TOPIC'
  EXCEPT DISTINCT

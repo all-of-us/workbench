@@ -166,6 +166,14 @@ public class UpdateCdrConfig {
           cdrDefaultVersionPerTier.put(v.accessTier, v.cdrVersionId);
         }
       }
+
+      if (!StringUtils.isAllEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)
+          && StringUtils.isAnyEmpty(v.wgsFilterSetName, v.wgsBigqueryDataset)) {
+        throw new IllegalArgumentException(
+            String.format(
+                "If either of wgsBigqueryDataset and wgsFilterSetName is defined, the other has to be defined too. Current values are: wgsBigqueryDataset: %s / wgsFilterSetName: %s",
+                v.wgsBigqueryDataset, v.wgsFilterSetName));
+      }
     }
 
     accessTierShortNames.forEach(

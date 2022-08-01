@@ -20,7 +20,7 @@ import org.springframework.data.repository.query.Param;
  * matches in the tree for a specific concept_id. This allows us to use the full text index and
  * makes the query much faster.
  */
-public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
+public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomCBCriteriaDao {
 
   @Query(
       value =

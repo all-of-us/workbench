@@ -20,5 +20,10 @@
     <addColumn tableName="workspace">
       <column name="last_modified_by" type="text"/>
     </addColumn>
+<!--    <dropColumn tableName="cohort" columnName="last_modified_by"/>-->
+<!--    <dropColumn tableName="cohort_review" columnName="last_modified_by"/>-->
+<!--    <dropColumn tableName="concept_set" columnName="last_modified_by"/>-->
+<!--    <dropColumn tableName="data_set" columnName="last_modified_by"/>-->
+<!--    <dropColumn tableName="workspace" columnName="last_modified_by"/>-->
   </changeSet>
 </databaseChangeLog>

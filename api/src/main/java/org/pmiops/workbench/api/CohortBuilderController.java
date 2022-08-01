@@ -26,18 +26,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
-  private final Provider<WorkbenchConfig> configProvider;
   private final CohortBuilderService cohortBuilderService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   CohortBuilderController(
-      Provider<WorkbenchConfig> configProvider,
       CohortBuilderService cohortBuilderService,
-      WorkspaceAuthService workspaceAuthService) {
-    this.configProvider = configProvider;
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortBuilderService = cohortBuilderService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -119,8 +119,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain, surveyName);
-    return ResponseEntity.ok(
-        cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          cohortBuilderService.findCriteriaByDomainV2(domain, term, surveyName, standard, limit));
+    } else {
+      return ResponseEntity.ok(
+          cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
+    }
   }
 
   @Override
@@ -366,6 +371,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (term == null || term.trim().isEmpty()) {
       throw new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "search term", term));
     }
+    // term has double-quoted phrase ["my word"] and more than 1 [*word]
+    // term has one word AND is [-word]
+    // term has 2 words AND has [*word and -word]
+    // term has 2 or more words AND has [*word and *word2]
   }
 
   protected AgeType validateAgeType(String age) {

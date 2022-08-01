@@ -115,8 +115,8 @@
     "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
     "enableMultiReview": true,
-    "enableUpdatedDemographicSurvey": true,
-    "enableDrugWildcardSearch": false
+    "enableDrugWildcardSearch": false,
+    "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

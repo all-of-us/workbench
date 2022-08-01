@@ -318,6 +318,10 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                   <div style={{ padding: '0.25rem 0.5rem' }}>
                     No results found
                   </div>
+                ) : menuOptions.length === 0 ? (
+                  <div style={{ textAlign: 'center' }}>
+                    <Spinner size={36} />
+                  </div>
                 ) : (
                   menuOptions
                     .filter((optionList) =>

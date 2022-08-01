@@ -12,7 +12,7 @@ mkdir screenshots
 
 yarn install
 
-export UI_HOSTNAME=pr-"$PR_SITE_NUM"-dot-all-of-us-workbench-test.appspot.com
+export UI_HOSTNAME=pr-$PR_SITE_NUM-dot-all-of-us-workbench-test.appspot.com
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 export JEST_SILENT_REPORTER_DOTS=true
 export JEST_SILENT_REPORTER_SHOW_PATHS=true
@@ -20,6 +20,9 @@ export JEST_SILENT_REPORTER_SHOW_PATHS=true
 BKT_ROOT=gs://all-of-us-workbench-test.appspot.com/circle-failed-tests
 FAILED_TESTS=$(gsutil cat $BKT_ROOT/\*.$CIRCLE_SHA1.txt || echo -n)
 gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
+
+# This warmup can take over thirty seconds, which causes timeouts in tests.
+time (curl https://pr-$PR_SITE_NUM-dot-api-dot-all-of-us-workbench-test.appspot.com; echo)
 
 set +e
 export FAILED_TESTS_LOG=failed-tests.txt

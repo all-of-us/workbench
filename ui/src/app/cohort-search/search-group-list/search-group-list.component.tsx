@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { TieredMenu } from 'primereact/tieredmenu';
 
 import {
   CdrVersionTiersResponse,
@@ -20,13 +19,11 @@ import {
   generateId,
   typeToTitle,
 } from 'app/cohort-search/utils';
-import { ClrIcon } from 'app/components/icons';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -85,53 +82,7 @@ const styles = reactStyles({
     margin: 0,
     textTransform: 'capitalize',
   },
-  menu: {
-    maxWidth: '15rem',
-    minWidth: '5rem',
-    width: 'auto',
-  },
-  menuButton: {
-    background: colors.white,
-    border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
-    borderRadius: '0.125rem',
-    color: colorWithWhiteness(colors.black, 0.45),
-    cursor: 'pointer',
-    fontSize: '12px',
-    fontWeight: 100,
-    height: '1.5rem',
-    letterSpacing: '1px',
-    lineHeight: '1.5rem',
-    padding: '0 0.5rem',
-    textTransform: 'uppercase',
-    verticalAlign: 'middle',
-  },
 });
-
-const css = `
-  body .p-menuitem > .p-menuitem-link {
-    height: 1.25rem;
-    line-height: 1.25rem;
-    padding: 0 1rem;
-  }
-  body .p-menuitem.menuitem-header > .p-menuitem-link {
-    cursor: default;
-    font-size: 12px;
-    font-weight: 600;
-    height: auto;
-    line-height: 0.75rem;
-    padding-left: 0.5rem;
-  }
-  body .p-menuitem.menuitem-header > .p-menuitem-link:hover {
-    background: ${colors.white};
-  }
-  body .p-tieredmenu .p-menu-separator {
-    margin: 0.25rem 0;
-  }
-  body .p-tieredmenu .p-submenu-list {
-    padding: 0.5rem 0;
-    width: 10rem;
-  }
-`;
 
 function mapMenuItem(item: CriteriaMenu) {
   const { category, domainId, group, id, name, sortOrder, type } = item;
@@ -161,21 +112,18 @@ interface Props {
 interface State {
   criteriaMenuOptions: Array<any>;
   index: number;
-  loadingMenuOptions: boolean;
 }
 const SearchGroupList = fp.flow(
   withCurrentWorkspace(),
   withCdrVersions()
 )(
   class extends React.Component<Props, State> {
-    private criteriaMenu: any;
     private subscription: Subscription;
     constructor(props: Props) {
       super(props);
       this.state = {
         criteriaMenuOptions: [],
         index: 0,
-        loadingMenuOptions: false,
       };
     }
 
@@ -203,7 +151,6 @@ const SearchGroupList = fp.flow(
     }
 
     getMenuOptions() {
-      this.setState({ loadingMenuOptions: true });
       const {
         workspace: { cdrVersionId, id, namespace },
       } = this.props;
@@ -229,46 +176,10 @@ const SearchGroupList = fp.flow(
             fp.groupBy('category', menuOptions)
           );
           criteriaMenuOptionsStore.next(criteriaMenuOptions);
-          this.setState({ loadingMenuOptions: false });
         });
-    }
-
-    mapCriteriaMenuItem(domain: any, temporalGroup: number) {
-      if (!!domain.children) {
-        return {
-          label: domain.name,
-          items: domain.children.map((dt) =>
-            this.mapCriteriaMenuItem(dt, temporalGroup)
-          ),
-        };
-      }
-      return { label: domain.name, command: () => this.launchSearch(domain) };
-    }
-
-    get criteriaMenuItems() {
-      const { criteriaMenuOptions, loadingMenuOptions } = this.state;
-      if (loadingMenuOptions) {
-        return [{ icon: 'pi pi-spin pi-spinner' }];
-      } else {
-        let menuItems = [];
-        criteriaMenuOptions.forEach((options, index) => {
-          menuItems = [
-            ...menuItems,
-            { label: options[0].category, className: 'menuitem-header' },
-            ...options.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
-          ];
-          if (index < criteriaMenuOptions.length - 1) {
-            menuItems.push({ separator: true });
-          }
-        });
-        return menuItems;
-      }
     }
 
     launchSearch(criteria: any, searchTerms?: string) {
-      if (this.criteriaMenu) {
-        this.criteriaMenu.hide();
-      }
       const { role } = this.props;
       const { domain, type, standard } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
@@ -300,7 +211,6 @@ const SearchGroupList = fp.flow(
       const { criteriaMenuOptions, index } = this.state;
       return (
         <React.Fragment>
-          <style>{css}</style>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h2 style={styles.listHeader}>
               {role === 'excludes' && <span>And</span>} {role.slice(0, -1)}{' '}
@@ -329,30 +239,12 @@ const SearchGroupList = fp.flow(
                 Group {groups.length + index + 1}
               </div>
             </div>
-            {serverConfigStore.get().config.enableUniversalSearch ? (
-              <CohortCriteriaMenu
-                launchSearch={(criteria, searchTerms) =>
-                  this.launchSearch(criteria, searchTerms)
-                }
-                menuOptions={criteriaMenuOptions}
-              />
-            ) : (
-              <div style={styles.cardBlock}>
-                <TieredMenu
-                  style={{ ...styles.menu, padding: '0.5rem 0' }}
-                  appendTo={document.body}
-                  model={this.criteriaMenuItems}
-                  popup
-                  ref={(el) => (this.criteriaMenu = el)}
-                />
-                <button
-                  style={styles.menuButton}
-                  onClick={(e) => this.criteriaMenu.toggle(e)}
-                >
-                  Add Criteria <ClrIcon shape='caret down' size={12} />
-                </button>
-              </div>
-            )}
+            <CohortCriteriaMenu
+              launchSearch={(criteria, searchTerms) =>
+                this.launchSearch(criteria, searchTerms)
+              }
+              menuOptions={criteriaMenuOptions}
+            />
           </div>
         </React.Fragment>
       );

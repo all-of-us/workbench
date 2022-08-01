@@ -30,6 +30,7 @@ import {
   currentCohortSearchContextStore,
   currentCohortStore,
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
@@ -44,7 +45,7 @@ const styles = reactStyles({
   },
 });
 
-function colStyle(percentage: string) {
+const colStyle = (percentage: string) => {
   return {
     flex: `0 0 ${percentage}%`,
     maxWidth: `${percentage}%`,
@@ -53,26 +54,40 @@ function colStyle(percentage: string) {
     position: 'relative',
     width: '100%',
   } as React.CSSProperties;
-}
+};
 
-interface Props extends WithSpinnerOverlayProps, RouteComponentProps {
+const clearCohort = () => {
+  idsInUse.next(new Set());
+  currentCohortStore.next(undefined);
+  currentCohortSearchContextStore.next(undefined);
+  searchRequestStore.next({
+    includes: [],
+    excludes: [],
+    dataFilters: [],
+  } as SearchRequest);
+  localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
+};
+
+interface Props
+  extends WithSpinnerOverlayProps,
+    RouteComponentProps<MatchParams> {
   cohortContext: any;
   workspace: WorkspaceData;
 }
 
 interface State {
-  loading: boolean;
-  overview: boolean;
-  criteria: SearchRequest;
-  updateCount: number;
   cohort: Cohort;
-  cohortError: boolean;
-  minHeight: string;
-  updateGroupListsCount: number;
   cohortChanged: boolean;
-  userClickedSaveRequest: boolean;
-  unsavedSelections: boolean;
+  cohortError: boolean;
+  criteria: SearchRequest;
+  loading: boolean;
+  minHeight: string;
+  overview: boolean;
   searchContext: any;
+  unsavedSelections: boolean;
+  updateCount: number;
+  updateGroupListsCount: number;
+  userClickedSaveRequest: boolean;
 }
 
 export const CohortPage = fp.flow(
@@ -87,18 +102,18 @@ export const CohortPage = fp.flow(
     constructor(props: any) {
       super(props);
       this.state = {
-        loading: false,
-        overview: false,
-        criteria: { dataFilters: [], includes: [], excludes: [] },
-        updateCount: 0,
         cohort: undefined,
-        cohortError: false,
-        minHeight: '10rem',
-        updateGroupListsCount: 0,
         cohortChanged: false,
-        userClickedSaveRequest: false,
-        unsavedSelections: false,
+        cohortError: false,
+        criteria: { dataFilters: [], includes: [], excludes: [] },
+        loading: false,
+        minHeight: '10rem',
+        overview: false,
         searchContext: undefined,
+        unsavedSelections: false,
+        updateCount: 0,
+        updateGroupListsCount: 0,
+        userClickedSaveRequest: false,
       };
     }
 
@@ -144,16 +159,8 @@ export const CohortPage = fp.flow(
     }
 
     componentWillUnmount() {
+      clearCohort();
       this.subscription.unsubscribe();
-      idsInUse.next(new Set());
-      currentCohortStore.next(undefined);
-      currentCohortSearchContextStore.next(undefined);
-      searchRequestStore.next({
-        includes: [],
-        excludes: [],
-        dataFilters: [],
-      } as SearchRequest);
-      localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
     }
 
     initCohort() {
@@ -219,6 +226,40 @@ export const CohortPage = fp.flow(
           localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);
         }
       }
+    }
+
+    onCohortClear() {
+      const {
+        history,
+        location: { search },
+        match: {
+          params: { ns, wsid },
+        },
+      } = this.props;
+      clearCohort();
+      this.setState(
+        {
+          cohort: {
+            criteria: "{'includes':[],'excludes':[],'dataFilters':[]}",
+            name: '',
+            type: '',
+          },
+          cohortChanged: false,
+          unsavedSelections: false,
+        },
+        () => {
+          // Clear cohortId query param if exists in url
+          if (search.indexOf('cohortId') > -1) {
+            history.push(`/workspaces/${ns}/${wsid}/data/cohorts/build`);
+          }
+        }
+      );
+    }
+
+    onDiscardCohortChnages() {
+      searchRequestStore.next(
+        parseCohortDefinition(this.state.cohort.criteria)
+      );
     }
 
     showUnsavedChangesModal(): boolean {
@@ -335,6 +376,12 @@ export const CohortPage = fp.flow(
                       <ListOverview
                         cohort={cohort}
                         cohortChanged={cohortChanged}
+                        onCreateNewCohort={() => this.onCohortClear()}
+                        onDiscardCohortChanges={() =>
+                          searchRequestStore.next(
+                            parseCohortDefinition(this.state.cohort.criteria)
+                          )
+                        }
                         searchRequest={criteria}
                         updateCount={updateCount}
                         updating={() =>

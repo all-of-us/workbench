@@ -36,6 +36,9 @@ public class CBCriteriaDaoTest {
   private DbCriteria icd9Criteria;
   private DbCriteria icd10Criteria;
   private DbCriteria measurementCriteria;
+  private DbCriteria drugCriteria;
+  private DbCriteria drugCriteria2;
+  private DbCriteria drugCriteria3;
   private DbCriteria raceAsian;
   private DbCriteria raceWhite;
   private DbCriteria gender;
@@ -130,6 +133,45 @@ public class CBCriteriaDaoTest {
                 .addCode("LP123")
                 .addSelectable(true)
                 .addFullText("001[MEASUREMENT_rank1]")
+                .build());
+    drugCriteria =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.DRUG.toString())
+                .addType(CriteriaType.RXNORM.toString())
+                .addCount(100L)
+                .addHierarchy(true)
+                .addStandard(true)
+                .addCode("ASP81")
+                .addName("BabyAspirin")
+                .addSelectable(true)
+                .addFullText("BabyAspirin[DRUG_rank1]")
+                .build());
+    drugCriteria2 =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.DRUG.toString())
+                .addType(CriteriaType.RXNORM.toString())
+                .addCount(100L)
+                .addHierarchy(true)
+                .addStandard(true)
+                .addCode("ASP100")
+                .addName("AdultAspirin")
+                .addSelectable(true)
+                .addFullText("AdultAspirin[DRUG_rank1]")
+                .build());
+    drugCriteria3 =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.DRUG.toString())
+                .addType(CriteriaType.RXNORM.toString())
+                .addCount(100L)
+                .addHierarchy(true)
+                .addStandard(true)
+                .addCode("ASP1000")
+                .addName("AdultOtherAspirin")
+                .addSelectable(true)
+                .addFullText("AdultOtherAspirin[DRUG_rank1]")
                 .build());
     raceAsian =
         cbCriteriaDao.save(

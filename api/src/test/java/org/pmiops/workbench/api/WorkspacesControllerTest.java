@@ -166,7 +166,6 @@ import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.model.WorkspaceOperationStatus;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
-import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
@@ -3390,20 +3389,19 @@ public class WorkspacesControllerTest {
                             new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
             .getBody();
 
-    WorkspaceResourcesRequest workspaceResourcesRequest = new WorkspaceResourcesRequest();
-    workspaceResourcesRequest.setTypesToFetch(
+    List<String> typesToFetch =
         ImmutableList.of(
-            ResourceType.COHORT,
-            ResourceType.COHORT_REVIEW,
-            ResourceType.CONCEPT_SET,
-            ResourceType.DATASET));
+            ResourceType.COHORT.toString(),
+            ResourceType.COHORT_REVIEW.toString(),
+            ResourceType.CONCEPT_SET.toString(),
+            ResourceType.DATASET.toString());
 
     WorkspaceResourceResponse workspaceResourceResponse =
         workspacesController
-            .getWorkspaceResources(
-                workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest)
+            .getWorkspaceResourcesV2(workspace.getNamespace(), workspace.getId(), typesToFetch)
             .getBody();
-    assertThat(workspaceResourceResponse.size()).isEqualTo(4);
+    assertThat(workspaceResourceResponse).hasSize(4);
+
     List<Cohort> cohorts =
         workspaceResourceResponse.stream()
             .map(WorkspaceResource::getCohort)

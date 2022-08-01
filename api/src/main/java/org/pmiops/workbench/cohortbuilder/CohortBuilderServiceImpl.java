@@ -16,10 +16,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -69,6 +72,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           .append(String.format("[%s_rank1]", Domain.OBSERVATION.toString().toLowerCase()))
           .append(String.format("[%s_rank1]", Domain.MEASUREMENT.toString().toLowerCase()))
           .append(String.format("[%s_rank1]", Domain.DRUG.toString().toLowerCase()));
+  private static final String MODIFIED_TERMS = "modifiedTerms";
+  private static final String ENDS_WITH_TERMS = "endsWithTerms";
 
   private final BigQueryService bigQueryService;
   private final CohortQueryBuilder cohortQueryBuilder;
@@ -281,7 +286,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     if (isTopCountsSearch(term)) {
       return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
     }
-
     String modifiedSearchTerm = modifyTermMatch(term);
     // if the modified search term is empty return an empty result
     if (modifiedSearchTerm.isEmpty()) {
@@ -304,6 +308,67 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
               domain, modifiedSearchTerm, standard, pageRequest);
     }
+
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
+  }
+
+  @Override
+  public CriteriaListWithCountResponse findCriteriaByDomainV2(
+      String domain, String term, String surveyName, Boolean standard, Integer limit) {
+    PageRequest pageRequest =
+        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+
+    // if search term is empty find the top counts for the domain
+    if (isTopCountsSearch(term)) {
+      return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
+    }
+
+    Map<String, String> parsedTerms = modifyTermMatchUseEndsWithTerms(term);
+    String modifiedSearchTerm = parsedTerms.get(MODIFIED_TERMS);
+    List<String> endsWithTerms = new ArrayList<>();
+    if (parsedTerms.get(ENDS_WITH_TERMS).length() > 0) {
+      endsWithTerms.addAll(Arrays.asList(parsedTerms.get(ENDS_WITH_TERMS).split(",")));
+    }
+    // if the modified search term is empty and endsWithTerms is empty return an empty result
+    if (modifiedSearchTerm.isEmpty() && endsWithTerms.isEmpty()) {
+      return new CriteriaListWithCountResponse().totalCount(0L);
+    }
+
+    // if domain type is survey and modifiedSearchTerm is not empty then return search survey
+    if (isSurveyDomain(domain) && modifiedSearchTerm.length() > 0) {
+      return findSurveyCriteriaBySearchTerm(surveyName, pageRequest, modifiedSearchTerm);
+    }
+
+    // find a match on concept code
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
+            domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
+
+    // if no match is found on concept code then find match on full text index by term
+    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+      if (endsWithTerms.isEmpty()) {
+        // regular search with modified terms, no endsWithTerms
+        dbCriteriaPage =
+            cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
+                domain, modifiedSearchTerm, standard, pageRequest);
+      } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.isEmpty()) {
+        // search only endsWithTerms for each endsWithTerm
+        dbCriteriaPage =
+            cbCriteriaDao.findCriteriaByDomainAndStandardAndNameEndsWith(
+                domain, standard, endsWithTerms, pageRequest);
+      } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
+        // search for eachEndsWithTerm and modifiedSearchTerm
+        dbCriteriaPage =
+            cbCriteriaDao.findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
+                domain, standard, modifiedSearchTerm, endsWithTerms, pageRequest);
+      }
+    }
+
     return new CriteriaListWithCountResponse()
         .items(
             dbCriteriaPage.getContent().stream()
@@ -619,6 +684,65 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               return "+" + keywords[i] + "*";
             })
         .collect(Collectors.joining());
+  }
+
+  protected Map<String, String> modifyTermMatchUseEndsWithTerms(String term) {
+    Map<String, String> retMap = new HashMap<>();
+    List<String> modifiedTerms = new ArrayList<>();
+    // add quoted pattern to the list of modifiedTerms
+    String quotedPattern = "([+|-]?\\\"((\\w+)\\s?)+\\\")";
+    Pattern pattern = Pattern.compile(quotedPattern);
+    Matcher matcher = pattern.matcher(term);
+    while (matcher.find()) {
+      modifiedTerms.add(
+          matcher.group().matches("^[+|-].*") ? matcher.group() : "+" + matcher.group());
+    }
+    // remove the quoted phrase/pattern
+    List<String> words =
+        new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
+    // process endsWith words
+    List<String> endsWith =
+        words.stream()
+            .filter(word -> word.startsWith("*") && word.length() >= 4)
+            .collect(Collectors.toList());
+    // now process non-endsWith words
+    words.removeAll(endsWith);
+    words.stream()
+        .filter(word -> word.length() >= 2 && !word.startsWith("*"))
+        .forEach(
+            word -> {
+              if (word.matches("-\\w+(-\\w+)+")) {
+                // -covid-19 -type-2-diabetes => -"covid-19" -"type-2-diabetes"
+                modifiedTerms.add("-\"" + word.substring(1) + "\"");
+              } else if (word.matches("\\+\\w+(-\\w+)+")) {
+                // +covid-19 +type-2-diabetes => +"covid-19" +"type-2-diabetes"
+                modifiedTerms.add("+\"" + word.substring(1) + "\"");
+              } else if (word.matches("\\w+(-\\w+)+")) {
+                // covid-19 type-2-diabetes => +"covid-19" +"type-2-diabetes"
+                modifiedTerms.add("+\"" + word + "\"");
+              } else if (word.startsWith("-")) {
+                // -diabet => -diabet
+                modifiedTerms.add(word);
+              } else if (word.startsWith("+")) {
+                // +diabet => +diabet*
+                modifiedTerms.add(word + "*");
+              } else {
+                // diabet => +diabet*
+                modifiedTerms.add("+" + word + "*");
+              }
+            });
+
+    // create strings for endsWithTerms and modifiedTerms
+    retMap.put(ENDS_WITH_TERMS, endsWith.stream().collect(Collectors.joining(",")));
+    retMap.put(
+        MODIFIED_TERMS,
+        modifiedTerms.stream()
+            .collect(Collectors.joining(""))
+            .replaceAll("\\+{2,}", "\\+")
+            .replaceAll("\\-{2,}", "\\-")
+            .replaceAll("\\*{2,}", "\\*"));
+
+    return retMap;
   }
 
   @NotNull

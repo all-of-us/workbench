@@ -112,7 +112,7 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableDSCREntryInRecentModified": false,
+    "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
     "enableMultiReview": false,
     "enableUpdatedDemographicSurvey": true,
@@ -123,12 +123,6 @@
     "bigQueryDataset": "workspace_action_audit_staging",
     "bigQueryTable": "workbench_action_audit_staging",
     "partitionColumn": "_PARTITIONTIME"
-  },
-  "rdrExport": {
-    "host": "all-of-us-rdr-staging.appspot.com",
-    "queueName": "rdrExportQueue",
-    "exportObjectsPerTask": 10,
-    "exportDemoSurveyV2": true
   },
   "captcha": {
     "enableCaptcha": true,

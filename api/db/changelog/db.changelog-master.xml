@@ -209,7 +209,8 @@
   <include file="changelog/db.changelog-199-update-demographic-survey-v2.xml"/>
   <include file="changelog/db.changelog-200-demographic-survey-v2-tweaks.xml"/>
   <include file="changelog/db.changelog-201-demographic-survey-v2-aian.xml"/>
-  <include file="changelog/db.changelog-202-last-modified-by.xml"/>
+  <include file="changelog/db.changelog-202-drop-user-recent-resource.xml"/>
+  <include file="changelog/db.changelog-203-last-modified-by.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

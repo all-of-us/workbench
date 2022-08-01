@@ -2,7 +2,13 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
-import { AttrName, CriteriaSubType, Domain, Operator } from 'generated/fetch';
+import {
+  AttrName,
+  CriteriaSubType,
+  CriteriaType,
+  Domain,
+  Operator,
+} from 'generated/fetch';
 
 import { PM_UNITS, PREDEFINED_ATTRIBUTES } from 'app/cohort-search/constant';
 import {
@@ -373,9 +379,26 @@ export const AttributesPage = fp.flow(
       const { form, options } = this.state;
       const { cdrVersionId } = currentWorkspaceStore.getValue();
       const surveyId = path.split('.')[0];
-      const surveyNode =
-        !!ppiSurveys.getValue()[cdrVersionId] &&
-        ppiSurveys.getValue()[cdrVersionId].find((n) => n.id === +surveyId);
+      let surveyNode = ppiSurveys
+        .getValue()
+        [cdrVersionId]?.find((n) => n.id === +surveyId);
+      if (!surveyNode) {
+        await cohortBuilderApi()
+          .findCriteriaBy(
+            namespace,
+            id,
+            Domain.SURVEY.toString(),
+            CriteriaType.PPI.toString(),
+            false,
+            0
+          )
+          .then(({ items }) => {
+            const rootSurveys = ppiSurveys.getValue();
+            rootSurveys[cdrVersionId] = items;
+            ppiSurveys.next(rootSurveys);
+            surveyNode = items.find((n) => n.id === +surveyId);
+          });
+      }
       if (
         !!surveyNode &&
         [COPE_SURVEY_GROUP_NAME, MINUTE_SURVEY_GROUP_NAME].includes(

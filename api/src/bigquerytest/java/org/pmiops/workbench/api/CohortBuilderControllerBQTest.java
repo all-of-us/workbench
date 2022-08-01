@@ -113,7 +113,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private AccessTierDao accessTierDao;
 
-  @Mock private Provider<WorkbenchConfig> configProvider;
+  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private DbCriteria drugNode1;
   private DbCriteria drugNode2;
@@ -159,12 +159,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void setUp() {
     WorkbenchConfig testConfig = WorkbenchConfig.createEmptyConfig();
 
-    when(configProvider.get()).thenReturn(testConfig);
+    when(workbenchConfigProvider.get()).thenReturn(testConfig);
 
     when(firecloudService.isUserMemberOfGroupWithCache(anyString(), anyString())).thenReturn(true);
 
     controller =
-        new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
+        new CohortBuilderController(
+            cohortBuilderService, workspaceAuthService, workbenchConfigProvider);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
