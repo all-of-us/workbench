@@ -97,6 +97,7 @@ public class DataSetMapperTest {
     dbDataset.setIncludesAllParticipants(false);
     dbDataset.setDescription("All Blue-eyed Blondes");
     dbDataset.setLastModifiedTime(Timestamp.from(Instant.now()));
+    dbDataset.setLastModifiedBy("recentUser@gmail.com");
     dbDataset.setInvalid(false);
     dbDataset.setWorkspaceId(1L);
     dbDataset.setPrePackagedConceptSet(
@@ -227,6 +228,7 @@ public class DataSetMapperTest {
     assertThat(dbDataset.getWorkspaceId()).isEqualTo(dataSet.getWorkspaceId());
     assertThat(dbDataset.getLastModifiedTime().toInstant().toEpochMilli())
         .isEqualTo(dataSet.getLastModifiedTime());
+    assertThat(dbDataset.getLastModifiedBy()).isEqualTo(dataSet.getLastModifiedBy());
     assertThat(dbDataset.getPrePackagedConceptSet())
         .isEqualTo(
             dataSet.getPrePackagedConceptSet().stream()
