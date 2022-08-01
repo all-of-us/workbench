@@ -253,6 +253,46 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<Criteria> findCriteriaAutoCompleteV2(
+      String domain, String term, String type, Boolean standard, Integer limit) {
+    PageRequest pageRequest =
+        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+
+    Map<String, String> parsedTerms = modifyTermMatchUseEndsWithTerms(term);
+    String modifiedSearchTerm = parsedTerms.get(MODIFIED_TERMS);
+    List<String> endsWithTerms = new ArrayList<>();
+    if (parsedTerms.get(ENDS_WITH_TERMS).length() > 0) {
+      endsWithTerms.addAll(Arrays.asList(parsedTerms.get(ENDS_WITH_TERMS).split(",")));
+    }
+
+    List<DbCriteria> criteriaList = new ArrayList<>();
+    if (endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
+              domain, type, standard, modifiedSearchTerm, pageRequest);
+    } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.isEmpty()) {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
+              domain, type, standard, endsWithTerms, pageRequest);
+    } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
+              domain, type, standard, modifiedSearchTerm, endsWithTerms, pageRequest);
+    }
+
+    if (criteriaList.isEmpty()) {
+      // why we do not use term.replaceAll("[()+\"*-]", "") as in
+      // findCriteriaByDomain()
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
+              domain, type, standard, term, pageRequest);
+    }
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<Criteria> findCriteriaBy(
       String domain, String type, Boolean standard, Long parentId) {
     List<DbCriteria> criteriaList;
@@ -352,17 +392,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       if (endsWithTerms.isEmpty()) {
-        // regular search with modified terms, no endsWithTerms
         dbCriteriaPage =
             cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
                 domain, modifiedSearchTerm, standard, pageRequest);
       } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.isEmpty()) {
-        // search only endsWithTerms for each endsWithTerm
         dbCriteriaPage =
             cbCriteriaDao.findCriteriaByDomainAndStandardAndNameEndsWith(
                 domain, standard, endsWithTerms, pageRequest);
       } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
-        // search for eachEndsWithTerm and modifiedSearchTerm
         dbCriteriaPage =
             cbCriteriaDao.findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
                 domain, standard, modifiedSearchTerm, endsWithTerms, pageRequest);
