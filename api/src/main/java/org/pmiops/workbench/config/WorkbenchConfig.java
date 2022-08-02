@@ -105,12 +105,8 @@ public class WorkbenchConfig {
     // The contact email from Carahsoft for billing account setup
     public String carahsoftEmail;
 
-    // The batch size used by the cron job to process users
+    // The batch size used by the cron job to process users.
     public Integer freeTierCronUserBatchSize;
-
-    // The number of minutes elapsed after the last cron run to update the free tier billing
-    // information
-    public Integer minutesBeforeLastFreeTierJob;
 
     // A value that defines the number of days to consider between the last update of the Free tier
     // usage in the database and the last workspace update when calculating the eligibility of a

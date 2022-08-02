@@ -106,7 +106,6 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.freeTierCronUserBatchSize = 10;
-    workbenchConfig.billing.minutesBeforeLastFreeTierJob = 0;
     workbenchConfig.billing.numberOfDaysToConsiderForFreeTierUsageUpdate = 2l;
 
     // by default we have 0 spend
