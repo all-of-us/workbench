@@ -127,9 +127,6 @@ public class NotebooksControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion.setAccessTier(TestMockFactory.createRegisteredTierForTests(accessTierDao));
     cdrVersion = cdrVersionDao.save(cdrVersion);
-
-    // required to enable the use of default method blobToFileDetail()
-//    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   @AfterEach

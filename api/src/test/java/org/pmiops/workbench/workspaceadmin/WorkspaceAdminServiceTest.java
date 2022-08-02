@@ -171,9 +171,6 @@ public class WorkspaceAdminServiceTest {
     when(mockFirecloudService.getGroup(anyString()))
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
 
-//    // required to enable the use of default method blobToFileDetail()
-//    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
-
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
