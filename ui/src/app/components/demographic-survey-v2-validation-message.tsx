@@ -3,7 +3,10 @@ import * as fp from 'lodash/fp';
 
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 
-import { possiblePreferNotToAnswerErrors } from './demographic-survey-v2';
+import {
+  possiblePreferNotToAnswerErrors,
+  questionsIndex,
+} from './demographic-survey-v2';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 
 interface DemographicSurveyValidationMessageProps
@@ -29,7 +32,9 @@ export const DemographicSurveyValidationMessage = fp.flow(
         {errors && (
           <>
             {Object.keys(errors).map((key) => (
-              <li key={errors[key][0]}>{errors[key][0]}</li>
+              <li key={errors[key][0]}>
+                {errors[key]} (Question {questionsIndex[key]})
+              </li>
             ))}
             {showPreferNotToAnswerMessage(errors) && (
               <li>

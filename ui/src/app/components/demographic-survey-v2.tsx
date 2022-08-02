@@ -17,6 +17,21 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withProfileErrorModal } from 'app/components/with-error-modal';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import {
+  DISABILITY_CONCENTRATING,
+  DISABILITY_DRESSING,
+  DISABILITY_ERRANDS,
+  DISABILITY_HEARING,
+  DISABILITY_SEEING,
+  DISABILITY_WALKING,
+  DISADVANTAGED,
+  EDUCATION,
+  ETHNIC_CATEGORIES,
+  GENDER_IDENTITIES,
+  SEX_AT_BIRTH,
+  SEXUAL_ORIENTATIONS,
+  YEAR_OF_BIRTH,
+} from 'app/utils/constants';
 
 import {
   CheckBox,
@@ -30,19 +45,35 @@ import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 import { YesNoOptionalQuestion } from './yes-no-optional-question';
 
 export const possiblePreferNotToAnswerErrors = [
-  'education',
-  'ethnicCategories',
-  'disabilityConcentrating',
-  'disabilityDressing',
-  'disabilityErrands',
-  'disabilityHearing',
-  'disabilitySeeing',
-  'disabilityWalking',
-  'disadvantaged',
-  'genderIdentities',
-  'sexAtBirth',
-  'sexualOrientations',
+  ETHNIC_CATEGORIES,
+  GENDER_IDENTITIES,
+  SEX_AT_BIRTH,
+  SEXUAL_ORIENTATIONS,
+  DISABILITY_HEARING,
+  DISABILITY_SEEING,
+  DISABILITY_CONCENTRATING,
+  DISABILITY_WALKING,
+  DISABILITY_DRESSING,
+  DISABILITY_ERRANDS,
+  EDUCATION,
+  DISADVANTAGED,
 ];
+
+export const questionsIndex = {
+  [ETHNIC_CATEGORIES]: 1,
+  [GENDER_IDENTITIES]: 2,
+  [SEX_AT_BIRTH]: 3,
+  [SEXUAL_ORIENTATIONS]: 4,
+  [DISABILITY_HEARING]: 5,
+  [DISABILITY_SEEING]: 6,
+  [DISABILITY_CONCENTRATING]: 7,
+  [DISABILITY_WALKING]: 8,
+  [DISABILITY_DRESSING]: 9,
+  [DISABILITY_ERRANDS]: 10,
+  [YEAR_OF_BIRTH]: 12,
+  [EDUCATION]: 13,
+  [DISADVANTAGED]: 14,
+};
 
 const maxYear = new Date().getFullYear();
 const minYear = maxYear - 125;
@@ -97,7 +128,7 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
             allowEmpty: false,
             message:
               '^You must either fill in your year of birth or check the corresponding ' +
-              '"Prefer not to answer" checkbox',
+              '"Prefer not to answer" checkbox ',
           },
           numericality: {
             onlyInteger: true,
@@ -111,16 +142,46 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     ethnicCategories: { presence: { allowEmpty: false } },
     genderIdentities: { presence: { allowEmpty: false } },
     sexAtBirth: { presence: { allowEmpty: false } },
+    sexualOrientations: { presence: { allowEmpty: false } },
+    disabilityHearing: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty hearing can't be blank",
+      },
+    },
+    disabilitySeeing: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty seeing can't be blank",
+      },
+    },
+    disabilityConcentrating: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty concentrating can't be blank",
+      },
+    },
+    disabilityWalking: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty walking can't be blank",
+      },
+    },
+    disabilityDressing: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty dressing can't be blank",
+      },
+    },
+    disabilityErrands: {
+      presence: {
+        allowEmpty: false,
+        message: "^ Difficulty doing errands can't be blank",
+      },
+    },
     ...yearOfBirth,
     education: { presence: { allowEmpty: false } },
     disadvantaged: { presence: { allowEmpty: false } },
-    disabilityHearing: { presence: { allowEmpty: false } },
-    disabilitySeeing: { presence: { allowEmpty: false } },
-    disabilityConcentrating: { presence: { allowEmpty: false } },
-    disabilityWalking: { presence: { allowEmpty: false } },
-    disabilityDressing: { presence: { allowEmpty: false } },
-    disabilityErrands: { presence: { allowEmpty: false } },
-    sexualOrientations: { presence: { allowEmpty: false } },
     surveyComments: {
       length: {
         maximum: 1000,
@@ -225,9 +286,16 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
       }
     }, [survey, isAian]);
 
+    const getQuestionLabel = (key, label) => {
+      return questionsIndex[key] + '. ' + label;
+    };
+
     const disadvantagedBackgroundQuestion = (
       <div>
-        14. Are you an individual from a disadvantaged background, as&nbsp;
+        {getQuestionLabel(
+          DISADVANTAGED,
+          'Are you an individual from a disadvantaged background, as&nbsp;'
+        )}
         <a
           target='_blank'
           href='https://extramural-diversity.nih.gov/diversity-matters/disadvantaged-backgrounds'
@@ -265,7 +333,10 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         </div>
         <FlexColumn>
           <MultipleChoiceQuestion
-            question='1. Which Racial and Ethnic categories describe you?'
+            question={getQuestionLabel(
+              ETHNIC_CATEGORIES,
+              'Which Racial and Ethnic categories describe you?'
+            )}
             label='Racial and/or Ethnic Identity/Identities'
             options={[
               {
@@ -670,7 +741,10 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             }
           />
           <MultipleChoiceQuestion
-            question='2. What terms best express how you describe your current gender identity?'
+            question={getQuestionLabel(
+              GENDER_IDENTITIES,
+              'What terms best express how you describe your current gender identity?'
+            )}
             label='Gender Identity/Identities'
             options={[
               { label: 'Genderqueer', value: GenderIdentityV2.GENDERQUEER },
@@ -731,13 +805,16 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             selected={survey.genderIdentities}
             onChange={(value) =>
               onUpdate(
-                'genderIdentities',
+                GENDER_IDENTITIES,
                 value.filter((v) => v !== GenderIdentityV2.PREFERNOTTOANSWER)
               )
             }
           />
           <MultipleChoiceQuestion
-            question='3. What was the sex assigned to you at birth, such as on your original birth certificate?'
+            question={getQuestionLabel(
+              SEX_AT_BIRTH,
+              'What was the sex assigned to you at birth, such as on your original birth certificate?'
+            )}
             label='Sex Assigned at Birth'
             options={[
               { label: 'Female', value: SexAtBirthV2.FEMALE },
@@ -771,11 +848,14 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               ) {
                 onUpdate('sexAtBirthOtherText', null);
               }
-              onUpdate('sexAtBirth', value);
+              onUpdate(SEX_AT_BIRTH, value);
             }}
           />
           <MultipleChoiceQuestion
-            question='4. What terms best express how you describe your current sexual orientation?'
+            question={getQuestionLabel(
+              SEXUAL_ORIENTATIONS,
+              'What terms best express how you describe your current sexual orientation?'
+            )}
             label='Sexual Orientation(s)'
             options={[
               { label: 'Asexual', value: SexualOrientationV2.ASEXUAL },
@@ -838,44 +918,60 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             selected={survey.sexualOrientations}
             onChange={(value) =>
               onUpdate(
-                'sexualOrientations',
+                SEXUAL_ORIENTATIONS,
                 value.filter((v) => v !== SexualOrientationV2.PREFERNOTTOANSWER)
               )
             }
           />
           <YesNoOptionalQuestion
-            question='5. Are you deaf or do you have serious difficulty hearing?'
+            question={getQuestionLabel(
+              DISABILITY_HEARING,
+              'Are you deaf or do you have serious difficulty hearing?'
+            )}
             selected={survey.disabilityHearing}
-            onChange={(value) => onUpdate('disabilityHearing', value)}
+            onChange={(value) => onUpdate(DISABILITY_HEARING, value)}
           />
           <YesNoOptionalQuestion
-            question='6. Are you blind or do you have serious difficulty seeing, even when
-            wearing glasses?'
+            question={getQuestionLabel(
+              DISABILITY_SEEING,
+              'Are you blind or do you have serious difficulty seeing, even when wearing glasses?'
+            )}
             selected={survey.disabilitySeeing}
-            onChange={(value) => onUpdate('disabilitySeeing', value)}
+            onChange={(value) => onUpdate(DISABILITY_SEEING, value)}
           />
           <YesNoOptionalQuestion
-            question='7. Because of a physical, cognitive, or emotional condition, do you
-            have serious difficulty concentrating, remembering, or making
-            decisions?'
+            question={getQuestionLabel(
+              DISABILITY_CONCENTRATING,
+              'Because of a physical, cognitive, or emotional condition, do you have serious ' +
+                'difficulty concentrating, remembering, or making decisions?'
+            )}
             selected={survey.disabilityConcentrating}
-            onChange={(value) => onUpdate('disabilityConcentrating', value)}
+            onChange={(value) => onUpdate(DISABILITY_CONCENTRATING, value)}
           />
           <YesNoOptionalQuestion
-            question='8. Do you have serious difficulty walking or climbing stairs?'
+            question={getQuestionLabel(
+              DISABILITY_WALKING,
+              'Do you have serious difficulty walking or climbing stairs?'
+            )}
             selected={survey.disabilityWalking}
-            onChange={(value) => onUpdate('disabilityWalking', value)}
+            onChange={(value) => onUpdate(DISABILITY_WALKING, value)}
           />
           <YesNoOptionalQuestion
-            question='9. Do you have difficulty dressing or bathing?'
+            question={getQuestionLabel(
+              DISABILITY_DRESSING,
+              'Do you have difficulty dressing or bathing?'
+            )}
             selected={survey.disabilityDressing}
-            onChange={(value) => onUpdate('disabilityDressing', value)}
+            onChange={(value) => onUpdate(DISABILITY_DRESSING, value)}
           />
           <YesNoOptionalQuestion
-            question="10. Because of a physical, mental, or emotional condition, do you have
-            difficulty doing errands alone such as visiting doctor's office or shopping?"
+            question={getQuestionLabel(
+              DISABILITY_ERRANDS,
+              'Because of a physical, mental, or emotional condition, do you have difficulty ' +
+                "doing errands alone such as visiting doctor's office or shopping?"
+            )}
             selected={survey.disabilityErrands}
-            onChange={(value) => onUpdate('disabilityErrands', value)}
+            onChange={(value) => onUpdate(DISABILITY_ERRANDS, value)}
           />
           <FlexColumn style={{ marginBottom: '1rem' }}>
             <div
@@ -892,10 +988,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               style={{ width: '50%' }}
             />
           </FlexColumn>
-          <div style={styles.question}>12. Year of birth</div>
+          <div style={styles.question}>
+            {getQuestionLabel(YEAR_OF_BIRTH, 'Year of birth')}
+          </div>
           <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
             <NumberInput
-              onChange={(value) => onUpdate('yearOfBirth', value)}
+              onChange={(value) => onUpdate(YEAR_OF_BIRTH, value)}
               disabled={survey.yearOfBirthPreferNot}
               min={minYear}
               max={maxYear}
@@ -905,7 +1003,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <CheckBox
               checked={survey.yearOfBirthPreferNot}
               onChange={(value) => {
-                onUpdate('yearOfBirth', null);
+                onUpdate(YEAR_OF_BIRTH, null);
                 onUpdate('yearOfBirthPreferNot', value);
               }}
               style={{ marginLeft: '1rem' }}
@@ -922,7 +1020,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             </label>
           </FlexRow>
           <MultipleChoiceQuestion
-            question={'13. Highest Level of Education'}
+            question={getQuestionLabel(EDUCATION, 'Highest Level of Education')}
             label='Highest Level of Education Completed'
             options={[
               {
@@ -953,13 +1051,13 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
             ]}
             selected={survey.education}
-            onChange={(value) => onUpdate('education', value)}
+            onChange={(value) => onUpdate(EDUCATION, value)}
           />
 
           <YesNoOptionalQuestion
             question={disadvantagedBackgroundQuestion}
             selected={survey.disadvantaged}
-            onChange={(value) => onUpdate('disadvantaged', value)}
+            onChange={(value) => onUpdate(DISADVANTAGED, value)}
           />
 
           <FlexColumn style={{ marginTop: '1rem' }}>
