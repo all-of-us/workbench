@@ -465,7 +465,9 @@ public class FreeTierBillingService {
   }
 
   /**
-   * Requesting live costs from BQ in batches then updating it in a transactional method.
+   * Requesting live costs from BQ in batches then updating it in a transactional method. The
+   * batching mechanism prevents the job from making huge BQ queries that always timed out,
+   * specially in test env where a user may have thousands of workspaces.
    *
    * @param allCostsInDbForUsers List of {@link WorkspaceCostView} containing all workspaces for the
    *     current batch of users
@@ -478,6 +480,7 @@ public class FreeTierBillingService {
       List<WorkspaceCostView> workspacesThatRequireUpdate) {
     final Map<Long, Double> liveCostsInBQ = new HashMap<>();
 
+    // Cache that maps a workspace ID to its current cost in the database
     final Map<Long, Double> dbCostByWorkspace =
         allCostsInDbForUsers.stream()
             .collect(
@@ -485,6 +488,8 @@ public class FreeTierBillingService {
                     WorkspaceCostView::getWorkspaceId,
                     v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
 
+    // Partition the workspaces in batches, to avoid making BQ queries with thousands of workspaces
+    // as in test env, which will eventually time out each time.
     for (List<WorkspaceCostView> workspacesPartition :
         Lists.partition(workspacesThatRequireUpdate, WORKSPACES_BATCH_SIZE)) {
       // Live cost in BQ
