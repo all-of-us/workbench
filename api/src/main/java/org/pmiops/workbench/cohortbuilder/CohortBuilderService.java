@@ -47,6 +47,9 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaAutoComplete(
       String domain, String term, String type, Boolean standard, Integer limit);
 
+  List<Criteria> findCriteriaAutoCompleteV2(
+      String domain, String term, String type, Boolean standard, Integer limit);
+
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
   CriteriaListWithCountResponse findCriteriaByDomain(

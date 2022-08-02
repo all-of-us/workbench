@@ -2,6 +2,7 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -43,27 +45,75 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     }
   }
 
+  private static final String BIND_VAR_DOMAIN = "domain";
+  private static final String BIND_VAR_STANDARD = "standard";
+  private static final String BIND_VAR_TERM = "term";
+  private static final String BIND_VAR_TYPE = "type";
+
+  // SQL snips
+  private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
+  private static final String LIMIT_OFFSET = "limit %s offset %s\n";
+  private static final String OR = "\nor\n";
+
   private static final String ENDS_WITH_WITHOUT_TERM =
       "select *\n"
           + "from %s.cb_criteria\n"
-          + "where is_standard = :standard\n"
-          + "and match(full_text) against(concat('+[', :domain, '_rank1]') in boolean mode)\n"
+          + "where is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
+          + "and match(full_text) against(concat('+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
 
   private static final String ENDS_WITH_WITH_TERM =
       "select *\n"
           + "from %s.cb_criteria\n"
-          + "where is_standard = :standard\n"
-          + "and match(full_text) against(concat(:term, '+[', :domain, '_rank1]') in boolean mode)\n"
+          + "where is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
+          + "and match(full_text) against(concat(:"
+          + BIND_VAR_TERM
+          + ", '+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
 
-  private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
+  private static final String AUTO_COMPLETE_ENDS_WITH_WITHOUT_TERM =
+      "select *\n"
+          + "from %s.cb_criteria\n"
+          + "where type = :"
+          + BIND_VAR_TYPE
+          + "\n"
+          + "and is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
+          + "and has_hierarchy = 1\n"
+          + "and match(full_text) against(concat('+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
+          + "and (%s)\n"
+          + "order by est_count desc, name asc\n";
 
-  private static final String LIMIT_OFFSET = "limit %s offset %s\n";
-
-  private static final String OR = "\nor\n";
+  private static final String AUTO_COMPLETE_ENDS_WITH_WITH_TERM =
+      "select *\n"
+          + "from %s.cb_criteria\n"
+          + "where type = :"
+          + BIND_VAR_TYPE
+          + "\n"
+          + "and is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
+          + "and has_hierarchy = 1\n"
+          + "and match(full_text) against(concat(:"
+          + BIND_VAR_TERM
+          + ", '+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
+          + "and (%s)\n"
+          + "order by est_count desc, name asc\n";
 
   @Autowired private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -72,8 +122,12 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
       String domain, Boolean standard, List<String> endsWithList, Pageable page) {
+    Object[][] params = {
+      {BIND_VAR_DOMAIN, domain},
+      {BIND_VAR_STANDARD, standard}
+    };
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(ENDS_WITH_WITHOUT_TERM, domain, standard, null, endsWithList);
+        generateQueryAndParameters(ENDS_WITH_WITHOUT_TERM, params, endsWithList);
     return new PageImpl<>(
         queryForPaginatedList(page, queryAndParameters),
         page,
@@ -83,23 +137,59 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
       String domain, Boolean standard, String term, List<String> endsWithList, Pageable page) {
+    Object[][] params = {
+      {BIND_VAR_DOMAIN, domain},
+      {BIND_VAR_STANDARD, standard},
+      {BIND_VAR_TERM, term}
+    };
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(ENDS_WITH_WITH_TERM, domain, standard, term, endsWithList);
+        generateQueryAndParameters(ENDS_WITH_WITH_TERM, params, endsWithList);
     return new PageImpl<>(
         queryForPaginatedList(page, queryAndParameters),
         page,
         Objects.requireNonNull(count(queryAndParameters)));
   }
 
-  protected QueryAndParameters generateQueryAndParameters(
-      String sql, String domain, Boolean standard, String term, List<String> endsWithList) {
-    MapSqlParameterSource parameters = new MapSqlParameterSource();
-    parameters.addValue("domain", domain).addValue("standard", standard);
-    if (term != null) {
-      parameters.addValue("term", term);
-    }
-    StringJoiner joiner = new StringJoiner(OR);
+  @Override
+  public List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
+      String domain, String type, Boolean standard, List<String> endsWithList, PageRequest page) {
+    Object[][] params = {
+      {BIND_VAR_DOMAIN, domain}, {BIND_VAR_TYPE, type}, {BIND_VAR_STANDARD, standard}
+    };
+    QueryAndParameters queryAndParameters =
+        generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH_WITHOUT_TERM, params, endsWithList);
+    return new PageImpl<>(
+            queryForPaginatedList(page, queryAndParameters),
+            page,
+            Objects.requireNonNull(count(queryAndParameters)))
+        .getContent();
+  }
 
+  @Override
+  public List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
+      String domain,
+      String type,
+      Boolean standard,
+      String term,
+      List<String> endsWithList,
+      PageRequest page) {
+    Object[][] params = {
+      {BIND_VAR_DOMAIN, domain},
+      {BIND_VAR_TYPE, type},
+      {BIND_VAR_STANDARD, standard},
+      {BIND_VAR_TERM, term}
+    };
+    QueryAndParameters queryAndParameters =
+        generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH_WITH_TERM, params, endsWithList);
+    return new PageImpl<>(
+            queryForPaginatedList(page, queryAndParameters),
+            page,
+            Objects.requireNonNull(count(queryAndParameters)))
+        .getContent();
+  }
+
+  protected QueryAndParameters generateQueryAndParameters(
+      String sql, Object[][] params, List<String> endsWithList) {
     long cdrVersionId = CdrVersionContext.getCdrVersion().getCdrVersionId();
     Optional<DbCdrVersion> cdrVersionOptional = cdrVersionDao.findById(cdrVersionId);
     DbCdrVersion dbCdrVersion =
@@ -108,6 +198,10 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
                 new BadRequestException(
                     String.format("CDR version with ID %s not found", cdrVersionId)));
 
+    MapSqlParameterSource parameters = new MapSqlParameterSource();
+    Arrays.stream(params).forEach(param -> parameters.addValue(param[0].toString(), param[1]));
+
+    StringJoiner joiner = new StringJoiner(OR);
     IntStream.range(0, endsWithList.size())
         .forEach(
             idx -> {
