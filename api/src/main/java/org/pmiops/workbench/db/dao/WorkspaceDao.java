@@ -188,8 +188,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "w.activeStatus AS activeStatus "
           + "FROM DbWorkspace w "
           + "LEFT JOIN DbWorkspaceFreeTierUsage f ON w.workspaceId = f.workspace.id "
-          // Billing migration status 1 = NEW
-          + "WHERE w.billingMigrationStatus = 1 AND w.creator IS NOT NULL "
+          + "WHERE w.creator IS NOT NULL "
           + "AND w.creator in (:creators)")
   List<WorkspaceCostView> getWorkspaceCostViews(@Param("creators") Set<DbUser> creators);
 }

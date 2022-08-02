@@ -8,6 +8,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FreeTierBillingService {
 
-  public static final Long TWO_DAYS = 172_800_000l;
   public static final int WORKSPACES_BATCH_SIZE = 1000;
   private final BigQueryService bigQueryService;
   private final MailService mailService;
@@ -415,14 +415,22 @@ public class FreeTierBillingService {
    * BQ will not be queried unnecessarily for the costs of deleted workspaces that we already have
    * their latest costs The method will return the workspace in 1 of these cases:
    *
-   * <p>1. The workspace is active 2. The workspace is deleted and either of the following is true
-   * 2.1. Free Tier Usage last updated time is null. This means that it wasn't calculated before
-   * 2.2. Workspace last updated time is null. This means we don't have enough info about the
-   * workspace, so we need to get its cost 2.3. Free Tier Usage time is before the Workspace last
-   * updated time. This means that the workspace got changed some time after our last calculation,
-   * so we need to recalculate it 2.4. Free Tier Usage time is after the Workspace last updated
-   * time, but the difference is smaller than a certain value. This case to account for charges that
-   * may occur after the workspace gets deleted and after the last cron had run.
+   * <ol>
+   *   <li>The workspace is active
+   *   <li>The workspace is deleted and either of the following is true
+   *       <ol>
+   *         <li>Free Tier Usage last updated time is null. This means that it wasn't calculated
+   *             before
+   *         <li>Workspace last updated time is null. This means we don't have enough info about *
+   *             the workspace, so we need to get its cost
+   *         <li>Free Tier Usage time is before the Workspace last updated time. This means * that
+   *             the workspace got changed some time after our last calculation, so we need to *
+   *             recalculate it
+   *         <li>Free Tier Usage time is after the Workspace last updated time, but * the difference
+   *             is smaller than a certain value. This case to account for charges that may * occur
+   *             after the workspace gets deleted and after the last cron had run.
+   *       </ol>
+   * </ol>
    *
    * @param allCostsInDbForUsers
    * @return a {@link java.util.List} of the workspaces that require updates only
@@ -443,7 +451,11 @@ public class FreeTierBillingService {
                                 || (c.getFreeTierLastUpdated().after(c.getWorkspaceLastUpdated())
                                     && c.getFreeTierLastUpdated().getTime()
                                             - c.getWorkspaceLastUpdated().getTime()
-                                        < getNumberOfDaysToConsiderForFreeTierUsageUpdate()))))
+                                        < Duration.ofDays(
+                                                workbenchConfigProvider.get()
+                                                    .billing
+                                                    .numberOfDaysToConsiderForFreeTierUsageUpdate)
+                                            .toMillis()))))
             .collect(Collectors.toList());
 
     logger.info(
@@ -565,13 +577,5 @@ public class FreeTierBillingService {
   private Integer getMinutesBeforeLastFreeTierJob() {
     return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob)
         .orElse(120);
-  }
-
-  private Long getNumberOfDaysToConsiderForFreeTierUsageUpdate() {
-    Long numOfDays =
-        workbenchConfigProvider.get().billing.numberOfDaysToConsiderForFreeTierUsageUpdate;
-    if (numOfDays == null) return TWO_DAYS;
-    if (numOfDays > 60) numOfDays = 60l;
-    return numOfDays * 86_400_000;
   }
 }
