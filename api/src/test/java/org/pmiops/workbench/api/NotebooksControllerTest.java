@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -113,6 +114,9 @@ public class NotebooksControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private NotebooksController notebooksController;
 
+  @Mock
+  private NotebooksService mockNotebookService;
+
   @BeforeEach
   public void setUp() {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
@@ -125,7 +129,7 @@ public class NotebooksControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+//    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   @AfterEach
@@ -145,6 +149,12 @@ public class NotebooksControllerTest {
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     Blob mockBlob3 = mock(Blob.class);
+    FileDetail fileDetail1 = new FileDetail();
+    FileDetail fileDetail2 = new FileDetail();
+    FileDetail fileDetail3 = new FileDetail();
+    fileDetail1.setName("mockFile.ipynb");
+    fileDetail2.setName("mockFile.text");
+    fileDetail3.setName("two words.ipynb");
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/mockFile"));
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
@@ -152,6 +162,10 @@ public class NotebooksControllerTest {
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
     when(mockCloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
+
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1,"bucket")).thenReturn(fileDetail1);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2,"bucket")).thenReturn(fileDetail2);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob3,"bucket")).thenReturn(fileDetail3);
 
     // Will return 1 entry as only python files in notebook folder are return
     List<String> gotNames =
@@ -170,6 +184,10 @@ public class NotebooksControllerTest {
     DbWorkspace workspace = createWorkspace();
     stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
 
+    FileDetail file1 = new FileDetail();
+    FileDetail file2 = new FileDetail();
+    file1.setName("nope.ipynb");
+    file2.setName("foo.ipynb");
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     when(mockBlob1.getName())
@@ -178,6 +196,10 @@ public class NotebooksControllerTest {
     when(mockCloudStorageClient.getBlobPageForPrefix(
             TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
+
+
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(file1);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(file2);
 
     List<FileDetail> body =
         notebooksController

@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -170,8 +171,8 @@ public class WorkspaceAdminServiceTest {
     when(mockFirecloudService.getGroup(anyString()))
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
 
-    // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+//    // required to enable the use of default method blobToFileDetail()
+//    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
@@ -324,6 +325,9 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString()))
+        .thenReturn(
+            expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
     assertThat(files).containsExactlyElementsIn(expectedFiles);
   }
