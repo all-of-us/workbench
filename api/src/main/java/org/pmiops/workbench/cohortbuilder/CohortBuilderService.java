@@ -69,6 +69,8 @@ public interface CohortBuilderService {
 
   List<CardCount> findDomainCounts(String term);
 
+  List<CardCount> findDomainCountsV2(String term);
+
   List<DomainCard> findDomainCards();
 
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
