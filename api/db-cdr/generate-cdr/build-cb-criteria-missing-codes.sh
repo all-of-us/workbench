@@ -353,7 +353,7 @@ FROM
     ) x"
 
 echo "CB_CRITERIA_ANCESTOR - Drugs - add vocabularies that are non-hierarchy"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
     (
           ancestor_id
@@ -379,7 +379,7 @@ and descendant_concept_id in
     )"
 
 echo "DRUGS - generate counts for vocabularies that are non-hierarchy"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 set x.rollup_count = 0
     , x.item_count = y.cnt
