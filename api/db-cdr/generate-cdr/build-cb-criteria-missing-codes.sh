@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='ADD IN OTHER CODES NOT ALREADY CAPTURED'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 
@@ -294,7 +293,7 @@ FROM
         GROUP BY 1,2,3,4
     ) x"
 
-echo "DRUG_EXPOSURE - add other standard concepts"
+echo "DRUG_EXPOSURE - add other standard concepts not in hierarchies"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
@@ -324,8 +323,8 @@ SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) 
     , concept_code
     , concept_name
     , 0
-    , cnt
-    , cnt
+    , 0
+    , 0
     , 0
     , 1
     , 0
@@ -333,7 +332,7 @@ SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) 
     , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
 FROM
     (
-        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        SELECT concept_name, vocabulary_id, concept_id, concept_code
         FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.drug_concept_id = b.concept_id
         WHERE standard_concept = 'S'
@@ -352,3 +351,52 @@ FROM
                 )
         GROUP BY 1,2,3,4
     ) x"
+
+echo "CB_CRITERIA_ANCESTOR - Drugs - add vocabularies that are non-hierarchy"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
+    (
+          ancestor_id
+        , descendant_id
+    )
+SELECT
+      ancestor_concept_id
+    , descendant_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+WHERE ancestor_concept_id in
+    (
+        SELECT DISTINCT concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE domain_id = 'DRUG'
+            and type = 'RXNORM'
+            and is_group = 0
+            and is_selectable = 1
+    )
+and descendant_concept_id in
+    (
+        SELECT DISTINCT drug_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
+    )"
+
+echo "DRUGS - generate counts for vocabularies that are non-hierarchy"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+set x.rollup_count = 0
+    , x.item_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT b.ANCESTOR_CONCEPT_ID as concept_id, count(distinct a.person_id) cnt
+                FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
+                JOIN
+                    (
+                        SELECT *
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` x
+                        left JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` y on x.ANCESTOR_CONCEPT_ID = y.CONCEPT_ID
+                        WHERE type in  ('CVX', 'HCPCS', 'RxNorm Extension')
+                    ) b on a.DRUG_CONCEPT_ID = b.DESCENDANT_CONCEPT_ID
+                group by 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.domain_id = 'DRUG'
+    and x.type in ('CVX', 'HCPCS', 'RxNorm Extension')"
