@@ -84,9 +84,9 @@ const styles = reactStyles({
 });
 
 const searchTooltip = (
-  <span>
+  <div style={{ marginLeft: '0.5rem' }}>
     The following special operators can be used to augment search terms:
-    <ul>
+    <ul style={{ listStylePosition: 'outside' }}>
       <li>
         (*) is the wildcard operator. This operator can be used with a prefix or
         suffix. For example: ceph* (starts with) or *statin (ends with - NOTE:
@@ -107,7 +107,7 @@ const searchTooltip = (
         operations. For example: brain tum* -neoplasm
       </li>
     </ul>
-  </span>
+  </div>
 );
 
 const searchTrigger = 2;
@@ -400,7 +400,7 @@ export class SearchBar extends React.Component<Props, State> {
               onKeyDown={(e) => this.onKeyDown(e.key)}
             />
             {serverConfigStore.get().config.enableUniversalSearch && (
-              <TooltipTrigger side='top' content={<div>{searchTooltip}</div>}>
+              <TooltipTrigger side='top' content={searchTooltip}>
                 <ClrIcon
                   style={styles.infoIcon}
                   className='is-solid'

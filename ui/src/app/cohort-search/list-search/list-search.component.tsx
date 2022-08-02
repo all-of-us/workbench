@@ -271,9 +271,9 @@ const sourceStandardTooltip = (
   </span>
 );
 const searchTooltip = (
-  <span>
+  <div style={{ marginLeft: '0.5rem' }}>
     The following special operators can be used to augment search terms:
-    <ul>
+    <ul style={{ listStylePosition: 'outside' }}>
       <li>
         (*) is the wildcard operator. This operator can be used with a prefix or
         suffix. For example: ceph* (starts with) or *statin (ends with - NOTE:
@@ -294,7 +294,7 @@ const searchTooltip = (
         operations. For example: brain tum* -neoplasm
       </li>
     </ul>
-  </span>
+  </div>
 );
 
 interface Props {
@@ -920,7 +920,7 @@ export const ListSearch = fp.flow(
                 onKeyPress={this.handleInput}
               />
               {serverConfigStore.get().config.enableDrugWildcardSearch && (
-                <TooltipTrigger side='top' content={<div>{searchTooltip}</div>}>
+                <TooltipTrigger side='top' content={searchTooltip}>
                   <ClrIcon
                     style={styles.infoIcon}
                     className='is-solid'

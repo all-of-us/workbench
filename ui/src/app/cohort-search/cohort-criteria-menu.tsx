@@ -91,7 +91,7 @@ const styles = reactStyles({
     minHeight: '1.25rem',
     width: '15rem',
     borderRadius: '.125rem',
-    zIndex: 1000,
+    zIndex: 103,
   },
   dropdownHeader: {
     height: '1.75rem',
@@ -137,7 +137,7 @@ const styles = reactStyles({
     minHeight: '1.25rem',
     width: '10rem',
     borderRadius: '.125rem',
-    zIndex: 1000,
+    zIndex: 103,
   },
   subMenuIcon: {
     color: colors.secondary,
@@ -164,9 +164,9 @@ const styles = reactStyles({
 });
 
 const searchTooltip = (
-  <span>
+  <div style={{ marginLeft: '0.5rem' }}>
     The following special operators can be used to augment search terms:
-    <ul>
+    <ul style={{ listStylePosition: 'outside' }}>
       <li>
         (*) is the wildcard operator. This operator can be used with a prefix or
         suffix. For example: ceph* (starts with) or *statin (ends with - NOTE:
@@ -187,7 +187,7 @@ const searchTooltip = (
         operations. For example: brain tum* -neoplasm
       </li>
     </ul>
-  </span>
+  </div>
 );
 
 export const CohortCriteriaMenu = withCurrentWorkspace()(
@@ -300,10 +300,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
                 {serverConfigStore.get().config.enableUniversalSearch && (
-                  <TooltipTrigger
-                    side='top'
-                    content={<div>{searchTooltip}</div>}
-                  >
+                  <TooltipTrigger side='top' content={searchTooltip}>
                     <ClrIcon
                       style={styles.infoIcon}
                       className='is-solid'
