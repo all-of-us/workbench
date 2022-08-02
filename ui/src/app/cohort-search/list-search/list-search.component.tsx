@@ -919,7 +919,7 @@ export const ListSearch = fp.flow(
                 onChange={(e) => this.setState({ searchTerms: e })}
                 onKeyPress={this.handleInput}
               />
-              {serverConfigStore.get().config.enableDrugWildcardSearch && (
+              {serverConfigStore.get().config.enableUniversalSearch && (
                 <TooltipTrigger side='top' content={searchTooltip}>
                   <ClrIcon
                     style={styles.infoIcon}

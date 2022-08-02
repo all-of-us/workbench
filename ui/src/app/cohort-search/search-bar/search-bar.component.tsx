@@ -378,6 +378,13 @@ export class SearchBar extends React.Component<Props, State> {
     this.selectOption(options[highlightedOption]);
   }
 
+  doesDomainIncludeToolTip() {
+    return (
+      this.props.node.domainId !== Domain.VISIT.toString() &&
+      this.props.node.domainId !== Domain.PHYSICALMEASUREMENT.toString()
+    );
+  }
+
   render() {
     const { highlightedOption, inputErrors, loading, options } = this.state;
     const inputValue =
@@ -399,15 +406,16 @@ export class SearchBar extends React.Component<Props, State> {
               onChange={(e) => this.props.setInput(e)}
               onKeyDown={(e) => this.onKeyDown(e.key)}
             />
-            {serverConfigStore.get().config.enableUniversalSearch && (
-              <TooltipTrigger side='top' content={searchTooltip}>
-                <ClrIcon
-                  style={styles.infoIcon}
-                  className='is-solid'
-                  shape='info-standard'
-                />
-              </TooltipTrigger>
-            )}
+            {serverConfigStore.get().config.enableUniversalSearch &&
+              this.doesDomainIncludeToolTip() && (
+                <TooltipTrigger side='top' content={searchTooltip}>
+                  <ClrIcon
+                    style={styles.infoIcon}
+                    className='is-solid'
+                    shape='info-standard'
+                  />
+                </TooltipTrigger>
+              )}
           </div>
           {inputErrors.map((error, e) => (
             <AlertDanger key={e} style={styles.inputAlert}>
