@@ -154,8 +154,10 @@ public class FreeTierBillingService {
    * insures that we don't calculate the costs unnecessarily again if we run the job manually to
    * clear up the backlog
    *
-   * @param allCostsInDbForUsers
-   * @return
+   * @param allCostsInDbForUsers a List of {@link WorkspaceCostView} which contains all info about
+   *     workspaces including when they were last updated.
+   * @return A filtered list containing the workspaces free tier usage entries that were not last
+   *     updated in the last 60 minutes.
    */
   @NotNull
   private List<WorkspaceCostView> findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(
