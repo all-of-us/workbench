@@ -149,7 +149,7 @@ public class WorkspaceAdminServiceTest {
     UserMapper.class,
     UserService.class,
     WorkspaceAuthService.class,
-    WorkspaceService.class
+    WorkspaceService.class,
   })
   static class Configuration {
     @Bean
@@ -340,6 +340,7 @@ public class WorkspaceAdminServiceTest {
     when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
         .thenReturn(
             expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
+
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
     assertThat(files).containsExactlyElementsIn(expectedFiles);
   }
