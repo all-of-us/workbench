@@ -154,15 +154,14 @@ public class FreeTierBillingService {
    * insures that we don't calculate the costs unnecessarily again if we run the job manually to
    * clear up the backlog
    *
-   * @param allCostsInDbForUsers a List of {@link WorkspaceCostView} which contains all info about
-   *     workspaces including when they were last updated.
-   * @return A filtered list containing the workspaces free tier usage entries that were not last
-   *     updated in the last 60 minutes.
+   * @param allCostsInDbForUsers
+   * @return
    */
   @NotNull
   private List<WorkspaceCostView> findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(
       List<WorkspaceCostView> allCostsInDbForUsers) {
-    Timestamp minusMinutes = Timestamp.valueOf(LocalDateTime.now().minusMinutes(60));
+    Timestamp minusMinutes =
+        Timestamp.valueOf(LocalDateTime.now().minusMinutes(getMinutesBeforeLastFreeTierJob()));
 
     List<WorkspaceCostView> filteredCostsInDbForUsers =
         allCostsInDbForUsers.stream()
@@ -578,5 +577,10 @@ public class FreeTierBillingService {
 
   private boolean costAboveLimit(final DbUser user, final double currentCost) {
     return CostComparisonUtils.compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
+  }
+
+  private Integer getMinutesBeforeLastFreeTierJob() {
+    return Optional.ofNullable(workbenchConfigProvider.get().billing.minutesBeforeLastFreeTierJob)
+        .orElse(120);
   }
 }
