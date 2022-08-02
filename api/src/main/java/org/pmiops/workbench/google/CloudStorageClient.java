@@ -54,13 +54,5 @@ public interface CloudStorageClient {
 
   String getCaptchaServerKey();
 
-  default FileDetail blobToFileDetail(Blob blob, String bucketName) {
-    String[] parts = blob.getName().split("/");
-    FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(parts[parts.length - 1]);
-    fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
-    fileDetail.setLastModifiedTime(blob.getUpdateTime());
-    fileDetail.setSizeInBytes(blob.getSize());
-    return fileDetail;
-  }
+  FileDetail blobToFileDetail(Blob blob, String bucketName);
 }

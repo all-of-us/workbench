@@ -120,29 +120,29 @@ public class WorkspaceAdminServiceTest {
 
   @TestConfiguration
   @Import({
-    AccessTierServiceImpl.class,
-    CohortMapperImpl.class,
-    FakeClockConfiguration.class,
-    LeonardoMapperImpl.class,
-    WorkspaceAdminServiceImpl.class,
-    WorkspaceMapperImpl.class,
+      AccessTierServiceImpl.class,
+      CohortMapperImpl.class,
+      FakeClockConfiguration.class,
+      LeonardoMapperImpl.class,
+      WorkspaceAdminServiceImpl.class,
+      WorkspaceMapperImpl.class,
   })
   @MockBean({
-    ActionAuditQueryService.class,
-    AdminAuditor.class,
-    MailService.class,
-    CohortDao.class,
-    CohortReviewMapper.class,
-    CommonMappers.class,
-    ConceptSetDao.class,
-    ConceptSetMapper.class,
-    DataSetDao.class,
-    DataSetMapper.class,
-    FirecloudMapper.class,
-    LeonardoNotebooksClient.class,
-    UserMapper.class,
-    UserService.class,
-    WorkspaceService.class
+      ActionAuditQueryService.class,
+      AdminAuditor.class,
+      MailService.class,
+      CohortDao.class,
+      CohortReviewMapper.class,
+      CommonMappers.class,
+      ConceptSetDao.class,
+      ConceptSetMapper.class,
+      DataSetDao.class,
+      DataSetMapper.class,
+      FirecloudMapper.class,
+      LeonardoNotebooksClient.class,
+      UserMapper.class,
+      UserService.class,
+      WorkspaceService.class,
   })
   static class Configuration {
     @Bean
@@ -169,9 +169,6 @@ public class WorkspaceAdminServiceTest {
 
     when(mockFirecloudService.getGroup(anyString()))
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
-
-    // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
@@ -226,9 +223,9 @@ public class WorkspaceAdminServiceTest {
         workspaceAdminService.getCloudStorageTraffic(WORKSPACE_NAMESPACE);
 
     assertThat(
-            cloudStorageTraffic.getReceivedBytes().stream()
-                .map(TimeSeriesPoint::getTimestamp)
-                .collect(Collectors.toList()))
+        cloudStorageTraffic.getReceivedBytes().stream()
+            .map(TimeSeriesPoint::getTimestamp)
+            .collect(Collectors.toList()))
         .containsExactly(1000L, 2000L);
   }
 
@@ -243,7 +240,8 @@ public class WorkspaceAdminServiceTest {
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
                 .storageBucketPath("gs://bucket"));
-    verify(mockNotebooksService, atLeastOnce()).getNotebooksAsService(any());
+    verify(mockNotebooksService, atLeastOnce())
+        .getNotebooksAsService(any());
 
     // Regression check: the admin service should never call the end-user variants of these methods.
     verify(mockNotebooksService, never()).getNotebooks(any(), any());
@@ -323,6 +321,10 @@ public class WorkspaceAdminServiceTest {
                 .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
+
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString()))
+        .thenReturn(
+            expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
 
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
     assertThat(files).containsExactlyElementsIn(expectedFiles);

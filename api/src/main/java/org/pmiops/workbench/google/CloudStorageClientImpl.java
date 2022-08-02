@@ -17,6 +17,7 @@ import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.FileDetail;
 
 public class CloudStorageClientImpl implements CloudStorageClient {
 
@@ -143,5 +144,16 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   @Override
   public String getCaptchaServerKey() {
     return getCredentialsBucketString("captcha-server-key.txt");
+  }
+
+  public FileDetail blobToFileDetail(Blob blob, String bucketName) {
+    String[] parts = blob.getName().split("/");
+    FileDetail fileDetail = new FileDetail();
+    fileDetail.setName(parts[parts.length - 1]);
+    fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+    fileDetail.setLastModifiedTime(blob.getUpdateTime());
+    fileDetail.setSizeInBytes(blob.getSize());
+
+    return fileDetail;
   }
 }

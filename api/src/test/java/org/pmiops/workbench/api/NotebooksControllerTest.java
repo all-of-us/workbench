@@ -112,7 +112,7 @@ public class NotebooksControllerTest {
     cdrVersion.setAccessTier(TestMockFactory.createRegisteredTierForTests(accessTierDao));
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString()))
         .thenReturn(new FileDetail());
   }
 
