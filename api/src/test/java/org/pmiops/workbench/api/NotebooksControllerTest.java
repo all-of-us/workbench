@@ -181,10 +181,10 @@ public class NotebooksControllerTest {
     DbWorkspace workspace = createWorkspace();
     stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
 
-    FileDetail file1 = new FileDetail();
-    FileDetail file2 = new FileDetail();
-    file1.setName("nope.ipynb");
-    file2.setName("foo.ipynb");
+    FileDetail fileDetail1 = new FileDetail();
+    FileDetail fileDetail2 = new FileDetail();
+    fileDetail1.setName("nope.ipynb");
+    fileDetail2.setName("foo.ipynb");
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     when(mockBlob1.getName())
@@ -195,8 +195,8 @@ public class NotebooksControllerTest {
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
 
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob1,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(file1);
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob2,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(file2);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(fileDetail1);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(fileDetail2);
 
     List<FileDetail> body =
         notebooksController
