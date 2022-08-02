@@ -65,8 +65,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       "select *\n"
           + "from %s.cb_criteria\n"
           + "where type = :type\n"
-          + "and standard = :standard\n"
-          + "and hierarchy = 1\n"
+          + "and is_standard = :standard\n"
+          + "and has_hierarchy = 1\n"
           + "and match(full_text) against(concat('+[', :domain, '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
@@ -75,8 +75,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       "select *\n"
           + "from %s.cb_criteria\n"
           + "where type = :type\n"
-          + "and standard = :standard\n"
-          + "and hierarchy = 1\n"
+          + "and is_standard = :standard\n"
+          + "and has_hierarchy = 1\n"
           + "and match(full_text) against(concat(:term, '+[', :domain, '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
