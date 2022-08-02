@@ -197,17 +197,6 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   }
 
   @NotNull
-  private MapSqlParameterSource getMapSqlParameterSource(
-      String domain, Boolean standard, String term) {
-    MapSqlParameterSource parameters = new MapSqlParameterSource();
-    parameters.addValue("domain", domain).addValue("standard", standard);
-    if (term != null) {
-      parameters.addValue("term", term);
-    }
-    return parameters;
-  }
-
-  @NotNull
   private List<DbCriteria> queryForPaginatedList(
       Pageable page, QueryAndParameters queryAndParameters) {
     return namedParameterJdbcTemplate.query(
