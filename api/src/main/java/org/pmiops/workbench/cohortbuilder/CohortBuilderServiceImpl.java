@@ -261,12 +261,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Map<String, String> parsedTerms = modifyTermMatchUseEndsWithTerms(term);
     String modifiedSearchTerm = parsedTerms.get(MODIFIED_TERMS);
     List<String> endsWithTerms = new ArrayList<>();
-    if (parsedTerms.get(ENDS_WITH_TERMS).length() > 0) {
+    if (!parsedTerms.get(ENDS_WITH_TERMS).isEmpty()) {
       endsWithTerms.addAll(Arrays.asList(parsedTerms.get(ENDS_WITH_TERMS).split(",")));
     }
 
     List<DbCriteria> criteriaList = new ArrayList<>();
-    if (endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
+    if (endsWithTerms.isEmpty() && !modifiedSearchTerm.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
               domain, type, standard, modifiedSearchTerm, pageRequest);
@@ -274,7 +274,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
               domain, type, standard, endsWithTerms, pageRequest);
-    } else if (!endsWithTerms.isEmpty() && modifiedSearchTerm.length() > 0) {
+    } else if (!endsWithTerms.isEmpty() && !modifiedSearchTerm.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
               domain, type, standard, modifiedSearchTerm, endsWithTerms, pageRequest);

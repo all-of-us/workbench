@@ -45,52 +45,75 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     }
   }
 
+  private static final String BIND_VAR_DOMAIN = "domain";
+  private static final String BIND_VAR_STANDARD = "standard";
+  private static final String BIND_VAR_TERM = "term";
+  private static final String BIND_VAR_TYPE = "type";
+
+  // SQL snips
+  private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
+  private static final String LIMIT_OFFSET = "limit %s offset %s\n";
+  private static final String OR = "\nor\n";
+
   private static final String ENDS_WITH_WITHOUT_TERM =
       "select *\n"
           + "from %s.cb_criteria\n"
-          + "where is_standard = :standard\n"
-          + "and match(full_text) against(concat('+[', :domain, '_rank1]') in boolean mode)\n"
+          + "where is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
+          + "and match(full_text) against(concat('+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
 
   private static final String ENDS_WITH_WITH_TERM =
       "select *\n"
           + "from %s.cb_criteria\n"
-          + "where is_standard = :standard\n"
-          + "and match(full_text) against(concat(:term, '+[', :domain, '_rank1]') in boolean mode)\n"
+          + "where is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
+          + "and match(full_text) against(concat(:"
+          + BIND_VAR_TERM
+          + ", '+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
 
   private static final String AUTO_COMPLETE_ENDS_WITH_WITHOUT_TERM =
       "select *\n"
           + "from %s.cb_criteria\n"
-          + "where type = :type\n"
-          + "and is_standard = :standard\n"
+          + "where type = :"
+          + BIND_VAR_TYPE
+          + "\n"
+          + "and is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
           + "and has_hierarchy = 1\n"
-          + "and match(full_text) against(concat('+[', :domain, '_rank1]') in boolean mode)\n"
+          + "and match(full_text) against(concat('+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
 
   private static final String AUTO_COMPLETE_ENDS_WITH_WITH_TERM =
       "select *\n"
           + "from %s.cb_criteria\n"
-          + "where type = :type\n"
-          + "and is_standard = :standard\n"
+          + "where type = :"
+          + BIND_VAR_TYPE
+          + "\n"
+          + "and is_standard = :"
+          + BIND_VAR_STANDARD
+          + "\n"
           + "and has_hierarchy = 1\n"
-          + "and match(full_text) against(concat(:term, '+[', :domain, '_rank1]') in boolean mode)\n"
+          + "and match(full_text) against(concat(:"
+          + BIND_VAR_TERM
+          + ", '+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n"
           + "and (%s)\n"
           + "order by est_count desc, name asc\n";
-
-  private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
-
-  private static final String LIMIT_OFFSET = "limit %s offset %s\n";
-
-  private static final String OR = "\nor\n";
-
-  private static final String BIND_VAR_DOMAIN = "domain";
-  private static final String BIND_VAR_STANDARD = "standard";
-  private static final String BIND_VAR_TERM = "term";
-  private static final String BIND_VAR_TYPE = "type";
 
   @Autowired private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -176,11 +199,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
                     String.format("CDR version with ID %s not found", cdrVersionId)));
 
     MapSqlParameterSource parameters = new MapSqlParameterSource();
-    Arrays.stream(params)
-        .forEach(
-            param -> {
-              parameters.addValue(param[0].toString(), param[1]);
-            });
+    Arrays.stream(params).forEach(param -> parameters.addValue(param[0].toString(), param[1]));
 
     StringJoiner joiner = new StringJoiner(OR);
     IntStream.range(0, endsWithList.size())
