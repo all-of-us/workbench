@@ -299,7 +299,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
             <div style={styles.searchContainer}>
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
-                {serverConfigStore.get().config.enableUniversalSearch && (
+                {serverConfigStore.get().config.enableDrugWildcardSearch && (
                   <TooltipTrigger side='top' content={searchTooltip}>
                     <ClrIcon
                       style={styles.infoIcon}

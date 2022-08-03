@@ -485,7 +485,7 @@ export const ConceptHomepage = fp.flow(
                   />
                 </Clickable>
               )}
-              {serverConfigStore.get().config.enableUniversalSearch && (
+              {serverConfigStore.get().config.enableDrugWildcardSearch && (
                 <TooltipTrigger side='top' content={searchTooltip}>
                   <ClrIcon
                     style={styles.infoIcon}

@@ -416,7 +416,7 @@ export class SearchBar extends React.Component<Props, State> {
           ))}
         </div>
         <div style={{ float: 'right' }}>
-          {serverConfigStore.get().config.enableUniversalSearch &&
+          {serverConfigStore.get().config.enableDrugWildcardSearch &&
             this.doesDomainIncludeToolTip() && (
               <TooltipTrigger side='top' content={searchTooltip}>
                 <ClrIcon

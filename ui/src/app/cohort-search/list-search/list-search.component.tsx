@@ -944,7 +944,7 @@ export const ListSearch = fp.flow(
               ))}
             </div>
             <div style={{ float: 'right', width: '20%' }}>
-              {serverConfigStore.get().config.enableUniversalSearch && (
+              {serverConfigStore.get().config.enableDrugWildcardSearch && (
                 <TooltipTrigger side='top' content={searchTooltip}>
                   <ClrIcon
                     style={styles.infoIcon}
