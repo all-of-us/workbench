@@ -30,7 +30,10 @@
       0.5,
       0.75
     ],
-    "carahsoftEmail": "NIHStrides@Carahsoft.com"
+    "carahsoftEmail": "NIHStrides@Carahsoft.com",
+    "freeTierCronUserBatchSize": 100,
+    "minutesBeforeLastFreeTierJob": 60,
+    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -112,7 +115,6 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": true,
-    "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
     "enableMultiReview": false,
     "enableUpdatedDemographicSurvey": true,

@@ -30,7 +30,10 @@
       0.5,
       0.75
     ],
-    "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"
+    "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
+    "freeTierCronUserBatchSize": 100,
+    "minutesBeforeLastFreeTierJob": 60,
+    "numberOfDaysToConsiderForFreeTierUsageUpdate": 2
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -112,7 +115,6 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableDSCREntryInRecentModified": true,
     "enableUniversalSearch": true,
     "enableMultiReview": true,
     "enableDrugWildcardSearch": false,

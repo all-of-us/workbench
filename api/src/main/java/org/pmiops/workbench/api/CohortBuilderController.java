@@ -54,11 +54,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateDomain(domain);
     validateType(type);
     validateTerm(term);
-    return ResponseEntity.ok(
-        new CriteriaListResponse()
-            .items(
-                cohortBuilderService.findCriteriaAutoComplete(
-                    domain, term, type, standard, limit)));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(
+                  cohortBuilderService.findCriteriaAutoCompleteV2(
+                      domain, term, type, standard, limit)));
+    } else {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(
+                  cohortBuilderService.findCriteriaAutoComplete(
+                      domain, term, type, standard, limit)));
+    }
   }
 
   @Override

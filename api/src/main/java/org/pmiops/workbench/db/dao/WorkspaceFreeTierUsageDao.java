@@ -16,8 +16,11 @@ public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFre
 
   DbWorkspaceFreeTierUsage findOneByWorkspace(DbWorkspace workspace);
 
-  default void updateCost(DbWorkspace workspace, double cost) {
-    DbWorkspaceFreeTierUsage usage = findOneByWorkspace(workspace);
+  Iterable<DbWorkspaceFreeTierUsage> findAllByWorkspaceIn(Iterable<DbWorkspace> workspaceList);
+
+  default void updateCost(
+      Map<Long, DbWorkspaceFreeTierUsage> cache, DbWorkspace workspace, double cost) {
+    DbWorkspaceFreeTierUsage usage = cache.get(workspace.getWorkspaceId());
     if (usage == null) {
       usage = new DbWorkspaceFreeTierUsage(workspace);
     }
