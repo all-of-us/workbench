@@ -55,15 +55,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   public static class SearchTerm {
 
+    private final String term;
     private final String modifiedTerm;
     private final List<String> endsWithTerms;
 
-    SearchTerm(String modifiedTerm, List<String> endsWithTerms) {
+    SearchTerm(String term, String modifiedTerm, List<String> endsWithTerms) {
+      this.term = term;
       this.modifiedTerm = modifiedTerm == null ? "" : modifiedTerm;
       this.endsWithTerms =
           endsWithTerms == null
               ? new ArrayList()
               : ImmutableList.copyOf(endsWithTerms.listIterator());
+    }
+
+    public String getTerm() {
+      return term;
     }
 
     public String getModifiedTerm() {
@@ -550,9 +556,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<CardCount> findDomainCountsV2(String term) {
+    SearchTerm searchTerm = modifyTermMatchUseEndsWithTerms(term);
+
     List<CardCount> cardCounts =
-        findDomainCounts(
-            term,
+        findDomainCountsV2(
+            searchTerm,
             true,
             ImmutableList.of(
                 Domain.CONDITION,
@@ -562,27 +570,35 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 Domain.PROCEDURE,
                 Domain.DEVICE));
     cardCounts.addAll(
-        findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
-    cardCounts.addAll(findSurveyCounts(term));
+        findDomainCountsV2(searchTerm, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
+    cardCounts.addAll(findSurveyCountsV2(searchTerm));
     return cardCounts;
   }
 
-  private List<CardCount> findDomainCountsV2(String term, Boolean standard, List<Domain> domains) {
-    List<String> strDomains =
-        domains.stream().map(d1 -> d1.toString()).collect(Collectors.toList());
+  private List<CardCount> findDomainCountsV2(
+      SearchTerm searchTerm, Boolean standard, List<Domain> domains) {
+    List<String> domainNames = domains.stream().map(Domain::toString).collect(Collectors.toList());
     List<DbCardCount> cardCounts =
-        cbCriteriaDao.findDomainCountsByCode(term, standard, strDomains).stream()
+        cbCriteriaDao.findDomainCountsByCode(searchTerm.getTerm(), standard, domainNames).stream()
             .filter(cardCount -> cardCount.getCount() > 0)
             .collect(Collectors.toList());
 
     // filter strDomains to remove domains that have a cardCount by domain
-    strDomains.removeAll(
-        cardCounts.stream().map(c -> c.getDomainId()).collect(Collectors.toList()));
+    domainNames.removeAll(
+        cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
 
-    // TODO here
-    // modify search term and call
-
-    cardCounts.addAll(cbCriteriaDao.findDomainCounts(modifyTermMatch(term), standard, strDomains));
+    if (searchTerm.hasModifiedTermOnly()) {
+      cardCounts.addAll(
+          cbCriteriaDao.findDomainCounts(searchTerm.getModifiedTerm(), standard, domainNames));
+    } else if (searchTerm.hasEndsWithOnly()) {
+      cardCounts.addAll(
+          cbCriteriaDao.findDomainCountsByDomainsAndStandardAndNameEndsWith(
+              domainNames, standard, searchTerm.getEndsWithTerms()));
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      cardCounts.addAll(
+          cbCriteriaDao.findDomainCountsByDomainsAndStandardAndTermAndNameEndsWith(
+              domainNames, standard, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms()));
+    }
 
     return cardCounts.stream()
         .filter(cardCount -> cardCount.getCount() > 0)
@@ -590,16 +606,33 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
+  private List<CardCount> findSurveyCountsV2(SearchTerm searchTerm) {
+    List<DbCardCount> surveyCounts = new ArrayList<>();
+    if (searchTerm.hasModifiedTermOnly()) {
+      surveyCounts = cbCriteriaDao.findSurveyCounts(searchTerm.getModifiedTerm());
+    } else if (searchTerm.hasEndsWithOnly()) {
+      surveyCounts = cbCriteriaDao.findSurveyCountsAndNameEndsWith(searchTerm.getEndsWithTerms());
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      surveyCounts =
+          cbCriteriaDao.findSurveyCountsAndTermAndNameEndsWith(
+              searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms());
+    }
+
+    return surveyCounts.stream()
+        .filter(cardCount -> cardCount.getCount() > 0)
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
   private List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
-    List<String> strDomains =
-        domains.stream().map(d1 -> d1.toString()).collect(Collectors.toList());
+    List<String> strDomains = domains.stream().map(Domain::toString).collect(Collectors.toList());
     List<DbCardCount> cardCounts =
         cbCriteriaDao.findDomainCountsByCode(term, standard, strDomains).stream()
             .filter(cardCount -> cardCount.getCount() > 0)
             .collect(Collectors.toList());
     // filter strDomains to remove domains that have a cardCount by domain
     strDomains.removeAll(
-        cardCounts.stream().map(c -> c.getDomainId()).collect(Collectors.toList()));
+        cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
     // modify search term and call
     cardCounts.addAll(cbCriteriaDao.findDomainCounts(modifyTermMatch(term), standard, strDomains));
 
@@ -821,7 +854,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // process endsWith words
     List<String> endsWith =
         words.stream()
-            .filter(word -> word.startsWith("*") && word.length() >= 4)
+            .filter(word -> word.startsWith("*") && word.length() >= 3)
+            .map(x -> x.replaceAll("\\*{1,}", "%"))
             .collect(Collectors.toList());
     // now process non-endsWith words
     words.removeAll(endsWith);
@@ -851,6 +885,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             });
 
     return new SearchTerm(
+        term,
         modifiedTerms.stream()
             .collect(Collectors.joining(""))
             .replaceAll("\\+{2,}", "\\+")

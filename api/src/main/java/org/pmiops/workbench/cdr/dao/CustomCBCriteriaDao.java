@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import java.util.List;
+import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,4 +24,14 @@ public interface CustomCBCriteriaDao {
       String term,
       List<String> endsWithTerms,
       PageRequest pageRequest);
+
+  List<DbCardCount> findDomainCountsByDomainsAndStandardAndNameEndsWith(
+      List<String> domains, Boolean standard, List<String> endsWithList);
+
+  List<DbCardCount> findDomainCountsByDomainsAndStandardAndTermAndNameEndsWith(
+      List<String> domains, Boolean standard, String term, List<String> endsWithList);
+
+  List<DbCardCount> findSurveyCountsAndNameEndsWith(List<String> endsWithList);
+
+  List<DbCardCount> findSurveyCountsAndTermAndNameEndsWith(String term, List<String> endsWithList);
 }
