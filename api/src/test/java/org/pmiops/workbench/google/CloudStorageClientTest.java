@@ -38,7 +38,7 @@ public class CloudStorageClientTest {
   }
 
   @Test
-  public void getExtractionJobs() {
+  public void testBlobToFileDetail() {
     String notebookPath = "notebooks/nb1.ipynb";
     Long notebookSize = 500l;
     Long updateTime = Instant.now().getEpochSecond();

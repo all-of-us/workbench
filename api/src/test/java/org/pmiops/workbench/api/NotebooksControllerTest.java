@@ -98,10 +98,10 @@ public class NotebooksControllerTest {
     }
   }
 
-  class Notebook{
+  class MockNotebook{
     Blob blob;
     FileDetail fileDetail;
-    Notebook(String path, String bucketName){
+    MockNotebook(String path, String bucketName){
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
 
@@ -155,9 +155,9 @@ public class NotebooksControllerTest {
 
   @Test
   public void testNotebookFileList() {
-    Notebook notebook1 = new Notebook(NotebooksService.withNotebookExtension("notebooks/mockFile"),"bucket");
-    Notebook notebook2 = new Notebook("notebooks/mockFile.text","bucket");
-    Notebook notebook3 = new Notebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
+    MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"),"bucket");
+    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text","bucket");
+    MockNotebook notebook3 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
 
     when(mockCloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
@@ -184,8 +184,8 @@ public class NotebooksControllerTest {
     DbWorkspace workspace = createWorkspace();
     stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
 
-    Notebook notebook1 = new Notebook(NotebooksService.withNotebookExtension("notebooks/extra/nope"),TestMockFactory.WORKSPACE_BUCKET_NAME);
-    Notebook notebook2 = new Notebook(NotebooksService.withNotebookExtension("notebooks/foo"),TestMockFactory.WORKSPACE_BUCKET_NAME);
+    MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/extra/nope"),TestMockFactory.WORKSPACE_BUCKET_NAME);
+    MockNotebook notebook2 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/foo"),TestMockFactory.WORKSPACE_BUCKET_NAME);
 
     when(mockCloudStorageClient.getBlobPageForPrefix(
         TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
