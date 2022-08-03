@@ -25,10 +25,7 @@ public class CloudStorageClientTest {
   @Autowired private CloudStorageClient cloudStorageClient;
 
   @TestConfiguration
-  @Import({
-    CloudStorageClientImpl.class
-  })
-
+  @Import({CloudStorageClientImpl.class})
   static class Configuration {
 
     @Bean
@@ -48,13 +45,12 @@ public class CloudStorageClientTest {
     when(notebookBlob.getName()).thenReturn(notebookPath);
     when(notebookBlob.getSize()).thenReturn(notebookSize);
     when(notebookBlob.getUpdateTime()).thenReturn(updateTime);
-    FileDetail actualFileDetail = cloudStorageClient.blobToFileDetail(notebookBlob,bucketName);
+    FileDetail actualFileDetail = cloudStorageClient.blobToFileDetail(notebookBlob, bucketName);
 
     assertThat(actualFileDetail.getName()).isEqualTo("nb1.ipynb");
-    assertThat(actualFileDetail.getPath()).isEqualTo("gs://"+bucketName+"/"+notebookBlob.getName());
+    assertThat(actualFileDetail.getPath())
+        .isEqualTo("gs://" + bucketName + "/" + notebookBlob.getName());
     assertThat(actualFileDetail.getLastModifiedTime()).isEqualTo(updateTime);
     assertThat(actualFileDetail.getSizeInBytes()).isEqualTo(notebookSize);
   }
-
-
 }
