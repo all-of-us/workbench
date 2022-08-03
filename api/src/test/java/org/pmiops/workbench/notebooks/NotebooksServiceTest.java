@@ -76,7 +76,7 @@ public class NotebooksServiceTest {
 
   @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
 
-  @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private FireCloudService mockFireCloudService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private WorkspaceDao workspaceDao;
   @MockBean private UserRecentResourceService mockUserRecentResourceService;
@@ -104,6 +104,24 @@ public class NotebooksServiceTest {
     }
   }
 
+  class MockNotebook{
+    Blob blob;
+    FileDetail fileDetail;
+    MockNotebook(String path, String bucketName){
+      blob = mock(Blob.class);
+      fileDetail = new FileDetail();
+
+      String[] parts = path.split("/");
+      String fileName = parts[parts.length - 1];
+      fileDetail.setName(fileName);
+
+      when(blob.getName())
+          .thenReturn(path);
+      when(mockCloudStorageClient.blobToFileDetail(blob,bucketName)).thenReturn(fileDetail);
+
+    }
+  }
+
   @BeforeEach
   public void setup() {
     dbUser = new DbUser();
@@ -120,7 +138,7 @@ public class NotebooksServiceTest {
   @Mock private Blob mockBlob;
 
   private void stubGetWorkspace(DbWorkspace workspace, WorkspaceAccessLevel access) {
-    when(mockFirecloudService.getWorkspace(
+    when(mockFireCloudService.getWorkspace(
         workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -133,7 +151,7 @@ public class NotebooksServiceTest {
   }
 
   private void stubNotebookToJson() {
-    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
@@ -148,10 +166,10 @@ public class NotebooksServiceTest {
     FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
     firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
     String htmlDocument = "<body><div>test</div></body>";
-    when(mockFirecloudService.getWorkspaceAsService(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
         .thenReturn(firecloudWorkspaceResponse);
 
-    when(mockFirecloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
+    when(mockFireCloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
 
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
     when(mockBlob.getSize()).thenReturn(1l);
@@ -164,7 +182,7 @@ public class NotebooksServiceTest {
 
   @Test
   public void testCloneNotebook_firesMetric() {
-    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(WORKSPACE_RESPONSE).when(mockFireCloudService).getWorkspace(anyString(), anyString());
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
@@ -246,7 +264,7 @@ public class NotebooksServiceTest {
         .thenReturn(dbWorkspace);
     when(workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceFirecloudName))
         .thenReturn(dbWorkspace);
-    when(mockFirecloudService.getWorkspace(any(), any())).thenReturn(firecloudWorkspaceResponse);
+    when(mockFireCloudService.getWorkspace(any(), any())).thenReturn(firecloudWorkspaceResponse);
 
     when(mockCloudStorageClient.getExistingBlobIdsIn(any())).thenReturn(existingBlobIds);
 
@@ -264,7 +282,7 @@ public class NotebooksServiceTest {
 
   @Test
   public void testDeleteNotebook_firesMetric() {
-    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(WORKSPACE_RESPONSE).when(mockFireCloudService).getWorkspace(anyString(), anyString());
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
@@ -313,7 +331,7 @@ public class NotebooksServiceTest {
     firecloudWorkspaceDetails.setBucketName("bucketName");
     FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
     firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
-    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(firecloudWorkspaceResponse);
     when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(notebookFile);
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
@@ -354,34 +372,32 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetNotebooks() {
-    String workspaceNamespace = "sampleNamespace";
-    String workspaceName = "sampleNamespace";
-    String bucketName = "sampleBucket";
-    HashMap<String, FirecloudWorkspaceAccessEntry> workspaceUserMap = new HashMap<>();
-    FirecloudWorkspaceResponse response = new FirecloudWorkspaceResponse();
-    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
-    FileDetail fileDetail = new FileDetail();
-    List<Blob> blobs = ImmutableList.of(mockBlob);
-    firecloudWorkspaceDetails.setBucketName(bucketName);
-    response.setWorkspace(firecloudWorkspaceDetails);
+    MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"),"bucket");
+    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text","bucket");
+    MockNotebook notebook3 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
 
-    when(mockFirecloudService.getWorkspace(anyString(), anyString())).thenReturn(response);
-    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
-        .thenReturn(workspaceUserMap);
-    when(mockBlob.getName()).thenReturn("notebooks/test.ipynb");
-    when(mockCloudStorageClient.getBlobPageForPrefix(anyString(), anyString())).thenReturn(blobs);
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString()))
-        .thenReturn(fileDetail);
+    when(mockCloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
+        .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
+    when(mockFireCloudService.getWorkspace("project", "workspace"))
+        .thenReturn(
+            new FirecloudWorkspaceResponse()
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bucket")));
 
-    List<FileDetail> fileDetails = notebooksService.getNotebooks(workspaceNamespace, workspaceName);
+    List<String> gotNames =
+        notebooksService.getNotebooks("project", "workspace").stream()
+            .map(FileDetail::getName)
+            .collect(Collectors.toList());
 
-    assertThat(fileDetails.size()).isEqualTo(1);
-    assertThat(fileDetails.get(0)).isEqualTo(fileDetail);
+    assertThat(gotNames)
+        .isEqualTo(
+            ImmutableList.of(
+                notebook1.fileDetail.getName(),
+                notebook3.fileDetail.getName()));
   }
 
   @Test
   public void testGetNotebooks_notFound() {
-    when(mockFirecloudService.getWorkspace("mockProject", "mockWorkspace"))
+    when(mockFireCloudService.getWorkspace("mockProject", "mockWorkspace"))
         .thenThrow(new org.pmiops.workbench.exceptions.NotFoundException());
     assertThrows(
         org.pmiops.workbench.exceptions.NotFoundException.class,
@@ -424,7 +440,7 @@ public class NotebooksServiceTest {
   public void testGetReadOnlyHtml_allowsDataImage() {
     stubNotebookToJson();
     String dataUri = "data:image/png;base64,MTIz";
-    when(mockFirecloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticNotebooksConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -434,7 +450,7 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_basicContent() {
     stubNotebookToJson();
-    when(mockFirecloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -445,7 +461,7 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
     stubNotebookToJson();
-    when(mockFirecloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -455,7 +471,7 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
     stubNotebookToJson();
-    when(mockFirecloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -466,7 +482,7 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
     stubNotebookToJson();
-    when(mockFirecloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticNotebooksConvert(any()))
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
@@ -491,7 +507,7 @@ public class NotebooksServiceTest {
     } catch (FailedPreconditionException e) {
       // expected
     }
-    verify(mockFirecloudService, never()).staticNotebooksConvert(any());
+    verify(mockFireCloudService, never()).staticNotebooksConvert(any());
   }
 
   @Test
@@ -508,7 +524,7 @@ public class NotebooksServiceTest {
 
     when(workspaceDao.getRequired(anyString(), anyString())).thenReturn(dbWorkspace);
 
-    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
@@ -534,7 +550,7 @@ public class NotebooksServiceTest {
 
     when(workspaceDao.getRequired(anyString(), anyString())).thenReturn(dbWorkspace);
 
-    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
