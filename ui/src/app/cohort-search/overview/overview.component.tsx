@@ -133,6 +133,9 @@ const styles = reactStyles({
   },
 });
 
+// Limit the size of cohort definition to 1MB
+const COHORT_BYTE_LIMIT = 1000000;
+
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
@@ -150,6 +153,7 @@ interface State {
   apiCallCheck: number;
   apiError: boolean;
   chartData: any;
+  cohortSizeError: boolean;
   currentGraphOptions: {
     ageType: AgeType;
     genderOrSexType: GenderOrSexType;
@@ -185,6 +189,7 @@ export const ListOverview = fp.flow(
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
+        cohortSizeError: false,
         currentGraphOptions: {
           ageType: AgeType.AGEATCDR,
           genderOrSexType: GenderOrSexType.GENDER,
@@ -217,6 +222,11 @@ export const ListOverview = fp.flow(
         this.props.updateCount > prevProps.updateCount &&
         !this.definitionErrors
       ) {
+        this.setState({
+          cohortSizeError:
+            new Blob([JSON.stringify(mapRequest(this.props.searchRequest))])
+              .size > COHORT_BYTE_LIMIT,
+        });
         this.getTotalCount();
       }
     }
@@ -517,8 +527,10 @@ export const ListOverview = fp.flow(
     }
 
     get disableSaveButton() {
-      const { loading, saving, total } = this.state;
-      return loading || saving || this.definitionErrors || !total;
+      const { cohortSizeError, loading, saving, total } = this.state;
+      return (
+        cohortSizeError || loading || saving || this.definitionErrors || !total
+      );
     }
 
     get disableRefreshButton() {
