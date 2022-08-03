@@ -146,6 +146,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     return getCredentialsBucketString("captcha-server-key.txt");
   }
 
+  @Override
   public FileDetail blobToFileDetail(Blob blob, String bucketName) {
     String[] parts = blob.getName().split("/");
     FileDetail fileDetail = new FileDetail();
