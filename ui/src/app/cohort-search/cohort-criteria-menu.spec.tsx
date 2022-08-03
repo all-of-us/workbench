@@ -8,7 +8,9 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -27,6 +29,12 @@ describe('CohortCriteriaMenu', () => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       cdrVersionId: '1',
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableDrugWildcardSearch: false,
+      },
     });
   });
 
