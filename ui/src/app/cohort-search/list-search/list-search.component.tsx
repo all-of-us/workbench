@@ -50,6 +50,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
+    float: 'left',
     width: '80%',
     padding: '0.4rem 0',
     zIndex: 10,
@@ -177,6 +178,7 @@ const styles = reactStyles({
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
     marginLeft: '0.25rem',
+    height: '100%',
   },
   clearSearchIcon: {
     color: colors.accent,
@@ -908,17 +910,40 @@ export const ListSearch = fp.flow(
               concepts before adding more.
             </div>
           )}
-          <div style={styles.searchContainer}>
-            <div style={styles.searchBar}>
-              <ClrIcon shape='search' size='18' />
-              <TextInput
-                data-test-id='list-search-input'
-                style={styles.searchInput}
-                value={searchTerms}
-                placeholder={this.textInputPlaceholder}
-                onChange={(e) => this.setState({ searchTerms: e })}
-                onKeyPress={this.handleInput}
-              />
+          <div style={{ display: 'flex' }}>
+            <div style={styles.searchContainer}>
+              <div style={styles.searchBar}>
+                <ClrIcon shape='search' size='18' />
+                <TextInput
+                  data-test-id='list-search-input'
+                  style={styles.searchInput}
+                  value={searchTerms}
+                  placeholder={this.textInputPlaceholder}
+                  onChange={(e) => this.setState({ searchTerms: e })}
+                  onKeyPress={this.handleInput}
+                />
+                {source === 'conceptSetDetails' && searching && (
+                  <Clickable
+                    style={styles.clearSearchIcon}
+                    onClick={() =>
+                      this.setState({
+                        data: concept,
+                        searching: false,
+                        searchTerms: '',
+                      })
+                    }
+                  >
+                    <ClrIcon size={24} shape='times-circle' />
+                  </Clickable>
+                )}
+              </div>
+              {inputErrors.map((error, e) => (
+                <AlertDanger key={e} style={styles.inputAlert}>
+                  <span data-test-id='input-error-alert'>{error}</span>
+                </AlertDanger>
+              ))}
+            </div>
+            <div style={{ float: 'right', width: '20%' }}>
               {serverConfigStore.get().config.enableUniversalSearch && (
                 <TooltipTrigger side='top' content={searchTooltip}>
                   <ClrIcon
@@ -928,26 +953,7 @@ export const ListSearch = fp.flow(
                   />
                 </TooltipTrigger>
               )}
-              {source === 'conceptSetDetails' && searching && (
-                <Clickable
-                  style={styles.clearSearchIcon}
-                  onClick={() =>
-                    this.setState({
-                      data: concept,
-                      searching: false,
-                      searchTerms: '',
-                    })
-                  }
-                >
-                  <ClrIcon size={24} shape='times-circle' />
-                </Clickable>
-              )}
             </div>
-            {inputErrors.map((error, e) => (
-              <AlertDanger key={e} style={styles.inputAlert}>
-                <span data-test-id='input-error-alert'>{error}</span>
-              </AlertDanger>
-            ))}
           </div>
           <div style={{ display: 'table', height: '100%', width: '100%' }}>
             <div style={styles.helpText}>

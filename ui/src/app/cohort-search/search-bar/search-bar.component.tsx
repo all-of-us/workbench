@@ -22,8 +22,9 @@ import { serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   searchContainer: {
+    float: 'left',
     background: colors.white,
-    width: '100%',
+    width: '95%',
     zIndex: 10,
   },
   searchBar: {
@@ -80,6 +81,7 @@ const styles = reactStyles({
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
     marginLeft: '0.25rem',
+    height: '100%',
   },
 });
 
@@ -392,7 +394,7 @@ export class SearchBar extends React.Component<Props, State> {
         ? options[highlightedOption].name
         : this.props.searchTerms;
     return (
-      <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{ display: 'flex', position: 'relative', width: '100%' }}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
             {loading ? (
@@ -406,22 +408,24 @@ export class SearchBar extends React.Component<Props, State> {
               onChange={(e) => this.props.setInput(e)}
               onKeyDown={(e) => this.onKeyDown(e.key)}
             />
-            {serverConfigStore.get().config.enableUniversalSearch &&
-              this.doesDomainIncludeToolTip() && (
-                <TooltipTrigger side='top' content={searchTooltip}>
-                  <ClrIcon
-                    style={styles.infoIcon}
-                    className='is-solid'
-                    shape='info-standard'
-                  />
-                </TooltipTrigger>
-              )}
           </div>
           {inputErrors.map((error, e) => (
             <AlertDanger key={e} style={styles.inputAlert}>
               <span data-test-id='input-error-alert'>{error}</span>
             </AlertDanger>
           ))}
+        </div>
+        <div style={{ float: 'right' }}>
+          {serverConfigStore.get().config.enableUniversalSearch &&
+            this.doesDomainIncludeToolTip() && (
+              <TooltipTrigger side='top' content={searchTooltip}>
+                <ClrIcon
+                  style={styles.infoIcon}
+                  className='is-solid'
+                  shape='info-standard'
+                />
+              </TooltipTrigger>
+            )}
         </div>
         {options !== null && (
           <div ref={(el) => (this.dropdown = el)} style={styles.dropdownMenu}>
