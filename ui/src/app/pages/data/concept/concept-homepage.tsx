@@ -66,9 +66,9 @@ const styles = reactStyles({
   },
   clearSearchIcon: {
     fill: colors.accent,
-    transform: 'translate(-1.5rem)',
     height: '1rem',
     width: '1rem',
+    marginLeft: '-1.5rem',
   },
   sectionHeader: {
     height: 24,
