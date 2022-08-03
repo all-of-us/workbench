@@ -134,7 +134,7 @@ const styles = reactStyles({
 });
 
 // Limit the size of cohort definition to 1MB
-const COHORT_BYTE_LIMIT = 1000000;
+const COHORT_BYTE_LIMIT = 1000;
 
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
@@ -556,6 +556,7 @@ export const ListOverview = fp.flow(
         ageType,
         apiError,
         chartData,
+        cohortSizeError,
         currentGraphOptions,
         deleting,
         genderOrSexType,
@@ -699,7 +700,22 @@ export const ListOverview = fp.flow(
                 ) : loading ? (
                   <Spinner size={18} />
                 ) : (
-                  <span>{this.showTotalCount && total.toLocaleString()}</span>
+                  <React.Fragment>
+                    {cohortSizeError && (
+                      <TooltipTrigger
+                        content={
+                          'The size of your cohort exceeds the 1MB limit. Remove some criteria selections to continue.'
+                        }
+                      >
+                        <ClrIcon
+                          style={{ color: '#F57600', marginRight: '0.25rem' }}
+                          shape='warning-standard'
+                          size={18}
+                        />
+                      </TooltipTrigger>
+                    )}
+                    <span>{this.showTotalCount && total.toLocaleString()}</span>
+                  </React.Fragment>
                 )}
               </h2>
             </div>
