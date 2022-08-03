@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -185,32 +184,19 @@ public class NotebooksControllerTest {
     DbWorkspace workspace = createWorkspace();
     stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
 
-    FileDetail fileDetail1 = new FileDetail();
-    FileDetail fileDetail2 = new FileDetail();
-    Blob mockBlob1 = mock(Blob.class);
-    Blob mockBlob2 = mock(Blob.class);
-
-
-    fileDetail1.setName("nope.ipynb");
-    when(mockBlob1.getName())
-        .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob1,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(fileDetail1);
-
-
-    fileDetail2.setName("foo.ipynb");
-    when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob2,TestMockFactory.WORKSPACE_BUCKET_NAME)).thenReturn(fileDetail2);
+    Notebook notebook1 = new Notebook(NotebooksService.withNotebookExtension("notebooks/extra/nope"),TestMockFactory.WORKSPACE_BUCKET_NAME);
+    Notebook notebook2 = new Notebook(NotebooksService.withNotebookExtension("notebooks/foo"),TestMockFactory.WORKSPACE_BUCKET_NAME);
 
     when(mockCloudStorageClient.getBlobPageForPrefix(
         TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
+        .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob));
     List<FileDetail> body =
         notebooksController
             .getNoteBookList(workspace.getWorkspaceNamespace(), workspace.getFirecloudName())
             .getBody();
 
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
-    assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
+    assertThat(gotNames).isEqualTo(ImmutableList.of(notebook2.fileDetail.getName()));
   }
 
   @Test
