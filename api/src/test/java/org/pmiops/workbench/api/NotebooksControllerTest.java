@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
@@ -380,6 +381,33 @@ public class NotebooksControllerTest {
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
     verify(mockNotebookService)
         .cloneNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
+  }
+
+  @Test
+  public void testReadOnlyNotebook() {
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+
+    String html = "<html><body><div>Hi!</div></body></html>";
+    ReadOnlyNotebookResponse expectedResponse = new ReadOnlyNotebookResponse().html(html);
+
+    when(mockNotebookService.getReadOnlyHtml(
+        anyString(), anyString(), anyString()))
+        .thenReturn(html);
+
+    ReadOnlyNotebookResponse actualResponse =
+        notebooksController
+            .readOnlyNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName)
+            .getBody();
+
+    verify(mockNotebookService)
+        .getReadOnlyHtml(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            fromNotebookName);
+
+    assertThat(actualResponse).isEqualTo(expectedResponse);
   }
 
   private static Stream<Arguments> notebookLockingCases() {
