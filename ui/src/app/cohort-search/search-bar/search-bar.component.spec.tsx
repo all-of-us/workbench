@@ -4,7 +4,9 @@ import { shallow } from 'enzyme';
 import { CohortBuilderApi, Criteria } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 
 import { SearchBar } from './search-bar.component';
@@ -27,6 +29,12 @@ const nodeStub = {
 describe('SearchBar', () => {
   beforeEach(() => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableDrugWildcardSearch: false,
+      },
+    });
   });
   it('should render', () => {
     const wrapper = shallow(

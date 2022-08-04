@@ -10,7 +10,9 @@ import {
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
@@ -39,6 +41,12 @@ describe('ConceptHomepage', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableDrugWildcardSearch: false,
+      },
+    });
   });
 
   it('should render', () => {
