@@ -16,7 +16,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +35,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -104,10 +102,11 @@ public class NotebooksServiceTest {
     }
   }
 
-  class MockNotebook{
+  class MockNotebook {
     Blob blob;
     FileDetail fileDetail;
-    MockNotebook(String path, String bucketName){
+
+    MockNotebook(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
 
@@ -115,10 +114,8 @@ public class NotebooksServiceTest {
       String fileName = parts[parts.length - 1];
       fileDetail.setName(fileName);
 
-      when(blob.getName())
-          .thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob,bucketName)).thenReturn(fileDetail);
-
+      when(blob.getName()).thenReturn(path);
+      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName)).thenReturn(fileDetail);
     }
   }
 
@@ -139,7 +136,7 @@ public class NotebooksServiceTest {
 
   private void stubGetWorkspace(DbWorkspace workspace, WorkspaceAccessLevel access) {
     when(mockFireCloudService.getWorkspace(
-        workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .accessLevel(access.toString())
@@ -372,9 +369,11 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetNotebooks() {
-    MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"),"bucket");
-    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text","bucket");
-    MockNotebook notebook3 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
+    MockNotebook notebook1 =
+        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), "bucket");
+    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text", "bucket");
+    MockNotebook notebook3 =
+        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"), "bucket");
 
     when(mockCloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
@@ -390,9 +389,7 @@ public class NotebooksServiceTest {
 
     assertThat(gotNames)
         .isEqualTo(
-            ImmutableList.of(
-                notebook1.fileDetail.getName(),
-                notebook3.fileDetail.getName()));
+            ImmutableList.of(notebook1.fileDetail.getName(), notebook3.fileDetail.getName()));
   }
 
   @Test
@@ -416,13 +413,11 @@ public class NotebooksServiceTest {
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
     when(mockCloudStorageClient.getBlobPageForPrefix(
-        TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
+            TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
-    when(mockCloudStorageClient.blobToFileDetail(
-        mockBlob1, TestMockFactory.WORKSPACE_BUCKET_NAME))
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, TestMockFactory.WORKSPACE_BUCKET_NAME))
         .thenReturn(fileDetail1);
-    when(mockCloudStorageClient.blobToFileDetail(
-        mockBlob2, TestMockFactory.WORKSPACE_BUCKET_NAME))
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, TestMockFactory.WORKSPACE_BUCKET_NAME))
         .thenReturn(fileDetail2);
     when(fileDetail1.getName()).thenReturn("nope.ipynb");
     when(fileDetail2.getName()).thenReturn("foo.ipynb");

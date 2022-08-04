@@ -3,14 +3,10 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
@@ -20,7 +16,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +34,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -99,10 +93,11 @@ public class NotebooksControllerTest {
     }
   }
 
-  class MockNotebook{
+  class MockNotebook {
     Blob blob;
     FileDetail fileDetail;
-    MockNotebook(String path, String bucketName){
+
+    MockNotebook(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
 
@@ -110,10 +105,8 @@ public class NotebooksControllerTest {
       String fileName = parts[parts.length - 1];
       fileDetail.setName(fileName);
 
-      when(blob.getName())
-          .thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob,bucketName)).thenReturn(fileDetail);
-
+      when(blob.getName()).thenReturn(path);
+      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName)).thenReturn(fileDetail);
     }
   }
 
@@ -122,9 +115,7 @@ public class NotebooksControllerTest {
   private FirecloudWorkspaceACL fcWorkspaceAcl;
   private DbCdrVersion cdrVersion;
 
-  @MockBean
-  private NotebooksService mockNotebookService;
-
+  @MockBean private NotebooksService mockNotebookService;
 
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;
@@ -135,7 +126,6 @@ public class NotebooksControllerTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
   @Autowired private NotebooksController notebooksController;
-
 
   @BeforeEach
   public void setUp() {
@@ -161,24 +151,20 @@ public class NotebooksControllerTest {
   public void testDeleteNotebook() {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
-    String notebookName ="notebook.ipynb";
+    String notebookName = "notebook.ipynb";
 
-    notebooksController.deleteNotebook(
-        workspaceNamespace,
-        workspaceName,
-        notebookName);
-    verify(mockNotebookService)
-        .deleteNotebook(workspaceNamespace,
-            workspaceName,
-            notebookName);
+    notebooksController.deleteNotebook(workspaceNamespace, workspaceName, notebookName);
+    verify(mockNotebookService).deleteNotebook(workspaceNamespace, workspaceName, notebookName);
   }
 
   @Test
   public void testGetNotebookList() {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
-    MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"),"bucket");
-    MockNotebook notebook2 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
+    MockNotebook notebook1 =
+        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), "bucket");
+    MockNotebook notebook2 =
+        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"), "bucket");
 
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
         .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
@@ -187,12 +173,10 @@ public class NotebooksControllerTest {
         notebooksController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
-    verify(mockNotebookService).getNotebooks(workspaceNamespace,workspaceName);
+    verify(mockNotebookService).getNotebooks(workspaceNamespace, workspaceName);
     assertThat(gotNames)
         .isEqualTo(
-            ImmutableList.of(
-                notebook1.fileDetail.getName(),
-                notebook2.fileDetail.getName()));
+            ImmutableList.of(notebook1.fileDetail.getName(), notebook2.fileDetail.getName()));
   }
 
   @Test
@@ -258,7 +242,7 @@ public class NotebooksControllerTest {
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String toNotebookName = "novice.ipynb";
-    String toPath = "/path/to/"+toNotebookName;
+    String toPath = "/path/to/" + toNotebookName;
 
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
@@ -272,15 +256,23 @@ public class NotebooksControllerTest {
     expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
     expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    when(mockNotebookService.copyNotebook(anyString(),anyString(),anyString(),anyString(),anyString(),anyString())).thenReturn(expectedFileDetail);
+    when(mockNotebookService.copyNotebook(
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
 
-    FileDetail actualFileDetail = notebooksController.copyNotebook(
-        fromWorkspaceNamespace,
-        fromWorkspaceName,
-        fromNotebookName,
-        copyRequest).getBody();
+    FileDetail actualFileDetail =
+        notebooksController
+            .copyNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName, copyRequest)
+            .getBody();
 
-    verify(mockNotebookService).copyNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName,toWorkspaceNamespace,toWorkspaceName,toNotebookName);
+    verify(mockNotebookService)
+        .copyNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            fromNotebookName,
+            toWorkspaceNamespace,
+            toWorkspaceName,
+            toNotebookName);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
@@ -293,7 +285,7 @@ public class NotebooksControllerTest {
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String toNotebookName = "novice.ipynb";
-    String toPath = "/path/to/"+toNotebookName;
+    String toPath = "/path/to/" + toNotebookName;
     long sizeInBytes = 500;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
@@ -307,18 +299,25 @@ public class NotebooksControllerTest {
     expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
     expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    when(mockNotebookService.copyNotebook(anyString(),anyString(),anyString(),anyString(),anyString(),anyString())).thenThrow(
-        BlobAlreadyExistsException.class);
+    when(mockNotebookService.copyNotebook(
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        .thenThrow(BlobAlreadyExistsException.class);
 
-    Throwable exception = assertThrows(
-        ConflictException.class,
-        () -> notebooksController.copyNotebook(
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                notebooksController.copyNotebook(
+                    fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName, copyRequest));
+
+    verify(mockNotebookService)
+        .copyNotebook(
             fromWorkspaceNamespace,
             fromWorkspaceName,
             fromNotebookName,
-            copyRequest));
-
-    verify(mockNotebookService).copyNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName,toWorkspaceNamespace,toWorkspaceName,toNotebookName);
+            toWorkspaceNamespace,
+            toWorkspaceName,
+            toNotebookName);
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
 
@@ -329,7 +328,7 @@ public class NotebooksControllerTest {
     String fromWorkspaceName = "fromWorkspace_000";
     String fromNotebookName = "starter.ipynb";
     String toNotebookName = "Duplicate of starter.ipynb";
-    String toPath = "/path/to/"+toNotebookName;
+    String toPath = "/path/to/" + toNotebookName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     FileDetail expectedFileDetail = new FileDetail();
 
@@ -338,14 +337,16 @@ public class NotebooksControllerTest {
     expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
     expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    when(mockNotebookService.cloneNotebook(anyString(),anyString(),anyString())).thenReturn(expectedFileDetail);
+    when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
 
-    FileDetail actualFileDetail = notebooksController.cloneNotebook(
-        fromWorkspaceNamespace,
-        fromWorkspaceName,
-        fromNotebookName).getBody();
+    FileDetail actualFileDetail =
+        notebooksController
+            .cloneNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName)
+            .getBody();
 
-    verify(mockNotebookService).cloneNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName);
+    verify(mockNotebookService)
+        .cloneNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
@@ -357,7 +358,7 @@ public class NotebooksControllerTest {
     String fromWorkspaceName = "fromWorkspace_000";
     String fromNotebookName = "starter.ipynb";
     String toNotebookName = "Duplicate of starter.ipynb";
-    String toPath = "/path/to/"+toNotebookName;
+    String toPath = "/path/to/" + toNotebookName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     FileDetail expectedFileDetail = new FileDetail();
 
@@ -366,18 +367,19 @@ public class NotebooksControllerTest {
     expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
     expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    when(mockNotebookService.cloneNotebook(anyString(),anyString(),anyString())).thenThrow(BlobAlreadyExistsException.class);
+    when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
+        .thenThrow(BlobAlreadyExistsException.class);
 
-    Throwable exception = assertThrows(
-        BadRequestException.class,
-        () -> notebooksController.cloneNotebook(
-            fromWorkspaceNamespace,
-            fromWorkspaceName,
-            fromNotebookName));
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                notebooksController.cloneNotebook(
+                    fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName));
 
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
-    verify(mockNotebookService).cloneNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName);
-
+    verify(mockNotebookService)
+        .cloneNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
   }
 
   private static Stream<Arguments> notebookLockingCases() {
@@ -603,9 +605,9 @@ public class NotebooksControllerTest {
         .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(
-        notebooksController
-            .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
-            .getBody())
+            notebooksController
+                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getBody())
         .isEqualTo(expectedResponse);
   }
 

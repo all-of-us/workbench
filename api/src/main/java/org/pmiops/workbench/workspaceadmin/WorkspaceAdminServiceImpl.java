@@ -162,10 +162,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     // NOTE: all of these may be undercounts, because we're only looking at the first Page of
     // Storage List results
-    int notebookFilesCount =
-        notebooksService
-            .getNotebooksAsService(bucketName)
-            .size();
+    int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName).size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
 
@@ -244,8 +241,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
     List<LeonardoListRuntimeResponse> runtimesToDelete =
         filterByRuntimesInList(
-            leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-            req.getRuntimesToDelete())
+                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
+                req.getRuntimesToDelete())
             .collect(Collectors.toList());
     runtimesToDelete.forEach(
         runtime ->
@@ -253,8 +250,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 runtime.getGoogleProject(), runtime.getRuntimeName()));
     List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
         filterByRuntimesInList(
-            leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
-            req.getRuntimesToDelete())
+                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
+                req.getRuntimesToDelete())
             .collect(Collectors.toList());
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
