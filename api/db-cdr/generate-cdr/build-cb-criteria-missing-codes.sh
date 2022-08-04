@@ -368,7 +368,7 @@ WHERE ancestor_concept_id in
         SELECT DISTINCT concept_id
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         WHERE domain_id = 'DRUG'
-            and type = 'RXNORM'
+            and type in ('CVX', 'HCPCS', 'RxNorm Extension')
             and is_group = 0
             and is_selectable = 1
     )
