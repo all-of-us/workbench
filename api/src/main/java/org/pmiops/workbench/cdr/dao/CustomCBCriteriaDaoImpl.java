@@ -44,27 +44,26 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     public MapSqlParameterSource getParameters() {
       return parameters;
     }
-
-    @Override
-    public String toString() {
-      return "QueryAndParameters{" + "query='" + query + '\'' + ", parameters=" + parameters + '}';
-    }
   }
 
   private static final String SQL_DB_CDR_NAME = "DB_CDR_NAME";
   private static final String SQL_ENDS_WITH = "SQL_ENDS_WITH";
+
+  // SQL bind parameter variables
   private static final String BIND_VAR_DOMAIN = "domain";
   private static final String BIND_VAR_STANDARD = "standard";
   private static final String BIND_VAR_TERM = "term";
   private static final String BIND_VAR_TYPE = "type";
-  private static final String BIND_VAR_IN_DOMAIN_LIST = "domains";
+
+  // SQL regexp replace variable (for IN clause)
+  private static final String VAR_IN_DOMAINS = "domains";
 
   // SQL snips
   private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
   private static final String LIMIT_OFFSET = "limit %s offset %s\n";
   private static final String OR = "\nor\n";
 
-  private static final String CRITERIA_BY_DOMAIN_ENDS_WITH_NO_TERM =
+  private static final String CRITERIA_BY_DOMAIN_ENDS_WITH =
       "select *\n"
           + "from \n"
           + SQL_DB_CDR_NAME
@@ -98,7 +97,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + ")\n"
           + "order by est_count desc, name asc\n";
 
-  private static final String AUTO_COMPLETE_ENDS_WITH_NO_TERM =
+  private static final String AUTO_COMPLETE_ENDS_WITH =
       "select *\n"
           + "from \n"
           + SQL_DB_CDR_NAME
@@ -156,7 +155,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + "and domain_id in (:"
-          + BIND_VAR_IN_DOMAIN_LIST
+          + VAR_IN_DOMAINS
           + ")\n"
           + "and ("
           + SQL_ENDS_WITH
@@ -164,7 +163,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "group by 1 "
           + "order by count desc";
 
-  private static final String DOMAIN_COUNTS_ENDS_WITH_NO_TERM =
+  private static final String DOMAIN_COUNTS_ENDS_WITH =
       "select \n"
           + "upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as domainId\n"
           + ", upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as name\n"
@@ -177,7 +176,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + "and domain_id in (:"
-          + BIND_VAR_IN_DOMAIN_LIST
+          + VAR_IN_DOMAINS
           + ")\n"
           + "and ("
           + SQL_ENDS_WITH
@@ -214,7 +213,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + ") a on c.id = a.survey_version_concept_id "
           + "order by count desc";
 
-  private static final String SURVEY_COUNTS_ENDS_WITH_NO_TERM =
+  private static final String SURVEY_COUNTS_ENDS_WITH =
       "select 'SURVEY' as domainId"
           + ", name\n"
           + ", count\n"
@@ -253,7 +252,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       {BIND_VAR_STANDARD, standard}
     };
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(CRITERIA_BY_DOMAIN_ENDS_WITH_NO_TERM, params, endsWithList);
+        generateQueryAndParameters(CRITERIA_BY_DOMAIN_ENDS_WITH, params, endsWithList);
     return new PageImpl<>(
         queryForPaginatedList(page, queryAndParameters),
         page,
@@ -283,7 +282,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       {BIND_VAR_DOMAIN, domain}, {BIND_VAR_TYPE, type}, {BIND_VAR_STANDARD, standard}
     };
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH_NO_TERM, params, endsWithList);
+        generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH, params, endsWithList);
     return new PageImpl<>(
             queryForPaginatedList(page, queryAndParameters),
             page,
@@ -317,9 +316,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public List<DbCardCount> findDomainCountsByDomainsAndStandardAndNameEndsWith(
       List<String> domains, Boolean standard, List<String> endsWithList) {
-    Object[][] params = {{BIND_VAR_STANDARD, standard}, {BIND_VAR_IN_DOMAIN_LIST, domains}};
+    Object[][] params = {{BIND_VAR_STANDARD, standard}, {VAR_IN_DOMAINS, domains}};
     return queryForDbCardCountList(
-        generateQueryAndParameters(DOMAIN_COUNTS_ENDS_WITH_NO_TERM, params, endsWithList));
+        generateQueryAndParameters(DOMAIN_COUNTS_ENDS_WITH, params, endsWithList));
   }
 
   @Override
@@ -328,7 +327,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     Object[][] params = {
       {BIND_VAR_STANDARD, standard},
       {BIND_VAR_TERM, term},
-      {BIND_VAR_IN_DOMAIN_LIST, domains}
+      {VAR_IN_DOMAINS, domains}
     };
     return queryForDbCardCountList(
         generateQueryAndParameters(DOMAIN_COUNTS_ENDS_WITH_AND_TERM, params, endsWithList));
@@ -337,7 +336,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public List<DbCardCount> findSurveyCountsAndNameEndsWith(List<String> endsWithList) {
     return queryForDbCardCountList(
-        generateQueryAndParameters(SURVEY_COUNTS_ENDS_WITH_NO_TERM, null, endsWithList));
+        generateQueryAndParameters(SURVEY_COUNTS_ENDS_WITH, null, endsWithList));
   }
 
   @Override
@@ -363,6 +362,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
     if (params != null) {
       Arrays.stream(params).forEach(param -> parameters.addValue(param[0].toString(), param[1]));
     }
+
     StringJoiner joiner = new StringJoiner(OR);
     IntStream.range(0, endsWithList.size())
         .forEach(
@@ -372,11 +372,10 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
               joiner.add(String.format(DYNAMIC_SQL, ":" + parameterName));
             });
 
-    String tmpSql =
+    return new QueryAndParameters(
         sql.replaceAll(SQL_DB_CDR_NAME, dbCdrVersion.getCdrDbName())
-            .replaceAll(SQL_ENDS_WITH, joiner.toString());
-
-    return new QueryAndParameters(tmpSql, parameters);
+            .replaceAll(SQL_ENDS_WITH, joiner.toString()),
+        parameters);
   }
 
   @NotNull
@@ -391,12 +390,10 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @NotNull
   private List<DbCardCount> queryForDbCardCountList(QueryAndParameters queryAndParameters) {
-    final List<DbCardCount> dbCardCountList =
-        namedParameterJdbcTemplate.query(
-            queryAndParameters.getQuery(),
-            queryAndParameters.getParameters(),
-            new DbCardCountRowMapper());
-    return dbCardCountList;
+    return namedParameterJdbcTemplate.query(
+        queryAndParameters.getQuery(),
+        queryAndParameters.getParameters(),
+        new DbCardCountRowMapper());
   }
 
   @Nullable
@@ -436,7 +433,6 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   }
 
   private static class DbCardCountRowMapper implements RowMapper<DbCardCount> {
-
     @Override
     public DbCardCount mapRow(ResultSet rs, int rowNum) throws SQLException {
       return new DbCardCountImpl(
@@ -446,9 +442,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   public static class DbCardCountImpl implements DbCardCount {
 
-    private String domainId;
-    private String name;
-    private long count;
+    private final String domainId;
+    private final String name;
+    private final long count;
 
     public DbCardCountImpl(String domainId, String name, long count) {
       this.domainId = domainId;
