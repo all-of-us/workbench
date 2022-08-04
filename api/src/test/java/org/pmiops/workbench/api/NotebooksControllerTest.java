@@ -121,6 +121,10 @@ public class NotebooksControllerTest {
   private FirecloudWorkspaceACL fcWorkspaceAcl;
   private DbCdrVersion cdrVersion;
 
+  @MockBean
+  private NotebooksService mockNotebookService;
+
+
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private UserRecentResourceService mockUserRecentResourceService;
@@ -131,7 +135,6 @@ public class NotebooksControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private NotebooksController notebooksController;
 
-  @Autowired private NotebooksService mockNotebookService;
 
   @BeforeEach
   public void setUp() {
@@ -154,58 +157,43 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testNotebookFileList() {
+  public void testDeleteNotebook() {
+    String workspaceNamespace = "project";
+    String workspaceName = "workspace";
+    String notebookName ="notebook.ipynb";
+
+    notebooksController.deleteNotebook(
+        workspaceNamespace,
+        workspaceName,
+        notebookName);
+    verify(mockNotebookService)
+        .deleteNotebook(workspaceNamespace,
+            workspaceName,
+            notebookName);
+  }
+
+  @Test
+  public void testGetNotebookList() {
+    String workspaceNamespace = "project";
+    String workspaceName = "workspace";
     MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"),"bucket");
-    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text","bucket");
-    MockNotebook notebook3 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
+    MockNotebook notebook2 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"),"bucket");
 
-    when(mockCloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
-        .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
-    when(mockFireCloudService.getWorkspace("project", "workspace"))
-        .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspaceDetails().bucketName("bucket")));
+    when(mockNotebookService.getNotebooks(anyString(), anyString()))
+        .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
 
-    // Will return 1 entry as only python files in notebook folder are return
     List<String> gotNames =
-        notebooksController.getNoteBookList("project", "workspace").getBody().stream()
+        notebooksController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
+    verify(mockNotebookService).getNotebooks(workspaceNamespace,workspaceName);
     assertThat(gotNames)
         .isEqualTo(
             ImmutableList.of(
                 notebook1.fileDetail.getName(),
-                notebook3.fileDetail.getName()));
+                notebook2.fileDetail.getName()));
   }
 
-  @Test
-  public void testNotebookFileListOmitsExtraDirectories() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    MockNotebook notebook1 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/extra/nope"),TestMockFactory.WORKSPACE_BUCKET_NAME);
-    MockNotebook notebook2 = new MockNotebook(NotebooksService.withNotebookExtension("notebooks/foo"),TestMockFactory.WORKSPACE_BUCKET_NAME);
-
-    when(mockCloudStorageClient.getBlobPageForPrefix(
-        TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob));
-    List<FileDetail> body =
-        notebooksController
-            .getNoteBookList(workspace.getWorkspaceNamespace(), workspace.getFirecloudName())
-            .getBody();
-
-    List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
-    assertThat(gotNames).isEqualTo(ImmutableList.of(notebook2.fileDetail.getName()));
-  }
-
-  @Test
-  public void testNotebookFileListNotFound() {
-    when(mockFireCloudService.getWorkspace("mockProject", "mockWorkspace"))
-        .thenThrow(new org.pmiops.workbench.exceptions.NotFoundException());
-    assertThrows(
-        org.pmiops.workbench.exceptions.NotFoundException.class,
-        () -> notebooksController.getNoteBookList("mockProject", "mockWorkspace"));
-  }
 
   @Test
   public void testRenameNotebookInWorkspace() {
@@ -456,53 +444,6 @@ public class NotebooksControllerTest {
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(mockUserRecentResourceService)
         .updateNotebookEntry(eq(workspace.getWorkspaceId()), anyLong(), eq(fullPath));
-  }
-
-  @Test
-  public void testDeleteNotebook() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
-    String fullPath = BUCKET_URI + nb1;
-    notebooksController.deleteNotebook(
-        workspace.getWorkspaceNamespace(),
-        workspace.getFirecloudName(),
-        NotebooksService.withNotebookExtension("nb1"));
-    verify(mockCloudStorageClient)
-        .deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
-    verify(mockUserRecentResourceService)
-        .deleteNotebookEntry(eq(workspace.getWorkspaceId()), anyLong(), eq(fullPath));
-  }
-
-  @Test
-  public void testDeleteNotebook_writer() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.WRITER);
-
-    notebooksController.deleteNotebook(
-        workspace.getWorkspaceNamespace(),
-        workspace.getFirecloudName(),
-        NotebooksService.withNotebookExtension("nb1"));
-    verify(mockCloudStorageClient).deleteBlob(any());
-    verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
-  }
-
-  @Test
-  public void testDeleteNotebook_reader() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.READER);
-
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            notebooksController.deleteNotebook(
-                workspace.getWorkspaceNamespace(),
-                workspace.getFirecloudName(),
-                NotebooksService.withNotebookExtension("nb1")));
-
-    verifyZeroInteractions(mockCloudStorageClient);
-    verifyZeroInteractions(mockUserRecentResourceService);
   }
 
   private static Stream<Arguments> notebookLockingCases() {
