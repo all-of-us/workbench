@@ -251,6 +251,7 @@ public class NotebooksControllerTest {
 
   @Test
   public void copyNotebook() {
+    long sizeInBytes = 500;
     String fromWorkspaceNamespace = "fromProject";
     String fromWorkspaceName = "fromWorkspace_000";
     String fromNotebookName = "starter.ipynb";
@@ -258,7 +259,7 @@ public class NotebooksControllerTest {
     String toWorkspaceName = "fromWorkspace_001";
     String toNotebookName = "novice.ipynb";
     String toPath = "/path/to/"+toNotebookName;
-    long sizeInBytes = 500;
+
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
     FileDetail expectedFileDetail = new FileDetail();
@@ -317,27 +318,66 @@ public class NotebooksControllerTest {
             fromNotebookName,
             copyRequest));
 
+    verify(mockNotebookService).copyNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName,toWorkspaceNamespace,toWorkspaceName,toNotebookName);
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
 
   @Test
   public void testCloneNotebook() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
+    long sizeInBytes = 500;
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toNotebookName = "Duplicate of starter.ipynb";
+    String toPath = "/path/to/"+toNotebookName;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    FileDetail expectedFileDetail = new FileDetail();
 
-    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
-    String newPath = NotebooksService.withNotebookExtension("notebooks/Duplicate of nb1");
-    String fullPath = BUCKET_URI + newPath;
-    notebooksController.cloneNotebook(
-        workspace.getWorkspaceNamespace(),
-        workspace.getFirecloudName(),
-        NotebooksService.withNotebookExtension("nb1"));
-    verify(mockCloudStorageClient)
-        .copyBlob(
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
-    verify(mockUserRecentResourceService)
-        .updateNotebookEntry(eq(workspace.getWorkspaceId()), anyLong(), eq(fullPath));
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
+
+    when(mockNotebookService.cloneNotebook(anyString(),anyString(),anyString())).thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail = notebooksController.cloneNotebook(
+        fromWorkspaceNamespace,
+        fromWorkspaceName,
+        fromNotebookName).getBody();
+
+    verify(mockNotebookService).cloneNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName);
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
+  public void testCloneNotebook_alreadyExists() {
+    long sizeInBytes = 500;
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toNotebookName = "Duplicate of starter.ipynb";
+    String toPath = "/path/to/"+toNotebookName;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    FileDetail expectedFileDetail = new FileDetail();
+
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
+
+    when(mockNotebookService.cloneNotebook(anyString(),anyString(),anyString())).thenThrow(BlobAlreadyExistsException.class);
+
+    Throwable exception = assertThrows(
+        BadRequestException.class,
+        () -> notebooksController.cloneNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            fromNotebookName));
+
+    assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
+    verify(mockNotebookService).cloneNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName);
+
   }
 
   private static Stream<Arguments> notebookLockingCases() {
@@ -409,19 +449,6 @@ public class NotebooksControllerTest {
 
     final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
-
-  @Test
-  public void cloneNotebook_validateActiveBilling() {
-    DbWorkspace workspace =
-        workspaceDao.save(newWorkspace().setBillingStatus(BillingStatus.INACTIVE));
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            notebooksController.cloneNotebook(
-                workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), "notebook"));
   }
 
   @Test
