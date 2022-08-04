@@ -410,6 +410,88 @@ public class NotebooksControllerTest {
     assertThat(actualResponse).isEqualTo(expectedResponse);
   }
 
+  @Test
+  public void renameNotebook() {
+    long sizeInBytes = 500;
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String toNotebookName = "novice.ipynb";
+    String toPath = "/path/to/" + toNotebookName;
+
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    NotebookRename notebookRename = new NotebookRename();
+    FileDetail expectedFileDetail = new FileDetail();
+
+    notebookRename.setName(fromNotebookName);
+    notebookRename.setNewName(toNotebookName);
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
+
+    when(mockNotebookService.renameNotebook(
+        anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .renameNotebook(fromWorkspaceNamespace, fromWorkspaceName, notebookRename)
+            .getBody();
+
+    verify(mockNotebookService)
+        .renameNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            notebookRename.getName(),
+            notebookRename.getNewName());
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
+  public void renameNotebook_alreadyExists() {
+    long sizeInBytes = 500;
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String toNotebookName = "novice.ipynb";
+    String toPath = "/path/to/" + toNotebookName;
+
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    NotebookRename notebookRename = new NotebookRename();
+    FileDetail expectedFileDetail = new FileDetail();
+
+    notebookRename.setName(fromNotebookName);
+    notebookRename.setNewName(toNotebookName);
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
+
+    when(mockNotebookService.renameNotebook(
+        anyString(), anyString(), anyString(), anyString()))
+        .thenThrow(BlobAlreadyExistsException.class);
+
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                notebooksController.renameNotebook(fromWorkspaceNamespace, fromWorkspaceName, notebookRename));
+
+    verify(mockNotebookService)
+        .renameNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            notebookRename.getName(),
+            notebookRename.getNewName());
+    assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
+  }
+
   private static Stream<Arguments> notebookLockingCases() {
     return Stream.of(
         Arguments.of(
