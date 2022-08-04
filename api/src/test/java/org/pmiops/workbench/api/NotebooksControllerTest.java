@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -48,6 +49,8 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.KernelTypeResponse;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
@@ -83,7 +86,6 @@ public class NotebooksControllerTest {
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksController.class,
     NotebooksServiceImpl.class,
-    WorkspaceAuthService.class
   })
   @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
   static class Configuration {
@@ -117,6 +119,7 @@ public class NotebooksControllerTest {
   private DbCdrVersion cdrVersion;
 
   @MockBean private NotebooksService mockNotebookService;
+  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;
@@ -392,8 +395,7 @@ public class NotebooksControllerTest {
     String html = "<html><body><div>Hi!</div></body></html>";
     ReadOnlyNotebookResponse expectedResponse = new ReadOnlyNotebookResponse().html(html);
 
-    when(mockNotebookService.getReadOnlyHtml(
-        anyString(), anyString(), anyString()))
+    when(mockNotebookService.getReadOnlyHtml(anyString(), anyString(), anyString()))
         .thenReturn(html);
 
     ReadOnlyNotebookResponse actualResponse =
@@ -402,10 +404,7 @@ public class NotebooksControllerTest {
             .getBody();
 
     verify(mockNotebookService)
-        .getReadOnlyHtml(
-            fromWorkspaceNamespace,
-            fromWorkspaceName,
-            fromNotebookName);
+        .getReadOnlyHtml(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
   }
@@ -432,8 +431,7 @@ public class NotebooksControllerTest {
     expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
     expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    when(mockNotebookService.renameNotebook(
-        anyString(), anyString(), anyString(), anyString()))
+    when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
@@ -473,15 +471,15 @@ public class NotebooksControllerTest {
     expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
     expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    when(mockNotebookService.renameNotebook(
-        anyString(), anyString(), anyString(), anyString()))
+    when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
 
     Throwable exception =
         assertThrows(
             BadRequestException.class,
             () ->
-                notebooksController.renameNotebook(fromWorkspaceNamespace, fromWorkspaceName, notebookRename));
+                notebooksController.renameNotebook(
+                    fromWorkspaceNamespace, fromWorkspaceName, notebookRename));
 
     verify(mockNotebookService)
         .renameNotebook(
@@ -490,6 +488,34 @@ public class NotebooksControllerTest {
             notebookRename.getName(),
             notebookRename.getNewName());
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
+  }
+
+  @Test
+  public void testGetNotebookKernel() {
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    KernelTypeEnum kernelTypeEnum = KernelTypeEnum.PYTHON;
+    KernelTypeResponse expectedResponse = new KernelTypeResponse().kernelType(kernelTypeEnum);
+
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
+        .thenReturn(WorkspaceAccessLevel.OWNER);
+    when(mockNotebookService.getNotebookKernel(anyString(), anyString(), anyString()))
+        .thenReturn(kernelTypeEnum);
+
+    KernelTypeResponse actualResponse =
+        notebooksController
+            .getNotebookKernel(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName)
+            .getBody();
+
+    verify(mockWorkspaceAuthService)
+        .enforceWorkspaceAccessLevel(
+            fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
+
+    verify(mockNotebookService)
+        .getNotebookKernel(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
+
+    assertThat(actualResponse).isEqualTo(expectedResponse);
   }
 
   private static Stream<Arguments> notebookLockingCases() {
