@@ -601,6 +601,23 @@ export const ListOverview = fp.flow(
                     Create Cohort
                   </Button>
                 )}
+                {cohortSizeError && (
+                  <TooltipTrigger
+                    content={
+                      'The size of your cohort exceeds the 1MB limit. Remove some criteria selections to continue.'
+                    }
+                  >
+                    <ClrIcon
+                      style={{
+                        color: '#F57600',
+                        float: 'right',
+                        margin: '0.25rem 0.5rem 0 0',
+                      }}
+                      shape='warning-standard'
+                      size={24}
+                    />
+                  </TooltipTrigger>
+                )}
                 <TooltipTrigger content={<div>Export to notebook</div>}>
                   <Clickable
                     style={{ ...styles.actionIcon, ...styles.disabled }}
@@ -700,22 +717,7 @@ export const ListOverview = fp.flow(
                 ) : loading ? (
                   <Spinner size={18} />
                 ) : (
-                  <React.Fragment>
-                    {cohortSizeError && (
-                      <TooltipTrigger
-                        content={
-                          'The size of your cohort exceeds the 1MB limit. Remove some criteria selections to continue.'
-                        }
-                      >
-                        <ClrIcon
-                          style={{ color: '#F57600', marginRight: '0.25rem' }}
-                          shape='warning-standard'
-                          size={18}
-                        />
-                      </TooltipTrigger>
-                    )}
-                    <span>{this.showTotalCount && total.toLocaleString()}</span>
-                  </React.Fragment>
+                  <span>{this.showTotalCount && total.toLocaleString()}</span>
                 )}
               </h2>
             </div>
