@@ -406,7 +406,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetNotebooks_omitsExtraDirectories() {
-    HashMap<String, FirecloudWorkspaceAccessEntry> workspaceUserMap = new HashMap<>();
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     FileDetail fileDetail1 = mock(FileDetail.class);
