@@ -194,7 +194,6 @@ public class NotebooksControllerTest {
                 notebook2.fileDetail.getName()));
   }
 
-
   @Test
   public void testRenameNotebookInWorkspace() {
     DbWorkspace workspace = createWorkspace();
@@ -285,80 +284,6 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void copyNotebook_onlyAppendsSuffixIfNeeded() {
-    DbWorkspace fromWorkspace = createWorkspace();
-    String fromNotebookName = "origin";
-
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
-
-    stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(toWorkspace, WorkspaceAccessLevel.OWNER);
-
-    notebooksController.copyNotebook(
-        fromWorkspace.getWorkspaceNamespace(),
-        fromWorkspace.getFirecloudName(),
-        fromNotebookName,
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getFirecloudName())
-            .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-            .newName(newNotebookName));
-
-    verify(mockCloudStorageClient)
-        .copyBlob(
-            BlobId.of(
-                TestMockFactory.WORKSPACE_BUCKET_NAME,
-                "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName));
-  }
-
-  @Test
-  public void copyNotebook_onlyHasReadPermissionsToDestination() {
-    DbWorkspace fromWorkspace = createWorkspace();
-    String fromNotebookName = "origin";
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
-    String newNotebookName = "new";
-
-    stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(toWorkspace, WorkspaceAccessLevel.READER);
-
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            notebooksController.copyNotebook(
-                fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getFirecloudName(),
-                fromNotebookName,
-                new CopyRequest()
-                    .toWorkspaceName(toWorkspace.getFirecloudName())
-                    .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-                    .newName(newNotebookName)));
-  }
-
-  @Test
-  public void copyNotebook_noAccessOnSource() {
-    DbWorkspace fromWorkspace = createWorkspace("fromWorkspaceNs", "fromworkspace");
-    String fromNotebookName = "origin";
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
-    String newNotebookName = "new";
-
-    stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.NO_ACCESS);
-    stubGetWorkspace(toWorkspace, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            notebooksController.copyNotebook(
-                fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getFirecloudName(),
-                fromNotebookName,
-                new CopyRequest()
-                    .toWorkspaceName(toWorkspace.getFirecloudName())
-                    .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-                    .newName(newNotebookName)));
-  }
-
-  @Test
   public void copyNotebook_alreadyExists() {
     DbWorkspace fromWorkspace = createWorkspace();
     String fromNotebookName = "origin";
@@ -386,44 +311,6 @@ public class NotebooksControllerTest {
                 fromWorkspace.getFirecloudName(),
                 fromNotebookName,
                 copyNotebookRequest));
-  }
-
-  @Test
-  public void testCopyNotebook_notAllowedBetweenTiers() {
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-    DbCdrVersion controlledCdr =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
-    controlledCdr.setName("2");
-    controlledCdr.setAccessTier(controlledTier);
-    controlledCdr = cdrVersionDao.save(controlledCdr);
-
-    DbWorkspace fromWorkspace = createWorkspace();
-    fromWorkspace.setCdrVersion(controlledCdr);
-    String fromNotebookName = "origin";
-
-    DbWorkspace toWorkspace =
-        workspaceDao.save(
-            newWorkspace()
-                .setWorkspaceNamespace("to-ns")
-                .setName("to-name")
-                .setFirecloudName("fc-to-name")
-                .setCdrVersion(cdrVersion));
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
-
-    stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(toWorkspace, WorkspaceAccessLevel.OWNER);
-
-    assertThrows(
-        BadRequestException.class,
-        () ->
-            notebooksController.copyNotebook(
-                fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getFirecloudName(),
-                fromNotebookName,
-                new CopyRequest()
-                    .toWorkspaceName(toWorkspace.getFirecloudName())
-                    .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-                    .newName(newNotebookName)));
   }
 
   @Test
