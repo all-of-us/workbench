@@ -59,6 +59,7 @@ import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
+import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -250,67 +251,73 @@ public class NotebooksControllerTest {
 
   @Test
   public void copyNotebook() {
-    DbWorkspace fromWorkspace = createWorkspace();
-    String fromNotebookName = "origin";
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String toNotebookName = "novice.ipynb";
+    String toPath = "/path/to/"+toNotebookName;
+    long sizeInBytes = 500;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    CopyRequest copyRequest = new CopyRequest();
+    FileDetail expectedFileDetail = new FileDetail();
 
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
-    String newNotebookName = "new";
-    String expectedNotebookName = newNotebookName + NotebooksService.NOTEBOOK_EXTENSION;
+    copyRequest.setNewName(toNotebookName);
+    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
+    copyRequest.setToWorkspaceName(toWorkspaceName);
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(toWorkspace, WorkspaceAccessLevel.OWNER);
+    when(mockNotebookService.copyNotebook(anyString(),anyString(),anyString(),anyString(),anyString(),anyString())).thenReturn(expectedFileDetail);
 
-    notebooksController.copyNotebook(
-        fromWorkspace.getWorkspaceNamespace(),
-        fromWorkspace.getFirecloudName(),
+    FileDetail actualFileDetail = notebooksController.copyNotebook(
+        fromWorkspaceNamespace,
+        fromWorkspaceName,
         fromNotebookName,
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getFirecloudName())
-            .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-            .newName(newNotebookName));
+        copyRequest).getBody();
 
-    verify(mockCloudStorageClient)
-        .copyBlob(
-            BlobId.of(
-                TestMockFactory.WORKSPACE_BUCKET_NAME,
-                "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + expectedNotebookName));
+    verify(mockNotebookService).copyNotebook(fromWorkspaceNamespace,fromWorkspaceName,fromNotebookName,toWorkspaceNamespace,toWorkspaceName,toNotebookName);
 
-    verify(mockUserRecentResourceService)
-        .updateNotebookEntry(
-            toWorkspace.getWorkspaceId(),
-            currentUser.getUserId(),
-            BUCKET_URI + "notebooks/" + expectedNotebookName);
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
 
   @Test
   public void copyNotebook_alreadyExists() {
-    DbWorkspace fromWorkspace = createWorkspace();
-    String fromNotebookName = "origin";
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String toNotebookName = "novice.ipynb";
+    String toPath = "/path/to/"+toNotebookName;
+    long sizeInBytes = 500;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    CopyRequest copyRequest = new CopyRequest();
+    FileDetail expectedFileDetail = new FileDetail();
 
-    stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(toWorkspace, WorkspaceAccessLevel.OWNER);
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-            .toWorkspaceName(toWorkspace.getFirecloudName())
-            .newName(newNotebookName);
-    BlobId newBlobId =
-        BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
-    doReturn(Collections.singleton(newBlobId))
-        .when(mockCloudStorageClient)
-        .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
+    copyRequest.setNewName(toNotebookName);
+    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
+    copyRequest.setToWorkspaceName(toWorkspaceName);
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
 
-    assertThrows(
+    when(mockNotebookService.copyNotebook(anyString(),anyString(),anyString(),anyString(),anyString(),anyString())).thenThrow(
+        BlobAlreadyExistsException.class);
+
+    Throwable exception = assertThrows(
         ConflictException.class,
-        () ->
-            notebooksController.copyNotebook(
-                fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getFirecloudName(),
-                fromNotebookName,
-                copyNotebookRequest));
+        () -> notebooksController.copyNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            fromNotebookName,
+            copyRequest));
+
+    assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
 
   @Test
