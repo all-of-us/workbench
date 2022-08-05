@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,13 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -52,7 +44,6 @@ import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -73,8 +64,6 @@ public class NotebooksControllerTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
-  private static final String BUCKET_URI =
-      String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
   @TestConfiguration
   @Import({
@@ -113,7 +102,6 @@ public class NotebooksControllerTest {
   private static DbUser currentUser;
 
   private FirecloudWorkspaceACL fcWorkspaceAcl;
-  private DbCdrVersion cdrVersion;
 
   @MockBean private NotebooksService mockNotebookService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
@@ -121,30 +109,12 @@ public class NotebooksControllerTest {
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;
 
-  @Autowired private AccessTierDao accessTierDao;
-  @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private UserDao userDao;
   @Autowired private NotebooksController notebooksController;
 
   @BeforeEach
   public void setUp() {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     fcWorkspaceAcl = createWorkspaceACL();
-
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
-    cdrVersion.setName("1");
-    cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(TestMockFactory.createRegisteredTierForTests(accessTierDao));
-    cdrVersion = cdrVersionDao.save(cdrVersion);
-  }
-
-  @AfterEach
-  public void tearDown() {
-    workspaceDao.deleteAll();
-    userDao.deleteAll();
-    cdrVersionDao.deleteAll();
-    accessTierDao.deleteAll();
   }
 
   @Test
@@ -600,7 +570,6 @@ public class NotebooksControllerTest {
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
 
-
   private void assertNotebookLockingMetadata(
       Map<String, String> gcsMetadata,
       NotebookLockingMetadataResponse expectedResponse,
@@ -636,7 +605,7 @@ public class NotebooksControllerTest {
     DbUser user = new DbUser();
     user.setUsername(email);
     user.setDisabled(false);
-    return userDao.save(user);
+    return user;
   }
 
   private FirecloudWorkspaceACL createWorkspaceACL() {
