@@ -44,11 +44,13 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
+    float: 'left',
     width: '80%',
     padding: '0.4rem 0',
     zIndex: 10,
@@ -61,7 +63,7 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
   },
   searchInput: {
-    width: '90%',
+    width: '94%',
     height: '1.5rem',
     marginLeft: '0.25rem',
     padding: '0',
@@ -176,6 +178,7 @@ const styles = reactStyles({
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
     marginLeft: '0.25rem',
+    height: '100%',
   },
   clearSearchIcon: {
     color: colors.accent,
@@ -268,6 +271,32 @@ const sourceStandardTooltip = (
     However, if you do not wish to rely on this standardization, you may select
     concepts as coded in the source data.
   </span>
+);
+const searchTooltip = (
+  <div style={{ marginLeft: '0.5rem' }}>
+    The following special operators can be used to augment search terms:
+    <ul style={{ listStylePosition: 'outside' }}>
+      <li>
+        (*) is the wildcard operator. This operator can be used with a prefix or
+        suffix. For example: ceph* (starts with) or *statin (ends with - NOTE:
+        when searching for ends with it will only match with end of concept
+        name)
+      </li>
+      <li>
+        (-) indicates that this word must <b>not</b> be present. For example:
+        lung -cancer
+      </li>
+      <li>
+        (") a phrase that is enclosed within double quote (") characters matches
+        only rows that contain the phrase literally, as it was typed. For
+        example: "lung cancer"
+      </li>
+      <li>
+        These operators can be combined to produce more complex search
+        operations. For example: brain tum* -neoplasm
+      </li>
+    </ul>
+  </div>
 );
 
 interface Props {
@@ -881,37 +910,50 @@ export const ListSearch = fp.flow(
               concepts before adding more.
             </div>
           )}
-          <div style={styles.searchContainer}>
-            <div style={styles.searchBar}>
-              <ClrIcon shape='search' size='18' />
-              <TextInput
-                data-test-id='list-search-input'
-                style={styles.searchInput}
-                value={searchTerms}
-                placeholder={this.textInputPlaceholder}
-                onChange={(e) => this.setState({ searchTerms: e })}
-                onKeyPress={this.handleInput}
-              />
-              {source === 'conceptSetDetails' && searching && (
-                <Clickable
-                  style={styles.clearSearchIcon}
-                  onClick={() =>
-                    this.setState({
-                      data: concept,
-                      searching: false,
-                      searchTerms: '',
-                    })
-                  }
-                >
-                  <ClrIcon size={24} shape='times-circle' />
-                </Clickable>
+          <div style={{ display: 'flex' }}>
+            <div style={styles.searchContainer}>
+              <div style={styles.searchBar}>
+                <ClrIcon shape='search' size='18' />
+                <TextInput
+                  data-test-id='list-search-input'
+                  style={styles.searchInput}
+                  value={searchTerms}
+                  placeholder={this.textInputPlaceholder}
+                  onChange={(e) => this.setState({ searchTerms: e })}
+                  onKeyPress={this.handleInput}
+                />
+                {source === 'conceptSetDetails' && searching && (
+                  <Clickable
+                    style={styles.clearSearchIcon}
+                    onClick={() =>
+                      this.setState({
+                        data: concept,
+                        searching: false,
+                        searchTerms: '',
+                      })
+                    }
+                  >
+                    <ClrIcon size={24} shape='times-circle' />
+                  </Clickable>
+                )}
+              </div>
+              {inputErrors.map((error, e) => (
+                <AlertDanger key={e} style={styles.inputAlert}>
+                  <span data-test-id='input-error-alert'>{error}</span>
+                </AlertDanger>
+              ))}
+            </div>
+            <div style={{ float: 'right', width: '20%' }}>
+              {serverConfigStore.get().config.enableDrugWildcardSearch && (
+                <TooltipTrigger side='top' content={searchTooltip}>
+                  <ClrIcon
+                    style={styles.infoIcon}
+                    className='is-solid'
+                    shape='info-standard'
+                  />
+                </TooltipTrigger>
               )}
             </div>
-            {inputErrors.map((error, e) => (
-              <AlertDanger key={e} style={styles.inputAlert}>
-                <span data-test-id='input-error-alert'>{error}</span>
-              </AlertDanger>
-            ))}
           </div>
           <div style={{ display: 'table', height: '100%', width: '100%' }}>
             <div style={styles.helpText}>

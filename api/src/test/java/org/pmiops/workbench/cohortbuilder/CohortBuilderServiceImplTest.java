@@ -9,7 +9,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +26,7 @@ import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl.SearchTerm;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.test.FakeClock;
@@ -91,8 +91,8 @@ class CohortBuilderServiceImplTest {
   @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
   @MethodSource("getModifyTermMatchEndsWithParameters")
   void modifyTermMatchUseEndsWith(String testInput, String term, String expected) {
-    Map<String, String> actual = cohortBuilderService.modifyTermMatchUseEndsWithTerms(term);
-    assertWithMessage(testInput).that(actual.get("modifiedTerms")).isEqualTo(expected);
+    SearchTerm actual = cohortBuilderService.modifyTermMatchUseEndsWithTerms(term);
+    assertWithMessage(testInput).that(actual.getModifiedTerm()).isEqualTo(expected);
   }
 
   @ParameterizedTest(name = "modifyTermMatch: {0} {1}=>{2}")

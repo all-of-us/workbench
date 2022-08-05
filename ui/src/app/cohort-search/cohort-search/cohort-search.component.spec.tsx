@@ -10,7 +10,9 @@ import {
   currentCohortSearchContextStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
@@ -48,6 +50,12 @@ describe('CohortSearch', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableDrugWildcardSearch: false,
+      },
+    });
   });
 
   it('should render', () => {
