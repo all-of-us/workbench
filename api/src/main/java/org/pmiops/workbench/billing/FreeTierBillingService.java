@@ -412,26 +412,28 @@ public class FreeTierBillingService {
   }
 
   /**
-   * Filter the costs further by getting the workspaces that are active, or deleted but their free
-   * tier last updated time is before the workspace last updated time. This filtration ensures that
-   * BQ will not be queried unnecessarily for the costs of deleted workspaces that we already have
-   * their latest costs The method will return the workspace in 1 of these cases:
+   * Filter the costs further by getting the workspaces that their free tier last updated time is
+   * before the workspace last updated time. This filtration ensures that BQ will not be queried
+   * unnecessarily for the costs of workspaces that we already have their latest costs The method
+   * will return the workspace in these cases:
    *
    * <ol>
-   *   <li>The workspace is active
-   *   <li>The workspace is deleted and either of the following is true
+   *   <li>Either of the following is true
    *       <ol>
    *         <li>Free Tier Usage last updated time is null. This means that it wasn't calculated
    *             before
-   *         <li>Workspace last updated time is null. This means we don't have enough info about *
-   *             the workspace, so we need to get its cost
-   *         <li>Free Tier Usage time is before the Workspace last updated time. This means * that
-   *             the workspace got changed some time after our last calculation, so we need to *
+   *         <li>Workspace last updated time is null. This means we don't have enough info about the
+   *             workspace, so we need to get its cost
+   *         <li>Free Tier Usage time is before the Workspace last updated time. This means that the
+   *             workspace got changed some time after our last calculation, so we need to
    *             recalculate it
-   *         <li>Free Tier Usage time is after the Workspace last updated time, but * the difference
-   *             is smaller than a certain value. This case to account for charges that may * occur
+   *         <li>Free Tier Usage time is after the Workspace last updated time, but the difference
+   *             is smaller than a certain value. This case to account for charges that may occur
    *             after the workspace gets deleted and after the last cron had run.
    *       </ol>
+   *   <li>AND The Workspace last update time is not older than 1 month. It's unlikely that a
+   *       workspace last updated that long ago to encounter any new charges. Note that this method
+   *       only finds what needs to be updated, and is not relevant to the alerts being trigerred.
    * </ol>
    *
    * @param allCostsInDbForUsers
@@ -445,19 +447,21 @@ public class FreeTierBillingService {
         allCostsInDbForUsers.stream()
             .filter(
                 c ->
-                    (c.getActiveStatus() == 0)
-                        || (c.getActiveStatus() == 1
-                            && (c.getFreeTierLastUpdated() == null
-                                || c.getWorkspaceLastUpdated() == null
-                                || c.getFreeTierLastUpdated().before(c.getWorkspaceLastUpdated())
-                                || (c.getFreeTierLastUpdated().after(c.getWorkspaceLastUpdated())
-                                    && c.getFreeTierLastUpdated().getTime()
-                                            - c.getWorkspaceLastUpdated().getTime()
-                                        < Duration.ofDays(
-                                                workbenchConfigProvider.get()
-                                                    .billing
-                                                    .numberOfDaysToConsiderForFreeTierUsageUpdate)
-                                            .toMillis()))))
+                    (c.getFreeTierLastUpdated() == null
+                            || c.getWorkspaceLastUpdated() == null
+                            || c.getFreeTierLastUpdated().before(c.getWorkspaceLastUpdated())
+                            || (c.getFreeTierLastUpdated().after(c.getWorkspaceLastUpdated())
+                                && c.getFreeTierLastUpdated().getTime()
+                                        - c.getWorkspaceLastUpdated().getTime()
+                                    < Duration.ofDays(
+                                            workbenchConfigProvider.get()
+                                                .billing
+                                                .numberOfDaysToConsiderForFreeTierUsageUpdate)
+                                        .toMillis()))
+                        && (c.getWorkspaceLastUpdated() == null
+                            || c.getWorkspaceLastUpdated()
+                                .toLocalDateTime()
+                                .isAfter(LocalDateTime.now().minusMonths(1))))
             .collect(Collectors.toList());
 
     logger.info(
