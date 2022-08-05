@@ -225,6 +225,7 @@ public class CohortsController implements CohortsApiDelegate {
       dbCohort.setCriteria(cohort.getCriteria());
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbCohort.setLastModifiedBy(userProvider.get().getUsername());
     dbCohort.setLastModifiedTime(now);
     try {
       // The version asserted on save is the same as the one we read via

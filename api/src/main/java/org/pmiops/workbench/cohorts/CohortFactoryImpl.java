@@ -73,6 +73,7 @@ public class CohortFactoryImpl implements CohortFactory {
     cohort.setType(type);
     cohort.setCriteria(criteria);
     cohort.setCreationTime(now);
+    cohort.setLastModifiedBy(creator.getUsername());
     cohort.setLastModifiedTime(now);
     cohort.setVersion(1);
     cohort.setCreator(creator);

@@ -378,6 +378,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceNamespace(fcWorkspace.getNamespace());
     dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
+    dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -504,6 +505,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     try {
+      dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
       dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
@@ -777,6 +779,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     dbWorkspace.setNeedsReviewPrompt(false);
+    dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
     try {
       dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
     } catch (Exception e) {

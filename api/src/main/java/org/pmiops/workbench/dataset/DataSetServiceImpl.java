@@ -60,6 +60,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -242,6 +243,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final Clock clock;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   @VisibleForTesting
@@ -261,7 +263,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      Clock clock) {
+      Clock clock,
+      Provider<DbUser> userProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortDao = cohortDao;
     this.cohortService = cohortService;
@@ -278,6 +281,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.userRecentResourceService = userRecentResourceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
+    this.userProvider = userProvider;
   }
 
   @Override
@@ -290,6 +294,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataSet saveDataSet(DbDataset dataset) {
     try {
+      dataset.setLastModifiedBy(userProvider.get().getUsername());
       dataset = dataSetDao.save(dataset);
       userRecentResourceService.updateDataSetEntry(
           dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());

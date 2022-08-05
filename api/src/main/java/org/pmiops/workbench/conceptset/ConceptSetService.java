@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -41,6 +42,7 @@ public class ConceptSetService {
   private final CohortBuilderService cohortBuilderService;
   private final ConceptSetMapper conceptSetMapper;
   private final Clock clock;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   public ConceptSetService(
@@ -48,12 +50,14 @@ public class ConceptSetService {
       ConceptBigQueryService conceptBigQueryService,
       CohortBuilderService cohortBuilderService,
       ConceptSetMapper conceptSetMapper,
-      Clock clock) {
+      Clock clock,
+      Provider<DbUser> userProvider) {
     this.conceptSetDao = conceptSetDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.cohortBuilderService = cohortBuilderService;
     this.conceptSetMapper = conceptSetMapper;
     this.clock = clock;
+    this.userProvider = userProvider;
   }
 
   public ConceptSet copyAndSave(
@@ -200,6 +204,7 @@ public class ConceptSetService {
 
     DbConceptSet dbConceptSetClone =
         conceptSetMapper.dbModelToDbModel(dbConceptSet, conceptSetContext);
+    dbConceptSetClone.setLastModifiedBy(userProvider.get().getUsername());
     return conceptSetDao.save(dbConceptSetClone);
   }
 
@@ -224,6 +229,7 @@ public class ConceptSetService {
   }
 
   private ConceptSet saveDbConceptSet(DbConceptSet dbConceptSet) {
+    dbConceptSet.setLastModifiedBy(userProvider.get().getUsername());
     try {
       return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (DataIntegrityViolationException e) {
