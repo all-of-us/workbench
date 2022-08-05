@@ -352,7 +352,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void renameNotebook() {
+  public void testRenameNotebook() {
     long sizeInBytes = 500;
     String fromWorkspaceNamespace = "fromProject";
     String fromWorkspaceName = "fromWorkspace_000";
@@ -392,7 +392,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void renameNotebook_alreadyExists() {
+  public void testRenameNotebook_alreadyExists() {
     long sizeInBytes = 500;
     String fromWorkspaceNamespace = "fromProject";
     String fromWorkspaceName = "fromWorkspace_000";
@@ -460,35 +460,14 @@ public class NotebooksControllerTest {
     assertThat(actualResponse).isEqualTo(expectedResponse);
   }
 
-  private static Stream<Arguments> notebookLockingCases() {
-    return Stream.of(
-        Arguments.of(
-            "fc-bucket-id-1",
-            "user@aou",
-            "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"),
-        Arguments.of(
-            "fc-bucket-id-1",
-            "another-user@aou",
-            "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"),
-        Arguments.of(
-            "fc-bucket-id-2",
-            "user@aou",
-            "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"),
-        // catches an edge case where the hash has a leading 0
-        Arguments.of(
-            "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
-            "brubenst2@fake-research-aou.org",
-            "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"));
-  }
-
   @ParameterizedTest
   @MethodSource("notebookLockingCases")
-  public void notebookLockingEmailHashTest(String bucket, String email, String hash) {
+  public void testNotebookLockingEmailHash(String bucket, String email, String hash) {
     assertThat(notebooksController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
   }
 
   @Test
-  public void testNotebookLockingMetadataPlaintextUser() {
+  public void testGetNotebookLockingMetadata_plaintextUser() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
@@ -512,7 +491,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testNotebookLockingNullMetadata() {
+  public void testGetNotebookLockingMetadata_nullMetadata() {
     final Map<String, String> gcsMetadata = null;
 
     // This file has no metadata so the response is empty
@@ -522,7 +501,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testNotebookLockingEmptyMetadata() {
+  public void testGetNotebookLockingMetadata_emptyMetadata() {
     final Map<String, String> gcsMetadata = new HashMap<>();
 
     // This file has no metadata so the response is empty
@@ -532,7 +511,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testNotebookLockingMetadata() {
+  public void testGetNotebookLockingMetadata() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
@@ -555,7 +534,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testNotebookLockingMetadataKnownUser() {
+  public void testGetNotebookLockingMetadata_knownUser() {
     final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
 
     FirecloudWorkspaceACL workspaceACL =
@@ -598,7 +577,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testNotebookLockingMetadataUnknownUser() {
+  public void testGetNotebookLockingMetadata_unknownUser() {
     final String lastLockedUser = "a-stranger@fake-research-aou.org";
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
@@ -674,6 +653,27 @@ public class NotebooksControllerTest {
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
+  }
+
+  private static Stream<Arguments> notebookLockingCases() {
+    return Stream.of(
+        Arguments.of(
+            "fc-bucket-id-1",
+            "user@aou",
+            "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"),
+        Arguments.of(
+            "fc-bucket-id-1",
+            "another-user@aou",
+            "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"),
+        Arguments.of(
+            "fc-bucket-id-2",
+            "user@aou",
+            "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"),
+        // catches an edge case where the hash has a leading 0
+        Arguments.of(
+            "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
+            "brubenst2@fake-research-aou.org",
+            "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"));
   }
 
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
