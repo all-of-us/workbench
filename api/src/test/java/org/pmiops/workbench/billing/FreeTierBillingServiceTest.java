@@ -852,7 +852,6 @@ public class FreeTierBillingServiceTest {
     return userDao.save(new DbUser().setUsername(email));
   }
 
-  // we only alert/record for BillingMigrationStatus.NEW workspaces
   private DbWorkspace createWorkspace(DbUser creator, String project) {
     return workspaceDao.save(
         new DbWorkspace()
