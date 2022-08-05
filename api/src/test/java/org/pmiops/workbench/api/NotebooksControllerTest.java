@@ -148,126 +148,6 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testDeleteNotebook() {
-    String workspaceNamespace = "project";
-    String workspaceName = "workspace";
-    String notebookName = "notebook.ipynb";
-
-    notebooksController.deleteNotebook(workspaceNamespace, workspaceName, notebookName);
-    verify(mockNotebookService).deleteNotebook(workspaceNamespace, workspaceName, notebookName);
-  }
-
-  @Test
-  public void testGetNotebookList() {
-    String workspaceNamespace = "project";
-    String workspaceName = "workspace";
-    MockNotebook notebook1 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), "bucket");
-    MockNotebook notebook2 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"), "bucket");
-
-    when(mockNotebookService.getNotebooks(anyString(), anyString()))
-        .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
-
-    List<String> gotNames =
-        notebooksController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
-            .map(FileDetail::getName)
-            .collect(Collectors.toList());
-    verify(mockNotebookService).getNotebooks(workspaceNamespace, workspaceName);
-    assertThat(gotNames)
-        .isEqualTo(
-            ImmutableList.of(notebook1.fileDetail.getName(), notebook2.fileDetail.getName()));
-  }
-
-  @Test
-  public void testCopyNotebook() {
-    long sizeInBytes = 500;
-    String fromWorkspaceNamespace = "fromProject";
-    String fromWorkspaceName = "fromWorkspace_000";
-    String fromNotebookName = "starter.ipynb";
-    String toWorkspaceNamespace = "fromProject";
-    String toWorkspaceName = "fromWorkspace_001";
-    String toNotebookName = "novice.ipynb";
-    String toPath = "/path/to/" + toNotebookName;
-
-    long toLastModifiedTime = Instant.now().toEpochMilli();
-    CopyRequest copyRequest = new CopyRequest();
-    FileDetail expectedFileDetail = new FileDetail();
-
-    copyRequest.setNewName(toNotebookName);
-    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
-    copyRequest.setToWorkspaceName(toWorkspaceName);
-    expectedFileDetail.setName(toNotebookName);
-    expectedFileDetail.setPath(toPath);
-    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
-    expectedFileDetail.setSizeInBytes(sizeInBytes);
-
-    when(mockNotebookService.copyNotebook(
-            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(expectedFileDetail);
-
-    FileDetail actualFileDetail =
-        notebooksController
-            .copyNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName, copyRequest)
-            .getBody();
-
-    verify(mockNotebookService)
-        .copyNotebook(
-            fromWorkspaceNamespace,
-            fromWorkspaceName,
-            fromNotebookName,
-            toWorkspaceNamespace,
-            toWorkspaceName,
-            toNotebookName);
-
-    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
-  }
-
-  @Test
-  public void testCopyNotebook_alreadyExists() {
-    String fromWorkspaceNamespace = "fromProject";
-    String fromWorkspaceName = "fromWorkspace_000";
-    String fromNotebookName = "starter.ipynb";
-    String toWorkspaceNamespace = "fromProject";
-    String toWorkspaceName = "fromWorkspace_001";
-    String toNotebookName = "novice.ipynb";
-    String toPath = "/path/to/" + toNotebookName;
-    long sizeInBytes = 500;
-    long toLastModifiedTime = Instant.now().toEpochMilli();
-    CopyRequest copyRequest = new CopyRequest();
-    FileDetail expectedFileDetail = new FileDetail();
-
-    copyRequest.setNewName(toNotebookName);
-    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
-    copyRequest.setToWorkspaceName(toWorkspaceName);
-    expectedFileDetail.setName(toNotebookName);
-    expectedFileDetail.setPath(toPath);
-    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
-    expectedFileDetail.setSizeInBytes(sizeInBytes);
-
-    when(mockNotebookService.copyNotebook(
-            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
-        .thenThrow(BlobAlreadyExistsException.class);
-
-    Throwable exception =
-        assertThrows(
-            ConflictException.class,
-            () ->
-                notebooksController.copyNotebook(
-                    fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName, copyRequest));
-
-    verify(mockNotebookService)
-        .copyNotebook(
-            fromWorkspaceNamespace,
-            fromWorkspaceName,
-            fromNotebookName,
-            toWorkspaceNamespace,
-            toWorkspaceName,
-            toNotebookName);
-    assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
-  }
-
-  @Test
   public void testCloneNotebook() {
     long sizeInBytes = 500;
     String fromWorkspaceNamespace = "fromProject";
@@ -326,6 +206,294 @@ public class NotebooksControllerTest {
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
     verify(mockNotebookService)
         .cloneNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
+  }
+
+  @Test
+  public void testCopyNotebook() {
+    long sizeInBytes = 500;
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String toNotebookName = "novice.ipynb";
+    String toPath = "/path/to/" + toNotebookName;
+
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    CopyRequest copyRequest = new CopyRequest();
+    FileDetail expectedFileDetail = new FileDetail();
+
+    copyRequest.setNewName(toNotebookName);
+    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
+    copyRequest.setToWorkspaceName(toWorkspaceName);
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
+
+    when(mockNotebookService.copyNotebook(
+        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .copyNotebook(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName, copyRequest)
+            .getBody();
+
+    verify(mockNotebookService)
+        .copyNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            fromNotebookName,
+            toWorkspaceNamespace,
+            toWorkspaceName,
+            toNotebookName);
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
+  public void testCopyNotebook_alreadyExists() {
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String toNotebookName = "novice.ipynb";
+    String toPath = "/path/to/" + toNotebookName;
+    long sizeInBytes = 500;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    CopyRequest copyRequest = new CopyRequest();
+    FileDetail expectedFileDetail = new FileDetail();
+
+    copyRequest.setNewName(toNotebookName);
+    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
+    copyRequest.setToWorkspaceName(toWorkspaceName);
+    expectedFileDetail.setName(toNotebookName);
+    expectedFileDetail.setPath(toPath);
+    expectedFileDetail.setLastModifiedTime(toLastModifiedTime);
+    expectedFileDetail.setSizeInBytes(sizeInBytes);
+
+    when(mockNotebookService.copyNotebook(
+        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        .thenThrow(BlobAlreadyExistsException.class);
+
+    Throwable exception =
+        assertThrows(
+            ConflictException.class,
+            () ->
+                notebooksController.copyNotebook(
+                    fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName, copyRequest));
+
+    verify(mockNotebookService)
+        .copyNotebook(
+            fromWorkspaceNamespace,
+            fromWorkspaceName,
+            fromNotebookName,
+            toWorkspaceNamespace,
+            toWorkspaceName,
+            toNotebookName);
+    assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
+  }
+  @Test
+  public void testDeleteNotebook() {
+    String workspaceNamespace = "project";
+    String workspaceName = "workspace";
+    String notebookName = "notebook.ipynb";
+
+    notebooksController.deleteNotebook(workspaceNamespace, workspaceName, notebookName);
+    verify(mockNotebookService).deleteNotebook(workspaceNamespace, workspaceName, notebookName);
+  }
+
+  @Test
+  public void testGetNotebookList() {
+    String workspaceNamespace = "project";
+    String workspaceName = "workspace";
+    MockNotebook notebook1 =
+        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), "bucket");
+    MockNotebook notebook2 =
+        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"), "bucket");
+
+    when(mockNotebookService.getNotebooks(anyString(), anyString()))
+        .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
+
+    List<String> gotNames =
+        notebooksController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
+            .map(FileDetail::getName)
+            .collect(Collectors.toList());
+    verify(mockNotebookService).getNotebooks(workspaceNamespace, workspaceName);
+    assertThat(gotNames)
+        .isEqualTo(
+            ImmutableList.of(notebook1.fileDetail.getName(), notebook2.fileDetail.getName()));
+  }
+
+  @Test
+  public void testGetNotebookKernel() {
+    String fromWorkspaceNamespace = "fromProject";
+    String fromWorkspaceName = "fromWorkspace_000";
+    String fromNotebookName = "starter.ipynb";
+    KernelTypeEnum kernelTypeEnum = KernelTypeEnum.PYTHON;
+    KernelTypeResponse expectedResponse = new KernelTypeResponse().kernelType(kernelTypeEnum);
+
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
+        .thenReturn(WorkspaceAccessLevel.OWNER);
+    when(mockNotebookService.getNotebookKernel(anyString(), anyString(), anyString()))
+        .thenReturn(kernelTypeEnum);
+
+    KernelTypeResponse actualResponse =
+        notebooksController
+            .getNotebookKernel(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName)
+            .getBody();
+
+    verify(mockWorkspaceAuthService)
+        .enforceWorkspaceAccessLevel(
+            fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
+
+    verify(mockNotebookService)
+        .getNotebookKernel(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
+
+    assertThat(actualResponse).isEqualTo(expectedResponse);
+  }
+
+  @Test
+  public void testGetNotebookLockingMetadata() {
+    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            .put(
+                LAST_LOCKING_USER_KEY,
+                notebooksController.notebookLockingEmailHash(
+                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy(lastLockedUser);
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testGetNotebookLockingMetadata_emptyMetadata() {
+    final Map<String, String> gcsMetadata = new HashMap<>();
+
+    // This file has no metadata so the response is empty
+
+    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testGetNotebookLockingMetadata_knownUser() {
+    final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
+
+    FirecloudWorkspaceACL workspaceACL =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    currentUser.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    readerOnMyWorkspace,
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", true)
+                        .put("canShare", true)));
+
+    final String lastLockedUser = readerOnMyWorkspace;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            .put(
+                LAST_LOCKING_USER_KEY,
+                notebooksController.notebookLockingEmailHash(
+                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // I'm the owner so I can see readers on my workspace
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy(readerOnMyWorkspace);
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, workspaceACL);
+  }
+
+  @Test
+  public void testGetNotebookLockingMetadata_nullMetadata() {
+    final Map<String, String> gcsMetadata = null;
+
+    // This file has no metadata so the response is empty
+
+    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testGetNotebookLockingMetadata_plaintextUser() {
+    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            // store directly in plaintext, to show that this does not work
+            .put(LAST_LOCKING_USER_KEY, lastLockedUser)
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // in case of accidentally storing the user email in plaintext
+    // it can't be retrieved by this endpoint
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy("UNKNOWN");
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testGetNotebookLockingMetadata_unknownUser() {
+    final String lastLockedUser = "a-stranger@fake-research-aou.org";
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            .put(
+                LAST_LOCKING_USER_KEY,
+                notebooksController.notebookLockingEmailHash(
+                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // This user is not listed in the DbWorkspace ACL so I don't know them
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy("UNKNOWN");
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @ParameterizedTest
+  @MethodSource("notebookLockingCases")
+  public void testNotebookLockingEmailHash(String bucket, String email, String hash) {
+    assertThat(notebooksController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
   }
 
   @Test
@@ -432,174 +600,6 @@ public class NotebooksControllerTest {
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
 
-  @Test
-  public void testGetNotebookKernel() {
-    String fromWorkspaceNamespace = "fromProject";
-    String fromWorkspaceName = "fromWorkspace_000";
-    String fromNotebookName = "starter.ipynb";
-    KernelTypeEnum kernelTypeEnum = KernelTypeEnum.PYTHON;
-    KernelTypeResponse expectedResponse = new KernelTypeResponse().kernelType(kernelTypeEnum);
-
-    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
-        .thenReturn(WorkspaceAccessLevel.OWNER);
-    when(mockNotebookService.getNotebookKernel(anyString(), anyString(), anyString()))
-        .thenReturn(kernelTypeEnum);
-
-    KernelTypeResponse actualResponse =
-        notebooksController
-            .getNotebookKernel(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName)
-            .getBody();
-
-    verify(mockWorkspaceAuthService)
-        .enforceWorkspaceAccessLevel(
-            fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
-
-    verify(mockNotebookService)
-        .getNotebookKernel(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
-
-    assertThat(actualResponse).isEqualTo(expectedResponse);
-  }
-
-  @ParameterizedTest
-  @MethodSource("notebookLockingCases")
-  public void testNotebookLockingEmailHash(String bucket, String email, String hash) {
-    assertThat(notebooksController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
-  }
-
-  @Test
-  public void testGetNotebookLockingMetadata_plaintextUser() {
-    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
-    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
-
-    final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            // store directly in plaintext, to show that this does not work
-            .put(LAST_LOCKING_USER_KEY, lastLockedUser)
-            .put("extraMetadata", "is not a problem")
-            .build();
-
-    // in case of accidentally storing the user email in plaintext
-    // it can't be retrieved by this endpoint
-
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy("UNKNOWN");
-
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
-
-  @Test
-  public void testGetNotebookLockingMetadata_nullMetadata() {
-    final Map<String, String> gcsMetadata = null;
-
-    // This file has no metadata so the response is empty
-
-    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
-
-  @Test
-  public void testGetNotebookLockingMetadata_emptyMetadata() {
-    final Map<String, String> gcsMetadata = new HashMap<>();
-
-    // This file has no metadata so the response is empty
-
-    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
-
-  @Test
-  public void testGetNotebookLockingMetadata() {
-    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
-    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
-
-    final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            .put(
-                LAST_LOCKING_USER_KEY,
-                notebooksController.notebookLockingEmailHash(
-                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
-            .put("extraMetadata", "is not a problem")
-            .build();
-
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy(lastLockedUser);
-
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
-
-  @Test
-  public void testGetNotebookLockingMetadata_knownUser() {
-    final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
-
-    FirecloudWorkspaceACL workspaceACL =
-        createWorkspaceACL(
-            new JSONObject()
-                .put(
-                    currentUser.getUsername(),
-                    new JSONObject()
-                        .put("accessLevel", "OWNER")
-                        .put("canCompute", true)
-                        .put("canShare", true))
-                .put(
-                    readerOnMyWorkspace,
-                    new JSONObject()
-                        .put("accessLevel", "READER")
-                        .put("canCompute", true)
-                        .put("canShare", true)));
-
-    final String lastLockedUser = readerOnMyWorkspace;
-    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
-
-    final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            .put(
-                LAST_LOCKING_USER_KEY,
-                notebooksController.notebookLockingEmailHash(
-                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
-            .put("extraMetadata", "is not a problem")
-            .build();
-
-    // I'm the owner so I can see readers on my workspace
-
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy(readerOnMyWorkspace);
-
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, workspaceACL);
-  }
-
-  @Test
-  public void testGetNotebookLockingMetadata_unknownUser() {
-    final String lastLockedUser = "a-stranger@fake-research-aou.org";
-    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
-
-    final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            .put(
-                LAST_LOCKING_USER_KEY,
-                notebooksController.notebookLockingEmailHash(
-                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
-            .put("extraMetadata", "is not a problem")
-            .build();
-
-    // This user is not listed in the DbWorkspace ACL so I don't know them
-
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy("UNKNOWN");
-
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
 
   private void assertNotebookLockingMetadata(
       Map<String, String> gcsMetadata,
