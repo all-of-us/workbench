@@ -134,7 +134,7 @@ const styles = reactStyles({
 });
 
 // Limit the size of cohort definition to 1MB
-const COHORT_BYTE_LIMIT = 1000;
+const COHORT_BYTE_LIMIT = 1000000;
 
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
@@ -210,6 +210,7 @@ export const ListOverview = fp.flow(
 
     componentDidMount(): void {
       if (!this.definitionErrors) {
+        this.checkCohortSize();
         this.getTotalCount();
         // Prevents multiple count calls on initial cohort load
         setTimeout(() => this.setState({ initializing: false }), 100);
@@ -222,17 +223,21 @@ export const ListOverview = fp.flow(
         this.props.updateCount > prevProps.updateCount &&
         !this.definitionErrors
       ) {
-        this.setState({
-          cohortSizeError:
-            new Blob([JSON.stringify(mapRequest(this.props.searchRequest))])
-              .size > COHORT_BYTE_LIMIT,
-        });
+        this.checkCohortSize();
         this.getTotalCount();
       }
     }
 
     componentWillUnmount(): void {
       this.aborter.abort();
+    }
+
+    checkCohortSize() {
+      this.setState({
+        cohortSizeError:
+          new Blob([JSON.stringify(mapRequest(this.props.searchRequest))])
+            .size > COHORT_BYTE_LIMIT,
+      });
     }
 
     getTotalCount() {
