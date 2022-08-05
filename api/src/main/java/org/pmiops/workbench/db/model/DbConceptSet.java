@@ -34,6 +34,7 @@ public class DbConceptSet {
   private long workspaceId;
   private DbUser creator;
   private Timestamp creationTime;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private Set<DbConceptSetConceptId> dbConceptSetConceptIds = new HashSet<>();
 
@@ -50,6 +51,7 @@ public class DbConceptSet {
       long workspaceId,
       DbUser creator,
       Timestamp creationTime,
+      String lastModifiedBy,
       Timestamp lastModifiedTime) {
     setVersion(version);
     setName(name);
@@ -59,6 +61,7 @@ public class DbConceptSet {
     setWorkspaceId(workspaceId);
     setCreator(creator);
     setCreationTime(creationTime);
+    setLastModifiedBy(lastModifiedBy);
     setLastModifiedTime(lastModifiedTime);
   }
 
@@ -71,6 +74,7 @@ public class DbConceptSet {
     setVersion(DbConceptSet.INITIAL_VERSION);
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
+    setLastModifiedBy(cs.getLastModifiedBy());
     setLastModifiedTime(cs.getLastModifiedTime());
     setConceptSetConceptIds(new HashSet<>(cs.getConceptSetConceptIds()));
   }
@@ -189,6 +193,16 @@ public class DbConceptSet {
     return this;
   }
 
+  @Column(name = "last_modified_by")
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public DbConceptSet setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
+    return this;
+  }
+
   @Column(name = "last_modified_time")
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
@@ -230,6 +244,7 @@ public class DbConceptSet {
         && Objects.equals(description, that.description)
         && Objects.equals(creator, that.creator)
         && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(lastModifiedBy, that.lastModifiedBy)
         && Objects.equals(lastModifiedTime, that.lastModifiedTime)
         && Objects.equals(dbConceptSetConceptIds, that.dbConceptSetConceptIds);
   }

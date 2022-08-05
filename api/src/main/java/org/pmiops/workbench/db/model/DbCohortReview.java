@@ -28,6 +28,7 @@ public class DbCohortReview {
   private String cohortDefinition;
   private String cohortName;
   private String description;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private long matchedParticipantCount;
   private long reviewSize;
@@ -148,6 +149,16 @@ public class DbCohortReview {
 
   public DbCohortReview creationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
+  }
+
+  @Column(name = "last_modified_by")
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public DbCohortReview setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
     return this;
   }
 
@@ -272,6 +283,7 @@ public class DbCohortReview {
         && Objects.equals(cohortDefinition, that.cohortDefinition)
         && Objects.equals(cohortName, that.cohortName)
         && Objects.equals(description, that.description)
+        && Objects.equals(lastModifiedBy, that.lastModifiedBy)
         && Objects.equals(lastModifiedTime, that.lastModifiedTime)
         && Objects.equals(reviewStatus, that.reviewStatus);
   }
@@ -286,6 +298,7 @@ public class DbCohortReview {
         cohortDefinition,
         cohortName,
         description,
+        lastModifiedBy,
         lastModifiedTime,
         matchedParticipantCount,
         reviewSize,
@@ -304,6 +317,7 @@ public class DbCohortReview {
         .append("cohortDefinition", cohortDefinition)
         .append("cohortName", cohortName)
         .append("description", description)
+        .append("lastModifiedBy", lastModifiedTime)
         .append("lastModifiedTime", lastModifiedTime)
         .append("matchedParticipantCount", matchedParticipantCount)
         .append("reviewSize", reviewSize)

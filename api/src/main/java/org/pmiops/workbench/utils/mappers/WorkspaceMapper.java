@@ -117,6 +117,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "firecloudUuid", ignore = true)
   @Mapping(target = "googleProject", ignore = true)
   @Mapping(target = "lastAccessedTime", ignore = true)
+  @Mapping(target = "lastModifiedBy", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "name", ignore = true)
   @Mapping(target = "needsResearchPurposeReviewPrompt", ignore = true)
