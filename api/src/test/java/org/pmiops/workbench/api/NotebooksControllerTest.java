@@ -120,7 +120,6 @@ public class NotebooksControllerTest {
 
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;
-  @Autowired private UserRecentResourceService mockUserRecentResourceService;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -661,25 +660,6 @@ public class NotebooksControllerTest {
     return userDao.save(user);
   }
 
-  private DbWorkspace createWorkspace() {
-    return createWorkspace(newWorkspace());
-  }
-
-  private DbWorkspace createWorkspace(String namespace, String name) {
-    return createWorkspace(
-        newWorkspace()
-            .setWorkspaceNamespace(namespace)
-            .setName(name)
-            .setFirecloudName("fc-" + name));
-  }
-
-  private DbWorkspace createWorkspace(DbWorkspace workspace) {
-    assertWithMessage("test code issue: name and firecloudName should be distinct")
-        .that(workspace.getFirecloudName())
-        .isNotEqualTo(workspace.getName());
-    return workspaceDao.save(workspace);
-  }
-
   private FirecloudWorkspaceACL createWorkspaceACL() {
     return createWorkspaceACL(
         new JSONObject()
@@ -696,32 +676,8 @@ public class NotebooksControllerTest {
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
   }
 
-  private DbWorkspace newWorkspace() {
-    return new DbWorkspace()
-        .setName("name")
-        .setCreator(currentUser)
-        .setFirecloudName("fc-name")
-        .setWorkspaceNamespace("namespace")
-        .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
-        .setCdrVersion(cdrVersion)
-        .setGoogleProject("proj");
-  }
-
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
-  }
-
-  private void stubGetWorkspace(DbWorkspace workspace, WorkspaceAccessLevel access) {
-    when(mockFireCloudService.getWorkspace(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .accessLevel(access.toString())
-                .workspace(
-                    new FirecloudWorkspaceDetails()
-                        .namespace(workspace.getWorkspaceNamespace())
-                        .name(workspace.getFirecloudName())
-                        .bucketName(TestMockFactory.WORKSPACE_BUCKET_NAME)));
   }
 
   private void stubGetWorkspace(
