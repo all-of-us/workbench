@@ -180,7 +180,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void copyNotebook() {
+  public void testCopyNotebook() {
     long sizeInBytes = 500;
     String fromWorkspaceNamespace = "fromProject";
     String fromWorkspaceName = "fromWorkspace_000";
@@ -224,7 +224,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void copyNotebook_alreadyExists() {
+  public void testCopyNotebook_alreadyExists() {
     String fromWorkspaceNamespace = "fromProject";
     String fromWorkspaceName = "fromWorkspace_000";
     String fromNotebookName = "starter.ipynb";
