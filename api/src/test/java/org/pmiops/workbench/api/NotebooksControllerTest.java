@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -40,13 +39,11 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -181,60 +178,6 @@ public class NotebooksControllerTest {
     assertThat(gotNames)
         .isEqualTo(
             ImmutableList.of(notebook1.fileDetail.getName(), notebook2.fileDetail.getName()));
-  }
-
-  @Test
-  public void testRenameNotebookInWorkspace() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
-    String newName = NotebooksService.withNotebookExtension("nb2");
-    String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
-    String fullPath = BUCKET_URI + newPath;
-    String origFullPath = BUCKET_URI + nb1;
-    NotebookRename rename = new NotebookRename();
-    rename.setName(NotebooksService.withNotebookExtension("nb1"));
-    rename.setNewName(newName);
-    notebooksController.renameNotebook(
-        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), rename);
-    verify(mockCloudStorageClient)
-        .copyBlob(
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
-    verify(mockCloudStorageClient)
-        .deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
-    verify(mockUserRecentResourceService)
-        .updateNotebookEntry(workspace.getWorkspaceId(), currentUser.getUserId(), fullPath);
-    verify(mockUserRecentResourceService)
-        .deleteNotebookEntry(workspace.getWorkspaceId(), currentUser.getUserId(), origFullPath);
-  }
-
-  @Test
-  public void testRenameNotebookWoExtension() {
-    DbWorkspace workspace = createWorkspace();
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
-    String newName = "nb2";
-    String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
-    String fullPath = BUCKET_URI + newPath;
-    String origFullPath = BUCKET_URI + nb1;
-    NotebookRename rename = new NotebookRename();
-    rename.setName(NotebooksService.withNotebookExtension("nb1"));
-    rename.setNewName(newName);
-    notebooksController.renameNotebook(
-        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), rename);
-    verify(mockCloudStorageClient)
-        .copyBlob(
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
-    verify(mockCloudStorageClient)
-        .deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
-    verify(mockUserRecentResourceService)
-        .updateNotebookEntry(workspace.getWorkspaceId(), currentUser.getUserId(), fullPath);
-    verify(mockUserRecentResourceService)
-        .deleteNotebookEntry(workspace.getWorkspaceId(), currentUser.getUserId(), origFullPath);
   }
 
   @Test
@@ -590,43 +533,6 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void renameNotebook_validateActiveBilling() {
-    DbWorkspace workspace =
-        workspaceDao.save(newWorkspace().setBillingStatus(BillingStatus.INACTIVE));
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    NotebookRename request = new NotebookRename().name("a").newName("b");
-
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            notebooksController.renameNotebook(
-                workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), request));
-  }
-
-  @Test
-  public void copyNotebook_validateActiveBilling() {
-    DbWorkspace workspace =
-        workspaceDao.save(newWorkspace().setBillingStatus(BillingStatus.INACTIVE));
-    stubGetWorkspace(workspace, WorkspaceAccessLevel.OWNER);
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(workspace.getFirecloudName())
-            .toWorkspaceNamespace(workspace.getWorkspaceNamespace())
-            .newName("x");
-
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            notebooksController.copyNotebook(
-                workspace.getWorkspaceNamespace(),
-                workspace.getFirecloudName(),
-                "z",
-                copyNotebookRequest));
-  }
-
-  @Test
   public void testNotebookLockingMetadata() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
@@ -640,8 +546,6 @@ public class NotebooksControllerTest {
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
-
-    // I can see that I have locked it myself, and when
 
     final NotebookLockingMetadataResponse expectedResponse =
         new NotebookLockingMetadataResponse()
@@ -734,6 +638,9 @@ public class NotebooksControllerTest {
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
+
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
+        .thenReturn(acl.getAcl());
 
     final String testNotebookPath = "notebooks/" + testNotebook;
     doReturn(gcsMetadata)
