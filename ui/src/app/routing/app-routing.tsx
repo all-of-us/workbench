@@ -33,7 +33,7 @@ import {
 import {
   acceptTermsOfService,
   useIsUserDisabled,
-  useNeedsToAcceptTOS,
+  useShowTOS,
 } from 'app/utils/access-utils';
 import { initializeAnalytics } from 'app/utils/analytics';
 import { useAuthentication } from 'app/utils/authentication';
@@ -225,7 +225,7 @@ export const AppRoutingComponent: React.FunctionComponent<
       }
     }
   };
-  const doesUserNeedToAcceptTOS = useNeedsToAcceptTOS();
+  const doesUserNeedToAcceptTOS = useShowTOS();
 
   useEffect(() => {
     if (config) {
