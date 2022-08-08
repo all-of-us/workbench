@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
