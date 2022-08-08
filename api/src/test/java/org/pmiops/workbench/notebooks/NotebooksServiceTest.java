@@ -178,11 +178,13 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testCloneNotebook_firesMetric() {
+  public void testCloneNotebook() {
     doReturn(WORKSPACE_RESPONSE).when(mockFireCloudService).getWorkspace(anyString(), anyString());
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    verify(mockWorkspaceAuthService).enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.READER);
+    verify(mockWorkspaceAuthService).enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);
   }
 
