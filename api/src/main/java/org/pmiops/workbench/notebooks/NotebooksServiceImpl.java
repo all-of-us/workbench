@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -112,16 +113,18 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
-    return getNotebooksAsService(bucketName);
+    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceName);
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
-  public List<FileDetail> getNotebooksAsService(String bucketName) {
+  public List<FileDetail> getNotebooksAsService(String bucketName, String workspaceNamespace, String workspaceName) {
+    Set<String> workspaceUsers =
+        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
-        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName))
+        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
   }
 

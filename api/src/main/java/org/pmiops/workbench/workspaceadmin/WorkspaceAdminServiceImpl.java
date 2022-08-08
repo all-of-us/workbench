@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,6 +65,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,6 +94,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
@@ -113,7 +116,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       UserService userService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService) {
     this.accessTierService = accessTierService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
@@ -133,6 +137,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
   }
 
   @Override
@@ -162,7 +167,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     // NOTE: all of these may be undercounts, because we're only looking at the first Page of
     // Storage List results
-    int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName).size();
+    int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName,workspaceNamespace, workspaceName).size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
 
@@ -324,9 +329,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
-
+    Set<String> workspaceUsers =
+        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient.getBlobPage(bucketName).stream()
-        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName))
+        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
   }
 
