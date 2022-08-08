@@ -280,11 +280,12 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testDeleteNotebook_firesMetric() {
+  public void testDeleteNotebook() {
     doReturn(WORKSPACE_RESPONSE).when(mockFireCloudService).getWorkspace(anyString(), anyString());
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
+    verify(mockWorkspaceAuthService).enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
