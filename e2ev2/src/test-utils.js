@@ -74,7 +74,10 @@ export_({browserTest})
 const useApiProxy = async page => {
   await page.setJavaScriptEnabled(false)
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
-  await page.evaluate(() => { localStorage.allOfUsApiUrlOverride = 'http://localhost:8000'})
+  await page.evaluate(
+    url => { localStorage.allOfUsApiUrlOverride = url},
+    process.env.API_PROXY_URL
+  )
   await page.setJavaScriptEnabled(true)
 }
 export_({useApiProxy})
