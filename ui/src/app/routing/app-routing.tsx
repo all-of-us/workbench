@@ -225,7 +225,7 @@ export const AppRoutingComponent: React.FunctionComponent<
       }
     }
   };
-  const doesUserNeedToAcceptTOS = useShowTOS();
+  const redirectToTOSPage = useShowTOS();
 
   useEffect(() => {
     if (config) {
@@ -294,14 +294,14 @@ export const AppRoutingComponent: React.FunctionComponent<
                   exact={false}
                   guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
                 >
-                  {!doesUserNeedToAcceptTOS && (
+                  {!redirectToTOSPage && (
                     <SignedInPage intermediaryRoute={true} routeData={{}} />
                   )}
                 </AppRoute>
               </Switch>
             </AppRouter>
           )}
-          {doesUserNeedToAcceptTOS && (
+          {redirectToTOSPage && (
             <TermsOfService
               showReAcceptNotification={true}
               onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}

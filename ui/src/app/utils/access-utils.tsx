@@ -409,7 +409,7 @@ export const useShowTOS = () => {
           } else {
             const userHasAcceptedLatestTOS =
               await profileApi().getUserTermsOfServiceStatus();
-            setUserRequiredToAcceptTOS(userHasAcceptedLatestTOS);
+            setUserRequiredToAcceptTOS(!userHasAcceptedLatestTOS);
           }
         } catch (e) {
           console.log('Error while getting user terms of service status');
