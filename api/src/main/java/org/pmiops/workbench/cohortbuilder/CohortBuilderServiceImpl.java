@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,50 +73,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CohortBuilderServiceImpl implements CohortBuilderService {
 
-  public static class SearchTerm {
-
-    private final String term;
-    private final String modifiedTerm;
-    private final List<String> endsWithTerms;
-
-    SearchTerm(String term, String modifiedTerm, List<String> endsWithTerms) {
-      this.term = term;
-      this.modifiedTerm = modifiedTerm == null ? "" : modifiedTerm;
-      this.endsWithTerms =
-          endsWithTerms == null
-              ? Collections.emptyList()
-              : ImmutableList.copyOf(endsWithTerms.listIterator());
-    }
-
-    public String getTerm() {
-      return term;
-    }
-
-    public String getModifiedTerm() {
-      return modifiedTerm;
-    }
-
-    public List<String> getEndsWithTerms() {
-      return endsWithTerms;
-    }
-
-    public boolean hasEndsWithOnly() {
-      return !endsWithTerms.isEmpty() && modifiedTerm.isEmpty();
-    }
-
-    public boolean hasModifiedTermOnly() {
-      return endsWithTerms.isEmpty() && !modifiedTerm.isEmpty();
-    }
-
-    public boolean hasEndsWithTermsAndModifiedTerm() {
-      return !endsWithTerms.isEmpty() && !modifiedTerm.isEmpty();
-    }
-
-    public boolean hasNoTerms() {
-      return endsWithTerms.isEmpty() && modifiedTerm.isEmpty();
-    }
-  }
-
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
@@ -137,8 +92,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           .append(String.format("[%s_rank1]", Domain.OBSERVATION.toString().toLowerCase()))
           .append(String.format("[%s_rank1]", Domain.MEASUREMENT.toString().toLowerCase()))
           .append(String.format("[%s_rank1]", Domain.DRUG.toString().toLowerCase()));
-  private static final String MODIFIED_TERMS = "modifiedTerms";
-  private static final String ENDS_WITH_TERMS = "endsWithTerms";
 
   private final BigQueryService bigQueryService;
   private final CohortQueryBuilder cohortQueryBuilder;
@@ -323,7 +276,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
 
-    SearchTerm searchTerm = modifyTermMatchUseEndsWithTerms(term);
+    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<DbCriteria> criteriaList = new ArrayList<>();
     if (searchTerm.hasModifiedTermOnly()) {
@@ -433,7 +386,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
     }
 
-    SearchTerm searchTerm = modifyTermMatchUseEndsWithTerms(term);
+    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
     if (searchTerm.hasNoTerms()) {
@@ -577,7 +530,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<CardCount> findDomainCountsV2(String term) {
-    SearchTerm searchTerm = modifyTermMatchUseEndsWithTerms(term);
+    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<CardCount> cardCounts =
         findDomainCountsV2(
@@ -856,63 +809,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               return "+" + keywords[i] + "*";
             })
         .collect(Collectors.joining());
-  }
-
-  protected SearchTerm modifyTermMatchUseEndsWithTerms(String term) {
-    Map<String, String> retMap = new HashMap<>();
-    List<String> modifiedTerms = new ArrayList<>();
-    // add quoted pattern to the list of modifiedTerms
-    String quotedPattern = "([+|-]?\\\"((\\w+)\\s?)+\\\")";
-    Pattern pattern = Pattern.compile(quotedPattern);
-    Matcher matcher = pattern.matcher(term);
-    while (matcher.find()) {
-      modifiedTerms.add(
-          matcher.group().matches("^[+|-].*") ? matcher.group() : "+" + matcher.group());
-    }
-    // remove the quoted phrase/pattern
-    List<String> words =
-        new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
-    // process endsWith words
-    List<String> endsWith =
-        words.stream()
-            .filter(word -> word.startsWith("*") && word.length() >= 3)
-            .map(x -> x.replaceAll("\\*{1,}", "%"))
-            .collect(Collectors.toList());
-    // now process non-endsWith words
-    words.removeAll(endsWith);
-    words.stream()
-        .filter(word -> word.length() >= 2 && !word.startsWith("*"))
-        .forEach(
-            word -> {
-              if (word.matches("-\\w+(-\\w+)+")) {
-                // -covid-19 -type-2-diabetes => -"covid-19" -"type-2-diabetes"
-                modifiedTerms.add("-\"" + word.substring(1) + "\"");
-              } else if (word.matches("\\+\\w+(-\\w+)+")) {
-                // +covid-19 +type-2-diabetes => +"covid-19" +"type-2-diabetes"
-                modifiedTerms.add("+\"" + word.substring(1) + "\"");
-              } else if (word.matches("\\w+(-\\w+)+")) {
-                // covid-19 type-2-diabetes => +"covid-19" +"type-2-diabetes"
-                modifiedTerms.add("+\"" + word + "\"");
-              } else if (word.startsWith("-")) {
-                // -diabet => -diabet
-                modifiedTerms.add(word);
-              } else if (word.startsWith("+")) {
-                // +diabet => +diabet*
-                modifiedTerms.add(word + "*");
-              } else {
-                // diabet => +diabet*
-                modifiedTerms.add("+" + word + "*");
-              }
-            });
-
-    return new SearchTerm(
-        term,
-        modifiedTerms.stream()
-            .collect(Collectors.joining(""))
-            .replaceAll("\\+{2,}", "\\+")
-            .replaceAll("\\-{2,}", "\\-")
-            .replaceAll("\\*{2,}", "\\*"),
-        endsWith);
   }
 
   @NotNull
