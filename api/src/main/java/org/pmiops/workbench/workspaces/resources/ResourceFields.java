@@ -69,7 +69,7 @@ class ResourceFields {
     return lastModifiedBy;
   }
 
-  public ResourceFields setLastModifiedBy(@Nullable String lastModifiedBy) {
+  public ResourceFields setLastModifiedBy(String lastModifiedBy) {
     this.lastModifiedBy = lastModifiedBy;
     return this;
   }
