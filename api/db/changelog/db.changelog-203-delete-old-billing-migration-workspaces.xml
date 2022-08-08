@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-203-delete-old-billing-migration-workspaces">
+    <!--
+      Delete the last remaining ACTIVE workspaces with BillingMigrationStatus other than 1 (NEW)
+      which designates One Project Per Workspace (1PPW) - which has been true for all new workspaces
+      created since 2019.
+
+      https://precisionmedicineinitiative.atlassian.net/browse/RW-8705
+
+      There are 31 of these in Test, and none in any other environment, according to
+      SELECT COUNT(*) FROM workspace
+      WHERE active_status = 0 /* ACTIVE */ AND billing_migration_status != 1 /* NEW */ ;
+
+      We are unable to delete these by our usual means, because the user which created them no
+      longer exists - perhaps why these were not migrated originally.  This also does not delete
+      their associated resources, but we are addressing such cases as part of a more general
+      cleanup in https://precisionmedicineinitiative.atlassian.net/browse/RW-8018
+
+
+      See also:
+
+      A previous attempt at cleanup
+      * https://github.com/all-of-us/workbench/pull/6162
+      * https://precisionmedicineinitiative.atlassian.net/browse/RW-5492
+
+      A fix for a typo in the above accidental change (changelog-190-billing-migration-bug-backfill)
+      * https://precisionmedicineinitiative.atlassian.net/browse/RW-7906
+      * https://github.com/all-of-us/workbench/pull/6336
+
+     -->
+    <sql>
+      UPDATE workspace
+        SET active_status = 1 /* DELETED */
+        WHERE active_status = 0 /* ACTIVE */ AND billing_migration_status != 1 /* NEW */ ;
+    </sql>
+  </changeSet>
+</databaseChangeLog>
