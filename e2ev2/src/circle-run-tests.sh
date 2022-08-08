@@ -24,7 +24,8 @@ gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 export PROXY_PORT=8080
 export API_PROXY_URL=http://localhost:$PROXY_PORT
 export PROXY_MODE=replay-only
-(cd ../api-proxy; ./startproxy.sh &)
+
+(cd ../api-proxy; yarn install; ln -s "$PWD" node_modules/$; ./startproxy.sh &)
 
 set +e
 export FAILED_TESTS_LOG=failed-tests.txt
