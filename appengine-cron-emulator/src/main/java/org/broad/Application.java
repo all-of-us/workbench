@@ -7,7 +7,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import java.io.*;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.ConnectException;
 import java.nio.file.Files;
