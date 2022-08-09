@@ -1003,7 +1003,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, 160);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB + 10);
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickWorkerCpu(wrapper, 16);
@@ -1015,7 +1015,7 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Cancel');
 
-    expect(getMainDiskSize(wrapper)).toBe(160);
+    expect(getMainDiskSize(wrapper)).toBe(DATAPROC_MIN_DISK_SIZE_GB + 10);
     expect(getMainCpu(wrapper)).toBe(8);
     expect(getMainRam(wrapper)).toBe(30);
     expect(getWorkerCpu(wrapper)).toBe(16);
