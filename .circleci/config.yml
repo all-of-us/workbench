@@ -823,11 +823,11 @@ workflows:
           <<: *filter-pr-branch
   e2etests:
     jobs:
-#      - e2etests-deploy-ui:
-#          <<: *filter-pr-branch
-      - e2etests-run
-#          requires:
-#            - e2etests-deploy-ui
+      - e2etests-deploy-ui:
+          <<: *filter-pr-branch
+      - e2etests-run:
+          requires:
+            - e2etests-deploy-ui
 
   deploy-staging:
     jobs:
