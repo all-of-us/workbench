@@ -393,6 +393,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                           )
                           .map((menuItem, m) => (
                             <li
+                              key={m}
                               style={{
                                 ...styles.dropdownItem,
                                 ...(hoverId === `${index}-${m}`

@@ -413,7 +413,7 @@ export const SearchGroup = withCurrentWorkspace()(
 
     launchSearch(criteria: any, temporalGroup: number, searchTerms?: string) {
       const { group, setSearchContext, role } = this.props;
-      const { domain, type, standard } = criteria;
+      const { domain, selectedSurvey, type, standard } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
       const label = `Add ${
         role === 'includes' ? 'Include' : 'Exclude'
@@ -433,6 +433,7 @@ export const SearchGroup = withCurrentWorkspace()(
         role,
         groupId,
         temporalGroup,
+        selectedSurvey,
       };
       setSearchContext(context);
     }
