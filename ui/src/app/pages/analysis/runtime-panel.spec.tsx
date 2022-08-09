@@ -790,7 +790,7 @@ describe('RuntimePanel', () => {
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerCpu(wrapper, 2);
     await pickComputeType(wrapper, ComputeType.Standard);
-
+    await pickMainDiskSize(wrapper, 120);
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
@@ -1160,8 +1160,8 @@ describe('RuntimePanel', () => {
       costEstimator().find('[data-test-id="running-cost"]');
     const storageCost = () =>
       costEstimator().find('[data-test-id="storage-cost"]');
-    expect(runningCost().text()).toEqual('$0.77/hour');
-    expect(storageCost().text()).toEqual('$0.07/hour');
+    expect(runningCost().text()).toEqual('$0.73/hour');
+    expect(storageCost().text()).toEqual('$0.02/hour');
 
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
