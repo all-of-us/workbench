@@ -8,8 +8,8 @@ import { AnalysisConfig, DiskConfig } from './runtime-utils';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
-export const MIN_DISK_SIZE_GB = 150;
-export const DATAPROC_WORKER_MIN_DISK_SIZE_GB = 150;
+export const MIN_DISK_SIZE_GB = 120;
+export const DATAPROC_MIN_DISK_SIZE_GB = 150;
 
 export enum ComputeType {
   Standard = 'Standard VM',

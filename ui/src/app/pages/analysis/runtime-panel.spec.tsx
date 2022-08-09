@@ -35,7 +35,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import {
   ComputeType,
-  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  DATAPROC_MIN_DISK_SIZE_GB,
   findMachineByName,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
@@ -550,7 +550,7 @@ describe('RuntimePanel', () => {
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB + 10);
 
     // worker settings
     await pickWorkerCpu(wrapper, 8);
@@ -567,7 +567,7 @@ describe('RuntimePanel', () => {
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
       masterMachineType: 'n1-standard-2',
-      masterDiskSize: MIN_DISK_SIZE_GB,
+      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
       workerMachineType: 'n1-standard-8',
       workerDiskSize: 300,
       numberOfWorkers: 10,
@@ -1003,26 +1003,26 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
+    await pickMainDiskSize(wrapper, 160);
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickWorkerCpu(wrapper, 16);
     await pickWorkerRam(wrapper, 60);
     await pickNumPreemptibleWorkers(wrapper, 3);
     await pickNumWorkers(wrapper, 5);
-    await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Cancel');
 
-    expect(getMainDiskSize(wrapper)).toBe(MIN_DISK_SIZE_GB + 10);
+    expect(getMainDiskSize(wrapper)).toBe(160);
     expect(getMainCpu(wrapper)).toBe(8);
     expect(getMainRam(wrapper)).toBe(30);
     expect(getWorkerCpu(wrapper)).toBe(16);
     expect(getWorkerRam(wrapper)).toBe(60);
     expect(getNumPreemptibleWorkers(wrapper)).toBe(3);
     expect(getNumWorkers(wrapper)).toBe(5);
-    expect(getWorkerDiskSize(wrapper)).toBe(DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    expect(getWorkerDiskSize(wrapper)).toBe(DATAPROC_MIN_DISK_SIZE_GB);
   });
 
   it('should disable Next button if Runtime is in between states', async () => {
@@ -1147,7 +1147,7 @@ describe('RuntimePanel', () => {
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
       },
     });
 
@@ -1243,8 +1243,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
@@ -1266,8 +1266,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
