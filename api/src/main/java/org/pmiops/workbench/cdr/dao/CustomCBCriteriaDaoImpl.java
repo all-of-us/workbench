@@ -60,8 +60,33 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   // SQL snips
   private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
+
   private static final String LIMIT_OFFSET = "limit %s offset %s\n";
+
   private static final String OR = "\nor\n";
+
+  private static final String FULLTEXT_DOMAIN_MATCH =
+      " and match(full_text) against(concat('+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n";
+
+  private static final String FULLTEXT_TERM_DOMAIN_MATCH =
+      " and match(full_text) against(concat(:"
+          + BIND_VAR_TERM
+          + ", '+[', :"
+          + BIND_VAR_DOMAIN
+          + ", '_rank1]') in boolean mode)\n";
+
+  private static final String DOMAIN_ID_IN_DOMAINS =
+      " and domain_id in (:" + VAR_IN_DOMAINS + ")\n";
+
+  private static final String FULLTEXT_SURVEY_MATCH =
+      " and match(full_text) against('+[survey_rank1]' in boolean mode)\n";
+
+  private static final String FULLTEXT_TERM_SURVEY_MATCH =
+      " and match(full_text) against(concat(:"
+          + BIND_VAR_TERM
+          + ", '+[survey_rank1]') in boolean mode)\n";
 
   private static final String CRITERIA_BY_DOMAIN_ENDS_WITH =
       "select *\n"
@@ -71,9 +96,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "where is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + "and match(full_text) against(concat('+[', :"
-          + BIND_VAR_DOMAIN
-          + ", '_rank1]') in boolean mode)\n"
+          + FULLTEXT_DOMAIN_MATCH
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -87,11 +110,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "where is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + "and match(full_text) against(concat(:"
-          + BIND_VAR_TERM
-          + ", '+[', :"
-          + BIND_VAR_DOMAIN
-          + ", '_rank1]') in boolean mode)\n"
+          + FULLTEXT_TERM_DOMAIN_MATCH
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -109,9 +128,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + "and has_hierarchy = 1\n"
-          + "and match(full_text) against(concat('+[', :"
-          + BIND_VAR_DOMAIN
-          + ", '_rank1]') in boolean mode)\n"
+          + FULLTEXT_DOMAIN_MATCH
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -129,11 +146,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + "and has_hierarchy = 1\n"
-          + "and match(full_text) against(concat(:"
-          + BIND_VAR_TERM
-          + ", '+[', :"
-          + BIND_VAR_DOMAIN
-          + ", '_rank1]') in boolean mode)\n"
+          + FULLTEXT_TERM_DOMAIN_MATCH
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -154,9 +167,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + "and domain_id in (:"
-          + VAR_IN_DOMAINS
-          + ")\n"
+          + DOMAIN_ID_IN_DOMAINS
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -175,9 +186,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + "and domain_id in (:"
-          + VAR_IN_DOMAINS
-          + ")\n"
+          + DOMAIN_ID_IN_DOMAINS
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -203,9 +212,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + SQL_DB_CDR_NAME
           + ".cb_criteria\n"
           + "where domain_id = 'SURVEY' "
-          + "and match(full_text) against(concat(:"
-          + BIND_VAR_TERM
-          + ", '+[survey_rank1]') in boolean mode)\n"
+          + FULLTEXT_TERM_SURVEY_MATCH
           + "and ("
           + SQL_ENDS_WITH
           + "))\n"
@@ -232,7 +239,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + SQL_DB_CDR_NAME
           + ".cb_criteria\n"
           + "where domain_id = 'SURVEY' "
-          + "and match(full_text) against('+[survey_rank1]' in boolean mode)\n"
+          + FULLTEXT_SURVEY_MATCH
           + "and ("
           + SQL_ENDS_WITH
           + "))\n"
