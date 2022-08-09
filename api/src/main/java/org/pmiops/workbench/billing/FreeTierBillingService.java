@@ -415,22 +415,24 @@ public class FreeTierBillingService {
    * Filter the costs further by getting the workspaces that are active, or deleted but their free
    * tier last updated time is before the workspace last updated time. This filtration ensures that
    * BQ will not be queried unnecessarily for the costs of deleted workspaces that we already have
-   * their latest costs The method will return the workspace in 1 of these cases:
+   * their latest costs The method will return the workspace in either of these cases:
    *
    * <ol>
    *   <li>The workspace is active
-   *   <li>The workspace is deleted within the past 6 months and either of the following is true
+   *   <li>The workspace is deleted within the past 6 months and any of the following is true.
    *       <ol>
    *         <li>Free Tier Usage last updated time is null. This means that it wasn't calculated
    *             before
-   *         <li>Workspace last updated time is null. This means we don't have enough info about *
-   *             the workspace, so we need to get its cost
-   *         <li>Free Tier Usage time is before the Workspace last updated time. This means * that
-   *             the workspace got changed some time after our last calculation, so we need to *
-   *             recalculate it
-   *         <li>Free Tier Usage time is after the Workspace last updated time, but * the difference
-   *             is smaller than a certain value. This case to account for charges that may * occur
-   *             after the workspace gets deleted and after the last cron had run.
+   *         <li>Workspace last updated time is null. This means we don't have enough info about the
+   *             workspace, so we need to get its cost from BQ
+   *         <li>Free Tier Usage time is before the Workspace last updated time (Here the workspace
+   *             last updated time will be the time that the workspace was deleted). This means that
+   *             the workspace got changed some time after our last calculation, so we need to
+   *             recalculate its usage
+   *         <li>Free Tier Usage time is after the Workspace last updated time (Here the workspace
+   *             last updated time will be the time that the workspace was deleted), but the
+   *             difference is smaller than a certain value. This case to account for charges that
+   *             may occur after the workspace gets deleted and after the last cron had run.
    *       </ol>
    * </ol>
    *
@@ -445,8 +447,8 @@ public class FreeTierBillingService {
         allCostsInDbForUsers.stream()
             .filter(
                 c ->
-                    (c.getActiveStatus() == 0)
-                        || (c.getActiveStatus() == 1
+                    (c.getActiveStatus() == 0) // ACTIVE
+                        || (c.getActiveStatus() == 1 // DELETED
                             && (c.getWorkspaceLastUpdated() == null
                                 || c.getWorkspaceLastUpdated()
                                     .toLocalDateTime()
