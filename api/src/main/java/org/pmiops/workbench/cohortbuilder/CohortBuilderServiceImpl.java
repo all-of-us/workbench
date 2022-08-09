@@ -15,14 +15,11 @@ import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -189,14 +186,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class SearchTerm {
 
-  private static final int MIN_TERM_LENGTH = 3;
+  private static final int MIN_TERM_LENGTH_NO_SPECIAL_CHAR = 3;
   private final String term;
   private String modifiedTerm;
   private List<String> endsWithTerms;
@@ -66,17 +66,29 @@ public class SearchTerm {
     final String endsWithPattern = "[+-]?\\*\\w+";
     List<String> endsWith =
         words.stream()
-            .filter(word -> word.matches(endsWithPattern) && word.length() >= MIN_TERM_LENGTH)
+            .filter(
+                word -> word.matches(endsWithPattern)
+                //                word ->
+                //                    word.matches(endsWithPattern)
+                //                        && word.length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
+                )
             .map(x -> x.replaceAll("[\\*|\\-|\\+]+$", ""))
             .map(x -> x.replaceAll("\\*+", "%"))
             .collect(Collectors.toList());
     // now process non-endsWith words
     words =
         words.stream()
-            .filter(word -> !(word.matches(endsWithPattern) && word.length() >= MIN_TERM_LENGTH))
+            .filter(
+                word -> !word.matches(endsWithPattern)
+                //                word ->
+                //                    !(word.matches(endsWithPattern)
+                //                        && word.length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
+                )
             .collect(Collectors.toList());
     words.stream()
-        .filter(word -> word.length() >= MIN_TERM_LENGTH && !word.startsWith("*"))
+        //        .filter(word -> word.length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR &&
+        // !word.startsWith("*"))
+        .filter(word -> !word.startsWith("*"))
         .forEach(
             word -> {
               if (word.matches("-\\w+(-\\w+)+")) {
@@ -100,18 +112,24 @@ public class SearchTerm {
               }
             });
 
+    // filter: any parsed words that are stop words criteria
+    // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
     this.endsWithTerms =
         endsWith.stream()
             .filter(w -> !w.replaceAll("[+%-]", "").toLowerCase().matches(stopWordPattern))
+            .filter(w -> w.replaceAll("[+%-]", "").length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
             .collect(Collectors.toList());
-    // replace more than 1 occurrence of +/-/* and not in stop word list
+
+    // fix multiple occurrence of +/-/*
+    // filter: any parsed words that are stop words criteria
+    // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
     this.modifiedTerm =
         parsedTerms.stream()
             .map(x -> x.replaceAll("\\++", "\\+"))
             .map(x -> x.replaceAll("-+", "\\-"))
             .map(x -> x.replaceAll("\\*+", "\\*"))
             .filter(w -> !w.replaceAll("[+*\"-]", "").toLowerCase().matches(stopWordPattern))
-            .filter(w -> w.replaceAll("[+*\"-]", "").length() > MIN_TERM_LENGTH)
+            .filter(w -> w.replaceAll("[+*\"-]", "").length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
             .collect(Collectors.joining(""));
   }
 }

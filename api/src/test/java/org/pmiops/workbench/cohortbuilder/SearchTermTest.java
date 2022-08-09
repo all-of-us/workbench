@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -92,8 +91,9 @@ class SearchTermTest {
         Arguments.of("Search term: ", "+diabet is from", "+diabet*"),
         Arguments.of("Search term: ", "+\"diabet is from\"", "+\"diabet is from\""),
         Arguments.of("Search term: ", "-\"diabet is from\"", "-\"diabet is from\""),
-        Arguments.of("Search term: ", "how* is *it diabet ", "+diabet*")
-        );
+        Arguments.of("Search term: ", "how* is *it diabet ", "+diabet*"),
+        Arguments.of("Search term: ", "how* is *it +di* ", ""),
+        Arguments.of("Search term: ", "how* is *it dia ", "+dia*"));
   }
 
   private static List<String> getStopWords() {
