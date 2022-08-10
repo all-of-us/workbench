@@ -711,7 +711,7 @@ export const withAnalysisConfigDefaults = (
         dataprocConfig?.numberOfPreemptibleWorkers ??
         defaults.numberOfPreemptibleWorkers,
     };
-    size = DATAPROC_MIN_DISK_SIZE_GB;
+    size = size ?? existingDisk?.size ?? DATAPROC_MIN_DISK_SIZE_GB;
   } else {
     throw Error(`unknown computeType: '${computeType}'`);
   }
