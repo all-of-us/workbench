@@ -278,6 +278,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<DbCriteria> criteriaList = new ArrayList<>();
+
     if (searchTerm.hasModifiedTermOnly()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
@@ -392,10 +393,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return new CriteriaListWithCountResponse().totalCount(0L);
     }
 
-    // if domain type is survey and modifiedSearchTerm is not empty then return search survey
-    // revisit after RW-8668 - fix to survey to use endsWith
-    if (isSurveyDomain(domain) && !searchTerm.getModifiedTerm().isEmpty()) {
-      return findSurveyCriteriaBySearchTerm(surveyName, pageRequest, searchTerm.getModifiedTerm());
+    if (isSurveyDomain(domain)) {
+      return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
     }
 
     // find a match on concept code
@@ -750,6 +749,62 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByPath(id, pageRequest);
     } else {
       dbCriteriaPage = cbCriteriaDao.findCriteriaTopCountsByStandard(domain, standard, pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
+  }
+
+  private CriteriaListWithCountResponse findSurveyCriteriaBySearchTermV2(
+      String surveyName, SearchTerm searchTerm, PageRequest pageRequest) {
+    Page<DbCriteria> dbCriteriaPage = null;
+    if (surveyName.equals("All")) {
+      switch (searchTerm.getSearchType()) {
+        case TERM_ONLY:
+          dbCriteriaPage =
+              cbCriteriaDao.findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest);
+          break;
+        case ENDS_WITH_ONLY:
+          dbCriteriaPage =
+              cbCriteriaDao.findSurveyQuestionByNameEndsWith(
+                  searchTerm.getEndsWithTerms(), pageRequest);
+          break;
+        case TERM_AND_ENDS_WITH:
+          dbCriteriaPage =
+              cbCriteriaDao.findSurveyQuestionByTermAndNameEndsWith(
+                  searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
+          break;
+        default:
+          // case EMPTY:
+          // ?? return new CriteriaListWithCountResponse();
+          break;
+      }
+    } else {
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
+      switch (searchTerm.getSearchType()) {
+        case TERM_ONLY:
+          dbCriteriaPage =
+              cbCriteriaDao.findSurveyQuestionByPathAndTerm(
+                  id, searchTerm.getModifiedTerm(), pageRequest);
+          break;
+        case ENDS_WITH_ONLY:
+          dbCriteriaPage =
+              cbCriteriaDao.findSurveyQuestionByPathAndNameEndsWith(
+                  id, searchTerm.getEndsWithTerms(), pageRequest);
+          break;
+        case TERM_AND_ENDS_WITH:
+          dbCriteriaPage =
+              cbCriteriaDao.findSurveyQuestionByPathAndTermAndNameEndsWith(
+                  id, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
+          break;
+        case EMPTY:
+        default:
+          // ?? return new CriteriaListWithCountResponse();
+          break;
+      }
     }
     return new CriteriaListWithCountResponse()
         .items(

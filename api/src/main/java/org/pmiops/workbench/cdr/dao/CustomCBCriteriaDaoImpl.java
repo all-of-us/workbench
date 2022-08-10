@@ -54,6 +54,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String BIND_VAR_STANDARD = "standard";
   private static final String BIND_VAR_TERM = "term";
   private static final String BIND_VAR_TYPE = "type";
+  private static final String BIND_VAR_ID = "id";
 
   // SQL regexp replace variable (for IN clause)
   private static final String VAR_IN_DOMAINS = "domains";
@@ -65,12 +66,12 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   private static final String OR = "\nor\n";
 
-  private static final String FULLTEXT_DOMAIN_MATCH =
+  private static final String MATCH_FULL_TEXT_DOMAIN =
       " and match(full_text) against(concat('+[', :"
           + BIND_VAR_DOMAIN
           + ", '_rank1]') in boolean mode)\n";
 
-  private static final String FULLTEXT_TERM_DOMAIN_MATCH =
+  private static final String MATCH_FULL_TEXT_DOMAIN_TERM =
       " and match(full_text) against(concat(:"
           + BIND_VAR_TERM
           + ", '+[', :"
@@ -80,13 +81,16 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String DOMAIN_ID_IN_DOMAINS =
       " and domain_id in (:" + VAR_IN_DOMAINS + ")\n";
 
-  private static final String FULLTEXT_SURVEY_MATCH =
+  private static final String MATCH_FULL_TEXT_SURVEY =
       " and match(full_text) against('+[survey_rank1]' in boolean mode)\n";
 
-  private static final String FULLTEXT_TERM_SURVEY_MATCH =
+  private static final String MATCH_FULL_TEXT_SURVEY_TERM =
       " and match(full_text) against(concat(:"
           + BIND_VAR_TERM
           + ", '+[survey_rank1]') in boolean mode)\n";
+
+  private static final String MATCH_ID_PATH =
+      "and match(path) against(:" + BIND_VAR_ID + " in boolean mode) \n";
 
   private static final String CRITERIA_BY_DOMAIN_ENDS_WITH =
       "select *\n"
@@ -96,13 +100,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "where is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + FULLTEXT_DOMAIN_MATCH
+          + MATCH_FULL_TEXT_DOMAIN
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
           + "order by est_count desc, name asc\n";
 
-  private static final String CRITERIA_BY_DOMAIN_ENDS_WITH_AND_TERM =
+  private static final String CRITERIA_BY_DOMAIN_TERM_ENDS_WITH =
       "select *\n"
           + "from \n"
           + SQL_DB_CDR_NAME
@@ -110,7 +114,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "where is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + FULLTEXT_TERM_DOMAIN_MATCH
+          + MATCH_FULL_TEXT_DOMAIN_TERM
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -128,13 +132,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + "and has_hierarchy = 1\n"
-          + FULLTEXT_DOMAIN_MATCH
+          + MATCH_FULL_TEXT_DOMAIN
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
           + "order by est_count desc, name asc\n";
 
-  private static final String AUTO_COMPLETE_ENDS_WITH_AND_TERM =
+  private static final String AUTO_COMPLETE_TERM_ENDS_WITH =
       "select *\n"
           + "from \n"
           + SQL_DB_CDR_NAME
@@ -146,13 +150,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + "and has_hierarchy = 1\n"
-          + FULLTEXT_TERM_DOMAIN_MATCH
+          + MATCH_FULL_TEXT_DOMAIN_TERM
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
           + "order by est_count desc, name asc\n";
 
-  private static final String DOMAIN_COUNTS_ENDS_WITH_AND_TERM =
+  private static final String DOMAIN_COUNTS_TERM_ENDS_WITH =
       "select \n"
           + "upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as domainId\n"
           + ", upper(substring_index(substring_index(full_text, '[', -1), '_rank1', 1)) as name\n"
@@ -193,7 +197,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "group by 1 "
           + "order by count desc";
 
-  private static final String SURVEY_COUNTS_ENDS_WITH_AND_TERM =
+  private static final String SURVEY_COUNTS_TERM_ENDS_WITH =
       "select 'SURVEY' as domainId"
           + ", name\n"
           + ", count\n"
@@ -212,7 +216,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + SQL_DB_CDR_NAME
           + ".cb_criteria\n"
           + "where domain_id = 'SURVEY' "
-          + FULLTEXT_TERM_SURVEY_MATCH
+          + MATCH_FULL_TEXT_SURVEY_TERM
           + "and ("
           + SQL_ENDS_WITH
           + "))\n"
@@ -239,13 +243,82 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + SQL_DB_CDR_NAME
           + ".cb_criteria\n"
           + "where domain_id = 'SURVEY' "
-          + FULLTEXT_SURVEY_MATCH
+          + MATCH_FULL_TEXT_SURVEY
           + "and ("
           + SQL_ENDS_WITH
           + "))\n"
           + "group by survey_version_concept_id"
           + ") a on c.id = a.survey_version_concept_id "
           + "order by count desc";
+
+  private static final String SURVEY_QUESTION_TERM_ENDS_WITH =
+      "select *\n"
+          + "from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria c1 \n"
+          + "where c1.domain_id = 'SURVEY' \n"
+          + "and c1.subtype = 'QUESTION' \n"
+          + "and c1.concept_id in (select concept_id from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria \n"
+          + "where domain_id = 'SURVEY'\n"
+          + MATCH_FULL_TEXT_SURVEY_TERM
+          + "and ("
+          + SQL_ENDS_WITH
+          + "))\n"
+          + "order by c1.est_count desc, name asc\n";
+
+  private static final String SURVEY_QUESTION_ENDS_WITH =
+      "select *\n"
+          + "from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria c1 \n"
+          + "where c1.domain_id = 'SURVEY' \n"
+          + "and c1.subtype = 'QUESTION' \n"
+          + "and c1.concept_id in (select concept_id from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria \n"
+          + "where domain_id = 'SURVEY'\n"
+          + MATCH_FULL_TEXT_SURVEY
+          + "and ("
+          + SQL_ENDS_WITH
+          + "))\n"
+          + "order by c1.est_count desc, name asc\n";
+
+  private static final String SURVEY_QUESTION_BY_PATH_TERM_ENDS_WITH =
+      "select *\n"
+          + "from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria c1 \n"
+          + "where c1.domain_id = 'SURVEY' \n"
+          + "and c1.subtype = 'QUESTION' \n"
+          + "and c1.concept_id in (select id from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria \n"
+          + "where domain_id = 'SURVEY' \n"
+          + MATCH_FULL_TEXT_SURVEY_TERM
+          + MATCH_ID_PATH
+          + "and ("
+          + SQL_ENDS_WITH
+          + "))\n"
+          + "order by c1.est_count desc, name asc\n";
+
+  private static final String SURVEY_QUESTION_BY_PATH_ENDS_WITH =
+      "select *\n"
+          + "from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria c1 \n"
+          + "where c1.domain_id = 'SURVEY' \n"
+          + "and c1.subtype = 'QUESTION' \n"
+          + "and c1.concept_id in (select id from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria \n"
+          + "where domain_id = 'SURVEY' \n"
+          + MATCH_ID_PATH
+          + "and ("
+          + SQL_ENDS_WITH
+          + "))\n"
+          + "order by c1.est_count desc, name asc\n";
 
   @Autowired private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -275,7 +348,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       {BIND_VAR_TERM, term}
     };
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(CRITERIA_BY_DOMAIN_ENDS_WITH_AND_TERM, params, endsWithList);
+        generateQueryAndParameters(CRITERIA_BY_DOMAIN_TERM_ENDS_WITH, params, endsWithList);
     return new PageImpl<>(
         queryForPaginatedList(page, queryAndParameters),
         page,
@@ -312,7 +385,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       {BIND_VAR_TERM, term}
     };
     QueryAndParameters queryAndParameters =
-        generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH_AND_TERM, params, endsWithList);
+        generateQueryAndParameters(AUTO_COMPLETE_TERM_ENDS_WITH, params, endsWithList);
     return new PageImpl<>(
             queryForPaginatedList(page, queryAndParameters),
             page,
@@ -337,7 +410,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       {VAR_IN_DOMAINS, domains}
     };
     return queryForDbCardCountList(
-        generateQueryAndParameters(DOMAIN_COUNTS_ENDS_WITH_AND_TERM, params, endsWithList));
+        generateQueryAndParameters(DOMAIN_COUNTS_TERM_ENDS_WITH, params, endsWithList));
   }
 
   @Override
@@ -351,7 +424,61 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       String term, List<String> endsWithList) {
     Object[][] params = {{BIND_VAR_TERM, term}};
     return queryForDbCardCountList(
-        generateQueryAndParameters(SURVEY_COUNTS_ENDS_WITH_AND_TERM, params, endsWithList));
+        generateQueryAndParameters(SURVEY_COUNTS_TERM_ENDS_WITH, params, endsWithList));
+  }
+
+  @Override
+  public Page<DbCriteria> findSurveyQuestionByNameEndsWith(
+      List<String> endsWithList, PageRequest page) {
+    QueryAndParameters queryAndParameters =
+        generateQueryAndParameters(SURVEY_QUESTION_ENDS_WITH, null, endsWithList);
+
+    return new PageImpl<>(
+        queryForPaginatedList(page, queryAndParameters),
+        page,
+        Objects.requireNonNull(count(queryAndParameters)));
+  }
+
+  @Override
+  public Page<DbCriteria> findSurveyQuestionByTermAndNameEndsWith(
+      String term, List<String> endsWithList, PageRequest page) {
+    Object[][] params = {{BIND_VAR_TERM, term}};
+
+    QueryAndParameters queryAndParameters =
+        generateQueryAndParameters(SURVEY_QUESTION_TERM_ENDS_WITH, params, endsWithList);
+
+    return new PageImpl<>(
+        queryForPaginatedList(page, queryAndParameters),
+        page,
+        Objects.requireNonNull(count(queryAndParameters)));
+  }
+
+  @Override
+  public Page<DbCriteria> findSurveyQuestionByPathAndNameEndsWith(
+      Long id, List<String> endsWithList, PageRequest page) {
+    Object[][] params = {{BIND_VAR_ID, id}};
+
+    QueryAndParameters queryAndParameters =
+        generateQueryAndParameters(SURVEY_QUESTION_BY_PATH_ENDS_WITH, params, endsWithList);
+
+    return new PageImpl<>(
+        queryForPaginatedList(page, queryAndParameters),
+        page,
+        Objects.requireNonNull(count(queryAndParameters)));
+  }
+
+  @Override
+  public Page<DbCriteria> findSurveyQuestionByPathAndTermAndNameEndsWith(
+      Long id, String term, List<String> endsWithList, PageRequest page) {
+    Object[][] params = {{BIND_VAR_ID, id}, {BIND_VAR_TERM, term}};
+
+    QueryAndParameters queryAndParameters =
+        generateQueryAndParameters(SURVEY_QUESTION_BY_PATH_TERM_ENDS_WITH, params, endsWithList);
+
+    return new PageImpl<>(
+        queryForPaginatedList(page, queryAndParameters),
+        page,
+        Objects.requireNonNull(count(queryAndParameters)));
   }
 
   protected QueryAndParameters generateQueryAndParameters(

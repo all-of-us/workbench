@@ -34,4 +34,15 @@ public interface CustomCBCriteriaDao {
   List<DbCardCount> findSurveyCountsAndNameEndsWith(List<String> endsWithList);
 
   List<DbCardCount> findSurveyCountsAndTermAndNameEndsWith(String term, List<String> endsWithList);
+
+  Page<DbCriteria> findSurveyQuestionByNameEndsWith(List<String> endsWithList, PageRequest page);
+
+  Page<DbCriteria> findSurveyQuestionByTermAndNameEndsWith(
+      String term, List<String> endsWithList, PageRequest page);
+
+  Page<DbCriteria> findSurveyQuestionByPathAndNameEndsWith(
+      Long id, List<String> endsWithList, PageRequest page);
+
+  Page<DbCriteria> findSurveyQuestionByPathAndTermAndNameEndsWith(
+      Long id, String term, List<String> endsWithList, PageRequest page);
 }
