@@ -135,7 +135,7 @@ const styles = reactStyles({
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
     minHeight: '1.25rem',
-    width: '10rem',
+    width: '15rem',
     borderRadius: '.125rem',
     zIndex: 103,
   },
@@ -393,6 +393,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                           )
                           .map((menuItem, m) => (
                             <li
+                              key={m}
                               style={{
                                 ...styles.dropdownItem,
                                 ...(hoverId === `${index}-${m}`
@@ -447,7 +448,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                     style={styles.subMenuIcon}
                                     className='pi pi-sort-down'
                                   />
-                                  {subMenuOpen && (
+                                  {hoverId === `${index}-${m}` && subMenuOpen && (
                                     <ul style={styles.subMenu}>
                                       {menuItem.children?.map(
                                         (subMenuItem, s) => (
