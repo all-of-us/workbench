@@ -60,7 +60,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String VAR_IN_DOMAINS = "domains";
 
   // SQL snips
-  private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
+  // private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
+  // essentially to match a non permitted ending character for name
+  private static final String DYNAMIC_SQL = "upper(name) regexp upper(%s)";
 
   private static final String LIMIT_OFFSET = "limit %s offset %s\n";
 
@@ -174,7 +176,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + DOMAIN_ID_IN_DOMAINS
           + "and ("
           + SQL_ENDS_WITH
-          + ")\n"
+          + ") \n"
           + "group by 1 "
           + "order by count desc";
 
@@ -193,7 +195,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + DOMAIN_ID_IN_DOMAINS
           + "and ("
           + SQL_ENDS_WITH
-          + ")\n"
+          + ") \n"
           + "group by 1 "
           + "order by count desc";
 
@@ -221,8 +223,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + SQL_ENDS_WITH
           + "))\n"
           + "group by survey_version_concept_id"
-          + ") a on c.id = a.survey_version_concept_id "
-          + "order by count desc";
+          + ") a on c.id = a.survey_version_concept_id \n"
+          + "order by count desc, name asc";
 
   private static final String SURVEY_COUNTS_ENDS_WITH =
       "select 'SURVEY' as domainId"
@@ -249,7 +251,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "))\n"
           + "group by survey_version_concept_id"
           + ") a on c.id = a.survey_version_concept_id "
-          + "order by count desc";
+          + " order by count desc, name asc";
 
   private static final String SURVEY_QUESTION_TERM_ENDS_WITH =
       "select *\n"
@@ -282,7 +284,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + MATCH_FULL_TEXT_SURVEY
           + "and ("
           + SQL_ENDS_WITH
-          + "))\n"
+          + ")) \n"
           + "order by c1.est_count desc, name asc\n";
 
   private static final String SURVEY_QUESTION_BY_PATH_TERM_ENDS_WITH =
@@ -292,7 +294,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + ".cb_criteria c1 \n"
           + "where c1.domain_id = 'SURVEY' \n"
           + "and c1.subtype = 'QUESTION' \n"
-          + "and c1.concept_id in (select id from \n"
+          + "and c1.full_text like '%[survey_rank1]%'\n"
+          + "and c1.concept_id in (select concept_id from \n"
           + SQL_DB_CDR_NAME
           + ".cb_criteria \n"
           + "where domain_id = 'SURVEY' \n"
@@ -300,7 +303,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + MATCH_ID_PATH
           + "and ("
           + SQL_ENDS_WITH
-          + "))\n"
+          + ")) \n"
           + "order by c1.est_count desc, name asc\n";
 
   private static final String SURVEY_QUESTION_BY_PATH_ENDS_WITH =
@@ -310,14 +313,15 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + ".cb_criteria c1 \n"
           + "where c1.domain_id = 'SURVEY' \n"
           + "and c1.subtype = 'QUESTION' \n"
-          + "and c1.concept_id in (select id from \n"
+          + "and c1.full_text like '%[survey_rank1]%'\n"
+          + "and c1.concept_id in (select concept_id from \n"
           + SQL_DB_CDR_NAME
           + ".cb_criteria \n"
           + "where domain_id = 'SURVEY' \n"
           + MATCH_ID_PATH
           + "and ("
           + SQL_ENDS_WITH
-          + "))\n"
+          + ")) \n"
           + "order by c1.est_count desc, name asc\n";
 
   @Autowired private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -430,6 +434,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public Page<DbCriteria> findSurveyQuestionByNameEndsWith(
       List<String> endsWithList, PageRequest page) {
+
     QueryAndParameters queryAndParameters =
         generateQueryAndParameters(SURVEY_QUESTION_ENDS_WITH, null, endsWithList);
 
@@ -502,7 +507,10 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
         .forEach(
             idx -> {
               String parameterName = "endsWith" + idx;
-              parameters.addValue(parameterName, endsWithList.get(idx));
+              // upper(\"%s[^a-z0-9]?$\"))"
+              // parameters.addValue(parameterName, endsWithList.get(idx));
+              parameters.addValue(
+                  parameterName, endsWithList.get(idx).substring(1) + "[^a-z0-9]?$");
               joiner.add(String.format(DYNAMIC_SQL, ":" + parameterName));
             });
 

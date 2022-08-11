@@ -186,16 +186,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao
-              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao
-              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -501,6 +499,32 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 Domain.VISIT));
     cardCounts.addAll(findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT)));
     Long sum = findSurveyCounts(term).stream().map(CardCount::getCount).reduce(0L, Long::sum);
+    if (sum > 0) {
+      cardCounts.add(new CardCount().domain(Domain.SURVEY).name("Survey").count(sum));
+    }
+    return cardCounts;
+  }
+
+  @Override
+  public List<CardCount> findUniversalDomainCountsV2(String term) {
+    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
+
+    List<CardCount> cardCounts =
+        findDomainCountsV2(
+            searchTerm,
+            true,
+            ImmutableList.of(
+                Domain.CONDITION,
+                Domain.DRUG,
+                Domain.MEASUREMENT,
+                Domain.OBSERVATION,
+                Domain.PROCEDURE,
+                Domain.DEVICE,
+                Domain.VISIT));
+    cardCounts.addAll(
+        findDomainCountsV2(searchTerm, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT)));
+    Long sum =
+        findSurveyCountsV2(searchTerm).stream().map(CardCount::getCount).reduce(0L, Long::sum);
     if (sum > 0) {
       cardCounts.add(new CardCount().domain(Domain.SURVEY).name("Survey").count(sum));
     }
