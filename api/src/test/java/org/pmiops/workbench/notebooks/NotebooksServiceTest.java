@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -351,6 +352,12 @@ public class NotebooksServiceTest {
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
+    verify(mockCloudStorageClient).deleteBlob(BlobId.of(BUCKET_NAME, "notebooks/" + NOTEBOOK_NAME));
+    verify(mockUserRecentResourceService)
+        .deleteNotebookEntry(
+            eq(dbWorkspace.getWorkspaceId()),
+            anyLong(),
+            eq("gs://" + BUCKET_NAME + "/notebooks/" + NOTEBOOK_NAME));
   }
 
   @Test
