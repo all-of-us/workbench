@@ -31,7 +31,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
     (id,parent_id,category,domain_id,type,name,is_group,sort_order)
 VALUES
 (1,0,'Program Data','PERSON','','Demographics',1,1),
-(2,0,'Program Data','SURVEY','PPI','Surveys',0,2),
+(2,0,'Program Data','SURVEY','PPI','Surveys',1,2),
 (3,0,'Program Data','PHYSICAL_MEASUREMENT','PPI','Physical Measurements',0,3)"
 
 if [[ $fitbitCount > 0 ]];
@@ -81,4 +81,32 @@ VALUES
 (16,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
 (17,1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
 (18,1,'Program Data','PERSON','RACE','Race',0,5),
-(19,1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6)"
+(19,1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6),
+(20,2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
+
+echo "Adding surveys"
+query="select name from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+where domain_id = 'SURVEY'
+and parent_id = 0
+order by id"
+surveyNames=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv "$query")
+
+echo "Getting max id"
+query="select max(id) as id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`"
+maxId=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
+sortOrder=1
+
+while IFS= read -r line
+do
+  if [[ "$line" != "name" ]]; then
+    maxId=$((maxId+1))
+    sortOrder=$((sortOrder+1))
+    echo "$maxId $line"
+    bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+      "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
+          (id,parent_id,category,domain_id,type,name,is_group,sort_order)
+      VALUES
+      ($maxId,2,'Program Data','SURVEY','PPI','$line',0,$sortOrder)"
+  fi
+done <<< "$surveyNames"

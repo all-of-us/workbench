@@ -85,7 +85,8 @@ const styles = reactStyles({
 });
 
 function mapMenuItem(item: CriteriaMenu) {
-  const { category, domainId, group, id, name, sortOrder, type } = item;
+  const { category, domainId, group, id, name, parentId, sortOrder, type } =
+    item;
   return {
     category,
     children: null,
@@ -93,6 +94,8 @@ function mapMenuItem(item: CriteriaMenu) {
     group,
     id,
     name,
+    selectedSurvey:
+      domainId === Domain.SURVEY.toString() && parentId !== 0 ? name : null,
     sortOrder,
     standard: domainId === Domain.VISIT.toString() ? true : null,
     type,
@@ -181,7 +184,7 @@ const SearchGroupList = fp.flow(
 
     launchSearch(criteria: any, searchTerms?: string) {
       const { role } = this.props;
-      const { domain, type, standard } = criteria;
+      const { domain, selectedSurvey, type, standard } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
       const label = `Add ${
         role === 'includes' ? 'Include' : 'Exclude'
@@ -201,6 +204,7 @@ const SearchGroupList = fp.flow(
         standard,
         role,
         groupId,
+        selectedSurvey,
       };
       this.props.setSearchContext(context);
     }
