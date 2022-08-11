@@ -940,7 +940,7 @@ const DiskSelector = ({
       <FlexColumn>
         {computeType === ComputeType.Dataproc && (
           <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
-            Master Node
+            Master Node Configuration
           </span>
         )}
         <FlexRow style={{ gap: '8px' }}>

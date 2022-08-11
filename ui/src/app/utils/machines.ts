@@ -8,6 +8,8 @@ import { AnalysisConfig, DiskConfig } from './runtime-utils';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
+// The minimum size for DATAPROC is a recommendation from LEO team
+// https://terra-bio.slack.com/archives/C9C4KKU65/p1658339782608629
 export const MIN_DISK_SIZE_GB = 120;
 export const DATAPROC_MIN_DISK_SIZE_GB = 150;
 
