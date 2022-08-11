@@ -162,11 +162,9 @@ public class NotebooksControllerTest {
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
-
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
     FileDetail expectedFileDetail = createFileDetail(TO_NOTEBOOK_NAME, toPath, toLastModifiedTime);
-
     copyRequest.setNewName(TO_NOTEBOOK_NAME);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
     copyRequest.setToWorkspaceName(toWorkspaceName);
@@ -249,14 +247,12 @@ public class NotebooksControllerTest {
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
         .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
 
-    List<String> gotNames =
+    List<FileDetail> actualNotebooks =
         notebooksController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
-            .map(FileDetail::getName)
             .collect(Collectors.toList());
     verify(mockNotebookService).getNotebooks(workspaceNamespace, workspaceName);
-    assertThat(gotNames)
-        .isEqualTo(
-            ImmutableList.of(notebook1.fileDetail.getName(), notebook2.fileDetail.getName()));
+    assertThat(actualNotebooks)
+        .isEqualTo(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
   }
 
   @Test
