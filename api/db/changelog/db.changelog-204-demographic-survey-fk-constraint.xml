@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
     <changeSet author="nsaxena" id="db.changelog-204-demographic-survey-fk-constraint">
-        <!-- Following FK Constraint does not have onDeletew CASCADE properties (check changelog 196) which made it difficult to update profile -->
+        <!-- Following FK Constraint does not have onDelete CASCADE properties (check changelog 196) which made it difficult to update profile -->
         <dropForeignKeyConstraint baseTableName="demographic_survey_v2_ethnic_category" constraintName="fk_demographic_survey_v2_ethnic_category"/>
         <dropForeignKeyConstraint baseTableName="demographic_survey_v2_gender_identity" constraintName="fk_demographic_survey_v2_gender_identity"/>
         <dropForeignKeyConstraint baseTableName="demographic_survey_v2_sexual_orientation" constraintName="fk_demographic_survey_v2_sexual_orientation"/>
