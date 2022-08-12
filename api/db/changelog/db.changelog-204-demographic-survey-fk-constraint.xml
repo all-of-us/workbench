@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <changeSet author="nsaxena" id="db.changelog-204-demographic-survey-fk-constraint">
+        <!-- Following FK Constraint does not have onDelete CASCADE properties (check changelog 196) which made it difficult to update profile -->
+        <dropForeignKeyConstraint baseTableName="demographic_survey_v2_ethnic_category" constraintName="fk_demographic_survey_v2_ethnic_category"/>
+        <dropForeignKeyConstraint baseTableName="demographic_survey_v2_gender_identity" constraintName="fk_demographic_survey_v2_gender_identity"/>
+        <dropForeignKeyConstraint baseTableName="demographic_survey_v2_sexual_orientation" constraintName="fk_demographic_survey_v2_sexual_orientation"/>
+
+        <addForeignKeyConstraint baseColumnNames="demographic_survey_v2_id"
+                                 baseTableName="demographic_survey_v2_ethnic_category"
+                                 constraintName="fk_demographic_survey_v2_ethnic"
+                                 referencedColumnNames="demographic_survey_v2_id"
+                                 referencedTableName="demographic_survey_v2" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseColumnNames="demographic_survey_v2_id"
+                                 baseTableName="demographic_survey_v2_gender_identity"
+                                 constraintName="fk_demographic_survey_v2_gender_identity"
+                                 referencedColumnNames="demographic_survey_v2_id"
+                                 referencedTableName="demographic_survey_v2" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseColumnNames="demographic_survey_v2_id"
+                                 baseTableName="demographic_survey_v2_sexual_orientation"
+                                 constraintName="fk_demographic_survey_v2_sexual_orientation"
+                                 referencedColumnNames="demographic_survey_v2_id"
+                                 referencedTableName="demographic_survey_v2" onDelete="CASCADE"/>                         
+    </changeSet>
+</databaseChangeLog>
