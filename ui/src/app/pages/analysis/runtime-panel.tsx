@@ -1882,7 +1882,6 @@ const RuntimePanel = fp.flow(
           ? DATAPROC_MIN_DISK_SIZE_GB
           : MIN_DISK_SIZE_GB;
       const message = {
-        // Check disk size just change the variable
         standard: `^Disk size must be between ${minDiskSize} and ${maxDiskSize} GB`,
         master: `^Master disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
         worker: `^Worker disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,

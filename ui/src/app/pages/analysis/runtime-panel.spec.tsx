@@ -790,7 +790,7 @@ describe('RuntimePanel', () => {
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerCpu(wrapper, 2);
     await pickComputeType(wrapper, ComputeType.Standard);
-    await pickMainDiskSize(wrapper, 120);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
