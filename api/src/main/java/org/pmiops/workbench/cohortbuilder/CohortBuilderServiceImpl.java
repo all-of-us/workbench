@@ -186,14 +186,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -786,49 +788,37 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String surveyName, SearchTerm searchTerm, PageRequest pageRequest) {
     Page<DbCriteria> dbCriteriaPage = null;
     if (surveyName.equals("All")) {
-      switch (searchTerm.getSearchType()) {
-        case TERM_ONLY:
-          dbCriteriaPage =
-              cbCriteriaDao.findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest);
-          break;
-        case ENDS_WITH_ONLY:
-          dbCriteriaPage =
-              cbCriteriaDao.findSurveyQuestionByNameEndsWith(
-                  searchTerm.getEndsWithTerms(), pageRequest);
-          break;
-        case TERM_AND_ENDS_WITH:
-          dbCriteriaPage =
-              cbCriteriaDao.findSurveyQuestionByTermAndNameEndsWith(
-                  searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
-          break;
-        default:
-          // case EMPTY:
-          // ?? return new CriteriaListWithCountResponse();
-          break;
+      if (searchTerm.hasModifiedTermOnly()) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest);
+      } else if (searchTerm.hasEndsWithOnly()) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionByNameEndsWith(
+                searchTerm.getEndsWithTerms(), pageRequest);
+      } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionByTermAndNameEndsWith(
+                searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
       }
     } else {
       Long id = cbCriteriaDao.findSurveyId(surveyName);
-      switch (searchTerm.getSearchType()) {
-        case TERM_ONLY:
-          dbCriteriaPage =
-              cbCriteriaDao.findSurveyQuestionByPathAndTerm(
-                  id, searchTerm.getModifiedTerm(), pageRequest);
-          break;
-        case ENDS_WITH_ONLY:
-          dbCriteriaPage =
-              cbCriteriaDao.findSurveyQuestionByPathAndNameEndsWith(
-                  id, searchTerm.getEndsWithTerms(), pageRequest);
-          break;
-        case TERM_AND_ENDS_WITH:
-          dbCriteriaPage =
-              cbCriteriaDao.findSurveyQuestionByPathAndTermAndNameEndsWith(
-                  id, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
-          break;
-        case EMPTY:
-        default:
-          // ?? return new CriteriaListWithCountResponse();
-          break;
+      if (searchTerm.hasModifiedTermOnly()) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionByPathAndTerm(
+                id, searchTerm.getModifiedTerm(), pageRequest);
+      } else if (searchTerm.hasEndsWithOnly()) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionByPathAndNameEndsWith(
+                id, searchTerm.getEndsWithTerms(), pageRequest);
+      } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionByPathAndTermAndNameEndsWith(
+                id, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
       }
+    }
+
+    if (dbCriteriaPage == null) {
+      return new CriteriaListWithCountResponse();
     }
     return new CriteriaListWithCountResponse()
         .items(

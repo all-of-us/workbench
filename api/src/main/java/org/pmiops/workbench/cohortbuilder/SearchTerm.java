@@ -9,25 +9,16 @@ import java.util.stream.Collectors;
 
 public class SearchTerm {
 
-  public enum SearchType {
-    EMPTY,
-    TERM_ONLY,
-    ENDS_WITH_ONLY,
-    TERM_AND_ENDS_WITH
-  };
-
   private static final int MIN_TERM_LENGTH_NO_SPECIAL_CHAR = 3;
   private final String term;
   private String modifiedTerm;
   private List<String> endsWithTerms;
   private List<String> stopWords;
-  private SearchType searchType;
 
   public SearchTerm(String term, List<String> stopWords) {
     this.term = term;
     this.stopWords = stopWords;
     parseTermForSearch();
-    setSearchType();
   }
 
   public String getTerm() {
@@ -40,24 +31,6 @@ public class SearchTerm {
 
   public List<String> getEndsWithTerms() {
     return endsWithTerms;
-  }
-
-  public SearchType getSearchType() {
-    return searchType;
-  }
-
-  private void setSearchType() {
-    if (endsWithTerms.isEmpty() && modifiedTerm.isEmpty()) {
-      searchType = SearchType.EMPTY;
-    } else if (endsWithTerms.isEmpty() && !modifiedTerm.isEmpty()) {
-      searchType = SearchType.TERM_ONLY;
-
-    } else if (!endsWithTerms.isEmpty() && modifiedTerm.isEmpty()) {
-      searchType = SearchType.ENDS_WITH_ONLY;
-
-    } else if (!endsWithTerms.isEmpty() && !modifiedTerm.isEmpty()) {
-      searchType = SearchType.TERM_AND_ENDS_WITH;
-    }
   }
 
   public boolean hasEndsWithOnly() {
@@ -93,28 +66,14 @@ public class SearchTerm {
     final String endsWithPattern = "[+-]?\\*\\w+";
     List<String> endsWith =
         words.stream()
-            .filter(
-                word -> word.matches(endsWithPattern)
-                //                word ->
-                //                    word.matches(endsWithPattern)
-                //                        && word.length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
-                )
+            .filter(word -> word.matches(endsWithPattern))
             .map(x -> x.replaceAll("[\\*|\\-|\\+]+$", ""))
             .map(x -> x.replaceAll("\\*+", "%"))
             .collect(Collectors.toList());
     // now process non-endsWith words
     words =
-        words.stream()
-            .filter(
-                word -> !word.matches(endsWithPattern)
-                //                word ->
-                //                    !(word.matches(endsWithPattern)
-                //                        && word.length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
-                )
-            .collect(Collectors.toList());
+        words.stream().filter(word -> !word.matches(endsWithPattern)).collect(Collectors.toList());
     words.stream()
-        //        .filter(word -> word.length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR &&
-        // !word.startsWith("*"))
         .filter(word -> !word.startsWith("*"))
         .forEach(
             word -> {
