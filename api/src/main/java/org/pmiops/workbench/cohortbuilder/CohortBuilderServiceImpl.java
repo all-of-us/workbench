@@ -386,11 +386,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
-    // if the modified search term is empty and endsWithTerms is empty return an empty result
-    if (searchTerm.hasNoTerms()) {
-      return new CriteriaListWithCountResponse().totalCount(0L);
-    }
-
+    // check survey domain before checking for match on concept code
     if (isSurveyDomain(domain)) {
       return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
     }
@@ -399,6 +395,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
             domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
+
+    // if the modified search term is empty and endsWithTerms is empty return an empty result
+    // this needs ot be here since word length of <3 are filtered and there are 2-concept codes
+    // of length 2 with rank1 - for procedures - type=(ICD9Proc abd ICD10PCS)
+    if (searchTerm.hasNoTerms() && dbCriteriaPage.getContent().isEmpty()) {
+      return new CriteriaListWithCountResponse().totalCount(0L);
+    }
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
