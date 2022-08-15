@@ -1616,6 +1616,7 @@ describe('RuntimePanel', () => {
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
+    await pickMainDiskSize(wrapper, 150);
     // This should make the cost about $140/hour.
     await pickNumWorkers(wrapper, 600);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
