@@ -1,12 +1,11 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,32 +13,53 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class SearchTermTest {
 
-  @BeforeEach
-  void setUp() {}
-
-  @AfterEach
-  void tearDown() {}
+  @Test
+  void getModifiedTerm() {
+    SearchTerm searchTerm = new SearchTerm("+statin *from", getStopWords());
+    assertThat(searchTerm.getModifiedTerm()).isEqualTo("+statin*");
+  }
 
   @Test
-  void getTerm() {}
+  void getEndsWithTerms() {
+    SearchTerm searchTerm = new SearchTerm("*statin +from", getStopWords());
+    assertThat(searchTerm.getEndsWithTerms()).containsExactly("%statin");
+  }
 
   @Test
-  void getModifiedTerm() {}
+  void hasEndsWithOnly() {
+    SearchTerm searchTerm = new SearchTerm("*itsok +from", getStopWords());
+    assertThat(searchTerm.hasModifiedTermOnly()).isFalse();
+    assertThat(searchTerm.hasEndsWithOnly()).isTrue();
+    assertThat(searchTerm.hasEndsWithTermsAndModifiedTerm()).isFalse();
+    assertThat(searchTerm.hasNoTerms()).isFalse();
+  }
 
   @Test
-  void getEndsWithTerms() {}
+  void hasModifiedTermOnly() {
+    SearchTerm searchTerm = new SearchTerm("*it +pita", getStopWords());
+    assertThat(searchTerm.hasModifiedTermOnly()).isTrue();
+    assertThat(searchTerm.hasEndsWithOnly()).isFalse();
+    assertThat(searchTerm.hasEndsWithTermsAndModifiedTerm()).isFalse();
+    assertThat(searchTerm.hasNoTerms()).isFalse();
+  }
 
   @Test
-  void hasEndsWithOnly() {}
+  void hasEndsWithTermsAndModifiedTerm() {
+    SearchTerm searchTerm = new SearchTerm("*statin +pita", getStopWords());
+    assertThat(searchTerm.hasModifiedTermOnly()).isFalse();
+    assertThat(searchTerm.hasEndsWithOnly()).isFalse();
+    assertThat(searchTerm.hasEndsWithTermsAndModifiedTerm()).isTrue();
+    assertThat(searchTerm.hasNoTerms()).isFalse();
+  }
 
   @Test
-  void hasModifiedTermOnly() {}
-
-  @Test
-  void hasEndsWithTermsAndModifiedTerm() {}
-
-  @Test
-  void hasNoTerms() {}
+  void hasNoTerms() {
+    SearchTerm searchTerm = new SearchTerm("*it +is +is* about", getStopWords());
+    assertThat(searchTerm.hasModifiedTermOnly()).isFalse();
+    assertThat(searchTerm.hasEndsWithOnly()).isFalse();
+    assertThat(searchTerm.hasEndsWithTermsAndModifiedTerm()).isFalse();
+    assertThat(searchTerm.hasNoTerms()).isTrue();
+  }
 
   @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
   @MethodSource("getModifyTermMatchEndsWithParameters")
