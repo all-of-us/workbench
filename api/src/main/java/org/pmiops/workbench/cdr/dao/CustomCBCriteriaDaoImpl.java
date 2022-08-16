@@ -60,10 +60,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String VAR_IN_DOMAINS = "domains";
 
   // SQL snips
-  private static final String DYNAMIC_SQL = "upper(name) like upper(%s)";
-
   // essentially to match a non permitted ending character for name
-  private static final boolean USE_ENDS_WITH_REGEXP = true;
   private static final String DYNAMIC_SQL_REGEXP = "upper(name) regexp upper(%s)";
 
   private static final String LIMIT_OFFSET = "limit %s offset %s\n";
@@ -509,15 +506,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
         .forEach(
             idx -> {
               String parameterName = "endsWith" + idx;
-              if (USE_ENDS_WITH_REGEXP) {
-                parameters.addValue(
-                    parameterName, endsWithList.get(idx).substring(1) + "[^a-z0-9]?$");
-                joiner.add(String.format(DYNAMIC_SQL_REGEXP, ":" + parameterName));
-
-              } else {
-                parameters.addValue(parameterName, endsWithList.get(idx));
-                joiner.add(String.format(DYNAMIC_SQL, ":" + parameterName));
-              }
+              parameters.addValue(
+                  parameterName, endsWithList.get(idx).substring(1) + "[^a-z0-9]?$");
+              joiner.add(String.format(DYNAMIC_SQL_REGEXP, ":" + parameterName));
             });
 
     return new QueryAndParameters(

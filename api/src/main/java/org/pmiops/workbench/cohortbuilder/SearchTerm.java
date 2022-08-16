@@ -63,12 +63,13 @@ public class SearchTerm {
     List<String> words =
         new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
     // process endsWith words
-    final String endsWithPattern = "[+-]?\\*\\w+";
+    final String endsWithPattern = "[+-]?\\*\\w+[^a-z0-9]*";
     List<String> endsWith =
         words.stream()
-            .filter(word -> word.matches(endsWithPattern))
-            .map(x -> x.replaceAll("[\\*|\\-|\\+]+$", ""))
-            .map(x -> x.replaceAll("\\*+", "%"))
+            .filter(word -> word.toLowerCase().matches(endsWithPattern))
+            .filter(word -> !(word.contains("+") || word.contains("-") || word.endsWith("*")))
+            .map(word -> word.replaceAll("\\*", "%"))
+            .map(word -> word.replaceAll("([\\.\\?])", "\\\\$1"))
             .collect(Collectors.toList());
     // now process non-endsWith words
     words =

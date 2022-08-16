@@ -61,14 +61,46 @@ class SearchTermTest {
     assertThat(searchTerm.hasNoTerms()).isTrue();
   }
 
-  @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
-  @MethodSource("getModifyTermMatchEndsWithParameters")
-  void modifyTermMatchUseEndsWith(String testInput, String term, String expected) {
+  @ParameterizedTest(name = "checkEndsWithTerms: {0} {1}=>{2}")
+  @MethodSource("getParametersTermAndCheckEndTerms")
+  void checkEndsWithTerms(String testInput, String term, List<String> expected) {
+    SearchTerm actual = new SearchTerm(term, getStopWords());
+
+    assertWithMessage(testInput).that(actual.getModifiedTerm()).isEmpty();
+
+    assertWithMessage(testInput)
+        .that(actual.getEndsWithTerms())
+        .containsExactlyElementsIn(expected.toArray());
+  }
+
+  private static Stream<Arguments> getParametersTermAndCheckEndTerms() {
+
+    return Stream.of(
+        Arguments.of("Search term: ", "*lung", Arrays.asList("%lung")),
+        Arguments.of("Search term: ", "*lung:", Arrays.asList("%lung:")),
+        Arguments.of("Search term: ", "*lung%", Arrays.asList("%lung%")),
+        Arguments.of("Search term: ", "*lung?", Arrays.asList("%lung\\?")),
+        Arguments.of("Search term: ", "*lung.", Arrays.asList("%lung\\.")),
+        Arguments.of("Search term: ", "*+lung", Arrays.asList()),
+        Arguments.of("Search term: ", "+*lung", Arrays.asList()),
+        Arguments.of("Search term: ", "*-lung", Arrays.asList()),
+        Arguments.of("Search term: ", "-*lung", Arrays.asList()),
+        Arguments.of("Search term: ", "*lung*", Arrays.asList()),
+        Arguments.of("Search term: ", "*lung+*", Arrays.asList()),
+        Arguments.of("Search term: ", "*lung-*", Arrays.asList())
+        // Arguments.of("Search term: ", "*lung*+", Arrays.asList("%lung")), // not allowed by ui
+        // Arguments.of("Search term: ", "*lung*-", Arrays.asList("%lung")), // not allowed by ui
+        );
+  }
+
+  @ParameterizedTest(name = "checkModifiedTerm: {0} {1}=>{2}")
+  @MethodSource("getParametersTermAndCheckModifiedTerm")
+  void checkModifiedTerm(String testInput, String term, String expected) {
     SearchTerm actual = new SearchTerm(term, getStopWords());
     assertWithMessage(testInput).that(actual.getModifiedTerm()).isEqualTo(expected);
   }
 
-  private static Stream<Arguments> getModifyTermMatchEndsWithParameters() {
+  private static Stream<Arguments> getParametersTermAndCheckModifiedTerm() {
 
     return Stream.of(
         Arguments.of("Search term: ", "lung", "+lung*"),
