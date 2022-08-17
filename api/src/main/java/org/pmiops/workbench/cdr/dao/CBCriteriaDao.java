@@ -192,9 +192,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "where standard=:standard "
               + "and code like upper(concat(:term,'%')) "
-              + "and standard=:standard "
+              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndCodeAndStandard(
       @Param("domain") String domain,
