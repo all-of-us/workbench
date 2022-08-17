@@ -609,7 +609,6 @@ public class CohortBuilderControllerTest {
                         null)
                     .getBody())
             .getItems();
-    System.out.println("standard:false \n" + results);
     assertThat(1).isEqualTo(results.size());
     assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria));
 
