@@ -475,7 +475,8 @@ export const ListSearch = fp.flow(
           domain,
           !searchSource,
           value.trim(),
-          surveyName === 'All Surveys' ? 'All' : surveyName
+          surveyName === 'All Surveys' ? 'All' : surveyName,
+            removeDrugBrand
         );
         let data;
         if (this.isSurvey) {

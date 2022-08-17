@@ -506,6 +506,7 @@ public class CohortBuilderControllerTest {
                             false,
                             "12345",
                             null,
+                            null,
                             null)
                         .getBody())
                 .getItems()
@@ -520,6 +521,7 @@ public class CohortBuilderControllerTest {
                             Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
                             true,
                             "12345",
+                            null,
                             null,
                             null)
                         .getBody())
@@ -556,6 +558,7 @@ public class CohortBuilderControllerTest {
                             false,
                             "001",
                             null,
+                            null,
                             null)
                         .getBody())
                 .getItems()
@@ -570,6 +573,7 @@ public class CohortBuilderControllerTest {
                             Domain.CONDITION.name(),
                             true,
                             "001",
+                            null,
                             null,
                             null)
                         .getBody())
@@ -606,6 +610,7 @@ public class CohortBuilderControllerTest {
                         false,
                         "00",
                         null,
+                        null,
                         null)
                     .getBody())
             .getItems();
@@ -621,6 +626,7 @@ public class CohortBuilderControllerTest {
                         Domain.CONDITION.name(),
                         true,
                         "00",
+                        null,
                         null,
                         null)
                     .getBody())
@@ -658,6 +664,7 @@ public class CohortBuilderControllerTest {
                         true,
                         "672535",
                         null,
+                        null,
                         null)
                     .getBody())
             .getItems();
@@ -673,6 +680,7 @@ public class CohortBuilderControllerTest {
                         Domain.DRUG.name(),
                         false,
                         "672535",
+                        null,
                         null,
                         null)
                     .getBody())
@@ -708,6 +716,7 @@ public class CohortBuilderControllerTest {
                             Domain.CONDITION.name(),
                             false,
                             "LP12",
+                            null,
                             null,
                             null)
                         .getBody())
@@ -745,6 +754,7 @@ public class CohortBuilderControllerTest {
                             true,
                             "LP12",
                             null,
+                            null,
                             null)
                         .getBody())
                 .getItems()
@@ -759,6 +769,7 @@ public class CohortBuilderControllerTest {
                             Domain.CONDITION.name(),
                             false,
                             "LP12",
+                            null,
                             null,
                             null)
                         .getBody())
@@ -795,6 +806,7 @@ public class CohortBuilderControllerTest {
                             true,
                             "",
                             null,
+                            null,
                             null)
                         .getBody())
                 .getItems()
@@ -810,6 +822,7 @@ public class CohortBuilderControllerTest {
                             Domain.CONDITION.name(),
                             false,
                             "",
+                            null,
                             null,
                             null)
                         .getBody())
@@ -848,6 +861,7 @@ public class CohortBuilderControllerTest {
                             true,
                             "LP12",
                             null,
+                            null,
                             null)
                         .getBody())
                 .getItems()
@@ -862,6 +876,7 @@ public class CohortBuilderControllerTest {
                             Domain.DRUG.name(),
                             false,
                             "LP12",
+                            null,
                             null,
                             null)
                         .getBody())
