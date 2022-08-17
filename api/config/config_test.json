@@ -98,20 +98,10 @@
     "unsafeAllowUserCreationFromGSuiteData": true,
     "enableRasLoginGovLinking": true,
     "enforceRasLoginGovLinking": true,
-    "currentDuccVersions": [
-      3,
-      4,
-      5
-    ],
+    "currentDuccVersions": [3, 4, 5],
     "renewal": {
       "expiryDays": 3650,
-      "expiryDaysWarningThresholds": [
-        1,
-        3,
-        7,
-        15,
-        30
-      ],
+      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
     }
@@ -162,16 +152,12 @@
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": false,
     "notifyFromEmail": "security-alerts@researchallofus.org",
-    "notifyCcEmails": [
-      "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"
-    ],
-    "escalations": [
-      {
-        "afterIncidentCount": 1,
-        "suspendCompute": {
-          "durationMinutes": 10
-        }
+    "notifyCcEmails": ["workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"],
+    "escalations": [{
+      "afterIncidentCount": 1,
+      "suspendCompute": {
+        "durationMinutes": 10
       }
-    ]
+    }]
   }
 }
