@@ -239,8 +239,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateTerm(term);
 
-    return ResponseEntity.ok(
-        new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCountsV2(term)));
+    } else {
+      return ResponseEntity.ok(
+          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
+    }
   }
 
   @Override

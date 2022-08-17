@@ -85,6 +85,8 @@ public interface CohortBuilderService {
 
   List<CardCount> findUniversalDomainCounts(String term);
 
+  List<CardCount> findUniversalDomainCountsV2(String term);
+
   List<CardCount> findDomainCounts(String term);
 
   List<CardCount> findDomainCountsV2(String term);

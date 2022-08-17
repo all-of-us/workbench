@@ -25,7 +25,6 @@ import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl.SearchTerm;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.test.FakeClock;
@@ -87,13 +86,6 @@ class CohortBuilderServiceImplTest {
 
   private static List<String> testCases = new ArrayList<>();
 
-  @ParameterizedTest(name = "modifyTermMatchUseEndsWith: {0} {1}=>{2}")
-  @MethodSource("getModifyTermMatchEndsWithParameters")
-  void modifyTermMatchUseEndsWith(String testInput, String term, String expected) {
-    SearchTerm actual = cohortBuilderService.modifyTermMatchUseEndsWithTerms(term);
-    assertWithMessage(testInput).that(actual.getModifiedTerm()).isEqualTo(expected);
-  }
-
   @ParameterizedTest(name = "modifyTermMatch: {0} {1}=>{2}")
   @MethodSource("getModifyTermMatchParameters")
   void modifyTermMatch(String testInput, String term, String expected) {
@@ -101,48 +93,6 @@ class CohortBuilderServiceImplTest {
     assertWithMessage(testInput)
         .that(cohortBuilderService.modifyTermMatch(term))
         .isEqualTo(expected);
-  }
-
-  private static Stream<Arguments> getModifyTermMatchEndsWithParameters() {
-
-    return Stream.of(
-        Arguments.of("Search term: ", "lung", "+lung*"),
-        Arguments.of("Search term: ", "+lung", "+lung*"),
-        Arguments.of("Search term: ", "lung cancer", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "lung cancer", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "lung* cancer", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "lung cancer*", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "lung* cancer*", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "+lung cancer", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "lung +cancer", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "+lung +cancer", "+lung*+cancer*"),
-        Arguments.of("Search term: ", "lung -cancer", "+lung*-cancer"),
-        Arguments.of("Search term: ", "+lung -cancer", "+lung*-cancer"),
-        Arguments.of("Search term: ", "lung* -cancer", "+lung*-cancer"),
-        Arguments.of("Search term: ", "\"lung cancer\"", "+\"lung cancer\""),
-        Arguments.of("Search term: ", "covid-19", "+\"covid-19\""),
-        Arguments.of("Search term: ", "type-2-diabetes", "+\"type-2-diabetes\""),
-        Arguments.of("Search term: ", "*statin pita", "+pita*"),
-        Arguments.of("Search term: ", "*statin +pita", "+pita*"),
-        Arguments.of("Search term: ", "-pita brea", "-pita+brea*"),
-        Arguments.of("Search term: ", "*statin -pita", "-pita"),
-        Arguments.of("Search term: ", "*statin *pita", ""),
-        Arguments.of("Search term: ", "*statin other *pita", "+other*"),
-        Arguments.of("Search term: ", "*statin other *pita -minus", "+other*-minus"),
-        Arguments.of("Search term: ", "-\"my first phrase\"", "-\"my first phrase\""),
-        Arguments.of("Search term: ", "+\"my second phrase\"", "+\"my second phrase\""),
-        Arguments.of("Search term: ", "\"my second phrase\"", "+\"my second phrase\""),
-        Arguments.of(
-            "Search term: ", "-covid-19 -type-2-diabetes", "-\"covid-19\"-\"type-2-diabetes\""),
-        Arguments.of(
-            "Search term: ", "+covid-19 +type-2-diabetes", "+\"covid-19\"+\"type-2-diabetes\""),
-        Arguments.of(
-            "Search term: ", "covid-19 type-2-diabetes", "+\"covid-19\"+\"type-2-diabetes\""),
-        Arguments.of("Search term: ", "-diabet", "-diabet"),
-        Arguments.of("Search term: ", "+diabet", "+diabet*"),
-        Arguments.of("Search term: ", "diabet", "+diabet*"),
-        Arguments.of("Search term: ", "+++diabet", "+diabet*"),
-        Arguments.of("Search term: ", "---diabet", "-diabet"));
   }
 
   private static Stream<Arguments> getModifyTermMatchParameters() {

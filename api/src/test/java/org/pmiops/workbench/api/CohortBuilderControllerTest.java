@@ -124,7 +124,7 @@ public class CohortBuilderControllerTest {
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
 
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableDrugWildcardSearch = false;
+    workbenchConfig.featureFlags.enableDrugWildcardSearch = true;
     doReturn(workbenchConfig).when(workbenchConfigProvider).get();
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
@@ -609,7 +609,6 @@ public class CohortBuilderControllerTest {
                         null)
                     .getBody())
             .getItems();
-
     assertThat(1).isEqualTo(results.size());
     assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria));
 
