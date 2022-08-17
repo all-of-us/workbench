@@ -275,33 +275,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
-    List<DbCriteria> criteriaList = new ArrayList<>();
+    List<DbCriteria> criteriaList =
+        cbCriteriaDao.findCriteriaAutoComplete(domain, type, standard, searchTerm, pageRequest);
 
-    if (searchTerm.hasModifiedTermOnly()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
-              domain, type, standard, searchTerm.getModifiedTerm(), pageRequest);
-    } else if (searchTerm.hasEndsWithOnly()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
-              domain, type, standard, searchTerm.getEndsWithTerms(), pageRequest);
-    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
-              domain,
-              type,
-              standard,
-              searchTerm.getModifiedTerm(),
-              searchTerm.getEndsWithTerms(),
-              pageRequest);
-    }
-
+    // find by code if auto complete return nothing.
     if (criteriaList.isEmpty()) {
-      // why we do not use term.replaceAll("[()+\"*-]", "") as in
-      // findCriteriaByDomain()
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, type, standard, term, pageRequest);
+              domain, type, standard, term.replaceAll("[()+\"*-]", ""), pageRequest);
     }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
@@ -314,7 +295,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbCriteria> criteriaList;
     if (parentId != null) {
       // Not everything in the condition source hierarchy(ICD9CM/ICD10CM) is a condition
-      // Or in the procedure source hierarchy(ICD9Proc/ICDPCS/CPT4) is a procedure
+      // Or in the procedure source hierarchy(ICD9Proc/ICD10PCS/CPT4) is a procedure
       // Please see - https://precisionmedicineinitiative.atlassian.net/browse/RW-7658
       List<String> domains =
           isConditionProcedureSourceHierarchy(domain, standard)
@@ -355,7 +336,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
+        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandard(
             domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
 
     // if no match is found on concept code then find match on full text index by term
@@ -393,7 +374,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
+        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandard(
             domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
@@ -405,23 +386,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
-      if (searchTerm.hasModifiedTermOnly()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
-                domain, searchTerm.getModifiedTerm(), standard, pageRequest);
-      } else if (searchTerm.hasEndsWithOnly()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findCriteriaByDomainAndStandardAndNameEndsWith(
-                domain, standard, searchTerm.getEndsWithTerms(), pageRequest);
-      } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-                domain,
-                standard,
-                searchTerm.getModifiedTerm(),
-                searchTerm.getEndsWithTerms(),
-                pageRequest);
-      }
+      dbCriteriaPage =
+          cbCriteriaDao.findCriteriaByDomain(domain, searchTerm, standard, pageRequest);
     }
 
     return new CriteriaListWithCountResponse()
@@ -586,18 +552,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     domainNames.removeAll(
         cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
 
-    if (searchTerm.hasModifiedTermOnly()) {
-      cardCounts.addAll(
-          cbCriteriaDao.findDomainCounts(searchTerm.getModifiedTerm(), standard, domainNames));
-    } else if (searchTerm.hasEndsWithOnly()) {
-      cardCounts.addAll(
-          cbCriteriaDao.findDomainCountsByDomainsAndStandardAndNameEndsWith(
-              domainNames, standard, searchTerm.getEndsWithTerms()));
-    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-      cardCounts.addAll(
-          cbCriteriaDao.findDomainCountsByDomainsAndStandardAndTermAndNameEndsWith(
-              domainNames, standard, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms()));
-    }
+    cardCounts.addAll(cbCriteriaDao.findDomainCounts(searchTerm, standard, domainNames));
 
     return cardCounts.stream()
         .filter(cardCount -> cardCount.getCount() > 0)
@@ -606,18 +561,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   private List<CardCount> findSurveyCountsV2(SearchTerm searchTerm) {
-    List<DbCardCount> surveyCounts = new ArrayList<>();
-    if (searchTerm.hasModifiedTermOnly()) {
-      surveyCounts = cbCriteriaDao.findSurveyCounts(searchTerm.getModifiedTerm());
-    } else if (searchTerm.hasEndsWithOnly()) {
-      surveyCounts = cbCriteriaDao.findSurveyCountsAndNameEndsWith(searchTerm.getEndsWithTerms());
-    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-      surveyCounts =
-          cbCriteriaDao.findSurveyCountsAndTermAndNameEndsWith(
-              searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms());
-    }
-
-    return surveyCounts.stream()
+    return cbCriteriaDao.findSurveyCounts(searchTerm).stream()
         .filter(cardCount -> cardCount.getCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
@@ -633,7 +577,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     strDomains.removeAll(
         cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
     // modify search term and call
-    cardCounts.addAll(cbCriteriaDao.findDomainCounts(modifyTermMatch(term), standard, strDomains));
+    cardCounts.addAll(
+        cbCriteriaDao.findDomainCountsByTermAndStandardAndDomains(
+            modifyTermMatch(term), standard, strDomains));
 
     return cardCounts.stream()
         .filter(cardCount -> cardCount.getCount() > 0)
@@ -642,7 +588,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   private List<CardCount> findSurveyCounts(String term) {
-    return cbCriteriaDao.findSurveyCounts(modifyTermMatch(term)).stream()
+    return cbCriteriaDao.findSurveyCountsByTerm(modifyTermMatch(term)).stream()
         .filter(cardCount -> cardCount.getCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
@@ -686,7 +632,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findStandardCriteriaByDomainAndConceptId(String domain, Long conceptId) {
-    // These look ups can be done as one dao call but to make this code testable with the mysql
+    // These look-ups can be done as one dao call but to make this code testable with the mysql
     // fulltext search match function and H2 in memory database, it's split into 2 separate calls
     // Each call is sub second, so having 2 calls and being testable is better than having one call
     // and it being non-testable.
@@ -697,7 +643,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbCriteria> criteriaList = new ArrayList<>();
     if (!conceptIds.isEmpty()) {
       // Not everything in the condition source hierarchy(ICD9CM/ICD10CM) is a condition
-      // Or in the procedure source hierarchy(ICD9Proc/ICDPCS/CPT4) is a procedure
+      // Or in the procedure source hierarchy(ICD9Proc/ICD10PCS/CPT4) is a procedure
       // Please see - https://precisionmedicineinitiative.atlassian.net/browse/RW-7658
       domain =
           isConditionProcedureSourceDomain(domain)
@@ -787,36 +733,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private CriteriaListWithCountResponse findSurveyCriteriaBySearchTermV2(
       String surveyName, SearchTerm searchTerm, PageRequest pageRequest) {
-    Page<DbCriteria> dbCriteriaPage = null;
-    if (surveyName.equals("All")) {
-      if (searchTerm.hasModifiedTermOnly()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest);
-      } else if (searchTerm.hasEndsWithOnly()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionByNameEndsWith(
-                searchTerm.getEndsWithTerms(), pageRequest);
-      } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionByTermAndNameEndsWith(
-                searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
-      }
-    } else {
-      Long id = cbCriteriaDao.findSurveyId(surveyName);
-      if (searchTerm.hasModifiedTermOnly()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionByPathAndTerm(
-                id, searchTerm.getModifiedTerm(), pageRequest);
-      } else if (searchTerm.hasEndsWithOnly()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionByPathAndNameEndsWith(
-                id, searchTerm.getEndsWithTerms(), pageRequest);
-      } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionByPathAndTermAndNameEndsWith(
-                id, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
-      }
-    }
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findSurveyQuestions(surveyName, searchTerm, pageRequest);
 
     if (dbCriteriaPage == null) {
       return new CriteriaListWithCountResponse();

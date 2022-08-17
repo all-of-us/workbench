@@ -19,7 +19,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -328,8 +327,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Override
-  public Page<DbCriteria> findCriteriaByDomainAndStandardAndNameEndsWith(
-      String domain, Boolean standard, List<String> endsWithList, Pageable page) {
+  public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndStandard(
+      String domain, List<String> endsWithList, Boolean standard, Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_STANDARD, standard}
@@ -343,8 +342,8 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   }
 
   @Override
-  public Page<DbCriteria> findCriteriaByDomainAndStandardAndTermAndNameEndsWith(
-      String domain, Boolean standard, String term, List<String> endsWithList, Pageable page) {
+  public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndTermAndStandard(
+      String domain, String term, List<String> endsWithList, Boolean standard, Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_STANDARD, standard},
@@ -360,7 +359,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
-      String domain, String type, Boolean standard, List<String> endsWithList, PageRequest page) {
+      String domain, String type, Boolean standard, List<String> endsWithList, Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain}, {BIND_VAR_TYPE, type}, {BIND_VAR_STANDARD, standard}
     };
@@ -380,7 +379,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       Boolean standard,
       String term,
       List<String> endsWithList,
-      PageRequest page) {
+      Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_TYPE, type},
@@ -397,16 +396,16 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   }
 
   @Override
-  public List<DbCardCount> findDomainCountsByDomainsAndStandardAndNameEndsWith(
-      List<String> domains, Boolean standard, List<String> endsWithList) {
+  public List<DbCardCount> findDomainCountsByNameEndsWithAndStandardAndDomains(
+      List<String> endsWithList, Boolean standard, List<String> domains) {
     Object[][] params = {{BIND_VAR_STANDARD, standard}, {VAR_IN_DOMAINS, domains}};
     return queryForDbCardCountList(
         generateQueryAndParameters(DOMAIN_COUNTS_ENDS_WITH, params, endsWithList));
   }
 
   @Override
-  public List<DbCardCount> findDomainCountsByDomainsAndStandardAndTermAndNameEndsWith(
-      List<String> domains, Boolean standard, String term, List<String> endsWithList) {
+  public List<DbCardCount> findDomainCountsByTermAndNameEndsWithAndStandardAndDomains(
+      String term, List<String> endsWithList, Boolean standard, List<String> domains) {
     Object[][] params = {
       {BIND_VAR_STANDARD, standard},
       {BIND_VAR_TERM, term},
@@ -417,13 +416,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   }
 
   @Override
-  public List<DbCardCount> findSurveyCountsAndNameEndsWith(List<String> endsWithList) {
+  public List<DbCardCount> findSurveyCountsByNameEndsWith(List<String> endsWithList) {
     return queryForDbCardCountList(
         generateQueryAndParameters(SURVEY_COUNTS_ENDS_WITH, null, endsWithList));
   }
 
   @Override
-  public List<DbCardCount> findSurveyCountsAndTermAndNameEndsWith(
+  public List<DbCardCount> findSurveyCountsByTermAndNameEndsWith(
       String term, List<String> endsWithList) {
     Object[][] params = {{BIND_VAR_TERM, term}};
     return queryForDbCardCountList(
@@ -432,7 +431,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public Page<DbCriteria> findSurveyQuestionByNameEndsWith(
-      List<String> endsWithList, PageRequest page) {
+      List<String> endsWithList, Pageable page) {
 
     QueryAndParameters queryAndParameters =
         generateQueryAndParameters(SURVEY_QUESTION_ENDS_WITH, null, endsWithList);
@@ -445,7 +444,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public Page<DbCriteria> findSurveyQuestionByTermAndNameEndsWith(
-      String term, List<String> endsWithList, PageRequest page) {
+      String term, List<String> endsWithList, Pageable page) {
     Object[][] params = {{BIND_VAR_TERM, term}};
 
     QueryAndParameters queryAndParameters =
@@ -459,7 +458,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public Page<DbCriteria> findSurveyQuestionByPathAndNameEndsWith(
-      Long id, List<String> endsWithList, PageRequest page) {
+      Long id, List<String> endsWithList, Pageable page) {
     Object[][] params = {{BIND_VAR_ID, id}};
 
     QueryAndParameters queryAndParameters =
@@ -473,7 +472,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public Page<DbCriteria> findSurveyQuestionByPathAndTermAndNameEndsWith(
-      Long id, String term, List<String> endsWithList, PageRequest page) {
+      Long id, String term, List<String> endsWithList, Pageable page) {
     Object[][] params = {{BIND_VAR_ID, id}, {BIND_VAR_TERM, term}};
 
     QueryAndParameters queryAndParameters =

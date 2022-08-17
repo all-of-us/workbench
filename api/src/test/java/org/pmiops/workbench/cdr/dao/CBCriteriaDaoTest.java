@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
+import org.pmiops.workbench.cohortbuilder.SearchTerm;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
@@ -238,6 +239,11 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
+  public void findSurveyIdNoMatch() {
+    assertThat(cbCriteriaDao.findSurveyId("ALL")).isNull();
+  }
+
+  @Test
   public void findSurveyQuestionByPathAndTerm() {
     PageRequest pageRequest = PageRequest.of(0, 100);
     assertThat(
@@ -261,14 +267,12 @@ public class CBCriteriaDaoTest {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao
-            .findCriteriaByDomainAndTypeAndCodeAndStandard(
-                Domain.CONDITION.toString(), "00", true, page)
+            .findCriteriaByDomainAndCodeAndStandard(Domain.CONDITION.toString(), "00", true, page)
             .getContent();
     assertThat(criteriaList).isEmpty();
     criteriaList =
         cbCriteriaDao
-            .findCriteriaByDomainAndTypeAndCodeAndStandard(
-                Domain.CONDITION.toString(), "00", false, page)
+            .findCriteriaByDomainAndCodeAndStandard(Domain.CONDITION.toString(), "00", false, page)
             .getContent();
     assertThat(criteriaList).containsExactly(icd9Criteria);
   }
