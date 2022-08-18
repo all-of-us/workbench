@@ -72,6 +72,7 @@ const browserTest = testFilePath => (description, testFn, timeoutMs) =>
 export_({browserTest})
 
 const useApiProxy = async page => {
+  assert(process.env.API_PROXY_URL, 'API_PROXY_URL not defined')
   await page.setJavaScriptEnabled(false)
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
   await page.evaluate(

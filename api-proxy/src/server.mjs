@@ -1,5 +1,6 @@
-import createLogger from '$/src/logging.mjs'
-import {handleReq} from '$/src/reqhandler.mjs'
+import * as http from 'http'
+import createLogger from './logging.mjs'
+import {handleReq} from './reqhandler.mjs'
 
 const nl = '\n'
 

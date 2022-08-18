@@ -2,6 +2,7 @@ import * as fs from 'fs'
 const fsp = fs.promises
 import * as https from 'https'
 import * as stream from 'stream'
+import * as nu from 'util'
 import * as zlib from 'zlib'
 
 const omit = ks => obj =>
@@ -13,7 +14,7 @@ const promiseEvent = eventName => x => new Promise(resolve => {
 
 const quoteSingles = x => x.replace(/[']/g, '\\\'')
 const quoteBackquotes = x => x.replace(/[`]/g, '\\`')
-const formatObj = x => util.inspect(x, {depth: Infinity, maxArrayLength: 10e3, breakLength: 100})
+const formatObj = x => nu.inspect(x, {depth: Infinity, maxArrayLength: 10e3, breakLength: 100})
 
 const jsonParse = s => {
   try { return [null, JSON.parse(s)] }
@@ -35,9 +36,11 @@ const formatHeaders = headers =>
 
 const record = async (req, res, resBody) => {
   const rdir = 'recordings'
+  // URLs are related to each other first by path then by method, so the path should come first
+  // so related URLs are sorted together alphabetically.
   const fname =
     req.index.toString().padStart(2, '0')+' '
-    +req.method.toLowerCase()+' '+req.url.pathname.replace(/[/]/g, '|')+req.url.search
+    req.url.pathname.replace(/[/]/g, '|')+req.url.search+'.'+req.method.toLowerCase()
     +'.mjs'
   await fsp.mkdir(rdir, {recursive: true})
   const [rbObj, rbString] = formatResBody(resBody)
@@ -87,7 +90,7 @@ export const handleReq = async (req, res) => {
   if (getMode().replay) {
     const hdir = 'handlers'
     const hpaths = await fsp.readdir(hdir)
-    for (let hp of hpaths) {
+    for (let hp of hpaths.filter(p => p.endsWith('.mjs'))) {
       await import('../'+hdir+'/'+encodeURIComponent(hp)+'?'+Date.now())
         .then(m => m.default(req, res))
       if (res.writableEnded) {

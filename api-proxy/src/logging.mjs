@@ -20,7 +20,7 @@ const create = (logStream = process.stderr) => {
     const stampStart = truncate(nowMs)
     const delta = nowMs - stampStart
     logStream.write('+'+delta.toString().padEnd(6, ' '))
-    logStream.write(util.format(...formatArgs)+'\n')
+    logStream.write(nu.format(...formatArgs)+'\n')
   }
   return {log}
 }
