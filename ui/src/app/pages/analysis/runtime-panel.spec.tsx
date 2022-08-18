@@ -1576,7 +1576,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     await pickNumWorkers(wrapper, 0);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -1602,7 +1602,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     // This should make the cost about $50/hour.
     await pickNumWorkers(wrapper, 20000);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
@@ -1623,7 +1623,7 @@ describe('RuntimePanel', () => {
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     // This should make the cost about $140/hour.
     await pickNumWorkers(wrapper, 600);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
@@ -1671,7 +1671,7 @@ describe('RuntimePanel', () => {
     await pickGpuType(wrapper, 'NVIDIA Tesla T4');
     await pickGpuNum(wrapper, 2);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
 
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
@@ -1690,7 +1690,7 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
