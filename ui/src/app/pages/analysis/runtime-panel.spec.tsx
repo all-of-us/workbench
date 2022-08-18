@@ -1153,17 +1153,27 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, 150);
-    const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
+    // with default main disk size: 120
+    let costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
     expect(costEstimator().exists()).toBeTruthy();
 
-    const runningCost = () =>
+    let runningCost = () =>
       costEstimator().find('[data-test-id="running-cost"]');
-    const storageCost = () =>
+    let storageCost = () =>
       costEstimator().find('[data-test-id="storage-cost"]');
+    expect(runningCost().text()).toEqual('$0.77/hour');
+    expect(storageCost().text()).toEqual('$0.07/hour');
+
+    // Change the main disk size or master size to 150
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
+
+    costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
+    expect(costEstimator().exists()).toBeTruthy();
+
+    runningCost = () => costEstimator().find('[data-test-id="running-cost"]');
+    storageCost = () => costEstimator().find('[data-test-id="storage-cost"]');
     expect(runningCost().text()).toEqual('$0.73/hour');
     expect(storageCost().text()).toEqual('$0.02/hour');
-
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
