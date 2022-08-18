@@ -101,6 +101,8 @@ describe('RuntimePanel', () => {
     };
   };
 
+  const costEstimator = (wrapper) => wrapper.find('[data-test-id="cost-estimator"]');
+
   const detachableDiskRuntime = (): Runtime => {
     const { size, diskType, name } = existingDisk();
     return {
@@ -1099,14 +1101,13 @@ describe('RuntimePanel', () => {
   it('should update the cost estimator when the compute profile changes', async () => {
     const wrapper = await component();
 
-    const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
-    expect(costEstimator().exists()).toBeTruthy();
+    expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
     const runningCost = () =>
-      costEstimator().find('[data-test-id="running-cost"]');
+      costEstimator(wrapper).find('[data-test-id="running-cost"]');
     const storageCost = () =>
-      costEstimator().find('[data-test-id="storage-cost"]');
+      costEstimator(wrapper).find('[data-test-id="storage-cost"]');
     expect(runningCost().text()).toEqual('$0.20/hour');
     expect(storageCost().text()).toEqual('< $0.01/hour');
 
@@ -1153,7 +1154,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    // with default main disk size: 120
+    // with Master disk size: 1000
     let costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
     expect(costEstimator().exists()).toBeTruthy();
 
@@ -1164,7 +1165,7 @@ describe('RuntimePanel', () => {
     expect(runningCost().text()).toEqual('$0.77/hour');
     expect(storageCost().text()).toEqual('$0.07/hour');
 
-    // Change the main disk size or master size to 150
+    // Change the Master disk size or master size to 150
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
