@@ -1153,6 +1153,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
+    await pickMainDiskSize(wrapper, 150);
     const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
     expect(costEstimator().exists()).toBeTruthy();
 
@@ -1553,7 +1554,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-
+    await pickMainDiskSize(wrapper, 150);
     // This should make the cost about $50/hour.
     await pickNumWorkers(wrapper, 200);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -1570,6 +1571,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickMainDiskSize(wrapper, 150);
 
     await pickNumWorkers(wrapper, 0);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -1595,7 +1597,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-
+    await pickMainDiskSize(wrapper, 150);
     // This should make the cost about $50/hour.
     await pickNumWorkers(wrapper, 20000);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
