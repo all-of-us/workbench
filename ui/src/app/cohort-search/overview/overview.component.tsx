@@ -134,7 +134,7 @@ const styles = reactStyles({
 });
 
 // Limit the size of cohort definition to 1MB
-const COHORT_BYTE_LIMIT = 500;
+const COHORT_BYTE_LIMIT = 1000000;
 
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
