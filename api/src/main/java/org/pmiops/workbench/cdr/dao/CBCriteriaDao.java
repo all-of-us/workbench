@@ -1,10 +1,13 @@
 package org.pmiops.workbench.cdr.dao;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
+import org.pmiops.workbench.cohortbuilder.SearchTerm;
+import org.pmiops.workbench.model.Domain;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +24,107 @@ import org.springframework.data.repository.query.Param;
  * makes the query much faster.
  */
 public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomCBCriteriaDao {
+
+  /** Consolidate all Survey Question Dao calls into one default method. */
+  default Page<DbCriteria> findSurveyQuestions(
+      String surveyName, SearchTerm searchTerm, Pageable pageRequest) {
+    Long surveyId = findSurveyId(surveyName);
+    boolean hasSurveyId = surveyId != null;
+    if (searchTerm.hasModifiedTermOnly()) {
+      return hasSurveyId
+          ? findSurveyQuestionByPathAndTerm(surveyId, searchTerm.getModifiedTerm(), pageRequest)
+          : findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest);
+    } else if (searchTerm.hasEndsWithOnly()) {
+      return hasSurveyId
+          ? findSurveyQuestionByPathAndNameEndsWith(
+              surveyId, searchTerm.getEndsWithTerms(), pageRequest)
+          : findSurveyQuestionByNameEndsWith(searchTerm.getEndsWithTerms(), pageRequest);
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      return hasSurveyId
+          ? findSurveyQuestionByPathAndTermAndNameEndsWith(
+              surveyId, searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest)
+          : findSurveyQuestionByTermAndNameEndsWith(
+              searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest);
+    }
+    return Page.empty();
+  }
+
+  /** Consolidate all AutoComplete Dao calls into one default method. */
+  default List<DbCriteria> findCriteriaAutoComplete(
+      String domain, String type, Boolean standard, SearchTerm searchTerm, Pageable pageRequest) {
+    Boolean isSurvey = Domain.SURVEY.toString().equals(domain);
+    if (searchTerm.hasModifiedTermOnly()) {
+      return isSurvey
+          ? findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest).getContent()
+          : findCriteriaByDomainAndTypeAndStandardAndFullText(
+              domain, type, standard, searchTerm.getModifiedTerm(), pageRequest);
+    } else if (searchTerm.hasEndsWithOnly()) {
+      return isSurvey
+          ? findSurveyQuestionByNameEndsWith(searchTerm.getEndsWithTerms(), pageRequest)
+              .getContent()
+          : findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
+              domain, type, standard, searchTerm.getEndsWithTerms(), pageRequest);
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      return isSurvey
+          ? findSurveyQuestionByTermAndNameEndsWith(
+                  searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), pageRequest)
+              .getContent()
+          : findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
+              domain,
+              type,
+              standard,
+              searchTerm.getModifiedTerm(),
+              searchTerm.getEndsWithTerms(),
+              pageRequest);
+    }
+    return ImmutableList.of();
+  }
+
+  default Page<DbCriteria> findCriteriaByDomain(
+      String domain, SearchTerm searchTerm, Boolean standard, Pageable pageRequest) {
+    if (searchTerm.hasModifiedTermOnly()) {
+      return findCriteriaByDomainAndFullTextAndStandard(
+          domain, searchTerm.getModifiedTerm(), standard, pageRequest);
+    } else if (searchTerm.hasEndsWithOnly()) {
+      return findCriteriaByDomainAndNameEndsWithAndStandard(
+          domain, searchTerm.getEndsWithTerms(), standard, pageRequest);
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      return findCriteriaByDomainAndNameEndsWithAndTermAndStandard(
+          domain,
+          searchTerm.getModifiedTerm(),
+          searchTerm.getEndsWithTerms(),
+          standard,
+          pageRequest);
+    }
+    return Page.empty();
+  }
+
+  default List<DbCardCount> findDomainCounts(
+      SearchTerm searchTerm, Boolean standard, List<String> domainNames) {
+    if (searchTerm.hasModifiedTermOnly()) {
+      return findDomainCountsByTermAndStandardAndDomains(
+          searchTerm.getModifiedTerm(), standard, domainNames);
+    } else if (searchTerm.hasEndsWithOnly()) {
+      return findDomainCountsByNameEndsWithAndStandardAndDomains(
+          searchTerm.getEndsWithTerms(), standard, domainNames);
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      return findDomainCountsByTermAndNameEndsWithAndStandardAndDomains(
+          searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms(), standard, domainNames);
+    }
+    return ImmutableList.of();
+  }
+
+  default List<DbCardCount> findSurveyCounts(SearchTerm searchTerm) {
+    if (searchTerm.hasModifiedTermOnly()) {
+      return findSurveyCountsByTerm(searchTerm.getModifiedTerm());
+    } else if (searchTerm.hasEndsWithOnly()) {
+      return findSurveyCountsByNameEndsWith(searchTerm.getEndsWithTerms());
+    } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
+      return findSurveyCountsByTermAndNameEndsWith(
+          searchTerm.getModifiedTerm(), searchTerm.getEndsWithTerms());
+    }
+    return ImmutableList.of();
+  }
 
   @Query(
       value =
@@ -92,7 +196,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "and code like upper(concat(:term,'%')) "
               + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc")
-  Page<DbCriteria> findCriteriaByDomainAndTypeAndCodeAndStandard(
+  Page<DbCriteria> findCriteriaByDomainAndCodeAndStandard(
       @Param("domain") String domain,
       @Param("term") String term,
       @Param("standard") Boolean standard,
@@ -258,7 +362,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "group by 1 "
               + "order by count desc",
       nativeQuery = true)
-  List<DbCardCount> findDomainCounts(
+  List<DbCardCount> findDomainCountsByTermAndStandardAndDomains(
       @Param("term") String term,
       @Param("standard") Boolean standard,
       @Param("domains") List<String> domains);
@@ -298,7 +402,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + ") a on c.id = a.survey_version_concept_id "
               + "order by count desc",
       nativeQuery = true)
-  List<DbCardCount> findSurveyCounts(@Param("term") String term);
+  List<DbCardCount> findSurveyCountsByTerm(@Param("term") String term);
 
   @Query(
       value =
