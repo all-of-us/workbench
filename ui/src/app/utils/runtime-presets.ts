@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import {
-  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_MACHINE_NAME,
   MIN_DISK_SIZE_GB,
@@ -35,9 +35,9 @@ export const runtimePresets: {
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
         masterMachineType: DEFAULT_MACHINE_NAME,
-        masterDiskSize: MIN_DISK_SIZE_GB,
+        masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
         workerMachineType: DEFAULT_MACHINE_NAME,
-        workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
       },

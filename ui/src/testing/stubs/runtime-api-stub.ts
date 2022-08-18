@@ -10,7 +10,7 @@ import {
 
 import { diskApi } from 'app/services/swagger-fetch-clients';
 import {
-  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  DATAPROC_MIN_DISK_SIZE_GB,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 
@@ -27,8 +27,8 @@ export const defaultGceConfig = (): GceConfig => ({
 
 export const defaultDataprocConfig = (): DataprocConfig => ({
   masterMachineType: 'n1-standard-4',
-  masterDiskSize: MIN_DISK_SIZE_GB,
-  workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
+  workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
   workerMachineType: 'n1-standard-4',
   numberOfWorkers: 2,
   numberOfPreemptibleWorkers: 3,

@@ -35,7 +35,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import {
   ComputeType,
-  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  DATAPROC_MIN_DISK_SIZE_GB,
   findMachineByName,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
@@ -100,6 +100,14 @@ describe('RuntimePanel', () => {
       blockSize: 1,
     };
   };
+
+  const costEstimator = (wrapper) =>
+    wrapper.find('[data-test-id="cost-estimator"]');
+
+  const runningCost = (wrapper) =>
+    costEstimator(wrapper).find('[data-test-id="running-cost"]');
+  const storageCost = (wrapper) =>
+    costEstimator(wrapper).find('[data-test-id="storage-cost"]');
 
   const detachableDiskRuntime = (): Runtime => {
     const { size, diskType, name } = existingDisk();
@@ -550,7 +558,7 @@ describe('RuntimePanel', () => {
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB + 10);
 
     // worker settings
     await pickWorkerCpu(wrapper, 8);
@@ -567,7 +575,7 @@ describe('RuntimePanel', () => {
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
       masterMachineType: 'n1-standard-2',
-      masterDiskSize: MIN_DISK_SIZE_GB,
+      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
       workerMachineType: 'n1-standard-8',
       workerDiskSize: 300,
       numberOfWorkers: 10,
@@ -790,7 +798,7 @@ describe('RuntimePanel', () => {
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerCpu(wrapper, 2);
     await pickComputeType(wrapper, ComputeType.Standard);
-
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
@@ -1003,26 +1011,26 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB + 10);
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickWorkerCpu(wrapper, 16);
     await pickWorkerRam(wrapper, 60);
     await pickNumPreemptibleWorkers(wrapper, 3);
     await pickNumWorkers(wrapper, 5);
-    await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Cancel');
 
-    expect(getMainDiskSize(wrapper)).toBe(MIN_DISK_SIZE_GB + 10);
+    expect(getMainDiskSize(wrapper)).toBe(DATAPROC_MIN_DISK_SIZE_GB + 10);
     expect(getMainCpu(wrapper)).toBe(8);
     expect(getMainRam(wrapper)).toBe(30);
     expect(getWorkerCpu(wrapper)).toBe(16);
     expect(getWorkerRam(wrapper)).toBe(60);
     expect(getNumPreemptibleWorkers(wrapper)).toBe(3);
     expect(getNumWorkers(wrapper)).toBe(5);
-    expect(getWorkerDiskSize(wrapper)).toBe(DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    expect(getWorkerDiskSize(wrapper)).toBe(DATAPROC_MIN_DISK_SIZE_GB);
   });
 
   it('should disable Next button if Runtime is in between states', async () => {
@@ -1099,31 +1107,26 @@ describe('RuntimePanel', () => {
   it('should update the cost estimator when the compute profile changes', async () => {
     const wrapper = await component();
 
-    const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
-    expect(costEstimator().exists()).toBeTruthy();
+    expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
-    const runningCost = () =>
-      costEstimator().find('[data-test-id="running-cost"]');
-    const storageCost = () =>
-      costEstimator().find('[data-test-id="storage-cost"]');
-    expect(runningCost().text()).toEqual('$0.20/hour');
-    expect(storageCost().text()).toEqual('< $0.01/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.20/hour');
+    expect(storageCost(wrapper).text()).toEqual('< $0.01/hour');
 
     // Change the machine to n1-standard-8 and bump the storage to 300GB.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickMainDiskSize(wrapper, 300);
-    expect(runningCost().text()).toEqual('$0.40/hour');
-    expect(storageCost().text()).toEqual('$0.02/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.40/hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.02/hour');
 
     await pickPreset(wrapper, { displayName: 'General Analysis' });
-    expect(runningCost().text()).toEqual('$0.20/hour');
-    expect(storageCost().text()).toEqual('< $0.01/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.20/hour');
+    expect(storageCost(wrapper).text()).toEqual('< $0.01/hour');
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    expect(runningCost().text()).toEqual('$0.73/hour');
-    expect(storageCost().text()).toEqual('$0.02/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.73/hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.02/hour');
 
     // Bump up all the worker values to increase the price on everything.
     await pickNumWorkers(wrapper, 4);
@@ -1131,8 +1134,8 @@ describe('RuntimePanel', () => {
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
-    expect(runningCost().text()).toEqual('$2.88/hour');
-    expect(storageCost().text()).toEqual('$0.14/hour');
+    expect(runningCost(wrapper).text()).toEqual('$2.88/hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.14/hour');
   });
 
   it('should update the cost estimator when master machine changes', async () => {
@@ -1147,27 +1150,30 @@ describe('RuntimePanel', () => {
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
       },
     });
 
     const wrapper = await component();
 
-    const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
-    expect(costEstimator().exists()).toBeTruthy();
+    // with Master disk size: 1000
+    expect(costEstimator(wrapper).exists()).toBeTruthy();
 
-    const runningCost = () =>
-      costEstimator().find('[data-test-id="running-cost"]');
-    const storageCost = () =>
-      costEstimator().find('[data-test-id="storage-cost"]');
-    expect(runningCost().text()).toEqual('$0.77/hour');
-    expect(storageCost().text()).toEqual('$0.07/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.77/hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.07/hour');
 
+    // Change the Master disk size or master size to 150
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
+
+    expect(costEstimator(wrapper).exists()).toBeTruthy();
+
+    expect(runningCost(wrapper).text()).toEqual('$0.73/hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.02/hour');
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
-    expect(runningCost().text()).toEqual('$0.87/hour');
-    expect(storageCost().text()).toEqual('$0.13/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.87/hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.13/hour');
   });
 
   it('should allow runtime deletion', async () => {
@@ -1243,8 +1249,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
@@ -1266,8 +1272,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
@@ -1553,7 +1559,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-
+    await pickMainDiskSize(wrapper, 150);
     // This should make the cost about $50/hour.
     await pickNumWorkers(wrapper, 200);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -1570,6 +1576,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     await pickNumWorkers(wrapper, 0);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -1595,7 +1602,7 @@ describe('RuntimePanel', () => {
       wrapper.find({ 'aria-label': 'Create' }).first();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     // This should make the cost about $50/hour.
     await pickNumWorkers(wrapper, 20000);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
@@ -1616,6 +1623,7 @@ describe('RuntimePanel', () => {
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
+    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     // This should make the cost about $140/hour.
     await pickNumWorkers(wrapper, 600);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
@@ -1663,7 +1671,7 @@ describe('RuntimePanel', () => {
     await pickGpuType(wrapper, 'NVIDIA Tesla T4');
     await pickGpuNum(wrapper, 2);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
 
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
@@ -1682,7 +1690,7 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);

@@ -27,6 +27,7 @@ import {
 import {
   AutopauseMinuteThresholds,
   ComputeType,
+  DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
@@ -710,6 +711,7 @@ export const withAnalysisConfigDefaults = (
         dataprocConfig?.numberOfPreemptibleWorkers ??
         defaults.numberOfPreemptibleWorkers,
     };
+    size = size ?? existingDisk?.size ?? DATAPROC_MIN_DISK_SIZE_GB;
   } else {
     throw Error(`unknown computeType: '${computeType}'`);
   }
