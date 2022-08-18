@@ -25,7 +25,7 @@ export PROXY_PORT=8080
 export API_PROXY_URL=http://localhost:$PROXY_PORT
 export PROXY_MODE=replay-only
 
-(cd ../api-proxy; yarn install; ln -s "$PWD" node_modules/$; ./startproxy.sh 2> /dev/null &)
+(cd ../api-proxy; node startproxy.mjs &)
 
 set +e
 export FAILED_TESTS_LOG=failed-tests.txt
