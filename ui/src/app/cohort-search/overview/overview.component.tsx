@@ -134,7 +134,7 @@ const styles = reactStyles({
 });
 
 // Limit the size of cohort definition to 1MB
-const COHORT_BYTE_LIMIT = 1000000;
+const COHORT_BYTE_LIMIT = 500;
 
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
@@ -608,9 +608,8 @@ export const ListOverview = fp.flow(
                 )}
                 {cohortSizeError && (
                   <TooltipTrigger
-                    content={
-                      'The size of your cohort exceeds the 1MB limit. Remove some criteria selections to continue.'
-                    }
+                    content={`The size of your cohort exceeds the 1MB limit. Please select Contact Us in the left hand navigation to report
+                      this issue.`}
                   >
                     <ClrIcon
                       style={{
