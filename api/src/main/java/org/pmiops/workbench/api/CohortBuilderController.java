@@ -150,7 +150,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateDomain(domain, surveyName);
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
       return ResponseEntity.ok(
-          cohortBuilderService.findCriteriaByDomainV2(domain, term, surveyName, standard, removeDrugBrand, limit));
+          cohortBuilderService.findCriteriaByDomainV2(
+              domain, term, surveyName, standard, removeDrugBrand, limit));
     } else {
       return ResponseEntity.ok(
           cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));

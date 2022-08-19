@@ -337,7 +337,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            domain, term.replaceAll("[()+\"*-]", ""), standard, CriteriaType.NONE.toString(), pageRequest);
+            domain,
+            term.replaceAll("[()+\"*-]", ""),
+            standard,
+            CriteriaType.NONE.toString(),
+            pageRequest);
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
@@ -356,7 +360,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainV2(
-          String domain, String term, String surveyName, Boolean standard, Boolean removeDrugBrand, Integer limit) {
+      String domain,
+      String term,
+      String surveyName,
+      Boolean standard,
+      Boolean removeDrugBrand,
+      Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
 
@@ -372,8 +381,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
     }
 
-    //if we need to remove brand names(only applies to drugs) use brand type otherwise use none
-    //for  other domains
+    // if we need to remove brand names(only applies to drugs) use brand type otherwise use none
+    // for  other domains
     String type = removeDrugBrand ? CriteriaType.BRAND.toString() : CriteriaType.NONE.toString();
 
     // find a match on concept code

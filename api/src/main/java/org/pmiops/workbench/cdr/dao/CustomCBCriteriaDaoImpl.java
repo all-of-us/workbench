@@ -101,9 +101,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + MATCH_FULL_TEXT_DOMAIN
-              + "and type != :"
-              + BIND_VAR_TYPE
-              + "\n"
+          + "and type != :"
+          + BIND_VAR_TYPE
+          + "\n"
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -118,9 +118,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + MATCH_FULL_TEXT_DOMAIN_TERM
-              + "and type != :"
-              + BIND_VAR_TYPE
-              + "\n"
+          + "and type != :"
+          + BIND_VAR_TYPE
+          + "\n"
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -334,7 +334,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndStandardAndNotType(
-          String domain, List<String> endsWithList, Boolean standard, String type, Pageable page) {
+      String domain, List<String> endsWithList, Boolean standard, String type, Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_STANDARD, standard},
@@ -350,7 +350,12 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndTermAndStandardAndNotType(
-          String domain, String term, List<String> endsWithList, Boolean standard, String type, Pageable page) {
+      String domain,
+      String term,
+      List<String> endsWithList,
+      Boolean standard,
+      String type,
+      Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_STANDARD, standard},

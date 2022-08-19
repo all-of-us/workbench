@@ -266,12 +266,14 @@ public class CBCriteriaDaoTest {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao
-            .findCriteriaByDomainAndCodeAndStandardAndNotType(Domain.CONDITION.toString(), "00", true, , page)
+            .findCriteriaByDomainAndCodeAndStandardAndNotType(
+                Domain.CONDITION.toString(), "00", true, CriteriaType.NONE.toString(), page)
             .getContent();
     assertThat(criteriaList).isEmpty();
     criteriaList =
         cbCriteriaDao
-            .findCriteriaByDomainAndCodeAndStandardAndNotType(Domain.CONDITION.toString(), "00", false, , page)
+            .findCriteriaByDomainAndCodeAndStandardAndNotType(
+                Domain.CONDITION.toString(), "00", false, CriteriaType.NONE.toString(), page)
             .getContent();
     assertThat(criteriaList).containsExactly(icd9Criteria);
   }
@@ -282,13 +284,13 @@ public class CBCriteriaDaoTest {
     List<DbCriteria> measurements =
         cbCriteriaDao
             .findCriteriaByDomainAndFullTextAndStandardAndNotType(
-                Domain.MEASUREMENT.toString(), "001", false, , page)
+                Domain.MEASUREMENT.toString(), "001", false, CriteriaType.NONE.toString(), page)
             .getContent();
     assertThat(measurements).isEmpty();
     measurements =
         cbCriteriaDao
             .findCriteriaByDomainAndFullTextAndStandardAndNotType(
-                Domain.MEASUREMENT.toString(), "001", true, , page)
+                Domain.MEASUREMENT.toString(), "001", true, CriteriaType.NONE.toString(), page)
             .getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
   }

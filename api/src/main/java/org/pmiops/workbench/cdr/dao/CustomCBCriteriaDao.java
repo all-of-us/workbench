@@ -8,10 +8,15 @@ import org.springframework.data.domain.Pageable;
 
 public interface CustomCBCriteriaDao {
   Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndStandardAndNotType(
-          String domain, List<String> endsWithList, Boolean standard, String type, Pageable page);
+      String domain, List<String> endsWithList, Boolean standard, String type, Pageable page);
 
   Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndTermAndStandardAndNotType(
-          String domain, String term, List<String> endsWithList, Boolean standard, String type, Pageable page);
+      String domain,
+      String term,
+      List<String> endsWithList,
+      Boolean standard,
+      String type,
+      Pageable page);
 
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
       String domain, String type, Boolean standard, List<String> endsWithList, Pageable page);

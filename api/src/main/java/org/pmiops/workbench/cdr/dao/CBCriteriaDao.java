@@ -81,7 +81,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   }
 
   default Page<DbCriteria> findCriteriaByDomain(
-          String domain, SearchTerm searchTerm, Boolean standard, String type, Pageable pageRequest) {
+      String domain, SearchTerm searchTerm, Boolean standard, String type, Pageable pageRequest) {
     if (searchTerm.hasModifiedTermOnly()) {
       return findCriteriaByDomainAndFullTextAndStandardAndNotType(
           domain, searchTerm.getModifiedTerm(), standard, type, pageRequest);
@@ -196,14 +196,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "where standard=:standard "
               + "and code like upper(concat(:term,'%')) "
               + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
-                  + "and type != :type "
+              + "and type != :type "
               + "order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndCodeAndStandardAndNotType(
-          @Param("domain") String domain,
-          @Param("term") String term,
-          @Param("standard") Boolean standard,
-          @Param("type") String type,
-          Pageable page);
+      @Param("domain") String domain,
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      @Param("type") String type,
+      Pageable page);
 
   @Query(
       value =
@@ -211,14 +211,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "from DbCriteria c "
               + "where standard=:standard "
               + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
-                  + "and type != :type "
+              + "and type != :type "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandardAndNotType(
-          @Param("domain") String domain,
-          @Param("term") String term,
-          @Param("standard") Boolean standard,
-          @Param("type") String type,
-          Pageable page);
+      @Param("domain") String domain,
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      @Param("type") String type,
+      Pageable page);
 
   @Query(
       value =
