@@ -1068,21 +1068,25 @@ export const ListSearch = fp.flow(
                     />
                   </span>
                 )}
-                {this.checkDrug && (
-                  <span style={{ float: 'right' }}>
-                    <span
-                      style={{ display: 'table-cell', paddingRight: '0.35rem' }}
-                    >
-                      Remove Brand Names
+                {this.checkDrug &&
+                  serverConfigStore.get().config.enableDrugWildcardSearch && (
+                    <span style={{ float: 'right' }}>
+                      <span
+                        style={{
+                          display: 'table-cell',
+                          paddingRight: '0.35rem',
+                        }}
+                      >
+                        Remove Brand Names
+                      </span>
+                      <InputSwitch
+                        checked={removeDrugBrand}
+                        disabled={loading}
+                        onChange={() => this.toggleDrugBrand()}
+                        style={{ display: 'table-cell', boxShadow: 0 }}
+                      />
                     </span>
-                    <InputSwitch
-                      checked={removeDrugBrand}
-                      disabled={loading}
-                      onChange={() => this.toggleDrugBrand()}
-                      style={{ display: 'table-cell', boxShadow: 0 }}
-                    />
-                  </span>
-                )}
+                  )}
               </div>
             </div>
           </div>
