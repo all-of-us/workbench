@@ -558,7 +558,7 @@ public class CohortBuilderControllerTest {
                             false,
                             "001",
                             null,
-                                false,
+                            false,
                             null)
                         .getBody())
                 .getItems()
@@ -610,7 +610,7 @@ public class CohortBuilderControllerTest {
                         false,
                         "00",
                         null,
-                            false,
+                        false,
                         null)
                     .getBody())
             .getItems();
@@ -664,7 +664,7 @@ public class CohortBuilderControllerTest {
                         true,
                         "672535",
                         null,
-                            false,
+                        false,
                         null)
                     .getBody())
             .getItems();
@@ -717,7 +717,7 @@ public class CohortBuilderControllerTest {
                             false,
                             "LP12",
                             null,
-                                false,
+                            false,
                             null)
                         .getBody())
                 .getItems()
@@ -754,7 +754,7 @@ public class CohortBuilderControllerTest {
                             true,
                             "LP12",
                             null,
-                                false,
+                            false,
                             null)
                         .getBody())
                 .getItems()
