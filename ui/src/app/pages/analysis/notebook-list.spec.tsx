@@ -15,6 +15,10 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { NotebookList } from './notebook-list';
 
+const RESOURCE_TYPE_COLUMN_NUMBER = 1;
+const NOTEBOOK_NAME_COLUMN_NUMBER = 2;
+const MODIFED_DATE_COLUMN_NUMBER = 3;
+
 describe('NotebookList', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
@@ -30,8 +34,53 @@ describe('NotebookList', () => {
       </MemoryRouter>
     );
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="card-name"]').first().text()).toMatch(
-      'mockFile'
+    const notebookTableColumns = wrapper
+      .find('[data-test-id="resource-list"]')
+      .find('tbody')
+      .find('td');
+
+    // Second Column of notebook table displays the type of resource type: Notebook
+    expect(notebookTableColumns.at(RESOURCE_TYPE_COLUMN_NUMBER).text()).toMatch(
+      'Notebook'
     );
+
+    // Third column of notebook table displays the notebook file name
+    expect(notebookTableColumns.at(NOTEBOOK_NAME_COLUMN_NUMBER).text()).toMatch(
+      NotebooksApiStub.stubNotebookList()[0].name.split('.ipynb')[0]
+    );
+
+    // Forth column of notebook table displays last modified time
+    expect(notebookTableColumns.at(MODIFED_DATE_COLUMN_NUMBER).text()).toMatch(
+      'Dec 31, 1969'
+    );
+  });
+
+  it('should redirect to notebook playground mode when some resource type or name is clicked', async () => {
+    currentWorkspaceStore.next(workspaceDataStub);
+    const wrapper = mount(
+      <MemoryRouter>
+        <NotebookList hideSpinner={() => {}} />
+      </MemoryRouter>
+    );
+    await waitOneTickAndUpdate(wrapper);
+    const notebookTableColumns = wrapper
+      .find('[data-test-id="resource-list"]')
+      .find('tbody')
+      .find('td');
+
+    // verify columns displaying resource type and notebook name are clickable
+    expect(
+      notebookTableColumns
+        .at(RESOURCE_TYPE_COLUMN_NUMBER)
+        .find('a')
+        .prop('href')
+    ).toBe('/workspaces/defaultNamespace/1/notebooks/preview/mockFile.ipynb');
+
+    expect(
+      notebookTableColumns
+        .at(NOTEBOOK_NAME_COLUMN_NUMBER)
+        .find('a')
+        .prop('href')
+    ).toBe('/workspaces/defaultNamespace/1/notebooks/preview/mockFile.ipynb');
   });
 });
