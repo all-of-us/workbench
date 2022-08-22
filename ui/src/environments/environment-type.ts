@@ -58,6 +58,8 @@ export interface EnvironmentBase {
   captchaSiteKey: string;
   // Enable workbench footer on the signed in pages
   enableFooter: boolean;
+  // Enable redirect to v2 demographic survey if not submitted by user
+  enableDemographicSurveyV2Redirect: boolean;
 
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
