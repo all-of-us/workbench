@@ -123,7 +123,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const { enableUpdatedDemographicSurvey } = serverConfigStore.get().config;
 
-  const {enableDemographicSurveyV2Redirect} = environment;
+  const { enableDemographicSurveyV2Redirect } = environment;
 
   // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
   // Demographic Survey Page and is cleared out on signOut.
