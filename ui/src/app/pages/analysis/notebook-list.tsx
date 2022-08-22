@@ -182,7 +182,7 @@ export const NotebookList = withCurrentWorkspace()(
       }
     }
 
-    getNotebookListAsResource = () => {
+    getNotebookListAsResources = () => {
       const { workspace } = this.props;
       const { notebookList } = this.state;
       return notebookList.map((notebook) => {
@@ -260,7 +260,7 @@ export const NotebookList = withCurrentWorkspace()(
                   </FlexRow>
                   {!loading && (
                     <ResourcesList
-                      workspaces={this.getNotebookListAsResource()}
+                      workspacesResources={this.getNotebookListAsResources()}
                       onUpdate={() => this.loadNotebooks()}
                     />
                   )}

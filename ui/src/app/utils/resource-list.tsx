@@ -3,18 +3,14 @@ import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { CdrVersionTiersResponse, WorkspaceResource } from 'generated/fetch';
+import { WorkspaceResource } from 'generated/fetch';
 
-import { TooltipTrigger } from 'app/components/popups';
 import { renderResourceCard } from 'app/components/render-resource-card';
 import {
   ResourceNavigation,
   StyledResourceType,
 } from 'app/components/resource-card';
-import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { getDisplayName } from 'app/utils/resources';
@@ -46,8 +42,7 @@ interface TableData {
 }
 
 interface Props {
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-  workspaces: WorkspaceResource[];
+  workspacesResources: WorkspaceResource[];
   onUpdate: Function;
 }
 
@@ -68,23 +63,10 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   };
 
   useEffect(() => {
-    const addAdminLockToNameColumn = () => {
-      return (
-        <TooltipTrigger
-          content={<div>Workspace compliance action required</div>}
-        >
-          <FontAwesomeIcon
-            style={{ color: colors.warning, marginRight: '0.5rem' }}
-            size={'sm'}
-            icon={faLockAlt}
-          />
-        </TooltipTrigger>
-      );
-    };
-
-    if (props.workspaces) {
+    const { workspacesResources } = props;
+    if (workspacesResources) {
       setTableData(
-        props.workspaces.map((r) => {
+        workspacesResources.map((r) => {
           return {
             menu: renderResourceMenu(r),
             resourceType: (
@@ -94,7 +76,6 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             ),
             resourceName: (
               <ResourceNavigation resource={r} style={styles.navigation}>
-                {r.adminLocked && addAdminLockToNameColumn()}
                 {getDisplayName(r)}
               </ResourceNavigation>
             ),
@@ -105,7 +86,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
         })
       );
     }
-  }, [props.workspaces]);
+  }, [props.workspacesResources]);
 
   return (
     <React.Fragment>
