@@ -88,6 +88,9 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     }
   }, [props.workspacesResources]);
 
+  const filterNameColumn = (value, filter) => {
+    return value.props.children.toUpperCase().startsWith(filter.toUpperCase());
+  };
   return (
     <React.Fragment>
       <div data-test-id='recent-resources-table'>
@@ -109,6 +112,10 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
               header='Name'
               style={styles.column}
               sortable
+              filter
+              filterPlaceholder={'Search Name'}
+              filterMatchMode='custom'
+              filterFunction={filterNameColumn}
             />
             <Column
               field='formattedLastModified'
