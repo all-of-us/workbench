@@ -5,6 +5,7 @@ import { mount } from 'enzyme';
 import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
@@ -51,7 +52,9 @@ describe('NotebookList', () => {
 
     // Forth column of notebook table displays last modified time
     expect(notebookTableColumns.at(MODIFED_DATE_COLUMN_NUMBER).text()).toMatch(
-      'Dec 31, 1969'
+      displayDateWithoutHours(
+        NotebooksApiStub.stubNotebookList()[0].lastModifiedTime
+      )
     );
   });
 
