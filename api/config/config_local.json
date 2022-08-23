@@ -117,7 +117,7 @@
     "ccSupportWhenAdminLocking": false,
     "enableUniversalSearch": true,
     "enableMultiReview": true,
-    "enableDrugWildcardSearch": false,
+    "enableDrugWildcardSearch": true,
     "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {

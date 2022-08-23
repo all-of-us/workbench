@@ -133,6 +133,9 @@ const styles = reactStyles({
   },
 });
 
+// Limit the size of cohort definition to 1MB
+const COHORT_BYTE_LIMIT = 1000000;
+
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
@@ -150,6 +153,7 @@ interface State {
   apiCallCheck: number;
   apiError: boolean;
   chartData: any;
+  cohortSizeError: boolean;
   currentGraphOptions: {
     ageType: AgeType;
     genderOrSexType: GenderOrSexType;
@@ -185,6 +189,7 @@ export const ListOverview = fp.flow(
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
+        cohortSizeError: false,
         currentGraphOptions: {
           ageType: AgeType.AGEATCDR,
           genderOrSexType: GenderOrSexType.GENDER,
@@ -205,6 +210,7 @@ export const ListOverview = fp.flow(
 
     componentDidMount(): void {
       if (!this.definitionErrors) {
+        this.checkCohortSize();
         this.getTotalCount();
         // Prevents multiple count calls on initial cohort load
         setTimeout(() => this.setState({ initializing: false }), 100);
@@ -217,12 +223,21 @@ export const ListOverview = fp.flow(
         this.props.updateCount > prevProps.updateCount &&
         !this.definitionErrors
       ) {
+        this.checkCohortSize();
         this.getTotalCount();
       }
     }
 
     componentWillUnmount(): void {
       this.aborter.abort();
+    }
+
+    checkCohortSize() {
+      this.setState({
+        cohortSizeError:
+          new Blob([JSON.stringify(mapRequest(this.props.searchRequest))])
+            .size > COHORT_BYTE_LIMIT,
+      });
     }
 
     getTotalCount() {
@@ -517,8 +532,10 @@ export const ListOverview = fp.flow(
     }
 
     get disableSaveButton() {
-      const { loading, saving, total } = this.state;
-      return loading || saving || this.definitionErrors || !total;
+      const { cohortSizeError, loading, saving, total } = this.state;
+      return (
+        cohortSizeError || loading || saving || this.definitionErrors || !total
+      );
     }
 
     get disableRefreshButton() {
@@ -544,6 +561,7 @@ export const ListOverview = fp.flow(
         ageType,
         apiError,
         chartData,
+        cohortSizeError,
         currentGraphOptions,
         deleting,
         genderOrSexType,
@@ -587,6 +605,22 @@ export const ListOverview = fp.flow(
                   >
                     Create Cohort
                   </Button>
+                )}
+                {cohortSizeError && (
+                  <TooltipTrigger
+                    content={`The size of your cohort exceeds the 1MB limit. Please select Contact Us in the left hand navigation to report
+                      this issue.`}
+                  >
+                    <ClrIcon
+                      style={{
+                        color: '#F57600',
+                        float: 'right',
+                        margin: '0.25rem 0.5rem 0 0',
+                      }}
+                      shape='warning-standard'
+                      size={24}
+                    />
+                  </TooltipTrigger>
                 )}
                 <TooltipTrigger content={<div>Export to notebook</div>}>
                   <Clickable

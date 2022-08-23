@@ -472,7 +472,7 @@ export const ListSearch = fp.flow(
           domain,
           !searchSource,
           value.trim(),
-          surveyName
+          surveyName === 'All Surveys' ? 'All' : surveyName
         );
         let data;
         if (this.isSurvey) {
