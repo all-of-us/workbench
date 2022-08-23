@@ -344,9 +344,7 @@ export const CohortSearch = fp.flow(
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectDemographics(
-        'Select Deceased'
-      );
+      AnalyticsTracker.CohortBuilder.SelectDemographics('Select Deceased');
       saveCriteria([param]);
     }
 
