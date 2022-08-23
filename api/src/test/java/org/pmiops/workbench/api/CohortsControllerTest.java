@@ -61,6 +61,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -186,6 +187,7 @@ public class CohortsControllerTest {
     WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
+    ObjectNameSizeService.class,
   })
   @MockBean({
     AccessModuleService.class,

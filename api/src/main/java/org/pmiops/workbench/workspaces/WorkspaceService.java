@@ -1,10 +1,13 @@
 package org.pmiops.workbench.workspaces;
 
 import java.util.List;
+import java.util.Set;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 /*
  * WorkspaceService is primarily an interface for coordinating the three Workspace models.
@@ -30,7 +33,7 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getPublishedWorkspaces();
 
-  void deleteWorkspace(DbWorkspace dbWorkspace);
+  boolean deleteWorkspace(DbWorkspace dbWorkspace);
 
   /*
    * This function will call the Google Cloud Billing API to set the given billing
@@ -39,6 +42,9 @@ public interface WorkspaceService {
    */
   void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
 
+  @Transactional
+  void forceDeleteWorkspace(DbWorkspace dbWorkspace);
+
   DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
 
   List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
@@ -46,4 +52,6 @@ public interface WorkspaceService {
   List<DbUserRecentWorkspace> getRecentWorkspaces();
 
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
+
+  Set<DbWorkspace> getActiveWorkspacesForUser(DbUser user);
 }

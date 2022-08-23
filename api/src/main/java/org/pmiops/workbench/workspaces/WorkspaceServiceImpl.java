@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -39,6 +40,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -88,6 +90,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceAuthService workspaceAuthService;
+  private final ObjectNameSizeService objectNameSizeService;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -107,7 +110,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      ObjectNameSizeService objectNameSizeService) {
     this.accessTierService = accessTierService;
     this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
@@ -125,6 +129,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceAuthService = workspaceAuthService;
+    this.objectNameSizeService = objectNameSizeService;
   }
 
   @Override
@@ -200,7 +205,18 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+  public boolean deleteWorkspace(DbWorkspace dbWorkspace) {
+    if (objectNameSizeService.objectNameSizeExceedsThreshold(dbWorkspace)) {
+      return false;
+    }
+
+    forceDeleteWorkspace(dbWorkspace);
+    return true;
+  }
+
+  @Transactional
+  @Override
+  public void forceDeleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
@@ -356,6 +372,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return updateRecentWorkspaces(
         workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
+  }
+
+  @Override
+  public Set<DbWorkspace> getActiveWorkspacesForUser(DbUser user) {
+    return workspaceDao.findAllByCreatorAndActiveStatus(
+        user, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   private DbUserRecentWorkspace updateRecentWorkspaces(

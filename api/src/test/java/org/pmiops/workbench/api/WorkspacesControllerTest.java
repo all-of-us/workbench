@@ -112,6 +112,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -280,6 +281,7 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
+  @Autowired ObjectNameSizeService objectNameSizeService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
@@ -334,6 +336,7 @@ public class WorkspacesControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
+    ObjectNameSizeService.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -694,7 +697,7 @@ public class WorkspacesControllerTest {
       workspace = workspacesController.createWorkspace(workspace).getBody();
       uniqueIds.add(workspace.getId());
 
-      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName(), true);
     }
     assertThat(uniqueIds.size()).isEqualTo(1);
   }
@@ -1013,7 +1016,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName(), true);
     verify(mockWorkspaceAuditor).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
@@ -1733,7 +1736,7 @@ public class WorkspacesControllerTest {
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
     assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
 
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId(), true);
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");

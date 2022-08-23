@@ -999,6 +999,12 @@ paths:
           schema:
             "$ref": "#/definitions/Workspace"
     delete:
+      parameters:
+      - in: query
+        name: force
+        required: false
+        default: false
+        type: boolean
       tags:
       - workspaces
       description: Deletes the workspace definition with the specified ID and namespace
@@ -1841,6 +1847,17 @@ paths:
       description: 'Endpoint meant to be called offline to trigger re-enqueueing of any pending
         egress events. Only executable via App Engine cronjob.'
       operationId: checkPendingEgressEvents
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/checkObjectNameSize":
+    get:
+      security: []
+      tags:
+      - offlineObjectNameSize
+      - cron
+      description: ''
+      operationId: checkObjectNameSize
       responses:
         204:
           description: No content.

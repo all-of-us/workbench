@@ -51,6 +51,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -221,6 +222,7 @@ public class ConceptSetsControllerTest {
     WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
+    ObjectNameSizeService.class,
   })
   @MockBean({
     AccessModuleService.class,

@@ -46,10 +46,12 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -82,7 +84,9 @@ public class WorkspaceServiceTest {
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
-    WorkspaceAuthService.class
+    WorkspaceAuthService.class,
+    CloudStorageClientImpl.class,
+    ObjectNameSizeService.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -431,7 +435,7 @@ public class WorkspaceServiceTest {
   @Test
   public void deleteWorkspace() {
     DbWorkspace ws = dbWorkspaces.get(0); // arbitrary choice of those defined for testing
-    workspaceService.deleteWorkspace(ws);
+    workspaceService.forceDeleteWorkspace(ws);
     assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
 
     String billingProject = ws.getWorkspaceNamespace();
@@ -449,7 +453,7 @@ public class WorkspaceServiceTest {
         .when(mockFireCloudService)
         .deleteBillingProject(anyString());
 
-    workspaceService.deleteWorkspace(ws);
+    workspaceService.forceDeleteWorkspace(ws);
 
     // deletion succeeds
 

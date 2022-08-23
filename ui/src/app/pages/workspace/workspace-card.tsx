@@ -128,7 +128,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         AnalyticsTracker.Workspaces.Delete();
         await workspacesApi().deleteWorkspace(
           this.props.workspace.namespace,
-          this.props.workspace.id
+          this.props.workspace.id,
+          false
         );
         await this.props.reload();
       }
