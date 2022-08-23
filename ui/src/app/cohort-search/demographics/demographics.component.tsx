@@ -325,7 +325,7 @@ export class Demographics extends React.Component<Props, State> {
 
   selectOption(opt: any) {
     AnalyticsTracker.CohortBuilder.SelectDemographics(
-      `${typeToTitle(opt.type)} - ${opt.name}`
+      `Select ${typeToTitle(opt.type)} - ${opt.name}`
     );
     this.props.select({
       ...opt,

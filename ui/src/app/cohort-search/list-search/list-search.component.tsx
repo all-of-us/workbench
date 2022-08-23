@@ -550,6 +550,11 @@ export const ListSearch = fp.flow(
           );
         }
       }
+      if (this.props.searchContext.source === 'cohort') {
+        AnalyticsTracker.CohortBuilder.SelectCriteria(
+          `Select ${domainToTitle(domainId)} - '${name}'`
+        );
+      }
       this.props.select(param);
     };
 
