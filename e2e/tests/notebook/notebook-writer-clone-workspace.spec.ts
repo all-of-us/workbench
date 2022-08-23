@@ -22,7 +22,9 @@ describe('WRITER clone workspace and notebook tests', () => {
     await findOrCreateWorkspace(page, { workspaceName: writerWorkspaceName });
   });
 
-  test('Create notebook and share workspace to WRITER', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Create notebook and share workspace to WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });
 
