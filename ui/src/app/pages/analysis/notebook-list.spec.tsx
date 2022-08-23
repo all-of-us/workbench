@@ -18,7 +18,10 @@ import { NotebookList } from './notebook-list';
 
 const RESOURCE_TYPE_COLUMN_NUMBER = 1;
 const NOTEBOOK_NAME_COLUMN_NUMBER = 2;
-const MODIFED_DATE_COLUMN_NUMBER = 3;
+const MODIFIED_DATE_COLUMN_NUMBER = 3;
+
+const NOTEBOOK_HREF_LOCATION =
+  '/workspaces/defaultNamespace/1/notebooks/preview/mockFile.ipynb';
 
 describe('NotebookList', () => {
   beforeEach(() => {
@@ -51,7 +54,7 @@ describe('NotebookList', () => {
     );
 
     // Forth column of notebook table displays last modified time
-    expect(notebookTableColumns.at(MODIFED_DATE_COLUMN_NUMBER).text()).toMatch(
+    expect(notebookTableColumns.at(MODIFIED_DATE_COLUMN_NUMBER).text()).toMatch(
       displayDateWithoutHours(
         NotebooksApiStub.stubNotebookList()[0].lastModifiedTime
       )
@@ -77,13 +80,13 @@ describe('NotebookList', () => {
         .at(RESOURCE_TYPE_COLUMN_NUMBER)
         .find('a')
         .prop('href')
-    ).toBe('/workspaces/defaultNamespace/1/notebooks/preview/mockFile.ipynb');
+    ).toBe(NOTEBOOK_HREF_LOCATION);
 
     expect(
       notebookTableColumns
         .at(NOTEBOOK_NAME_COLUMN_NUMBER)
         .find('a')
         .prop('href')
-    ).toBe('/workspaces/defaultNamespace/1/notebooks/preview/mockFile.ipynb');
+    ).toBe(NOTEBOOK_HREF_LOCATION);
   });
 });

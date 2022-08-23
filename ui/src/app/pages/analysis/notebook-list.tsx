@@ -230,6 +230,7 @@ export const NotebookList = withCurrentWorkspace()(
                     {/* disable if user does not have write permission*/}
                     <TooltipTrigger content={this.disabledCreateButtonText()}>
                       <Clickable
+                        style={{ paddingTop: '0.5rem', paddingRight: '0.5rem' }}
                         onClick={() => {
                           AnalyticsTracker.Notebooks.OpenCreateModal();
                           this.setState({ creating: true });
@@ -242,25 +243,22 @@ export const NotebookList = withCurrentWorkspace()(
                         <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
                       </Clickable>
                     </TooltipTrigger>
-                    <ListPageHeader
-                      style={{
-                        paddingLeft: '0.5rem',
-                        paddingTop: '-1.2rem',
-                        paddingRight: '0.3rem',
-                      }}
+                    <ListPageHeader>Create a New Notebook</ListPageHeader>
+                    <div
+                      style={{ paddingTop: '0.4rem', paddingLeft: '0.5rem' }}
                     >
-                      Create a New Notebook
-                    </ListPageHeader>
-                    <TooltipTrigger
-                      content={`A Notebook is a computational environment where you
+                      <TooltipTrigger
+                        side={'right'}
+                        content={`A Notebook is a computational environment where you
             can analyze data with basic programming knowledge in R or Python.`}
-                    >
-                      <InfoIcon size={16} />
-                    </TooltipTrigger>
+                      >
+                        <InfoIcon size={16} />
+                      </TooltipTrigger>
+                    </div>
                   </FlexRow>
                   {!loading && (
                     <ResourcesList
-                      workspacesResources={this.getNotebookListAsResources()}
+                      workspaceResources={this.getNotebookListAsResources()}
                       onUpdate={() => this.loadNotebooks()}
                     />
                   )}

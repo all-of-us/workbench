@@ -42,14 +42,14 @@ interface TableData {
 }
 
 interface Props {
-  workspacesResources: WorkspaceResource[];
+  workspaceResources: WorkspaceResource[];
   onUpdate: Function;
 }
 
 export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   const [tableData, setTableData] = useState<TableData[]>();
 
-  const loadResources = async () => {
+  const reloadResources = async () => {
     await props.onUpdate();
   };
 
@@ -58,15 +58,15 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
       resource,
       menuOnly: true,
       existingNameList: [], // TODO existing bug RW-5847: does not populate names for rename modal
-      onUpdate: loadResources,
+      onUpdate: reloadResources,
     });
   };
 
   useEffect(() => {
-    const { workspacesResources } = props;
-    if (workspacesResources) {
+    const { workspaceResources } = props;
+    if (workspaceResources) {
       setTableData(
-        workspacesResources.map((r) => {
+        workspaceResources.map((r) => {
           return {
             menu: renderResourceMenu(r),
             resourceType: (
@@ -86,11 +86,12 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
         })
       );
     }
-  }, [props.workspacesResources]);
+  }, [props.workspaceResources]);
 
   const filterNameColumn = (value, filter) => {
     return value.props.children.toUpperCase().startsWith(filter.toUpperCase());
   };
+
   return (
     <React.Fragment>
       <div data-test-id='recent-resources-table'>
