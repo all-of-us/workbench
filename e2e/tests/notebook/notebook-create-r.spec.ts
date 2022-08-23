@@ -1,7 +1,7 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import { Language, } from 'app/text-labels';
+import { Language } from 'app/text-labels';
 import expect from 'expect';
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
@@ -55,7 +55,7 @@ describe('Create R kernel notebook', () => {
   });
 
   /*Comment the test below as they will be moved to the new version of e2e test.
-  * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
 
   // test('Duplicate rename delete notebook', async () => {
   //   await loadWorkspace(page, workspaceName);
