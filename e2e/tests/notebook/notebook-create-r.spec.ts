@@ -56,44 +56,47 @@ describe('Create R kernel notebook', () => {
     expect(cell3Output).toMatch(/success$/);
   });
 
-  test('Duplicate rename delete notebook', async () => {
-    await loadWorkspace(page, workspaceName);
+  /*Comment the test below as they will be moved to the new version of e2e test.
+  * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
 
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await openTab(page, Tabs.Analysis, analysisPage);
-
-    // Start clone notebook.
-    const cloneNotebookName = `Duplicate of ${rNotebookName}`;
-    await analysisPage.duplicateNotebook(rNotebookName);
-
-    // Rename notebook clone.
-    const newNotebookName = makeRandomName('r-cloneNotebook');
-    const modalTextContents = await analysisPage.renameResource(
-      cloneNotebookName,
-      newNotebookName,
-      ResourceCard.Notebook
-    );
-    expect(modalTextContents).toContain(`Enter new name for ${cloneNotebookName}`);
-
-    // Notebook card with new name is found.
-    const dataResourceCard = new DataResourceCard(page);
-    let cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(true);
-
-    // Notebook card with old name is not found.
-    cardExists = await dataResourceCard.cardExists(cloneNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(false);
-
-    // Delete newly renamed notebook.
-    await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
-    // Verify delete was successful.
-    cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(false);
-
-    // Delete R notebook
-    await analysisPage.deleteResource(rNotebookName, ResourceCard.Notebook);
-    await analysisPage.waitForLoad();
-  });
+  // test('Duplicate rename delete notebook', async () => {
+  //   await loadWorkspace(page, workspaceName);
+  //
+  //   const analysisPage = new WorkspaceAnalysisPage(page);
+  //   await openTab(page, Tabs.Analysis, analysisPage);
+  //
+  //   // Start clone notebook.
+  //   const cloneNotebookName = `Duplicate of ${rNotebookName}`;
+  //   await analysisPage.duplicateNotebook(rNotebookName);
+  //
+  //   // Rename notebook clone.
+  //   const newNotebookName = makeRandomName('r-cloneNotebook');
+  //   const modalTextContents = await analysisPage.renameResource(
+  //     cloneNotebookName,
+  //     newNotebookName,
+  //     ResourceCard.Notebook
+  //   );
+  //   expect(modalTextContents).toContain(`Enter new name for ${cloneNotebookName}`);
+  //
+  //   // Notebook card with new name is found.
+  //   const dataResourceCard = new DataResourceCard(page);
+  //   let cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+  //   expect(cardExists).toBe(true);
+  //
+  //   // Notebook card with old name is not found.
+  //   cardExists = await dataResourceCard.cardExists(cloneNotebookName, ResourceCard.Notebook);
+  //   expect(cardExists).toBe(false);
+  //
+  //   // Delete newly renamed notebook.
+  //   await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
+  //   // Verify delete was successful.
+  //   cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+  //   expect(cardExists).toBe(false);
+  //
+  //   // Delete R notebook
+  //   await analysisPage.deleteResource(rNotebookName, ResourceCard.Notebook);
+  //   await analysisPage.waitForLoad();
+  // });
 
   // Helper functions: Load previously saved URL instead clicks thru links to open workspace data page.
   async function loadWorkspace(page: Page, workspaceName?: string): Promise<string> {

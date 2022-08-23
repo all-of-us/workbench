@@ -23,6 +23,10 @@ const styles = reactStyles({
     textAlign: 'left',
     width: '130px',
   },
+  modifiedDateColumn: {
+    textAlign: 'left',
+    width: '9rem',
+  },
   menu: {
     width: '30px',
   },
@@ -101,6 +105,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             value={tableData}
             scrollable={true}
             sortMode='multiple'
+            style={{ width: '40rem' }}
           >
             <Column field='menu' style={styles.menu} />
             <Column
@@ -120,8 +125,8 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             />
             <Column
               field='formattedLastModified'
-              header='Last changed'
-              style={styles.column}
+              header='Last Modified Date'
+              style={styles.modifiedDateColumn}
             />
           </DataTable>
         )}
