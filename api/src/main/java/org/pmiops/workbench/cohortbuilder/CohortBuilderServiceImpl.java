@@ -336,14 +336,18 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandard(
-            domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
+        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
+            domain,
+            term.replaceAll("[()+\"*-]", ""),
+            standard,
+            CriteriaType.NONE.toString(),
+            pageRequest);
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
-              domain, modifiedSearchTerm, standard, pageRequest);
+          cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandardAndNotType(
+              domain, modifiedSearchTerm, standard, CriteriaType.NONE.toString(), pageRequest);
     }
 
     return new CriteriaListWithCountResponse()
@@ -356,7 +360,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainV2(
-      String domain, String term, String surveyName, Boolean standard, Integer limit) {
+      String domain,
+      String term,
+      String surveyName,
+      Boolean standard,
+      Boolean removeDrugBrand,
+      Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
 
@@ -372,10 +381,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
     }
 
+    // if we need to remove brand names(only applies to drugs) use brand type otherwise use none
+    // for  other domains
+    String type = removeDrugBrand ? CriteriaType.BRAND.toString() : CriteriaType.NONE.toString();
+
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandard(
-            domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
+        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
+            domain, term.replaceAll("[()+\"*-]", ""), standard, type, pageRequest);
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
     // this needs ot be here since word length of <3 are filtered and there are 2-concept codes
@@ -387,7 +400,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomain(domain, searchTerm, standard, pageRequest);
+          cbCriteriaDao.findCriteriaByDomain(domain, searchTerm, standard, type, pageRequest);
     }
 
     return new CriteriaListWithCountResponse()

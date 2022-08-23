@@ -101,6 +101,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + MATCH_FULL_TEXT_DOMAIN
+          + "and type != :"
+          + BIND_VAR_TYPE
+          + "\n"
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -115,6 +118,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + BIND_VAR_STANDARD
           + "\n"
           + MATCH_FULL_TEXT_DOMAIN_TERM
+          + "and type != :"
+          + BIND_VAR_TYPE
+          + "\n"
           + "and ("
           + SQL_ENDS_WITH
           + ")\n"
@@ -327,11 +333,12 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Override
-  public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndStandard(
-      String domain, List<String> endsWithList, Boolean standard, Pageable page) {
+  public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndStandardAndNotType(
+      String domain, List<String> endsWithList, Boolean standard, String type, Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
-      {BIND_VAR_STANDARD, standard}
+      {BIND_VAR_STANDARD, standard},
+      {BIND_VAR_TYPE, type}
     };
     QueryAndParameters queryAndParameters =
         generateQueryAndParameters(CRITERIA_BY_DOMAIN_ENDS_WITH, params, endsWithList);
@@ -342,12 +349,18 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   }
 
   @Override
-  public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndTermAndStandard(
-      String domain, String term, List<String> endsWithList, Boolean standard, Pageable page) {
+  public Page<DbCriteria> findCriteriaByDomainAndNameEndsWithAndTermAndStandardAndNotType(
+      String domain,
+      String term,
+      List<String> endsWithList,
+      Boolean standard,
+      String type,
+      Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_STANDARD, standard},
-      {BIND_VAR_TERM, term}
+      {BIND_VAR_TERM, term},
+      {BIND_VAR_TYPE, type}
     };
     QueryAndParameters queryAndParameters =
         generateQueryAndParameters(CRITERIA_BY_DOMAIN_TERM_ENDS_WITH, params, endsWithList);

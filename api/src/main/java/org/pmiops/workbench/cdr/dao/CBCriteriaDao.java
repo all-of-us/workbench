@@ -81,19 +81,20 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   }
 
   default Page<DbCriteria> findCriteriaByDomain(
-      String domain, SearchTerm searchTerm, Boolean standard, Pageable pageRequest) {
+      String domain, SearchTerm searchTerm, Boolean standard, String type, Pageable pageRequest) {
     if (searchTerm.hasModifiedTermOnly()) {
-      return findCriteriaByDomainAndFullTextAndStandard(
-          domain, searchTerm.getModifiedTerm(), standard, pageRequest);
+      return findCriteriaByDomainAndFullTextAndStandardAndNotType(
+          domain, searchTerm.getModifiedTerm(), standard, type, pageRequest);
     } else if (searchTerm.hasEndsWithOnly()) {
-      return findCriteriaByDomainAndNameEndsWithAndStandard(
-          domain, searchTerm.getEndsWithTerms(), standard, pageRequest);
+      return findCriteriaByDomainAndNameEndsWithAndStandardAndNotType(
+          domain, searchTerm.getEndsWithTerms(), standard, type, pageRequest);
     } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
-      return findCriteriaByDomainAndNameEndsWithAndTermAndStandard(
+      return findCriteriaByDomainAndNameEndsWithAndTermAndStandardAndNotType(
           domain,
           searchTerm.getModifiedTerm(),
           searchTerm.getEndsWithTerms(),
           standard,
+          type,
           pageRequest);
     }
     return Page.empty();
@@ -195,11 +196,13 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "where standard=:standard "
               + "and code like upper(concat(:term,'%')) "
               + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "and type != :type "
               + "order by c.count desc")
-  Page<DbCriteria> findCriteriaByDomainAndCodeAndStandard(
+  Page<DbCriteria> findCriteriaByDomainAndCodeAndStandardAndNotType(
       @Param("domain") String domain,
       @Param("term") String term,
       @Param("standard") Boolean standard,
+      @Param("type") String type,
       Pageable page);
 
   @Query(
@@ -208,11 +211,13 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "from DbCriteria c "
               + "where standard=:standard "
               + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "and type != :type "
               + "order by c.count desc, c.name asc")
-  Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandard(
+  Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandardAndNotType(
       @Param("domain") String domain,
       @Param("term") String term,
       @Param("standard") Boolean standard,
+      @Param("type") String type,
       Pageable page);
 
   @Query(
