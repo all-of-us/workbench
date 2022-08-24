@@ -337,11 +337,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
         const domain = _item.type;
         // If domain is PERSON, list the type as well as the domain in the label
         const { type, standard } = getTypeAndStandard(searchParameters, domain);
-        const label = `Edit item - ${
-          role === 'includes' ? 'Include' : 'Exclude'
-        } Criteria - ${domainToTitle(domain)}${
+        const label = `Edit ${domainToTitle(domain)}${
           domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
-        }`;
+        } item - ${role === 'includes' ? 'Include' : 'Exclude'} Criteria`;
         currentCohortCriteriaStore.next(
           JSON.parse(JSON.stringify(searchParameters))
         );

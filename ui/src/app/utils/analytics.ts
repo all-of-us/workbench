@@ -329,6 +329,12 @@ export const AnalyticsTracker = {
       ),
   },
   CohortBuilder: {
+    SelectCriteria: (label) =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click select icon',
+        label
+      ),
     SelectDemographics: (suffix) =>
       triggerEvent(
         AnalyticsCategory.COHORT_BUILDER,

@@ -32,13 +32,6 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 @Entity
 @Table(name = "workspace")
 public class DbWorkspace {
-  /**
-   * Deprecated database migration field. The column is preserved for historical reference, but
-   * forced to 1 (NEW) for all workspaces going forward.
-   */
-  public static final short BILLING_MIGRATION_NEW_STATUS = 1;
-
-  private short billingMigrationStatus = BILLING_MIGRATION_NEW_STATUS;
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -72,13 +65,6 @@ public class DbWorkspace {
       return this.workspaceNamespace.equals(that.workspaceNamespace)
           && this.workspaceName.equals(that.workspaceName);
     }
-  }
-
-  // see https://precisionmedicineinitiative.atlassian.net/browse/RW-2705
-  public enum BillingMigrationStatus {
-    OLD, // pre-1PPW; this billing project may be associated with multiple workspaces
-    NEW, // a One Project Per DbWorkspace (1PPW) billing project
-    MIGRATED // a pre-1PPW billing project which has been cloned and is now ready to be deleted
   }
 
   private long workspaceId;
@@ -396,15 +382,6 @@ public class DbWorkspace {
   public DbWorkspace setOtherPurposeDetails(String otherPurposeDetails) {
     this.otherPurposeDetails = otherPurposeDetails;
     return this;
-  }
-
-  @Column(name = "billing_migration_status")
-  private short getBillingMigrationStatus() {
-    return billingMigrationStatus;
-  }
-
-  private void setBillingMigrationStatus(Short status) {
-    this.billingMigrationStatus = status;
   }
 
   @Column(name = "google_project")
@@ -798,5 +775,42 @@ public class DbWorkspace {
         .append(billingAccountName)
         .append(googleProject)
         .toHashCode();
+  }
+
+  /**
+   * Preserve the database migration field 'billing_migration_status' for historical purposes, to
+   * indicate the status of some older workspaces. All workspaces created going forward have status
+   * 1 (NEW).
+   *
+   * <p>For additional context, see also:
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-2607
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-2705
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-5492
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-5493
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-8705
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-8709
+   */
+  @Deprecated
+  public enum BillingMigrationStatus {
+    OLD, // 0 (DEPRECATED) - indicates pre-1PPW; this billing project may be associated with
+    // multiple workspaces
+
+    NEW, // 1 - a One Project Per Workspace (1PPW) billing project; all new workspaces
+
+    MIGRATED // 2 (DEPRECATED) - an original pre-1PPW billing project which has been cloned to a
+    // 1/NEW workspace, and then deleted.
+  }
+
+  private short billingMigrationStatus = 1; // NEW (1PPW) - includes all post-2019 workspaces
+
+  @Column(name = "billing_migration_status")
+  @Deprecated // do not use; only retained for Hibernate compatibility
+  private short getBillingMigrationStatus() {
+    return billingMigrationStatus;
+  }
+
+  @Deprecated // do not use; only retained for Hibernate compatibility
+  private void setBillingMigrationStatus(Short status) {
+    this.billingMigrationStatus = status;
   }
 }

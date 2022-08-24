@@ -29,19 +29,19 @@ export const signInGuard: Guard = {
   redirectPath: '/login',
 };
 
-const userIsEnabled = (userDisabledInDb: boolean) =>
-  !userDisabledInDb &&
-  eligibleForTier(profileStore.get().profile, AccessTierShortNames.Registered);
+export const userIsDisabled = (userDisabledInDb: boolean) =>
+  userDisabledInDb ||
+  !eligibleForTier(profileStore.get().profile, AccessTierShortNames.Registered);
 
 export const disabledGuard = (userDisabledInDb: boolean): Guard => ({
   // Show disabled screen when user account is disabled by admin or removed from institution registered tier requirement.
-  allowed: (): boolean => userIsEnabled(userDisabledInDb),
+  allowed: (): boolean => !userIsDisabled(userDisabledInDb),
   redirectPath: '/user-disabled',
 });
 
 export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
   // enabled users should be redirected to the homepage if they visit the /user-disabled page
-  allowed: (): boolean => !userIsEnabled(userDisabledInDb),
+  allowed: (): boolean => userIsDisabled(userDisabledInDb),
   redirectPath: '/',
 });
 

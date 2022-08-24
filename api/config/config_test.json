@@ -118,7 +118,7 @@
     "enableUniversalSearch": true,
     "enableMultiReview": true,
     "enableUpdatedDemographicSurvey": true,
-    "enableDrugWildcardSearch": false
+    "enableDrugWildcardSearch": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

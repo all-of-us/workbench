@@ -11,12 +11,14 @@ import {
 
 import { PREDEFINED_ATTRIBUTES } from 'app/cohort-search/constant';
 import { ppiQuestions } from 'app/cohort-search/search-state.service';
+import { domainToTitle } from 'app/cohort-search/utils';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { highlightSearchTerm, reactStyles } from 'app/utils';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
@@ -331,6 +333,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       node: { conceptId, domainId, group, parentId, subtype, value },
       select,
       selectedIds,
+      source,
     } = this.props;
     let {
       node: { name },
@@ -370,6 +373,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         attributes,
         name,
       };
+      if (source === 'cohort') {
+        AnalyticsTracker.CohortBuilder.SelectCriteria(
+          `Select ${domainToTitle(domainId)} - '${name}'`
+        );
+      }
       select(param);
     }
   }

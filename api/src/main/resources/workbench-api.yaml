@@ -3567,6 +3567,12 @@ paths:
           required: false
           description: name for the survey to search
         - in: query
+          name: removeDrugBrand
+          type: boolean
+          default: false
+          required: false
+          description: True - remove brand names from results
+        - in: query
           name: limit
           type: integer
           required: false
@@ -8421,6 +8427,7 @@ definitions:
     - SEX
     - SNOMED
     - VISIT
+    - NONE
   CriteriaSubType:
     type: string
     description: possible criteria types

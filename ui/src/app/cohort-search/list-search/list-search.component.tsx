@@ -320,6 +320,7 @@ interface State {
   childNodes: any;
   inputErrors: Array<string>;
   loading: boolean;
+  removeDrugBrand: boolean;
   searching: boolean;
   searchSource: boolean;
   searchTerms: string;
@@ -352,6 +353,7 @@ export const ListSearch = fp.flow(
         inputErrors: [],
         hoverId: undefined,
         loading: false,
+        removeDrugBrand: false,
         searching: false,
         searchSource: [
           Domain.PHYSICALMEASUREMENT,
@@ -465,6 +467,7 @@ export const ListSearch = fp.flow(
           workspace: { id, namespace },
         } = this.props;
         const { searchSource } = this.state;
+        const { removeDrugBrand } = this.state;
         const surveyName = selectedSurvey || 'All';
         const resp = await cohortBuilderApi().findCriteriaByDomain(
           namespace,
@@ -472,7 +475,8 @@ export const ListSearch = fp.flow(
           domain,
           !searchSource,
           value.trim(),
-          surveyName
+          surveyName === 'All Surveys' ? 'All' : surveyName,
+          removeDrugBrand
         );
         let data;
         if (this.isSurvey) {
@@ -518,6 +522,10 @@ export const ListSearch = fp.flow(
       );
     }
 
+    get checkDrug() {
+      return [Domain.DRUG].includes(this.props.searchContext.domain);
+    }
+
     selectIconDisabled() {
       const {
         searchContext: { source },
@@ -549,6 +557,11 @@ export const ListSearch = fp.flow(
               : { name: AttrName.CAT, operator: Operator.IN, operands: [value] }
           );
         }
+      }
+      if (this.props.searchContext.source === 'cohort') {
+        AnalyticsTracker.CohortBuilder.SelectCriteria(
+          `Select ${domainToTitle(domainId)} - '${name}'`
+        );
       }
       this.props.select(param);
     };
@@ -686,6 +699,13 @@ export const ListSearch = fp.flow(
     toggleSearchSource() {
       this.setState(
         (state) => ({ searchSource: !state.searchSource }),
+        () => this.getResultsBySourceOrStandard(this.state.searchTerms || '')
+      );
+    }
+
+    toggleDrugBrand() {
+      this.setState(
+        (state) => ({ removeDrugBrand: !state.removeDrugBrand }),
         () => this.getResultsBySourceOrStandard(this.state.searchTerms || '')
       );
     }
@@ -881,6 +901,7 @@ export const ListSearch = fp.flow(
         inputErrors,
         loading,
         searching,
+        removeDrugBrand,
         searchSource,
         searchTerms,
         standardOnly,
@@ -1052,6 +1073,25 @@ export const ListSearch = fp.flow(
                     />
                   </span>
                 )}
+                {this.checkDrug &&
+                  serverConfigStore.get().config.enableDrugWildcardSearch && (
+                    <span style={{ float: 'right' }}>
+                      <span
+                        style={{
+                          display: 'table-cell',
+                          paddingRight: '0.35rem',
+                        }}
+                      >
+                        Remove Brand Names
+                      </span>
+                      <InputSwitch
+                        checked={removeDrugBrand}
+                        disabled={loading}
+                        onChange={() => this.toggleDrugBrand()}
+                        style={{ display: 'table-cell', boxShadow: 0 }}
+                      />
+                    </span>
+                  )}
               </div>
             </div>
           </div>

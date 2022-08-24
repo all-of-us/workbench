@@ -103,17 +103,11 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Optional<DbWorkspace> findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
       String googleProject, short activeStatus);
 
-  List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
-
   DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
   List<DbWorkspace> findAllByNeedsResearchPurposeReviewPrompt(short researchPurposeReviewed);
-
-  default List<DbWorkspace> findAllWithBillingMigrationNewStatus() {
-    return findAllByBillingMigrationStatus(DbWorkspace.BILLING_MIGRATION_NEW_STATUS);
-  }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {
     DbWorkspace toUpdate =

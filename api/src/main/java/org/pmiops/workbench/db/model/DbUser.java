@@ -404,7 +404,7 @@ public class DbUser {
   }
 
   @OneToOne(
-      cascade = CascadeType.ALL,
+      cascade = CascadeType.MERGE,
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")

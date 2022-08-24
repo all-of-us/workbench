@@ -211,7 +211,8 @@
   <include file="changelog/db.changelog-201-demographic-survey-v2-aian.xml"/>
   <include file="changelog/db.changelog-202-drop-user-recent-resource.xml"/>
   <include file="changelog/db.changelog-203-delete-old-billing-migration-workspaces.xml"/>
-  <include file="changelog/db.changelog-204-last-modified-by.xml"/>
+  <include file="changelog/db.changelog-204-demographic-survey-fk-constraint.xml"/>
+  <include file="changelog/db.changelog-205-last-modified-by.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -47,7 +47,7 @@ import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
-  DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+  DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_MACHINE_NAME,
   DEFAULT_MACHINE_TYPE,
@@ -924,25 +924,34 @@ const DiskSelector = ({
   disabled,
   disableDetachableReason,
   existingDisk,
+  computeType,
 }: {
   diskConfig: DiskConfig;
   onChange: (c: DiskConfig) => void;
   disabled: boolean;
   disableDetachableReason: string | null;
   existingDisk: Disk | null;
+  computeType: string | null;
 }) => {
   return (
     <FlexColumn
       style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
     >
-      <FlexRow style={{ gap: '8px' }}>
-        <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
-          Storage disk options
-        </span>
-        <StyledExternalLink href={supportUrls.persistentDisk}>
-          View documentation
-        </StyledExternalLink>
-      </FlexRow>
+      <FlexColumn>
+        {computeType === ComputeType.Dataproc && (
+          <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
+            Master Node Configuration
+          </span>
+        )}
+        <FlexRow style={{ gap: '8px' }}>
+          <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
+            Storage disk options
+          </span>
+          <StyledExternalLink href={supportUrls.persistentDisk}>
+            View documentation
+          </StyledExternalLink>
+        </FlexRow>
+      </FlexColumn>
       <FlexRow style={styles.diskRow}>
         <RadioButton
           name='standardDisk'
@@ -1176,7 +1185,7 @@ const DataProcConfigSelector = ({
 }) => {
   const {
     workerMachineType = DEFAULT_MACHINE_NAME,
-    workerDiskSize = DATAPROC_WORKER_MIN_DISK_SIZE_GB,
+    workerDiskSize = DATAPROC_MIN_DISK_SIZE_GB,
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0,
   } = dataprocConfig || {};
@@ -1871,17 +1880,21 @@ const RuntimePanel = fp.flow(
       const maxDiskSize = isUsingFreeTierBillingAccount(workspace)
         ? 4000
         : 64000;
+      const minDiskSize =
+        analysisConfig.computeType === ComputeType.Dataproc
+          ? DATAPROC_MIN_DISK_SIZE_GB
+          : MIN_DISK_SIZE_GB;
       const message = {
-        standard: `^Disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-        master: `^Master disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-        worker: `^Worker disk size must be between ${DATAPROC_WORKER_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+        standard: `^Disk size must be between ${minDiskSize} and ${maxDiskSize} GB`,
+        master: `^Master disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+        worker: `^Worker disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
       };
 
       return {
         numericality: {
           greaterThanOrEqualTo:
-            diskType === 'worker'
-              ? DATAPROC_WORKER_MIN_DISK_SIZE_GB
+            analysisConfig.computeType === ComputeType.Dataproc
+              ? DATAPROC_MIN_DISK_SIZE_GB
               : MIN_DISK_SIZE_GB,
           lessThanOrEqualTo: maxDiskSize,
           message: message[diskType],
@@ -2366,6 +2379,7 @@ const RuntimePanel = fp.flow(
                     disabled={disableControls}
                     disableDetachableReason={disableDetachableReason}
                     existingDisk={persistentDisk}
+                    computeType={analysisConfig.computeType}
                   />
                 )}
                 {runtimeExists && updateMessaging.warn && (

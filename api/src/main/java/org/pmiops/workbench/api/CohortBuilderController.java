@@ -143,13 +143,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       Boolean standard,
       String term,
       String surveyName,
+      Boolean removeDrugBrand,
       Integer limit) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain, surveyName);
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
       return ResponseEntity.ok(
-          cohortBuilderService.findCriteriaByDomainV2(domain, term, surveyName, standard, limit));
+          cohortBuilderService.findCriteriaByDomainV2(
+              domain, term, surveyName, standard, removeDrugBrand, limit));
     } else {
       return ResponseEntity.ok(
           cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
@@ -239,8 +241,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateTerm(term);
 
-    return ResponseEntity.ok(
-        new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCountsV2(term)));
+    } else {
+      return ResponseEntity.ok(
+          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
+    }
   }
 
   @Override
