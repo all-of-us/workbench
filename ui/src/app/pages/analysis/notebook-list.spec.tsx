@@ -43,7 +43,7 @@ describe('NotebookList', () => {
       .find('tbody')
       .find('td');
 
-    // Second Column of notebook table displays the type of resource type: Notebook
+    // Second Column of notebook table displays the type of resource: Notebook
     expect(notebookTableColumns.at(RESOURCE_TYPE_COLUMN_NUMBER).text()).toMatch(
       'Notebook'
     );
@@ -61,7 +61,7 @@ describe('NotebookList', () => {
     );
   });
 
-  it('should redirect to notebook playground mode when some resource type or name is clicked', async () => {
+  it('should redirect to notebook playground mode when either resource type or name is clicked', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
     const wrapper = mount(
       <MemoryRouter>
@@ -74,7 +74,6 @@ describe('NotebookList', () => {
       .find('tbody')
       .find('td');
 
-    // verify columns displaying resource type and notebook name are clickable
     expect(
       notebookTableColumns
         .at(RESOURCE_TYPE_COLUMN_NUMBER)
