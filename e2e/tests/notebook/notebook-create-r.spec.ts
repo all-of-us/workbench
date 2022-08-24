@@ -1,10 +1,12 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import { Language } from 'app/text-labels';
+import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
+import DataResourceCard from 'app/component/card/data-resource-card';
+import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
