@@ -344,6 +344,7 @@ export const CohortSearch = fp.flow(
         selectable: true,
         attributes: [],
       } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectDemographics('Select Deceased');
       saveCriteria([param]);
     }
 
@@ -360,6 +361,9 @@ export const CohortSearch = fp.flow(
         selectable: true,
         attributes: [],
       } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Has any Fitbit data'
+      );
       saveCriteria([param]);
     }
 
@@ -376,6 +380,9 @@ export const CohortSearch = fp.flow(
         selectable: true,
         attributes: [],
       } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Whole Genome Sequence'
+      );
       saveCriteria([param]);
     }
 
@@ -392,6 +399,9 @@ export const CohortSearch = fp.flow(
         selectable: true,
         attributes: [],
       } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Global Diversity Array'
+      );
       saveCriteria([param]);
     }
 

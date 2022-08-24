@@ -415,11 +415,10 @@ export const SearchGroup = withCurrentWorkspace()(
       const { group, setSearchContext, role } = this.props;
       const { domain, selectedSurvey, type, standard } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
-      const label = `Add ${
-        role === 'includes' ? 'Include' : 'Exclude'
-      } Criteria - ${domainToTitle(domain)}${
+      const label = `Enter ${domainToTitle(domain)}${
         domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
-      }${temporalGroup === 1 ? ' - Temporal' : ''}`;
+      } search - ${role === 'includes' ? 'Include' : 'Exclude'} Criteria
+      ${temporalGroup === 1 ? ' - Temporal' : ''}`;
       AnalyticsTracker.CohortBuilder.LaunchSearch(label);
       const itemId = generateId('items');
       const item = initItem(itemId, domain, temporalGroup);

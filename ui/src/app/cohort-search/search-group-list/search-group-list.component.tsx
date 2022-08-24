@@ -186,11 +186,9 @@ const SearchGroupList = fp.flow(
       const { role } = this.props;
       const { domain, selectedSurvey, type, standard } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
-      const label = `Add ${
-        role === 'includes' ? 'Include' : 'Exclude'
-      } Criteria - ${domainToTitle(domain)}${
+      const label = `Enter ${domainToTitle(domain)}${
         domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
-      }`;
+      } search - ${role === 'includes' ? 'Include' : 'Exclude'} Criteria`;
       AnalyticsTracker.CohortBuilder.LaunchSearch(label);
 
       const itemId = generateId('items');
