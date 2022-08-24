@@ -56,7 +56,7 @@ describe('Workspace WRITER notebook tests', () => {
     await notebookPage.save();
   });
 
-  test('WRITER can copy notebook to another workspace with same access tier', async () => {
+  test.skip('WRITER can copy notebook to another workspace with same access tier', async () => {
     // WRITER log in.
     await signInWithAccessToken(page, config.WRITER_USER);
 
