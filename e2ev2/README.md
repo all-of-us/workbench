@@ -1,32 +1,108 @@
-Install dependencies:
+A properly configured system should be able to run:
+```
+yarn test tests/sanity.browser.test.js
+```
+
+Let's give it a try:
+```
+% yarn test tests/sanity.browser.test.js
+yarn run v1.22.18
+$ jest tests/sanity.browser.test.js
+/bin/sh: jest: command not found
+error Command failed with exit code 127.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+
+Dependencies are not installed. Run:
 ```
 yarn install
 ```
 
-Service Account key for calling impersonation APIs:
+Let's try again:
 ```
-export SA_KEY_JSON="$(<sa-key.json)"
+% yarn test tests/sanity.browser.test.js
+yarn run v1.22.18
+$ jest tests/sanity.browser.test.js
+ FAIL  tests/sanity.browser.test.js
+  ✕ page loads (7 ms)
+  ✕ view cookie policy page (1 ms)
+  ✕ navigation to /workspaces redirects to sign-in page
+  ✕ navigation to /profile redirects to sign-in page
+
+  ● page loads
+
+    Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (1002410).
 ```
 
-Make sure impersonation works:
-```
-node src/impersonate.js "$SA_KEY_JSON" all-of-us-workbench-test puppeteer-tester-7@fake-research-aou.org
-```
-
-Tell Puppeteer where your Chrome lives:
+We need to tell Puppeteer where your Chrome lives:
 ```
 export PUPPETEER_EXECUTABLE_PATH=/path/to/some/chromium/binary
 ```
 
-Set the hostname of the UI you are testing against:
+Again:
+```
+% yarn test tests/sanity.browser.test.js
+<snip>
+  ● view cookie policy page
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      API_PROXY_URL not defined
+```
+
+Point the tests at a running API Proxy. For example:
+```
+cd ../api-proxy
+PROXY_PORT=8080 PROXY_MODE=replay-only node startproxy.mjs
+```
+
+`replay-only` means that requests missing handlers will produce a 500 error rather than forwarding the request to the API servier. `record-only` does the opposite. The default is to use handlers when they are available and forward requests that do not have a handler defined.
+
+then:
+```
+export API_PROXY_URL=http://localhost:8080
+```
+
+Again:
+```
+% yarn test tests/sanity.browser.test.js
+<snip>
+    Message:
+      UI_HOSTNAME not defined. Try: export UI_HOSTNAME=all-of-us-workbench-test.appspot.com
+```
+
+`UI_HOSTNAME` holds the code under test.
 ```
 export UI_HOSTNAME=all-of-us-workbench-test.appspot.com
 ```
 
-Sanity checks:
+Should be good to go now:
 ```
-yarn test tests/sanity.browser.test.js
+% yarn test tests/sanity.browser.test.js
+yarn run v1.22.18
+$ jest tests/sanity.browser.test.js
+ PASS  tests/sanity.browser.test.js (14.386 s)
+  ✓ page loads (1370 ms)
+  ✓ view cookie policy page (5326 ms)
+  ✓ navigation to /workspaces redirects to sign-in page (3876 ms)
+  ✓ navigation to /profile redirects to sign-in page (3530 ms)
 
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        14.42 s
+Ran all test suites matching /tests\/sanity.browser.test.js/i.
+✨  Done in 14.99s.
+```
+
+Also try:
+```
 HEADLESS=false yarn test tests/sanity.browser.test.js
 ```
 
