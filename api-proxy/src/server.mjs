@@ -30,9 +30,6 @@ export const createReqHandler = handleReq => {
     }
     res.log = req.log
     const protocol = req.socket.encrypted ? 'https' : 'http'
-    const {host} = req.headers
-    const isIp = host.match(/^\d+[.]\d+[.]\d+[.]\d+/)
-    if (isIp) { return res.status(400).typeText().mwrite('Invalid host.'+nl).mend() }
     req.url = parseUrl(protocol, req)
     req.log('req %s %s %s',
       req.socket.remoteAddress, req.method, req.url
