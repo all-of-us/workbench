@@ -45,7 +45,9 @@ describe('Python Kernel Notebook Test', () => {
   const workspaceName = 'e2eCreatePythonKernelNotebookTest';
   const pyNotebookName = makeRandomName('Py3');
 
-  test('Run Python code and download notebook', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Run Python code and download notebook', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);

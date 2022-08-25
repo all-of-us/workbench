@@ -17,7 +17,9 @@ describe('Export Dataset to Notebook Test', () => {
    * - Export dataset to notebook via snowman menu.
    * - Notebook runtime is not started.
    */
-  test('Export to Python kernel Jupyter notebook via dataset card snowman menu', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Export to Python kernel Jupyter notebook via dataset card snowman menu', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
     const datasetName = await findOrCreateDataset(page, { openEditPage: false });
 

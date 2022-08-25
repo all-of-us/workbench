@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { faExclamationTriangle } from '@fortawesome/pro-solid-svg-icons';
+import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { BillingStatus, FileDetail, ResourceType } from 'generated/fetch';
 
-import { CardButton } from 'app/components/buttons';
+import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { FlexColumn } from 'app/components/flex';
-import { ClrIcon, InfoIcon } from 'app/components/icons';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { ListPageHeader } from 'app/components/headers';
+import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
-import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
 import {
   notebooksApi,
   profileApi,
@@ -21,6 +22,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { ResourcesList } from 'app/utils/resource-list';
 import { convertToResource } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -180,10 +182,17 @@ export const NotebookList = withCurrentWorkspace()(
       }
     }
 
+    getNotebookListAsResources = () => {
+      const { workspace } = this.props;
+      const { notebookList } = this.state;
+      return notebookList.map((notebook) => {
+        return convertToResource(notebook, ResourceType.NOTEBOOK, workspace);
+      });
+    };
+
     render() {
       const { workspace } = this.props;
       const {
-        notebookList,
         notebookNameList,
         creating,
         loading,
@@ -191,37 +200,7 @@ export const NotebookList = withCurrentWorkspace()(
       } = this.state;
       return (
         <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
-          <div style={styles.heading}>
-            Notebooks&nbsp;
-            <TooltipTrigger
-              content={`A Notebook is a computational environment where you
-            can analyze data with basic programming knowledge in R or Python.`}
-            >
-              <InfoIcon size={16} />
-            </TooltipTrigger>
-          </div>
           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-            <TooltipTrigger content={this.disabledCreateButtonText()}>
-              <CardButton
-                disabled={
-                  workspace.billingStatus === BillingStatus.INACTIVE ||
-                  !this.canWrite()
-                }
-                type='small'
-                onClick={() => {
-                  AnalyticsTracker.Notebooks.OpenCreateModal();
-                  this.setState({ creating: true });
-                }}
-              >
-                Create a<br />
-                New Notebook
-                <ClrIcon
-                  shape='plus-circle'
-                  size={21}
-                  style={{ marginTop: 5 }}
-                />
-              </CardButton>
-            </TooltipTrigger>
             <div
               style={{
                 display: 'flex',
@@ -230,44 +209,60 @@ export const NotebookList = withCurrentWorkspace()(
               }}
             >
               {showWaitingForNotebookTransferMsg ? (
-                <CardButton
-                  disabled={showWaitingForNotebookTransferMsg}
-                  style={styles.cloneNotebookCard}
-                  type='small'
-                  onClick={() => {}}
-                >
-                  <FlexColumn style={{ paddingTop: '0.5rem' }}>
-                    <div>
-                      <FontAwesomeIcon
-                        style={{ color: colors.warning }}
-                        icon={faExclamationTriangle}
-                        size='2x'
-                      />
-                    </div>
-                    <div style={styles.cloneNotebookMsg}>
-                      Copying 1 or more notebooks from another workspace. This
-                      may take <b> a few minutes</b>.
-                    </div>
-                  </FlexColumn>
-                </CardButton>
-              ) : (
-                notebookList.map((notebook, index) => {
-                  return (
-                    <NotebookResourceCard
-                      key={index}
-                      resource={convertToResource(
-                        notebook,
-                        ResourceType.NOTEBOOK,
-                        workspace
-                      )}
-                      existingNameList={notebookNameList}
-                      onUpdate={() => this.loadNotebooks()}
-                      disableDuplicate={
-                        workspace.billingStatus === BillingStatus.INACTIVE
-                      }
+                <FlexColumn style={{ paddingTop: '0.5rem' }}>
+                  <div>
+                    <FontAwesomeIcon
+                      style={{ color: colors.warning }}
+                      icon={faExclamationTriangle}
+                      size='2x'
                     />
-                  );
-                })
+                  </div>
+                  <div style={styles.cloneNotebookMsg}>
+                    Copying 1 or more notebooks from another workspace. This may
+                    take <b> a few minutes</b>.
+                  </div>
+                </FlexColumn>
+              ) : (
+                <FlexColumn>
+                  <FlexRow
+                    style={{ ...styles.heading, paddingBottom: '0.5rem' }}
+                  >
+                    {/* disable if user does not have write permission*/}
+                    <TooltipTrigger content={this.disabledCreateButtonText()}>
+                      <Clickable
+                        style={{ paddingTop: '0.5rem', paddingRight: '0.5rem' }}
+                        onClick={() => {
+                          AnalyticsTracker.Notebooks.OpenCreateModal();
+                          this.setState({ creating: true });
+                        }}
+                        disabled={
+                          workspace.billingStatus === BillingStatus.INACTIVE ||
+                          !this.canWrite()
+                        }
+                      >
+                        <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
+                      </Clickable>
+                    </TooltipTrigger>
+                    <ListPageHeader>Create a New Notebook</ListPageHeader>
+                    <div
+                      style={{ paddingTop: '0.4rem', paddingLeft: '0.5rem' }}
+                    >
+                      <TooltipTrigger
+                        side={'right'}
+                        content={`A Notebook is a computational environment where you
+            can analyze data with basic programming knowledge in R or Python.`}
+                      >
+                        <InfoIcon size={16} />
+                      </TooltipTrigger>
+                    </div>
+                  </FlexRow>
+                  {!loading && (
+                    <ResourcesList
+                      workspaceResources={this.getNotebookListAsResources()}
+                      onUpdate={() => this.loadNotebooks()}
+                    />
+                  )}
+                </FlexColumn>
               )}
             </div>
           </div>

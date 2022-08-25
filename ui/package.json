@@ -55,7 +55,7 @@
     "nouislider-react": "^3.3.7",
     "outdated-browser-rework": "^2.8.0",
     "portable-fetch": "^3.0.0",
-    "primeicons": "^1.0.0",
+    "primeicons": "^5.0.0",
     "primereact": "^4.2.0",
     "querystring-es3": "^0.2.1",
     "react": "^16.13.1",

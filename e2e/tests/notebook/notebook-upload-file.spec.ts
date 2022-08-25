@@ -18,7 +18,9 @@ describe('Notebook Upload File Test', () => {
   const pyFileName = 'nbstripoutput-filter.py';
   const pyFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${pyFileName}`);
 
-  test('Upload file and run Python code', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Upload file and run Python code', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);

@@ -19,7 +19,9 @@ describe('Notebook and Runtime UI Test', () => {
   const workspaceName = 'e2eCreatePythonKernelNotebookTest';
   let pyNotebookName: string;
 
-  test('Notebook name is unique', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Notebook name is unique', async () => {
     const existWorkspace = await openWorkspace(page, workspaceName);
     if (!existWorkspace) {
       logger.info(`Cannot find workspace "${workspaceName}". Test end early.`);

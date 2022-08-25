@@ -4,9 +4,9 @@ import { makeRandomName } from 'utils/str-utils';
 import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import { Page } from 'puppeteer';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import DataResourceCard from 'app/component/card/data-resource-card';
 import { logger } from 'libs/logger';
+import DataResourceCard from 'app/component/card/data-resource-card';
+import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -20,7 +20,9 @@ describe('Create R kernel notebook', () => {
   const workspaceName = 'e2eCreateRKernelNotebookTest';
   const rNotebookName = makeRandomName('R');
 
-  test('Run R code', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Run R code', async () => {
     await loadWorkspace(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);
@@ -56,7 +58,10 @@ describe('Create R kernel notebook', () => {
     expect(cell3Output).toMatch(/success$/);
   });
 
-  test('Duplicate rename delete notebook', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+
+  test.skip('Duplicate rename delete notebook', async () => {
     await loadWorkspace(page, workspaceName);
 
     const analysisPage = new WorkspaceAnalysisPage(page);

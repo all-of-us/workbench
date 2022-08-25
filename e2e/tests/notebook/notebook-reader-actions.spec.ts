@@ -27,7 +27,9 @@ describe('Workspace READER Jupyter notebook action tests', () => {
   const pyCode = '!jupyter kernelspec list';
   const pyAnswer = 'python3';
 
-  test('Share notebook to workspace READER', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Share notebook to workspace READER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });
 
