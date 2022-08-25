@@ -229,14 +229,14 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     };
 
     const categoryHasResults = (index: number) => {
-      return (
-        domainCounts === null ||
-        domainCounts.some((domainCount) =>
-          menuOptions[index].some(
-            (menuOption) => domainCount.domain === menuOption.domain
-          )
+      return domainCounts?.some((domainCount) =>
+        menuOptions[index].some(
+          (menuOption) => domainCount.domain === menuOption.domain
         )
       );
+    };
+    const showMenuItem = (index: number) => {
+      return domainCounts === null || categoryHasResults(index);
     };
 
     const closeAndClearMenu = () => {
@@ -373,7 +373,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                     )
                     .map((category, index) => (
                       <ul key={index}>
-                        {categoryHasResults(index) && (
+                        {showMenuItem(index) && (
                           <li
                             style={styles.dropdownHeader}
                             className='menuitem-header'
@@ -424,7 +424,10 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                 key={m}
                                 style={styles.dropdownLink}
                                 onClick={() => {
-                                  if (!menuItem.group) {
+                                  if (
+                                    !menuItem.group ||
+                                    categoryHasResults(index)
+                                  ) {
                                     onMenuItemClick(menuItem);
                                   }
                                 }}
@@ -442,7 +445,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                   </span>
                                 )}
                               </a>
-                              {menuItem.group && (
+                              {menuItem.group && !categoryHasResults(index) && (
                                 <React.Fragment>
                                   <i
                                     style={styles.subMenuIcon}
