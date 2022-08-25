@@ -24,7 +24,7 @@ const jsonParse = s => {
 const formatResBody = buf => {
   const s = buf.toString()
   const [e, obj] = jsonParse(s)
-  return e ? [null, s] : [obj, null]
+  return e ? [s, null] : [null, obj]
 }
 
 const formatHeaders = headers =>
@@ -43,7 +43,7 @@ const record = async (req, res, resBody) => {
     req.url.pathname.replace(/[/]/g, '|')+req.url.search+'.'+req.method.toLowerCase()
     +'.mjs'
   await fsp.mkdir(rdir, {recursive: true})
-  const [rbObj, rbString] = formatResBody(resBody)
+  const [rbString, rbObj] = formatResBody(resBody)
   const escapedBody = rbObj
     ? `JSON.stringify(\n${formatObj(rbObj)}\n)`
     : '`'+quoteBackquotes(rbString)+'`'
