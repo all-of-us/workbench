@@ -4421,10 +4421,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to persistent disk as the notebook storage
-      enableUniversalSearch:
-        type: boolean
-        default: false
-        description: Whether to enable Universal Search feature in Cohort Builder
       enableMultiReview:
         type: boolean
         default: false
