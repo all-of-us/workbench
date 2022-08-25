@@ -71,7 +71,6 @@ public interface WorkbenchConfigMapper {
       source = "config.featureFlags.enableGenomicExtraction")
   @Mapping(target = "enableGpu", source = "config.featureFlags.enableGpu")
   @Mapping(target = "enablePersistentDisk", source = "config.featureFlags.enablePersistentDisk")
-  @Mapping(target = "enableUniversalSearch", source = "config.featureFlags.enableUniversalSearch")
   @Mapping(target = "enableMultiReview", source = "config.featureFlags.enableMultiReview")
   @Mapping(
       target = "enableDrugWildcardSearch",
