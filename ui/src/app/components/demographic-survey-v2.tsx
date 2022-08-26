@@ -294,7 +294,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
       <div>
         {getQuestionLabel(
           DISADVANTAGED,
-          'Are you an individual from a disadvantaged background, as&nbsp;'
+          `Are you an individual from a disadvantaged background, as `
         )}
         <a
           target='_blank'
@@ -1039,7 +1039,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               {
                 label:
-                  'College graduate (4 years or more) or current post-graduate traineee',
+                  'College graduate (4 years or more) or current post-graduate trainee',
                 value: EducationV2.COLLEGEGRADUATE,
               },
 
