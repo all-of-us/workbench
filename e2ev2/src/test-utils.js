@@ -18,6 +18,8 @@ const launch = options => {
     // slowMo: 200,
     // Enable dumpio to see the browser's console output.
     // dumpio: true,
+    // Enable to open with devtools already visible.
+    // devtools: true,
     defaultViewport: null, // allow the viewport to use available window space
     // args: ['--app-shell-host-window-size=1600x900'],
     args: ['--disable-gpu'],
@@ -52,7 +54,8 @@ const browserTest = testFilePath => (description, testFn, timeoutMs) =>
     await browser.initialPage.setUserAgent(uaString)
     // Default timeout is 30 seconds, which is too long for most operations
     // (e.g., finding an element).
-    browser.initialPage.setDefaultTimeout(2000)
+    browser.initialPage.setDefaultTimeout(2e3)
+    browser.initialPage.setDefaultNavigationTimeout(4e3)
     try {
       return await testFn(browser)
     } catch (e) {
@@ -67,6 +70,25 @@ const browserTest = testFilePath => (description, testFn, timeoutMs) =>
     }
   }, timeoutMs)
 export_({browserTest})
+
+const useApiProxy = async page => {
+  assert(process.env.API_PROXY_URL, 'API_PROXY_URL not defined')
+  await page.setJavaScriptEnabled(false)
+  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+  await page.evaluate(
+    url => { localStorage.allOfUsApiUrlOverride = url},
+    process.env.API_PROXY_URL
+  )
+  await page.setJavaScriptEnabled(true)
+}
+export_({useApiProxy})
+
+const fakeSignIn = async page => {
+  await page.evaluate(() => localStorage['test-access-token-override'] = 'fake-bearer-token')
+  await page.reload({waitUntil: 'networkidle0'})
+  await expect(page.waitForSelector('[data-test-id="signed-in"]')).resolves.toBeDefined()
+}
+export_({fakeSignIn})
 
 const impersonateUser = async (page, username) => {
   const saBearerToken = await (() => {

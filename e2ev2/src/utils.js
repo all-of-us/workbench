@@ -64,7 +64,7 @@ export_({Task})
 const delay = ms => Task((rej, res) => setTimeout(res, ms))
 export_({delay})
 const delayP = ms => new Promise(resolve => setTimeout(resolve, ms))
-export_({delay})
+export_({delayP})
 
 const traverse = (of, l, f) => {
   const acc = xs => x => [...xs, x]

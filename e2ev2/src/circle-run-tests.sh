@@ -21,8 +21,11 @@ BKT_ROOT=gs://all-of-us-workbench-test.appspot.com/circle-failed-tests
 FAILED_TESTS=$(gsutil cat $BKT_ROOT/\*.$CIRCLE_SHA1.txt || echo -n)
 gsutil rm $BKT_ROOT/\*.$CIRCLE_SHA1.txt || true
 
-# This warmup can take over thirty seconds, which causes timeouts in tests.
-time (curl https://pr-$PR_SITE_NUM-dot-api-dot-all-of-us-workbench-test.appspot.com; echo)
+export PROXY_PORT=8080
+export API_PROXY_URL=http://localhost:$PROXY_PORT
+export PROXY_MODE=replay-only
+
+(cd ../api-proxy; node startproxy.mjs &)
 
 set +e
 export FAILED_TESTS_LOG=failed-tests.txt
@@ -32,6 +35,8 @@ yarn test $FAILED_TESTS \
   --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
 TESTS_EXIT_CODE=$?
 set -e
+
+killall node
 
 if [[ $TESTS_EXIT_CODE -ne 0 ]]; then
   gsutil cp $FAILED_TESTS_LOG $BKT_ROOT/$CIRCLE_BUILD_NUM.$CIRCLE_SHA1.txt || true
