@@ -43,6 +43,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
@@ -86,6 +87,7 @@ public class EgressRemediationServiceTest {
   @Autowired private UserDao userDao;
 
   @Autowired private EgressRemediationService egressRemediationService;
+  @Autowired private EgressJiraHandler egressJiraHandler;
 
   private long userId;
   private DbWorkspace dbWorkspace;

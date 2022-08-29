@@ -9,19 +9,23 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ObjectNameSizeService {
 
   private static final Logger LOGGER = Logger.getLogger(ObjectNameSizeService.class.getName());
-  private static final long THRESHOLD = 100;
 
-  @Autowired FireCloudService fireCloudService;
-  @Autowired CloudStorageClient cloudStorageClient;
+  final FireCloudService fireCloudService;
+  final CloudStorageClient cloudStorageClient;
 
-  public boolean objectNameSizeExceedsThreshold(DbWorkspace workspace) {
+  public ObjectNameSizeService(
+      FireCloudService fireCloudService, CloudStorageClient cloudStorageClient) {
+    this.fireCloudService = fireCloudService;
+    this.cloudStorageClient = cloudStorageClient;
+  }
+
+  public long calculateObjectNameLength(DbWorkspace workspace) {
 
     FirecloudWorkspaceResponse fsWorkspace =
         fireCloudService.getWorkspaceAsService(
@@ -36,15 +40,7 @@ public class ObjectNameSizeService {
 
     final long fileNameLengths = getFileNamesLengths(fileDetailList);
 
-    if (fileNameLengths > THRESHOLD) {
-      LOGGER.info(
-          String.format(
-              "An offending workspaces has been found for workspace ID: %d, bucket name: %s",
-              workspace.getWorkspaceId(), bucketName));
-      return true;
-    }
-
-    return false;
+    return fileNameLengths;
   }
 
   private long getFileNamesLengths(List<FileDetail> fileDetailList) {

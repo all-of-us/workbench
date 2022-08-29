@@ -206,7 +206,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Transactional
   @Override
   public boolean deleteWorkspace(DbWorkspace dbWorkspace) {
-    if (objectNameSizeService.objectNameSizeExceedsThreshold(dbWorkspace)) {
+    if (objectNameSizeService.calculateObjectNameLength(dbWorkspace) > 10000) { // FIXME
       return false;
     }
 
