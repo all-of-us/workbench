@@ -295,6 +295,7 @@ export const CohortReviewPage = fp.flow(
                   <CohortReviewListItem
                     key={cr}
                     cohortReview={cohortReview}
+                    cohortModifiedTime={cohort.lastModifiedTime}
                     onUpdate={() => loadCohortAndReviews()}
                     onSelect={() => {
                       if (
