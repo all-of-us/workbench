@@ -21,6 +21,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -246,11 +247,7 @@ public class OrphanedProjects {
     String now = Instant.now().toString().replace(':', '-'); // : is awkward
     Path outputDir = Paths.get("orphaned-projects", now);
     LOG.info("Creating output directory " + outputDir);
-    try {
-      return Files.createDirectories(outputDir);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return OPUtils.uncheck(() -> Files.createDirectories(outputDir));
   }
 
   private static Optional<String> matchPrefixes(Collection<String> prefixes, String name) {
@@ -270,15 +267,13 @@ public class OrphanedProjects {
           String prefix = maybePrefix.orElse("other");
           Path prefixedProjectsFile =
               outputDir.resolve(String.format("%s_%s_%s.txt", tierName, type, prefix));
-          try {
-            Files.write(
-                prefixedProjectsFile,
-                OPUtils.nullSafeSort(projectNames),
-                StandardOpenOption.CREATE_NEW);
-            OPUtils.logFileWrite(prefixedProjectsFile, projectNames.size());
-          } catch (IOException ex) {
-            throw new RuntimeException(ex);
-          }
+          OPUtils.uncheck(
+              () ->
+                  Files.write(
+                      prefixedProjectsFile,
+                      OPUtils.nullSafeSort(projectNames),
+                      StandardOpenOption.CREATE_NEW));
+          OPUtils.logFileWrite(prefixedProjectsFile, projectNames.size());
         });
   }
 
@@ -358,6 +353,21 @@ public class OrphanedProjects {
           .orElse(NULL_STRING);
     }
 
+    // kluge to "cast" checked IOExceptions to UncheckedIOExceptions
+
+    @FunctionalInterface
+    private interface IOChecked<R> {
+      R apply() throws IOException;
+    }
+
+    static <R> R uncheck(IOChecked<R> function) {
+      try {
+        return function.apply();
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    }
+
     private static void writeToTierCSV(
         Path outputDir,
         String tierName,
@@ -370,11 +380,7 @@ public class OrphanedProjects {
       // prepend CSV header
       lines.add(0, csvHeader);
 
-      try {
-        Files.write(tierFile, lines, StandardOpenOption.CREATE_NEW);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      uncheck(() -> Files.write(tierFile, lines, StandardOpenOption.CREATE_NEW));
       logFileWrite(tierFile, lines.size());
     }
 
@@ -443,12 +449,8 @@ public class OrphanedProjects {
     }
 
     static Organization getOrganization(CloudResourceManager manager, String organization) {
-      final List<Organization> orgs;
-      try {
-        orgs = manager.organizations().search().execute().getOrganizations();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      List<Organization> orgs =
+          uncheck(() -> manager.organizations().search().execute().getOrganizations());
       if (orgs == null) {
         throw new BadRequestException(
             "User does not have access to any organizations in CloudResourceManager");
@@ -468,13 +470,16 @@ public class OrphanedProjects {
 
     private static List<Folder> getAllParentFolders(
         CloudResourceManager manager, Organization organization) {
-      final List<Folder> allParentFolders;
-      try {
-        allParentFolders =
-            manager.folders().list().setParent(organization.getName()).execute().getFolders();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      List<Folder> allParentFolders =
+          OPUtils.uncheck(
+              () ->
+                  manager
+                      .folders()
+                      .list()
+                      .setParent(organization.getName())
+                      .execute()
+                      .getFolders());
+
       if (allParentFolders == null) {
         LOG.warning("Did not retrieve any parent folders");
         return Collections.emptyList();
@@ -483,30 +488,28 @@ public class OrphanedProjects {
     }
 
     private static Stream<Folder> getSubFolders(CloudResourceManager manager, Folder parent) {
-      try {
-        return manager.folders().list().setParent(parent.getName()).execute().getFolders().stream();
-      } catch (IOException e) {
-        // need to convert checked to unchecked in order to call from Streams
-        throw new RuntimeException(e);
-      }
+      return uncheck(
+          () ->
+              manager.folders().list().setParent(parent.getName()).execute().getFolders().stream());
+    }
+
+    private static ListProjectsResponse getListProjectsResponse(
+        CloudResourceManager manager, Folder folder, String pageToken) {
+      return uncheck(
+          () ->
+              manager
+                  .projects()
+                  .list()
+                  .setParent(folder.getName())
+                  .setPageToken(pageToken)
+                  .execute());
     }
 
     static List<Project> getProjectsInFolder(CloudResourceManager manager, Folder folder) {
       List<Project> projects = new ArrayList<>();
       String pageToken = null;
       do {
-        final ListProjectsResponse response;
-        try {
-          response =
-              manager
-                  .projects()
-                  .list()
-                  .setParent(folder.getName())
-                  .setPageToken(pageToken)
-                  .execute();
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
+        ListProjectsResponse response = getListProjectsResponse(manager, folder, pageToken);
         List<Project> pageProjects = response.getProjects();
         projects.addAll(pageProjects);
         maybeLogProgress(folder, pageProjects.size(), projects.size());
