@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.chart.ChartService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -47,15 +48,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
   private final CohortBuilderService cohortBuilderService;
+
+  private final ChartService chartService;
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   CohortBuilderController(
       CohortBuilderService cohortBuilderService,
+      ChartService chartService,
       WorkspaceAuthService workspaceAuthService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortBuilderService = cohortBuilderService;
+    this.chartService = chartService;
     this.workspaceAuthService = workspaceAuthService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -219,7 +224,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       return ResponseEntity.ok(response);
     }
     return ResponseEntity.ok(
-        response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
+        response.items(chartService.findDemoChartInfo(genderOrSexType, ageType, request)));
   }
 
   @Override
@@ -231,7 +236,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
-    return ResponseEntity.ok(response.items(cohortBuilderService.findEthnicityInfo(request)));
+    return ResponseEntity.ok(response.items(chartService.findEthnicityInfo(request)));
   }
 
   @Override
@@ -359,6 +364,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String domain,
       Integer limit,
       SearchRequest request) {
+
+    System.out.println(
+        "\n\n***** ResponseEntity<CohortChartDataListResponse> getCohortChartData *******\n\n");
+
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
@@ -375,7 +384,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         new CohortChartDataListResponse()
             .count(count)
             .items(
-                cohortBuilderService.findCohortChartData(
+                chartService.findCohortChartData(
                     request, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
   }
 

@@ -9,12 +9,10 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.ParticipantData;
@@ -109,12 +107,6 @@ public interface CohortReviewService {
    */
   List<DbParticipantCohortStatus> createDbParticipantCohortStatusesList(
       DbCohort dbCohort, Integer requestSize, Long cohortReviewId);
-
-  /** Find a list of {@link CohortChartData} for the specified cohort and domain. */
-  List<CohortChartData> findCohortChartData(DbCohort dbCohort, Domain domain, int limit);
-
-  /** Find a list of {@link ParticipantChartData} for the specified participant id and domain. */
-  List<ParticipantChartData> findParticipantChartData(Long participantId, Domain domain, int limit);
 
   /** Find participant count. */
   Long findParticipantCount(Long participantId, Domain domain, PageRequest pageRequest);

@@ -36,6 +36,9 @@ import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDomainCard;
 import org.pmiops.workbench.cdr.model.DbPerson;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
+import org.pmiops.workbench.chart.ChartQueryBuilder;
+import org.pmiops.workbench.chart.ChartService;
+import org.pmiops.workbench.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -78,6 +81,9 @@ public class CohortBuilderControllerTest {
 
   @Mock private BigQueryService bigQueryService;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
+
+  @Mock private ChartQueryBuilder chartQueryBuilder;
+
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
@@ -115,10 +121,11 @@ public class CohortBuilderControllerTest {
             surveyModuleDao,
             cohortBuilderMapper,
             mySQLStopWordsProvider);
+    ChartService chartService = new ChartServiceImpl(bigQueryService, chartQueryBuilder);
 
     controller =
         new CohortBuilderController(
-            cohortBuilderService, workspaceAuthService, workbenchConfigProvider);
+            cohortBuilderService, chartService, workspaceAuthService, workbenchConfigProvider);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();

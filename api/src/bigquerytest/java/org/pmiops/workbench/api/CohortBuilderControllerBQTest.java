@@ -29,6 +29,7 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbPerson;
+import org.pmiops.workbench.chart.ChartService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -120,6 +121,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortBuilderService cohortBuilderService;
 
+  @Autowired private ChartService chartService;
+
   @Autowired private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -190,7 +193,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     controller =
         new CohortBuilderController(
-            cohortBuilderService, workspaceAuthService, workbenchConfigProvider);
+            cohortBuilderService, chartService, workspaceAuthService, workbenchConfigProvider);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
