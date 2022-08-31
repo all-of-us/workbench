@@ -116,6 +116,8 @@ const defaultReviewQuery = {
   filters: { items: [] },
 } as Request;
 
+const sortByCreationTime = (a, b) => b.creationTime - a.creationTime;
+
 export const CohortReviewPage = fp.flow(
   withCurrentWorkspace(),
   withSpinnerOverlay()
@@ -309,29 +311,31 @@ export const CohortReviewPage = fp.flow(
                 </Clickable>
               </div>
               <div style={{ minHeight: '10rem', padding: '0.25rem' }}>
-                {cohortReviews.map((cohortReview, cr) => (
-                  <CohortReviewListItem
-                    key={cr}
-                    cohortReview={cohortReview}
-                    cohortModifiedTime={cohort.lastModifiedTime}
-                    onUpdate={() => loadCohortAndReviews()}
-                    onSelect={() => {
-                      if (
-                        activeReview?.cohortReviewId !==
+                {cohortReviews
+                  .sort(sortByCreationTime)
+                  .map((cohortReview, cr) => (
+                    <CohortReviewListItem
+                      key={cr}
+                      cohortReview={cohortReview}
+                      cohortModifiedTime={cohort.lastModifiedTime}
+                      onUpdate={() => loadCohortAndReviews()}
+                      onSelect={() => {
+                        if (
+                          activeReview?.cohortReviewId !==
+                          cohortReview.cohortReviewId
+                        ) {
+                          onReviewSelect(cohortReview);
+                        }
+                      }}
+                      selected={
+                        activeReview?.cohortReviewId ===
                         cohortReview.cohortReviewId
-                      ) {
-                        onReviewSelect(cohortReview);
                       }
-                    }}
-                    selected={
-                      activeReview?.cohortReviewId ===
-                      cohortReview.cohortReviewId
-                    }
-                    existingNames={cohortReviews.map(
-                      ({ cohortName }) => cohortName
-                    )}
-                  />
-                ))}
+                      existingNames={cohortReviews.map(
+                        ({ cohortName }) => cohortName
+                      )}
+                    />
+                  ))}
               </div>
             </div>
             <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}>
