@@ -108,7 +108,8 @@ export const CohortReviewOverview = ({ cohortReview }) => {
         style={styles.overviewHeader}
         onClick={() => setPanelOpen((prevPanelOpen) => !prevPanelOpen)}
       >
-        Overview
+        Overview for{' '}
+        <span style={{ color: colors.accent }}>{cohortReview.cohortName}</span>
         <ClrIcon
           style={{ marginLeft: '0.5rem' }}
           shape='angle'

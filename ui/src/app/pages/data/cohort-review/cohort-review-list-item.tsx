@@ -2,11 +2,6 @@ import * as React from 'react';
 import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { RadioButton } from 'primereact/radiobutton';
-import {
-  faCircleCheck,
-  faDiamondExclamation,
-} from '@fortawesome/pro-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const { useState } = React;
 
@@ -24,6 +19,8 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { displayDate } from 'app/utils/dates';
 import { MatchParams } from 'app/utils/stores';
+import latest from 'assets/icons/latest.svg';
+import outdated from 'assets/icons/outdated.svg';
 
 export const CohortReviewListItem = fp.flow(
   withConfirmDeleteModal(),
@@ -115,16 +112,25 @@ export const CohortReviewListItem = fp.flow(
             style={{
               color: colors.primary,
               flex: '0 0 50%',
-              fontSize: '13px',
               lineHeight: '0.75rem',
               padding: '0.5rem 0.25rem',
             }}
           >
-            <div>{cohortReview.cohortName}</div>
+            <div style={{ fontSize: '14px', fontWeight: 600 }}>
+              {cohortReview.cohortName}
+            </div>
             <Clickable>
-              <span style={{ color: colors.accent }}>Cohort details</span>
+              <span
+                style={{
+                  color: colors.accent,
+                  fontSize: '12px',
+                  fontWeight: 500,
+                }}
+              >
+                Cohort details
+              </span>
             </Clickable>
-            <div style={{ color: colors.disabled, fontSize: '11px' }}>
+            <div style={{ color: colors.disabled, fontSize: '10px' }}>
               {displayDate(cohortReview.creationTime)}
             </div>
           </div>
@@ -132,7 +138,7 @@ export const CohortReviewListItem = fp.flow(
             style={{
               color: colors.primary,
               flex: '0 0 40%',
-              fontSize: '13px',
+              fontSize: '12px',
             }}
           >
             <div style={{ height: '50%', textAlign: 'right' }}>
@@ -140,11 +146,11 @@ export const CohortReviewListItem = fp.flow(
             </div>
             {cohortModifiedTime > cohortReview.creationTime ? (
               <div style={{ color: colors.warning, padding: '0.25rem 0' }}>
-                <FontAwesomeIcon icon={faDiamondExclamation} /> Outdated
+                <img src={outdated} /> Outdated
               </div>
             ) : (
               <div style={{ color: colors.select, padding: '0.25rem 0' }}>
-                <FontAwesomeIcon icon={faCircleCheck} /> Latest
+                <img src={latest} /> Latest
               </div>
             )}
           </div>
