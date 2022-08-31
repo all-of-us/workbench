@@ -1,16 +1,13 @@
-package org.pmiops.workbench.chart;
+package org.pmiops.workbench.cohortbuilder.chart;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -94,29 +91,6 @@ public class ChartServiceImpl implements ChartService {
   }
 
   @Override
-  public List<CohortChartData> findCohortChartData(DbCohort dbCohort, Domain domain, int limit) {
-    SearchRequest searchRequest =
-        new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
-
-    TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                chartQueryBuilder.buildDomainChartInfoCounterQuery(
-                    new ParticipantCriteria(searchRequest), domain, limit)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-    List<CohortChartData> cohortChartData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      cohortChartData.add(
-          new CohortChartData()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return cohortChartData;
-  }
-
-  @Override
   public List<ParticipantChartData> findParticipantChartData(
       Long participantId, Domain domain, int limit) {
     TableResult result =
@@ -135,15 +109,5 @@ public class ChartServiceImpl implements ChartService {
               .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
     }
     return participantChartData;
-  }
-
-  private String getCohortDefinition(DbCohort dbCohort) {
-    String definition = dbCohort.getCriteria();
-    if (definition == null) {
-      throw new NotFoundException(
-          String.format(
-              "Not Found: No Cohort definition matching cohortId: %s", dbCohort.getCohortId()));
-    }
-    return definition;
   }
 }

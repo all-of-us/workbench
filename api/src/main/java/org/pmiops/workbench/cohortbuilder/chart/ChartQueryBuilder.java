@@ -1,4 +1,4 @@
-package org.pmiops.workbench.chart;
+package org.pmiops.workbench.cohortbuilder.chart;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
