@@ -49,6 +49,53 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * Example usage:
+ *
+ * <p>gcloud auth login [you]@test.firecloud.org && gcloud auth print-access-token gcloud auth login
+ *
+ * <p>[you]@pmi-ops.org ./project.rb orphaned-projects --project all-of-us-workbench-test
+ * --terra-admin-token [printed token]
+ *
+ * <p>Example output (abbreviated):
+ *
+ * <p>Retrieved 1631 active workspaces in the registered tier from the AoU DB
+ *
+ * <p>Retrieved 48125 projects from folder terra_dev_aou_test in Google Cloud
+ *
+ * <p>Attempting to match 1631 workspaces against 48125 projects
+ *
+ * <p>1329 projects match, 302 projects are only in the DB, and 46796 projects are only in the cloud
+ *
+ * <p>Wrote 1330 lines to file orphaned-projects/2022-08-31T18-36-39.174Z/registered_match.csv
+ *
+ * <p>Wrote 303 lines to file orphaned-projects/2022-08-31T18-36-39.174Z/registered_db.csv
+ *
+ * <p>Wrote 46797 lines to file orphaned-projects/2022-08-31T18-36-39.174Z/registered_cloud.csv
+ *
+ * <p>Wrote 79 lines to file orphaned-projects/2022-08-31T18-36-39.174Z/registered_db_other.txt
+ *
+ * <p>Wrote 223 lines to file
+ * orphaned-projects/2022-08-31T18-36-39.174Z/registered_db_aou-rw-test.txt
+ *
+ * <p>Wrote 2513 lines to file orphaned-projects/2022-08-31T18-36-39.174Z/registered_cloud_other.txt
+ *
+ * <p>Wrote 7043 lines to file
+ * orphaned-projects/2022-08-31T18-36-39.174Z/registered_cloud_aou-rw-local1.txt
+ *
+ * <p>Wrote 37240 lines to file
+ * orphaned-projects/2022-08-31T18-36-39.174Z/registered_cloud_aou-rw-test.txt
+ *
+ * <p>Interpretation:
+ *
+ * <p>registered_match.csv contains the registered tier workspaces/projects which the tool has
+ * determined to match.
+ *
+ * <p>registered_db.csv and registered_cloud.csv contain DB-only and Cloud-only mismatches.
+ *
+ * <p>The prefix-split files registered_db_other.txt and registered_db_aou-rw-test.txt splits the
+ * DB-only mismatches by prefix, aou-rw-test.txt and all others.
+ */
 public class OrphanedProjects {
   private static final Logger LOG = Logger.getLogger(OrphanedProjects.class.getName());
 
