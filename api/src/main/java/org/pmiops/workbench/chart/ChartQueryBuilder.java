@@ -105,10 +105,6 @@ public class ChartQueryBuilder extends QueryBuilder {
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
     queryBuilder.append(ChartQueryBuilder.DEMO_CHART_INFO_SQL_GROUP_BY);
 
-    System.out.println("QueryJobConfiguration buildDemoChartInfoCounterQuery .....");
-    System.out.println("SQL: " + queryBuilder.toString());
-    System.out.println("Params map: " + params);
-
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
         .setUseLegacySql(false)
@@ -127,10 +123,6 @@ public class ChartQueryBuilder extends QueryBuilder {
         participantCriteria, ChartQueryBuilder.SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
     queryBuilder.append(ChartQueryBuilder.ETHNICITY_INFO_SQL_GROUP_BY);
-
-    System.out.println("QueryJobConfiguration buildEthnicityInfoCounterQuery .....");
-    System.out.println("SQL: " + queryBuilder.toString());
-    System.out.println("Params map: " + params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -174,10 +166,6 @@ public class ChartQueryBuilder extends QueryBuilder {
             .replace("${tableId}", "standard_concept_id")
             .replace("${domain}", paramName);
     queryBuilder.append(endSqlTemplate);
-
-    System.out.println("QueryJobConfiguration buildDomainChartInfoCounterQuery .....");
-    System.out.println("SQL: " + queryBuilder.toString());
-    System.out.println("Params map: " + params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)

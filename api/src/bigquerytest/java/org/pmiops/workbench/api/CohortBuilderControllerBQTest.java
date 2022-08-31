@@ -29,7 +29,9 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbPerson;
+import org.pmiops.workbench.chart.ChartQueryBuilder;
 import org.pmiops.workbench.chart.ChartService;
+import org.pmiops.workbench.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -94,6 +96,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Import({
     BigQueryTestService.class,
     CohortQueryBuilder.class,
+    ChartServiceImpl.class,
+    ChartQueryBuilder.class,
     CommonMappers.class,
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,

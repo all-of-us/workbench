@@ -81,7 +81,6 @@ public class CohortBuilderControllerTest {
 
   @Mock private BigQueryService bigQueryService;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
-
   @Mock private ChartQueryBuilder chartQueryBuilder;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;

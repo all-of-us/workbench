@@ -48,7 +48,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
   private final CohortBuilderService cohortBuilderService;
-
   private final ChartService chartService;
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -364,9 +363,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String domain,
       Integer limit,
       SearchRequest request) {
-
-    System.out.println(
-        "\n\n***** ResponseEntity<CohortChartDataListResponse> getCohortChartData *******\n\n");
 
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {

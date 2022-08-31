@@ -52,10 +52,6 @@ public class CohortQueryBuilder extends QueryBuilder {
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
 
-    System.out.println("QueryJobConfiguration buildParticipantCounterQuery .....");
-    System.out.println("SQL: " + queryBuilder.toString());
-    System.out.println("Params map: " + params);
-
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
         .setUseLegacySql(false)

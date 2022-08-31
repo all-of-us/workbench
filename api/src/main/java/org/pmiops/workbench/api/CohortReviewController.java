@@ -274,9 +274,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       String domain,
       Integer limit) {
 
-    System.out.println(
-        "\n\n***** ResponseEntity<ParticipantChartDataListResponse> getParticipantChartData *******\n\n");
-
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(

@@ -57,6 +57,8 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.chart.ChartQueryBuilder;
+import org.pmiops.workbench.chart.ChartService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -279,6 +281,7 @@ public class WorkspacesControllerTest {
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
   @MockBean CohortBuilderService cohortBuilderService;
+
   @MockBean AccessTierService accessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
@@ -343,6 +346,8 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortQueryBuilder.class,
     CohortService.class,
+    ChartService.class,
+    ChartQueryBuilder.class,
     ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
