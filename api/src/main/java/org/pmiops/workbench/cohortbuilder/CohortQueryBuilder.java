@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,13 +35,7 @@ public class CohortQueryBuilder extends QueryBuilder {
 
   private static final String UNION_TEMPLATE = "UNION ALL\n";
 
-  //  private CBCriteriaDao cbCriteriaDao;
   private static final Logger log = Logger.getLogger(CohortQueryBuilder.class.getName());
-
-  @Autowired
-  public CohortQueryBuilder() {
-    // this.cbCriteriaDao = cbCriteriaDao;
-  }
 
   /** Provides counts of unique subjects defined by the provided {@link ParticipantCriteria}. */
   public QueryJobConfiguration buildParticipantCounterQuery(
