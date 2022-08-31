@@ -566,7 +566,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace() throws Exception {
+  public void testCreateWorkspace() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
@@ -621,13 +621,11 @@ public class WorkspacesControllerTest {
             workspace.getNamespace(), registeredTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-    verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(anyString());
-    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
     verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
-  public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
+  public void testCreateWorkspace_resetBillingAccountOnFailedSave() {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
     TestMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
@@ -718,28 +716,6 @@ public class WorkspacesControllerTest {
     final Workspace createdWorkspace =
         workspacesController.createWorkspace(requestedWorkspace).getBody();
     assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(registeredTier.getShortName());
-  }
-
-  @Test
-  public void testCreateWorkspace_accessTierIgnored_grantWorkflowPermission_controlled() {
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    DbCdrVersion controlledTierCdr =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
-    controlledTierCdr.setAccessTier(controlledTier);
-    controlledTierCdr = cdrVersionDao.save(controlledTierCdr);
-
-    final Workspace requestedWorkspace = createWorkspace();
-    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
-
-    requestedWorkspace.setCdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
-    // even if we pretend it's registered - the CDR Version will override this
-    requestedWorkspace.setAccessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
-
-    final Workspace createdWorkspace =
-        workspacesController.createWorkspace(requestedWorkspace).getBody();
-    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
-    verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(DEFAULT_GOOGLE_PROJECT);
   }
 
   @Test
@@ -1322,7 +1298,6 @@ public class WorkspacesControllerTest {
     verify(fireCloudService)
         .createAllOfUsBillingProject(
             clonedWorkspace.getNamespace(), registeredTier.getServicePerimeter());
-    verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(any());
   }
 
   @Test
@@ -1411,34 +1386,6 @@ public class WorkspacesControllerTest {
           workspacesController.cloneWorkspace(
               originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
         });
-  }
-
-  @Test
-  public void testCloneWorkspace_controlledTier_grantWorkflowRunner() {
-    TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    DbCdrVersion controlledTierCdr =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 2);
-
-    Workspace originalWorkspace = createWorkspace();
-    originalWorkspace.setCdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
-    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
-    verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(DEFAULT_GOOGLE_PROJECT);
-
-    final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    modWorkspace.setResearchPurpose(new ResearchPurpose());
-    modWorkspace.setCdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
-
-    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    workspacesController.cloneWorkspace(
-        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
-    verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(CLONE_GOOGLE_PROJECT_ID);
   }
 
   // DbWorkspace stores several fields as Sets, but Workspace sees them as Lists of arbitrary order.
@@ -2269,13 +2216,7 @@ public class WorkspacesControllerTest {
             eq("cloned-ns"),
             eq("cloned"),
             // Accept the ACL update list in any order.
-            argThat(arg -> new HashSet(updateACLRequestList).equals(new HashSet(arg))));
-    verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(CLONE_GOOGLE_PROJECT_ID);
-    // The name LOGGED_IN_USER_EMAIL is confusing. The actually logged in user is cloner,
-    // LOGGED_IN_USER_EMAIL just a workspace owner
-    verify(mockIamService)
-        .grantWorkflowRunnerRoleForUsers(
-            CLONE_GOOGLE_PROJECT_ID, ImmutableList.of(LOGGED_IN_USER_EMAIL, writer.getUsername()));
+            argThat(arg -> new HashSet<>(updateACLRequestList).equals(new HashSet<>(arg))));
   }
 
   @Test
@@ -2402,7 +2343,6 @@ public class WorkspacesControllerTest {
     List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
     verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
