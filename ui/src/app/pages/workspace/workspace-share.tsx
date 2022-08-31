@@ -21,7 +21,6 @@ import {
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
-import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -136,12 +135,6 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
   },
-
-  workflowRolesText: {
-    color: colors.primary,
-    margin: '1em 0 1em 0',
-    fontSize: 14,
-  },
 });
 
 export const UserRoleOptions = [
@@ -168,57 +161,6 @@ const ConflictModal = (props: ConflictProps) => (
   </Modal>
 );
 
-interface WorkflowRolesProps {
-  usernames: string[];
-  cancelAction: () => void;
-}
-const WorkflowRolesErrorModal = (props: WorkflowRolesProps) => (
-  <Modal>
-    <ModalTitle>Workspace sharing was successful but incomplete</ModalTitle>
-    <ModalBody>
-      <div style={styles.workflowRolesText}>
-        The Researcher Workbench has successfully shared the workspace with the
-        specified collaborators, but with limited functionality for some
-        researchers.
-      </div>
-      <div style={styles.workflowRolesText}>
-        For compliance reasons, we were unable to grant the following
-        researchers the appropriate access to run workflows in this workspace:
-        <ul>
-          {props.usernames.sort().map((item) => (
-            <li>{item}</li>
-          ))}
-        </ul>
-      </div>
-      <div style={styles.workflowRolesText}>
-        For these researchers to gain access to run workflows, the following
-        must occur, in order:
-        <ol>
-          <li>
-            The researchers must log in to the <AoU /> Research Workbench and
-            accept the updated <AoU /> Terms of Service agreement.
-          </li>
-          <li>
-            The workspace access level for these users must be changed to
-            Reader.
-          </li>
-          <li>
-            The workspace access levels for these users may then be changed to
-            Writers or Owners, as appropriate.
-          </li>
-        </ol>
-      </div>
-      <div style={styles.workflowRolesText}>
-        We apologize for the inconvenience. For any questions, please contact{' '}
-        <SupportMailto />
-      </div>
-    </ModalBody>
-    <ModalFooter>
-      <Button onClick={() => props.cancelAction()}>Return to Workspace</Button>
-    </ModalFooter>
-  </Modal>
-);
-
 interface State {
   autocompleteLoading: boolean;
   autocompleteUsers: User[];
@@ -232,7 +174,6 @@ interface State {
   userRolesToChange: UserRole[];
   searchTerm: string;
   dropDown: boolean;
-  workflowRolesErrors: string[];
 }
 
 export interface WorkspaceShareProps {
@@ -264,7 +205,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         userRolesToChange: [],
         searchTerm: '',
         dropDown: false,
-        workflowRolesErrors: [],
       };
       this.searchTermChangedEvent = fp.debounce(300, this.userSearch);
     }
@@ -330,15 +270,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
             userRoles: resp.items,
             userRolesToChange: [],
           });
-
-          // TODO: should we do anything for failed workflow role revocations?
-          if (resp.failedWorkflowGrants?.length > 0) {
-            this.setState({
-              workflowRolesErrors: resp.failedWorkflowGrants,
-            });
-          } else {
-            this.props.onClose();
-          }
+          this.props.onClose();
         })
         .catch((error) => {
           if (error.status === 400) {
@@ -791,12 +723,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
           {this.state.workspaceUpdateConflictError && (
             <ConflictModal
               reloadAction={() => this.loadUserRoles()}
-              cancelAction={() => this.onCancel()}
-            />
-          )}
-          {this.state.workflowRolesErrors?.length > 0 && (
-            <WorkflowRolesErrorModal
-              usernames={this.state.workflowRolesErrors}
               cancelAction={() => this.onCancel()}
             />
           )}
