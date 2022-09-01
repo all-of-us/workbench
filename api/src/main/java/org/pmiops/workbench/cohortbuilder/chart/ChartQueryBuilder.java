@@ -91,19 +91,14 @@ public class ChartQueryBuilder extends QueryBuilder {
       ParticipantCriteria participantCriteria) {
     Map<String, QueryParameterValue> params = new HashMap<>();
     String sqlTemplate =
-        ChartQueryBuilder.DEMO_CHART_INFO_SQL_TEMPLATE
+        DEMO_CHART_INFO_SQL_TEMPLATE
             .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
-            .replace(
-                "${ageRange1}",
-                ChartQueryBuilder.getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
-            .replace(
-                "${ageRange2}",
-                ChartQueryBuilder.getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
+            .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
+            .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
-    addWhereClause(
-        participantCriteria, ChartQueryBuilder.SEARCH_PERSON_TABLE, queryBuilder, params);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
-    queryBuilder.append(ChartQueryBuilder.DEMO_CHART_INFO_SQL_GROUP_BY);
+    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -118,11 +113,10 @@ public class ChartQueryBuilder extends QueryBuilder {
   public QueryJobConfiguration buildEthnicityInfoCounterQuery(
       ParticipantCriteria participantCriteria) {
     Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder = new StringBuilder(ChartQueryBuilder.ETHNICITY_INFO_SQL_TEMPLATE);
-    addWhereClause(
-        participantCriteria, ChartQueryBuilder.SEARCH_PERSON_TABLE, queryBuilder, params);
+    StringBuilder queryBuilder = new StringBuilder(ETHNICITY_INFO_SQL_TEMPLATE);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
-    queryBuilder.append(ChartQueryBuilder.ETHNICITY_INFO_SQL_GROUP_BY);
+    queryBuilder.append(ETHNICITY_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -147,21 +141,18 @@ public class ChartQueryBuilder extends QueryBuilder {
    */
   public QueryJobConfiguration buildDomainChartInfoCounterQuery(
       ParticipantCriteria participantCriteria, Domain domain, int chartLimit) {
-    StringBuilder queryBuilder = new StringBuilder(ChartQueryBuilder.ID_SQL_TEMPLATE);
+    StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
     Map<String, QueryParameterValue> params = new HashMap<>();
-    addWhereClause(
-        participantCriteria, ChartQueryBuilder.SEARCH_PERSON_TABLE, queryBuilder, params);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
     String searchPersonSql = queryBuilder.toString();
     queryBuilder =
-        new StringBuilder(
-            ChartQueryBuilder.DOMAIN_CHART_INFO_SQL_TEMPLATE.replace(
-                "${innerSql}", searchPersonSql));
+        new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${innerSql}", searchPersonSql));
     String paramName =
         QueryParameterUtil.addQueryParameterValue(
             params, QueryParameterValue.string(domain.name()));
     String endSqlTemplate =
-        ChartQueryBuilder.DOMAIN_CHART_INFO_SQL_GROUP_BY
+        DOMAIN_CHART_INFO_SQL_GROUP_BY
             .replace("${limit}", Integer.toString(chartLimit))
             .replace("${tableId}", "standard_concept_id")
             .replace("${domain}", paramName);

@@ -14,20 +14,15 @@ import org.pmiops.workbench.model.SearchRequest;
 
 public class QueryBuilder {
   private static final String INCLUDE_SQL_TEMPLATE = "${mainTable}.person_id IN (${includeSql})\n";
-
   private static final String PERSON_ID_WHITELIST_PARAM = "person_id_whitelist";
   private static final String PERSON_ID_BLACKLIST_PARAM = "person_id_blacklist";
-
   private static final String PERSON_ID_WHITELIST_TEMPLATE =
       "${mainTable}.person_id IN unnest(@" + PERSON_ID_WHITELIST_PARAM + ")\n";
   private static final String PERSON_ID_BLACKLIST_TEMPLATE =
       "${mainTable}.person_id NOT IN unnest(@" + PERSON_ID_BLACKLIST_PARAM + ")\n";
-
   private static final String EXCLUDE_SQL_TEMPLATE =
       "${mainTable}.person_id NOT IN\n" + "(${excludeSql})\n";
-
   private static final String UNION_TEMPLATE = "UNION ALL\n";
-
   private static final Logger log = Logger.getLogger(QueryBuilder.class.getName());
 
   public void addWhereClause(
@@ -37,15 +32,14 @@ public class QueryBuilder {
       Map<String, QueryParameterValue> params) {
     SearchRequest request = participantCriteria.getSearchRequest();
     if (request == null) {
-      queryBuilder.append(
-          QueryBuilder.PERSON_ID_WHITELIST_TEMPLATE.replace("${mainTable}", mainTable));
+      queryBuilder.append(PERSON_ID_WHITELIST_TEMPLATE.replace("${mainTable}", mainTable));
       params.put(
-          QueryBuilder.PERSON_ID_WHITELIST_PARAM,
+          PERSON_ID_WHITELIST_PARAM,
           QueryParameterValue.array(
               participantCriteria.getParticipantIdsToInclude().toArray(new Long[0]), Long.class));
     } else {
       if (request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
-        QueryBuilder.log.log(
+        log.log(
             Level.WARNING, "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
         throw new BadRequestException(
             "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
@@ -62,9 +56,9 @@ public class QueryBuilder {
       }
       Set<Long> participantIdsToExclude = participantCriteria.getParticipantIdsToExclude();
       if (!participantIdsToExclude.isEmpty()) {
-        joiner.add(QueryBuilder.PERSON_ID_BLACKLIST_TEMPLATE.replace("${mainTable}", mainTable));
+        joiner.add(PERSON_ID_BLACKLIST_TEMPLATE.replace("${mainTable}", mainTable));
         params.put(
-            QueryBuilder.PERSON_ID_BLACKLIST_PARAM,
+            PERSON_ID_BLACKLIST_PARAM,
             QueryParameterValue.array(participantIdsToExclude.toArray(new Long[0]), Long.class));
       }
       queryBuilder.append(joiner.toString());
@@ -96,14 +90,14 @@ public class QueryBuilder {
 
       if (excludeSQL) {
         joiner.add(
-            QueryBuilder.EXCLUDE_SQL_TEMPLATE
+            EXCLUDE_SQL_TEMPLATE
                 .replace("${mainTable}", mainTable)
-                .replace("${excludeSql}", String.join(QueryBuilder.UNION_TEMPLATE, queryParts)));
+                .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
       } else {
         joiner.add(
-            QueryBuilder.INCLUDE_SQL_TEMPLATE
+            INCLUDE_SQL_TEMPLATE
                 .replace("${mainTable}", mainTable)
-                .replace("${includeSql}", String.join(QueryBuilder.UNION_TEMPLATE, queryParts)));
+                .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
       }
       queryParts = new ArrayList<>();
     }
