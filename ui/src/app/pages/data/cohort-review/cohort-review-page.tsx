@@ -15,7 +15,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { Button, Clickable } from 'app/components/buttons';
+import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -33,6 +33,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { datatableStyles } from 'app/styles/datatable';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { displayDate } from 'app/utils/dates';
 import { currentCohortReviewStore, useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
@@ -46,7 +47,7 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   title: {
-    marginTop: 0,
+    margin: '0 0.5rem 0 0',
     fontSize: '20px',
     fontWeight: 600,
     color: colors.primary,
@@ -114,6 +115,8 @@ const defaultReviewQuery = {
   sortOrder: SortOrder.Asc,
   filters: { items: [] },
 } as Request;
+
+const sortByCreationTime = (a, b) => b.creationTime - a.creationTime;
 
 export const CohortReviewPage = fp.flow(
   withCurrentWorkspace(),
@@ -252,10 +255,9 @@ export const CohortReviewPage = fp.flow(
             >
               Back to cohort
             </button>
-            <h4 style={styles.title}>
-              Review Sets for {cohort.name}
-              <Button
-                style={{ float: 'right', height: '1.3rem' }}
+            <div style={{ display: 'flex' }}>
+              <h4 style={styles.title}>Review Sets for {cohort.name}</h4>
+              <Clickable
                 disabled={loading}
                 onClick={() =>
                   navigate([
@@ -270,9 +272,27 @@ export const CohortReviewPage = fp.flow(
                   ])
                 }
               >
-                Cohort Description
-              </Button>
-            </h4>
+                <span
+                  style={{
+                    color: colors.accent,
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    marginRight: '0.5rem',
+                  }}
+                >
+                  Cohort details
+                </span>
+              </Clickable>
+              <span
+                style={{
+                  color: colors.disabled,
+                  fontSize: '11px',
+                  marginRight: '0.5rem',
+                }}
+              >
+                Last modified date: {displayDate(cohort.lastModifiedTime)}
+              </span>
+            </div>
             <div style={styles.description}>{cohort.description}</div>
           </div>
           {!!activeReview && (
@@ -291,28 +311,31 @@ export const CohortReviewPage = fp.flow(
                 </Clickable>
               </div>
               <div style={{ minHeight: '10rem', padding: '0.25rem' }}>
-                {cohortReviews.map((cohortReview, cr) => (
-                  <CohortReviewListItem
-                    key={cr}
-                    cohortReview={cohortReview}
-                    onUpdate={() => loadCohortAndReviews()}
-                    onSelect={() => {
-                      if (
-                        activeReview?.cohortReviewId !==
+                {cohortReviews
+                  .sort(sortByCreationTime)
+                  .map((cohortReview, cr) => (
+                    <CohortReviewListItem
+                      key={cr}
+                      cohortReview={cohortReview}
+                      cohortModifiedTime={cohort.lastModifiedTime}
+                      onUpdate={() => loadCohortAndReviews()}
+                      onSelect={() => {
+                        if (
+                          activeReview?.cohortReviewId !==
+                          cohortReview.cohortReviewId
+                        ) {
+                          onReviewSelect(cohortReview);
+                        }
+                      }}
+                      selected={
+                        activeReview?.cohortReviewId ===
                         cohortReview.cohortReviewId
-                      ) {
-                        onReviewSelect(cohortReview);
                       }
-                    }}
-                    selected={
-                      activeReview?.cohortReviewId ===
-                      cohortReview.cohortReviewId
-                    }
-                    existingNames={cohortReviews.map(
-                      ({ cohortName }) => cohortName
-                    )}
-                  />
-                ))}
+                      existingNames={cohortReviews.map(
+                        ({ cohortName }) => cohortName
+                      )}
+                    />
+                  ))}
               </div>
             </div>
             <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}>
