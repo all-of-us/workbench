@@ -626,6 +626,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<Criteria> findDrugBrandOrIngredientByValueV2(String value, Integer limit) {
+    List<DbCriteria> criteriaList;
+    if (value.startsWith("*")) {
+      criteriaList =
+          cbCriteriaDao.findDrugBrandOrIngredientByValueEndsWith(
+              value.substring(1), Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+    } else {
+      criteriaList =
+          cbCriteriaDao.findDrugBrandOrIngredientByValue(
+              value, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+    }
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<Criteria> findDrugIngredientByConceptId(Long conceptId) {
     List<DbCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(conceptId);
     return criteriaList.stream()

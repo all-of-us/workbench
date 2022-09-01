@@ -94,9 +94,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, String value, Integer limit) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(
-        new CriteriaListResponse()
-            .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findDrugBrandOrIngredientByValueV2(value, limit)));
+    } else {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
+    }
   }
 
   @Override

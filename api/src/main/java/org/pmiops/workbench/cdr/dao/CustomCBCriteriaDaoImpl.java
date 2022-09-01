@@ -54,6 +54,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String BIND_VAR_TERM = "term";
   private static final String BIND_VAR_TYPE = "type";
   private static final String BIND_VAR_ID = "id";
+  private static final String BIND_VAR_LIMIT = "limit";
 
   // SQL regexp replace variable (for IN clause)
   private static final String VAR_IN_DOMAINS = "domains";
@@ -328,6 +329,24 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + ")) \n"
           + "order by c1.est_count desc, name asc\n";
 
+  private static final String DRUG_BRAND_OR_INGREDIENT_ENDS_WITH =
+      "select *\n"
+          + "from \n"
+          + SQL_DB_CDR_NAME
+          + ".cb_criteria c1 \n"
+          + "where c1.domain_id = 'DRUG' \n"
+          + "and c1.type IN ('ATC', 'BRAND', 'RXNORM') \n"
+          + "and is_selectable = 1 \n"
+          + "and (upper(c.name) like upper(concat('%',:"
+          + BIND_VAR_TERM
+          + ")) \n"
+          + "or upper(c.code) like upper(concat('%',:"
+          + BIND_VAR_TERM
+          + "))) \n"
+          + "order by name asc \n"
+          + "limit :"
+          + BIND_VAR_LIMIT;
+
   @Autowired private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -497,6 +516,15 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
         Objects.requireNonNull(count(queryAndParameters)));
   }
 
+  public List<DbCriteria> findDrugBrandOrIngredientByValueEndsWith(
+      String endsWithTerm, Integer limit) {
+    Object[][] params = {{BIND_VAR_TERM, endsWithTerm}, {BIND_VAR_LIMIT, limit}};
+    return namedParameterJdbcTemplate.query(
+        DRUG_BRAND_OR_INGREDIENT_ENDS_WITH,
+        getMapSqlParameterSource(params),
+        new DBCriteriaRowMapper());
+  }
+
   protected QueryAndParameters generateQueryAndParameters(
       String sql, Object[][] params, List<String> endsWithList) {
 
@@ -508,10 +536,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
                 new BadRequestException(
                     String.format("CDR version with ID %s not found", cdrVersionId)));
 
-    MapSqlParameterSource parameters = new MapSqlParameterSource();
-    if (params != null) {
-      Arrays.stream(params).forEach(param -> parameters.addValue(param[0].toString(), param[1]));
-    }
+    MapSqlParameterSource parameters = getMapSqlParameterSource(params);
 
     StringJoiner joiner = new StringJoiner(OR);
     IntStream.range(0, endsWithList.size())
@@ -527,6 +552,15 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
         sql.replaceAll(SQL_DB_CDR_NAME, dbCdrVersion.getCdrDbName())
             .replaceAll(SQL_ENDS_WITH, joiner.toString()),
         parameters);
+  }
+
+  @NotNull
+  private static MapSqlParameterSource getMapSqlParameterSource(Object[][] params) {
+    MapSqlParameterSource parameters = new MapSqlParameterSource();
+    if (params != null) {
+      Arrays.stream(params).forEach(param -> parameters.addValue(param[0].toString(), param[1]));
+    }
+    return parameters;
   }
 
   @NotNull

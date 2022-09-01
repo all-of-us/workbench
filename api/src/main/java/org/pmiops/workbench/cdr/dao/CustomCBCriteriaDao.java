@@ -49,4 +49,6 @@ public interface CustomCBCriteriaDao {
 
   Page<DbCriteria> findSurveyQuestionByPathAndTermAndNameEndsWith(
       Long id, String term, List<String> endsWithList, Pageable page);
+
+  List<DbCriteria> findDrugBrandOrIngredientByValueEndsWith(String endsWithTerm, Integer limit);
 }

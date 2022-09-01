@@ -100,6 +100,8 @@ public interface CohortBuilderService {
 
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
+  List<Criteria> findDrugBrandOrIngredientByValueV2(String value, Integer limit);
+
   List<Criteria> findDrugIngredientByConceptId(Long conceptId);
 
   List<EthnicityInfo> findEthnicityInfo(SearchRequest request);
