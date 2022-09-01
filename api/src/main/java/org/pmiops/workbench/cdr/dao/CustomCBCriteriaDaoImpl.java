@@ -337,10 +337,10 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "where c1.domain_id = 'DRUG' \n"
           + "and c1.type IN ('ATC', 'BRAND', 'RXNORM') \n"
           + "and is_selectable = 1 \n"
-          + "and (upper(c.name) like upper(concat('%',:"
+          + "and (upper(c1.name) like upper(concat('%',:"
           + BIND_VAR_TERM
           + ")) \n"
-          + "or upper(c.code) like upper(concat('%',:"
+          + "or upper(c1.code) like upper(concat('%',:"
           + BIND_VAR_TERM
           + "))) \n"
           + "order by name asc \n"
@@ -520,21 +520,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       String endsWithTerm, Integer limit) {
     Object[][] params = {{BIND_VAR_TERM, endsWithTerm}, {BIND_VAR_LIMIT, limit}};
     return namedParameterJdbcTemplate.query(
-        DRUG_BRAND_OR_INGREDIENT_ENDS_WITH,
+        DRUG_BRAND_OR_INGREDIENT_ENDS_WITH.replaceAll(SQL_DB_CDR_NAME, getDbCdrVersionName()),
         getMapSqlParameterSource(params),
         new DBCriteriaRowMapper());
   }
 
   protected QueryAndParameters generateQueryAndParameters(
       String sql, Object[][] params, List<String> endsWithList) {
-
-    long cdrVersionId = CdrVersionContext.getCdrVersion().getCdrVersionId();
-    Optional<DbCdrVersion> cdrVersionOptional = cdrVersionDao.findById(cdrVersionId);
-    DbCdrVersion dbCdrVersion =
-        cdrVersionOptional.orElseThrow(
-            () ->
-                new BadRequestException(
-                    String.format("CDR version with ID %s not found", cdrVersionId)));
 
     MapSqlParameterSource parameters = getMapSqlParameterSource(params);
 
@@ -549,9 +541,20 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
             });
 
     return new QueryAndParameters(
-        sql.replaceAll(SQL_DB_CDR_NAME, dbCdrVersion.getCdrDbName())
+        sql.replaceAll(SQL_DB_CDR_NAME, getDbCdrVersionName())
             .replaceAll(SQL_ENDS_WITH, joiner.toString()),
         parameters);
+  }
+
+  private String getDbCdrVersionName() {
+    long cdrVersionId = CdrVersionContext.getCdrVersion().getCdrVersionId();
+    Optional<DbCdrVersion> cdrVersionOptional = cdrVersionDao.findById(cdrVersionId);
+    DbCdrVersion dbCdrVersion =
+        cdrVersionOptional.orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format("CDR version with ID %s not found", cdrVersionId)));
+    return dbCdrVersion.getCdrDbName();
   }
 
   @NotNull
