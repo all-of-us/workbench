@@ -1,13 +1,11 @@
 package org.pmiops.workbench.cohortbuilder.chart;
 
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -24,90 +22,59 @@ public class ChartServiceImpl implements ChartService {
 
   private final ChartQueryBuilder chartQueryBuilder;
 
-  public ChartServiceImpl(BigQueryService bigQueryService, ChartQueryBuilder chartQueryBuilder) {
+  private final CohortBuilderMapper cohortBuilderMapper;
+
+  private final CohortReviewMapper cohortReviewMapper;
+
+  public ChartServiceImpl(
+      BigQueryService bigQueryService,
+      ChartQueryBuilder chartQueryBuilder,
+      CohortBuilderMapper cohortBuilderMapper,
+      CohortReviewMapper cohortReviewMapper) {
     this.bigQueryService = bigQueryService;
     this.chartQueryBuilder = chartQueryBuilder;
+    this.cohortBuilderMapper = cohortBuilderMapper;
+    this.cohortReviewMapper = cohortReviewMapper;
   }
 
   @Override
   public List<CohortChartData> findCohortChartData(
       SearchRequest searchRequest, Domain domain, int limit) {
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                chartQueryBuilder.buildDomainChartInfoCounterQuery(
-                    new ParticipantCriteria(searchRequest), domain, limit)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildDomainChartInfoCounterQuery(
+                new ParticipantCriteria(searchRequest), domain, limit));
 
-    List<CohortChartData> cohortChartData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      cohortChartData.add(
-          new CohortChartData()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return cohortChartData;
+    return cohortBuilderMapper.tableResultToCohortChartData(result);
   }
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
-    QueryJobConfiguration qjc =
-        bigQueryService.filterBigQueryConfig(
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
                 new ParticipantCriteria(request, genderOrSexType, ageType)));
-    TableResult result = bigQueryService.executeQuery(qjc);
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-    List<DemoChartInfo> demoChartInfos = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      demoChartInfos.add(
-          new DemoChartInfo()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .race(bigQueryService.getString(row, rm.get("race")))
-              .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return demoChartInfos;
+    return cohortBuilderMapper.tableResultToDemoChartInfo(result);
   }
 
   @Override
   public List<EthnicityInfo> findEthnicityInfo(SearchRequest request) {
-    QueryJobConfiguration qjc =
-        bigQueryService.filterBigQueryConfig(
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(request)));
-    TableResult result = bigQueryService.executeQuery(qjc);
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-    List<EthnicityInfo> ethnicityInfos = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      ethnicityInfos.add(
-          new EthnicityInfo()
-              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return ethnicityInfos;
+    return cohortBuilderMapper.tableResultToEthnicityInfo(result);
   }
 
   @Override
   public List<ParticipantChartData> findParticipantChartData(
       Long participantId, Domain domain, int limit) {
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                chartQueryBuilder.buildChartDataQuery(participantId, domain, limit)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<ParticipantChartData> participantChartData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      participantChartData.add(
-          new ParticipantChartData()
-              .standardName(bigQueryService.getString(row, rm.get("standardName")))
-              .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-              .startDate(bigQueryService.getDate(row, rm.get("startDate")))
-              .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-              .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
-    }
-    return participantChartData;
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildChartDataQuery(participantId, domain, limit));
+
+    return cohortReviewMapper.tableResultToParticipantChartData(result);
   }
 }

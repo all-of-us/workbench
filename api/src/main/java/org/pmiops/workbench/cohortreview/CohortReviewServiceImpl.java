@@ -27,6 +27,7 @@ import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -39,7 +40,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +68,6 @@ import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
-import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -395,83 +394,49 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     SearchRequest searchRequest =
         new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                cohortQueryBuilder.buildRandomParticipantQuery(
-                    new ParticipantCriteria(searchRequest), requestSize, 0L)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<DbParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      participantCohortStatuses.add(
-          new DbParticipantCohortStatus()
-              .participantKey(
-                  new DbParticipantCohortStatusKey(
-                      cohortReviewId, bigQueryService.getLong(row, rm.get("person_id"))))
-              .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NOT_REVIEWED))
-              .birthDate(getBirthDate(rm, row))
-              .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
-              .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
-              .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id")))
-              .sexAtBirthConceptId(bigQueryService.getLong(row, rm.get("sex_at_birth_concept_id")))
-              .deceased(bigQueryService.getBoolean(row, rm.get("deceased"))));
-    }
-    return participantCohortStatuses;
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            cohortQueryBuilder.buildRandomParticipantQuery(
+                new ParticipantCriteria(searchRequest), requestSize, 0L));
+
+    return participantCohortStatusMapper.tableResultToDbParticipantCohortStatus(
+        result, cohortReviewId);
   }
 
   @Override
   public Long findParticipantCount(Long participantId, Domain domain, PageRequest pageRequest) {
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                reviewQueryBuilder.buildCountQuery(participantId, domain, pageRequest)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    return bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count"));
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            reviewQueryBuilder.buildCountQuery(participantId, domain, pageRequest));
+    FieldValueList row = result.iterateAll().iterator().next();
+    return row.get("count").getLongValue();
   }
 
   @Override
   public List<ParticipantData> findParticipantData(
       Long participantId, Domain domain, PageRequest pageRequest) {
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                reviewQueryBuilder.buildQuery(participantId, domain, pageRequest)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            reviewQueryBuilder.buildQuery(participantId, domain, pageRequest));
 
-    List<ParticipantData> participantData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      participantData.add(convertRowToParticipantData(rm, row, domain));
-    }
-    return participantData;
+    return cohortReviewMapper.tableResultToParticipantData(result, domain);
   }
 
   @Override
   public List<Vocabulary> findVocabularies() {
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(reviewQueryBuilder.buildVocabularyDataQuery()));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<Vocabulary> vocabularies = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      vocabularies.add(
-          new Vocabulary()
-              .domain(bigQueryService.getString(row, rm.get("domain")))
-              .type(bigQueryService.getString(row, rm.get("type")))
-              .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
-    }
-    return vocabularies;
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            reviewQueryBuilder.buildVocabularyDataQuery());
+    return cohortReviewMapper.tableResultToParticipantData(result);
   }
 
   @Override
   public Long participationCount(DbCohort dbCohort) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
     TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<FieldValue> row = result.iterateAll().iterator().next();
-    long cohortCount = bigQueryService.getLong(row, rm.get("count"));
-    return cohortCount;
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request)));
+    FieldValueList row = result.iterateAll().iterator().next();
+    return row.get("count").getLongValue();
   }
 
   @Override

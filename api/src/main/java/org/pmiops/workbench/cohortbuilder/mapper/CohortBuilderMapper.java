@@ -1,5 +1,9 @@
 package org.pmiops.workbench.cohortbuilder.mapper;
 
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
+import java.util.stream.StreamSupport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
@@ -11,15 +15,8 @@ import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbDomainCard;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
-import org.pmiops.workbench.model.AgeTypeCount;
-import org.pmiops.workbench.model.CardCount;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaAttribute;
-import org.pmiops.workbench.model.CriteriaMenu;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.SurveyModule;
-import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -52,4 +49,46 @@ public interface CohortBuilderMapper {
 
   @Mapping(target = "domain", source = "source.domainId", qualifiedByName = "domainIdToDomain")
   CardCount dbModelToClient(DbCardCount source);
+
+  default CohortChartData fieldValueListToCohortChartData(FieldValueList row) {
+    CohortChartData cohortChartData = new CohortChartData();
+    FieldValues.getString(row, "name").ifPresent(cohortChartData::setName);
+    FieldValues.getLong(row, "conceptId").ifPresent(cohortChartData::setConceptId);
+    FieldValues.getLong(row, "count").ifPresent(cohortChartData::setCount);
+    return cohortChartData;
+  }
+
+  default ImmutableList<CohortChartData> tableResultToCohortChartData(TableResult tableResult) {
+    return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToCohortChartData)
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  default DemoChartInfo fieldValueListToDemoChartInfo(FieldValueList row) {
+    DemoChartInfo demoChartInfo = new DemoChartInfo();
+    FieldValues.getString(row, "name").ifPresent(demoChartInfo::setName);
+    FieldValues.getString(row, "race").ifPresent(demoChartInfo::setRace);
+    FieldValues.getString(row, "ageRange").ifPresent(demoChartInfo::setAgeRange);
+    FieldValues.getLong(row, "count").ifPresent(demoChartInfo::setCount);
+    return demoChartInfo;
+  }
+
+  default ImmutableList<DemoChartInfo> tableResultToDemoChartInfo(TableResult tableResult) {
+    return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToDemoChartInfo)
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  default EthnicityInfo fieldValueListToEthnicityInfo(FieldValueList row) {
+    EthnicityInfo ethnicityInfo = new EthnicityInfo();
+    FieldValues.getString(row, "ethnicity").ifPresent(ethnicityInfo::setEthnicity);
+    FieldValues.getLong(row, "count").ifPresent(ethnicityInfo::setCount);
+    return ethnicityInfo;
+  }
+
+  default ImmutableList<EthnicityInfo> tableResultToEthnicityInfo(TableResult tableResult) {
+    return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToEthnicityInfo)
+        .collect(ImmutableList.toImmutableList());
+  }
 }

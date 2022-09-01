@@ -57,6 +57,11 @@ public class BigQueryService {
         .orElse(defaultBigQuery);
   }
 
+  public TableResult filterBigQueryConfigAndExecuteQuery(QueryJobConfiguration query) {
+    QueryJobConfiguration qjc = filterBigQueryConfig(query);
+    return executeQuery(qjc, defaultBigQueryTimeout.toMillis());
+  }
+
   /** Execute the provided query using bigquery and wait for completion. */
   public TableResult executeQuery(QueryJobConfiguration query) {
     return executeQuery(query, defaultBigQueryTimeout.toMillis());

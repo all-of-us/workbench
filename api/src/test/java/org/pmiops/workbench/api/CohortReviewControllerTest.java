@@ -19,16 +19,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -666,7 +657,7 @@ public class CohortReviewControllerTest {
                 new CreateReviewRequest().size(1))
             .getBody();
 
-    assertNewlyCreatedCohortReview(cohortReview);
+    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview));
   }
 
   @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
@@ -789,7 +780,7 @@ public class CohortReviewControllerTest {
                 requestCohortReview)
             .getBody();
 
-    assertThat(updated.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
+    assertThat(Objects.requireNonNull(updated).getCohortName()).isEqualTo(requestCohortReview.getCohortName());
     assertThat(updated.getDescription()).isEqualTo(requestCohortReview.getDescription());
     assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
   }
@@ -987,7 +978,7 @@ public class CohortReviewControllerTest {
                 workspace.getNamespace(), workspace.getId(), cohortReviewId, participantId, request)
             .getBody();
 
-    assertCreatedParticipantCohortAnnotation(response, request);
+    assertCreatedParticipantCohortAnnotation(Objects.requireNonNull(response), request);
   }
 
   @ParameterizedTest(
@@ -1017,7 +1008,7 @@ public class CohortReviewControllerTest {
                 request)
             .getBody();
 
-    assertCreatedParticipantCohortAnnotation(response, request);
+    assertCreatedParticipantCohortAnnotation(Objects.requireNonNull(response), request);
   }
 
   @ParameterizedTest(
@@ -1211,7 +1202,7 @@ public class CohortReviewControllerTest {
                 new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
             .getBody();
 
-    assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
+    assertThat(Objects.requireNonNull(participantCohortAnnotation).getAnnotationValueString()).isEqualTo("test1");
   }
 
   @ParameterizedTest(
@@ -1419,7 +1410,7 @@ public class CohortReviewControllerTest {
                 new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED))
             .getBody();
 
-    assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
+    assertThat(Objects.requireNonNull(participantCohortStatus).getStatus()).isEqualTo(CohortStatus.INCLUDED);
   }
 
   @ParameterizedTest(name = "updateParticipantCohortStatusForbiddenLevels WorkspaceAccessLevel={0}")
