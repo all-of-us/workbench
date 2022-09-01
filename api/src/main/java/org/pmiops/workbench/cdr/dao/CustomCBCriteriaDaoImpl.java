@@ -53,6 +53,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   private static final String BIND_VAR_STANDARD = "standard";
   private static final String BIND_VAR_TERM = "term";
   private static final String BIND_VAR_TYPE = "type";
+  private static final String BIND_VAR_TYPES = "types";
   private static final String BIND_VAR_ID = "id";
 
   // SQL regexp replace variable (for IN clause)
@@ -131,9 +132,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "from \n"
           + SQL_DB_CDR_NAME
           + ".cb_criteria\n"
-          + "where type = :"
-          + BIND_VAR_TYPE
-          + "\n"
+          + "where type in (:"
+          + BIND_VAR_TYPES
+          + ")\n"
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
@@ -149,9 +150,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "from \n"
           + SQL_DB_CDR_NAME
           + ".cb_criteria\n"
-          + "where type = :"
-          + BIND_VAR_TYPE
-          + "\n"
+          + "where type in (:"
+          + BIND_VAR_TYPES
+          + ")\n"
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
@@ -372,9 +373,13 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
 
   @Override
   public List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
-      String domain, String type, Boolean standard, List<String> endsWithList, Pageable page) {
+      String domain,
+      List<String> types,
+      Boolean standard,
+      List<String> endsWithList,
+      Pageable page) {
     Object[][] params = {
-      {BIND_VAR_DOMAIN, domain}, {BIND_VAR_TYPE, type}, {BIND_VAR_STANDARD, standard}
+      {BIND_VAR_DOMAIN, domain}, {BIND_VAR_TYPES, types}, {BIND_VAR_STANDARD, standard}
     };
     QueryAndParameters queryAndParameters =
         generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH, params, endsWithList);
@@ -388,14 +393,14 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
       String domain,
-      String type,
+      List<String> types,
       Boolean standard,
       String term,
       List<String> endsWithList,
       Pageable page) {
     Object[][] params = {
       {BIND_VAR_DOMAIN, domain},
-      {BIND_VAR_TYPE, type},
+      {BIND_VAR_TYPES, types},
       {BIND_VAR_STANDARD, standard},
       {BIND_VAR_TERM, term}
     };

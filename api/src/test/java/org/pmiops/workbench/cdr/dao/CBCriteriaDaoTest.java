@@ -335,7 +335,11 @@ public class CBCriteriaDaoTest {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> labs =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-            Domain.MEASUREMENT.toString(), CriteriaType.LOINC.toString(), true, "LP123", page);
+            Domain.MEASUREMENT.toString(),
+            ImmutableList.of(CriteriaType.LOINC.toString()),
+            true,
+            "LP123",
+            page);
     assertThat(labs).containsExactly(measurementCriteria);
   }
 
@@ -344,7 +348,11 @@ public class CBCriteriaDaoTest {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> conditions =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
-            Domain.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, "myMatch", page);
+            Domain.CONDITION.toString(),
+            ImmutableList.of(CriteriaType.SNOMED.toString()),
+            true,
+            "myMatch",
+            page);
     assertThat(conditions).containsExactly(standardCriteria);
   }
 
