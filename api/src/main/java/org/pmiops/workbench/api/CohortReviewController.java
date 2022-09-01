@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
@@ -66,6 +67,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   private final CohortBuilderService cohortBuilderService;
   private final CohortReviewService cohortReviewService;
+
+  private ChartService chartService;
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -76,6 +79,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   CohortReviewController(
       CohortReviewService cohortReviewService,
       CohortBuilderService cohortBuilderService,
+      ChartService chartService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -83,6 +87,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.cohortBuilderService = cohortBuilderService;
+    this.chartService = chartService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -268,6 +273,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       String domain,
       Integer limit) {
+
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
@@ -289,7 +295,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     return ResponseEntity.ok(
         new ParticipantChartDataListResponse()
             .items(
-                cohortReviewService.findParticipantChartData(
+                chartService.findParticipantChartData(
                     pcs.getParticipantId(),
                     Objects.requireNonNull(Domain.fromValue(domain)),
                     chartLimit)));

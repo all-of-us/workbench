@@ -75,13 +75,11 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.ParticipantData;
@@ -418,50 +416,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
               .deceased(bigQueryService.getBoolean(row, rm.get("deceased"))));
     }
     return participantCohortStatuses;
-  }
-
-  @Override
-  public List<CohortChartData> findCohortChartData(DbCohort dbCohort, Domain domain, int limit) {
-    SearchRequest searchRequest =
-        new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
-
-    TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                cohortQueryBuilder.buildDomainChartInfoCounterQuery(
-                    new ParticipantCriteria(searchRequest), domain, limit)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-    List<CohortChartData> cohortChartData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      cohortChartData.add(
-          new CohortChartData()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return cohortChartData;
-  }
-
-  @Override
-  public List<ParticipantChartData> findParticipantChartData(
-      Long participantId, Domain domain, int limit) {
-    TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                reviewQueryBuilder.buildChartDataQuery(participantId, domain, limit)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<ParticipantChartData> participantChartData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      participantChartData.add(
-          new ParticipantChartData()
-              .standardName(bigQueryService.getString(row, rm.get("standardName")))
-              .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-              .startDate(bigQueryService.getDate(row, rm.get("startDate")))
-              .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-              .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
-    }
-    return participantChartData;
   }
 
   @Override

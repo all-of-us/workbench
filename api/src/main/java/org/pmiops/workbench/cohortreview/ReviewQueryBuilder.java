@@ -88,10 +88,7 @@ public class ReviewQueryBuilder {
         SURVEY_TABLE,
         PART_ID
       };
-  private static final Object[] CHART_DATA_ARGS =
-      new Object[] {
-        REVIEW_TABLE, REVIEW_TABLE, PART_ID, DOMAIN_PARAM, LIMIT, PART_ID, DOMAIN_PARAM, LIMIT
-      };
+
   private static final ImmutableList<FilterColumns> LONG_NUMBERS =
       ImmutableList.of(AGE_AT_EVENT, NUM_MENTIONS);
   private static final ImmutableList<FilterColumns> DOUBLE_NUMBERS =
@@ -142,24 +139,6 @@ public class ReviewQueryBuilder {
       "select count(*) as count\n"
           + "from `${projectId}.${dataSetId}.%s`\n"
           + "where person_id = @%s\n";
-  private static final String CHART_DATA_TEMPLATE =
-      "select distinct a.standard_name as standardName, a.standard_vocabulary as standardVocabulary, "
-          + "DATE(a.start_datetime) as startDate, a.age_at_event as ageAtEvent, rnk as rank\n"
-          + "from `${projectId}.${dataSetId}.%s` a\n"
-          + "join (select standard_code, RANK() OVER (ORDER BY count DESC) AS rnk\n"
-          + "from (select standard_code, count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.%s`\n"
-          + "where person_id = @%s\n"
-          + "and domain = @%s\n"
-          + "and standard_concept_id != 0\n"
-          + "group by standard_code\n"
-          + "order by count(*) desc\n"
-          + "LIMIT @%s)) b on a.standard_code = b.standard_code\n"
-          + "where person_id = @%s\n"
-          + "and domain = @%s\n"
-          + "and standard_concept_id != 0\n"
-          + "and rnk <= @%s\n"
-          + "order by rank asc, standardName, startDate\n";
   private static final String VOCAB_DATA_TEMPLATE =
       "SELECT distinct 'Standard' as type, 'ALL_EVENTS' as domain, standard_vocabulary as vocabulary\n"
           + "FROM `${projectId}.${dataSetId}.%1$s`\n"
@@ -189,18 +168,6 @@ public class ReviewQueryBuilder {
   public QueryJobConfiguration buildCountQuery(
       Long participantId, Domain domain, PageRequest pageRequest) {
     return buildQueryJobConfiguration(participantId, domain, pageRequest, true);
-  }
-
-  public QueryJobConfiguration buildChartDataQuery(
-      Long participantId, Domain domain, Integer limit) {
-    Map<String, QueryParameterValue> params = new HashMap<>();
-    params.put(PART_ID, QueryParameterValue.int64(participantId));
-    params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
-    params.put(LIMIT, QueryParameterValue.int64(limit));
-    return QueryJobConfiguration.newBuilder(String.format(CHART_DATA_TEMPLATE, CHART_DATA_ARGS))
-        .setNamedParameters(params)
-        .setUseLegacySql(false)
-        .build();
   }
 
   public QueryJobConfiguration buildVocabularyDataQuery() {

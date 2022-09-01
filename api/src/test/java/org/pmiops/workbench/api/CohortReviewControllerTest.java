@@ -52,6 +52,8 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
@@ -160,7 +162,6 @@ public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
-
   private static final String WORKSPACE2_NAMESPACE = "namespace2";
   private static final String WORKSPACE2_NAME = "name2";
   private static final String USER_EMAIL = "bob@gmail.com";
@@ -206,7 +207,6 @@ public class CohortReviewControllerTest {
   @Autowired ComplianceService complianceService;
   @Autowired DataSetService dataSetService;
   @Autowired BigQueryService bigQueryService;
-
   @Autowired UserService userService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired WorkspaceService workspaceService;
@@ -261,6 +261,8 @@ public class CohortReviewControllerTest {
   @Import({
     FakeClockConfiguration.class,
     CdrVersionService.class,
+    ChartServiceImpl.class,
+    ChartQueryBuilder.class,
     CohortBuilderServiceImpl.class,
     CohortReviewController.class,
     CohortReviewMapperImpl.class,

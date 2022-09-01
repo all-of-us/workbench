@@ -60,6 +60,8 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -279,6 +281,7 @@ public class WorkspacesControllerTest {
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
   @MockBean CohortBuilderService cohortBuilderService;
+
   @MockBean AccessTierService accessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
@@ -343,6 +346,8 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortQueryBuilder.class,
     CohortService.class,
+    ChartService.class,
+    ChartQueryBuilder.class,
     ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,

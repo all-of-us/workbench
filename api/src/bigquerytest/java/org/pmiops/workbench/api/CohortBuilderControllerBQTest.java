@@ -33,6 +33,9 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.chart.ChartService;
+import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -93,6 +96,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Import({
     BigQueryTestService.class,
     CohortQueryBuilder.class,
+    ChartServiceImpl.class,
+    ChartQueryBuilder.class,
     CommonMappers.class,
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
@@ -119,6 +124,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private CohortBuilderService cohortBuilderService;
+
+  @Autowired private ChartService chartService;
 
   @Autowired private WorkspaceAuthService workspaceAuthService;
 
@@ -190,7 +197,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     controller =
         new CohortBuilderController(
-            cohortBuilderService, workspaceAuthService, workbenchConfigProvider);
+            cohortBuilderService, chartService, workspaceAuthService, workbenchConfigProvider);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);

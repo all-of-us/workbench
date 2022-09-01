@@ -5,21 +5,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
-import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CardCount;
-import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.EthnicityInfo;
-import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
@@ -58,8 +52,6 @@ public interface CohortBuilderService {
 
   List<AgeTypeCount> findAgeTypeCounts();
 
-  List<CohortChartData> findCohortChartData(SearchRequest searchRequest, Domain domain, int limit);
-
   List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId);
 
   List<Criteria> findCriteriaAutoComplete(
@@ -85,9 +77,6 @@ public interface CohortBuilderService {
 
   List<DataFilter> findDataFilters();
 
-  List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
-
   List<CardCount> findUniversalDomainCounts(String term);
 
   List<CardCount> findUniversalDomainCountsV2(String term);
@@ -101,8 +90,6 @@ public interface CohortBuilderService {
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
   List<Criteria> findDrugIngredientByConceptId(Long conceptId);
-
-  List<EthnicityInfo> findEthnicityInfo(SearchRequest request);
 
   ParticipantDemographics findParticipantDemographics();
 
