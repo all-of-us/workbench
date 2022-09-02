@@ -54,6 +54,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       String domain,
       List<String> types,
       Boolean standard,
+      List<Boolean> hierarchies,
       SearchTerm searchTerm,
       Pageable pageRequest) {
     Boolean isSurvey = Domain.SURVEY.toString().equals(domain);
@@ -61,13 +62,13 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       return isSurvey
           ? findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest).getContent()
           : findCriteriaByDomainAndTypeAndStandardAndFullText(
-              domain, types, standard, searchTerm.getModifiedTerm(), pageRequest);
+              domain, types, standard, hierarchies, searchTerm.getModifiedTerm(), pageRequest);
     } else if (searchTerm.hasEndsWithOnly()) {
       return isSurvey
           ? findSurveyQuestionByNameEndsWith(searchTerm.getEndsWithTerms(), pageRequest)
               .getContent()
           : findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
-              domain, types, standard, searchTerm.getEndsWithTerms(), pageRequest);
+              domain, types, standard, hierarchies, searchTerm.getEndsWithTerms(), pageRequest);
     } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
       return isSurvey
           ? findSurveyQuestionByTermAndNameEndsWith(
@@ -77,6 +78,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               domain,
               types,
               standard,
+              hierarchies,
               searchTerm.getModifiedTerm(),
               searchTerm.getEndsWithTerms(),
               pageRequest);
@@ -283,7 +285,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "from DbCriteria c "
               + "where type in (:types) "
               + "and standard=:standard "
-              + "and hierarchy=1 "
+              + "and hierarchy in (:hierarchies) "
               + "and code like upper(concat(:term,'%')) "
               + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc")
@@ -291,6 +293,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       @Param("domain") String domain,
       @Param("types") List<String> types,
       @Param("standard") Boolean standard,
+      @Param("hierarchies") List<Boolean> hierarchies,
       @Param("term") String term,
       Pageable page);
 
@@ -300,13 +303,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "from DbCriteria c "
               + "where type in (:types) "
               + "and standard = :standard "
-              + "and hierarchy=1 "
+              + "and hierarchy in (:hierarchies) "
               + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, name asc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndFullText(
       @Param("domain") String domain,
       @Param("types") List<String> types,
       @Param("standard") Boolean standard,
+      @Param("hierarchies") List<Boolean> hierarchies,
       @Param("term") String term,
       Pageable page);
 

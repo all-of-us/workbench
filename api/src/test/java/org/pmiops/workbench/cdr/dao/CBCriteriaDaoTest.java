@@ -3,7 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -314,11 +314,17 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() {
     List<DbCriteria> actualIcd9s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-            Arrays.asList(Domain.CONDITION.toString()), CriteriaType.ICD9CM.toString(), false, 0L);
+            Collections.singletonList(Domain.CONDITION.toString()),
+            CriteriaType.ICD9CM.toString(),
+            false,
+            0L);
     assertThat(actualIcd9s).containsExactly(sourceCriteria, icd9Criteria);
     List<DbCriteria> actualIcd10s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-            Arrays.asList(Domain.CONDITION.toString()), CriteriaType.ICD10CM.toString(), false, 0L);
+            Collections.singletonList(Domain.CONDITION.toString()),
+            CriteriaType.ICD10CM.toString(),
+            false,
+            0L);
     assertThat(actualIcd10s).containsExactly(icd10Criteria);
   }
 
@@ -338,6 +344,7 @@ public class CBCriteriaDaoTest {
             Domain.MEASUREMENT.toString(),
             ImmutableList.of(CriteriaType.LOINC.toString()),
             true,
+            ImmutableList.of(true),
             "LP123",
             page);
     assertThat(labs).containsExactly(measurementCriteria);
@@ -351,6 +358,7 @@ public class CBCriteriaDaoTest {
             Domain.CONDITION.toString(),
             ImmutableList.of(CriteriaType.SNOMED.toString()),
             true,
+            ImmutableList.of(true),
             "myMatch",
             page);
     assertThat(conditions).containsExactly(standardCriteria);

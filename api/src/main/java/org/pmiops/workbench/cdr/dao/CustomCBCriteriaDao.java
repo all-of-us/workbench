@@ -22,6 +22,7 @@ public interface CustomCBCriteriaDao {
       String domain,
       List<String> types,
       Boolean standard,
+      List<Boolean> hierarchies,
       List<String> endsWithList,
       Pageable page);
 
@@ -29,6 +30,7 @@ public interface CustomCBCriteriaDao {
       String domain,
       List<String> types,
       Boolean standard,
+      List<Boolean> hierarchies,
       String term,
       List<String> endsWithTerms,
       Pageable pageRequest);

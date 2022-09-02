@@ -51,6 +51,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   // SQL bind parameter variables
   private static final String BIND_VAR_DOMAIN = "domain";
   private static final String BIND_VAR_STANDARD = "standard";
+  private static final String BIND_VAR_HIERARCHIES = "hierarchies";
   private static final String BIND_VAR_TERM = "term";
   private static final String BIND_VAR_TYPE = "type";
   private static final String BIND_VAR_TYPES = "types";
@@ -138,7 +139,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + "and has_hierarchy = 1\n"
+          + "and has_hierarchy in (:"
+          + BIND_VAR_HIERARCHIES
+          + ")\n"
           + MATCH_FULL_TEXT_DOMAIN
           + "and ("
           + SQL_ENDS_WITH
@@ -156,7 +159,9 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
-          + "and has_hierarchy = 1\n"
+          + "and has_hierarchy in (:"
+          + BIND_VAR_HIERARCHIES
+          + ")\n"
           + MATCH_FULL_TEXT_DOMAIN_TERM
           + "and ("
           + SQL_ENDS_WITH
@@ -376,10 +381,14 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       String domain,
       List<String> types,
       Boolean standard,
+      List<Boolean> hierarchies,
       List<String> endsWithList,
       Pageable page) {
     Object[][] params = {
-      {BIND_VAR_DOMAIN, domain}, {BIND_VAR_TYPES, types}, {BIND_VAR_STANDARD, standard}
+      {BIND_VAR_DOMAIN, domain},
+      {BIND_VAR_TYPES, types},
+      {BIND_VAR_STANDARD, standard},
+      {BIND_VAR_HIERARCHIES, hierarchies}
     };
     QueryAndParameters queryAndParameters =
         generateQueryAndParameters(AUTO_COMPLETE_ENDS_WITH, params, endsWithList);
@@ -395,6 +404,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       String domain,
       List<String> types,
       Boolean standard,
+      List<Boolean> hierarchies,
       String term,
       List<String> endsWithList,
       Pageable page) {
@@ -402,6 +412,7 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
       {BIND_VAR_DOMAIN, domain},
       {BIND_VAR_TYPES, types},
       {BIND_VAR_STANDARD, standard},
+      {BIND_VAR_HIERARCHIES, hierarchies},
       {BIND_VAR_TERM, term}
     };
     QueryAndParameters queryAndParameters =
