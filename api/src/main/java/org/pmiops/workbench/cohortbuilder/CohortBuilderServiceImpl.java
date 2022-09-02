@@ -580,7 +580,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     String domain = Domain.DRUG.toString();
     List<String> types =
-        ImmutableList.of(CriteriaType.ATC.toString(), CriteriaType.RXNORM.toString());
+        ImmutableList.of(
+            CriteriaType.ATC.toString(),
+            CriteriaType.BRAND.toString(),
+            CriteriaType.RXNORM.toString());
     Boolean standard = true;
     List<Boolean> hierarchies = ImmutableList.of(true, false);
     List<DbCriteria> criteriaList =
