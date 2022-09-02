@@ -58,7 +58,7 @@ public interface CohortBuilderService {
       String domain, String term, String type, Boolean standard, Integer limit);
 
   List<Criteria> findCriteriaAutoCompleteV2(
-      String domain, String term, String type, Boolean standard, Integer limit);
+      String domain, String term, List<String> types, Boolean standard, Integer limit);
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
@@ -88,6 +88,8 @@ public interface CohortBuilderService {
   List<DomainCard> findDomainCards();
 
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
+
+  List<Criteria> findDrugBrandOrIngredientByValueV2(String value, Integer limit);
 
   List<Criteria> findDrugIngredientByConceptId(Long conceptId);
 

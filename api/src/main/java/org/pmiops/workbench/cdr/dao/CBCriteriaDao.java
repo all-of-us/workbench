@@ -51,19 +51,24 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
 
   /** Consolidate all AutoComplete Dao calls into one default method. */
   default List<DbCriteria> findCriteriaAutoComplete(
-      String domain, String type, Boolean standard, SearchTerm searchTerm, Pageable pageRequest) {
+      String domain,
+      List<String> types,
+      Boolean standard,
+      List<Boolean> hierarchies,
+      SearchTerm searchTerm,
+      Pageable pageRequest) {
     Boolean isSurvey = Domain.SURVEY.toString().equals(domain);
     if (searchTerm.hasModifiedTermOnly()) {
       return isSurvey
           ? findSurveyQuestionByTerm(searchTerm.getModifiedTerm(), pageRequest).getContent()
           : findCriteriaByDomainAndTypeAndStandardAndFullText(
-              domain, type, standard, searchTerm.getModifiedTerm(), pageRequest);
+              domain, types, standard, hierarchies, searchTerm.getModifiedTerm(), pageRequest);
     } else if (searchTerm.hasEndsWithOnly()) {
       return isSurvey
           ? findSurveyQuestionByNameEndsWith(searchTerm.getEndsWithTerms(), pageRequest)
               .getContent()
           : findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
-              domain, type, standard, searchTerm.getEndsWithTerms(), pageRequest);
+              domain, types, standard, hierarchies, searchTerm.getEndsWithTerms(), pageRequest);
     } else if (searchTerm.hasEndsWithTermsAndModifiedTerm()) {
       return isSurvey
           ? findSurveyQuestionByTermAndNameEndsWith(
@@ -71,8 +76,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               .getContent()
           : findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
               domain,
-              type,
+              types,
               standard,
+              hierarchies,
               searchTerm.getModifiedTerm(),
               searchTerm.getEndsWithTerms(),
               pageRequest);
@@ -277,16 +283,17 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where type=:type "
+              + "where type in (:types) "
               + "and standard=:standard "
-              + "and hierarchy=1 "
+              + "and hierarchy in (:hierarchies) "
               + "and code like upper(concat(:term,'%')) "
               + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndCode(
       @Param("domain") String domain,
-      @Param("type") String type,
+      @Param("types") List<String> types,
       @Param("standard") Boolean standard,
+      @Param("hierarchies") List<Boolean> hierarchies,
       @Param("term") String term,
       Pageable page);
 
@@ -294,15 +301,16 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where type = :type "
+              + "where type in (:types) "
               + "and standard = :standard "
-              + "and hierarchy=1 "
+              + "and hierarchy in (:hierarchies) "
               + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, name asc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndFullText(
       @Param("domain") String domain,
-      @Param("type") String type,
+      @Param("types") List<String> types,
       @Param("standard") Boolean standard,
+      @Param("hierarchies") List<Boolean> hierarchies,
       @Param("term") String term,
       Pageable page);
 

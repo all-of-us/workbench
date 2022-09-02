@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.apphosting.api.DeadlineExceededException;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Objects;
@@ -83,7 +84,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
           new CriteriaListResponse()
               .items(
                   cohortBuilderService.findCriteriaAutoCompleteV2(
-                      domain, term, type, standard, limit)));
+                      domain, term, ImmutableList.of(type), standard, limit)));
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
@@ -98,9 +99,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, String value, Integer limit) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(
-        new CriteriaListResponse()
-            .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findDrugBrandOrIngredientByValueV2(value, limit)));
+    } else {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
+    }
   }
 
   @Override

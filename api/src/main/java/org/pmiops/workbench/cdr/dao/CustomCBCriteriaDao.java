@@ -19,12 +19,18 @@ public interface CustomCBCriteriaDao {
       Pageable page);
 
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndNameEndsWith(
-      String domain, String type, Boolean standard, List<String> endsWithList, Pageable page);
+      String domain,
+      List<String> types,
+      Boolean standard,
+      List<Boolean> hierarchies,
+      List<String> endsWithList,
+      Pageable page);
 
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndTermAndNameEndsWith(
       String domain,
-      String type,
+      List<String> types,
       Boolean standard,
+      List<Boolean> hierarchies,
       String term,
       List<String> endsWithTerms,
       Pageable pageRequest);

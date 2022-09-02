@@ -228,13 +228,19 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domain, String term, String type, Boolean standard, Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
-            domain, type, standard, modifyTermMatch(term), pageRequest);
+            domain,
+            ImmutableList.of(type),
+            standard,
+            ImmutableList.of(true),
+            modifyTermMatch(term),
+            pageRequest);
     if (criteriaList.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, type, standard, term, pageRequest);
+              domain, ImmutableList.of(type), standard, ImmutableList.of(true), term, pageRequest);
     }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
@@ -243,20 +249,26 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaAutoCompleteV2(
-      String domain, String term, String type, Boolean standard, Integer limit) {
+      String domain, String term, List<String> types, Boolean standard, Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
 
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaAutoComplete(domain, type, standard, searchTerm, pageRequest);
+        cbCriteriaDao.findCriteriaAutoComplete(
+            domain, types, standard, ImmutableList.of(true), searchTerm, pageRequest);
 
     // find by code if auto complete return nothing.
     if (criteriaList.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, type, standard, term.replaceAll("[()+\"*-]", ""), pageRequest);
+              domain,
+              types,
+              standard,
+              ImmutableList.of(true),
+              term.replaceAll("[()+\"*-]", ""),
+              pageRequest);
     }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
@@ -554,6 +566,36 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findDrugBrandOrIngredientByValue(
             value, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Criteria> findDrugBrandOrIngredientByValueV2(String term, Integer limit) {
+    PageRequest pageRequest =
+        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+
+    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
+
+    String domain = Domain.DRUG.toString();
+    List<String> types =
+        ImmutableList.of(
+            CriteriaType.ATC.toString(),
+            CriteriaType.BRAND.toString(),
+            CriteriaType.RXNORM.toString());
+    Boolean standard = true;
+    List<Boolean> hierarchies = ImmutableList.of(true, false);
+    List<DbCriteria> criteriaList =
+        cbCriteriaDao.findCriteriaAutoComplete(
+            domain, types, standard, hierarchies, searchTerm, pageRequest);
+
+    // find by code if auto complete return nothing.
+    if (criteriaList.isEmpty()) {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
+              domain, types, standard, hierarchies, term.replaceAll("[()+\"*-]", ""), pageRequest);
+    }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());

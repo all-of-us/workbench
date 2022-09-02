@@ -930,22 +930,28 @@ public class CohortBuilderControllerTest {
             .addCode("LP12345")
             .addName("drugName")
             .addConceptId("12345")
+            .addStandard(true)
             .addGroup(true)
             .addSelectable(true)
+            .addHierarchy(true)
             .addCount(12L)
+            .addFullText("drugN*[DRUG_rank1]")
             .build();
     cbCriteriaDao.save(drugATCCriteria);
     DbCriteria drugBrandCriteria =
         DbCriteria.builder()
             .addDomainId(Domain.DRUG.toString())
-            .addType(CriteriaType.BRAND.toString())
+            .addType(CriteriaType.RXNORM.toString())
             .addParentId(0L)
             .addCode("LP6789")
-            .addName("brandName")
+            .addName("RXName")
             .addConceptId("1235")
+            .addStandard(true)
             .addGroup(true)
             .addSelectable(true)
+            .addHierarchy(true)
             .addCount(33L)
+            .addFullText("rxN*[DRUG_rank1]")
             .build();
     cbCriteriaDao.save(drugBrandCriteria);
 
@@ -963,7 +969,7 @@ public class CohortBuilderControllerTest {
             Objects.requireNonNull(
                     controller
                         .findDrugBrandOrIngredientByValue(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "brandN", null)
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "rxN", null)
                         .getBody())
                 .getItems()
                 .get(0))
