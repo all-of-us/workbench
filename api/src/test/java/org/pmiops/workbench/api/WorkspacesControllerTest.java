@@ -492,16 +492,15 @@ public class WorkspacesControllerTest {
   }
 
   private void stubBigQueryCohortCalls() {
-    //construct the first TableResult call
+    // construct the first TableResult call
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
     Schema schema = Schema.of(count);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
-    List<FieldValueList> tableRows =
-            Arrays.asList(FieldValueList.of(Arrays.asList(countValue)));
+    List<FieldValueList> tableRows = Arrays.asList(FieldValueList.of(Arrays.asList(countValue)));
     TableResult result =
-            new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
-    //construct the second TableResult call
+    // construct the second TableResult call
     Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
     Field birthDatetime = Field.of("birth_datetime", LegacySQLTypeName.DATETIME);
     Field genderConceptId = Field.of("gender_concept_id", LegacySQLTypeName.INTEGER);
@@ -509,7 +508,15 @@ public class WorkspacesControllerTest {
     Field ethnicityConceptId = Field.of("ethnicity_concept_id", LegacySQLTypeName.INTEGER);
     Field sexAtBirthConceptId = Field.of("sex_at_birth_concept_id", LegacySQLTypeName.INTEGER);
     Field deceased = Field.of("deceased", LegacySQLTypeName.BOOLEAN);
-    Schema schema2 = Schema.of(personId, birthDatetime, genderConceptId, raceConceptId, ethnicityConceptId, sexAtBirthConceptId, deceased);
+    Schema schema2 =
+        Schema.of(
+            personId,
+            birthDatetime,
+            genderConceptId,
+            raceConceptId,
+            ethnicityConceptId,
+            sexAtBirthConceptId,
+            deceased);
     FieldValue personIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue birthDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue genderConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
@@ -518,11 +525,20 @@ public class WorkspacesControllerTest {
     FieldValue sexAtBirthConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
     FieldValue deceasedValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "false");
     List<FieldValueList> tableRows2 =
-            Arrays.asList(FieldValueList.of(Arrays.asList(personIdValue, birthDatetimeValue, genderConceptIdValue, raceConceptIdValue, ethnicityConceptIdValue, sexAtBirthConceptIdValue, deceasedValue)));
+        Arrays.asList(
+            FieldValueList.of(
+                Arrays.asList(
+                    personIdValue,
+                    birthDatetimeValue,
+                    genderConceptIdValue,
+                    raceConceptIdValue,
+                    ethnicityConceptIdValue,
+                    sexAtBirthConceptIdValue,
+                    deceasedValue)));
     TableResult result2 =
-            new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
 
-    //return the TableResult calls in order of call
+    // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);
   }
 

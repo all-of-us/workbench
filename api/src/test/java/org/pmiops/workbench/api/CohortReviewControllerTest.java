@@ -3,14 +3,14 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.TableResult;
+import com.google.cloud.PageImpl;
+import com.google.cloud.bigquery.*;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -599,7 +599,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReviewAlreadyExists() {
-    stubBigQueryCohortCalls();
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     // use existing cohort
     Throwable exception =
@@ -623,7 +622,6 @@ public class CohortReviewControllerTest {
   @Test
   public void createCohortReviewNoCohortException() {
     Long cohortId = cohort.getCohortId() + 99L;
-    stubBigQueryCohortCalls();
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
 
     Throwable exception =
@@ -644,7 +642,7 @@ public class CohortReviewControllerTest {
       value = WorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
   public void createCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
-    stubBigQueryCohortCalls();
+    stubBigQueryCreateCohortReview();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -666,7 +664,6 @@ public class CohortReviewControllerTest {
       names = {"READER", "NO_ACCESS"})
   public void createCohortReviewAllowedForbiddenAccessLevel(
       WorkspaceAccessLevel workspaceAccessLevel) {
-    stubBigQueryCohortCalls();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -780,7 +777,8 @@ public class CohortReviewControllerTest {
                 requestCohortReview)
             .getBody();
 
-    assertThat(Objects.requireNonNull(updated).getCohortName()).isEqualTo(requestCohortReview.getCohortName());
+    assertThat(Objects.requireNonNull(updated).getCohortName())
+        .isEqualTo(requestCohortReview.getCohortName());
     assertThat(updated.getDescription()).isEqualTo(requestCohortReview.getDescription());
     assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
   }
@@ -1044,7 +1042,7 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortAnnotationNoCohortReview() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
-    Long wrongCohorReviewId = -1L;
+    Long wrongCohortReviewId = -1L;
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1052,12 +1050,12 @@ public class CohortReviewControllerTest {
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    wrongCohorReviewId,
+                    wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
                     new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")));
 
-    assertNotFoundExceptionCohortReview(wrongCohorReviewId, exception);
+    assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
   @Test
@@ -1202,7 +1200,8 @@ public class CohortReviewControllerTest {
                 new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
             .getBody();
 
-    assertThat(Objects.requireNonNull(participantCohortAnnotation).getAnnotationValueString()).isEqualTo("test1");
+    assertThat(Objects.requireNonNull(participantCohortAnnotation).getAnnotationValueString())
+        .isEqualTo("test1");
   }
 
   @ParameterizedTest(
@@ -1410,7 +1409,8 @@ public class CohortReviewControllerTest {
                 new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED))
             .getBody();
 
-    assertThat(Objects.requireNonNull(participantCohortStatus).getStatus()).isEqualTo(CohortStatus.INCLUDED);
+    assertThat(Objects.requireNonNull(participantCohortStatus).getStatus())
+        .isEqualTo(CohortStatus.INCLUDED);
   }
 
   @ParameterizedTest(name = "updateParticipantCohortStatusForbiddenLevels WorkspaceAccessLevel={0}")
@@ -1491,7 +1491,7 @@ public class CohortReviewControllerTest {
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
-    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(Objects.requireNonNull(response).getItems().size()).isEqualTo(2);
     List<ParticipantCohortAnnotation> expected =
         ImmutableList.of(
             participantCohortAnnotationMapper.dbModelToClient(participantAnnotation),
@@ -1576,7 +1576,7 @@ public class CohortReviewControllerTest {
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
-    assertThat(response.getParticipantId())
+    assertThat(Objects.requireNonNull(response).getParticipantId())
         .isEqualTo(participantCohortStatus1.getParticipantKey().getParticipantId());
     assertThat(response.getStatus())
         .isEqualTo(DbStorageEnums.cohortStatusFromStorage(participantCohortStatus1.getStatus()));
@@ -1707,7 +1707,7 @@ public class CohortReviewControllerTest {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     long cohortReviewId = cohortReview.getCohortReviewId();
-    stubBigQueryCohortCalls();
+    stubBigQueryParticipantCount();
     ParticipantDataCountResponse actual =
         cohortReviewController
             .getParticipantCount(
@@ -1718,7 +1718,7 @@ public class CohortReviewControllerTest {
                 new PageFilterRequest().domain(Domain.CONDITION))
             .getBody();
 
-    assertThat(actual.getCount()).isEqualTo(0L);
+    assertThat(Objects.requireNonNull(actual).getCount()).isEqualTo(0L);
   }
 
   @ParameterizedTest(name = "getParticipantCountForbiddenAccessLevel WorkspaceAccessLevel={0}")
@@ -1840,7 +1840,7 @@ public class CohortReviewControllerTest {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     long cohortReviewId = cohortReview.getCohortReviewId();
-    stubBigQueryCohortCalls();
+    stubBigQueryParticipantData();
     ParticipantDataListResponse actual =
         cohortReviewController
             .getParticipantData(
@@ -1848,9 +1848,9 @@ public class CohortReviewControllerTest {
                 workspace.getId(),
                 cohortReviewId,
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
-                new PageFilterRequest().domain(Domain.SURVEY))
+                new PageFilterRequest().domain(Domain.OBSERVATION))
             .getBody();
-    assertThat(actual.getItems().size()).isEqualTo(1);
+    assertThat(Objects.requireNonNull(actual).getItems().size()).isEqualTo(1);
   }
 
   @ParameterizedTest(name = "getParticipantDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
@@ -1899,7 +1899,7 @@ public class CohortReviewControllerTest {
   public void getParticipantCohortStatusesOldNoCohort() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
 
-    Long worngCohortId = -1L;
+    Long wrongCohortId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -1908,10 +1908,10 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortStatusesOld(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    worngCohortId,
+                    wrongCohortId,
                     new PageFilterRequest()));
 
-    assertNotFoundExceptionNoCohort(worngCohortId, exception);
+    assertNotFoundExceptionNoCohort(wrongCohortId, exception);
   }
 
   @ParameterizedTest(
@@ -1927,13 +1927,14 @@ public class CohortReviewControllerTest {
         new PageFilterRequest().sortOrder(sortOrder).sortColumn(filterColumns);
 
     CohortReview actualReview =
-        cohortReviewController
-            .getParticipantCohortStatusesOld(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getCohortId(),
-                pageFilterRequest)
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getParticipantCohortStatusesOld(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohort.getCohortId(),
+                        pageFilterRequest)
+                    .getBody())
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
@@ -1957,13 +1958,14 @@ public class CohortReviewControllerTest {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview actualReview =
-        cohortReviewController
-            .getParticipantCohortStatusesOld(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getCohortId(),
-                new PageFilterRequest())
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getParticipantCohortStatusesOld(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohort.getCohortId(),
+                        new PageFilterRequest())
+                    .getBody())
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
@@ -2024,7 +2026,7 @@ public class CohortReviewControllerTest {
   public void getParticipantCohortStatusesNoCohort() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
 
-    Long worngCohortId = -1L;
+    Long wrongCohortId = -1L;
 
     Throwable exception =
         assertThrows(
@@ -2033,11 +2035,11 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortStatuses(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    worngCohortId,
+                    wrongCohortId,
                     cohortReview.getCohortReviewId(),
                     new PageFilterRequest()));
 
-    assertNotFoundExceptionNoCohort(worngCohortId, exception);
+    assertNotFoundExceptionNoCohort(wrongCohortId, exception);
   }
 
   @ParameterizedTest(
@@ -2053,14 +2055,15 @@ public class CohortReviewControllerTest {
         new PageFilterRequest().sortOrder(sortOrder).sortColumn(filterColumns);
 
     CohortReview actualReview =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getCohortId(),
-                cohortReview.getCohortReviewId(),
-                pageFilterRequest)
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getParticipantCohortStatuses(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohort.getCohortId(),
+                        cohortReview.getCohortReviewId(),
+                        pageFilterRequest)
+                    .getBody())
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
@@ -2084,14 +2087,15 @@ public class CohortReviewControllerTest {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview actualReview =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getCohortId(),
-                cohortReview.getCohortReviewId(),
-                new PageFilterRequest())
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getParticipantCohortStatuses(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohort.getCohortId(),
+                        cohortReview.getCohortReviewId(),
+                        new PageFilterRequest())
+                    .getBody())
             .getCohortReview();
 
     verify(userRecentResourceService, atLeastOnce())
@@ -2145,9 +2149,10 @@ public class CohortReviewControllerTest {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     List<CohortReview> actual =
-        cohortReviewController
-            .getCohortReviewsInWorkspace(workspace.getNamespace(), workspace.getId())
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getCohortReviewsInWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody())
             .getItems();
 
     assertThat(actual).isEqualTo(expected);
@@ -2182,7 +2187,7 @@ public class CohortReviewControllerTest {
       names = {"OWNER", "WRITER", "READER"})
   public void getCohortReviewsByCohortIdAllowedAccessLevel(
       WorkspaceAccessLevel workspaceAccessLevel) {
-    DbCohortReview cohortReviewMult =
+    DbCohortReview cohortReviewMultiple =
         cohortReviewDao.save(
             new DbCohortReview()
                 .cohortId(cohort.getCohortId())
@@ -2193,16 +2198,17 @@ public class CohortReviewControllerTest {
     List<CohortReview> expected =
         ImmutableList.of(
             cohortReviewMapper.dbModelToClient(cohortReview),
-            cohortReviewMapper.dbModelToClient(cohortReviewMult));
+            cohortReviewMapper.dbModelToClient(cohortReviewMultiple));
 
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     List<CohortReview> actual =
-        cohortReviewController
-            .getCohortReviewsByCohortId(
-                workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getCohortReviewsByCohortId(
+                        workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+                    .getBody())
             .getItems();
 
     assertThat(actual).isEqualTo(expected);
@@ -2237,18 +2243,19 @@ public class CohortReviewControllerTest {
   public void getParticipantChartDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-    stubBigQueryCohortCalls();
+    stubBigQueryParticipantChartData();
 
     List<ParticipantChartData> actual =
-        cohortReviewController
-            .getParticipantChartData(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohortReview.getCohortReviewId(),
-                participantCohortStatus1.getParticipantKey().getParticipantId(),
-                Domain.CONDITION.toString(),
-                1)
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getParticipantChartData(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohortReview.getCohortReviewId(),
+                        participantCohortStatus1.getParticipantKey().getParticipantId(),
+                        Domain.CONDITION.toString(),
+                        1)
+                    .getBody())
             .getItems();
 
     assertThat(actual.size()).isEqualTo(1);
@@ -2286,13 +2293,16 @@ public class CohortReviewControllerTest {
   public void getVocabulariesAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-    stubBigQueryCohortCalls();
+    stubBigQueryVocabulary();
 
     List<Vocabulary> actual =
-        cohortReviewController
-            .getVocabularies(
-                workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId())
-            .getBody()
+        Objects.requireNonNull(
+                cohortReviewController
+                    .getVocabularies(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohortReview.getCohortReviewId())
+                    .getBody())
             .getItems();
 
     assertThat(actual.size()).isEqualTo(1);
@@ -2465,69 +2475,234 @@ public class CohortReviewControllerTest {
     return participantCohortAnnotation;
   }
 
-  private void stubBigQueryCohortCalls() {
-    TableResult queryResult = mock(TableResult.class);
-    Iterable testIterable =
-        () -> {
-          List<FieldValue> list = new ArrayList<>();
-          list.add(null);
-          return list.iterator();
-        };
-    Map<String, Integer> rm =
-        ImmutableMap.<String, Integer>builder()
-            .put("person_id", 0)
-            .put("birth_datetime", 1)
-            .put("gender_concept_id", 2)
-            .put("race_concept_id", 3)
-            .put("ethnicity_concept_id", 4)
-            .put("sex_at_birth_concept_id", 5)
-            .put("count", 6)
-            .put("deceased", 7)
-            .put(FilterColumns.START_DATETIME.toString(), 8)
-            .put(FilterColumns.SURVEY_NAME.toString(), 29)
-            .put(FilterColumns.QUESTION.toString(), 30)
-            .put(FilterColumns.ANSWER.toString(), 31)
-            // chartData
-            .put("name", 0)
-            .put("conceptId", 1)
-            // participantChartData
-            .put("standardName", 0)
-            .put("standardVocabulary", 1)
-            .put("startDate", 2)
-            .put("ageAtEvent", 3)
-            .put("rank", 4)
-            // vocabularies
-            .put("domain", 0)
-            .put("type", 1)
-            .put("vocabulary", 2)
-            .build();
+  private void stubBigQueryParticipantChartData() {
+    // construct the first TableResult call
+    Field standardName = Field.of("standardName", LegacySQLTypeName.STRING);
+    Field standardVocabulary = Field.of("standardVocabulary", LegacySQLTypeName.STRING);
+    Field startDate = Field.of("startDate", LegacySQLTypeName.DATETIME);
+    Field ageAtEvent = Field.of("ageAtEvent", LegacySQLTypeName.INTEGER);
+    Field rank = Field.of("rank", LegacySQLTypeName.INTEGER);
+    Schema schema = Schema.of(standardName, standardVocabulary, startDate, ageAtEvent, rank);
+    FieldValue standardNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardName");
+    FieldValue standardVocabularyValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardVocabulary");
+    FieldValue startDateValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1944-01-12 00:00:00 UTC");
+    FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue rankValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    List<FieldValueList> tableRows =
+            Collections.singletonList(
+                    FieldValueList.of(
+                            Arrays.asList(
+                                    standardNameValue,
+                                    standardVocabularyValue,
+                                    startDateValue,
+                                    ageAtEventValue,
+                                    rankValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
-    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
-    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
-    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
-    when(queryResult.iterateAll()).thenReturn(testIterable);
-    when(queryResult.getValues()).thenReturn(testIterable);
-    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
-    when(bigQueryService.getString(null, 1)).thenReturn("1");
-    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 7)).thenReturn(0L);
-    // get participantCohortStatus - SURVEY
-    when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
-    when(bigQueryService.getString(null, 29)).thenReturn("1");
-    when(bigQueryService.getString(null, 30)).thenReturn("1");
-    when(bigQueryService.getString(null, 31)).thenReturn("1");
-    // chart data - 0-string, 1-long, 2-long
-    when(bigQueryService.getString(null, 0)).thenReturn("1");
-    when(bigQueryService.getLong(null, 1)).thenReturn(1L);
-    // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
-    when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
-    // vocabularies 0-string, 1-string, 2-string
-    when(bigQueryService.getString(null, 2)).thenReturn("1");
+    // return the TableResult calls in order of call
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
   }
+
+  private void stubBigQueryVocabulary() {
+    // construct the first TableResult call
+    Field type = Field.of("type", LegacySQLTypeName.STRING);
+    Field domain = Field.of("domain", LegacySQLTypeName.STRING);
+    Field vocabulary = Field.of("vocabulary", LegacySQLTypeName.STRING);
+    Schema schema = Schema.of(type, domain, vocabulary);
+    FieldValue typeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "type");
+    FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
+    FieldValue vocabularyValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "vocabulary");
+    List<FieldValueList> tableRows =
+            Collections.singletonList(FieldValueList.of(Arrays.asList(typeValue, domainValue, vocabularyValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    // return the TableResult calls in order of call
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
+  }
+
+  private void stubBigQueryParticipantCount() {
+    // construct the first TableResult call
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+    Schema schema = Schema.of(count);
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0");
+    List<FieldValueList> tableRows = Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    // return the TableResult calls in order of call
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
+  }
+
+  private void stubBigQueryParticipantData() {
+    // construct the first TableResult call
+    Field startDatetime = Field.of("START_DATETIME", LegacySQLTypeName.DATETIME);
+    Field domain = Field.of("DOMAIN", LegacySQLTypeName.STRING);
+    Field standardName = Field.of("STANDARD_NAME", LegacySQLTypeName.STRING);
+    Field ageAtEvent = Field.of("AGE_AT_EVENT", LegacySQLTypeName.INTEGER);
+    Field standardConceptId = Field.of("STANDARD_CONCEPT_ID", LegacySQLTypeName.INTEGER);
+    Field sourceConceptId = Field.of("SOURCE_CONCEPT_ID", LegacySQLTypeName.INTEGER);
+    Field standardVocabulary = Field.of("STANDARD_VOCABULARY", LegacySQLTypeName.STRING);
+    Field sourceVocabulary = Field.of("SOURCE_VOCABULARY", LegacySQLTypeName.STRING);
+    Field sourceName = Field.of("SOURCE_NAME", LegacySQLTypeName.STRING);
+    Field sourceCode = Field.of("SOURCE_CODE", LegacySQLTypeName.STRING);
+    Field standardCode = Field.of("STANDARD_CODE", LegacySQLTypeName.STRING);
+    Field valueAsNumber = Field.of("VALUE_AS_NUMBER", LegacySQLTypeName.STRING);
+    Field visitType = Field.of("VISIT_TYPE", LegacySQLTypeName.STRING);
+    Field numMentions = Field.of("NUM_MENTIONS", LegacySQLTypeName.STRING);
+    Field firstMention = Field.of("FIRST_MENTION", LegacySQLTypeName.STRING);
+    Field lastMention = Field.of("LAST_MENTION", LegacySQLTypeName.STRING);
+    Field unit = Field.of("UNIT", LegacySQLTypeName.STRING);
+    Field dose = Field.of("DOSE", LegacySQLTypeName.STRING);
+    Field strength = Field.of("STRENGTH", LegacySQLTypeName.STRING);
+    Field route = Field.of("ROUTE", LegacySQLTypeName.STRING);
+    Field refRange = Field.of("REF_RANGE", LegacySQLTypeName.STRING);
+    Schema schema =
+        Schema.of(
+            startDatetime,
+            domain,
+            standardName,
+            ageAtEvent,
+            standardConceptId,
+            sourceConceptId,
+            standardVocabulary,
+            sourceVocabulary,
+            sourceName,
+            sourceCode,
+            standardCode,
+                valueAsNumber,
+                visitType,
+                numMentions,
+                firstMention,
+                lastMention,
+                unit,
+                dose,
+                strength,
+                route,
+                refRange);
+    FieldValue startDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1944-01-12 00:00:00 UTC");
+    FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
+    FieldValue standardNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardName");
+    FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue standardConceptIdValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue sourceConceptIdValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
+    FieldValue standardVocabularyValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardVocabulary");
+    FieldValue sourceVocabularyValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "sourceVocabulary");
+    FieldValue sourceNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "sourceName");
+    FieldValue sourceCodeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "sourceCode");
+    FieldValue standardCodeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardCode");
+    FieldValue valueAsNumberValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "valueAsNumber");
+    FieldValue visitTypeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "visitType");
+    FieldValue numMentionsValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue firstMentionValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue lastMentionValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue unitValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue doseValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
+    FieldValue strengthValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue routeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "4");
+    FieldValue refRangeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
+    List<FieldValueList> tableRows =
+            Collections.singletonList(
+                    FieldValueList.of(
+                            Arrays.asList(
+                                    startDatetimeValue,
+                                    domainValue,
+                                    standardNameValue,
+                                    ageAtEventValue,
+                                    standardConceptIdValue,
+                                    sourceConceptIdValue,
+                                    standardVocabularyValue,
+                                    sourceVocabularyValue,
+                                    sourceNameValue,
+                                    sourceCodeValue,
+                                    standardCodeValue,
+                                    valueAsNumberValue,
+                                    visitTypeValue,
+                                    numMentionsValue,
+                                    firstMentionValue,
+                                    lastMentionValue,
+                                    unitValue,
+                                    doseValue,
+                                    strengthValue,
+                                    routeValue,
+                                    refRangeValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    // return the TableResult calls in order of call
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
+  }
+
+//  private void stubBigQueryCohortCalls() {
+//    TableResult queryResult = mock(TableResult.class);
+//    Iterable testIterable =
+//        () -> {
+//          List<FieldValue> list = new ArrayList<>();
+//          list.add(null);
+//          return list.iterator();
+//        };
+//    Map<String, Integer> rm =
+//        ImmutableMap.<String, Integer>builder()
+//            .put("person_id", 0)
+//            .put("birth_datetime", 1)
+//            .put("gender_concept_id", 2)
+//            .put("race_concept_id", 3)
+//            .put("ethnicity_concept_id", 4)
+//            .put("sex_at_birth_concept_id", 5)
+//            .put("count", 6)
+//            .put("deceased", 7)
+//            .put(FilterColumns.START_DATETIME.toString(), 8)
+//            .put(FilterColumns.SURVEY_NAME.toString(), 29)
+//            .put(FilterColumns.QUESTION.toString(), 30)
+//            .put(FilterColumns.ANSWER.toString(), 31)
+//            // chartData
+//            .put("name", 0)
+//            .put("conceptId", 1)
+//            // participantChartData
+//            .put("standardName", 0)
+//            .put("standardVocabulary", 1)
+//            .put("startDate", 2)
+//            .put("ageAtEvent", 3)
+//            .put("rank", 4)
+//            // vocabularies
+//            .put("domain", 0)
+//            .put("type", 1)
+//            .put("vocabulary", 2)
+//            .build();
+//
+//    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
+//    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
+//    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
+//    when(queryResult.iterateAll()).thenReturn(testIterable);
+//    when(queryResult.getValues()).thenReturn(testIterable);
+//    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
+//    when(bigQueryService.getString(null, 1)).thenReturn("1");
+//    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
+//    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
+//    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
+//    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
+//    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
+//    when(bigQueryService.getLong(null, 7)).thenReturn(0L);
+//    // get participantCohortStatus - SURVEY
+//    when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
+//    when(bigQueryService.getString(null, 29)).thenReturn("1");
+//    when(bigQueryService.getString(null, 30)).thenReturn("1");
+//    when(bigQueryService.getString(null, 31)).thenReturn("1");
+//    // chart data - 0-string, 1-long, 2-long
+//    when(bigQueryService.getString(null, 0)).thenReturn("1");
+//    when(bigQueryService.getLong(null, 1)).thenReturn(1L);
+//    // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
+//    when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
+//    // vocabularies 0-string, 1-string, 2-string
+//    when(bigQueryService.getString(null, 2)).thenReturn("1");
+//  }
 
   private CohortReview createCohortReview(
       DbCohortReview actualReview, List<DbParticipantCohortStatus> participantCohortStatusList) {
@@ -2582,6 +2757,57 @@ public class CohortReviewControllerTest {
         .deceased(dbStatus.getDeceased());
   }
 
+  private void stubBigQueryCreateCohortReview() {
+    // construct the first TableResult call
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+    Schema schema = Schema.of(count);
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    List<FieldValueList> tableRows = Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+    TableResult result =
+            new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    // construct the second TableResult call
+    Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
+    Field birthDatetime = Field.of("birth_datetime", LegacySQLTypeName.DATETIME);
+    Field genderConceptId = Field.of("gender_concept_id", LegacySQLTypeName.INTEGER);
+    Field raceConceptId = Field.of("race_concept_id", LegacySQLTypeName.INTEGER);
+    Field ethnicityConceptId = Field.of("ethnicity_concept_id", LegacySQLTypeName.INTEGER);
+    Field sexAtBirthConceptId = Field.of("sex_at_birth_concept_id", LegacySQLTypeName.INTEGER);
+    Field deceased = Field.of("deceased", LegacySQLTypeName.BOOLEAN);
+    Schema schema2 =
+            Schema.of(
+                    personId,
+                    birthDatetime,
+                    genderConceptId,
+                    raceConceptId,
+                    ethnicityConceptId,
+                    sexAtBirthConceptId,
+                    deceased);
+    FieldValue personIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue birthDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue genderConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
+    FieldValue raceConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue ethnicityConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "4");
+    FieldValue sexAtBirthConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
+    FieldValue deceasedValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "false");
+    List<FieldValueList> tableRows2 =
+            Collections.singletonList(
+                    FieldValueList.of(
+                            Arrays.asList(
+                                    personIdValue,
+                                    birthDatetimeValue,
+                                    genderConceptIdValue,
+                                    raceConceptIdValue,
+                                    ethnicityConceptIdValue,
+                                    sexAtBirthConceptIdValue,
+                                    deceasedValue)));
+    TableResult result2 =
+            new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+
+    // return the TableResult calls in order of call
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result, result2);
+  }
+
   private void stubWorkspaceAccessLevel(
       Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
@@ -2626,7 +2852,7 @@ public class CohortReviewControllerTest {
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
-    stubWorkspaceAccessLevel(tmpWorkspace, workspaceAccessLevel);
+    stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), workspaceAccessLevel);
 
     return tmpWorkspace;
   }
