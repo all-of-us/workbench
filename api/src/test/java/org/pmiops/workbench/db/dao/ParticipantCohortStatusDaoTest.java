@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -148,6 +149,18 @@ public class ParticipantCohortStatusDaoTest {
         participantCohortStatusDao.findByParticipantKey_CohortReviewId(COHORT_REVIEW_ID);
 
     assertThat(results.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void findByParticipantKeyCohortReviewIdList() {
+    List<DbParticipantCohortStatus> results =
+        participantCohortStatusDao.findByParticipantKey_CohortReviewId(COHORT_REVIEW_ID);
+    List<Long> participantIds =
+        results.stream()
+            .map(pcs -> pcs.getParticipantKey().getParticipantId())
+            .collect(Collectors.toList());
+
+    assertThat(participantIds.size()).isEqualTo(2);
   }
 
   @Test

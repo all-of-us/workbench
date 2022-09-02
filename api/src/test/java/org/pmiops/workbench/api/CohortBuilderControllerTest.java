@@ -45,6 +45,7 @@ import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -90,6 +91,7 @@ public class CohortBuilderControllerTest {
   @Autowired private DomainCardDao domainCardDao;
   @Autowired private PersonDao personDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
+  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private WorkspaceAuthService workspaceAuthService;
@@ -120,7 +122,8 @@ public class CohortBuilderControllerTest {
             surveyModuleDao,
             cohortBuilderMapper,
             mySQLStopWordsProvider);
-    ChartService chartService = new ChartServiceImpl(bigQueryService, chartQueryBuilder);
+    ChartService chartService =
+        new ChartServiceImpl(bigQueryService, chartQueryBuilder, participantCohortStatusDao);
 
     controller =
         new CohortBuilderController(

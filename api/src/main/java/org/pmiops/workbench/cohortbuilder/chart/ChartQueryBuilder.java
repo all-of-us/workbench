@@ -28,15 +28,17 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "WHERE ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
-      "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
+      " GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "SELECT standard_name as name, standard_concept_id as conceptId, COUNT(DISTINCT person_id) as count\n"
           + "FROM `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
           + "WHERE cb_review_all_events.person_id IN (${innerSql})";
 
+  private static final String PERSON_ID_IN_SQL = " AND person_id in (${personIds}) ";
+
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
-      "AND domain = ${domain}\n"
+      " AND domain = ${domain}\n"
           + "AND standard_concept_id != 0 \n"
           + "GROUP BY name, conceptId\n"
           + "ORDER BY count DESC, name ASC\n"
@@ -49,7 +51,7 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "WHERE ";
 
   private static final String ETHNICITY_INFO_SQL_GROUP_BY =
-      "GROUP BY ethnicity\n" + "ORDER BY ethnicity\n";
+      " GROUP BY ethnicity\n" + "ORDER BY ethnicity\n";
 
   private static final String ID_SQL_TEMPLATE =
       "SELECT distinct person_id\n FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n WHERE\n";
@@ -151,6 +153,13 @@ public class ChartQueryBuilder extends QueryBuilder {
     String paramName =
         QueryParameterUtil.addQueryParameterValue(
             params, QueryParameterValue.string(domain.name()));
+
+    if (!participantCriteria.getParticipantIdsToInclude().isEmpty()) {
+      queryBuilder.append(
+          PERSON_ID_IN_SQL.replace(
+              "${personIds}", participantCriteria.getParticipantIdsToInclude().toString()));
+    }
+
     String endSqlTemplate =
         DOMAIN_CHART_INFO_SQL_GROUP_BY
             .replace("${limit}", Integer.toString(chartLimit))

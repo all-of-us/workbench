@@ -22,13 +22,16 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortReviewWithCountResponse;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.EthnicityInfoListResponse;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
@@ -40,6 +43,7 @@ import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.ParticipantDataCountResponse;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -263,6 +267,49 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         new CohortReviewListResponse()
             .items(
                 cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId)));
+  }
+
+  @Override
+  public ResponseEntity<DemoChartInfoListResponse> findCohortReviewDemoChartInfo(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      String genderOrSex,
+      String age,
+      SearchRequest request) {
+    return CohortReviewApiDelegate.super.findCohortReviewDemoChartInfo(
+        workspaceNamespace, workspaceId, cohortReviewId, genderOrSex, age, request);
+  }
+
+  @Override
+  public ResponseEntity<EthnicityInfoListResponse> findCohortReviewEthnicityInfo(
+      String workspaceNamespace, String workspaceId, Long cohortReviewId, SearchRequest request) {
+    return CohortReviewApiDelegate.super.findCohortReviewEthnicityInfo(
+        workspaceNamespace, workspaceId, cohortReviewId, request);
+  }
+
+  @Override
+  public ResponseEntity<CohortChartDataListResponse> getCohortReviewChartData(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      String domain,
+      Integer limit,
+      SearchRequest request) {
+    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
+      throw new BadRequestException(
+          String.format(
+              "Bad Request: Please provide a chart limit between %d and %d.",
+              MIN_LIMIT, MAX_LIMIT));
+    }
+    // ensure access level
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    return ResponseEntity.ok(
+        chartService.findCohortReviewChartData(
+            request, cohortReviewId, Objects.requireNonNull(Domain.fromValue(domain)), limit));
   }
 
   @Override

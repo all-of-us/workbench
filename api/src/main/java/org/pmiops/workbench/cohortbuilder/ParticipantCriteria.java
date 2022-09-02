@@ -25,7 +25,7 @@ public class ParticipantCriteria {
   private static final ImmutableSet<Long> NO_PARTICIPANTS_TO_EXCLUDE = ImmutableSet.of();
 
   private final SearchRequest searchRequest;
-  private final Set<Long> participantIdsToInclude;
+  private Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
   private final GenderOrSexType genderOrSexType;
   private final AgeType ageType;
@@ -51,12 +51,9 @@ public class ParticipantCriteria {
     this.ageType = null;
   }
 
-  public ParticipantCriteria(Set<Long> participantIdsToInclude) {
+  public ParticipantCriteria participantIdsToInclude(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
-    this.searchRequest = null;
-    this.participantIdsToExclude = null;
-    this.genderOrSexType = null;
-    this.ageType = null;
+    return this;
   }
 
   @Nullable
