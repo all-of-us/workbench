@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -72,7 +70,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private final CohortBuilderService cohortBuilderService;
   private final CohortReviewService cohortReviewService;
 
-  private final ChartService chartService;
+  private ChartService chartService;
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -271,15 +269,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<DemoChartInfoListResponse> findCohortReviewDemoChartInfo(
-      String workspaceNamespace, String workspaceId, Long cohortReviewId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    Set<Long> participantIds = cohortReviewService.findParticipantIdsByCohortReview(cohortReviewId);
-
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      String genderOrSex,
+      String age) {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     return ResponseEntity.ok(
-        response.items(chartService.findCohortReviewDemoChartInfo(participantIds)));
+        response.items(
+            chartService.findCohortReviewDemoChartInfo(cohortReviewId, genderOrSex, age)));
   }
 
   @Override
@@ -297,17 +295,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
+
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    Set<Long> participantIds = cohortReviewService.findParticipantIdsByCohortReview(cohortReviewId);
+    // TODO for count.....
 
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
-            .count((long) participantIds.size())
+            .count(0L)
             .items(
                 chartService.findCohortReviewChartData(
-                    participantIds, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
+                    cohortReviewId, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
   }
 
   @Override
@@ -404,9 +402,24 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview.participantCohortStatuses(participantCohortStatuses);
 
-    updateCohortReviewIfNotNull(cohort, cohortReview);
+    // Cohort review id will be null if the user is creating a new Cohort Review
+    // In such cases createCohort will update the entry in userrecentresource
+    // Cohort review id will be populated, if  user is viewing an existing cohort review
+    if (cohortReview.getCohortReviewId() != null) {
+      userRecentResourceService.updateCohortReviewEntry(
+          cohort.getWorkspaceId(),
+          userProvider.get().getUserId(),
+          cohortReview.getCohortReviewId());
+    }
 
-    return getCohortReviewWithCountResponseResponseEntity(pageRequest, cohortReview);
+    return ResponseEntity.ok(
+        new CohortReviewWithCountResponse()
+            .cohortReview(cohortReview)
+            .queryResultSize(
+                pageRequest.getFilters().isEmpty()
+                    ? cohortReview.getReviewSize()
+                    : cohortReviewService.findCount(
+                        cohortReview.getCohortReviewId(), pageRequest)));
   }
 
   /**
@@ -424,26 +437,29 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
+    CohortReview cohortReview;
+    List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
     DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
     PageRequest pageRequest = createPageRequest(request);
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
-    CohortReview cohortReview =
+    cohortReview =
         cohortReviewService.findCohortReviewForWorkspace(cohort.getWorkspaceId(), cohortReviewId);
-    List<ParticipantCohortStatus> participantCohortStatuses =
+    participantCohortStatuses =
         cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
 
     cohortReview.participantCohortStatuses(participantCohortStatuses);
 
-    updateCohortReviewIfNotNull(cohort, cohortReview);
+    // Cohort review id will be null if the user is creating a new Cohort Review
+    // In such cases createCohort will update the entry in userrecentresource
+    // Cohort review id will be populated, if  user is viewing an existing cohort review
+    if (cohortReview.getCohortReviewId() != null) {
+      userRecentResourceService.updateCohortReviewEntry(
+          cohort.getWorkspaceId(),
+          userProvider.get().getUserId(),
+          cohortReview.getCohortReviewId());
+    }
 
-    return getCohortReviewWithCountResponseResponseEntity(pageRequest, cohortReview);
-  }
-
-  @NotNull
-  private ResponseEntity<CohortReviewWithCountResponse>
-      getCohortReviewWithCountResponseResponseEntity(
-          PageRequest pageRequest, CohortReview cohortReview) {
     return ResponseEntity.ok(
         new CohortReviewWithCountResponse()
             .cohortReview(cohortReview)
@@ -452,18 +468,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     ? cohortReview.getReviewSize()
                     : cohortReviewService.findCount(
                         cohortReview.getCohortReviewId(), pageRequest)));
-  }
-
-  private void updateCohortReviewIfNotNull(DbCohort cohort, CohortReview cohortReview) {
-    // Cohort review id will be null if the user is creating a new Cohort Review
-    // In such cases createCohort will update the entry in userRecentResource
-    // Cohort review id will be populated, if  user is viewing an existing cohort review
-    if (cohortReview.getCohortReviewId() != null) {
-      userRecentResourceService.updateCohortReviewEntry(
-          cohort.getWorkspaceId(),
-          userProvider.get().getUserId(),
-          cohortReview.getCohortReviewId());
-    }
   }
 
   @Override

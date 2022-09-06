@@ -3972,7 +3972,7 @@ paths:
           description: A collection of CohortChartData
           schema:
             "$ref": "#/definitions/CohortChartDataListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{cohortReviewId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{cohortReviewId}/{genderOrSex}/{age}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3984,6 +3984,17 @@ paths:
         - application/json
       description: Searches for demographic info about subjects.
       operationId: findCohortReviewDemoChartInfo
+      parameters:
+        - in: path
+          name: genderOrSex
+          type: string
+          required: true
+          description: represents gender or sex at birth
+        - in: path
+          name: age
+          type: string
+          required: true
+          description: represents age, age at consent or age at cdr
       responses:
         200:
           description: A collection of criteria
