@@ -75,15 +75,9 @@ export default class BypassPopup extends BaseMenu {
     }
   }
 
-  // click the checkmark on the bypass-popup to save the bypass access
-  async clickCheckmarkBypass(): Promise<void> {
-    const xpath = `${this.getXpath()}//*[local-name()='svg' and @data-icon='check']`;
-    await new Checkbox(this.page, xpath).click();
-  }
-
   // click the cancel icon to close the bypass-popup
   async clickCancelBypass(): Promise<void> {
-    const xpath = `${this.getXpath()}//*[local-name()='svg' and @data-icon='times']`;
+    const xpath = `${this.getXpath()}//*[local-name()='svg' and @data-icon='xmark']`;
     await new Checkbox(this.page, xpath).click();
   }
 }

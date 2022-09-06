@@ -20,7 +20,7 @@ export default class Module extends Container {
   }
 
   async getCheckIcon(): Promise<ElementHandle> {
-    return this.page.waitForXPath(`${this.rootXpath}//*[local-name()="svg" and @data-icon="check-circle"]`, {
+    return this.page.waitForXPath(`${this.rootXpath}//*[local-name()="svg" and @data-icon="circle-check"]`, {
       visible: true
     });
   }

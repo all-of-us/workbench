@@ -62,7 +62,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
 
   private async getStatusSuccessXpath(datasetName: string): Promise<string> {
     const statusCell = await this.getStatusCell(datasetName);
-    return statusCell.getXpath() + '/*[.//*[@data-icon="check-circle" and @role="img"]]';
+    return statusCell.getXpath() + '/*[.//*[@data-icon="circle-check" and @role="img"]]';
   }
 
   private async getStatusCell(datasetName: string): Promise<Cell> {
