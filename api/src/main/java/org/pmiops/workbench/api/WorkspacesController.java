@@ -637,11 +637,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .cost(freeTierBillingService.getWorkspaceFreeTierBillingUsage(workspace)));
   }
 
-  private WorkspaceUserRolesResponse shareWorkspace(
-      String workspaceNamespace,
-      String workspaceId,
-      ShareWorkspaceRequest request,
-      boolean patchSemantics) {
+  @Override
+  public ResponseEntity<WorkspaceUserRolesResponse> shareWorkspacePatch(
+      String workspaceNamespace, String workspaceId, ShareWorkspaceRequest request) {
     if (Strings.isNullOrEmpty(request.getWorkspaceEtag())) {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
     }
@@ -707,10 +705,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    dbWorkspace =
-        patchSemantics
-            ? workspaceAuthService.patchWorkspaceAcls(dbWorkspace, aclsByEmail)
-            : workspaceAuthService.updateAllWorkspaceAcls(dbWorkspace, aclsByEmail);
+    dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     List<UserRole> userRolesAfterShare =
@@ -719,25 +714,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
-    return resp;
-  }
 
-  @Override
-  @Deprecated // use shareWorkspacePatch()
-  public ResponseEntity<WorkspaceUserRolesResponse> shareWorkspace(
-      String workspaceNamespace, String workspaceId, ShareWorkspaceRequest request) {
-    final boolean patchSemantics = false;
-    WorkspaceUserRolesResponse resp =
-        shareWorkspace(workspaceNamespace, workspaceId, request, patchSemantics);
-    return ResponseEntity.ok(resp);
-  }
-
-  @Override
-  public ResponseEntity<WorkspaceUserRolesResponse> shareWorkspacePatch(
-      String workspaceNamespace, String workspaceId, ShareWorkspaceRequest request) {
-    final boolean patchSemantics = true;
-    WorkspaceUserRolesResponse resp =
-        shareWorkspace(workspaceNamespace, workspaceId, request, patchSemantics);
     return ResponseEntity.ok(resp);
   }
 

@@ -1080,30 +1080,6 @@ paths:
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
-    post:
-      tags:
-      - workspaces
-      consumes:
-      - application/json
-      description: 'DEPRECATED in favor of shareWorkspacePatch.
-        Shares/unshares a workspace with the given users and permissions.  Use the
-        WorkspaceAccessLevel enum value "NO ACCESS" to unshare. Note
-        that the entire ACL must be provided to this method (including all existing
-        users and roles), not just the additional roles desired. Clients should first
-        fetch existing ACLs via the getFirecloudWorkspaceUserRoles method, make any
-        changes desired, then pass the final list to this method.'
-      operationId: shareWorkspace
-      parameters:
-      - in: body
-        name: body
-        description: users to share/unshare the workspace with
-        schema:
-          "$ref": "#/definitions/ShareWorkspaceRequest"
-      responses:
-        200:
-          description: Successful share response
-          schema:
-            "$ref": "#/definitions/WorkspaceUserRolesResponse"
     patch:
       tags:
         - workspaces

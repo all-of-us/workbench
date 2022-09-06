@@ -1,8 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,64 +161,6 @@ public class WorkspaceAuthService {
         fireCloudService.addOwnerToBillingProject(email, billingProjectName);
       }
     }
-  }
-
-  // TODO(RW-8065): This method incurs undue concurrency risk by performing a full read / write
-  // replacement, while the underlying Rawls method already supports patch semantics. Instead, the
-  // Workbench API should expose a similar PATCH API, allowing the client to only send a delta.
-  // If this change were made, concurrency etag support could also be dropped from the Workbench
-  // shareWorkspace API.
-  @Deprecated // use patchWorkspaceAcls() to only specify the access controls being changed
-  public DbWorkspace updateAllWorkspaceAcls(
-      DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
-    // existingAclsMap is a map of the old permissions for ALL users on the ws
-    Map<String, FirecloudWorkspaceAccessEntry> existingAclsMap =
-        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-
-    // TODO(RW-8065): This logic should no longer be necessary.
-    // The RT group is always used for publishing, regardless of the tier of this workspace. We
-    // don't want to drop the published group here unless explicitly requested.
-    // Note: keep in sync with WorkspaceAdminService.setPublished().
-    String publishedGroup = accessTierService.getRegisteredTierOrThrow().getAuthDomainGroupEmail();
-
-    // Iterate through existing roles, update/remove them
-    List<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : existingAclsMap.entrySet()) {
-      String email = entry.getKey();
-      WorkspaceAccessLevel updatedAccess = toAdd.get(email);
-      if (updatedAccess != null) {
-        updateACLRequestList.add(FirecloudTransforms.buildAclUpdate(email, updatedAccess));
-        toAdd.remove(email);
-      } else {
-        // To remove a user from the Firecloud ACL: set NO ACCESS for the user on the ACL update.
-        // We exclude the auth domain group here, since that is used during publishing. An unpublish
-        // request will pass the specific NO_ACCESS acl to indicate removal.
-        if (!email.equals(publishedGroup)) {
-          updateACLRequestList.add(
-              FirecloudTransforms.buildAclUpdate(email, WorkspaceAccessLevel.NO_ACCESS));
-        }
-      }
-    }
-
-    // Iterate through remaining new roles; add them
-    for (Map.Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
-      updateACLRequestList.add(
-          FirecloudTransforms.buildAclUpdate(remainingRole.getKey(), remainingRole.getValue()));
-    }
-
-    updateAcl(workspace, updateACLRequestList);
-
-    // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
-    // canCompute on the workspace / billing project, nor does it grant the ability to grant
-    // canCompute to other users. See RW-3009 for details.
-    synchronizeOwnerBillingProjects(
-        workspace.getWorkspaceNamespace(),
-        Sets.union(updatedAclsMap.keySet(), existingAclsMap.keySet()),
-        updatedAclsMap,
-        existingAclsMap);
-
-    return workspaceDao.saveWithLastModified(workspace);
   }
 
   public DbWorkspace patchWorkspaceAcls(
