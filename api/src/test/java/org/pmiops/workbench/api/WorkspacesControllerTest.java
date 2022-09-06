@@ -2301,7 +2301,6 @@ public class WorkspacesControllerTest {
     List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
     verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
@@ -2486,10 +2485,6 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
     verify(mockIamService)
-        .grantWorkflowRunnerRoleForUsers(
-            DEFAULT_GOOGLE_PROJECT,
-            ImmutableList.of(writerUser.getUsername(), ownerUser.getUsername()));
-    verify(mockIamService)
         .revokeWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT, ImmutableList.of(previousWriter.getUsername()));
   }
@@ -2542,10 +2537,6 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, never()).addOwnerToBillingProject(eq(readerUser.getUsername()), any());
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
-    verify(mockIamService)
-        .grantWorkflowRunnerRoleForUsers(
-            DEFAULT_GOOGLE_PROJECT,
-            ImmutableList.of(ownerUser.getUsername(), writerUser.getUsername()));
     verify(mockIamService)
         .revokeWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT, ImmutableList.of(previousWriter.getUsername()));
