@@ -1,9 +1,11 @@
 package org.pmiops.workbench.cohortbuilder.chart;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import java.util.List;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.model.AgeType;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChartServiceImpl implements ChartService {
+  private static final String BAD_REQUEST_MESSAGE =
+      "Bad Request: Please provide a valid %s. %s is not valid.";
   private final BigQueryService bigQueryService;
 
   private final ChartQueryBuilder chartQueryBuilder;
@@ -46,6 +50,16 @@ public class ChartServiceImpl implements ChartService {
                 new ParticipantCriteria(searchRequest), domain, limit));
 
     return cohortBuilderMapper.tableResultToCohortChartData(result);
+  }
+  @Override
+  public List<CohortChartData> findCohortReviewChartData(
+      Long cohortReviewId, Domain domain, int limit) {
+    List<Long> participantIds = null;
+    QueryJobConfiguration qjc =
+        chartQueryBuilder.buildDomainChartInfoCounterQuery(participantIds, domain, limit);
+
+    return fetchCohortChartData(qjc);
+
   }
 
   @Override
@@ -76,5 +90,57 @@ public class ChartServiceImpl implements ChartService {
             chartQueryBuilder.buildChartDataQuery(participantId, domain, limit));
 
     return cohortReviewMapper.tableResultToParticipantChartData(result);
+  }
+
+  @NotNull
+  private List<CohortChartData> fetchCohortChartData(QueryJobConfiguration qjc) {
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<CohortChartData> cohortChartData = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      cohortChartData.add(
+          new CohortChartData()
+              .name(bigQueryService.getString(row, rm.get("name")))
+              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return cohortChartData;
+  }
+
+  @NotNull
+  private List<DemoChartInfo> fetchDemoChartInfos(QueryJobConfiguration qjc) {
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<DemoChartInfo> demoChartInfos = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      demoChartInfos.add(
+          new DemoChartInfo()
+              .name(bigQueryService.getString(row, rm.get("name")))
+              .race(bigQueryService.getString(row, rm.get("race")))
+              .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return demoChartInfos;
+  }
+
+  protected AgeType validateAgeType(String age) {
+    return Optional.ofNullable(age)
+        .map(AgeType::fromValue)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(BAD_REQUEST_MESSAGE, "age type parameter", age)));
+  }
+
+  protected GenderOrSexType validateGenderOrSexType(String genderOrSex) {
+    return Optional.ofNullable(genderOrSex)
+        .map(GenderOrSexType::fromValue)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(
+                        BAD_REQUEST_MESSAGE, "gender or sex at birth parameter", genderOrSex)));
   }
 }

@@ -3,8 +3,8 @@ package org.pmiops.workbench.cohortbuilder.chart;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.QueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryParameterUtil;
@@ -114,7 +114,7 @@ public class ChartQueryBuilder extends QueryBuilder {
   }
 
   public QueryJobConfiguration buildDemoChartInfoCounterQuery(
-      Set<Long> participantIds, GenderOrSexType genderOrSexType, AgeType ageType) {
+      List<Long> participantIds, GenderOrSexType genderOrSexType, AgeType ageType) {
     Map<String, QueryParameterValue> params = new HashMap<>();
     String sqlTemplate =
         DEMO_CHART_INFO_SQL_TEMPLATE
@@ -194,7 +194,7 @@ public class ChartQueryBuilder extends QueryBuilder {
   }
 
   public QueryJobConfiguration buildDomainChartInfoCounterQuery(
-      Set<Long> participantIds, Domain domain, int chartLimit) {
+      List<Long> participantIds, Domain domain, int chartLimit) {
     Map<String, QueryParameterValue> params = new HashMap<>();
     StringBuilder queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE);
 
@@ -217,7 +217,7 @@ public class ChartQueryBuilder extends QueryBuilder {
 
   private static void addParticipantIds(
       Map<String, QueryParameterValue> params,
-      Set<Long> participantIds,
+      List<Long> participantIds,
       StringBuilder queryBuilder,
       String mainTable) {
     String paramName =

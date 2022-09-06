@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
@@ -275,15 +274,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       String genderOrSex,
       String age) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    Set<Long> participantIds = cohortReviewService.findParticipantIdsByCohortReview(cohortReviewId);
-
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     return ResponseEntity.ok(
         response.items(
-            chartService.findCohortReviewDemoChartInfo(participantIds, genderOrSex, age)));
+            chartService.findCohortReviewDemoChartInfo(cohortReviewId, genderOrSex, age)));
   }
 
   @Override
@@ -301,17 +295,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
+
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    Set<Long> participantIds = cohortReviewService.findParticipantIdsByCohortReview(cohortReviewId);
+    // TODO for count.....
 
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
-            .count((long) participantIds.size())
+            .count(0L)
             .items(
                 chartService.findCohortReviewChartData(
-                    participantIds, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
+                    cohortReviewId, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
   }
 
   @Override
