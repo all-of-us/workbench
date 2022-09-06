@@ -1,8 +1,13 @@
 package org.pmiops.workbench.cohortbuilder.chart;
 
+import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -44,13 +49,13 @@ public class ChartServiceImpl implements ChartService {
   @Override
   public List<CohortChartData> findCohortChartData(
       SearchRequest searchRequest, Domain domain, int limit) {
-    TableResult result =
-        bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            chartQueryBuilder.buildDomainChartInfoCounterQuery(
-                new ParticipantCriteria(searchRequest), domain, limit));
+    QueryJobConfiguration qjc =
+        chartQueryBuilder.buildDomainChartInfoCounterQuery(
+            new ParticipantCriteria(searchRequest), domain, limit);
 
-    return cohortBuilderMapper.tableResultToCohortChartData(result);
+    return fetchCohortChartData(qjc);
   }
+
   @Override
   public List<CohortChartData> findCohortReviewChartData(
       Long cohortReviewId, Domain domain, int limit) {
@@ -75,21 +80,41 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<EthnicityInfo> findEthnicityInfo(SearchRequest request) {
-    TableResult result =
-        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+    QueryJobConfiguration qjc =
+        bigQueryService.filterBigQueryConfig(
             chartQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(request)));
+    TableResult result = bigQueryService.executeQuery(qjc);
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-    return cohortBuilderMapper.tableResultToEthnicityInfo(result);
+    List<EthnicityInfo> ethnicityInfos = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      ethnicityInfos.add(
+          new EthnicityInfo()
+              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return ethnicityInfos;
   }
 
   @Override
   public List<ParticipantChartData> findParticipantChartData(
       Long participantId, Domain domain, int limit) {
     TableResult result =
-        bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            chartQueryBuilder.buildChartDataQuery(participantId, domain, limit));
-
-    return cohortReviewMapper.tableResultToParticipantChartData(result);
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(
+                chartQueryBuilder.buildChartDataQuery(participantId, domain, limit)));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    List<ParticipantChartData> participantChartData = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      participantChartData.add(
+          new ParticipantChartData()
+              .standardName(bigQueryService.getString(row, rm.get("standardName")))
+              .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
+              .startDate(bigQueryService.getDate(row, rm.get("startDate")))
+              .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+              .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
+    }
+    return participantChartData;
   }
 
   @NotNull
