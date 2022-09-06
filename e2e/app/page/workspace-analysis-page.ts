@@ -1,6 +1,7 @@
 import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
+import Link from 'app/element/link';
 import { Language, MenuOption, ResourceCard } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
@@ -9,7 +10,6 @@ import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 import { logger } from 'libs/logger';
-import Link from 'app/element/link';
 
 const PageTitle = 'View Notebooks';
 
