@@ -110,14 +110,14 @@ public class NotebooksServiceTest {
     MockNotebook(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
-      Set userSet = mock(Set.class);
+      Set<String> workspaceUsersSet = new HashSet();
 
       String[] parts = path.split("/");
       String fileName = parts[parts.length - 1];
       fileDetail.setName(fileName);
 
       when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, userSet))
+      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsersSet))
           .thenReturn(fileDetail);
     }
   }
@@ -474,7 +474,7 @@ public class NotebooksServiceTest {
     Blob mockBlob2 = mock(Blob.class);
     FileDetail fileDetail1 = mock(FileDetail.class);
     FileDetail fileDetail2 = mock(FileDetail.class);
-    Set userSet = mock(Set.class);
+    Set<String> workspaceUsersSet = new HashSet<String>();
 
     stubGetWorkspace(
         dbWorkspace.getWorkspaceNamespace(),
@@ -486,9 +486,9 @@ public class NotebooksServiceTest {
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, userSet))
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME, userSet))
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail2);
     when(fileDetail1.getName()).thenReturn("nope.ipynb");
     when(fileDetail2.getName()).thenReturn("foo.ipynb");
