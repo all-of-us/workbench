@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,13 +110,15 @@ public class NotebooksServiceTest {
     MockNotebook(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
+      Set userSet = mock(Set.class);
 
       String[] parts = path.split("/");
       String fileName = parts[parts.length - 1];
       fileDetail.setName(fileName);
 
       when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName)).thenReturn(fileDetail);
+      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, userSet))
+          .thenReturn(fileDetail);
     }
   }
 
@@ -471,6 +474,7 @@ public class NotebooksServiceTest {
     Blob mockBlob2 = mock(Blob.class);
     FileDetail fileDetail1 = mock(FileDetail.class);
     FileDetail fileDetail2 = mock(FileDetail.class);
+    Set userSet = mock(Set.class);
 
     stubGetWorkspace(
         dbWorkspace.getWorkspaceNamespace(),
@@ -482,8 +486,10 @@ public class NotebooksServiceTest {
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME)).thenReturn(fileDetail1);
-    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME)).thenReturn(fileDetail2);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, userSet))
+        .thenReturn(fileDetail1);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME, userSet))
+        .thenReturn(fileDetail2);
     when(fileDetail1.getName()).thenReturn("nope.ipynb");
     when(fileDetail2.getName()).thenReturn("foo.ipynb");
 

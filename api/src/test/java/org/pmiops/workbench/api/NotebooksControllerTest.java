@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.json.JSONObject;
@@ -97,7 +98,8 @@ public class NotebooksControllerTest {
       fileDetail.setName(fileName);
 
       when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName)).thenReturn(fileDetail);
+      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, mock(Set.class)))
+          .thenReturn(fileDetail);
     }
   }
 

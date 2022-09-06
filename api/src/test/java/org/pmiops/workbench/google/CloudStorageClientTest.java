@@ -8,6 +8,7 @@ import com.google.cloud.storage.Blob;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.test.FakeClock;
@@ -45,7 +46,8 @@ public class CloudStorageClientTest {
     when(notebookBlob.getName()).thenReturn(notebookPath);
     when(notebookBlob.getSize()).thenReturn(notebookSize);
     when(notebookBlob.getUpdateTime()).thenReturn(updateTime);
-    FileDetail actualFileDetail = cloudStorageClient.blobToFileDetail(notebookBlob, bucketName);
+    FileDetail actualFileDetail =
+        cloudStorageClient.blobToFileDetail(notebookBlob, bucketName, mock(Set.class));
 
     assertThat(actualFileDetail.getName()).isEqualTo("nb1.ipynb");
     assertThat(actualFileDetail.getPath())

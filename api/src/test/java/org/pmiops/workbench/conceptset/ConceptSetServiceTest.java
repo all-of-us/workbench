@@ -16,6 +16,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -40,7 +41,8 @@ public class ConceptSetServiceTest {
     CommonMappers.class,
     CohortBuilderMapper.class,
     ConceptBigQueryService.class,
-    CohortBuilderService.class
+    CohortBuilderService.class,
+    DbUser.class
   })
   static class Configuration {}
 

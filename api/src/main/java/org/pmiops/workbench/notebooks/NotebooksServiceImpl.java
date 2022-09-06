@@ -118,7 +118,8 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
-  public List<FileDetail> getNotebooksAsService(String bucketName, String workspaceNamespace, String workspaceName) {
+  public List<FileDetail> getNotebooksAsService(
+      String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)

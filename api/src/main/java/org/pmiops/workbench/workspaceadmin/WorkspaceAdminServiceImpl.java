@@ -167,7 +167,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     // NOTE: all of these may be undercounts, because we're only looking at the first Page of
     // Storage List results
-    int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName,workspaceNamespace, workspaceName).size();
+    int notebookFilesCount =
+        notebooksService
+            .getNotebooksAsService(bucketName, workspaceNamespace, workspaceName)
+            .size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
 

@@ -77,6 +77,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -143,6 +144,7 @@ public class WorkspaceAdminServiceTest {
     LeonardoNotebooksClient.class,
     UserMapper.class,
     UserService.class,
+    WorkspaceAuthService.class,
     WorkspaceService.class
   })
   static class Configuration {
@@ -241,7 +243,8 @@ public class WorkspaceAdminServiceTest {
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
                 .storageBucketPath("gs://bucket"));
-    verify(mockNotebooksService, atLeastOnce()).getNotebooksAsService(any(), anyString(), anyString());
+    verify(mockNotebooksService, atLeastOnce())
+        .getNotebooksAsService(any(), anyString(), anyString());
 
     // Regression check: the admin service should never call the end-user variants of these methods.
     verify(mockNotebooksService, never()).getNotebooks(any(), any());
