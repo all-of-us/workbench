@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
@@ -291,6 +292,13 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     }
     return participantCohortStatusMapper.dbModelToClient(
         dbParticipantCohortStatus, cohortBuilderService.findAllDemographicsMap());
+  }
+
+  @Override
+  public Set<Long> findParticipantIdsByCohortReview(Long cohortReviewId) {
+    return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId).stream()
+        .map(pcs -> pcs.getParticipantKey().getParticipantId())
+        .collect(Collectors.toSet());
   }
 
   public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {

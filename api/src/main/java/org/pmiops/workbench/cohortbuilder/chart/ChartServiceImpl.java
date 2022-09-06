@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -46,8 +47,8 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<CohortChartData> findCohortReviewChartData(
-      Long cohortReviewId, Domain domain, int limit) {
-    List<Long> participantIds = null;
+      Set<Long> participantIds, Domain domain, int limit) {
+
     QueryJobConfiguration qjc =
         chartQueryBuilder.buildDomainChartInfoCounterQuery(participantIds, domain, limit);
 
@@ -66,8 +67,7 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<DemoChartInfo> findCohortReviewDemoChartInfo(
-      Long cohortReviewId, String genderOrSex, String age) {
-    List<Long> participantIds = null;
+      Set<Long> participantIds, String genderOrSex, String age) {
     QueryJobConfiguration qjc =
         chartQueryBuilder.buildDemoChartInfoCounterQuery(
             participantIds, validateGenderOrSexType(genderOrSex), validateAgeType(age));
