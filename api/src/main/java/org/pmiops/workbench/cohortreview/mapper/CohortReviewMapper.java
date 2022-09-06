@@ -108,7 +108,7 @@ public interface CohortReviewMapper {
     return participantData;
   }
 
-  default ImmutableList<ParticipantData> tableResultToParticipantData(
+  default ImmutableList<ParticipantData> tableResultToVocabulary(
       TableResult tableResult, Domain domain) {
     return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
         .map(row -> fieldValueListToParticipantData(row, domain))
@@ -123,7 +123,7 @@ public interface CohortReviewMapper {
     return vocabulary;
   }
 
-  default ImmutableList<Vocabulary> tableResultToParticipantData(TableResult tableResult) {
+  default ImmutableList<Vocabulary> tableResultToVocabulary(TableResult tableResult) {
     return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
         .map(this::fieldValueListToVocabulary)
         .collect(ImmutableList.toImmutableList());

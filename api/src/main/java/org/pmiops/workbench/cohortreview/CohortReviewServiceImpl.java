@@ -418,7 +418,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             reviewQueryBuilder.buildQuery(participantId, domain, pageRequest));
 
-    return cohortReviewMapper.tableResultToParticipantData(result, domain);
+    return cohortReviewMapper.tableResultToVocabulary(result, domain);
   }
 
   @Override
@@ -426,7 +426,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             reviewQueryBuilder.buildVocabularyDataQuery());
-    return cohortReviewMapper.tableResultToParticipantData(result);
+    return cohortReviewMapper.tableResultToVocabulary(result);
   }
 
   @Override

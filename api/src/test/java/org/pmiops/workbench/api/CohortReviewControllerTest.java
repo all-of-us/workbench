@@ -2491,14 +2491,14 @@ public class CohortReviewControllerTest {
     FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
     FieldValue rankValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     List<FieldValueList> tableRows =
-            Collections.singletonList(
-                    FieldValueList.of(
-                            Arrays.asList(
-                                    standardNameValue,
-                                    standardVocabularyValue,
-                                    startDateValue,
-                                    ageAtEventValue,
-                                    rankValue)));
+        Collections.singletonList(
+            FieldValueList.of(
+                Arrays.asList(
+                    standardNameValue,
+                    standardVocabularyValue,
+                    startDateValue,
+                    ageAtEventValue,
+                    rankValue)));
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
@@ -2516,7 +2516,8 @@ public class CohortReviewControllerTest {
     FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
     FieldValue vocabularyValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "vocabulary");
     List<FieldValueList> tableRows =
-            Collections.singletonList(FieldValueList.of(Arrays.asList(typeValue, domainValue, vocabularyValue)));
+        Collections.singletonList(
+            FieldValueList.of(Arrays.asList(typeValue, domainValue, vocabularyValue)));
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
@@ -2529,7 +2530,8 @@ public class CohortReviewControllerTest {
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
     Schema schema = Schema.of(count);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0");
-    List<FieldValueList> tableRows = Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+    List<FieldValueList> tableRows =
+        Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
@@ -2573,24 +2575,23 @@ public class CohortReviewControllerTest {
             sourceName,
             sourceCode,
             standardCode,
-                valueAsNumber,
-                visitType,
-                numMentions,
-                firstMention,
-                lastMention,
-                unit,
-                dose,
-                strength,
-                route,
-                refRange);
-    FieldValue startDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1944-01-12 00:00:00 UTC");
+            valueAsNumber,
+            visitType,
+            numMentions,
+            firstMention,
+            lastMention,
+            unit,
+            dose,
+            strength,
+            route,
+            refRange);
+    FieldValue startDatetimeValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1944-01-12 00:00:00 UTC");
     FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
     FieldValue standardNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardName");
     FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
-    FieldValue standardConceptIdValue =
-        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
-    FieldValue sourceConceptIdValue =
-        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
+    FieldValue standardConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue sourceConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
     FieldValue standardVocabularyValue =
         FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardVocabulary");
     FieldValue sourceVocabularyValue =
@@ -2609,30 +2610,30 @@ public class CohortReviewControllerTest {
     FieldValue routeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "4");
     FieldValue refRangeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
     List<FieldValueList> tableRows =
-            Collections.singletonList(
-                    FieldValueList.of(
-                            Arrays.asList(
-                                    startDatetimeValue,
-                                    domainValue,
-                                    standardNameValue,
-                                    ageAtEventValue,
-                                    standardConceptIdValue,
-                                    sourceConceptIdValue,
-                                    standardVocabularyValue,
-                                    sourceVocabularyValue,
-                                    sourceNameValue,
-                                    sourceCodeValue,
-                                    standardCodeValue,
-                                    valueAsNumberValue,
-                                    visitTypeValue,
-                                    numMentionsValue,
-                                    firstMentionValue,
-                                    lastMentionValue,
-                                    unitValue,
-                                    doseValue,
-                                    strengthValue,
-                                    routeValue,
-                                    refRangeValue)));
+        Collections.singletonList(
+            FieldValueList.of(
+                Arrays.asList(
+                    startDatetimeValue,
+                    domainValue,
+                    standardNameValue,
+                    ageAtEventValue,
+                    standardConceptIdValue,
+                    sourceConceptIdValue,
+                    standardVocabularyValue,
+                    sourceVocabularyValue,
+                    sourceNameValue,
+                    sourceCodeValue,
+                    standardCodeValue,
+                    valueAsNumberValue,
+                    visitTypeValue,
+                    numMentionsValue,
+                    firstMentionValue,
+                    lastMentionValue,
+                    unitValue,
+                    doseValue,
+                    strengthValue,
+                    routeValue,
+                    refRangeValue)));
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
@@ -2640,69 +2641,69 @@ public class CohortReviewControllerTest {
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
   }
 
-//  private void stubBigQueryCohortCalls() {
-//    TableResult queryResult = mock(TableResult.class);
-//    Iterable testIterable =
-//        () -> {
-//          List<FieldValue> list = new ArrayList<>();
-//          list.add(null);
-//          return list.iterator();
-//        };
-//    Map<String, Integer> rm =
-//        ImmutableMap.<String, Integer>builder()
-//            .put("person_id", 0)
-//            .put("birth_datetime", 1)
-//            .put("gender_concept_id", 2)
-//            .put("race_concept_id", 3)
-//            .put("ethnicity_concept_id", 4)
-//            .put("sex_at_birth_concept_id", 5)
-//            .put("count", 6)
-//            .put("deceased", 7)
-//            .put(FilterColumns.START_DATETIME.toString(), 8)
-//            .put(FilterColumns.SURVEY_NAME.toString(), 29)
-//            .put(FilterColumns.QUESTION.toString(), 30)
-//            .put(FilterColumns.ANSWER.toString(), 31)
-//            // chartData
-//            .put("name", 0)
-//            .put("conceptId", 1)
-//            // participantChartData
-//            .put("standardName", 0)
-//            .put("standardVocabulary", 1)
-//            .put("startDate", 2)
-//            .put("ageAtEvent", 3)
-//            .put("rank", 4)
-//            // vocabularies
-//            .put("domain", 0)
-//            .put("type", 1)
-//            .put("vocabulary", 2)
-//            .build();
-//
-//    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
-//    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
-//    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
-//    when(queryResult.iterateAll()).thenReturn(testIterable);
-//    when(queryResult.getValues()).thenReturn(testIterable);
-//    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
-//    when(bigQueryService.getString(null, 1)).thenReturn("1");
-//    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
-//    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
-//    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
-//    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
-//    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
-//    when(bigQueryService.getLong(null, 7)).thenReturn(0L);
-//    // get participantCohortStatus - SURVEY
-//    when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
-//    when(bigQueryService.getString(null, 29)).thenReturn("1");
-//    when(bigQueryService.getString(null, 30)).thenReturn("1");
-//    when(bigQueryService.getString(null, 31)).thenReturn("1");
-//    // chart data - 0-string, 1-long, 2-long
-//    when(bigQueryService.getString(null, 0)).thenReturn("1");
-//    when(bigQueryService.getLong(null, 1)).thenReturn(1L);
-//    // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
-//    when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
-//    // vocabularies 0-string, 1-string, 2-string
-//    when(bigQueryService.getString(null, 2)).thenReturn("1");
-//  }
+  //  private void stubBigQueryCohortCalls() {
+  //    TableResult queryResult = mock(TableResult.class);
+  //    Iterable testIterable =
+  //        () -> {
+  //          List<FieldValue> list = new ArrayList<>();
+  //          list.add(null);
+  //          return list.iterator();
+  //        };
+  //    Map<String, Integer> rm =
+  //        ImmutableMap.<String, Integer>builder()
+  //            .put("person_id", 0)
+  //            .put("birth_datetime", 1)
+  //            .put("gender_concept_id", 2)
+  //            .put("race_concept_id", 3)
+  //            .put("ethnicity_concept_id", 4)
+  //            .put("sex_at_birth_concept_id", 5)
+  //            .put("count", 6)
+  //            .put("deceased", 7)
+  //            .put(FilterColumns.START_DATETIME.toString(), 8)
+  //            .put(FilterColumns.SURVEY_NAME.toString(), 29)
+  //            .put(FilterColumns.QUESTION.toString(), 30)
+  //            .put(FilterColumns.ANSWER.toString(), 31)
+  //            // chartData
+  //            .put("name", 0)
+  //            .put("conceptId", 1)
+  //            // participantChartData
+  //            .put("standardName", 0)
+  //            .put("standardVocabulary", 1)
+  //            .put("startDate", 2)
+  //            .put("ageAtEvent", 3)
+  //            .put("rank", 4)
+  //            // vocabularies
+  //            .put("domain", 0)
+  //            .put("type", 1)
+  //            .put("vocabulary", 2)
+  //            .build();
+  //
+  //    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
+  //    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
+  //    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
+  //    when(queryResult.iterateAll()).thenReturn(testIterable);
+  //    when(queryResult.getValues()).thenReturn(testIterable);
+  //    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
+  //    when(bigQueryService.getString(null, 1)).thenReturn("1");
+  //    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
+  //    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
+  //    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
+  //    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
+  //    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
+  //    when(bigQueryService.getLong(null, 7)).thenReturn(0L);
+  //    // get participantCohortStatus - SURVEY
+  //    when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
+  //    when(bigQueryService.getString(null, 29)).thenReturn("1");
+  //    when(bigQueryService.getString(null, 30)).thenReturn("1");
+  //    when(bigQueryService.getString(null, 31)).thenReturn("1");
+  //    // chart data - 0-string, 1-long, 2-long
+  //    when(bigQueryService.getString(null, 0)).thenReturn("1");
+  //    when(bigQueryService.getLong(null, 1)).thenReturn(1L);
+  //    // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
+  //    when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
+  //    // vocabularies 0-string, 1-string, 2-string
+  //    when(bigQueryService.getString(null, 2)).thenReturn("1");
+  //  }
 
   private CohortReview createCohortReview(
       DbCohortReview actualReview, List<DbParticipantCohortStatus> participantCohortStatusList) {
@@ -2762,9 +2763,10 @@ public class CohortReviewControllerTest {
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
     Schema schema = Schema.of(count);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
-    List<FieldValueList> tableRows = Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+    List<FieldValueList> tableRows =
+        Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
     TableResult result =
-            new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
     // construct the second TableResult call
     Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
@@ -2775,14 +2777,14 @@ public class CohortReviewControllerTest {
     Field sexAtBirthConceptId = Field.of("sex_at_birth_concept_id", LegacySQLTypeName.INTEGER);
     Field deceased = Field.of("deceased", LegacySQLTypeName.BOOLEAN);
     Schema schema2 =
-            Schema.of(
-                    personId,
-                    birthDatetime,
-                    genderConceptId,
-                    raceConceptId,
-                    ethnicityConceptId,
-                    sexAtBirthConceptId,
-                    deceased);
+        Schema.of(
+            personId,
+            birthDatetime,
+            genderConceptId,
+            raceConceptId,
+            ethnicityConceptId,
+            sexAtBirthConceptId,
+            deceased);
     FieldValue personIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue birthDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue genderConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
@@ -2791,18 +2793,18 @@ public class CohortReviewControllerTest {
     FieldValue sexAtBirthConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
     FieldValue deceasedValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "false");
     List<FieldValueList> tableRows2 =
-            Collections.singletonList(
-                    FieldValueList.of(
-                            Arrays.asList(
-                                    personIdValue,
-                                    birthDatetimeValue,
-                                    genderConceptIdValue,
-                                    raceConceptIdValue,
-                                    ethnicityConceptIdValue,
-                                    sexAtBirthConceptIdValue,
-                                    deceasedValue)));
+        Collections.singletonList(
+            FieldValueList.of(
+                Arrays.asList(
+                    personIdValue,
+                    birthDatetimeValue,
+                    genderConceptIdValue,
+                    raceConceptIdValue,
+                    ethnicityConceptIdValue,
+                    sexAtBirthConceptIdValue,
+                    deceasedValue)));
     TableResult result2 =
-            new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
 
     // return the TableResult calls in order of call
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result, result2);
