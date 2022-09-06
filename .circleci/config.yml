@@ -786,44 +786,18 @@ jobs:
 
 workflows:
   build-test-deploy:
-    jobs:
-      # Always run basic test/lint/compilation (open PRs, main branch merge)
-      # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
-      - api-test-coverage:
-          requires:
-          - api-unit-test
-      # Deploy to "test" on main branch merges
-      - api-deploy-to-test:
-          <<: *filter-main-branch
-          requires:
-            - api-unit-test
-      - ui-deploy-to-test:
-          <<: *filter-main-branch
-          requires:
-            - ui-unit-test
-      # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - puppeteer-env-setup
-      - puppeteer-generate-access-tokens:
-          env_name: "local"
-      - puppeteer-test:
-          <<: *filter-pr-branch
-          env_name: "local"
-          parallel_num: 5
-          optional_steps:
-            - halt-puppeteer-check
-          requires:
-            - puppeteer-env-setup
-            - puppeteer-generate-access-tokens
-      # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
-      - puppeteer-test:
-          parallel_num: 5
+   jobs:
+     - api-bigquery-test
+     - puppeteer-env-setup
+     - puppeteer-generate-access-tokens:
           env_name: "test"
-          <<: *filter-main-branch
+     - puppeteer-test:
+          parallel_num: 4
+          test_mode: "nightly-integration"
+          optional_steps:
+            - puppeteer-access-test-user-setup
+          # genomic-extraction-to-vcf.spec takes long time to run.
+          no_output_timeout: 90m
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
