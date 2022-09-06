@@ -6,8 +6,11 @@ import com.google.cloud.bigquery.TableResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChartServiceImpl implements ChartService {
+  private static final String BAD_REQUEST_MESSAGE =
+      "Bad Request: Please provide a valid %s. %s is not valid.";
   private final BigQueryService bigQueryService;
 
   private final ChartQueryBuilder chartQueryBuilder;
@@ -32,44 +37,41 @@ public class ChartServiceImpl implements ChartService {
   @Override
   public List<CohortChartData> findCohortChartData(
       SearchRequest searchRequest, Domain domain, int limit) {
-    TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                chartQueryBuilder.buildDomainChartInfoCounterQuery(
-                    new ParticipantCriteria(searchRequest), domain, limit)));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    QueryJobConfiguration qjc =
+        chartQueryBuilder.buildDomainChartInfoCounterQuery(
+            new ParticipantCriteria(searchRequest), domain, limit);
 
-    List<CohortChartData> cohortChartData = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      cohortChartData.add(
-          new CohortChartData()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return cohortChartData;
+    return fetchCohortChartData(qjc);
+  }
+
+  @Override
+  public List<CohortChartData> findCohortReviewChartData(
+      Long cohortReviewId, Domain domain, int limit) {
+    List<Long> participantIds = null;
+    QueryJobConfiguration qjc =
+        chartQueryBuilder.buildDomainChartInfoCounterQuery(participantIds, domain, limit);
+
+    return fetchCohortChartData(qjc);
   }
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
+      String genderOrSex, String age, SearchRequest request) {
     QueryJobConfiguration qjc =
-        bigQueryService.filterBigQueryConfig(
-            chartQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(request, genderOrSexType, ageType)));
-    TableResult result = bigQueryService.executeQuery(qjc);
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+        chartQueryBuilder.buildDemoChartInfoCounterQuery(
+            new ParticipantCriteria(
+                request, validateGenderOrSexType(genderOrSex), validateAgeType(age)));
+    return fetchDemoChartInfos(qjc);
+  }
 
-    List<DemoChartInfo> demoChartInfos = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
-      demoChartInfos.add(
-          new DemoChartInfo()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .race(bigQueryService.getString(row, rm.get("race")))
-              .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
-    }
-    return demoChartInfos;
+  @Override
+  public List<DemoChartInfo> findCohortReviewDemoChartInfo(
+      Long cohortReviewId, String genderOrSex, String age) {
+    List<Long> participantIds = null;
+    QueryJobConfiguration qjc =
+        chartQueryBuilder.buildDemoChartInfoCounterQuery(
+            participantIds, validateGenderOrSexType(genderOrSex), validateAgeType(age));
+    return fetchDemoChartInfos(qjc);
   }
 
   @Override
@@ -109,5 +111,57 @@ public class ChartServiceImpl implements ChartService {
               .rank(bigQueryService.getLong(row, rm.get("rank")).intValue()));
     }
     return participantChartData;
+  }
+
+  @NotNull
+  private List<CohortChartData> fetchCohortChartData(QueryJobConfiguration qjc) {
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<CohortChartData> cohortChartData = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      cohortChartData.add(
+          new CohortChartData()
+              .name(bigQueryService.getString(row, rm.get("name")))
+              .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return cohortChartData;
+  }
+
+  @NotNull
+  private List<DemoChartInfo> fetchDemoChartInfos(QueryJobConfiguration qjc) {
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<DemoChartInfo> demoChartInfos = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      demoChartInfos.add(
+          new DemoChartInfo()
+              .name(bigQueryService.getString(row, rm.get("name")))
+              .race(bigQueryService.getString(row, rm.get("race")))
+              .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return demoChartInfos;
+  }
+
+  protected AgeType validateAgeType(String age) {
+    return Optional.ofNullable(age)
+        .map(AgeType::fromValue)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(BAD_REQUEST_MESSAGE, "age type parameter", age)));
+  }
+
+  protected GenderOrSexType validateGenderOrSexType(String genderOrSex) {
+    return Optional.ofNullable(genderOrSex)
+        .map(GenderOrSexType::fromValue)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(
+                        BAD_REQUEST_MESSAGE, "gender or sex at birth parameter", genderOrSex)));
   }
 }

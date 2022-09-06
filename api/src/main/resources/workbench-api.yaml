@@ -3941,33 +3941,89 @@ paths:
       - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - cohortBuilder
+        - cohortBuilder
       consumes:
-      - application/json
+        - application/json
       description: Returns a collection of CohortChartData for UI charting in cohort.
       operationId: getCohortChartData
       parameters:
-      - in: path
-        name: domain
-        type: string
-        required: true
-        description: represents gender or sex at birth
-      - in: path
-        name: limit
-        type: integer
-        required: true
-        description: represents age, age at consent or age at cdr
-      - in: body
-        name: request
-        description: the cohort
-        schema:
-          "$ref": "#/definitions/SearchRequest"
-        required: true
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: represents gender or sex at birth
+        - in: path
+          name: limit
+          type: integer
+          required: true
+          description: represents age, age at consent or age at cdr
+        - in: body
+          name: request
+          description: the cohort
+          schema:
+            "$ref": "#/definitions/SearchRequest"
+          required: true
       responses:
         200:
           description: A collection of CohortChartData
           schema:
             "$ref": "#/definitions/CohortChartDataListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{cohortReviewId}/{domain}/{limit}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: Returns a collection of CohortChartData for UI charting in cohort.
+      operationId: getCohortReviewChartData
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: represents string value of Domain
+        - in: path
+          name: limit
+          type: integer
+          required: true
+          description: represents top n-items to return
+      responses:
+        200:
+          description: A collection of CohortChartData
+          schema:
+            "$ref": "#/definitions/CohortChartDataListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{cohortReviewId}/{genderOrSex}/{age}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: Searches for demographic info about subjects.
+      operationId: findCohortReviewDemoChartInfo
+      parameters:
+        - in: path
+          name: genderOrSex
+          type: string
+          required: true
+          description: represents gender or sex at birth
+        - in: path
+          name: age
+          type: string
+          required: true
+          description: represents age, age at consent or age at cdr
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/DemoChartInfoListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/demographics":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"

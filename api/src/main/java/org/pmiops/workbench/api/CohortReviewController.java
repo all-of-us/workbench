@@ -22,11 +22,13 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortReviewWithCountResponse;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
@@ -263,6 +265,47 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         new CohortReviewListResponse()
             .items(
                 cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId)));
+  }
+
+  @Override
+  public ResponseEntity<DemoChartInfoListResponse> findCohortReviewDemoChartInfo(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      String genderOrSex,
+      String age) {
+    DemoChartInfoListResponse response = new DemoChartInfoListResponse();
+    return ResponseEntity.ok(
+        response.items(
+            chartService.findCohortReviewDemoChartInfo(cohortReviewId, genderOrSex, age)));
+  }
+
+  @Override
+  public ResponseEntity<CohortChartDataListResponse> getCohortReviewChartData(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      String domain,
+      Integer limit) {
+
+    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
+      throw new BadRequestException(
+          String.format(
+              "Bad Request: Please provide a chart limit between %d and %d.",
+              MIN_LIMIT, MAX_LIMIT));
+    }
+
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    // TODO for count.....
+
+    return ResponseEntity.ok(
+        new CohortChartDataListResponse()
+            .count(0L)
+            .items(
+                chartService.findCohortReviewChartData(
+                    cohortReviewId, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
   }
 
   @Override
