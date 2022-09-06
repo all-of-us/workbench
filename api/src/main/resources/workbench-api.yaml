@@ -4849,11 +4849,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/UserRole"
-      failedWorkflowGrants:
-        description: A list of user emails to whom we were unable to grant workflow runner roles, if any
-        type: array
-        items:
-          type: string
       failedWorkflowRevocations:
         description: A list of user emails for whom we were unable to revoke workflow runner roles, if any
         type: array
@@ -4902,11 +4897,6 @@ definitions:
       workspace:
         "$ref": "#/definitions/Workspace"
         description: The newly created workspace duplicate.
-      failedWorkflowGrants:
-        description: A list of user emails to whom we were unable to grant workflow runner roles, if any
-        type: array
-        items:
-          type: string
   WorkspaceOperation:
     type: object
     required:
