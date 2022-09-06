@@ -2,7 +2,7 @@ import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
 import Link from 'app/element/link';
-import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { Language, MenuOption, ResourceCard } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
@@ -100,7 +100,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   }
 
   createNewNotebookLink(): Link {
-    return Link.findByName(this.page, { normalizeSpace: LinkText.CreateNewNotebook });
+    const xpath = '//*[local-name()="svg" and @data-icon="circle-plus"]';
+    return new Link(this.page, xpath);
   }
 
   /**

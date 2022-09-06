@@ -80,7 +80,6 @@ export enum LinkText {
   CreateAnotherConceptSet = 'Create another Concept Set',
   CreateCohort = 'Create Cohort',
   CreateDataset = 'Create a Dataset',
-  CreateNewNotebook = 'New Notebook',
   CreateNewWorkspace = 'Create a New Workspace',
   CreateNotebook = 'Create Notebook',
   CreateReviewSets = 'Create Review Sets',
@@ -101,7 +100,6 @@ export enum LinkText {
   Edit = 'Edit',
   Export = 'Export',
   ExtractAndContinue = 'Extract & Continue',
-  Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
   GetStarted = 'Get Started',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
@@ -130,7 +128,6 @@ export enum LinkText {
   SeeCodePreview = 'See Code Preview',
   StayHere = 'Stay Here',
   Submit = 'Submit',
-  Update = 'Update',
   Yes = 'Yes',
   YesDelete = 'YES, DELETE',
   YesLeave = 'Yes, Leave'
