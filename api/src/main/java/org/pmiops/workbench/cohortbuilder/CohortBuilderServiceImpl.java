@@ -352,7 +352,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
     }
 
-    // if we need to remove brand names(only applies to drugs) use brand type otherwise use none
+    // if we need to remove brand names(only applies to drug) use brand type otherwise use none
     // for  other domains
     String type = removeDrugBrand ? CriteriaType.BRAND.toString() : CriteriaType.NONE.toString();
 

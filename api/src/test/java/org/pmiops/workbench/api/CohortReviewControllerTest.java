@@ -343,16 +343,16 @@ public class CohortReviewControllerTest {
         createTestWorkspace(
             WORKSPACE_NAMESPACE,
             WORKSPACE_NAME,
-            cdrVersion.getCdrVersionId(),
-            WorkspaceAccessLevel.OWNER);
+            cdrVersion.getCdrVersionId()
+        );
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
 
     workspace2 =
         createTestWorkspace(
             WORKSPACE2_NAMESPACE,
             WORKSPACE2_NAME,
-            cdrVersion.getCdrVersionId(),
-            WorkspaceAccessLevel.OWNER);
+            cdrVersion.getCdrVersionId()
+        );
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.OWNER);
 
     cbCriteriaDao.save(
@@ -2641,70 +2641,6 @@ public class CohortReviewControllerTest {
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
   }
 
-  //  private void stubBigQueryCohortCalls() {
-  //    TableResult queryResult = mock(TableResult.class);
-  //    Iterable testIterable =
-  //        () -> {
-  //          List<FieldValue> list = new ArrayList<>();
-  //          list.add(null);
-  //          return list.iterator();
-  //        };
-  //    Map<String, Integer> rm =
-  //        ImmutableMap.<String, Integer>builder()
-  //            .put("person_id", 0)
-  //            .put("birth_datetime", 1)
-  //            .put("gender_concept_id", 2)
-  //            .put("race_concept_id", 3)
-  //            .put("ethnicity_concept_id", 4)
-  //            .put("sex_at_birth_concept_id", 5)
-  //            .put("count", 6)
-  //            .put("deceased", 7)
-  //            .put(FilterColumns.START_DATETIME.toString(), 8)
-  //            .put(FilterColumns.SURVEY_NAME.toString(), 29)
-  //            .put(FilterColumns.QUESTION.toString(), 30)
-  //            .put(FilterColumns.ANSWER.toString(), 31)
-  //            // chartData
-  //            .put("name", 0)
-  //            .put("conceptId", 1)
-  //            // participantChartData
-  //            .put("standardName", 0)
-  //            .put("standardVocabulary", 1)
-  //            .put("startDate", 2)
-  //            .put("ageAtEvent", 3)
-  //            .put("rank", 4)
-  //            // vocabularies
-  //            .put("domain", 0)
-  //            .put("type", 1)
-  //            .put("vocabulary", 2)
-  //            .build();
-  //
-  //    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
-  //    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
-  //    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
-  //    when(queryResult.iterateAll()).thenReturn(testIterable);
-  //    when(queryResult.getValues()).thenReturn(testIterable);
-  //    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
-  //    when(bigQueryService.getString(null, 1)).thenReturn("1");
-  //    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
-  //    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
-  //    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
-  //    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
-  //    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
-  //    when(bigQueryService.getLong(null, 7)).thenReturn(0L);
-  //    // get participantCohortStatus - SURVEY
-  //    when(bigQueryService.getDateTime(null, 8)).thenReturn("2000-01-01");
-  //    when(bigQueryService.getString(null, 29)).thenReturn("1");
-  //    when(bigQueryService.getString(null, 30)).thenReturn("1");
-  //    when(bigQueryService.getString(null, 31)).thenReturn("1");
-  //    // chart data - 0-string, 1-long, 2-long
-  //    when(bigQueryService.getString(null, 0)).thenReturn("1");
-  //    when(bigQueryService.getLong(null, 1)).thenReturn(1L);
-  //    // participant chart data - 0-string, 1-string, 2-date, 3-long, 4-long
-  //    when(bigQueryService.getDate(null, 2)).thenReturn("2000-01-01");
-  //    // vocabularies 0-string, 1-string, 2-string
-  //    when(bigQueryService.getString(null, 2)).thenReturn("1");
-  //  }
-
   private CohortReview createCohortReview(
       DbCohortReview actualReview, List<DbParticipantCohortStatus> participantCohortStatusList) {
     List<ParticipantCohortStatus> newParticipantCohortStatusList =
@@ -2842,8 +2778,7 @@ public class CohortReviewControllerTest {
   private Workspace createTestWorkspace(
       String workspaceNamespace,
       String workspaceName,
-      long cdrVersionId,
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      long cdrVersionId) {
     Workspace tmpWorkspace = new Workspace();
     tmpWorkspace.setName(workspaceName);
     tmpWorkspace.setNamespace(workspaceNamespace);
@@ -2854,7 +2789,7 @@ public class CohortReviewControllerTest {
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
-    stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), workspaceAccessLevel);
+    stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), WorkspaceAccessLevel.OWNER);
 
     return tmpWorkspace;
   }

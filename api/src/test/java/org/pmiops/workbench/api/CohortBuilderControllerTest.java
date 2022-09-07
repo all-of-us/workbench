@@ -1133,10 +1133,10 @@ public class CohortBuilderControllerTest {
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 222, 333, 999, 200)");
 
     List<SurveyVersion> response =
-        controller
-            .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, 222L, 333L)
-            .getBody()
+        Objects.requireNonNull(controller
+                        .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+                                WORKSPACE_NAMESPACE, WORKSPACE_ID, 222L, 333L)
+                        .getBody())
             .getItems();
     assertThat(response.get(0).getSurveyVersionConceptId()).isEqualTo(999);
     assertThat(response.get(0).getDisplayName()).isEqualTo("May 2020");
@@ -1207,7 +1207,7 @@ public class CohortBuilderControllerTest {
     expected.add(new AgeTypeCount().ageType("AGE_AT_CONSENT").age(18).count(3L));
 
     List<AgeTypeCount> response =
-        controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+        Objects.requireNonNull(controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody()).getItems();
     assertThat(response).isEqualTo(expected);
   }
 
@@ -1369,7 +1369,7 @@ public class CohortBuilderControllerTest {
         "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
 
     List<Criteria> response =
-        controller.findVersionedSurveys(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+        Objects.requireNonNull(controller.findVersionedSurveys(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody()).getItems();
     assertThat(response.size()).isEqualTo(1);
     assertThat(response.get(0).getId()).isEqualTo(versionedSurvey.getId());
 
