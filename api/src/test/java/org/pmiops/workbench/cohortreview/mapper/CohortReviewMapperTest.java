@@ -153,8 +153,7 @@ public class CohortReviewMapperTest {
             strength,
             route,
             refRange);
-    FieldValue startDatetimeValue =
-        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue startDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
     FieldValue standardNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardName");
     FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
