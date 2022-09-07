@@ -2,10 +2,12 @@ package org.pmiops.workbench.cohortbuilder.chart;
 
 import java.util.List;
 import java.util.Set;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EthnicityInfo;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.SearchRequest;
 
@@ -17,7 +19,7 @@ public interface ChartService {
       Set<Long> participantIds, Domain domain, int limit);
 
   List<DemoChartInfo> findDemoChartInfo(
-      String genderOrSexType, String ageType, SearchRequest request);
+      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
   List<DemoChartInfo> findCohortReviewDemoChartInfo(Set<Long> participantIds);
 
