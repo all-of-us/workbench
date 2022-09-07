@@ -154,7 +154,7 @@ public class CohortReviewMapperTest {
             route,
             refRange);
     FieldValue startDatetimeValue =
-        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1944-01-12 00:00:00 UTC");
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
     FieldValue standardNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardName");
     FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
@@ -207,7 +207,7 @@ public class CohortReviewMapperTest {
 
     ParticipantData participantData =
         new ParticipantData()
-            .itemDate("1944-01-12 00:00:00 UTC")
+            .itemDate("1970-01-01 00:00:01 UTC")
             .domain("domain")
             .standardName("standardName")
             .ageAtEvent(1)
@@ -221,8 +221,8 @@ public class CohortReviewMapperTest {
             .value("valueAsNumber")
             .visitType("visitType")
             .numMentions("3")
-            .firstMention("3")
-            .lastMention("3")
+            .firstMention("1970-01-01 00:00:03 UTC")
+            .lastMention("1970-01-01 00:00:03 UTC")
             .unit("1")
             .dose("2")
             .strength("3")
