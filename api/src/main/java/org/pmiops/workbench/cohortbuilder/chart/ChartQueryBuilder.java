@@ -113,14 +113,13 @@ public class ChartQueryBuilder extends QueryBuilder {
         .build();
   }
 
-  public QueryJobConfiguration buildDemoChartInfoCounterQuery(
-      Set<Long> participantIds, GenderOrSexType genderOrSexType, AgeType ageType) {
+  public QueryJobConfiguration buildDemoChartInfoCounterQuery(Set<Long> participantIds) {
     Map<String, QueryParameterValue> params = new HashMap<>();
     String sqlTemplate =
         DEMO_CHART_INFO_SQL_TEMPLATE
-            .replace("${genderOrSex}", genderOrSexType.toString())
-            .replace("${ageRange1}", getAgeRangeSql(18, 44, ageType))
-            .replace("${ageRange2}", getAgeRangeSql(45, 64, ageType));
+            .replace("${genderOrSex}", GenderOrSexType.GENDER.toString())
+            .replace("${ageRange1}", getAgeRangeSql(18, 44, AgeType.AGE))
+            .replace("${ageRange2}", getAgeRangeSql(45, 64, AgeType.AGE));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
 
     addParticipantIds(params, participantIds, queryBuilder, SEARCH_PERSON_TABLE);

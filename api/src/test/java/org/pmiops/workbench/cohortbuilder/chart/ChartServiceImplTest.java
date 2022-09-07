@@ -12,11 +12,13 @@ import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,6 +33,10 @@ class ChartServiceImplTest {
   @Mock private BigQueryService bigQueryService;
   @Mock private ChartQueryBuilder chartQueryBuilder;
 
+  @Autowired CohortBuilderMapperImpl cohortBuilderMapper;
+
+  @Autowired CohortReviewMapperImpl cohortReviewMapper;
+
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
   @MockBean({WorkspaceAuthService.class})
@@ -39,7 +45,9 @@ class ChartServiceImplTest {
   @BeforeEach
   public void setUp() {
 
-    chartService = new ChartServiceImpl(bigQueryService, chartQueryBuilder);
+    chartService =
+        new ChartServiceImpl(
+            bigQueryService, chartQueryBuilder, cohortBuilderMapper, cohortReviewMapper);
   }
 
   @Test
