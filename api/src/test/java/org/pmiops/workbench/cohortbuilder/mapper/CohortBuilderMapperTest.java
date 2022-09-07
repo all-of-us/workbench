@@ -2,6 +2,12 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.cloud.PageImpl;
+import com.google.cloud.bigquery.*;
+import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,15 +20,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
-import org.pmiops.workbench.model.AgeTypeCount;
-import org.pmiops.workbench.model.CardCount;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaAttribute;
-import org.pmiops.workbench.model.CriteriaSubType;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -162,6 +160,72 @@ public class CohortBuilderMapperTest {
                   }
                 }))
         .isEqualTo(expected);
+  }
+
+  @Test
+  public void tableResultToCohortChartData() {
+    Field name = Field.of("name", LegacySQLTypeName.STRING);
+    Field conceptId = Field.of("conceptId", LegacySQLTypeName.INTEGER);
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+    Schema schema = Schema.of(name, conceptId, count);
+
+    FieldValue nameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "name");
+    FieldValue conceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "77");
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "10");
+    List<FieldValueList> tableRows =
+        Collections.singletonList(
+            FieldValueList.of(Arrays.asList(nameValue, conceptIdValue, countValue)));
+
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    CohortChartData cohortChartData = new CohortChartData().name("name").conceptId(77L).count(10L);
+    assertThat(cohortBuilderMapper.tableResultToCohortChartData(result))
+        .isEqualTo(ImmutableList.of(cohortChartData));
+  }
+
+  @Test
+  public void tableResultToDemoChartInfo() {
+    Field name = Field.of("name", LegacySQLTypeName.STRING);
+    Field race = Field.of("race", LegacySQLTypeName.STRING);
+    Field ageRange = Field.of("ageRange", LegacySQLTypeName.STRING);
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+    Schema s = Schema.of(name, race, ageRange, count);
+
+    FieldValue nameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "name");
+    FieldValue raceValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "race");
+    FieldValue ageRangeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2-11");
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "10");
+    List<FieldValueList> tableRows =
+        Collections.singletonList(
+            FieldValueList.of(Arrays.asList(nameValue, raceValue, ageRangeValue, countValue)));
+
+    TableResult result =
+        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    DemoChartInfo demoChartInfo =
+        new DemoChartInfo().name("name").race("race").ageRange("2-11").count(10L);
+    assertThat(cohortBuilderMapper.tableResultToDemoChartInfo(result))
+        .isEqualTo(ImmutableList.of(demoChartInfo));
+  }
+
+  @Test
+  public void tableResultToEthnicityInfo() {
+    Field ethnicity = Field.of("ethnicity", LegacySQLTypeName.STRING);
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+    Schema s = Schema.of(ethnicity, count);
+
+    FieldValue idValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "eth");
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "10");
+    List<FieldValueList> tableRows =
+        Collections.singletonList(FieldValueList.of(Arrays.asList(idValue, countValue)));
+
+    TableResult result =
+        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    EthnicityInfo ethnicityInfo = new EthnicityInfo().ethnicity("eth").count(10L);
+    assertThat(cohortBuilderMapper.tableResultToEthnicityInfo(result))
+        .isEqualTo(ImmutableList.of(ethnicityInfo));
   }
 
   private static Stream<Arguments> domainCountParameters() {

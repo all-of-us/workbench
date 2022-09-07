@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,11 +21,10 @@ import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.TableResult;
+import com.google.cloud.PageImpl;
+import com.google.cloud.bigquery.*;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -35,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -495,40 +492,54 @@ public class WorkspacesControllerTest {
   }
 
   private void stubBigQueryCohortCalls() {
-    TableResult queryResult = mock(TableResult.class);
-    Iterable testIterable =
-        new Iterable() {
-          @Override
-          public Iterator iterator() {
-            List<FieldValue> list = new ArrayList<>();
-            list.add(null);
-            return list.iterator();
-          }
-        };
-    Map<String, Integer> rm =
-        ImmutableMap.<String, Integer>builder()
-            .put("person_id", 0)
-            .put("birth_datetime", 1)
-            .put("gender_concept_id", 2)
-            .put("race_concept_id", 3)
-            .put("ethnicity_concept_id", 4)
-            .put("sex_at_birth_concept_id", 5)
-            .put("count", 6)
-            .put("deceased", 7)
-            .build();
+    // construct the first TableResult call
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+    Schema schema = Schema.of(count);
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    List<FieldValueList> tableRows = Arrays.asList(FieldValueList.of(Arrays.asList(countValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
-    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
-    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
-    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
-    when(queryResult.iterateAll()).thenReturn(testIterable);
-    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
-    when(bigQueryService.getString(null, 1)).thenReturn("1");
-    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
-    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
-    when(bigQueryService.getBoolean(null, 7)).thenReturn(false);
+    // construct the second TableResult call
+    Field personId = Field.of("person_id", LegacySQLTypeName.STRING);
+    Field birthDatetime = Field.of("birth_datetime", LegacySQLTypeName.DATETIME);
+    Field genderConceptId = Field.of("gender_concept_id", LegacySQLTypeName.INTEGER);
+    Field raceConceptId = Field.of("race_concept_id", LegacySQLTypeName.INTEGER);
+    Field ethnicityConceptId = Field.of("ethnicity_concept_id", LegacySQLTypeName.INTEGER);
+    Field sexAtBirthConceptId = Field.of("sex_at_birth_concept_id", LegacySQLTypeName.INTEGER);
+    Field deceased = Field.of("deceased", LegacySQLTypeName.BOOLEAN);
+    Schema schema2 =
+        Schema.of(
+            personId,
+            birthDatetime,
+            genderConceptId,
+            raceConceptId,
+            ethnicityConceptId,
+            sexAtBirthConceptId,
+            deceased);
+    FieldValue personIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue birthDatetimeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
+    FieldValue genderConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2");
+    FieldValue raceConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "3");
+    FieldValue ethnicityConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "4");
+    FieldValue sexAtBirthConceptIdValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "5");
+    FieldValue deceasedValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "false");
+    List<FieldValueList> tableRows2 =
+        Arrays.asList(
+            FieldValueList.of(
+                Arrays.asList(
+                    personIdValue,
+                    birthDatetimeValue,
+                    genderConceptIdValue,
+                    raceConceptIdValue,
+                    ethnicityConceptIdValue,
+                    sexAtBirthConceptIdValue,
+                    deceasedValue)));
+    TableResult result2 =
+        new TableResult(schema2, tableRows2.size(), new PageImpl<>(() -> null, null, tableRows2));
+
+    // return the TableResult calls in order of call
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);
   }
 
   private Workspace createWorkspace() {
@@ -1489,6 +1500,7 @@ public class WorkspacesControllerTest {
                     .cohortReviewId(cr1.getCohortReviewId()))
             .getBody();
 
+    stubBigQueryCohortCalls();
     reviewReq.setSize(2);
     CohortReview cr2 =
         cohortReviewController
