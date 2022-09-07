@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortreview;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -60,6 +61,8 @@ public interface CohortReviewService {
    * Find the {@link ParticipantCohortStatus} for the specified cohortReviewId and participantId.
    */
   ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
+
+  public Set<Long> findParticipantIdsByCohortReview(Long cohortReviewId);
 
   /**
    * Find a list of {@link ParticipantCohortStatus} for the specified cohortReviewId, filtering and

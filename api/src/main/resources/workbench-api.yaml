@@ -3888,6 +3888,21 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/DemoChartInfoListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{cohortReviewId}/demo":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+    get:
+      tags:
+        - cohortReview
+      description: Searches for demographic info about subjects.
+      operationId: findCohortReviewDemoChartInfo
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/DemoChartInfoListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/ethnicity":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3939,6 +3954,32 @@ paths:
         schema:
           "$ref": "#/definitions/SearchRequest"
         required: true
+      responses:
+        200:
+          description: A collection of CohortChartData
+          schema:
+            "$ref": "#/definitions/CohortChartDataListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{cohortReviewId}/{domain}/{limit}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+    get:
+      tags:
+        - cohortReview
+      description: Returns a collection of CohortChartData for UI charting in cohort.
+      operationId: getCohortReviewChartData
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: represents text domain
+        - in: path
+          name: limit
+          type: integer
+          required: true
+          description: represents top n-items to get
       responses:
         200:
           description: A collection of CohortChartData
