@@ -36,7 +36,12 @@ class ChartServiceImplTest {
   @Autowired private CohortReviewMapperImpl cohortReviewMapper;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    CommonMappers.class,
+    CohortBuilderMapperImpl.class,
+    CohortReviewMapperImpl.class
+  })
   @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
 

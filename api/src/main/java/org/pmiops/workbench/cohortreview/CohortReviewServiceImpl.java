@@ -265,9 +265,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public Set<Long> findParticipantIdsByCohortReview(Long cohortReviewId) {
-    return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId).stream()
-        .map(pcs -> pcs.getParticipantKey().getParticipantId())
-        .collect(Collectors.toSet());
+    return participantCohortStatusDao.findParticipantIdsByCohortReviewId(cohortReviewId);
   }
 
   public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
