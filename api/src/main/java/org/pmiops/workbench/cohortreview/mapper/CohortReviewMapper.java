@@ -5,6 +5,9 @@ import static org.pmiops.workbench.model.FilterColumns.*;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.StreamSupport;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
@@ -66,9 +69,12 @@ public interface CohortReviewMapper {
   }
 
   default ParticipantData fieldValueListToParticipantData(FieldValueList row, Domain domain) {
+    DateTimeFormatter df =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").withZone(ZoneId.of("UTC"));
+
     ParticipantData participantData = new ParticipantData();
     if (!domain.equals(Domain.SURVEY)) {
-      FieldValues.getString(row, START_DATETIME.toString()).ifPresent(participantData::setItemDate);
+      participantData.setItemDate(df.format(FieldValues.getInstant(row.get(START_DATETIME.toString()))));
       FieldValues.getString(row, DOMAIN.toString()).ifPresent(participantData::setDomain);
       FieldValues.getString(row, STANDARD_NAME.toString())
           .ifPresent(participantData::setStandardName);
@@ -90,17 +96,15 @@ public interface CohortReviewMapper {
       FieldValues.getString(row, VISIT_TYPE.toString()).ifPresent(participantData::setVisitType);
       FieldValues.getString(row, NUM_MENTIONS.toString())
           .ifPresent(participantData::setNumMentions);
-      FieldValues.getString(row, FIRST_MENTION.toString())
-          .ifPresent(participantData::setFirstMention);
-      FieldValues.getString(row, LAST_MENTION.toString())
-          .ifPresent(participantData::setLastMention);
+      participantData.setFirstMention(df.format(FieldValues.getInstant(row.get(FIRST_MENTION.toString()))));
+      participantData.setLastMention(df.format(FieldValues.getInstant(row.get(LAST_MENTION.toString()))));
       FieldValues.getString(row, UNIT.toString()).ifPresent(participantData::setUnit);
       FieldValues.getString(row, DOSE.toString()).ifPresent(participantData::setDose);
       FieldValues.getString(row, STRENGTH.toString()).ifPresent(participantData::setStrength);
       FieldValues.getString(row, ROUTE.toString()).ifPresent(participantData::setRoute);
       FieldValues.getString(row, REF_RANGE.toString()).ifPresent(participantData::setRefRange);
     } else {
-      FieldValues.getString(row, START_DATETIME.toString()).ifPresent(participantData::setItemDate);
+      participantData.setItemDate(df.format(FieldValues.getInstant(row.get(START_DATETIME.toString()))));
       FieldValues.getString(row, SURVEY_NAME.toString()).ifPresent(participantData::setSurvey);
       FieldValues.getString(row, QUESTION.toString()).ifPresent(participantData::setQuestion);
       FieldValues.getString(row, ANSWER.toString()).ifPresent(participantData::setAnswer);
