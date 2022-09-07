@@ -15,7 +15,7 @@ public interface ChartService {
   List<CohortChartData> findCohortChartData(SearchRequest searchRequest, Domain domain, int limit);
 
   List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
+      String genderOrSexType, String ageType, SearchRequest request);
 
   List<EthnicityInfo> findEthnicityInfo(SearchRequest request);
 
