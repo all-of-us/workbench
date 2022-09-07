@@ -4,11 +4,13 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.QueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryParameterUtil;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,13 +29,18 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
           + "WHERE ";
 
+  private static final String PERSON_IDS_IN_SQL = "${mainTable}.person_id in UNNEST(${personIds}) ";
+
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
       "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "SELECT standard_name as name, standard_concept_id as conceptId, COUNT(DISTINCT person_id) as count\n"
           + "FROM `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
-          + "WHERE cb_review_all_events.person_id IN (${innerSql})";
+          + "WHERE ";
+
+  private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE_INNER_SQL =
+      "cb_review_all_events.person_id IN (${innerSql})";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
       "AND domain = ${domain}\n"
@@ -106,6 +113,25 @@ public class ChartQueryBuilder extends QueryBuilder {
         .build();
   }
 
+  public QueryJobConfiguration buildDemoChartInfoCounterQuery(Set<Long> participantIds) {
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    String sqlTemplate =
+        DEMO_CHART_INFO_SQL_TEMPLATE
+            .replace("${genderOrSex}", GenderOrSexType.GENDER.toString())
+            .replace("${ageRange1}", getAgeRangeSql(18, 44, AgeType.AGE))
+            .replace("${ageRange2}", getAgeRangeSql(45, 64, AgeType.AGE));
+    StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
+
+    addParticipantIds(params, participantIds, queryBuilder, SEARCH_PERSON_TABLE);
+
+    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
+
+    return QueryJobConfiguration.newBuilder(queryBuilder.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
   /**
    * Provides counts with ethnicity info for cohort defined by the provided {@link
    * ParticipantCriteria}.
@@ -146,8 +172,10 @@ public class ChartQueryBuilder extends QueryBuilder {
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
     String searchPersonSql = queryBuilder.toString();
-    queryBuilder =
-        new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${innerSql}", searchPersonSql));
+
+    queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE);
+    queryBuilder.append(
+        DOMAIN_CHART_INFO_SQL_TEMPLATE_INNER_SQL.replace("${innerSql}", searchPersonSql));
     String paramName =
         QueryParameterUtil.addQueryParameterValue(
             params, QueryParameterValue.string(domain.name()));
@@ -162,6 +190,40 @@ public class ChartQueryBuilder extends QueryBuilder {
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();
+  }
+
+  public QueryJobConfiguration buildDomainChartInfoCounterQuery(
+      Set<Long> participantIds, Domain domain, int chartLimit) {
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    StringBuilder queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE);
+
+    addParticipantIds(params, participantIds, queryBuilder, REVIEW_TABLE);
+
+    String paramName2 =
+        QueryParameterUtil.addQueryParameterValue(
+            params, QueryParameterValue.string(domain.name()));
+    String endSqlTemplate =
+        DOMAIN_CHART_INFO_SQL_GROUP_BY
+            .replace("${limit}", Integer.toString(chartLimit))
+            .replace("${domain}", paramName2);
+    queryBuilder.append(endSqlTemplate);
+
+    return QueryJobConfiguration.newBuilder(queryBuilder.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  private static void addParticipantIds(
+      Map<String, QueryParameterValue> params,
+      Set<Long> participantIds,
+      StringBuilder queryBuilder,
+      String mainTable) {
+    String paramName =
+        QueryParameterUtil.addQueryParameterValue(
+            params, QueryParameterValue.array(participantIds.toArray(new Long[0]), Long.class));
+    queryBuilder.append(
+        PERSON_IDS_IN_SQL.replace("${mainTable}", mainTable).replace("${personIds}", paramName));
   }
 
   /**

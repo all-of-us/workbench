@@ -48,7 +48,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
@@ -57,7 +56,6 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
@@ -1314,52 +1312,6 @@ public class CohortBuilderControllerTest {
             () -> controller.validateTerm("   "),
             "Expected BadRequestException is not thrown.");
     assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
-  }
-
-  @Test
-  public void validateAgeTypeCaseSensitive() {
-    List<String> values =
-        Stream.of(AgeType.values()).map(AgeType::toString).collect(Collectors.toList());
-    for (String value : values) {
-      assertDoesNotThrow(
-          () -> controller.validateAgeType(value),
-          "BadRequestException is not expected to be thrown for [" + value + "]");
-    }
-    // expect exception for lowercase
-    values.replaceAll(String::toLowerCase);
-    for (String value : values) {
-      Throwable exception =
-          assertThrows(
-              BadRequestException.class,
-              () -> controller.validateAgeType(value),
-              "Expected BadRequestException is not thrown.");
-      assertThat(exception).hasMessageThat().contains("Please provide a valid age type parameter");
-    }
-  }
-
-  @Test
-  public void validateGenderOrSexTypeCaseSensitive() {
-    List<String> values =
-        Stream.of(GenderOrSexType.values())
-            .map(GenderOrSexType::toString)
-            .collect(Collectors.toList());
-    for (String value : values) {
-      assertDoesNotThrow(
-          () -> controller.validateGenderOrSexType(value),
-          "BadRequestException is not expected to be thrown for [" + value + "]");
-    }
-    // expect exception for lowercase
-    values.replaceAll(String::toLowerCase);
-    for (String value : values) {
-      Throwable exception =
-          assertThrows(
-              BadRequestException.class,
-              () -> controller.validateGenderOrSexType(value),
-              "Expected BadRequestException is not thrown.");
-      assertThat(exception)
-          .hasMessageThat()
-          .contains("Please provide a valid gender or sex at birth parameter");
-    }
   }
 
   @Test

@@ -2,10 +2,13 @@ package org.pmiops.workbench.cohortbuilder.chart;
 
 import com.google.cloud.bigquery.TableResult;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChartServiceImpl implements ChartService {
+  private static final String BAD_REQUEST_MESSAGE =
+      "Bad Request: Please provide a valid %s. %s is not valid.";
   private final BigQueryService bigQueryService;
 
   private final ChartQueryBuilder chartQueryBuilder;
@@ -49,12 +54,32 @@ public class ChartServiceImpl implements ChartService {
   }
 
   @Override
+  public List<CohortChartData> findCohortReviewChartData(
+      Set<Long> participantIds, Domain domain, int limit) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildDomainChartInfoCounterQuery(participantIds, domain, limit));
+
+    return cohortBuilderMapper.tableResultToCohortChartData(result);
+  }
+
+  @Override
   public List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
+      String genderOrSex, String age, SearchRequest request) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(request, genderOrSexType, ageType)));
+                new ParticipantCriteria(
+                    request, validateGenderOrSexType(genderOrSex), validateAgeType(age))));
+
+    return cohortBuilderMapper.tableResultToDemoChartInfo(result);
+  }
+
+  @Override
+  public List<DemoChartInfo> findCohortReviewDemoChartInfo(Set<Long> participantIds) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildDemoChartInfoCounterQuery(participantIds));
 
     return cohortBuilderMapper.tableResultToDemoChartInfo(result);
   }
@@ -76,5 +101,24 @@ public class ChartServiceImpl implements ChartService {
             chartQueryBuilder.buildChartDataQuery(participantId, domain, limit));
 
     return cohortReviewMapper.tableResultToParticipantChartData(result);
+  }
+
+  protected AgeType validateAgeType(String age) {
+    return Optional.ofNullable(age)
+        .map(AgeType::fromValue)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(BAD_REQUEST_MESSAGE, "age type parameter", age)));
+  }
+
+  protected GenderOrSexType validateGenderOrSexType(String genderOrSex) {
+    return Optional.ofNullable(genderOrSex)
+        .map(GenderOrSexType::fromValue)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(
+                        BAD_REQUEST_MESSAGE, "gender or sex at birth parameter", genderOrSex)));
   }
 }
