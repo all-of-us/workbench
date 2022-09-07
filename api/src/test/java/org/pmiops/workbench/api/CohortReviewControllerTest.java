@@ -2578,7 +2578,7 @@ public class CohortReviewControllerTest {
             route,
             refRange);
     FieldValue startDatetimeValue =
-        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1944-01-12 00:00:00 UTC");
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");
     FieldValue domainValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "domain");
     FieldValue standardNameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "standardName");
     FieldValue ageAtEventValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1");

@@ -95,8 +95,10 @@ public class BigQueryService {
   public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
     DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     String returnSql =
-        queryJobConfiguration.getQuery().replace("${projectId}", cdrVersion.getBigqueryProject());
-    returnSql = returnSql.replace("${dataSetId}", cdrVersion.getBigqueryDataset());
+        queryJobConfiguration
+            .getQuery()
+            .replace("${projectId}", cdrVersion.getBigqueryProject())
+            .replace("${dataSetId}", cdrVersion.getBigqueryDataset());
     return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
   }
 

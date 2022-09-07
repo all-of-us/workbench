@@ -73,8 +73,10 @@ public interface CohortReviewMapper {
 
     ParticipantData participantData = new ParticipantData();
     if (!domain.equals(Domain.SURVEY)) {
-      participantData.setItemDate(
-          df.format(FieldValues.getInstant(row.get(START_DATETIME.toString()))));
+      if (!row.get(START_DATETIME.toString()).isNull()) {
+        participantData.setItemDate(
+            df.format(FieldValues.getInstant(row.get(START_DATETIME.toString()))));
+      }
       FieldValues.getString(row, DOMAIN.toString()).ifPresent(participantData::setDomain);
       FieldValues.getString(row, STANDARD_NAME.toString())
           .ifPresent(participantData::setStandardName);
@@ -96,18 +98,24 @@ public interface CohortReviewMapper {
       FieldValues.getString(row, VISIT_TYPE.toString()).ifPresent(participantData::setVisitType);
       FieldValues.getString(row, NUM_MENTIONS.toString())
           .ifPresent(participantData::setNumMentions);
-      participantData.setFirstMention(
-          df.format(FieldValues.getInstant(row.get(FIRST_MENTION.toString()))));
-      participantData.setLastMention(
-          df.format(FieldValues.getInstant(row.get(LAST_MENTION.toString()))));
+      if (!row.get(FIRST_MENTION.toString()).isNull()) {
+        participantData.setFirstMention(
+            df.format(FieldValues.getInstant(row.get(FIRST_MENTION.toString()))));
+      }
+      if (!row.get(LAST_MENTION.toString()).isNull()) {
+        participantData.setLastMention(
+            df.format(FieldValues.getInstant(row.get(LAST_MENTION.toString()))));
+      }
       FieldValues.getString(row, UNIT.toString()).ifPresent(participantData::setUnit);
       FieldValues.getString(row, DOSE.toString()).ifPresent(participantData::setDose);
       FieldValues.getString(row, STRENGTH.toString()).ifPresent(participantData::setStrength);
       FieldValues.getString(row, ROUTE.toString()).ifPresent(participantData::setRoute);
       FieldValues.getString(row, REF_RANGE.toString()).ifPresent(participantData::setRefRange);
     } else {
-      participantData.setItemDate(
-          df.format(FieldValues.getInstant(row.get(START_DATETIME.toString()))));
+      if (!row.get(START_DATETIME.toString()).isNull()) {
+        participantData.setItemDate(
+            df.format(FieldValues.getInstant(row.get(START_DATETIME.toString()))));
+      }
       FieldValues.getString(row, SURVEY_NAME.toString()).ifPresent(participantData::setSurvey);
       FieldValues.getString(row, QUESTION.toString()).ifPresent(participantData::setQuestion);
       FieldValues.getString(row, ANSWER.toString()).ifPresent(participantData::setAnswer);
