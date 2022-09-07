@@ -1,32 +1,5 @@
 package org.pmiops.workbench.cohortreview;
 
-import static org.pmiops.workbench.model.FilterColumns.AGE_AT_EVENT;
-import static org.pmiops.workbench.model.FilterColumns.ANSWER;
-import static org.pmiops.workbench.model.FilterColumns.DOMAIN;
-import static org.pmiops.workbench.model.FilterColumns.DOSE;
-import static org.pmiops.workbench.model.FilterColumns.FIRST_MENTION;
-import static org.pmiops.workbench.model.FilterColumns.LAST_MENTION;
-import static org.pmiops.workbench.model.FilterColumns.NUM_MENTIONS;
-import static org.pmiops.workbench.model.FilterColumns.QUESTION;
-import static org.pmiops.workbench.model.FilterColumns.REF_RANGE;
-import static org.pmiops.workbench.model.FilterColumns.ROUTE;
-import static org.pmiops.workbench.model.FilterColumns.SOURCE_CODE;
-import static org.pmiops.workbench.model.FilterColumns.SOURCE_CONCEPT_ID;
-import static org.pmiops.workbench.model.FilterColumns.SOURCE_NAME;
-import static org.pmiops.workbench.model.FilterColumns.SOURCE_VOCABULARY;
-import static org.pmiops.workbench.model.FilterColumns.STANDARD_CODE;
-import static org.pmiops.workbench.model.FilterColumns.STANDARD_CONCEPT_ID;
-import static org.pmiops.workbench.model.FilterColumns.STANDARD_NAME;
-import static org.pmiops.workbench.model.FilterColumns.STANDARD_VOCABULARY;
-import static org.pmiops.workbench.model.FilterColumns.START_DATETIME;
-import static org.pmiops.workbench.model.FilterColumns.STRENGTH;
-import static org.pmiops.workbench.model.FilterColumns.SURVEY_NAME;
-import static org.pmiops.workbench.model.FilterColumns.UNIT;
-import static org.pmiops.workbench.model.FilterColumns.VALUE_AS_NUMBER;
-import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
-
-import com.google.cloud.bigquery.BigQueryException;
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
@@ -36,18 +9,15 @@ import com.google.gson.Gson;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -446,16 +416,14 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(
       Long cohortAnnotationDefinitionId) {
-    DbCohortAnnotationDefinition cohortAnnotationDefinition =
-        cohortAnnotationDefinitionDao
-            .findById(cohortAnnotationDefinitionId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "Not Found: No cohort annotation definition found for id: %s",
-                            cohortAnnotationDefinitionId)));
-    return cohortAnnotationDefinition;
+    return cohortAnnotationDefinitionDao
+        .findById(cohortAnnotationDefinitionId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format(
+                        "Not Found: No cohort annotation definition found for id: %s",
+                        cohortAnnotationDefinitionId)));
   }
 
   private DbCohortReview findDbCohortReview(Long cohortReviewId) {
@@ -564,18 +532,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     return definition;
   }
 
-  @NotNull
-  private Date getBirthDate(Map<String, Integer> rm, List<FieldValue> row) {
-    String birthDateTimeString = bigQueryService.getString(row, rm.get("birth_datetime"));
-    if (birthDateTimeString == null) {
-      throw new BigQueryException(
-          500, "birth_datetime is null at position: " + rm.get("birth_datetime"));
-    }
-    return new Date(
-        Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000))
-            .getTime());
-  }
-
   /** Helper method that constructs a {@link CohortReview} with the specified ids and count. */
   private CohortReview createNewCohortReview(DbCohort cohort, Long cdrVersionId, Long cohortCount) {
     return new CohortReview()
@@ -590,48 +546,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         .reviewedCount(0L)
         .reviewSize(0L)
         .reviewStatus(ReviewStatus.NONE);
-  }
-
-  /** Helper method to convert a collection of {@link FieldValue} to {@link ParticipantData}. */
-  private ParticipantData convertRowToParticipantData(
-      Map<String, Integer> rm, List<FieldValue> row, Domain domain) {
-    if (!domain.equals(Domain.SURVEY)) {
-      return new ParticipantData()
-          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATETIME.toString())))
-          .domain(bigQueryService.getString(row, rm.get(DOMAIN.toString())))
-          .standardName(bigQueryService.getString(row, rm.get(STANDARD_NAME.toString())))
-          .ageAtEvent(bigQueryService.getLong(row, rm.get(AGE_AT_EVENT.toString())).intValue())
-          .standardConceptId(bigQueryService.getLong(row, rm.get(STANDARD_CONCEPT_ID.toString())))
-          .sourceConceptId(bigQueryService.getLong(row, rm.get(SOURCE_CONCEPT_ID.toString())))
-          .standardVocabulary(
-              bigQueryService.getString(row, rm.get(STANDARD_VOCABULARY.toString())))
-          .sourceVocabulary(bigQueryService.getString(row, rm.get(SOURCE_VOCABULARY.toString())))
-          .sourceName(bigQueryService.getString(row, rm.get(SOURCE_NAME.toString())))
-          .sourceCode(bigQueryService.getString(row, rm.get(SOURCE_CODE.toString())))
-          .standardCode(bigQueryService.getString(row, rm.get(STANDARD_CODE.toString())))
-          .value(bigQueryService.getString(row, rm.get(VALUE_AS_NUMBER.toString())))
-          .visitType(bigQueryService.getString(row, rm.get(VISIT_TYPE.toString())))
-          .numMentions(bigQueryService.getString(row, rm.get(NUM_MENTIONS.toString())))
-          .firstMention(
-              row.get(rm.get(FIRST_MENTION.toString())).isNull()
-                  ? ""
-                  : bigQueryService.getDateTime(row, rm.get(FIRST_MENTION.toString())))
-          .lastMention(
-              row.get(rm.get(LAST_MENTION.toString())).isNull()
-                  ? ""
-                  : bigQueryService.getDateTime(row, rm.get(LAST_MENTION.toString())))
-          .unit(bigQueryService.getString(row, rm.get(UNIT.toString())))
-          .dose(bigQueryService.getString(row, rm.get(DOSE.toString())))
-          .strength(bigQueryService.getString(row, rm.get(STRENGTH.toString())))
-          .route(bigQueryService.getString(row, rm.get(ROUTE.toString())))
-          .refRange(bigQueryService.getString(row, rm.get(REF_RANGE.toString())));
-    } else {
-      return new ParticipantData()
-          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATETIME.toString())))
-          .survey(bigQueryService.getString(row, rm.get(SURVEY_NAME.toString())))
-          .question(bigQueryService.getString(row, rm.get(QUESTION.toString())))
-          .answer(bigQueryService.getString(row, rm.get(ANSWER.toString())));
-    }
   }
 
   @Override

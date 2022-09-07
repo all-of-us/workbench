@@ -3,9 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.BigQueryOptions;
-import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.Job;
@@ -15,15 +13,8 @@ import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -34,7 +25,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -109,51 +99,6 @@ public class BigQueryService {
         queryJobConfiguration.getQuery().replace("${projectId}", cdrVersion.getBigqueryProject());
     returnSql = returnSql.replace("${dataSetId}", cdrVersion.getBigqueryDataset());
     return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
-  }
-
-  public Map<String, Integer> getResultMapper(TableResult result) {
-    if (result.getTotalRows() == 0) {
-      return Collections.emptyMap();
-    }
-    AtomicInteger index = new AtomicInteger();
-    return result.getSchema().getFields().stream()
-        .collect(Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
-  }
-
-  // TODO(jaycarlton): replace or merge these with FieldValues methods.
-  public Long getLong(List<FieldValue> row, int index) {
-    if (row.get(index).isNull()) {
-      throw new BigQueryException(500, "FieldValue is null at position: " + index);
-    }
-    return row.get(index).getLongValue();
-  }
-
-  public boolean isNull(List<FieldValue> row, int index) {
-    return row.get(index).isNull();
-  }
-
-  public String getString(List<FieldValue> row, int index) {
-    return row.get(index).isNull() ? null : row.get(index).getStringValue();
-  }
-
-  public Boolean getBoolean(List<FieldValue> row, int index) {
-    return row.get(index).getBooleanValue();
-  }
-
-  public String getDateTime(List<FieldValue> row, int index) {
-    if (row.get(index).isNull()) {
-      return null;
-    }
-    DateTimeFormatter df =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").withZone(ZoneId.of("UTC"));
-    return df.format(FieldValues.getInstant(row.get(index)));
-  }
-
-  public String getDate(List<FieldValue> row, int index) {
-    if (row.get(index).isNull()) {
-      return null;
-    }
-    return row.get(index).getStringValue();
   }
 
   public FieldList getTableFieldsFromDomain(Domain domain) {
