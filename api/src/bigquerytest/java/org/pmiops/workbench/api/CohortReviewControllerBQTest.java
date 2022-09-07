@@ -28,6 +28,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -111,7 +112,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
     CommonMappers.class,
-    CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
@@ -122,7 +122,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     UserMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
-    WorkspaceAuthService.class
+    WorkspaceAuthService.class,
+    CohortBuilderMapperImpl.class
   })
   @MockBean({
     AccessTierService.class,

@@ -7,13 +7,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import com.google.apphosting.api.DeadlineExceededException;
+import com.google.cloud.bigquery.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
@@ -45,6 +43,7 @@ import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -104,7 +103,12 @@ public class CohortBuilderControllerTest {
   private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, CommonMappers.class, CohortBuilderMapperImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    CommonMappers.class,
+    CohortBuilderMapperImpl.class,
+    CohortReviewMapperImpl.class
+  })
   @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
 
@@ -1133,10 +1137,11 @@ public class CohortBuilderControllerTest {
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 222, 333, 999, 200)");
 
     List<SurveyVersion> response =
-        Objects.requireNonNull(controller
-                        .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-                                WORKSPACE_NAMESPACE, WORKSPACE_ID, 222L, 333L)
-                        .getBody())
+        Objects.requireNonNull(
+                controller
+                    .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, 222L, 333L)
+                    .getBody())
             .getItems();
     assertThat(response.get(0).getSurveyVersionConceptId()).isEqualTo(999);
     assertThat(response.get(0).getDisplayName()).isEqualTo("May 2020");
@@ -1207,7 +1212,9 @@ public class CohortBuilderControllerTest {
     expected.add(new AgeTypeCount().ageType("AGE_AT_CONSENT").age(18).count(3L));
 
     List<AgeTypeCount> response =
-        Objects.requireNonNull(controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody()).getItems();
+        Objects.requireNonNull(
+                controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody())
+            .getItems();
     assertThat(response).isEqualTo(expected);
   }
 
@@ -1369,7 +1376,9 @@ public class CohortBuilderControllerTest {
         "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
 
     List<Criteria> response =
-        Objects.requireNonNull(controller.findVersionedSurveys(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody()).getItems();
+        Objects.requireNonNull(
+                controller.findVersionedSurveys(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody())
+            .getItems();
     assertThat(response.size()).isEqualTo(1);
     assertThat(response.get(0).getId()).isEqualTo(versionedSurvey.getId());
 
@@ -1410,7 +1419,7 @@ public class CohortBuilderControllerTest {
   }
 
   private void stubBigQueryCallThrowDeadlineExceededException() {
-    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
-    when(bigQueryService.executeQuery(null)).thenThrow(new DeadlineExceededException());
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null))
+        .thenThrow(new DeadlineExceededException());
   }
 }

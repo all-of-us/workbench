@@ -340,19 +340,11 @@ public class CohortReviewControllerTest {
     cdrVersionDao.save(cdrVersion);
 
     workspace =
-        createTestWorkspace(
-            WORKSPACE_NAMESPACE,
-            WORKSPACE_NAME,
-            cdrVersion.getCdrVersionId()
-        );
+        createTestWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cdrVersion.getCdrVersionId());
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
 
     workspace2 =
-        createTestWorkspace(
-            WORKSPACE2_NAMESPACE,
-            WORKSPACE2_NAME,
-            cdrVersion.getCdrVersionId()
-        );
+        createTestWorkspace(WORKSPACE2_NAMESPACE, WORKSPACE2_NAME, cdrVersion.getCdrVersionId());
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.OWNER);
 
     cbCriteriaDao.save(
@@ -2776,9 +2768,7 @@ public class CohortReviewControllerTest {
   }
 
   private Workspace createTestWorkspace(
-      String workspaceNamespace,
-      String workspaceName,
-      long cdrVersionId) {
+      String workspaceNamespace, String workspaceName, long cdrVersionId) {
     Workspace tmpWorkspace = new Workspace();
     tmpWorkspace.setName(workspaceName);
     tmpWorkspace.setNamespace(workspaceNamespace);

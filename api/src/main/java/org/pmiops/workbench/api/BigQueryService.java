@@ -48,8 +48,7 @@ public class BigQueryService {
   }
 
   public TableResult filterBigQueryConfigAndExecuteQuery(QueryJobConfiguration query) {
-    QueryJobConfiguration qjc = filterBigQueryConfig(query);
-    return executeQuery(qjc, defaultBigQueryTimeout.toMillis());
+    return executeQuery(filterBigQueryConfig(query), defaultBigQueryTimeout.toMillis());
   }
 
   /** Execute the provided query using bigquery and wait for completion. */
