@@ -5,8 +5,7 @@ import static org.pmiops.workbench.model.FilterColumns.GENDER;
 import static org.pmiops.workbench.model.FilterColumns.RACE;
 import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -198,13 +197,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public Long countParticipants(SearchRequest request) {
-    QueryJobConfiguration qjc =
-        bigQueryService.filterBigQueryConfig(
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
             cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request)));
-    TableResult result = bigQueryService.executeQuery(qjc);
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<FieldValue> row = result.iterateAll().iterator().next();
-    return bigQueryService.getLong(row, rm.get("count"));
+    FieldValueList row = result.iterateAll().iterator().next();
+    return row.get("count").getLongValue();
   }
 
   @Override
@@ -367,7 +364,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
     }
 
-    // if we need to remove brand names(only applies to drugs) use brand type otherwise use none
+    // if we need to remove brand names(only applies to drug) use brand type otherwise use none
     // for  other domains
     String type = removeDrugBrand ? CriteriaType.BRAND.toString() : CriteriaType.NONE.toString();
 
