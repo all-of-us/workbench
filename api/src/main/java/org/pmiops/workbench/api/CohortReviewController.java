@@ -275,7 +275,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       String genderOrSex,
       String age) {
-
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
@@ -302,7 +301,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
-
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 

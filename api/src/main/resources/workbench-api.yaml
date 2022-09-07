@@ -3973,11 +3973,9 @@ paths:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
       - "$ref": "#/parameters/cohortReviewId"
-    post:
+    get:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description: Returns a collection of CohortChartData for UI charting in cohort.
       operationId: getCohortReviewChartData
       parameters:
@@ -4001,11 +3999,9 @@ paths:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
       - "$ref": "#/parameters/cohortReviewId"
-    post:
+    get:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description: Searches for demographic info about subjects.
       operationId: findCohortReviewDemoChartInfo
       parameters:
