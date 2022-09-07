@@ -16,10 +16,10 @@ public interface ChartService {
   List<CohortChartData> findCohortReviewChartData(
       Set<Long> participantIds, Domain domain, int limit);
 
-  List<DemoChartInfo> findDemoChartInfo(String genderOrSex, String age, SearchRequest request);
+  List<DemoChartInfo> findDemoChartInfo(
+      String genderOrSexType, String ageType, SearchRequest request);
 
-  List<DemoChartInfo> findCohortReviewDemoChartInfo(
-      Set<Long> participantIds, String genderOrSex, String age);
+  List<DemoChartInfo> findCohortReviewDemoChartInfo(Set<Long> participantIds);
 
   List<EthnicityInfo> findEthnicityInfo(SearchRequest request);
 

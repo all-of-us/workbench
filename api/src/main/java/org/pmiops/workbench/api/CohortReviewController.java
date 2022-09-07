@@ -270,11 +270,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<DemoChartInfoListResponse> findCohortReviewDemoChartInfo(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortReviewId,
-      String genderOrSex,
-      String age) {
+      String workspaceNamespace, String workspaceId, Long cohortReviewId) {
 
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -283,8 +279,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     return ResponseEntity.ok(
-        response.items(
-            chartService.findCohortReviewDemoChartInfo(participantIds, genderOrSex, age)));
+        response.items(chartService.findCohortReviewDemoChartInfo(participantIds)));
   }
 
   @Override
