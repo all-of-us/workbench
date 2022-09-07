@@ -2028,10 +2028,6 @@ public class CohortReviewControllerTest {
 
     assertNotFoundExceptionNoCohort(cohortId, exception);
   }
-  @Test
-  public void getxx(){
-      ///cohortReviewController.
-  }
 
   @Test
   public void getParticipantCohortStatusesNoCohort() {
