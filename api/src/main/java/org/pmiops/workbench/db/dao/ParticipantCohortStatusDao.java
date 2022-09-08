@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus;
 import org.springframework.data.jpa.repository.Modifying;
@@ -47,6 +48,14 @@ public interface ParticipantCohortStatusDao
       @Param("conceptId") long conceptId,
       @Param("personIds") List<Long> personIds,
       @Param("cohortReviewId") Long cohortReviewId);
+
+  @Query(
+      value =
+          "SELECT participant_id"
+              + " FROM participant_cohort_status pcs"
+              + " WHERE cohort_review_id = :cohortReviewId",
+      nativeQuery = true)
+  Set<Long> findParticipantIdsByCohortReviewId(@Param("cohortReviewId") Long cohortReviewId);
 
   DbParticipantCohortStatus findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
       @Param("cohortReviewId") long cohortReviewId, @Param("participantId") long participantId);

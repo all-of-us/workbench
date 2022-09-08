@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.chart;
 
 import com.google.cloud.bigquery.TableResult;
 import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -49,12 +50,31 @@ public class ChartServiceImpl implements ChartService {
   }
 
   @Override
+  public List<CohortChartData> findCohortReviewChartData(
+      Set<Long> participantIds, Domain domain, int limit) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildDomainChartInfoCounterQuery(participantIds, domain, limit));
+
+    return cohortBuilderMapper.tableResultToCohortChartData(result);
+  }
+
+  @Override
   public List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
                 new ParticipantCriteria(request, genderOrSexType, ageType)));
+
+    return cohortBuilderMapper.tableResultToDemoChartInfo(result);
+  }
+
+  @Override
+  public List<DemoChartInfo> findCohortReviewDemoChartInfo(Set<Long> participantIds) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildDemoChartInfoCounterQuery(participantIds));
 
     return cohortBuilderMapper.tableResultToDemoChartInfo(result);
   }

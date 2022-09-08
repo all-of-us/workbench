@@ -2370,29 +2370,6 @@ paths:
           description: The updated concept set.
           schema:
             "$ref": "#/definitions/ConceptSet"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
-    post:
-      tags:
-        - dataSet
-      description: 'Given a Data Set, return the SQL query built from it.'
-      operationId: generateCode
-      parameters:
-        - "$ref": "#/parameters/workspaceNamespace"
-        - "$ref": "#/parameters/workspaceId"
-        - in: path
-          name: kernelType
-          required: true
-          type: string
-        - in: body
-          name: dataSet
-          required: true
-          schema:
-            "$ref": "#/definitions/DataSetRequest"
-      responses:
-        200:
-          description: 'A SQL query for each domain in the Data Set'
-          schema:
-            "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2417,6 +2394,29 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/ConceptSet"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
+    post:
+      tags:
+        - dataSet
+      description: 'Given a Data Set, return the SQL query built from it.'
+      operationId: generateCode
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/workspaceId"
+        - in: path
+          name: kernelType
+          required: true
+          type: string
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            "$ref": "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: 'A SQL query for each domain in the Data Set'
+          schema:
+            "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3282,8 +3282,8 @@ paths:
           description: A count of Participants.
           schema:
             "$ref": "#/definitions/ParticipantDataCountResponse"
-  ? "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}"
-  : parameters:
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}":
+    parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     - "$ref": "#/parameters/cohortReviewId"
@@ -3338,6 +3338,47 @@ paths:
           description: A collection of OMOP vocabularies.
           schema:
             "$ref": "#/definitions/VocabularyListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{cohortReviewId}/demo":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+    get:
+      tags:
+        - cohortReview
+      description: Searches for demographic info about subjects.
+      operationId: findCohortReviewDemoChartInfo
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/DemoChartInfoListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{cohortReviewId}/{domain}/{limit}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+    get:
+      tags:
+        - cohortReview
+      description: Returns a collection of CohortChartData for UI charting in cohort.
+      operationId: getCohortReviewChartData
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: represents text domain
+        - in: path
+          name: limit
+          type: integer
+          required: true
+          description: represents top n-items to get
+      responses:
+        200:
+          description: A collection of CohortChartData
+          schema:
+            "$ref": "#/definitions/CohortChartDataListResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"

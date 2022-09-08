@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import com.google.apphosting.api.DeadlineExceededException;
-import com.google.cloud.bigquery.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
