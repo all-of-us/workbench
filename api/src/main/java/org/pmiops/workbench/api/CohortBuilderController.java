@@ -95,6 +95,26 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<CriteriaListResponse> findSurveyAutoComplete(
+      String workspaceNamespace, String workspaceId, String surveyName, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(term);
+    validateSurveyName(surveyName);
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findSurveyAutoComplete(surveyName, term)));
+    } else {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(
+                  cohortBuilderService.findCriteriaAutoComplete(
+                      Domain.SURVEY.toString(), term, CriteriaType.PPI.toString(), false, null)));
+    }
+  }
+
+  @Override
   public ResponseEntity<CriteriaListResponse> findDrugBrandOrIngredientByValue(
       String workspaceNamespace, String workspaceId, String value, Integer limit) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -408,6 +428,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                   new BadRequestException(
                       String.format(BAD_REQUEST_MESSAGE, "surveyName", surveyName)));
     }
+  }
+
+  protected void validateSurveyName(String surveyName) {
+    Optional.ofNullable(surveyName)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(BAD_REQUEST_MESSAGE, "surveyName", surveyName)));
   }
 
   protected void validateType(String type) {
