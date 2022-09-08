@@ -85,7 +85,9 @@ describe('RAS Test', () => {
     const passwordInput = await newPage.waitForXPath('//input[@type="password"]', { visible: true });
     await passwordInput.type(govLoginPassword);
 
-    const signInButton = await newPage.waitForXPath('//input[@value="Sign in" and @type="submit"]', { visible: true });
+    const signInButton = await newPage.waitForXPath('//button[contains(text(), "Sign in") and @type="submit"]', {
+      visible: true
+    });
     await signInButton.click();
 
     // Type one-time code
@@ -94,7 +96,9 @@ describe('RAS Test', () => {
     });
     await oneTimeCodeInput.type(oneTimeCode);
 
-    const submitButton = await newPage.waitForXPath('//input[@value="Submit" and @type="submit"]', { visible: true });
+    const submitButton = await newPage.waitForXPath('//button[contains(text(), "Submit") and @type="submit"]', {
+      visible: true
+    });
     await submitButton.click();
 
     // Could show up
