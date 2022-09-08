@@ -433,6 +433,7 @@ export const CriteriaTree = fp.flow(
         searchTerms,
         select,
         selectedIds,
+        selectedSurvey,
         selectOption,
         setAttributes,
         setSearchTerms,
@@ -465,6 +466,7 @@ export const CriteriaTree = fp.flow(
             <SearchBar
               node={node}
               searchTerms={searchTerms}
+              selectedSurvey={selectedSurvey}
               selectOption={selectOption}
               setIngredients={(i) => this.setState({ ingredients: i })}
               setInput={(v) => setSearchTerms(v)}
