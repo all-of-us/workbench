@@ -263,6 +263,19 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
   );
 };
 
+const defaultOptions = [
+  { label: 'Equals', value: Operator.EQUAL.toString() },
+  {
+    label: 'Greater Than or Equal To',
+    value: Operator.GREATERTHANOREQUALTO.toString(),
+  },
+  {
+    label: 'Less Than or Equal To',
+    value: Operator.LESSTHANOREQUALTO.toString(),
+  },
+  { label: 'Between', value: Operator.BETWEEN.toString() },
+];
+
 const optionUtil = {
   ANY: { display: 'Any value', code: 'Any' },
   EQUAL: { display: '= ', code: '01' },
@@ -270,13 +283,6 @@ const optionUtil = {
   LESS_THAN_OR_EQUAL_TO: { display: '<= ', code: '03' },
   BETWEEN: { display: '', code: '04' },
 };
-
-interface AttributeForm {
-  anyValue: boolean; // Include any values that exist (Measurements and COPE only)
-  anyVersion: boolean; // Include any version that exist (COPE only)
-  num: Array<any>; // Numerical attributes (Physical Measurements, Measurements or COPE)
-  cat: Array<any>; // Categorical attributes (Measurements only)
-}
 
 export interface AttributesPageProps {
   back: Function;
@@ -293,28 +299,16 @@ export const AttributesPage = fp.flow(
   const [calculating, setCalculating] = useState(false);
   const [attributeCount, setAttributeCount] = useState(null);
   const [countError, setCountError] = useState(false);
-  const [form, setForm] = useState({
-    anyValue: false,
-    anyVersion: false,
-    num: [],
-    cat: [],
-  });
+  const [anyValue, setAnyValue] = useState(false);
+  const [anyVersion, setAnyVersion] = useState(false);
+  const [numAttributes, setNumAttributes] = useState([]);
+  const [catAttributes, setCatAttributes] = useState([]);
+  const [formUpdated, setFormUpdated] = useState(0);
   const [formErrors, setFormErrors] = useState([]);
   const [formValid, setFormValid] = useState(false);
   const [isCOPEOrMinuteSurvey, setIsCOPEOrMinuteSurvey] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [options, setOptions] = useState([
-    { label: 'Equals', value: Operator.EQUAL.toString() },
-    {
-      label: 'Greater Than or Equal To',
-      value: Operator.GREATERTHANOREQUALTO.toString(),
-    },
-    {
-      label: 'Less Than or Equal To',
-      value: Operator.LESSTHANOREQUALTO.toString(),
-    },
-    { label: 'Between', value: Operator.BETWEEN.toString() },
-  ]);
+  const [options, setOptions] = useState(defaultOptions);
 
   const isSurvey = () => {
     return node.domainId === Domain.SURVEY;
@@ -329,8 +323,8 @@ export const AttributesPage = fp.flow(
         resp.items.forEach((attr) => {
           if (attr.type === AttrName[AttrName.NUM]) {
             // NUM attributes set the min and max range for the number inputs in the attributes form
-            if (!form.num.length) {
-              form.num.push({
+            if (!numAttributes.length) {
+              numAttributes.push({
                 name: AttrName.NUM,
                 operator: isSurvey() ? 'ANY' : null,
                 operands: [],
@@ -338,7 +332,7 @@ export const AttributesPage = fp.flow(
                 [attr.conceptName]: parseFloat(attr.estCount),
               });
             } else {
-              form.num[0][attr.conceptName] = parseFloat(attr.estCount);
+              numAttributes[0][attr.conceptName] = parseFloat(attr.estCount);
             }
           } else {
             // CAT attributes are displayed as checkboxes in the attributes form
@@ -347,12 +341,14 @@ export const AttributesPage = fp.flow(
               // TODO RW-5572 confirm proper behavior and fix
               // eslint-disable-next-line @typescript-eslint/dot-notation
               attr['checked'] = false;
-              form.cat.push(attr);
+              catAttributes.push(attr);
             }
           }
         });
         setAttributeCount(null);
-        setForm(form);
+        setCatAttributes(catAttributes);
+        setNumAttributes(numAttributes);
+        setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
         setLoading(false);
       });
   };
@@ -420,19 +416,20 @@ export const AttributesPage = fp.flow(
         );
       }
       const [surveyVersions, numericalAttributes] = await Promise.all(promises);
-      form.cat = surveyVersions.items.map((attr) => ({
+      const updatedCatAttributes = surveyVersions.items.map((attr) => ({
         checked: false,
         conceptName: attr.displayName,
         estCount: attr.itemCount,
         valueAsConceptId: attr.surveyVersionConceptId,
       }));
+      setCatAttributes(updatedCatAttributes);
       if (
         numericalAttributes &&
         !(subtype === CriteriaSubType.ANSWER.toString() && !!value)
       ) {
         numericalAttributes.items.forEach((attr) => {
-          if (!form.num.length) {
-            form.num.push({
+          if (!numAttributes.length) {
+            numAttributes.push({
               name: AttrName.NUM,
               operator: null,
               operands: [],
@@ -440,12 +437,13 @@ export const AttributesPage = fp.flow(
               [attr.conceptName]: parseFloat(attr.estCount),
             });
           } else {
-            form.num[0][attr.conceptName] = parseFloat(attr.estCount);
+            numAttributes[0][attr.conceptName] = parseFloat(attr.estCount);
           }
         });
+        setNumAttributes(numAttributes);
       }
       setAttributeCount(null);
-      setForm(form);
+      setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
       setIsCOPEOrMinuteSurvey(true);
       setLoading(false);
     } else {
@@ -498,13 +496,13 @@ export const AttributesPage = fp.flow(
     return (
       calculating ||
       !formValid ||
-      (form.anyValue && attributeCount !== null) ||
+      (anyValue && attributeCount !== null) ||
       (isCOPEOrMinuteSurvey &&
-        !form.anyVersion &&
-        !form.cat.some((attr) => attr.checked)) ||
+        !anyVersion &&
+        !catAttributes.some((attr) => attr.checked)) ||
       (!isSurvey() &&
-        form.num.length &&
-        form.num.every((attr) => attr.operator === 'ANY'))
+        numAttributes.length &&
+        numAttributes.every((attr) => attr.operator === 'ANY'))
     );
   };
 
@@ -519,6 +517,8 @@ export const AttributesPage = fp.flow(
   };
 
   const initAttributeForm = () => {
+    setLoading(true);
+    setFormErrors([]);
     const { subtype } = node;
     if (isSurvey()) {
       getSurveyAttributes();
@@ -531,41 +531,30 @@ export const AttributesPage = fp.flow(
           value: AttrName[AttrName.ANY],
         });
       }
-      form.num =
+      const updatedNumAttributes =
         subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{ name: subtype, operator: 'ANY', operands: [] }];
+      setOptions(options);
       setAttributeCount(nodeCount());
-      setForm(form);
+      setNumAttributes(updatedNumAttributes);
+      setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
       setFormValid(true);
       setLoading(false);
-      setOptions(options);
     }
   };
 
-  useEffect(() => {
-    initAttributeForm();
-  }, []);
-
-  useEffect(() => {
-    setForm({ anyValue: false, anyVersion: false, num: [], cat: [] });
-    setFormErrors([]);
-    setFormValid(isPhysicalMeasurement());
-    setLoading(true);
-    initAttributeForm();
-  }, [node]);
-
   const validateForm = () => {
     if (
-      (form.anyValue || (isCOPEOrMinuteSurvey && form.num.length === 0)) &&
-      (!isCOPEOrMinuteSurvey || form.anyVersion)
+      (anyValue || (isCOPEOrMinuteSurvey && numAttributes.length === 0)) &&
+      (!isCOPEOrMinuteSurvey || anyVersion)
     ) {
       setFormErrors([]);
       setFormValid(true);
     } else {
       let updatedFormValid = true,
-        operatorSelected = form.num.length !== 0;
-      const updatedFormErrors = form.num.reduce((acc, attr) => {
+        operatorSelected = numAttributes.length !== 0;
+      const updatedFormErrors = numAttributes.reduce((acc, attr) => {
         const { MIN, MAX, operator } = attr;
         const operands = attr.operands.map((op) => parseFloat(op));
         switch (operator) {
@@ -604,68 +593,90 @@ export const AttributesPage = fp.flow(
       // dropdown and no categorical checkboxes checked
       if ((isMeasurement() || isObservation()) && updatedFormValid) {
         updatedFormValid =
-          operatorSelected || form.cat.some((attr) => attr.checked);
+          operatorSelected || catAttributes.some((attr) => attr.checked);
       }
       if (isCOPEOrMinuteSurvey && updatedFormValid) {
         updatedFormValid =
-          (form.num.length === 0 || form.anyValue || operatorSelected) &&
-          (form.anyVersion || form.cat.some((attr) => attr.checked));
+          (numAttributes.length === 0 || anyValue || operatorSelected) &&
+          (anyVersion || catAttributes.some((attr) => attr.checked));
       }
       setFormErrors(Array.from(updatedFormErrors));
       setFormValid(updatedFormValid);
     }
   };
 
+  useEffect(() => {
+    setOptions(defaultOptions);
+    setFormUpdated(0);
+    setAnyValue(false);
+    setAnyVersion(false);
+    setCatAttributes([]);
+    setNumAttributes([]);
+  }, [node.id]);
+
+  useEffect(() => {
+    if (formUpdated > 0) {
+      validateForm();
+    } else {
+      initAttributeForm();
+    }
+  }, [formUpdated]);
+
   const toggleAnyValueCheckbox = (checked: boolean) => {
     let { count } = node;
-    form.anyValue = checked;
+    setAnyValue(checked);
     if (checked) {
-      form.num = form.num.map((attr) => ({
-        ...attr,
-        operator: isPhysicalMeasurement() ? 'ANY' : null,
-        operands: [],
-      }));
+      setNumAttributes((prevNumAttributes) =>
+        prevNumAttributes.map((attr) => ({
+          ...attr,
+          operator: isPhysicalMeasurement() ? 'ANY' : null,
+          operands: [],
+        }))
+      );
       if (isMeasurement() || isObservation()) {
-        form.cat = form.cat.map((attr) => ({ ...attr, checked: false }));
+        setCatAttributes((prevCatAttributes) =>
+          prevCatAttributes.map((attr) => ({ ...attr, checked: false }))
+        );
       }
     }
     if (!checked || count === -1) {
       count = null;
     }
     setAttributeCount(count);
-    setForm(form);
-    validateForm();
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
   };
 
   const toggleAnyVersionCheckbox = (checked: boolean) => {
-    form.anyVersion = checked;
-    form.cat = form.cat.map((attr) => ({ ...attr, checked: false }));
-    setForm(form);
-    validateForm();
+    setAnyVersion(checked);
+    setCatAttributes((prevCatAttributes) =>
+      prevCatAttributes.map((attr) => ({ ...attr, checked: false }))
+    );
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
   };
 
   const selectChange = (attributeIndex: number, value: string) => {
-    form.num[attributeIndex].operator = value;
+    const updatedNumAttributes = JSON.parse(JSON.stringify(numAttributes));
+    updatedNumAttributes[attributeIndex].operator = value;
     if (isBloodPressure()) {
       // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
       const otherAttribute = attributeIndex === 0 ? 1 : 0;
       if (value === 'ANY') {
-        form.num[attributeIndex].operands = [];
-        form.num[otherAttribute].operands = [];
-        form.num[otherAttribute].operator = 'ANY';
-      } else if (form.num[otherAttribute].operator === 'ANY') {
-        form.num[otherAttribute].operator = value;
+        updatedNumAttributes[attributeIndex].operands = [];
+        updatedNumAttributes[otherAttribute].operands = [];
+        updatedNumAttributes[otherAttribute].operator = 'ANY';
+      } else if (updatedNumAttributes[otherAttribute].operator === 'ANY') {
+        updatedNumAttributes[otherAttribute].operator = value;
       }
     } else if (value === 'ANY') {
-      form.num[attributeIndex].operands = [];
+      updatedNumAttributes[attributeIndex].operands = [];
     }
     if (value !== Operator[Operator.BETWEEN]) {
       // delete second operand if it exists
-      form.num[attributeIndex].operands.splice(1);
+      updatedNumAttributes[attributeIndex].operands.splice(1);
     }
     setAttributeCount(value === 'ANY' && !isSurvey() ? nodeCount() : null);
-    setForm(form);
-    validateForm();
+    setNumAttributes(updatedNumAttributes);
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
   };
 
   const inputChange = (
@@ -673,25 +684,29 @@ export const AttributesPage = fp.flow(
     attributeIndex: number,
     operandIndex: number
   ) => {
-    form.num[attributeIndex].operands[operandIndex] =
-      sanitizeNumericalInput(input);
+    setNumAttributes((prevNumAttributes) => {
+      prevNumAttributes[attributeIndex].operands[operandIndex] =
+        sanitizeNumericalInput(input);
+      return prevNumAttributes;
+    });
     setAttributeCount(null);
-    setForm(form);
-    validateForm();
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
   };
 
   const checkboxChange = (checked: boolean, index: number) => {
-    form.cat[index].checked = checked;
+    setCatAttributes((prevCatAttributes) => {
+      prevCatAttributes[index].checked = checked;
+      return prevCatAttributes;
+    });
     setAttributeCount(null);
-    setForm(form);
-    validateForm();
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
   };
 
   const paramId = () => {
     const { conceptId, id, value } = node;
-    const code = form.anyValue
+    const code = anyValue
       ? 'Any'
-      : form.num.reduce((acc, attr) => {
+      : numAttributes.reduce((acc, attr) => {
           if (attr.operator) {
             acc += optionUtil[attr.operator].code;
           }
@@ -699,7 +714,7 @@ export const AttributesPage = fp.flow(
         }, '');
     const paramConceptId = isCOPEOrMinuteSurvey && !!value ? value : conceptId;
     // make sure param ID is unique for different checkbox combinations
-    const catValues = form.cat
+    const catValues = catAttributes
       .filter((c) => c.checked)
       .map((c) => c.valueAsConceptId)
       .join('');
@@ -713,10 +728,10 @@ export const AttributesPage = fp.flow(
   const getParamName = () => {
     const selectionDisplay = [];
     let name = '';
-    if (form.anyVersion) {
+    if (anyVersion) {
       selectionDisplay.push('Any version');
     }
-    form.num
+    numAttributes
       .filter((at) => at.operator)
       .forEach((attr, i) => {
         if (attr.operator === 'ANY') {
@@ -740,7 +755,7 @@ export const AttributesPage = fp.flow(
     if (name !== '') {
       selectionDisplay.push(name);
     }
-    form.cat
+    catAttributes
       .filter((ca) => ca.checked)
       .forEach((attr) => selectionDisplay.push(attr.conceptName));
     const nodeName =
@@ -751,7 +766,7 @@ export const AttributesPage = fp.flow(
       nodeName +
       ' (' +
       selectionDisplay.join(', ') +
-      (hasUnits() && form.num[0].operator !== AttrName.ANY
+      (hasUnits() && numAttributes[0].operator !== AttrName.ANY
         ? ' ' + PM_UNITS[node.subtype]
         : '') +
       ')'
@@ -762,12 +777,12 @@ export const AttributesPage = fp.flow(
     const { name, subtype, value } = node;
     let paramName;
     const attrs = [];
-    if (!isCOPEOrMinuteSurvey && form.anyValue) {
+    if (!isCOPEOrMinuteSurvey && anyValue) {
       paramName = name + ` (${optionUtil.ANY.display})`;
-    } else if (isCOPEOrMinuteSurvey && form.anyValue && form.anyVersion) {
+    } else if (isCOPEOrMinuteSurvey && anyValue && anyVersion) {
       paramName = name + ' (Any version AND any value)';
     } else {
-      form.num
+      numAttributes
         .filter((at) => at.operator)
         .forEach(({ operator, operands, conceptId }) => {
           const attr = { name: AttrName.NUM, operator, operands };
@@ -786,14 +801,14 @@ export const AttributesPage = fp.flow(
             attrs.push(attr);
           }
         });
-      if (form.cat.some((at) => at.checked)) {
-        const catOperands = form.cat.reduce((checked, current) => {
+      if (catAttributes.some((at) => at.checked)) {
+        const catOperands = catAttributes.reduce((checked, current) => {
           if (current.checked) {
             checked.push(current.valueAsConceptId.toString());
           }
           return checked;
         }, []);
-        if (isCOPEOrMinuteSurvey && !form.anyVersion) {
+        if (isCOPEOrMinuteSurvey && !anyVersion) {
           attrs.push({
             name: AttrName.SURVEYVERSIONCONCEPTID,
             operator: Operator.IN,
@@ -818,7 +833,8 @@ export const AttributesPage = fp.flow(
     }
     if (
       subtype === CriteriaSubType.ANSWER &&
-      (form.anyValue || (form.num.length && form.num[0].operator === 'ANY')) &&
+      (anyValue ||
+        (numAttributes.length && numAttributes[0].operator === 'ANY')) &&
       value === ''
     ) {
       attrs.push({ name: AttrName.ANY });
@@ -887,7 +903,7 @@ export const AttributesPage = fp.flow(
   const renderNumericalAttributes = () => {
     const { count, subtype } = node;
     return (
-      form.num.length > 0 && (
+      numAttributes.length > 0 && (
         <React.Fragment>
           {(isMeasurement() || isObservation()) && (
             <div style={styles.label}>Numeric Values</div>
@@ -900,8 +916,8 @@ export const AttributesPage = fp.flow(
               )}
             </div>
           )}
-          {!(isCOPEOrMinuteSurvey && form.anyValue) &&
-            form.num.map((attr, a) => (
+          {!(isCOPEOrMinuteSurvey && anyValue) &&
+            numAttributes.map((attr, a) => (
               <div key={a}>
                 {isBloodPressure() && (
                   <div style={styles.label}>{attr.name}</div>
@@ -968,7 +984,7 @@ export const AttributesPage = fp.flow(
 
   const renderCategoricalAttributes = () => {
     return (
-      form.cat.length > 0 && (
+      catAttributes.length > 0 && (
         <React.Fragment>
           {isCOPEOrMinuteSurvey && (
             <div>
@@ -979,15 +995,15 @@ export const AttributesPage = fp.flow(
               )}
             </div>
           )}
-          {!(isCOPEOrMinuteSurvey && form.anyVersion) && (
+          {!(isCOPEOrMinuteSurvey && anyVersion) && (
             <React.Fragment>
-              {(form.num.length > 0 || isObservation()) && (
+              {(numAttributes.length > 0 || isObservation()) && (
                 <div style={styles.orCircle}>OR</div>
               )}
               {!isCOPEOrMinuteSurvey && (
                 <div style={styles.label}>Categorical Values</div>
               )}
-              {form.cat.map((attr, a) => (
+              {catAttributes.map((attr, a) => (
                 <div key={a} style={styles.categorical}>
                   <CheckBox
                     checked={attr.checked}
@@ -1080,7 +1096,7 @@ export const AttributesPage = fp.flow(
       {isCOPEOrMinuteSurvey ? (
         <div>
           {renderCategoricalAttributes()}
-          {form.num.length > 0 && form.cat.length > 0 && (
+          {numAttributes.length > 0 && catAttributes.length > 0 && (
             <div style={{ position: 'relative' }}>
               <div style={styles.andCircle}>AND</div>
               <div style={styles.andDivider} />
@@ -1095,12 +1111,12 @@ export const AttributesPage = fp.flow(
               <div style={styles.label}>{displayName()}</div>
               <CheckBox onChange={(v) => toggleAnyValueCheckbox(v)} /> Any value{' '}
               {isMeasurement() && <span> (lab exists)</span>}
-              {!form.anyValue && form.num.length > 0 && (
+              {!anyValue && numAttributes.length > 0 && (
                 <div style={styles.orCircle}>OR</div>
               )}
             </div>
           )}
-          {!form.anyValue && (
+          {!anyValue && (
             <div style={{ minHeight: '15rem' }}>
               {renderNumericalAttributes()}
               {renderCategoricalAttributes()}
