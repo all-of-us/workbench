@@ -2372,23 +2372,23 @@ paths:
             "$ref": "#/definitions/ConceptSet"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy":
     parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: path
-        name: conceptSetId
-        required: true
-        type: string
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - in: path
+      name: conceptSetId
+      required: true
+      type: string
     post:
       tags:
-        - conceptSets
+      - conceptSets
       description: Copy specified concept set in path to specified workspace in body
       operationId: copyConceptSet
       parameters:
-        - in: body
-          name: copyConceptSetRequest
-          required: true
-          schema:
-            "$ref": "#/definitions/CopyRequest"
+      - in: body
+        name: copyConceptSetRequest
+        required: true
+        schema:
+          "$ref": "#/definitions/CopyRequest"
       responses:
         200:
           description: Successful copy
