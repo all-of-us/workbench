@@ -72,8 +72,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String domain,
       String term,
       String type,
-      Boolean standard,
-      Integer limit) {
+      Boolean standard) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
@@ -84,13 +83,31 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
           new CriteriaListResponse()
               .items(
                   cohortBuilderService.findCriteriaAutoCompleteV2(
-                      domain, term, ImmutableList.of(type), standard, limit)));
+                      domain, term, ImmutableList.of(type), standard)));
+    } else {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findCriteriaAutoComplete(domain, term, type, standard)));
+    }
+  }
+
+  @Override
+  public ResponseEntity<CriteriaListResponse> findSurveyAutoComplete(
+      String workspaceNamespace, String workspaceId, String surveyName, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateSurveyName(surveyName);
+    validateTerm(term);
+    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findSurveyAutoComplete(surveyName, term)));
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
               .items(
                   cohortBuilderService.findCriteriaAutoComplete(
-                      domain, term, type, standard, limit)));
+                      Domain.SURVEY.toString(), term, CriteriaType.PPI.toString(), false)));
     }
   }
 
@@ -408,6 +425,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                   new BadRequestException(
                       String.format(BAD_REQUEST_MESSAGE, "surveyName", surveyName)));
     }
+  }
+
+  protected void validateSurveyName(String surveyName) {
+    Optional.ofNullable(surveyName)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(BAD_REQUEST_MESSAGE, "surveyName", surveyName)));
   }
 
   protected void validateType(String type) {

@@ -3718,11 +3718,31 @@ paths:
         type: string
         required: true
         description: the term to search for
-      - in: query
-        name: limit
-        type: integer
-        required: false
-        description: number of criteria matches to return
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/CriteriaListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/survey/{surveyName}/{term}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns matches on criteria table by code or name
+      operationId: findSurveyAutoComplete
+      parameters:
+        - in: path
+          name: surveyName
+          type: string
+          required: true
+          description: the specific survey to search
+        - in: path
+          name: term
+          type: string
+          required: true
+          description: the term to search for
       responses:
         200:
           description: A collection of criteria

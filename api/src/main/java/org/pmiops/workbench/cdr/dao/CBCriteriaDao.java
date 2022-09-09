@@ -262,7 +262,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
               + "                     where c.domainId = 'SURVEY' "
-              + "                       and match(c.fullText, concat(:term, '+[SURVEY_rank1]')) > 0) "
+              + "                       and match(c.fullText, concat(:term, '+[survey_rank1]')) > 0) "
               + "order by c1.count desc")
   Page<DbCriteria> findSurveyQuestionByTerm(@Param("term") String term, Pageable page);
 

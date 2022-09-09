@@ -41,6 +41,7 @@ describe('SearchBar', () => {
       <SearchBar
         node={nodeStub}
         searchTerms={''}
+        selectedSurvey={''}
         setIngredients={() => {}}
         selectOption={() => {}}
         setInput={() => {}}

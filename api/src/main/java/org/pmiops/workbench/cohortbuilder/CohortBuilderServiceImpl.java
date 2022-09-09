@@ -222,9 +222,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, String type, Boolean standard, Integer limit) {
-    PageRequest pageRequest =
-        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+      String domain, String term, String type, Boolean standard) {
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
@@ -246,9 +245,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaAutoCompleteV2(
-      String domain, String term, List<String> types, Boolean standard, Integer limit) {
-    PageRequest pageRequest =
-        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+      String domain, String term, List<String> types, Boolean standard) {
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
@@ -268,6 +266,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               pageRequest);
     }
     return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Criteria> findSurveyAutoComplete(String surveyName, String term) {
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
+
+    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
+
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findSurveyQuestions(surveyName, searchTerm, pageRequest);
+
+    if (dbCriteriaPage == null) {
+      return ImmutableList.of();
+    }
+    return dbCriteriaPage.getContent().stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }

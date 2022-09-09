@@ -195,6 +195,7 @@ interface Props {
   node: Criteria;
   searchTerms: string;
   setIngredients: Function;
+  selectedSurvey: string;
   selectOption: Function;
   setInput: Function;
 }
@@ -270,27 +271,40 @@ export class SearchBar extends React.Component<Props, State> {
     const {
       node: { domainId, isStandard, subtype, type },
       searchTerms,
+      selectedSurvey,
     } = this.props;
     AnalyticsTracker.CohortBuilder.SearchTerms(
       `${domainToTitle(domainId)} - '${searchTerms}'`
     );
     this.setState({ inputErrors: [], loading: true });
     const { id, namespace } = currentWorkspaceStore.getValue();
-    const apiCall =
-      domainId === Domain.DRUG.toString()
-        ? cohortBuilderApi().findDrugBrandOrIngredientByValue(
-            namespace,
-            id,
-            searchTerms
-          )
-        : cohortBuilderApi().findCriteriaAutoComplete(
-            namespace,
-            id,
-            domainId,
-            searchTerms,
-            type,
-            isStandard
-          );
+    let apiCall;
+    switch (domainId) {
+      case Domain.DRUG.toString():
+        apiCall = cohortBuilderApi().findDrugBrandOrIngredientByValue(
+          namespace,
+          id,
+          searchTerms
+        );
+        break;
+      case Domain.SURVEY.toString():
+        apiCall = cohortBuilderApi().findSurveyAutoComplete(
+          namespace,
+          id,
+          selectedSurvey,
+          searchTerms
+        );
+        break;
+      default:
+        apiCall = cohortBuilderApi().findCriteriaAutoComplete(
+          namespace,
+          id,
+          domainId,
+          searchTerms,
+          type,
+          isStandard
+        );
+    }
     apiCall.then(
       (resp) => {
         const optionNames: Array<string> = [];
