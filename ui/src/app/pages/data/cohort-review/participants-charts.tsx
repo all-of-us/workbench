@@ -4,7 +4,10 @@ import { SearchRequest } from 'generated/fetch';
 
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
+import {
+  cohortBuilderApi,
+  cohortReviewApi,
+} from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -39,19 +42,19 @@ const styles = reactStyles({
     display: '-webkit-box',
   },
   dataBarContainer: {
-    flex: '0 0 58.33333%',
+    flex: '0 0 55%',
     position: 'relative',
     width: '100%',
     minHeight: '1px',
-    maxWidth: '58.33333%',
+    maxWidth: '55%',
     padding: '0.5rem 0 0 1rem',
     borderLeft: '1px solid black',
   },
   dataHeading: {
-    flex: '0 0 33.33333%',
+    flex: '0 0 30%',
     position: 'relative',
     minHeight: '1px',
-    maxWidth: '33.33333%',
+    maxWidth: '30%',
     padding: '0.5rem 0.5rem 0',
     width: '16rem',
     fontSize: '10px',
@@ -102,8 +105,9 @@ const styles = reactStyles({
 });
 
 export interface ParticipantsChartsProps {
+  cohortReviewId?: number;
   domain: string;
-  searchRequest: SearchRequest;
+  searchRequest?: SearchRequest;
   workspace: WorkspaceData;
 }
 
@@ -140,22 +144,36 @@ export const ParticipantsCharts = withCurrentWorkspace()(
       }
     }
 
-    getChartData() {
+    async getChartData() {
       const {
+        cohortReviewId,
         domain,
         searchRequest,
         workspace: { id, namespace },
       } = this.props;
-      cohortBuilderApi()
-        .getCohortChartData(namespace, id, domain, 10, searchRequest)
-        .then((resp) => {
-          const data = resp.items.map((item) => {
-            this.nameRefs.push(React.createRef());
-            const percentCount = Math.round((item.count / resp.count) * 100);
-            return { ...item, percentCount };
-          });
-          this.setState({ data, loading: false });
-        });
+      const chartResponse = !!cohortReviewId
+        ? await cohortReviewApi().getCohortReviewChartData(
+            namespace,
+            id,
+            cohortReviewId,
+            domain,
+            10
+          )
+        : await cohortBuilderApi().getCohortChartData(
+            namespace,
+            id,
+            domain,
+            10,
+            searchRequest
+          );
+      const data = chartResponse.items.map((item) => {
+        this.nameRefs.push(React.createRef());
+        const percentCount = Math.round(
+          (item.count / chartResponse.count) * 100
+        );
+        return { ...item, percentCount };
+      });
+      this.setState({ data, loading: false });
     }
 
     checkWidth = (i: number) => {
@@ -164,7 +182,7 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     };
 
     render() {
-      const { domain } = this.props;
+      const { cohortReviewId, domain } = this.props;
       const { data, loading } = this.state;
       const heading = domain.toLowerCase();
       return (
@@ -216,7 +234,8 @@ export const ParticipantsCharts = withCurrentWorkspace()(
                         </div>
                       </div>
                       <div style={styles.dataPercent}>
-                        {item.percentCount}% of Cohort
+                        {item.percentCount}% of Cohort{' '}
+                        {!!cohortReviewId ? 'Review' : ''}
                       </div>
                     </div>
                   ))}

@@ -3,12 +3,12 @@ import { useParams } from 'react-router';
 
 const { useEffect, useState } = React;
 
-import { AgeType, Domain, GenderOrSexType } from 'generated/fetch';
+import { Domain } from 'generated/fetch';
 
 import { ComboChart } from 'app/components/combo-chart.component';
 import { ClrIcon } from 'app/components/icons';
-import { SpinnerOverlay } from 'app/components/spinners';
-import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
+import { Spinner } from 'app/components/spinners';
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
@@ -88,19 +88,14 @@ export const CohortReviewOverview = ({ cohortReview }) => {
   const [panelOpen, setPanelOpen] = useState(false);
 
   useEffect(() => {
-    cohortBuilderApi()
-      .findDemoChartInfo(
-        ns,
-        wsid,
-        GenderOrSexType[GenderOrSexType.GENDER],
-        AgeType[AgeType.AGE],
-        JSON.parse(cohortReview.cohortDefinition)
-      )
+    setLoading(true);
+    cohortReviewApi()
+      .findCohortReviewDemoChartInfo(ns, wsid, cohortReview.cohortReviewId)
       .then((demoChartInfo) => {
         setDemoChartData(demoChartInfo.items);
         setLoading(false);
       });
-  }, []);
+  }, [cohortReview.cohortReviewId]);
 
   return (
     <div style={styles.overviewContainer}>
@@ -118,38 +113,38 @@ export const CohortReviewOverview = ({ cohortReview }) => {
       </h3>
       {panelOpen && (
         <div>
-          {loading ? (
-            <SpinnerOverlay />
-          ) : (
-            <div style={{ display: 'flex' }}>
-              <div style={styles.tabsContainer}>
-                {domainTabs.map(({ displayText, domain }, index) => (
-                  <div key={index} style={{ marginBottom: '0.5rem' }}>
-                    <button
-                      style={
-                        activeTab === domain
-                          ? styles.activeButton
-                          : styles.domainButton
-                      }
-                      onClick={() => setActiveTab(domain)}
-                    >
-                      {displayText}
-                    </button>
-                  </div>
-                ))}
-              </div>
+          <div style={{ display: 'flex' }}>
+            <div style={styles.tabsContainer}>
+              {domainTabs.map(({ displayText, domain }, index) => (
+                <div key={index} style={{ marginBottom: '0.5rem' }}>
+                  <button
+                    style={
+                      activeTab === domain
+                        ? styles.activeButton
+                        : styles.domainButton
+                    }
+                    onClick={() => setActiveTab(domain)}
+                  >
+                    {displayText}
+                  </button>
+                </div>
+              ))}
+            </div>
+            {loading ? (
+              <Spinner style={{ margin: 'auto' }} />
+            ) : (
               <div style={styles.graphContainer}>
                 {activeTab === Domain.PERSON ? (
                   <ComboChart mode={'stacked'} data={demoChartData} />
                 ) : (
                   <ParticipantsCharts
+                    cohortReviewId={cohortReview.cohortReviewId}
                     domain={activeTab}
-                    searchRequest={JSON.parse(cohortReview.cohortDefinition)}
                   />
                 )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
