@@ -10,7 +10,10 @@ import com.google.apphosting.api.DeadlineExceededException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
@@ -392,8 +395,7 @@ public class CohortBuilderControllerTest {
                             Domain.MEASUREMENT.toString(),
                             "LP12",
                             CriteriaType.LOINC.toString(),
-                            true,
-                            null)
+                            true)
                         .getBody())
                 .getItems()
                 .get(0))
@@ -423,8 +425,7 @@ public class CohortBuilderControllerTest {
                             Domain.MEASUREMENT.toString(),
                             "LP12",
                             CriteriaType.LOINC.toString(),
-                            true,
-                            null)
+                            true)
                         .getBody())
                 .getItems()
                 .get(0))
@@ -453,8 +454,7 @@ public class CohortBuilderControllerTest {
                             Domain.CONDITION.toString(),
                             "LP12",
                             CriteriaType.SNOMED.toString(),
-                            true,
-                            null)
+                            true)
                         .getBody())
                 .getItems()
                 .get(0))
@@ -467,14 +467,14 @@ public class CohortBuilderControllerTest {
         BadRequestException.class,
         () ->
             controller.findCriteriaAutoComplete(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null, null),
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null),
         "Bad Request: Please provide a valid domain. null is not valid.");
 
     assertThrows(
         BadRequestException.class,
         () ->
             controller.findCriteriaAutoComplete(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null, null),
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null),
         "Bad Request: Please provide a valid domain. blah is not valid.");
 
     assertThrows(
@@ -486,7 +486,6 @@ public class CohortBuilderControllerTest {
                 Domain.CONDITION.toString(),
                 "blah",
                 "blah",
-                null,
                 null),
         "Bad Request: Please provide a valid type. blah is not valid.");
   }
@@ -494,84 +493,73 @@ public class CohortBuilderControllerTest {
   @Test
   public void findSurveyAutoCompleteTheBasics() {
     DbCriteria criteria =
-            DbCriteria.builder()
-                    .addDomainId(Domain.SURVEY.toString())
-                    .addType(CriteriaType.PPI.toString())
-                    .addSubtype("QUESTION")
-                    .addConceptId("1001")
-                    .addCount(0L)
-                    .addHierarchy(true)
-                    .addName("The Basics")
-                    .addStandard(true)
-                    .addFullText("LP12*[survey_rank1]")
-                    .build();
+        DbCriteria.builder()
+            .addDomainId(Domain.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype("QUESTION")
+            .addConceptId("1001")
+            .addCount(0L)
+            .addHierarchy(true)
+            .addName("The Basics")
+            .addStandard(true)
+            .addFullText("LP12*[survey_rank1]")
+            .build();
     criteria = cbCriteriaDao.save(criteria);
-    //need to set the id in the path
+    // need to set the id in the path
     criteria.setPath(String.valueOf(criteria.getId()));
     criteria = cbCriteriaDao.save(criteria);
 
     assertThat(
             Objects.requireNonNull(
-                            controller
-                                    .findSurveyAutoComplete(
-                                            WORKSPACE_NAMESPACE,
-                                            WORKSPACE_ID,
-                                            "The Basics",
-                                            "LP12")
-                                    .getBody())
-                    .getItems()
-                    .get(0))
-            .isEqualTo(createResponseCriteria(criteria));
+                    controller
+                        .findSurveyAutoComplete(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "The Basics", "LP12")
+                        .getBody())
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
   }
 
   @Test
   public void findSurveyAutoCompleteAllSurveys() {
     DbCriteria criteria =
-            DbCriteria.builder()
-                    .addDomainId(Domain.SURVEY.toString())
-                    .addType(CriteriaType.PPI.toString())
-                    .addSubtype("QUESTION")
-                    .addConceptId("1001")
-                    .addCount(0L)
-                    .addHierarchy(true)
-                    .addName("The Basics")
-                    .addStandard(true)
-                    .addFullText("LP12*[survey_rank1]")
-                    .build();
+        DbCriteria.builder()
+            .addDomainId(Domain.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype("QUESTION")
+            .addConceptId("1001")
+            .addCount(0L)
+            .addHierarchy(true)
+            .addName("The Basics")
+            .addStandard(true)
+            .addFullText("LP12*[survey_rank1]")
+            .build();
     criteria = cbCriteriaDao.save(criteria);
-    //need to set the id in the path
+    // need to set the id in the path
     criteria.setPath(String.valueOf(criteria.getId()));
     criteria = cbCriteriaDao.save(criteria);
 
     assertThat(
             Objects.requireNonNull(
-                            controller
-                                    .findSurveyAutoComplete(
-                                            WORKSPACE_NAMESPACE,
-                                            WORKSPACE_ID,
-                                            "All",
-                                            "LP12")
-                                    .getBody())
-                    .getItems()
-                    .get(0))
-            .isEqualTo(createResponseCriteria(criteria));
+                    controller
+                        .findSurveyAutoComplete(WORKSPACE_NAMESPACE, WORKSPACE_ID, "All", "LP12")
+                        .getBody())
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
   }
 
   @Test
   public void findSurveyAutoCompleteExceptions() {
     assertThrows(
-            BadRequestException.class,
-            () ->
-                    controller.findSurveyAutoComplete(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah"),
-            "Bad Request: Please provide a valid surveyName. null is not valid.");
+        BadRequestException.class,
+        () -> controller.findSurveyAutoComplete(WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah"),
+        "Bad Request: Please provide a valid surveyName. null is not valid.");
 
     assertThrows(
-            BadRequestException.class,
-            () ->
-                    controller.findSurveyAutoComplete(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "All", null),
-            "Bad Request: Please provide a valid term. blah is not valid.");
+        BadRequestException.class,
+        () -> controller.findSurveyAutoComplete(WORKSPACE_NAMESPACE, WORKSPACE_ID, "All", null),
+        "Bad Request: Please provide a valid term. blah is not valid.");
   }
 
   @Test

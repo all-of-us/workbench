@@ -55,10 +55,10 @@ public interface CohortBuilderService {
   List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId);
 
   List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, String type, Boolean standard, Integer limit);
+      String domain, String term, String type, Boolean standard);
 
   List<Criteria> findCriteriaAutoCompleteV2(
-      String domain, String term, List<String> types, Boolean standard, Integer limit);
+      String domain, String term, List<String> types, Boolean standard);
 
   List<Criteria> findSurveyAutoComplete(String surveyName, String term);
 

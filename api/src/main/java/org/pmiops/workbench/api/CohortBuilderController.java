@@ -72,8 +72,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String domain,
       String term,
       String type,
-      Boolean standard,
-      Integer limit) {
+      Boolean standard) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
@@ -84,13 +83,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
           new CriteriaListResponse()
               .items(
                   cohortBuilderService.findCriteriaAutoCompleteV2(
-                      domain, term, ImmutableList.of(type), standard, limit)));
+                      domain, term, ImmutableList.of(type), standard)));
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaAutoComplete(
-                      domain, term, type, standard, limit)));
+              .items(cohortBuilderService.findCriteriaAutoComplete(domain, term, type, standard)));
     }
   }
 
@@ -110,7 +107,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
           new CriteriaListResponse()
               .items(
                   cohortBuilderService.findCriteriaAutoComplete(
-                      Domain.SURVEY.toString(), term, CriteriaType.PPI.toString(), false, null)));
+                      Domain.SURVEY.toString(), term, CriteriaType.PPI.toString(), false)));
     }
   }
 

@@ -3677,11 +3677,6 @@ paths:
         type: string
         required: true
         description: the term to search for
-      - in: query
-        name: limit
-        type: integer
-        required: false
-        description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria

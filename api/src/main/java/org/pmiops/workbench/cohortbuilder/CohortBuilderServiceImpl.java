@@ -222,9 +222,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, String type, Boolean standard, Integer limit) {
-    PageRequest pageRequest =
-        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+      String domain, String term, String type, Boolean standard) {
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
@@ -246,9 +245,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaAutoCompleteV2(
-      String domain, String term, List<String> types, Boolean standard, Integer limit) {
-    PageRequest pageRequest =
-        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+      String domain, String term, List<String> types, Boolean standard) {
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
