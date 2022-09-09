@@ -242,6 +242,15 @@ public class OrphanedProjects {
               ENV_TO_PARENT_FOLDER.get(rwEnvOpt),
               ENV_TO_FOLDERS.get(rwEnvOpt));
 
+
+
+      TODO!
+      Don't use Folders, use Service Perimeters
+      Cloud Console -> Security -> VPC Service Controls ?
+      Figure out APIs
+
+
+
       // All such workspaces should:
       // * have 1PPW google projects
       // * be associated with a CDR in the registered or controlled tier
