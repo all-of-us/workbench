@@ -11,6 +11,7 @@ import {
   EthnicityInfo,
   GenderOrSexType,
   SearchRequest,
+  SortOrder,
 } from 'generated/fetch';
 
 import { ComboChart } from 'app/components/combo-chart.component';
@@ -20,6 +21,7 @@ import { CohortDefinition } from 'app/pages/data/cohort-review/cohort-definition
 import { ParticipantsCharts } from 'app/pages/data/cohort-review/participants-charts';
 import {
   cohortBuilderApi,
+  cohortReviewApi,
   cohortsApi,
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -210,6 +212,7 @@ export interface QueryReportProps
 export interface QueryReportState {
   cdrName: string;
   data: DemoChartInfo[];
+  displayCohort: Cohort;
   groupedData: any;
   chartsLoading: boolean;
   cohortLoading: boolean;
@@ -229,6 +232,7 @@ export const QueryReport = fp.flow(
       this.state = {
         cdrName: null,
         data: null,
+        displayCohort: null,
         groupedData: null,
         chartsLoading: true,
         cohortLoading: true,
@@ -239,26 +243,12 @@ export const QueryReport = fp.flow(
     async componentDidMount() {
       const {
         cdrVersionTiersResponse,
-        cohort,
         workspace: { cdrVersionId },
         hideSpinner,
       } = this.props;
       hideSpinner();
-      const { ns, wsid, cid } = this.props.match.params;
-      let request: SearchRequest;
-      if (cohort?.id === +cid) {
-        this.setState({ cohortLoading: false });
-        request = JSON.parse(cohort.criteria);
-      } else {
-        await cohortsApi()
-          .getCohort(ns, wsid, +cid)
-          .then((cohortResponse) => {
-            currentCohortStore.next(cohortResponse);
-            request = JSON.parse(cohortResponse.criteria);
-            this.setState({ cohortLoading: false });
-          });
-      }
-
+      const { ns, wsid } = this.props.match.params;
+      const searchRequest = await this.getRequestFromCohort();
       const cdrName = findCdrVersion(
         cdrVersionId,
         cdrVersionTiersResponse
@@ -271,10 +261,10 @@ export const QueryReport = fp.flow(
             wsid,
             GenderOrSexType[GenderOrSexType.GENDER],
             AgeType[AgeType.AGE],
-            request
+            searchRequest
           ),
-          cohortBuilderApi().findEthnicityInfo(ns, wsid, request),
-          cohortBuilderApi().countParticipants(ns, wsid, request),
+          cohortBuilderApi().findEthnicityInfo(ns, wsid, searchRequest),
+          cohortBuilderApi().countParticipants(ns, wsid, searchRequest),
         ]);
       this.groupChartData([...demoChartInfo.items, ...ethnicityInfo.items]);
       this.setState({
@@ -282,6 +272,42 @@ export const QueryReport = fp.flow(
         chartsLoading: false,
         participantCount,
       });
+    }
+
+    async getRequestFromCohort() {
+      const { cohort } = this.props;
+      const { ns, wsid, cid, crid } = this.props.match.params;
+      let request: SearchRequest;
+      if (cohort?.id === +cid) {
+        this.setState({ cohortLoading: false });
+        request = crid
+          ? this.getRequestFromCohortReview()
+          : JSON.parse(cohort.criteria);
+      } else {
+        await cohortsApi()
+          .getCohort(ns, wsid, +cid)
+          .then((cohortResponse) => {
+            currentCohortStore.next(cohortResponse);
+            request = crid
+              ? this.getRequestFromCohortReview()
+              : JSON.parse(cohortResponse.criteria);
+            this.setState({ cohortLoading: false });
+          });
+      }
+      return request;
+    }
+
+    async getRequestFromCohortReview() {
+      const { ns, wsid, cid, crid } = this.props.match.params;
+      const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.Asc };
+      let request: SearchRequest;
+      await cohortReviewApi()
+        .getParticipantCohortStatuses(ns, wsid, +cid, +crid, filterRequest)
+        .then(({ cohortReview }) => {
+          request = JSON.parse(cohortReview.cohortDefinition);
+          this.setState({ cohortLoading: false });
+        });
+      return request;
     }
 
     groupChartData(data: Array<DemoChartInfo | EthnicityInfo>) {

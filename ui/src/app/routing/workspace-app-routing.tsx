@@ -335,6 +335,20 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
+        path={`${path}/data/cohorts/:cid/reviews/:crid/cohort-description`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <QueryReportPage
+          routeData={{
+            title: 'Review Cohort Description',
+            breadcrumb: BreadcrumbType.Cohort,
+            workspaceNavBarTab: 'data',
+            pageKey: 'cohortDescription',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
         path={`${path}/data/cohorts/:cid/review`}
         guards={[adminLockedGuard(ns, wsid)]}
       >

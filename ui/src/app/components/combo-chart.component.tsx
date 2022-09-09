@@ -25,7 +25,10 @@ export class ComboChart extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: any): void {
-    if (prevProps.mode !== this.props.mode) {
+    if (
+      prevProps.mode !== this.props.mode ||
+      prevProps.data !== this.props.data
+    ) {
       this.getChartOptions();
     }
   }

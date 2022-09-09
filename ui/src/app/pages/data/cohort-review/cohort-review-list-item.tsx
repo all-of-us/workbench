@@ -18,6 +18,7 @@ import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { displayDate } from 'app/utils/dates';
+import { useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import latest from 'assets/icons/latest.svg';
 import outdated from 'assets/icons/outdated.svg';
@@ -36,7 +37,8 @@ export const CohortReviewListItem = fp.flow(
     onSelect,
     existingNames,
   }) => {
-    const { ns, wsid } = useParams<MatchParams>();
+    const { ns, wsid, cid } = useParams<MatchParams>();
+    const [navigate] = useNavigation();
     const [showRenameModal, setShowRenameModal] = useState(false);
     const readOnly =
       workspace.accessLevel !== WorkspaceAccessLevel.OWNER &&
@@ -119,7 +121,21 @@ export const CohortReviewListItem = fp.flow(
             <div style={{ fontSize: '14px', fontWeight: 600 }}>
               {cohortReview.cohortName}
             </div>
-            <Clickable>
+            <Clickable
+              onClick={() =>
+                navigate([
+                  'workspaces',
+                  ns,
+                  wsid,
+                  'data',
+                  'cohorts',
+                  cid,
+                  'reviews',
+                  cohortReview.cohortReviewId,
+                  'cohort-description',
+                ])
+              }
+            >
               <span
                 style={{
                   color: colors.accent,
