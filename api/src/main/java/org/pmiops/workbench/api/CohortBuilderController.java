@@ -99,8 +99,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, String surveyName, String term) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateTerm(term);
     validateSurveyName(surveyName);
+    validateTerm(term);
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
       return ResponseEntity.ok(
           new CriteriaListResponse()

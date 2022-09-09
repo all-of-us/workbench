@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import com.google.apphosting.api.DeadlineExceededException;
-import com.google.cloud.bigquery.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
@@ -490,6 +489,89 @@ public class CohortBuilderControllerTest {
                 null,
                 null),
         "Bad Request: Please provide a valid type. blah is not valid.");
+  }
+
+  @Test
+  public void findSurveyAutoCompleteTheBasics() {
+    DbCriteria criteria =
+            DbCriteria.builder()
+                    .addDomainId(Domain.SURVEY.toString())
+                    .addType(CriteriaType.PPI.toString())
+                    .addSubtype("QUESTION")
+                    .addConceptId("1001")
+                    .addCount(0L)
+                    .addHierarchy(true)
+                    .addName("The Basics")
+                    .addStandard(true)
+                    .addFullText("LP12*[survey_rank1]")
+                    .build();
+    criteria = cbCriteriaDao.save(criteria);
+    //need to set the id in the path
+    criteria.setPath(String.valueOf(criteria.getId()));
+    criteria = cbCriteriaDao.save(criteria);
+
+    assertThat(
+            Objects.requireNonNull(
+                            controller
+                                    .findSurveyAutoComplete(
+                                            WORKSPACE_NAMESPACE,
+                                            WORKSPACE_ID,
+                                            "The Basics",
+                                            "LP12")
+                                    .getBody())
+                    .getItems()
+                    .get(0))
+            .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
+  public void findSurveyAutoCompleteAllSurveys() {
+    DbCriteria criteria =
+            DbCriteria.builder()
+                    .addDomainId(Domain.SURVEY.toString())
+                    .addType(CriteriaType.PPI.toString())
+                    .addSubtype("QUESTION")
+                    .addConceptId("1001")
+                    .addCount(0L)
+                    .addHierarchy(true)
+                    .addName("The Basics")
+                    .addStandard(true)
+                    .addFullText("LP12*[survey_rank1]")
+                    .build();
+    criteria = cbCriteriaDao.save(criteria);
+    //need to set the id in the path
+    criteria.setPath(String.valueOf(criteria.getId()));
+    criteria = cbCriteriaDao.save(criteria);
+
+    assertThat(
+            Objects.requireNonNull(
+                            controller
+                                    .findSurveyAutoComplete(
+                                            WORKSPACE_NAMESPACE,
+                                            WORKSPACE_ID,
+                                            "All",
+                                            "LP12")
+                                    .getBody())
+                    .getItems()
+                    .get(0))
+            .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
+  public void findSurveyAutoCompleteExceptions() {
+    assertThrows(
+            BadRequestException.class,
+            () ->
+                    controller.findSurveyAutoComplete(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah"),
+            "Bad Request: Please provide a valid surveyName. null is not valid.");
+
+    assertThrows(
+            BadRequestException.class,
+            () ->
+                    controller.findSurveyAutoComplete(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "All", null),
+            "Bad Request: Please provide a valid term. blah is not valid.");
   }
 
   @Test
