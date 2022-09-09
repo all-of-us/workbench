@@ -172,6 +172,7 @@ export const CohortReviewPage = fp.flow(
         cohortReviewApi().getCohortReviewsByCohortId(ns, wsid, +cid),
         cohortReviewApi().cohortParticipantCount(ns, wsid, +cid),
       ]);
+    cohortReviewResponse.items.sort(sortByCreationTime);
     setCohort(cohortResponse);
     setCohortReviews(cohortReviewResponse.items);
     setParticipantCount(participantCountResponse);
@@ -311,31 +312,29 @@ export const CohortReviewPage = fp.flow(
                 </Clickable>
               </div>
               <div style={{ minHeight: '10rem', padding: '0.25rem' }}>
-                {cohortReviews
-                  .sort(sortByCreationTime)
-                  .map((cohortReview, cr) => (
-                    <CohortReviewListItem
-                      key={cr}
-                      cohortReview={cohortReview}
-                      cohortModifiedTime={cohort.lastModifiedTime}
-                      onUpdate={() => loadCohortAndReviews()}
-                      onSelect={() => {
-                        if (
-                          activeReview?.cohortReviewId !==
-                          cohortReview.cohortReviewId
-                        ) {
-                          onReviewSelect(cohortReview);
-                        }
-                      }}
-                      selected={
-                        activeReview?.cohortReviewId ===
+                {cohortReviews.map((cohortReview, cr) => (
+                  <CohortReviewListItem
+                    key={cr}
+                    cohortReview={cohortReview}
+                    cohortModifiedTime={cohort.lastModifiedTime}
+                    onUpdate={() => loadCohortAndReviews()}
+                    onSelect={() => {
+                      if (
+                        activeReview?.cohortReviewId !==
                         cohortReview.cohortReviewId
+                      ) {
+                        onReviewSelect(cohortReview);
                       }
-                      existingNames={cohortReviews.map(
-                        ({ cohortName }) => cohortName
-                      )}
-                    />
-                  ))}
+                    }}
+                    selected={
+                      activeReview?.cohortReviewId ===
+                      cohortReview.cohortReviewId
+                    }
+                    existingNames={cohortReviews.map(
+                      ({ cohortName }) => cohortName
+                    )}
+                  />
+                ))}
               </div>
             </div>
             <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}>
