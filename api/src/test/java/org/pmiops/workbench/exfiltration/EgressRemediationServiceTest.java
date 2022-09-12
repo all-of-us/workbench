@@ -43,7 +43,9 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.impl.EgressSumologicRemediationService;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
+import org.pmiops.workbench.exfiltration.jirahandler.EgressSumologicJiraHandler;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
@@ -61,6 +63,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -86,7 +89,10 @@ public class EgressRemediationServiceTest {
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private UserDao userDao;
 
-  @Autowired private EgressRemediationService egressRemediationService;
+  @Autowired
+  @Qualifier("sumologic-egress-service")
+  private EgressRemediationService egressRemediationService;
+
   @Autowired private EgressJiraHandler egressJiraHandler;
 
   private long userId;
@@ -96,10 +102,11 @@ public class EgressRemediationServiceTest {
   @TestConfiguration
   @Import({
     EgressEventMapperImpl.class,
-    EgressRemediationService.class,
+    EgressSumologicRemediationService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
-    JiraService.class
+    JiraService.class,
+    EgressSumologicJiraHandler.class
   })
   @MockBean({
     CommonMappers.class,

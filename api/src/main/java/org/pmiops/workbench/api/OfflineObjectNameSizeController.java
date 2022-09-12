@@ -31,7 +31,6 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
   private final WorkspaceService workspaceService;
   private final ObjectNameSizeService objectNameSizeService;
   private final EgressEventDao egressEventDao;
-  private final EgressJiraHandler egressJiraHandler;
   private final EgressRemediationService egressRemediationService;
 
   @Autowired
@@ -41,13 +40,13 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
       WorkspaceService workspaceService,
       ObjectNameSizeService objectNameSizeService,
       EgressEventDao egressEventDao,
-      @Qualifier("internal") EgressJiraHandler egressJiraHandler,
-      EgressRemediationService egressRemediationService) {
+      @Qualifier("internal-jira-handler") EgressJiraHandler egressJiraHandler,
+      @Qualifier("internal-remediation-service")
+          EgressRemediationService egressRemediationService) {
     this.userService = userService;
     this.workspaceService = workspaceService;
     this.objectNameSizeService = objectNameSizeService;
     this.egressEventDao = egressEventDao;
-    this.egressJiraHandler = egressJiraHandler;
     this.egressRemediationService = egressRemediationService;
   }
 
@@ -69,9 +68,7 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
           // Create an egress alert.
           Optional<DbEgressEvent> maybeEvent =
               this.maybePersistEgressEvent(nameLength, workspace.getCreator(), workspace);
-          egressRemediationService
-              .withEgressJiraHandler(egressJiraHandler)
-              .remediateEgressEvent(maybeEvent.get().getEgressEventId());
+          egressRemediationService.remediateEgressEvent(maybeEvent.get().getEgressEventId());
         }
       }
     }
@@ -80,7 +77,7 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
   }
 
   private Optional<DbEgressEvent> maybePersistEgressEvent(
-      Long event, DbUser dbUser, DbWorkspace dbWorkspace) {
+      Long objectNameLengths, DbUser dbUser, DbWorkspace dbWorkspace) {
 
     return Optional.of(
         egressEventDao.save(
@@ -88,9 +85,9 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
                 .setUser(dbUser)
                 .setWorkspace(dbWorkspace)
                 .setEgressMegabytes(
-                    Optional.ofNullable(event)
-                        // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
-                        .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
+                    Optional.ofNullable(objectNameLengths)
+                        // bytes -> Megabytes (10^6 bytes)
+                        .map(bytes -> (float) (bytes / (1024 * 1024)))
                         .orElse(null))
                 .setStatus(DbEgressEventStatus.PENDING)));
   }

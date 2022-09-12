@@ -26,17 +26,11 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
-import org.pmiops.workbench.jira.JiraService;
-import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
-import org.springframework.stereotype.Service;
 
 /** Service for automated egress alert remediation. */
-@Service
-public class EgressRemediationService {
+public abstract class EgressRemediationService {
   // Heuristic window for merging egress alerts into an "incident", for characterizing prior user
   // behavior.
   private static final Duration EGRESS_INCIDENT_MERGE_WINDOW = Duration.ofMinutes(90L);
@@ -50,31 +44,23 @@ public class EgressRemediationService {
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
-  private final MailService mailService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
-  private EgressJiraHandler egressJiraHandler;
 
   public EgressRemediationService(
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
-      MailService mailService,
       LeonardoNotebooksClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
-      EgressEventDao egressEventDao,
-      EgressEventMapper egressEventMapper,
-      JiraService jiraService,
-      EgressJiraHandler egressJiraHandler) {
+      EgressEventDao egressEventDao) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
-    this.mailService = mailService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
-    this.egressJiraHandler = egressJiraHandler;
   }
 
   public void remediateEgressEvent(long egressEventId) {
@@ -122,7 +108,7 @@ public class EgressRemediationService {
 
           if (egressPolicy != null && egressPolicy.enableJiraTicketing) {
             try {
-              egressJiraHandler.logEventToJira(event, action);
+              logEventToJira(event, action);
             } catch (ApiException ex) {
               throw new ServerErrorException("failed to log event to Jira", ex);
             }
@@ -130,7 +116,7 @@ public class EgressRemediationService {
 
           if (shouldNotifyForEvent(event)) {
             try {
-              mailService.sendEgressRemediationEmail(user, action);
+              sendEgressRemediationEmail(user, action);
             } catch (MessagingException ex) {
               throw new ServerErrorException("failed to send egress remediation email", ex);
             }
@@ -141,6 +127,12 @@ public class EgressRemediationService {
 
     egressEventAuditor.fireRemediateEgressEvent(event, escalation.orElse(null));
   }
+
+  protected abstract void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
+      throws MessagingException;
+
+  protected abstract void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
+      throws ApiException;
 
   /**
    * Returns a heuristic count of logical egress "incidents", which are created by merging proximal
@@ -268,10 +260,5 @@ public class EgressRemediationService {
   private void stopUserRuntimes(String userEmail) {
     int stopCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
     log.info(String.format("stopped %d runtimes for user", stopCount));
-  }
-
-  public EgressRemediationService withEgressJiraHandler(EgressJiraHandler egressJiraHandler) {
-    this.egressJiraHandler = egressJiraHandler;
-    return this;
   }
 }

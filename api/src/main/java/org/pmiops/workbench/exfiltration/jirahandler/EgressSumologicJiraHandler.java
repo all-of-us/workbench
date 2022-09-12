@@ -26,7 +26,7 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("sumologic-jira-handler")
 public class EgressSumologicJiraHandler implements EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressSumologicJiraHandler.class.getName());

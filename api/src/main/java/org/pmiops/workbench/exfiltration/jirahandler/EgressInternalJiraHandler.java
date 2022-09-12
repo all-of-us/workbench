@@ -5,7 +5,7 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.jira.ApiException;
 import org.springframework.stereotype.Service;
 
-@Service("internal")
+@Service("internal-jira-handler")
 public class EgressInternalJiraHandler implements EgressJiraHandler {
 
   @Override

@@ -51,6 +51,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MailServiceImpl implements MailService {
+
+  public static final ImmutableMap<EgressRemediationAction, String> EGRESS_REMEDIATION_ACTION_MAP =
+      ImmutableMap.of(
+          EgressRemediationAction.DISABLE_USER,
+          "Your account has been disabled pending manual review by the <i>All of Us</i> "
+              + "security team.",
+          EgressRemediationAction.SUSPEND_COMPUTE,
+          "Your Workbench compute access has been temporarily suspended, and will be "
+              + "automatically restored after a brief duration.");
   private final Provider<MandrillApi> mandrillApiProvider;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -59,6 +68,8 @@ public class MailServiceImpl implements MailService {
 
   private static final String EGRESS_REMEDIATION_RESOURCE =
       "emails/egress_remediation/content.html";
+  private static final String FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL =
+      "emails/file_lengths_egress_remediation_email/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
       "emails/initial_credits_dollar_threshold/content.html";
   private static final String INITIAL_CREDITS_EXPIRATION_RESOURCE =
@@ -316,18 +327,22 @@ public class MailServiceImpl implements MailService {
   @Override
   public void sendEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
-    String remediationDescription =
-        ImmutableMap.of(
-                EgressRemediationAction.DISABLE_USER,
-                "Your account has been disabled pending manual review by the <i>All of Us</i> "
-                    + "security team.",
-                EgressRemediationAction.SUSPEND_COMPUTE,
-                "Your Workbench compute access has been temporarily suspended, and will be "
-                    + "automatically restored after a brief duration.")
-            .get(action);
+    sendInternalEgressRemediationEmail(dbUser, action, EGRESS_REMEDIATION_RESOURCE);
+  }
+
+  @Override
+  public void sendInternalEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
+      throws MessagingException {
+    sendInternalEgressRemediationEmail(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
+  }
+
+  public void sendInternalEgressRemediationEmail(
+      DbUser dbUser, EgressRemediationAction action, String remediationEmail)
+      throws MessagingException {
+    String remediationDescription = EGRESS_REMEDIATION_ACTION_MAP.get(action);
     String htmlMessage =
         buildHtml(
-            EGRESS_REMEDIATION_RESOURCE,
+            remediationEmail,
             ImmutableMap.<EmailSubstitutionField, String>builder()
                 .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
                 .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
