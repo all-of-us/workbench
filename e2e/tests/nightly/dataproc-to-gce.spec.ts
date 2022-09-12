@@ -15,7 +15,9 @@ describe('Updating runtime compute type', () => {
 
   const workspaceName = makeRandomName('e2eDataprocToGceTest');
 
-  test('Switch from dataproc to GCE', async () => {
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
+  test.skip('Switch from dataproc to GCE', async () => {
     await findOrCreateWorkspace(page, {
       workspaceName,
       cdrVersion: config.CONTROLLED_TIER_CDR_VERSION_NAME,
