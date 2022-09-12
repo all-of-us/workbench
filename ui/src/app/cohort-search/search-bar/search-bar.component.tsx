@@ -291,7 +291,7 @@ export class SearchBar extends React.Component<Props, State> {
         apiCall = cohortBuilderApi().findSurveyAutoComplete(
           namespace,
           id,
-          selectedSurvey,
+          selectedSurvey || 'All surveys',
           searchTerms
         );
         break;
