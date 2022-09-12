@@ -35,7 +35,7 @@ describe('Workspace owner can copy notebook', () => {
 
   /*Skipping the tests below as they will be moved to the new version of e2e test.
    * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-   
+
   test.skip(
     'Copy notebook to another Workspace when CDR versions match',
     async () => {
