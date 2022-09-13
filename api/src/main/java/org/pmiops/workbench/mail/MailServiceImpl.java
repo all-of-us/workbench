@@ -327,39 +327,13 @@ public class MailServiceImpl implements MailService {
   @Override
   public void sendEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
-    sendInternalEgressRemediationEmail(dbUser, action, EGRESS_REMEDIATION_RESOURCE);
+    sendEgressRemediationEmailWithContent(dbUser, action, EGRESS_REMEDIATION_RESOURCE);
   }
 
   @Override
   public void sendInternalEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
-    sendInternalEgressRemediationEmail(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
-  }
-
-  public void sendInternalEgressRemediationEmail(
-      DbUser dbUser, EgressRemediationAction action, String remediationEmail)
-      throws MessagingException {
-    String remediationDescription = EGRESS_REMEDIATION_ACTION_MAP.get(action);
-    String htmlMessage =
-        buildHtml(
-            remediationEmail,
-            ImmutableMap.<EmailSubstitutionField, String>builder()
-                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-                .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
-                .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
-                .build());
-
-    EgressAlertRemediationPolicy egressPolicy =
-        workbenchConfigProvider.get().egressAlertRemediationPolicy;
-    sendWithRetries(
-        egressPolicy.notifyFromEmail,
-        ImmutableList.of(dbUser.getContactEmail()),
-        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
-        ImmutableList.of(),
-        "[Response Required] AoU Researcher Workbench High Data Egress Alert",
-        String.format("Egress remediation email for %s", dbUser.getUsername()),
-        htmlMessage);
+    sendEgressRemediationEmailWithContent(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
   }
 
   @Override
@@ -387,6 +361,32 @@ public class MailServiceImpl implements MailService {
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
+  }
+
+  private void sendEgressRemediationEmailWithContent(
+      DbUser dbUser, EgressRemediationAction action, String remediationEmail)
+      throws MessagingException {
+    String remediationDescription = EGRESS_REMEDIATION_ACTION_MAP.get(action);
+    String htmlMessage =
+        buildHtml(
+            remediationEmail,
+            ImmutableMap.<EmailSubstitutionField, String>builder()
+                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+                .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
+                .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
+                .build());
+
+    EgressAlertRemediationPolicy egressPolicy =
+        workbenchConfigProvider.get().egressAlertRemediationPolicy;
+    sendWithRetries(
+        egressPolicy.notifyFromEmail,
+        ImmutableList.of(dbUser.getContactEmail()),
+        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
+        ImmutableList.of(),
+        "[Response Required] AoU Researcher Workbench High Data Egress Alert",
+        String.format("Egress remediation email for %s", dbUser.getUsername()),
+        htmlMessage);
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
