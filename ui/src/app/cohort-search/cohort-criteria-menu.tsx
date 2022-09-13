@@ -9,7 +9,11 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import {
+  reactStyles,
+  validateInputForMySQL,
+  withCurrentWorkspace,
+} from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
@@ -162,7 +166,7 @@ const styles = reactStyles({
     marginLeft: '0.25rem',
   },
 });
-
+const searchTrigger = 2;
 const searchTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
     The following special operators can be used to augment search terms:
@@ -218,7 +222,10 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     };
 
     const onEnterPress = () => {
-      if (!searchTerms || searchTerms.length < 2) {
+      const inputErrors = validateInputForMySQL(searchTerms, searchTrigger);
+      if (inputErrors.length > 0) {
+        setInputError(inputErrors.join('\r\n'));
+      } else if (!searchTerms || searchTerms.length < searchTrigger) {
         setInputError('Minimum search length is two characters.');
       } else {
         setDomainCountsError(false);
