@@ -543,6 +543,11 @@ export function validateInputForMySQL(
         `Minimum criteria search length for ends with term is two characters after '*' [${word}]`
       );
     }
+    if (word.match(/[+*-]{2,}|^\*.*[+*-]$/)) {
+      inputErrors.add(
+        `Search term cannot contain consecutive special characters [${word}]`
+      );
+    }
   });
   return Array.from(inputErrors);
 }

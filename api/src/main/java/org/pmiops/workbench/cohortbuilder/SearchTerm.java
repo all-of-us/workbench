@@ -62,21 +62,10 @@ public class SearchTerm {
     List<String> words =
         new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
     // remove words that start with multiple special chars
+    Pattern specialChars = Pattern.compile("[+\\*|\\-]{2,}|^\\*.*[+\\*\\-]$");
     words =
         words.stream()
-            .filter(
-                word ->
-                    !(word.startsWith("*+")
-                        || word.startsWith("*-")
-                        || word.startsWith("+*")
-                        || word.startsWith("-*")))
-            .filter(
-                word ->
-                    !(word.endsWith("*+")
-                        || word.endsWith("*-")
-                        || word.endsWith("+*")
-                        || word.endsWith("-*")))
-            .filter(word -> !(word.startsWith("*") && word.endsWith("*")))
+            .filter(word -> !specialChars.matcher(word).find())
             .collect(Collectors.toList());
 
     List<String> endsWith =
