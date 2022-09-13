@@ -53,6 +53,7 @@ import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -70,7 +71,6 @@ import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -901,7 +901,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void getCohortChartDataBadLimit() {
     try {
       controller.getCohortChartData(
-          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), -1, new SearchRequest());
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), -1, new CohortDefinition());
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -914,7 +914,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void getCohortChartDataBadLimitOverHundred() {
     try {
       controller.getCohortChartData(
-          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), 101, new SearchRequest());
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), 101, new CohortDefinition());
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -932,7 +932,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 Domain.LAB.name(),
                 10,
-                createSearchRequests(
+                createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
     List<CohortChartData> items = Objects.requireNonNull(response).getItems();
@@ -952,7 +952,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 Domain.DRUG.name(),
                 10,
-                createSearchRequests(
+                createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
     List<CohortChartData> items = Objects.requireNonNull(response).getItems();
@@ -970,7 +970,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 Domain.CONDITION.name(),
                 10,
-                createSearchRequests(
+                createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
     List<CohortChartData> items = Objects.requireNonNull(response).getItems();
@@ -988,7 +988,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 Domain.PROCEDURE.name(),
                 10,
-                createSearchRequests(
+                createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
 
@@ -1019,10 +1019,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countParticipantsSearchGroupNoItems() {
     List<SearchGroup> groups = new ArrayList<>();
     groups.add(new SearchGroup().id("sg1"));
-    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    CohortDefinition cohortDefinition = new CohortDefinition().includes(groups);
     assertThrows(
         BadRequestException.class,
-        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest));
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition));
   }
 
   @Test
@@ -1038,59 +1038,59 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     List<SearchGroup> groups = new ArrayList<>();
     groups.add(searchGroup);
-    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    CohortDefinition cohortDefinition = new CohortDefinition().includes(groups);
     assertThrows(
         BadRequestException.class,
-        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest));
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition));
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChild() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildHasEHRData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_EHR_DATA");
+    cohortDefinition.addDataFiltersItem("HAS_EHR_DATA");
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildHasPMData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_PHYSICAL_MEASUREMENT_DATA");
+    cohortDefinition.addDataFiltersItem("HAS_PHYSICAL_MEASUREMENT_DATA");
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildHasPPISurveyData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_PPI_SURVEY_DATA");
+    cohortDefinition.addDataFiltersItem("HAS_PPI_SURVEY_DATA");
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildHasEHRAndPPISurveyData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_EHR_DATA").addDataFiltersItem("HAS_PPI_SURVEY_DATA");
+    cohortDefinition.addDataFiltersItem("HAS_EHR_DATA").addDataFiltersItem("HAS_PPI_SURVEY_DATA");
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1122,22 +1122,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     // matches icd9SGI in group 0 and icd10SGI in group 1
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsForSurveyWithAgeModifiers() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(),
             ImmutableList.of(survey().conceptId(1585899L)),
             ImmutableList.of(ageModifier()));
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1163,9 +1164,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_BEFORE)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -1193,9 +1195,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -1221,9 +1224,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.WITHIN_X_DAYS_OF)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1247,9 +1251,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .mention(TemporalMention.FIRST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -1274,9 +1279,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -1306,9 +1312,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -1339,30 +1346,31 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildAgeAtEvent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(ageModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildEncounter() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9()),
             ImmutableList.of(visitModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1370,131 +1378,133 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Modifier modifier =
         ageModifier().operator(Operator.BETWEEN).operands(ImmutableList.of("37", "39"));
 
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9()),
             ImmutableList.of(ageModifier(), occurrencesModifier().operands(ImmutableList.of("2"))));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildAgeAtEventAndOccurrencesAndEventDate() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9(), icd9().conceptId(2L)),
             ImmutableList.of(ageModifier(), occurrencesModifier(), eventDateModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildEventDate() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9()),
             ImmutableList.of(eventDateModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionNumOfOccurrences() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9()),
             ImmutableList.of(occurrencesModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9Child() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionParent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9().group(true).conceptId(44823922L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDemoGender() {
-    SearchRequest searchRequest =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsDemoRace() {
-    SearchRequest searchRequest =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsDemoEthnicity() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PERSON.toString(), ImmutableList.of(ethnicity()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsDemoDec() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PERSON.toString(), ImmutableList.of(deceased()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countParticipantsFitbit() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countParticipantsWholeGenomeVariant() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.WHOLE_GENOME_VARIANT.toString(),
             ImmutableList.of(wholeGenomeVariant()),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1508,10 +1518,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.AGE)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
@@ -1523,10 +1533,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.AGE_AT_CONSENT)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of("29", "30"))));
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 3);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 3);
   }
 
   @Test
@@ -1538,10 +1548,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.AGE_AT_CDR)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of("29", "30"))));
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
@@ -1557,8 +1567,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
 
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
 
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
@@ -1572,11 +1583,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .searchParameters(ImmutableList.of(demoAgeSearchParam))
             .modifiers(new ArrayList<>());
 
-    searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
-    searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
+    cohortDefinition.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+    cohortDefinition.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
@@ -1587,141 +1598,142 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .searchParameters(ImmutableList.of(male()));
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
-    searchRequests.getExcludes().add(excludeSearchGroup);
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
+    cohortDefinition.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 0);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 0);
   }
 
   @Test
   public void countSubjectsICD9ParentAndICD10ChildCondition() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 2);
   }
 
   @Test
   public void countSubjectsCPTProcedure() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PROCEDURE.toString(),
             ImmutableList.of(procedure().conceptId(4L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsSnomedChildCondition() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.CONDITION.toString(),
             ImmutableList.of(snomed().standard(true).conceptId(6L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsSnomedParentProcedure() {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PROCEDURE.toString(), ImmutableList.of(snomed), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsVisit() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.VISIT.toString(), ImmutableList.of(visit().conceptId(10L)), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
   public void countSubjectsVisitModifiers() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.VISIT.toString(),
             ImmutableList.of(visit().conceptId(10L)),
             ImmutableList.of(occurrencesModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
   public void countSubjectsDrugChild() {
-    SearchRequest searchRequest =
-        createSearchRequests(Domain.DRUG.toString(), ImmutableList.of(drug()), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(Domain.DRUG.toString(), ImmutableList.of(drug()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugParent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.DRUG.toString(),
             ImmutableList.of(drug().group(true).conceptId(21600932L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugParentAndChild() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.DRUG.toString(),
             ImmutableList.of(drug().group(true).conceptId(21600932L), drug()),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugChildEncounter() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(visitModifier()));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugChildAgeAtEvent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(ageModifier()));
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsLabEncounter() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.MEASUREMENT.toString(),
             ImmutableList.of(measurement()),
             ImmutableList.of(visitModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1733,11 +1745,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of("0", "1"))));
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.MEASUREMENT.toString(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1749,10 +1761,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.CAT)
                 .operator(Operator.IN)
                 .operands(ImmutableList.of("1"))));
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1769,21 +1781,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .operator(Operator.IN)
             .operands(ImmutableList.of("1", "2"));
     lab.attributes(ImmutableList.of(numerical, categorical));
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsLabCategoricalAgeAtEvent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.MEASUREMENT.toString(),
             ImmutableList.of(measurement()),
             ImmutableList.of(ageModifier()));
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1794,30 +1806,30 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Attribute labCategorical =
         new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(ImmutableList.of("77"));
     lab3.attributes(ImmutableList.of(labCategorical));
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             lab1.getDomain(), ImmutableList.of(lab1, lab2, lab3), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
   public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() {
     SearchParameter icd9 = icd9();
     SearchParameter snomed = snomed().standard(true);
-    SearchRequest searchRequest =
-        createSearchRequests(icd9.getDomain(), ImmutableList.of(icd9, snomed), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(icd9.getDomain(), ImmutableList.of(icd9, snomed), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsBloodPressure() {
     SearchParameter pm = bloodPressure().attributes(bpAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(pm.getDomain(), ImmutableList.of(pm), new ArrayList<>());
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(pm.getDomain(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1827,11 +1839,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903118L),
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903115L));
     SearchParameter pm = bloodPressure().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1846,21 +1858,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(ImmutableList.of("71")));
     SearchParameter hrPm = hrDetail().attributes(hrAttributes);
 
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(),
             ImmutableList.of(bpPm, hrPm),
             new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
   public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() {
     SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(bpPm), new ArrayList<>());
 
     List<Attribute> hrAttributes =
@@ -1876,7 +1888,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .searchParameters(ImmutableList.of(hrPm))
             .modifiers(new ArrayList<>());
 
-    searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+    cohortDefinition.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
     List<Attribute> irrAttributes =
         ImmutableList.of(
@@ -1891,21 +1903,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .searchParameters(ImmutableList.of(hrIrrPm))
             .modifiers(new ArrayList<>());
 
-    searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
+    cohortDefinition.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 3);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 3);
   }
 
   @Test
   public void countSubjectsHeartRateAny() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(),
             ImmutableList.of(hrDetail().conceptId(1586218L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
@@ -1916,13 +1928,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
                 .operands(ImmutableList.of("45")));
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(),
             ImmutableList.of(hrDetail().conceptId(1586218L).attributes(attributes)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
@@ -1934,12 +1946,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.LESS_THAN_OR_EQUAL_TO)
                 .operands(ImmutableList.of("168")));
     SearchParameter pm = height().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1951,12 +1963,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.LESS_THAN_OR_EQUAL_TO)
                 .operands(ImmutableList.of("201")));
     SearchParameter pm = weight().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1968,12 +1980,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.LESS_THAN_OR_EQUAL_TO)
                 .operands(ImmutableList.of("263")));
     SearchParameter pm = bmi().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -1986,12 +1998,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(ImmutableList.of("31")));
     SearchParameter pm = waistCircumference().attributes(attributes);
     SearchParameter pm1 = hipCircumference().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm, pm1), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -2003,103 +2015,103 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.IN)
                 .operands(ImmutableList.of("45877994")));
     SearchParameter pm = pregnancy().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectWheelChairUser() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 2);
   }
 
   @Test
   public void countSubjectHasPhysicalMeasurementData() {
     SearchParameter pm = physicalMeasurementDataNoConceptId();
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
   public void countSubjectsSurvey() {
     // Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(),
             ImmutableList.of(survey().conceptId(1585899L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsCopeSurveyQuestion() {
     // Cope Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyQuestion()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsCopeSurveyQuestionVersionAndAnyValue() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(),
             ImmutableList.of(copeSurveyQuestionVersionAndAnyValue()),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsCopeSurveyQuestionAnyValue() {
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(),
             ImmutableList.of(copeSurveyQuestionAnyValue()),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsCopeSurveyAnswer() {
     // Cope Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyAnswer()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsCopeSurveyCatAndNum() {
     // Cope Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyCatAndNum()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -2108,11 +2120,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Question
     SearchParameter ppiQuestion =
         survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             ppiQuestion.getDomain(), ImmutableList.of(ppiQuestion), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -2126,13 +2138,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.IN)
                 .operands(ImmutableList.of("7")));
     SearchParameter ppiValueAsConceptId = surveyAnswer().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             ppiValueAsConceptId.getDomain(),
             ImmutableList.of(ppiValueAsConceptId),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
@@ -2146,19 +2158,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.EQUAL)
                 .operands(ImmutableList.of("7")));
     SearchParameter ppiValueAsNumber = surveyAnswer().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             ppiValueAsNumber.getDomain(), ImmutableList.of(ppiValueAsNumber), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
   }
 
   @Test
   public void findDemoChartInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
@@ -2168,7 +2180,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 GenderOrSexType.GENDER.toString(),
                 AgeType.AGE.toString(),
-                searchRequest)
+                cohortDefinition)
             .getBody();
     assertDemographics(Objects.requireNonNull(response));
   }
@@ -2176,22 +2188,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void findEthnicityInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     EthnicityInfoListResponse response =
-        controller.findEthnicityInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest).getBody();
+        controller.findEthnicityInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition).getBody();
     assertEthnicity(Objects.requireNonNull(response));
   }
 
   @Test
   public void findDemoChartInfoGenderAgeAtConsentWithEHRData() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_EHR_DATA");
+    cohortDefinition.addDataFiltersItem("HAS_EHR_DATA");
 
     DemoChartInfoListResponse response =
         controller
@@ -2200,7 +2212,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 GenderOrSexType.GENDER.toString(),
                 AgeType.AGE_AT_CONSENT.toString(),
-                searchRequest)
+                cohortDefinition)
             .getBody();
     assertDemographics(Objects.requireNonNull(response));
   }
@@ -2208,8 +2220,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void findDemoChartInfoSexAtBirthAgeAtCdr() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
@@ -2219,7 +2231,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_ID,
                 GenderOrSexType.SEX_AT_BIRTH.toString(),
                 AgeType.AGE_AT_CDR.toString(),
-                searchRequest)
+                cohortDefinition)
             .getBody();
     assertDemographics(Objects.requireNonNull(response));
   }
@@ -2264,7 +2276,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return Period.between(birthDate, LocalDate.now());
   }
 
-  private SearchRequest createSearchRequests(
+  private CohortDefinition createCohortDefinition(
       String type, List<SearchParameter> parameters, List<Modifier> modifiers) {
     final SearchGroupItem searchGroupItem =
         new SearchGroupItem().type(type).searchParameters(parameters).modifiers(modifiers);
@@ -2273,7 +2285,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     List<SearchGroup> groups = new ArrayList<>();
     groups.add(searchGroup);
-    return new SearchRequest().includes(groups);
+    return new CohortDefinition().includes(groups);
   }
 
   private void assertParticipants(ResponseEntity response, Integer expectedCount) {

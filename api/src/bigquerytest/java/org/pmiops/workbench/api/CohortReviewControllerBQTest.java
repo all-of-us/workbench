@@ -78,8 +78,8 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -232,12 +232,12 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     Gson gson = new Gson();
     DbCohort cohortWithoutEHRData = new DbCohort();
     cohortWithoutEHRData.setWorkspaceId(workspace.getWorkspaceId());
-    cohortWithoutEHRData.setCriteria(gson.toJson(SearchRequests.males()));
+    cohortWithoutEHRData.setCriteria(gson.toJson(CohortDefinitions.males()));
     cohortWithoutEHRData = cohortDao.save(cohortWithoutEHRData);
 
     DbCohort cohortWithEHRData = new DbCohort();
     cohortWithEHRData.setWorkspaceId(workspace.getWorkspaceId());
-    cohortWithEHRData.setCriteria(gson.toJson(SearchRequests.malesWithEHRData()));
+    cohortWithEHRData.setCriteria(gson.toJson(CohortDefinitions.malesWithEHRData()));
     cohortWithEHRData = cohortDao.save(cohortWithEHRData);
 
     reviewWithoutEHRData = createCohortReview(cohortWithoutEHRData);

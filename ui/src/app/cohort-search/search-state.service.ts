@@ -1,4 +1,4 @@
-import { SearchRequest } from 'generated/fetch';
+import { CohortDefinition } from 'generated/fetch';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -6,7 +6,7 @@ export const initSearchRequest = {
   includes: [],
   excludes: [],
   dataFilters: [],
-} as SearchRequest;
+} as CohortDefinition;
 export const searchRequestStore = new BehaviorSubject<any>(initSearchRequest);
 export const idsInUse = new BehaviorSubject<any>(new Set());
 export const ppiQuestions = new BehaviorSubject<any>({});

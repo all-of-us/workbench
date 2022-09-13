@@ -1,6 +1,7 @@
 package org.pmiops.workbench.test;
 
 import java.util.Arrays;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Modifier;
@@ -9,19 +10,18 @@ import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 
-public class SearchRequests {
+public class CohortDefinitions {
 
   private static final long MALE_CONCEPT_ID = 8507;
   private static final long FEMALE_CONCEPT_ID = 8532;
   private static final long WEIRD_CONCEPT_ID = 2;
 
-  private SearchRequests() {}
+  private CohortDefinitions() {}
 
-  public static SearchRequest genderRequest(long... conceptIds) {
+  public static CohortDefinition genderRequest(long... conceptIds) {
     SearchGroupItem searchGroupItem =
         new SearchGroupItem().id("id1").type(Domain.PERSON.toString());
     for (long conceptId : conceptIds) {
@@ -35,10 +35,10 @@ public class SearchRequests {
               .ancestorData(false);
       searchGroupItem.addSearchParametersItem(parameter);
     }
-    return searchRequest(searchGroupItem);
+    return cohortDefinition(searchGroupItem);
   }
 
-  public static SearchRequest codesRequest(
+  public static CohortDefinition codesRequest(
       String groupType, String type, boolean group, Long conceptId) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
     SearchParameter parameter =
@@ -50,10 +50,10 @@ public class SearchRequests {
             .standard(false)
             .ancestorData(false);
     searchGroupItem.addSearchParametersItem(parameter);
-    return searchRequest(searchGroupItem);
+    return cohortDefinition(searchGroupItem);
   }
 
-  public static SearchRequest modifierRequest(
+  public static CohortDefinition modifierRequest(
       String groupType, String type, Modifier... modifiers) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
     SearchParameter parameter =
@@ -66,10 +66,10 @@ public class SearchRequests {
             .ancestorData(false);
     searchGroupItem.addSearchParametersItem(parameter);
     searchGroupItem.setModifiers(Arrays.asList(modifiers));
-    return searchRequest(searchGroupItem);
+    return cohortDefinition(searchGroupItem);
   }
 
-  public static SearchRequest temporalRequest() {
+  public static CohortDefinition temporalRequest() {
     SearchParameter icd9 =
         new SearchParameter()
             .domain(Domain.CONDITION.toString())
@@ -119,35 +119,35 @@ public class SearchRequests {
             .mention(TemporalMention.FIRST_MENTION)
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
-    return new SearchRequest().includes(Arrays.asList(temporalGroup));
+    return new CohortDefinition().includes(Arrays.asList(temporalGroup));
   }
 
-  private static SearchRequest searchRequest(SearchGroupItem searchGroupItem) {
+  private static CohortDefinition cohortDefinition(SearchGroupItem searchGroupItem) {
     SearchGroup searchGroup = new SearchGroup();
     searchGroup.setId("id2");
     searchGroup.setTemporal(false);
     searchGroup.addItemsItem(searchGroupItem);
 
-    SearchRequest request = new SearchRequest();
-    request.addIncludesItem(searchGroup);
+    CohortDefinition cohortDefinition = new CohortDefinition();
+    cohortDefinition.addIncludesItem(searchGroup);
 
-    return request;
+    return cohortDefinition;
   }
 
-  public static SearchRequest icd9Codes() {
+  public static CohortDefinition icd9Codes() {
     return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true, 1L);
   }
 
-  public static SearchRequest icd9CodesChildren() {
+  public static CohortDefinition icd9CodesChildren() {
     return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 1L);
   }
 
-  public static SearchRequest conditionPreviewCodes() {
+  public static CohortDefinition conditionPreviewCodes() {
     return codesRequest(
         Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 44823922L);
   }
 
-  public static SearchRequest icd9CodeWithModifiers() {
+  public static CohortDefinition icd9CodeWithModifiers() {
     return modifierRequest(
         Domain.CONDITION.toString(),
         CriteriaType.ICD9CM.toString(),
@@ -165,23 +165,23 @@ public class SearchRequests {
             .operands(Arrays.asList("2")));
   }
 
-  public static SearchRequest males() {
+  public static CohortDefinition males() {
     return genderRequest(MALE_CONCEPT_ID);
   }
 
-  public static SearchRequest malesWithEHRData() {
+  public static CohortDefinition malesWithEHRData() {
     return genderRequest(MALE_CONCEPT_ID).addDataFiltersItem("HAS_EHR_DATA");
   }
 
-  public static SearchRequest females() {
+  public static CohortDefinition females() {
     return genderRequest(FEMALE_CONCEPT_ID);
   }
 
-  public static SearchRequest maleOrFemale() {
+  public static CohortDefinition maleOrFemale() {
     return genderRequest(MALE_CONCEPT_ID, FEMALE_CONCEPT_ID);
   }
 
-  public static SearchRequest allGenders() {
+  public static CohortDefinition allGenders() {
     return genderRequest(MALE_CONCEPT_ID, FEMALE_CONCEPT_ID, WEIRD_CONCEPT_ID);
   }
 }

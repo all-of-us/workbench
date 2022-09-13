@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { SearchRequest } from 'generated/fetch';
+import { CohortDefinition } from 'generated/fetch';
 
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -107,7 +107,7 @@ const styles = reactStyles({
 export interface ParticipantsChartsProps {
   cohortReviewId?: number;
   domain: string;
-  searchRequest?: SearchRequest;
+  searchRequest?: CohortDefinition;
   workspace: WorkspaceData;
 }
 

@@ -127,9 +127,9 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -355,7 +355,7 @@ public class DataSetControllerTest {
                 noAccessWorkspace.getName(),
                 new Cohort()
                     .name("noAccessCohort")
-                    .criteria(new Gson().toJson(SearchRequests.allGenders())))
+                    .criteria(new Gson().toJson(CohortDefinitions.allGenders())))
             .getBody();
 
     cohort =
@@ -363,7 +363,7 @@ public class DataSetControllerTest {
             .createCohort(
                 workspace.getNamespace(),
                 workspace.getName(),
-                new Cohort().name("cohort1").criteria(new Gson().toJson(SearchRequests.males())))
+                new Cohort().name("cohort1").criteria(new Gson().toJson(CohortDefinitions.males())))
             .getBody();
 
     List<Concept> conceptList = new ArrayList<>();

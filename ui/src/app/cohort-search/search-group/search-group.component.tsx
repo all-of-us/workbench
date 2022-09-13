@@ -3,9 +3,9 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { Menu } from 'primereact/menu';
 
 import {
+  CohortDefinition,
   Domain,
   ResourceType,
-  SearchRequest,
   TemporalMention,
   TemporalTime,
 } from 'generated/fetch';
@@ -197,7 +197,7 @@ interface Props {
   group: any;
   index: number;
   setSearchContext: (context: any) => void;
-  role: keyof SearchRequest;
+  role: keyof CohortDefinition;
   updated: number;
   updateRequest: Function;
   workspace: WorkspaceData;

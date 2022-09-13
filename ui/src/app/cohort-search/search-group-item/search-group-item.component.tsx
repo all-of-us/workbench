@@ -3,13 +3,13 @@ import { Menu } from 'primereact/menu';
 import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {
+  CohortDefinition,
   CriteriaType,
   Domain,
   Modifier,
   ModifierType,
   ResourceType,
   SearchGroupItem as Item,
-  SearchRequest,
 } from 'generated/fetch';
 
 import { MODIFIERS_MAP } from 'app/cohort-search/constant';
@@ -173,7 +173,7 @@ interface Props {
   item: ItemProp;
   index: number;
   setSearchContext: (context: any) => void;
-  role: keyof SearchRequest;
+  role: keyof CohortDefinition;
   updateGroup: Function;
   workspace: WorkspaceData;
 }

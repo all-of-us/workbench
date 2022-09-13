@@ -108,7 +108,7 @@ interface State {
   visits: Array<Criteria>;
 }
 
-export const CohortDefinition = withRouter(
+export const CohortDefinitionComponent = withRouter(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);

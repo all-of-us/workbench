@@ -43,7 +43,8 @@ public class CohortQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     StringBuilder queryBuilder = new StringBuilder(COUNT_SQL_TEMPLATE);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
-    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    addDataFilters(
+        participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -60,7 +61,8 @@ public class CohortQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
-    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    addDataFilters(
+        participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
     String searchPersonSql = queryBuilder.toString();
 
     queryBuilder = new StringBuilder(RANDOM_SQL_TEMPLATE.replace("${innerSql}", searchPersonSql));

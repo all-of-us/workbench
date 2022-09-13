@@ -104,7 +104,8 @@ public class ChartQueryBuilder extends QueryBuilder {
             .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
-    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    addDataFilters(
+        participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
     queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
@@ -141,7 +142,8 @@ public class ChartQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     StringBuilder queryBuilder = new StringBuilder(ETHNICITY_INFO_SQL_TEMPLATE);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
-    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    addDataFilters(
+        participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
     queryBuilder.append(ETHNICITY_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
@@ -170,7 +172,8 @@ public class ChartQueryBuilder extends QueryBuilder {
     StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
     Map<String, QueryParameterValue> params = new HashMap<>();
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
-    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    addDataFilters(
+        participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
     String searchPersonSql = queryBuilder.toString();
 
     queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE);

@@ -41,6 +41,7 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CardCount;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -52,7 +53,6 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,10 +196,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public Long countParticipants(SearchRequest request) {
+  public Long countParticipants(CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request)));
+            cohortQueryBuilder.buildParticipantCounterQuery(
+                new ParticipantCriteria(cohortDefinition)));
     FieldValueList row = result.iterateAll().iterator().next();
     return row.get("count").getLongValue();
   }

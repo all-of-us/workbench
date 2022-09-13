@@ -78,8 +78,8 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -303,17 +303,17 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    dbCohort1.setCriteria(new Gson().toJson(SearchRequests.icd9CodeWithModifiers()));
+    dbCohort1.setCriteria(new Gson().toJson(CohortDefinitions.icd9CodeWithModifiers()));
     dbCohort1 = cohortDao.save(dbCohort1);
 
     dbCohort2 = new DbCohort();
     dbCohort2.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    dbCohort2.setCriteria(new Gson().toJson(SearchRequests.icd9Codes()));
+    dbCohort2.setCriteria(new Gson().toJson(CohortDefinitions.icd9Codes()));
     dbCohort2 = cohortDao.save(dbCohort2);
 
     dbCohort3 = new DbCohort();
     dbCohort3.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    dbCohort3.setCriteria(new Gson().toJson(SearchRequests.conditionPreviewCodes()));
+    dbCohort3.setCriteria(new Gson().toJson(CohortDefinitions.conditionPreviewCodes()));
     dbCohort3 = cohortDao.save(dbCohort3);
 
     when(cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))

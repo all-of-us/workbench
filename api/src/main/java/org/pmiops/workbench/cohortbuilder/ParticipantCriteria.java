@@ -5,8 +5,8 @@ import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.SearchRequest;
 
 /**
  * A class representing participants to use when querying data from a CDR version.
@@ -24,27 +24,27 @@ public class ParticipantCriteria {
 
   private static final ImmutableSet<Long> NO_PARTICIPANTS_TO_EXCLUDE = ImmutableSet.of();
 
-  private final SearchRequest searchRequest;
+  private final CohortDefinition cohortDefinition;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
   private final GenderOrSexType genderOrSexType;
   private final AgeType ageType;
 
-  public ParticipantCriteria(SearchRequest searchRequest) {
-    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE);
+  public ParticipantCriteria(CohortDefinition cohortDefinition) {
+    this(cohortDefinition, NO_PARTICIPANTS_TO_EXCLUDE);
   }
 
   public ParticipantCriteria(
-      SearchRequest searchRequest, GenderOrSexType genderOrSexType, AgeType ageType) {
-    this.searchRequest = searchRequest;
+      CohortDefinition cohortDefinition, GenderOrSexType genderOrSexType, AgeType ageType) {
+    this.cohortDefinition = cohortDefinition;
     this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
     this.participantIdsToInclude = null;
     this.genderOrSexType = genderOrSexType;
     this.ageType = ageType;
   }
 
-  public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude) {
-    this.searchRequest = searchRequest;
+  public ParticipantCriteria(CohortDefinition cohortDefinition, Set<Long> participantIdsToExclude) {
+    this.cohortDefinition = cohortDefinition;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
     this.genderOrSexType = null;
@@ -53,15 +53,15 @@ public class ParticipantCriteria {
 
   public ParticipantCriteria(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
-    this.searchRequest = null;
+    this.cohortDefinition = null;
     this.participantIdsToExclude = null;
     this.genderOrSexType = null;
     this.ageType = null;
   }
 
   @Nullable
-  public SearchRequest getSearchRequest() {
-    return searchRequest;
+  public CohortDefinition getCohortDefinition() {
+    return cohortDefinition;
   }
 
   @Nullable
@@ -87,7 +87,11 @@ public class ParticipantCriteria {
   @Override
   public int hashCode() {
     return Objects.hash(
-        searchRequest, participantIdsToExclude, participantIdsToExclude, genderOrSexType, ageType);
+        cohortDefinition,
+        participantIdsToExclude,
+        participantIdsToExclude,
+        genderOrSexType,
+        ageType);
   }
 
   @Override
@@ -96,7 +100,7 @@ public class ParticipantCriteria {
       return false;
     }
     ParticipantCriteria that = (ParticipantCriteria) obj;
-    return Objects.equals(this.searchRequest, that.searchRequest)
+    return Objects.equals(this.cohortDefinition, that.cohortDefinition)
         && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
         && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude)
         && Objects.equals(this.genderOrSexType, that.genderOrSexType)

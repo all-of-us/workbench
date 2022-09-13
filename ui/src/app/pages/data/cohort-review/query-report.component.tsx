@@ -6,18 +6,18 @@ import {
   AgeType,
   CdrVersionTiersResponse,
   Cohort,
+  CohortDefinition,
   DemoChartInfo,
   Domain,
   EthnicityInfo,
   GenderOrSexType,
-  SearchRequest,
   SortOrder,
 } from 'generated/fetch';
 
 import { ComboChart } from 'app/components/combo-chart.component';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { CohortDefinition } from 'app/pages/data/cohort-review/cohort-definition.component';
+import { CohortDefinitionComponent } from 'app/pages/data/cohort-review/cohort-definition.component';
 import { ParticipantsCharts } from 'app/pages/data/cohort-review/participants-charts';
 import {
   cohortBuilderApi,
@@ -277,7 +277,7 @@ export const QueryReport = fp.flow(
     async getRequestFromCohort() {
       const { cohort } = this.props;
       const { ns, wsid, cid, crid } = this.props.match.params;
-      let request: SearchRequest;
+      let request: CohortDefinition;
       if (cohort?.id === +cid) {
         this.setState({ cohortLoading: false });
         request = crid
@@ -300,7 +300,7 @@ export const QueryReport = fp.flow(
     async getRequestFromCohortReview() {
       const { ns, wsid, cid, crid } = this.props.match.params;
       const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.Asc };
-      let request: SearchRequest;
+      let request: CohortDefinition;
       await cohortReviewApi()
         .getParticipantCohortStatuses(ns, wsid, +cid, +crid, filterRequest)
         .then(({ cohortReview }) => {
@@ -410,7 +410,7 @@ export const QueryReport = fp.flow(
                           <div style={styles.queryContent}>{cdrName}</div>
                         </div>
                         <div style={columns.col12}>
-                          <CohortDefinition cohort={cohort} />
+                          <CohortDefinitionComponent cohort={cohort} />
                         </div>
                       </div>
                     </div>

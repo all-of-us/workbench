@@ -67,6 +67,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataDictionaryEntry;
@@ -84,7 +85,6 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -549,16 +549,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @VisibleForTesting
   public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(DbCohort cohortDbModel) {
-    String cohortDefinition = cohortDbModel.getCriteria();
-    if (cohortDefinition == null) {
+    String dbCohortDescription = cohortDbModel.getCriteria();
+    if (dbCohortDescription == null) {
       throw new NotFoundException(
           String.format(
               "Not Found: No Cohort definition matching cohortId: %s",
               cohortDbModel.getCohortId()));
     }
-    final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
+    final CohortDefinition cohortDefinition =
+        new Gson().fromJson(dbCohortDescription, CohortDefinition.class);
     final QueryJobConfiguration participantIdQuery =
-        cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
+        cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(cohortDefinition));
     final AtomicReference<String> participantQuery =
         new AtomicReference<>(participantIdQuery.getQuery());
     final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder =
@@ -1227,17 +1228,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       participantCriteriaList =
           ImmutableList.of(
               new ParticipantCriteria(
-                  new SearchRequest().addIncludesItem(createHasWgsSearchGroup())));
+                  new CohortDefinition().addIncludesItem(createHasWgsSearchGroup())));
     } else {
       participantCriteriaList =
           this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
               .map(
                   cohort -> {
-                    final SearchRequest searchRequest =
-                        new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
+                    final CohortDefinition cohortDefinition =
+                        new Gson().fromJson(cohort.getCriteria(), CohortDefinition.class);
                     // AND the existing search criteria with participants having genomics data.
-                    searchRequest.addIncludesItem(createHasWgsSearchGroup());
-                    return new ParticipantCriteria(searchRequest);
+                    cohortDefinition.addIncludesItem(createHasWgsSearchGroup());
+                    return new ParticipantCriteria(cohortDefinition);
                   })
               .collect(Collectors.toList());
     }

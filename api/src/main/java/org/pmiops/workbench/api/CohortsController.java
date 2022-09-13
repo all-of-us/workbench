@@ -25,10 +25,10 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -93,7 +93,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     try {
       // validate the cohort definition
-      new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
+      new Gson().fromJson(cohort.getCriteria(), CohortDefinition.class);
     } catch (JsonSyntaxException e) {
       throw new ServerErrorException(
           String.format(

@@ -66,6 +66,7 @@ import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -74,10 +75,9 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,8 +158,8 @@ public class DataSetServiceTest {
   }
 
   private DbCohort buildSimpleCohort(DbWorkspace workspace) {
-    final SearchRequest searchRequest = SearchRequests.males();
-    final String cohortCriteria = new Gson().toJson(searchRequest);
+    final CohortDefinition cohortDefinition = CohortDefinitions.males();
+    final String cohortCriteria = new Gson().toJson(cohortDefinition);
 
     final DbCohort cohortDbModel = new DbCohort();
     cohortDbModel.setType("foo");

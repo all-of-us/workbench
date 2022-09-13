@@ -7,6 +7,7 @@ import java.util.Set;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CardCount;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
@@ -15,7 +16,6 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 
@@ -48,7 +48,7 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaByDomainIdAndConceptIds(
       String domainId, Collection<Long> sourceConceptIds, Collection<Long> standardConceptIds);
 
-  Long countParticipants(SearchRequest request);
+  Long countParticipants(CohortDefinition cohortDefinition);
 
   List<AgeTypeCount> findAgeTypeCounts();
 

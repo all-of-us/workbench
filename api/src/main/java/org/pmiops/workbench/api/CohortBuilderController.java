@@ -16,6 +16,7 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
 import org.pmiops.workbench.model.CardCountResponse;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
@@ -29,7 +30,6 @@ import org.pmiops.workbench.model.DomainCardResponse;
 import org.pmiops.workbench.model.EthnicityInfoListResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -148,17 +148,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   /**
    * This method will return a count of unique subjects defined by the provided {@link
-   * SearchRequest}.
+   * CohortDefinition}.
    */
   @Override
   public ResponseEntity<Long> countParticipants(
-      String workspaceNamespace, String workspaceId, SearchRequest request) {
+      String workspaceNamespace, String workspaceId, CohortDefinition cohortDefinition) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     try {
-      return ResponseEntity.ok(cohortBuilderService.countParticipants(request));
+      return ResponseEntity.ok(cohortBuilderService.countParticipants(cohortDefinition));
     } catch (DeadlineExceededException exception) {
-      log.severe("searchRequest:\n" + new Gson().toJson(request));
+      log.severe("cohortDefinition:\n" + new Gson().toJson(cohortDefinition));
       throw exception;
     }
   }
@@ -237,29 +237,29 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceId,
       String genderOrSex,
       String age,
-      SearchRequest request) {
+      CohortDefinition cohortDefinition) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     GenderOrSexType genderOrSexType = validateGenderOrSexType(genderOrSex);
     AgeType ageType = validateAgeType(age);
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
-    if (request.getIncludes().isEmpty()) {
+    if (cohortDefinition.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
     return ResponseEntity.ok(
-        response.items(chartService.findDemoChartInfo(genderOrSexType, ageType, request)));
+        response.items(chartService.findDemoChartInfo(genderOrSexType, ageType, cohortDefinition)));
   }
 
   @Override
   public ResponseEntity<EthnicityInfoListResponse> findEthnicityInfo(
-      String workspaceNamespace, String workspaceId, SearchRequest request) {
+      String workspaceNamespace, String workspaceId, CohortDefinition cohortDefinition) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     EthnicityInfoListResponse response = new EthnicityInfoListResponse();
-    if (request.getIncludes().isEmpty()) {
+    if (cohortDefinition.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
-    return ResponseEntity.ok(response.items(chartService.findEthnicityInfo(request)));
+    return ResponseEntity.ok(response.items(chartService.findEthnicityInfo(cohortDefinition)));
   }
 
   @Override
@@ -386,7 +386,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceId,
       String domain,
       Integer limit,
-      SearchRequest request) {
+      CohortDefinition cohortDefinition) {
 
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
@@ -398,14 +398,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    long count = cohortBuilderService.countParticipants(request);
+    long count = cohortBuilderService.countParticipants(cohortDefinition);
 
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
             .count(count)
             .items(
                 chartService.findCohortChartData(
-                    request, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
+                    cohortDefinition,
+                    Objects.requireNonNull(Domain.fromValue(domain)),
+                    chartLimit)));
   }
 
   protected void validateDomain(String domain) {
