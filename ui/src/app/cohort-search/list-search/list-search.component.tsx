@@ -427,7 +427,7 @@ export const ListSearch = fp.flow(
             inputErrors: ['Minimum criteria search length is two characters'],
           });
         } else {
-          const inputErrors = validateInputForMySQL(value);
+          const inputErrors = validateInputForMySQL(value, searchTrigger);
           if (inputErrors.length > 0) {
             this.setState({ inputErrors });
           } else {

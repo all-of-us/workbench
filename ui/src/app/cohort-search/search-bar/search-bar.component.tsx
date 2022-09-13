@@ -229,7 +229,7 @@ export class SearchBar extends React.Component<Props, State> {
     if (input.trim().length < searchTrigger) {
       this.setState({ inputErrors: [], options: null });
     } else {
-      const inputErrors = validateInputForMySQL(input);
+      const inputErrors = validateInputForMySQL(input, searchTrigger);
       if (inputErrors.length > 0) {
         this.setState({ inputErrors, options: null });
       } else {

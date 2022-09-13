@@ -108,6 +108,7 @@ const styles = reactStyles({
   },
 });
 
+const searchTrigger = 2;
 const searchTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
     The following special operators can be used to augment search terms:
@@ -375,7 +376,7 @@ export const ConceptHomepage = fp.flow(
         if (currentInputString.trim().length < 3) {
           this.setState({ inputErrors: [], showSearchError: true });
         } else {
-          const inputErrors = validateInputForMySQL(currentInputString);
+          const inputErrors = validateInputForMySQL(currentInputString, searchTrigger);
           this.setState({ inputErrors, showSearchError: false });
           if (inputErrors.length === 0) {
             this.setState({ currentSearchString: currentInputString }, () => {
