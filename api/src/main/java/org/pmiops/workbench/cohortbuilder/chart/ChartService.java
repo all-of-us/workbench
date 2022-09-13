@@ -2,7 +2,14 @@ package org.pmiops.workbench.cohortbuilder.chart;
 
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.CohortChartData;
+import org.pmiops.workbench.model.CohortDefinition;
+import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.EthnicityInfo;
+import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.ParticipantChartData;
 
 public interface ChartService {
 

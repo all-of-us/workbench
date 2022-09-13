@@ -7,7 +7,14 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.CohortChartData;
+import org.pmiops.workbench.model.CohortDefinition;
+import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.EthnicityInfo;
+import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.ParticipantChartData;
 import org.springframework.stereotype.Service;
 
 @Service

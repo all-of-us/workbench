@@ -1,7 +1,18 @@
 package org.pmiops.workbench.test;
 
 import java.util.Arrays;
-import org.pmiops.workbench.model.*;
+
+import org.pmiops.workbench.model.CohortDefinition;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
+import org.pmiops.workbench.model.TemporalTime;
 
 public class CohortDefinitions {
 
