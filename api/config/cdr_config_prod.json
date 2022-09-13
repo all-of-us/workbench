@@ -134,7 +134,8 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsHailStoragePath": "wgs/hail.mt",
       "microarrayHailStoragePath": "microarray/hail.mt",
-      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
+      "microarrayVcfSingleSampleStoragePath": "",
+      "microarrayVcfManifestPath": "microarray/vcf/single_sample/manifest.csv"
     },
     {
       "cdrVersionId": 9,
