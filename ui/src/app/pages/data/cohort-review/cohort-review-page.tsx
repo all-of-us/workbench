@@ -222,7 +222,7 @@ export const CohortReviewPage = fp.flow(
   const onReviewCreate = (review: CohortReview) => {
     updateUrlWithCohortReviewId(review.cohortReviewId);
     currentCohortReviewStore.next(review);
-    setCohortReviews((prevCohortReviews) => [...prevCohortReviews, review]);
+    setCohortReviews((prevCohortReviews) => [review, ...prevCohortReviews]);
     setActiveReview(review);
     setShowCreateModal(false);
   };
