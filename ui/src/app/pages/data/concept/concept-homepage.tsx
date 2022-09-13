@@ -373,10 +373,13 @@ export const ConceptHomepage = fp.flow(
       const { currentInputString } = this.state;
       // search on enter key if no forbidden characters are present
       if (e.key === 'Enter') {
-        if (currentInputString.trim().length < 3) {
+        if (currentInputString.trim().length < searchTrigger) {
           this.setState({ inputErrors: [], showSearchError: true });
         } else {
-          const inputErrors = validateInputForMySQL(currentInputString, searchTrigger);
+          const inputErrors = validateInputForMySQL(
+            currentInputString,
+            searchTrigger
+          );
           this.setState({ inputErrors, showSearchError: false });
           if (inputErrors.length === 0) {
             this.setState({ currentSearchString: currentInputString }, () => {
