@@ -10,7 +10,7 @@
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.7",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.9",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
