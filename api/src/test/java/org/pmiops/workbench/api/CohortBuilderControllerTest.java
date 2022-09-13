@@ -145,7 +145,9 @@ public class CohortBuilderControllerTest {
     stubBigQueryCallThrowDeadlineExceededException();
     assertThrows(
         DeadlineExceededException.class,
-        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, new CohortDefinition()));
+        () ->
+            controller.countParticipants(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, new CohortDefinition()));
   }
 
   @Test

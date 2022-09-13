@@ -184,7 +184,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   public Long countParticipants(CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(cohortDefinition)));
+            cohortQueryBuilder.buildParticipantCounterQuery(
+                new ParticipantCriteria(cohortDefinition)));
     FieldValueList row = result.iterateAll().iterator().next();
     return row.get("count").getLongValue();
   }

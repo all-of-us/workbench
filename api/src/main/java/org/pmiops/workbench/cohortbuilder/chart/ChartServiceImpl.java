@@ -33,7 +33,7 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<CohortChartData> findCohortChartData(
-          CohortDefinition cohortDefinition, Domain domain, int limit) {
+      CohortDefinition cohortDefinition, Domain domain, int limit) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDomainChartInfoCounterQuery(
@@ -54,7 +54,7 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-          GenderOrSexType genderOrSexType, AgeType ageType, CohortDefinition cohortDefinition) {
+      GenderOrSexType genderOrSexType, AgeType ageType, CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
@@ -76,7 +76,8 @@ public class ChartServiceImpl implements ChartService {
   public List<EthnicityInfo> findEthnicityInfo(CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            chartQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(cohortDefinition)));
+            chartQueryBuilder.buildEthnicityInfoCounterQuery(
+                new ParticipantCriteria(cohortDefinition)));
 
     return cohortBuilderMapper.tableResultToEthnicityInfo(result);
   }

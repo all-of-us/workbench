@@ -35,7 +35,7 @@ public class ParticipantCriteria {
   }
 
   public ParticipantCriteria(
-          CohortDefinition cohortDefinition, GenderOrSexType genderOrSexType, AgeType ageType) {
+      CohortDefinition cohortDefinition, GenderOrSexType genderOrSexType, AgeType ageType) {
     this.cohortDefinition = cohortDefinition;
     this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
     this.participantIdsToInclude = null;
@@ -87,7 +87,11 @@ public class ParticipantCriteria {
   @Override
   public int hashCode() {
     return Objects.hash(
-            cohortDefinition, participantIdsToExclude, participantIdsToExclude, genderOrSexType, ageType);
+        cohortDefinition,
+        participantIdsToExclude,
+        participantIdsToExclude,
+        genderOrSexType,
+        ageType);
   }
 
   @Override

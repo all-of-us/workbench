@@ -1097,7 +1097,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     // matches icd9SGI in group 0 and icd10SGI in group 1
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
@@ -1138,7 +1139,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_BEFORE)
             .timeValue(5L);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
@@ -1168,7 +1170,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
@@ -1196,7 +1199,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.WITHIN_X_DAYS_OF)
             .timeValue(5L);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
@@ -1222,7 +1226,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .mention(TemporalMention.FIRST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
@@ -1249,7 +1254,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
@@ -1281,7 +1287,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
@@ -1314,7 +1321,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    CohortDefinition cohortDefinition = new CohortDefinition().includes(ImmutableList.of(temporalGroup));
+    CohortDefinition cohortDefinition =
+        new CohortDefinition().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);
@@ -1421,7 +1429,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsDemoGender() {
     CohortDefinition cohortDefinition =
-        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
@@ -1429,7 +1438,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsDemoRace() {
     CohortDefinition cohortDefinition =
-        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
@@ -1533,7 +1543,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
 
     CohortDefinition cohortDefinition =
-        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
 
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
@@ -1563,7 +1574,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
     CohortDefinition cohortDefinition =
-        createCohortDefinition(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
     cohortDefinition.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(

@@ -538,7 +538,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               "Not Found: No Cohort definition matching cohortId: %s",
               cohortDbModel.getCohortId()));
     }
-    final CohortDefinition cohortDefinition = new Gson().fromJson(dbCohortDescription, CohortDefinition.class);
+    final CohortDefinition cohortDefinition =
+        new Gson().fromJson(dbCohortDescription, CohortDefinition.class);
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(cohortDefinition));
     final AtomicReference<String> participantQuery =

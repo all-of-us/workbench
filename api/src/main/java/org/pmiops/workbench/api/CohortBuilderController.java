@@ -12,7 +12,27 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.AgeTypeCountListResponse;
+import org.pmiops.workbench.model.CardCountResponse;
+import org.pmiops.workbench.model.CohortChartDataListResponse;
+import org.pmiops.workbench.model.CohortDefinition;
+import org.pmiops.workbench.model.CriteriaAttributeListResponse;
+import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.CriteriaListWithCountResponse;
+import org.pmiops.workbench.model.CriteriaMenuListResponse;
+import org.pmiops.workbench.model.CriteriaRequest;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DataFiltersResponse;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCardResponse;
+import org.pmiops.workbench.model.EthnicityInfoListResponse;
+import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.model.SurveysResponse;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -385,7 +405,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .count(count)
             .items(
                 chartService.findCohortChartData(
-                    cohortDefinition, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
+                    cohortDefinition,
+                    Objects.requireNonNull(Domain.fromValue(domain)),
+                    chartLimit)));
   }
 
   protected void validateDomain(String domain) {
