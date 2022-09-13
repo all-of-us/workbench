@@ -7,14 +7,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.CohortChartData;
-import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EthnicityInfo;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.ParticipantChartData;
-import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,11 +33,11 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<CohortChartData> findCohortChartData(
-      SearchRequest searchRequest, Domain domain, int limit) {
+          CohortDefinition cohortDefinition, Domain domain, int limit) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDomainChartInfoCounterQuery(
-                new ParticipantCriteria(searchRequest), domain, limit));
+                new ParticipantCriteria(cohortDefinition), domain, limit));
 
     return cohortBuilderMapper.tableResultToCohortChartData(result);
   }
@@ -61,11 +54,11 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
+          GenderOrSexType genderOrSexType, AgeType ageType, CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(request, genderOrSexType, ageType)));
+                new ParticipantCriteria(cohortDefinition, genderOrSexType, ageType)));
 
     return cohortBuilderMapper.tableResultToDemoChartInfo(result);
   }
@@ -80,10 +73,10 @@ public class ChartServiceImpl implements ChartService {
   }
 
   @Override
-  public List<EthnicityInfo> findEthnicityInfo(SearchRequest request) {
+  public List<EthnicityInfo> findEthnicityInfo(CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            chartQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(request)));
+            chartQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(cohortDefinition)));
 
     return cohortBuilderMapper.tableResultToEthnicityInfo(result);
   }

@@ -39,22 +39,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
-import org.pmiops.workbench.model.AgeTypeCount;
-import org.pmiops.workbench.model.CardCount;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaAttribute;
-import org.pmiops.workbench.model.CriteriaListWithCountResponse;
-import org.pmiops.workbench.model.CriteriaMenu;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.FilterColumns;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SurveyModule;
-import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -196,10 +181,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public Long countParticipants(SearchRequest request) {
+  public Long countParticipants(CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request)));
+            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(cohortDefinition)));
     FieldValueList row = result.iterateAll().iterator().next();
     return row.get("count").getLongValue();
   }

@@ -50,21 +50,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.AgeTypeCount;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaAttribute;
-import org.pmiops.workbench.model.CriteriaSubType;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SurveyModule;
-import org.pmiops.workbench.model.SurveyVersion;
-import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,7 +145,7 @@ public class CohortBuilderControllerTest {
     stubBigQueryCallThrowDeadlineExceededException();
     assertThrows(
         DeadlineExceededException.class,
-        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, new SearchRequest()));
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, new CohortDefinition()));
   }
 
   @Test

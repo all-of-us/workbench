@@ -44,19 +44,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortStatus;
-import org.pmiops.workbench.model.ParticipantData;
-import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.Vocabulary;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
@@ -367,12 +355,12 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public List<DbParticipantCohortStatus> createDbParticipantCohortStatusesList(
       DbCohort dbCohort, Integer requestSize, Long cohortReviewId) {
-    SearchRequest searchRequest =
-        new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
+    CohortDefinition cohortDefinition =
+        new Gson().fromJson(getCohortDefinition(dbCohort), CohortDefinition.class);
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             cohortQueryBuilder.buildRandomParticipantQuery(
-                new ParticipantCriteria(searchRequest), requestSize, 0L));
+                new ParticipantCriteria(cohortDefinition), requestSize, 0L));
 
     return participantCohortStatusMapper.tableResultToDbParticipantCohortStatus(
         result, cohortReviewId);
@@ -407,10 +395,10 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public Long participationCount(DbCohort dbCohort) {
-    SearchRequest request = new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
+    CohortDefinition cohortDefinition = new Gson().fromJson(getCohortDefinition(dbCohort), CohortDefinition.class);
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request)));
+            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(cohortDefinition)));
     FieldValueList row = result.iterateAll().iterator().next();
     return row.get("count").getLongValue();
   }

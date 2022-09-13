@@ -71,20 +71,14 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.DuplicateCohortRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -137,7 +131,7 @@ public class CohortsControllerTest {
   Workspace workspace;
   Workspace workspace2;
   DbCdrVersion cdrVersion;
-  SearchRequest searchRequest;
+  CohortDefinition cohortDefinition;
   String cohortCriteria;
   String badCohortCriteria;
 
@@ -257,8 +251,8 @@ public class CohortsControllerTest {
     cdrVersion.setName(CDR_VERSION_NAME);
     cdrVersionDao.save(cdrVersion);
 
-    searchRequest = SearchRequests.males();
-    cohortCriteria = new Gson().toJson(searchRequest);
+    cohortDefinition = CohortDefinitions.males();
+    cohortCriteria = new Gson().toJson(cohortDefinition);
     badCohortCriteria =
         "{\n"
             + "  \"includes\": [\n"

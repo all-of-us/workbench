@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 
 import {
   AgeType,
+  CohortDefinition,
   CriteriaSubType,
   CriteriaType,
   Domain,
@@ -9,7 +10,6 @@ import {
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
-  SearchRequest,
   TemporalMention,
   TemporalTime,
 } from 'generated/fetch';
@@ -399,7 +399,7 @@ export function mapRequest(sr: any) {
       }
       return acc;
     }, []);
-  return <SearchRequest>{
+  return <CohortDefinition>{
     includes: grpFilter('includes'),
     excludes: grpFilter('excludes'),
     dataFilters: sr.dataFilters,

@@ -3,9 +3,9 @@ import * as fp from 'lodash/fp';
 
 import {
   CdrVersionTiersResponse,
+  CohortDefinition,
   CriteriaMenu,
   Domain,
-  SearchRequest,
 } from 'generated/fetch';
 
 import { CohortCriteriaMenu } from 'app/cohort-search/cohort-criteria-menu';
@@ -105,7 +105,7 @@ function mapMenuItem(item: CriteriaMenu) {
 interface Props {
   groups: Array<any>;
   setSearchContext: (context: any) => void;
-  role: keyof SearchRequest;
+  role: keyof CohortDefinition;
   updated: number;
   updateRequest: Function;
   workspace: WorkspaceData;

@@ -170,7 +170,7 @@ import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -549,7 +549,7 @@ public class WorkspacesControllerTest {
   public Cohort createDefaultCohort(String name) {
     Cohort cohort = new Cohort();
     cohort.setName(name);
-    cohort.setCriteria(new Gson().toJson(SearchRequests.males()));
+    cohort.setCriteria(new Gson().toJson(CohortDefinitions.males()));
     return cohort;
   }
 

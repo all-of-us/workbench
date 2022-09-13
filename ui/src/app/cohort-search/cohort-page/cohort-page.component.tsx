@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Prompt, RouteComponentProps, withRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 
-import { Cohort, SearchRequest } from 'generated/fetch';
+import { Cohort, CohortDefinition } from 'generated/fetch';
 
 import { CohortSearch } from 'app/cohort-search/cohort-search/cohort-search.component';
 import { ListOverview } from 'app/cohort-search/overview/overview.component';
@@ -64,7 +64,7 @@ const clearCohort = () => {
     includes: [],
     excludes: [],
     dataFilters: [],
-  } as SearchRequest);
+  } as CohortDefinition);
   localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
 };
 
@@ -79,7 +79,7 @@ interface State {
   cohort: Cohort;
   cohortChanged: boolean;
   cohortError: boolean;
-  criteria: SearchRequest;
+  criteria: CohortDefinition;
   loading: boolean;
   minHeight: string;
   overview: boolean;
