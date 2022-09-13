@@ -22,7 +22,7 @@ import {
   StyledExternalLink,
 } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ClrIcon } from 'app/components/icons';
+import { ClrIcon, InfoIcon } from 'app/components/icons';
 import { CheckBox, RadioButton } from 'app/components/inputs';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
@@ -1255,7 +1255,17 @@ const DataProcConfigSelector = ({
         </FlexRow>
         <FlexRow style={styles.labelAndInput}>
           <label style={styles.label} htmlFor='num-preemptible'>
-            Preemptible
+            Preemptible workers
+            <TooltipTrigger
+              content='Preemptible secondary workers can be added in addition to
+                primary workers. They are less expensive than primary workers
+                but may be removed from the cluster if they are required by
+                Google Cloud for other tasks. This may affect job stability'
+            >
+              <InfoIcon
+                style={{ marginLeft: '0.1rem', height: '18px', width: '18px' }}
+              />
+            </TooltipTrigger>
           </label>
           <InputNumber
             id='num-preemptible'
