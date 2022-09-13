@@ -1,7 +1,6 @@
 package org.pmiops.workbench.test;
 
 import java.util.Arrays;
-
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
