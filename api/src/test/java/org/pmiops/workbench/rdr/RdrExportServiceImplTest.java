@@ -305,7 +305,6 @@ public class RdrExportServiceImplTest {
     assertThat(expectedNoSurvey.getDemographicSurveyV2()).isNull();
 
     verify(rdrExportService, times(1)).updateDbRdrExport(RdrEntity.USER, userIds);
-    verify(mockRdrApi).exportResearchers(Collections.singletonList(expectedNoSurvey), backfill);
   }
 
   @Test
