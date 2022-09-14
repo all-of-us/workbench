@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
+import org.pmiops.workbench.model.CriteriaSearchRequest;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.Domain;
@@ -313,40 +314,43 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public CriteriaListWithCountResponse findCriteriaByDomain(
-      String domain, String term, String surveyName, Boolean standard, Integer limit) {
-    PageRequest pageRequest =
-        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+  public CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request) {
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
 
     // if search term is empty find the top counts for the domain
-    if (isTopCountsSearch(term)) {
-      return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
+    if (isTopCountsSearch(request.getTerm())) {
+      return getTopCountsSearchWithStandard(request, pageRequest);
     }
-    String modifiedSearchTerm = modifyTermMatch(term);
+    String modifiedSearchTerm = modifyTermMatch(request.getTerm());
     // if the modified search term is empty return an empty result
     if (modifiedSearchTerm.isEmpty()) {
       return new CriteriaListWithCountResponse().totalCount(0L);
     }
 
     // if domain type is survey then search survey by term.
-    if (isSurveyDomain(domain)) {
-      return findSurveyCriteriaBySearchTerm(surveyName, pageRequest, modifiedSearchTerm);
+    if (isSurveyDomain(request.getDomain())) {
+      return findSurveyCriteriaBySearchTerm(
+          request.getSurveyName(), pageRequest, modifiedSearchTerm);
     }
 
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            domain,
-            term.replaceAll("[()+\"*-]", ""),
-            standard,
+            request.getDomain(),
+            request.getTerm().replaceAll("[()+\"*-]", ""),
+            request.getStandard(),
             CriteriaType.NONE.toString(),
             pageRequest);
 
     // if no match is found on concept code then find match on full text index by term
-    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+    if (dbCriteriaPage.getContent().isEmpty() && !request.getTerm().contains(".")) {
       dbCriteriaPage =
           cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandardAndNotType(
-              domain, modifiedSearchTerm, standard, CriteriaType.NONE.toString(), pageRequest);
+              request.getDomain(),
+              modifiedSearchTerm,
+              request.getStandard(),
+              CriteriaType.NONE.toString(),
+              pageRequest);
     }
 
     return new CriteriaListWithCountResponse()
@@ -358,26 +362,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public CriteriaListWithCountResponse findCriteriaByDomainV2(
-      String domain,
-      String term,
-      String surveyName,
-      Boolean standard,
-      Boolean removeDrugBrand,
-      Integer limit) {
-    PageRequest pageRequest =
-        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+  public CriteriaListWithCountResponse findCriteriaByDomainV2(CriteriaSearchRequest request) {
+    boolean removeDrugBrand = request.getRemoveDrugBrand();
+    PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
 
     // if search term is empty find the top counts for the domain
-    if (isTopCountsSearch(term)) {
-      return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
+    if (isTopCountsSearch(request.getTerm())) {
+      return getTopCountsSearchWithStandard(request, pageRequest);
     }
 
-    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
+    SearchTerm searchTerm =
+        new SearchTerm(request.getTerm(), mySQLStopWordsProvider.get().getStopWords());
 
     // check survey domain before checking for match on concept code
-    if (isSurveyDomain(domain)) {
-      return findSurveyCriteriaBySearchTermV2(surveyName, searchTerm, pageRequest);
+    if (isSurveyDomain(request.getDomain())) {
+      return findSurveyCriteriaBySearchTermV2(request.getSurveyName(), searchTerm, pageRequest);
     }
 
     // if we need to remove brand names(only applies to drug) use brand type otherwise use none
@@ -387,7 +386,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            domain, term.replaceAll("[()+\"*-]", ""), standard, type, pageRequest);
+            request.getDomain(),
+            request.getTerm().replaceAll("[()+\"*-]", ""),
+            request.getStandard(),
+            type,
+            pageRequest);
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
     // this needs ot be here since word length of <3 are filtered and there are 2-concept codes
@@ -397,9 +400,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     }
 
     // if no match is found on concept code then find match on full text index by term
-    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+    if (dbCriteriaPage.getContent().isEmpty() && !request.getTerm().contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomain(domain, searchTerm, standard, type, pageRequest);
+          cbCriteriaDao.findCriteriaByDomain(
+              request.getDomain(), searchTerm, request.getStandard(), type, pageRequest);
     }
 
     return new CriteriaListWithCountResponse()
@@ -717,13 +721,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
-      String domain, String surveyName, Boolean standard, PageRequest pageRequest) {
+      CriteriaSearchRequest request, PageRequest pageRequest) {
     Page<DbCriteria> dbCriteriaPage;
-    if (isSurveyDomain(domain)) {
-      Long id = cbCriteriaDao.findSurveyId(surveyName);
+    if (isSurveyDomain(request.getDomain())) {
+      Long id = cbCriteriaDao.findSurveyId(request.getSurveyName());
       dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByPath(id, pageRequest);
     } else {
-      dbCriteriaPage = cbCriteriaDao.findCriteriaTopCountsByStandard(domain, standard, pageRequest);
+      dbCriteriaPage =
+          cbCriteriaDao.findCriteriaTopCountsByStandard(
+              request.getDomain(), request.getStandard(), pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(

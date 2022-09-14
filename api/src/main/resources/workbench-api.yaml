@@ -3557,46 +3557,23 @@ paths:
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-    get:
+    post:
       tags:
         - cohortBuilder
-      description: 'Returns a collection of criteria per search term'
+      consumes:
+        - application/json
+      description: Returns a collection of criteria per search term.
       operationId: findCriteriaByDomain
       parameters:
-        - in: path
-          name: domain
-          type: string
+        - in: body
+          name: request
           required: true
-          description: the specific type of domain
-        - in: path
-          name: standard
-          type: boolean
-          required: true
-          description: True if standard else false
-        - in: query
-          name: term
-          type: string
-          required: true
-          description: the term to search for
-        - in: query
-          name: surveyName
-          type: string
-          required: false
-          description: name for the survey to search
-        - in: query
-          name: removeDrugBrand
-          type: boolean
-          default: false
-          required: false
-          description: True - remove brand names from results
-        - in: query
-          name: limit
-          type: integer
-          required: false
-          description: number of criteria matches to return
+          description: CriteriaSearchRequest body
+          schema:
+            "$ref": "#/definitions/CriteriaSearchRequest"
       responses:
         200:
-          description: A collection of criteria
+          description: A collection of criteria.
           schema:
             "$ref": "#/definitions/CriteriaListWithCountResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{conceptId}":
@@ -8091,6 +8068,30 @@ definitions:
         description: item count
         type: integer
         format: int64
+  CriteriaSearchRequest:
+    type: object
+    required:
+      - domain
+      - standard
+      - term
+    properties:
+      domain:
+        description: The omop domain that this criteria belongs to
+        type: string
+      standard:
+        description: flag that determines standard or source
+        type: boolean
+        default: false
+      term:
+        description: the term to search for
+        type: string
+      surveyName:
+        description: name for the survey to search
+        type: string
+      removeDrugBrand:
+        description: True - remove brand names from results
+        type: boolean
+        default: false
   CohortDefinition:
     description: 'The CohortDefinition describes the state of the Cohort Builder at any
       given moment. It contains two keys, `include` and `exclude`, each of which specifies

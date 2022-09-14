@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
+import org.pmiops.workbench.model.CriteriaSearchRequest;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DomainCard;
@@ -64,16 +65,9 @@ public interface CohortBuilderService {
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
-  CriteriaListWithCountResponse findCriteriaByDomain(
-      String domain, String term, String surveyName, Boolean standard, Integer limit);
+  CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request);
 
-  CriteriaListWithCountResponse findCriteriaByDomainV2(
-      String domain,
-      String term,
-      String surveyName,
-      Boolean standard,
-      Boolean removeDrugBrand,
-      Integer limit);
+  CriteriaListWithCountResponse findCriteriaByDomainV2(CriteriaSearchRequest request);
 
   List<CriteriaMenu> findCriteriaMenuByParentId(long parentId);
 
