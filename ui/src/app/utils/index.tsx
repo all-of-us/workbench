@@ -538,14 +538,17 @@ export function validateInputForMySQL(
   }
   // check each endsWith term - terms that start with *
   searchString.split(' ').forEach((word) => {
-    if (word.substring(1).length < searchTrigger && word.startsWith('*')) {
-      inputErrors.add(
-        `Minimum criteria search length for ends with term is two characters after '*' [${word}]`
-      );
-    }
+    // consecutive special chars
     if (word.match(/[+*-]{2,}|^\*.*[+*-]$/)) {
       inputErrors.add(
         `Search term cannot contain consecutive special characters [${word}]`
+      );
+    }
+    // length of every word without the special chars mut be >= searchTrigger
+    // for hyphenated word there will be at least 2 letters, if hyphen is removed
+    if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
+      inputErrors.add(
+        `Search term length must be atleast ${searchTrigger} characters without special characters [${word}]`
       );
     }
   });
