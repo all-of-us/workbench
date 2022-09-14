@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class SearchTerm {
 
-  private static final int MIN_TERM_LENGTH_NO_SPECIAL_CHAR = 3;
+  private static final int MIN_TERM_LENGTH_NO_SPECIAL_CHAR = 2;
   private final String term;
   private String modifiedTerm;
   private List<String> endsWithTerms;
@@ -51,7 +51,6 @@ public class SearchTerm {
 
   private void parseTermForSearch() {
     List<String> parsedTerms = new ArrayList<>();
-    final String stopWordPattern = String.join("|", stopWords);
     // add quoted pattern to the list of modifiedTerms
     final String quotedPattern = "([+-]?\\\"[^\\\"]*\\\")";
     Pattern pattern = Pattern.compile(quotedPattern);
@@ -62,20 +61,25 @@ public class SearchTerm {
     // remove the quoted phrase/pattern
     List<String> words =
         new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
-    // process endsWith words
-    final String endsWithPattern = "[+-]?\\*\\w+[^a-z0-9]*";
+    // remove words that start with multiple special chars
+    Pattern specialChars = Pattern.compile("[+\\*|\\-]{2,}|^\\*.*[+\\*\\-]$");
+    words =
+        words.stream()
+            .filter(word -> !specialChars.matcher(word).find())
+            .collect(Collectors.toList());
+
     List<String> endsWith =
         words.stream()
-            .filter(word -> word.toLowerCase().matches(endsWithPattern))
-            .filter(word -> !(word.contains("+") || word.contains("-") || word.endsWith("*")))
+            // .filter(word -> word.toLowerCase().matches(endsWithPattern))
+            .filter(word -> word.startsWith("*"))
             .map(word -> word.replaceAll("\\*", "%"))
             .map(word -> word.replaceAll("([\\.\\?])", "\\\\$1"))
             .collect(Collectors.toList());
+
     // now process non-endsWith words
-    words =
-        words.stream().filter(word -> !word.matches(endsWithPattern)).collect(Collectors.toList());
+    words = words.stream().filter(word -> !word.startsWith("*")).collect(Collectors.toList());
+
     words.stream()
-        .filter(word -> !word.startsWith("*"))
         .forEach(
             word -> {
               if (word.matches("-\\w+(-\\w+)+")) {
@@ -100,16 +104,18 @@ public class SearchTerm {
             });
 
     // filter: any parsed words that are stop words criteria
+    final String stopWordPattern = "^(" + String.join(")$|^(", stopWords) + ")$";
     // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
     this.endsWithTerms =
         endsWith.stream()
-            .filter(w -> !w.replaceAll("[+%-]", "").toLowerCase().matches(stopWordPattern))
+            .filter(w -> !w.replaceAll("[+-]", "").toLowerCase().matches(stopWordPattern))
             .filter(w -> w.replaceAll("[+%-]", "").length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
             .collect(Collectors.toList());
 
     // fix multiple occurrence of +/-/*
     // filter: any parsed words that are stop words criteria
     // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
+
     this.modifiedTerm =
         parsedTerms.stream()
             .map(x -> x.replaceAll("\\++", "\\+"))

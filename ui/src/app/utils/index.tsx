@@ -498,7 +498,10 @@ export const withAsyncErrorHandling = fp.curry(
 
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unclosed "", trailing + or -, and breaking special characters.
-export function validateInputForMySQL(searchString: string): Array<string> {
+export function validateInputForMySQL(
+  searchString: string,
+  searchTrigger: number
+): Array<string> {
   const inputErrors = new Set<string>(); // use Set to prevent duplicate messages
   let unclosedQuotes = false;
   for (let i = 0; i < searchString.length; i++) {
@@ -533,6 +536,27 @@ export function validateInputForMySQL(searchString: string): Array<string> {
     // unclosed quote
     inputErrors.add('There is an unclosed " in the search string');
   }
+  // check each endsWith term - terms that start with *
+  searchString.split(' ').forEach((word) => {
+    // consecutive special chars
+    if (word.match(/[+*-]{2,}/)) {
+      inputErrors.add(
+        `Search term [${word}] cannot contain consecutive special characters `
+      );
+    }
+    if (word.match(/^\*.*\*$/)) {
+      inputErrors.add(
+        `Search term [${word}] cannot start and end in wild character '*'`
+      );
+    }
+    // length of every word without the special chars mut be >= searchTrigger
+    // for hyphenated word there will be at least 2 letters, if hyphen is removed
+    if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
+      inputErrors.add(
+        `Search term [${word}] length must be at least ${searchTrigger} characters without special characters`
+      );
+    }
+  });
   return Array.from(inputErrors);
 }
 

@@ -108,6 +108,7 @@ const styles = reactStyles({
   },
 });
 
+const searchTrigger = 2;
 const searchTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
     The following special operators can be used to augment search terms:
@@ -372,10 +373,13 @@ export const ConceptHomepage = fp.flow(
       const { currentInputString } = this.state;
       // search on enter key if no forbidden characters are present
       if (e.key === 'Enter') {
-        if (currentInputString.trim().length < 3) {
+        if (currentInputString.trim().length < searchTrigger) {
           this.setState({ inputErrors: [], showSearchError: true });
         } else {
-          const inputErrors = validateInputForMySQL(currentInputString);
+          const inputErrors = validateInputForMySQL(
+            currentInputString,
+            searchTrigger
+          );
           this.setState({ inputErrors, showSearchError: false });
           if (inputErrors.length === 0) {
             this.setState({ currentSearchString: currentInputString }, () => {
@@ -502,7 +506,7 @@ export const ConceptHomepage = fp.flow(
             ))}
             {showSearchError && (
               <AlertDanger style={styles.inputAlert}>
-                Minimum concept search length is three characters.
+                {`Minimum concept search length is ${searchTrigger} characters.`}
                 <AlertClose
                   style={{ width: 'unset' }}
                   onClick={() => this.setState({ showSearchError: false })}

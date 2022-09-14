@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class SearchTermTest {
 
   @Test
   void hasModifiedTermOnly() {
-    SearchTerm searchTerm = new SearchTerm("*it +pita", getStopWords());
+    SearchTerm searchTerm = new SearchTerm("*t +pita", getStopWords());
     assertThat(searchTerm.hasModifiedTermOnly()).isTrue();
     assertThat(searchTerm.hasEndsWithOnly()).isFalse();
     assertThat(searchTerm.hasEndsWithTermsAndModifiedTerm()).isFalse();
@@ -54,7 +55,7 @@ class SearchTermTest {
 
   @Test
   void hasNoTerms() {
-    SearchTerm searchTerm = new SearchTerm("*it +is +is* about", getStopWords());
+    SearchTerm searchTerm = new SearchTerm("+is +is* about", getStopWords());
     assertThat(searchTerm.hasModifiedTermOnly()).isFalse();
     assertThat(searchTerm.hasEndsWithOnly()).isFalse();
     assertThat(searchTerm.hasEndsWithTermsAndModifiedTerm()).isFalse();
@@ -76,18 +77,23 @@ class SearchTermTest {
   private static Stream<Arguments> getParametersTermAndCheckEndTerms() {
 
     return Stream.of(
-        Arguments.of("Search term: ", "*lung", Arrays.asList("%lung")),
-        Arguments.of("Search term: ", "*lung:", Arrays.asList("%lung:")),
-        Arguments.of("Search term: ", "*lung%", Arrays.asList("%lung%")),
-        Arguments.of("Search term: ", "*lung?", Arrays.asList("%lung\\?")),
-        Arguments.of("Search term: ", "*lung.", Arrays.asList("%lung\\.")),
-        Arguments.of("Search term: ", "*+lung", Arrays.asList()),
-        Arguments.of("Search term: ", "+*lung", Arrays.asList()),
-        Arguments.of("Search term: ", "*-lung", Arrays.asList()),
-        Arguments.of("Search term: ", "-*lung", Arrays.asList()),
-        Arguments.of("Search term: ", "*lung*", Arrays.asList()),
-        Arguments.of("Search term: ", "*lung+*", Arrays.asList()),
-        Arguments.of("Search term: ", "*lung-*", Arrays.asList())
+        Arguments.of("Search term: ", "*n", Collections.emptyList()),
+        Arguments.of("Search term: ", "*in", Collections.singletonList("%in")),
+        Arguments.of("Search term: ", "*sin", Collections.singletonList("%sin")),
+        Arguments.of("Search term: ", "*non-steroids", Collections.singletonList("%non-steroids")),
+        Arguments.of("Search term: ", "*2-diabetes", Collections.singletonList("%2-diabetes")),
+        Arguments.of("Search term: ", "*lung", Collections.singletonList("%lung")),
+        Arguments.of("Search term: ", "*lung:", Collections.singletonList("%lung:")),
+        Arguments.of("Search term: ", "*lung%", Collections.singletonList("%lung%")),
+        Arguments.of("Search term: ", "*lung?", Collections.singletonList("%lung\\?")),
+        Arguments.of("Search term: ", "*lung.", Collections.singletonList("%lung\\.")),
+        Arguments.of("Search term: ", "*+lung", Collections.emptyList()),
+        Arguments.of("Search term: ", "+*lung", Collections.emptyList()),
+        Arguments.of("Search term: ", "*-lung", Collections.emptyList()),
+        Arguments.of("Search term: ", "-*lung", Collections.emptyList()),
+        Arguments.of("Search term: ", "*lung*", Collections.emptyList()),
+        Arguments.of("Search term: ", "*lung+*", Collections.emptyList()),
+        Arguments.of("Search term: ", "*lung-*", Collections.emptyList())
         // Arguments.of("Search term: ", "*lung*+", Arrays.asList("%lung")), // not allowed by ui
         // Arguments.of("Search term: ", "*lung*-", Arrays.asList("%lung")), // not allowed by ui
         );
@@ -103,6 +109,7 @@ class SearchTermTest {
   private static Stream<Arguments> getParametersTermAndCheckModifiedTerm() {
 
     return Stream.of(
+        Arguments.of("Search term: ", "non-steroid", "+\"non-steroid\""),
         Arguments.of("Search term: ", "lung", "+lung*"),
         Arguments.of("Search term: ", "+lung", "+lung*"),
         Arguments.of("Search term: ", "lung cancer", "+lung*+cancer*"),
@@ -138,13 +145,13 @@ class SearchTermTest {
         Arguments.of("Search term: ", "-diabet", "-diabet"),
         Arguments.of("Search term: ", "+diabet", "+diabet*"),
         Arguments.of("Search term: ", "diabet", "+diabet*"),
-        Arguments.of("Search term: ", "+++diabet", "+diabet*"),
-        Arguments.of("Search term: ", "---diabet", "-diabet"),
+        Arguments.of("Search term: ", "+++diabet", ""),
+        Arguments.of("Search term: ", "---diabet", ""),
         Arguments.of("Search term: ", "+diabet is from", "+diabet*"),
         Arguments.of("Search term: ", "+\"diabet is from\"", "+\"diabet is from\""),
         Arguments.of("Search term: ", "-\"diabet is from\"", "-\"diabet is from\""),
         Arguments.of("Search term: ", "how* is *it diabet ", "+diabet*"),
-        Arguments.of("Search term: ", "how* is *it +di* ", ""),
+        Arguments.of("Search term: ", "how* is *it +di* ", "+di*"),
         Arguments.of("Search term: ", "how* is *it dia ", "+dia*"));
   }
 
