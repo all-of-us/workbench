@@ -17,6 +17,6 @@ public class BigQueryConfig {
 
   @Bean(name = DEFAULT_QUERY_TIMEOUT)
   public Duration defaultQueryTimeout() {
-    return Duration.ofMinutes(1L);
+    return Duration.ofMinutes(5L);
   }
 }
