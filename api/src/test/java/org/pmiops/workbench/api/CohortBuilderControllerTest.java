@@ -833,20 +833,20 @@ public class CohortBuilderControllerTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-        Objects.requireNonNull(
-                controller
-                    .findCriteriaByDomain(
-                        WORKSPACE_NAMESPACE,
-                        WORKSPACE_ID,
-                        Domain.CONDITION.name(),
-                        false,
-                        "12-1",
-                        null,
-                        false,
-                        null)
-                    .getBody())
-            .getItems()
-            .get(0))
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            false,
+                            "12-1",
+                            null,
+                            false,
+                            null)
+                        .getBody())
+                .getItems()
+                .get(0))
         .isEqualTo(createResponseCriteria(criteria));
   }
 
