@@ -506,7 +506,7 @@ export const ConceptHomepage = fp.flow(
             ))}
             {showSearchError && (
               <AlertDanger style={styles.inputAlert}>
-                Minimum concept search length is three characters.
+                {`Minimum concept search length is ${searchTrigger} characters.`}
                 <AlertClose
                   style={{ width: 'unset' }}
                   onClick={() => this.setState({ showSearchError: false })}
