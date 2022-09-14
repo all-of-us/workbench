@@ -137,7 +137,6 @@ public class SearchTerm {
   private void parseAndSetEndsWithTerms(List<String> filteredWords) {
     List<String> endsWith =
         filteredWords.stream()
-            // .filter(word -> word.toLowerCase().matches(endsWithPattern))
             .filter(word -> word.startsWith("*"))
             .map(word -> word.replaceAll("\\*", "%"))
             .map(word -> word.replaceAll("([\\.\\?])", "\\\\$1"))
