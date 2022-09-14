@@ -7,7 +7,6 @@ import {
   AttrName,
   CdrVersion,
   CdrVersionTiersResponse,
-  CreateConceptSetRequest,
   Criteria,
   CriteriaSearchRequest,
   CriteriaSubType,
