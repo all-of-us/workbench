@@ -814,6 +814,43 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void findCriteriaByDomainMatchesStandardCodeWithHyphen() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("12-1")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah with hyphen in code")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addFullText("[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_ID,
+                        Domain.CONDITION.name(),
+                        false,
+                        "12-1",
+                        null,
+                        false,
+                        null)
+                    .getBody())
+            .getItems()
+            .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
   public void findCriteriaByDomainMatchesSynonyms() {
     DbCriteria criteria =
         DbCriteria.builder()

@@ -337,7 +337,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             domain,
-            term.replaceAll("[()+\"*-]", ""),
+            term.replaceAll("[()+\"*]", ""),
             standard,
             CriteriaType.NONE.toString(),
             pageRequest);
@@ -387,7 +387,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            domain, term.replaceAll("[()+\"*-]", ""), standard, type, pageRequest);
+            domain, term.replaceAll("[()+\"*]", ""), standard, type, pageRequest);
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
     // this needs ot be here since word length of <3 are filtered and there are 2-concept codes
