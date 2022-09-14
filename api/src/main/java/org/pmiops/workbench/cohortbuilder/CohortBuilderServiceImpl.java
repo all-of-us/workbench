@@ -337,7 +337,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             domain,
-            term.replaceAll("[()+\"*]", ""),
+            term,
             standard,
             CriteriaType.NONE.toString(),
             pageRequest);
