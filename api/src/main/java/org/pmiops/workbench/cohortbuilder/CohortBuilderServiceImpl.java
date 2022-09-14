@@ -336,11 +336,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            domain,
-            term,
-            standard,
-            CriteriaType.NONE.toString(),
-            pageRequest);
+            domain, term, standard, CriteriaType.NONE.toString(), pageRequest);
 
     // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
