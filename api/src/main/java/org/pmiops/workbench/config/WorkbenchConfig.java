@@ -343,7 +343,7 @@ public class WorkbenchConfig {
     // Number of ids per task
     public Integer exportObjectsPerTask;
     // feature flag: do we export V2 of the Demographic Survey to RDR
-    public boolean exportDemoSurveyV2;
+    public Boolean exportDemoSurveyV2;
   }
 
   public static class CaptchaConfig {

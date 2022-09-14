@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -203,7 +204,8 @@ public class RdrExportServiceImpl implements RdrExportService {
             dbUser,
             accessTierService.getAccessTiersForUser(dbUser),
             verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
-    return workbenchConfigProvider.get().rdrExport.exportDemoSurveyV2
+    return Optional.ofNullable(workbenchConfigProvider.get().rdrExport.exportDemoSurveyV2)
+            .orElse(false)
         ? researcher
         : researcher.demographicSurveyV2(null);
   }
