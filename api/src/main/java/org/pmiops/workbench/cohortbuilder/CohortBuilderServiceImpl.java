@@ -264,7 +264,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               types,
               standard,
               ImmutableList.of(true),
-              term.replaceAll("[()+\"*-]", ""),
+              term.replaceAll("[()+\"*]", ""),
               pageRequest);
     }
     return criteriaList.stream()
@@ -337,7 +337,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             request.getDomain(),
-            request.getTerm().replaceAll("[()+\"*-]", ""),
+            request.getTerm().replaceAll("[()+\"*]", ""),
             request.getStandard(),
             CriteriaType.NONE.toString(),
             pageRequest);
@@ -387,7 +387,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             request.getDomain(),
-            request.getTerm().replaceAll("[()+\"*-]", ""),
+            request.getTerm().replaceAll("[()+\"*]", ""),
             request.getStandard(),
             type,
             pageRequest);
@@ -611,7 +611,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     if (criteriaList.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, types, standard, hierarchies, term.replaceAll("[()+\"*-]", ""), pageRequest);
+              domain, types, standard, hierarchies, term.replaceAll("[()+\"*]", ""), pageRequest);
     }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
