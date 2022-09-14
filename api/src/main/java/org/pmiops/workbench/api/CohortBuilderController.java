@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuListResponse;
 import org.pmiops.workbench.model.CriteriaRequest;
+import org.pmiops.workbench.model.CriteriaSearchRequest;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
@@ -165,24 +166,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomain(
-      String workspaceNamespace,
-      String workspaceId,
-      String domain,
-      Boolean standard,
-      String term,
-      String surveyName,
-      Boolean removeDrugBrand,
-      Integer limit) {
+      String workspaceNamespace, String workspaceId, CriteriaSearchRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateDomain(domain, surveyName);
+    validateDomain(request.getDomain(), request.getSurveyName());
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(
-          cohortBuilderService.findCriteriaByDomainV2(
-              domain, term, surveyName, standard, removeDrugBrand, limit));
+      return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomainV2(request));
     } else {
-      return ResponseEntity.ok(
-          cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
+      return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomain(request));
     }
   }
 

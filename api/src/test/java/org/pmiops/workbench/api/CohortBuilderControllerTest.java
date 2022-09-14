@@ -56,6 +56,7 @@ import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
+import org.pmiops.workbench.model.CriteriaSearchRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
@@ -590,12 +591,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
-                            false,
-                            "12345",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.PHYSICAL_MEASUREMENT_CSS.toString())
+                                .standard(false)
+                                .term("12345")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems()
                 .get(0));
@@ -606,12 +606,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
-                            true,
-                            "12345",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.PHYSICAL_MEASUREMENT_CSS.toString())
+                                .standard(true)
+                                .term("12345")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems())
         .isEmpty();
@@ -642,12 +641,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            false,
-                            "001",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .standard(false)
+                                .term("001")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -658,12 +656,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            true,
-                            "001",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.PHYSICAL_MEASUREMENT_CSS.toString())
+                                .standard(true)
+                                .term("001")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems())
         .isEmpty();
@@ -694,12 +691,11 @@ public class CohortBuilderControllerTest {
                     .findCriteriaByDomain(
                         WORKSPACE_NAMESPACE,
                         WORKSPACE_ID,
-                        Domain.CONDITION.name(),
-                        false,
-                        "00",
-                        null,
-                        false,
-                        null)
+                        new CriteriaSearchRequest()
+                            .domain(Domain.CONDITION.toString())
+                            .standard(false)
+                            .term("00")
+                            .removeDrugBrand(false))
                     .getBody())
             .getItems();
     assertThat(1).isEqualTo(results.size());
@@ -711,12 +707,11 @@ public class CohortBuilderControllerTest {
                     .findCriteriaByDomain(
                         WORKSPACE_NAMESPACE,
                         WORKSPACE_ID,
-                        Domain.CONDITION.name(),
-                        true,
-                        "00",
-                        null,
-                        false,
-                        null)
+                        new CriteriaSearchRequest()
+                            .domain(Domain.CONDITION.toString())
+                            .standard(true)
+                            .term("00")
+                            .removeDrugBrand(false))
                     .getBody())
             .getItems();
 
@@ -748,12 +743,11 @@ public class CohortBuilderControllerTest {
                     .findCriteriaByDomain(
                         WORKSPACE_NAMESPACE,
                         WORKSPACE_ID,
-                        Domain.DRUG.name(),
-                        true,
-                        "672535",
-                        null,
-                        false,
-                        null)
+                        new CriteriaSearchRequest()
+                            .domain(Domain.DRUG.toString())
+                            .standard(true)
+                            .term("672535")
+                            .removeDrugBrand(false))
                     .getBody())
             .getItems();
     assertThat(1).isEqualTo(results.size());
@@ -765,12 +759,11 @@ public class CohortBuilderControllerTest {
                     .findCriteriaByDomain(
                         WORKSPACE_NAMESPACE,
                         WORKSPACE_ID,
-                        Domain.DRUG.name(),
-                        false,
-                        "672535",
-                        null,
-                        false,
-                        null)
+                        new CriteriaSearchRequest()
+                            .domain(Domain.DRUG.toString())
+                            .standard(false)
+                            .term("672535")
+                            .removeDrugBrand(false))
                     .getBody())
             .getItems();
     assertThat(0).isEqualTo(results.size());
@@ -801,12 +794,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            false,
-                            "LP12",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .standard(false)
+                                .term("LP12")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -838,12 +830,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            true,
-                            "LP12",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .standard(true)
+                                .term("LP12")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -854,12 +845,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            false,
-                            "LP12",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .standard(false)
+                                .term("LP12")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems())
         .isEmpty();
@@ -890,12 +880,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            true,
-                            "",
-                            null,
-                            null,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .standard(true)
+                                .term("")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -907,12 +896,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.name(),
-                            false,
-                            "",
-                            null,
-                            null,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .standard(false)
+                                .term("")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems())
         .isEmpty();
@@ -945,12 +933,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.DRUG.name(),
-                            true,
-                            "LP12",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.DRUG.toString())
+                                .standard(true)
+                                .term("LP12")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -961,12 +948,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaByDomain(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.DRUG.name(),
-                            false,
-                            "LP12",
-                            null,
-                            false,
-                            null)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.DRUG.toString())
+                                .standard(false)
+                                .term("LP12")
+                                .removeDrugBrand(false))
                         .getBody())
                 .getItems())
         .isEmpty();

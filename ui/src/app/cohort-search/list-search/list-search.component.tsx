@@ -8,6 +8,7 @@ import {
   CdrVersion,
   CdrVersionTiersResponse,
   Criteria,
+  CriteriaSearchRequest,
   CriteriaSubType,
   CriteriaType,
   Domain,
@@ -471,14 +472,17 @@ export const ListSearch = fp.flow(
         const { searchSource } = this.state;
         const { removeDrugBrand } = this.state;
         const surveyName = selectedSurvey || 'All';
+        const request: CriteriaSearchRequest = {
+          domain,
+          standard: !searchSource,
+          term: value.trim(),
+          surveyName: 'All Surveys' ? 'All' : surveyName,
+          removeDrugBrand,
+        };
         const resp = await cohortBuilderApi().findCriteriaByDomain(
           namespace,
           id,
-          domain,
-          !searchSource,
-          value.trim(),
-          surveyName === 'All Surveys' ? 'All' : surveyName,
-          removeDrugBrand
+          request
         );
         let data;
         if (this.isSurvey) {
