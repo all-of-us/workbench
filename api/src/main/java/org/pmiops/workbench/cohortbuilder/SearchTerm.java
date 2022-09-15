@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 
 public class SearchTerm {
 
@@ -13,16 +14,26 @@ public class SearchTerm {
   private final String term;
   private String modifiedTerm;
   private List<String> endsWithTerms;
-  private List<String> stopWords;
+  private final String stopWordPattern;
 
   public SearchTerm(String term, List<String> stopWords) {
     this.term = term;
-    this.stopWords = stopWords;
+    // filter: any parsed words that are stop words criteria
+    this.stopWordPattern = "^(" + String.join(")$|^(", stopWords) + ")$";
     parseTermForSearch();
   }
 
   public String getTerm() {
     return term;
+  }
+
+  public String getCodeTerm() {
+    // could just be a static method
+    if (term.startsWith("-")) {
+      return term.substring(1).replaceAll("[()+\"*]", "");
+    } else {
+      return term.replaceAll("[()+\"*]", "");
+    }
   }
 
   public String getModifiedTerm() {
@@ -46,18 +57,14 @@ public class SearchTerm {
   }
 
   public boolean hasNoTerms() {
+    // do not use codeTerm
     return endsWithTerms.isEmpty() && modifiedTerm.isEmpty();
   }
 
   private void parseTermForSearch() {
-    List<String> parsedTerms = new ArrayList<>();
-    // add quoted pattern to the list of modifiedTerms
+    // add quoted pattern to the list for modifiedTerms
     final String quotedPattern = "([+-]?\\\"[^\\\"]*\\\")";
-    Pattern pattern = Pattern.compile(quotedPattern);
-    Matcher matcher = pattern.matcher(term);
-    while (matcher.find()) {
-      parsedTerms.add(matcher.group().matches("^[+-].*") ? matcher.group() : "+" + matcher.group());
-    }
+    List<String> quotedTerms = parseQuotedTerms(quotedPattern);
     // remove the quoted phrase/pattern
     List<String> words =
         new ArrayList<>(Arrays.asList(term.replaceAll(quotedPattern, "").split(" ")));
@@ -67,18 +74,27 @@ public class SearchTerm {
         words.stream()
             .filter(word -> !specialChars.matcher(word).find())
             .collect(Collectors.toList());
+    // parse and set endsWithTerms
+    parseAndSetEndsWithTerms(words);
+    // parse and set modifiedTerm
+    parseAndSetModifiedTerm(words, quotedTerms);
+  }
 
-    List<String> endsWith =
-        words.stream()
-            // .filter(word -> word.toLowerCase().matches(endsWithPattern))
-            .filter(word -> word.startsWith("*"))
-            .map(word -> word.replaceAll("\\*", "%"))
-            .map(word -> word.replaceAll("([\\.\\?])", "\\\\$1"))
-            .collect(Collectors.toList());
+  private List<String> parseQuotedTerms(String quotedPattern) {
+    List<String> quotedTerms = new ArrayList<>();
+    Pattern pattern = Pattern.compile(quotedPattern);
+    Matcher matcher = pattern.matcher(term);
+    while (matcher.find()) {
+      quotedTerms.add(matcher.group().matches("^[+-].*") ? matcher.group() : "+" + matcher.group());
+    }
+    return quotedTerms;
+  }
 
+  private void parseAndSetModifiedTerm(List<String> filteredWords, List<String> quotedTerms) {
     // now process non-endsWith words
-    words = words.stream().filter(word -> !word.startsWith("*")).collect(Collectors.toList());
-
+    List<String> words =
+        filteredWords.stream().filter(word -> !word.startsWith("*")).collect(Collectors.toList());
+    List<String> parsedTerms = new ArrayList<>(quotedTerms);
     words.stream()
         .forEach(
             word -> {
@@ -103,15 +119,6 @@ public class SearchTerm {
               }
             });
 
-    // filter: any parsed words that are stop words criteria
-    final String stopWordPattern = "^(" + String.join(")$|^(", stopWords) + ")$";
-    // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
-    this.endsWithTerms =
-        endsWith.stream()
-            .filter(w -> !w.replaceAll("[+-]", "").toLowerCase().matches(stopWordPattern))
-            .filter(w -> w.replaceAll("[+%-]", "").length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
-            .collect(Collectors.toList());
-
     // fix multiple occurrence of +/-/*
     // filter: any parsed words that are stop words criteria
     // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
@@ -124,5 +131,22 @@ public class SearchTerm {
             .filter(w -> !w.replaceAll("[+*\"-]", "").toLowerCase().matches(stopWordPattern))
             .filter(w -> w.replaceAll("[+*\"-]", "").length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
             .collect(Collectors.joining(""));
+  }
+
+  @NotNull
+  private void parseAndSetEndsWithTerms(List<String> filteredWords) {
+    List<String> endsWith =
+        filteredWords.stream()
+            // .filter(word -> word.toLowerCase().matches(endsWithPattern))
+            .filter(word -> word.startsWith("*"))
+            .map(word -> word.replaceAll("\\*", "%"))
+            .map(word -> word.replaceAll("([\\.\\?])", "\\\\$1"))
+            .collect(Collectors.toList());
+    // filter: any parsed words that fail MIN_TERM_LENGTH_NO_SPECIAL_CHAR criteria
+    this.endsWithTerms =
+        endsWith.stream()
+            .filter(w -> !w.replaceAll("[+-]", "").toLowerCase().matches(stopWordPattern))
+            .filter(w -> w.replaceAll("[+%-]", "").length() >= MIN_TERM_LENGTH_NO_SPECIAL_CHAR)
+            .collect(Collectors.toList());
   }
 }

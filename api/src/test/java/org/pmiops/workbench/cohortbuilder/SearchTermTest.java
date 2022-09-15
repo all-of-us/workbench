@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,26 @@ class SearchTermTest {
     assertThat(searchTerm.hasNoTerms()).isTrue();
   }
 
+  @ParameterizedTest(name = "checkCodeTerm: {0} {1}=>{2}")
+  @MethodSource("getParametersCheckCodeTerm")
+  void getCodeTerm(String testInput, String term, String expected) {
+    SearchTerm actual = new SearchTerm(term, new ArrayList<>());
+    assertWithMessage(testInput).that(actual.getCodeTerm()).isEqualTo(expected);
+  }
+
+  private static Stream<Arguments> getParametersCheckCodeTerm() {
+    return Stream.of(
+        Arguments.of("Search term: ", "12-5", "12-5"),
+        Arguments.of("Search term: ", "+12-5", "12-5"),
+        Arguments.of("Search term: ", "-12-5", "12-5"),
+        Arguments.of("Search term: ", "*12-5", "12-5"),
+        Arguments.of("Search term: ", "+12-5*", "12-5"),
+        Arguments.of("Search term: ", "-12-5*", "12-5"),
+        Arguments.of("Search term: ", "*12-5*", "12-5"),
+        Arguments.of("Search term: ", "+12-5*", "12-5"),
+        Arguments.of("Search term: ", "-12-5*", "12-5"));
+  }
+
   @ParameterizedTest(name = "checkEndsWithTerms: {0} {1}=>{2}")
   @MethodSource("getParametersTermAndCheckEndTerms")
   void checkEndsWithTerms(String testInput, String term, List<String> expected) {
@@ -75,7 +96,6 @@ class SearchTermTest {
   }
 
   private static Stream<Arguments> getParametersTermAndCheckEndTerms() {
-
     return Stream.of(
         Arguments.of("Search term: ", "*n", Collections.emptyList()),
         Arguments.of("Search term: ", "*in", Collections.singletonList("%in")),
@@ -107,7 +127,6 @@ class SearchTermTest {
   }
 
   private static Stream<Arguments> getParametersTermAndCheckModifiedTerm() {
-
     return Stream.of(
         Arguments.of("Search term: ", "non-steroid", "+\"non-steroid\""),
         Arguments.of("Search term: ", "lung", "+lung*"),

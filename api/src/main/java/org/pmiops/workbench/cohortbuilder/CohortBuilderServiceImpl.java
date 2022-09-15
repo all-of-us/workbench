@@ -264,7 +264,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               types,
               standard,
               ImmutableList.of(true),
-              term.replaceAll("[()+\"*-]", ""),
+              searchTerm.getCodeTerm(),
               pageRequest);
     }
     return criteriaList.stream()
@@ -337,7 +337,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             request.getDomain(),
-            request.getTerm().replaceAll("[()+\"*-]", ""),
+            new SearchTerm(request.getTerm(), new ArrayList<>()).getCodeTerm(),
             request.getStandard(),
             CriteriaType.NONE.toString(),
             pageRequest);
@@ -387,7 +387,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             request.getDomain(),
-            request.getTerm().replaceAll("[()+\"*-]", ""),
+            searchTerm.getCodeTerm(),
             request.getStandard(),
             type,
             pageRequest);
@@ -520,7 +520,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       SearchTerm searchTerm, Boolean standard, List<Domain> domains) {
     List<String> domainNames = domains.stream().map(Domain::toString).collect(Collectors.toList());
     List<DbCardCount> cardCounts =
-        cbCriteriaDao.findDomainCountsByCode(searchTerm.getTerm(), standard, domainNames).stream()
+        cbCriteriaDao.findDomainCountsByCode(searchTerm.getCodeTerm(), standard, domainNames)
+            .stream()
             .filter(cardCount -> cardCount.getCount() > 0)
             .collect(Collectors.toList());
 
@@ -546,7 +547,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
     List<String> strDomains = domains.stream().map(Domain::toString).collect(Collectors.toList());
     List<DbCardCount> cardCounts =
-        cbCriteriaDao.findDomainCountsByCode(term, standard, strDomains).stream()
+        cbCriteriaDao
+            .findDomainCountsByCode(
+                new SearchTerm(term, new ArrayList<>()).getCodeTerm(), standard, strDomains)
+            .stream()
             .filter(cardCount -> cardCount.getCount() > 0)
             .collect(Collectors.toList());
     // filter strDomains to remove domains that have a cardCount by domain
@@ -611,7 +615,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     if (criteriaList.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, types, standard, hierarchies, term.replaceAll("[()+\"*-]", ""), pageRequest);
+              domain, types, standard, hierarchies, searchTerm.getCodeTerm(), pageRequest);
     }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
