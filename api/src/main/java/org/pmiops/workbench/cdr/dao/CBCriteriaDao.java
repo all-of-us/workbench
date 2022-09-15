@@ -410,7 +410,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "and concept_id in ( select concept_id "
               + "from cb_criteria "
               + "where domain_id = 'SURVEY' "
-              + "and match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
+              + "and match(full_text) against(:term in boolean mode)) "
               + "group by survey_version_concept_id"
               + ") a on c.id = a.survey_version_concept_id "
               + "order by count desc",
