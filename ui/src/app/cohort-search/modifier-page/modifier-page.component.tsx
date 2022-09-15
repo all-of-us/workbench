@@ -166,7 +166,6 @@ const validatorFuncs = {
     return null;
   },
 };
-const SURVEY_MODIFIERS = [ModifierType.AGEATEVENT];
 
 const dateTooltip = `Dates are consistently shifted within a participant’s record
       by a time period of up to 364 days backwards to de-identify patient data.
@@ -214,432 +213,413 @@ interface Props {
 export const ModifierPage = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohortSearchContext()
-)(
-  ({
-     selections,
-     closeModifiers,
-     workspace,
-     cohortContext,
-   }: Props) => {
-    const { ns, wsid, cid, crid } = useParams<MatchParams>();
-    const [calculateError, setCalculateError] = useState(false);
-    const [calculating, setCalculating] = useState(false);
-    const [count, setCount] = useState(null);
-    const [formErrors, setFormErrors] = useState([]);
-    const [formState, setFormState] = useState(defaultFormState);
-    const [formUntouched, setFormUntouched] = useState(false);
-    const [initialFormState, setInitialFormState] = useState(true);
-    const [loading, setLoading] = useState(true);
-    const [visitCounts, setVisitCounts] = useState(undefined);
+)(({ selections, closeModifiers, workspace, cohortContext }: Props) => {
+  const { ns, wsid } = useParams<MatchParams>();
+  const [calculateError, setCalculateError] = useState(false);
+  const [calculating, setCalculating] = useState(false);
+  const [count, setCount] = useState(null);
+  const [formErrors, setFormErrors] = useState([]);
+  const [formState, setFormState] = useState(
+    JSON.parse(JSON.stringify(defaultFormState))
+  );
+  const [formUntouched, setFormUntouched] = useState(false);
+  const [initialFormState, setInitialFormState] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [visitCounts, setVisitCounts] = useState(undefined);
 
-    const addEncounters = () => {
-      return ![
-        Domain.PHYSICALMEASUREMENT,
-        Domain.SURVEY,
-        Domain.VISIT,
-      ].includes(cohortContext.domain);
-    };
+  const addEncounters = () => {
+    return ![Domain.PHYSICALMEASUREMENT, Domain.SURVEY, Domain.VISIT].includes(
+      cohortContext.domain
+    );
+  };
 
-    const getExisting = () => {
-      // This reseeds the form state with existing data if we're editing an existing item
-      cohortContext.item.modifiers.forEach((existing) => {
-        const index = formState.findIndex((mod) => existing.name === mod.name);
-        if (index > -1) {
-          const mod = formState[index];
-          const values = existing.operands.filter((val) => !!val);
-          switch (mod.name) {
-            case ModifierType.ENCOUNTERS:
-              formState[index] = {
-                ...mod,
-                operator: existing.operands[0],
-                values,
-              };
-              break;
-            case ModifierType.EVENTDATE:
-              formState[index] = {
-                ...mod,
-                operator: existing.operator,
-                values: values.map((val) => new Date(val + 'T08:00:00')),
-              };
-              break;
-            default:
-              formState[index] = {
-                ...mod,
-                operator: existing.operator,
-                values,
-              };
-          }
+  const getExisting = () => {
+    // This reseeds the form state with existing data if we're editing an existing item
+    cohortContext.item.modifiers.forEach((existing) => {
+      const index = formState.findIndex((mod) => existing.name === mod.name);
+      if (index > -1) {
+        const mod = formState[index];
+        const values = existing.operands.filter((val) => !!val);
+        formState[index] = {
+          ...mod,
+          operator:
+            mod.name === ModifierType.ENCOUNTERS
+              ? existing.operands[0]
+              : existing.operator,
+          values:
+            mod.name === ModifierType.EVENTDATE
+              ? values.map((val) => new Date(val + 'T08:00:00'))
+              : values,
+        };
+      }
+    });
+    setFormState(formState);
+    setLoading(false);
+  };
+
+  const initModifiersForm = async () => {
+    if (cohortContext.domain !== Domain.SURVEY) {
+      formState.push({
+        name: ModifierType.NUMOFOCCURRENCES,
+        label: 'Number Of Occurrence Dates',
+        type: 'number',
+        operator: undefined,
+        values: [undefined, undefined],
+        options: [
+          {
+            label: 'Any',
+            value: undefined,
+          },
+          {
+            label: 'N or More',
+            value: Operator.GREATERTHANOREQUALTO,
+          },
+        ],
+      });
+    }
+    if (serverConfigStore.get().config.enableEventDateModifier) {
+      formState.push({
+        name: ModifierType.EVENTDATE,
+        label: 'Event Date',
+        type: 'date',
+        operator: undefined,
+        values: [undefined, undefined],
+        options: [
+          {
+            label: 'Any',
+            value: undefined,
+          },
+          {
+            label: 'Is On or Before',
+            value: Operator.LESSTHANOREQUALTO,
+          },
+          {
+            label: 'Is On or After',
+            value: Operator.GREATERTHANOREQUALTO,
+          },
+          {
+            label: 'Is Between',
+            value: Operator.BETWEEN,
+          },
+        ],
+      });
+    }
+    if (addEncounters()) {
+      let encountersOptions = encountersStore.getValue();
+      if (!encountersOptions) {
+        // get options for visit modifier from api
+        const res = await cohortBuilderApi().findCriteriaBy(
+          ns,
+          wsid,
+          Domain.VISIT.toString(),
+          CriteriaType.VISIT.toString()
+        );
+        encountersOptions = res.items;
+        encountersStore.next(encountersOptions);
+      }
+      const initVisitCounts = {};
+      const encounters = {
+        name: ModifierType.ENCOUNTERS,
+        label: 'During Visit Type',
+        type: null,
+        operator: undefined,
+        values: [undefined],
+        options: [
+          {
+            label: 'Any',
+            value: undefined,
+          },
+        ],
+      };
+      encountersOptions.forEach((option) => {
+        if (option.count > 0) {
+          encounters.options.push({
+            label: option.name,
+            value: option.conceptId.toString(),
+          });
+          initVisitCounts[option.conceptId] = option.count;
         }
       });
-      setFormState(formState);
-      setLoading(false);
+      formState.push(encounters);
+      setVisitCounts(initVisitCounts);
     }
+    setFormState(formState);
+    getExisting();
+  };
 
-    useEffect(() => {
-      if (cohortContext.domain !== Domain.SURVEY) {
-        formState.push({
-          name: ModifierType.NUMOFOCCURRENCES,
-          label: 'Number Of Occurrence Dates',
-          type: 'number',
-          operator: undefined,
-          values: [undefined, undefined],
-          options: [
-            {
-              label: 'Any',
-              value: undefined,
-            },
-            {
-              label: 'N or More',
-              value: Operator.GREATERTHANOREQUALTO,
-            },
-          ],
-        });
-      }
-      if (serverConfigStore.get().config.enableEventDateModifier) {
-        formState.push({
-          name: ModifierType.EVENTDATE,
-          label: 'Event Date',
-          type: 'date',
-          operator: undefined,
-          values: [undefined, undefined],
-          options: [
-            {
-              label: 'Any',
-              value: undefined,
-            },
-            {
-              label: 'Is On or Before',
-              value: Operator.LESSTHANOREQUALTO,
-            },
-            {
-              label: 'Is On or After',
-              value: Operator.GREATERTHANOREQUALTO,
-            },
-            {
-              label: 'Is Between',
-              value: Operator.BETWEEN,
-            },
-          ],
-        });
-      }
-      if (addEncounters()) {
-        let encountersOptions = encountersStore.getValue();
-        if (!encountersOptions) {
-          // get options for visit modifier from api
-          const getEncountersOptions = async () => {
-            const res = await cohortBuilderApi().findCriteriaBy(
-              ns,
-              wsid,
-              Domain.VISIT.toString(),
-              CriteriaType.VISIT.toString()
-            );
-            encountersOptions = res.items;
-            encountersStore.next(encountersOptions);
-          }
-          getEncountersOptions();
-        }
-        const initVisitCounts = {};
-        const encounters = {
-          name: ModifierType.ENCOUNTERS,
-          label: 'During Visit Type',
-          type: null,
-          operator: undefined,
-          values: [undefined],
-          options: [
-            {
-              label: 'Any',
-              value: undefined,
-            },
-          ],
-        };
-        encountersOptions.forEach((option) => {
-          if (option.count > 0) {
-            encounters.options.push({
-              label: option.name,
-              value: option.conceptId.toString(),
-            });
-            initVisitCounts[option.conceptId] = option.count;
-          }
-        });
-        formState.push(encounters);
-        setVisitCounts(initVisitCounts);
-      }
-      setFormState(formState);
-      getExisting();
-    }, [])
+  useEffect(() => {
+    initModifiersForm();
+  }, []);
 
-    const validateValues = () => {
-      let initialState = true;
-      let untouched = false;
-      const errors = formState.reduce((acc, item) => {
-        if (item.name !== ModifierType.ENCOUNTERS) {
-          item.values.forEach((val, v) => {
-            if (val !== undefined) {
-              initialState = false;
-              const error = validatorFuncs[item.name](val);
-              if (error) {
-                acc.add(error);
-              }
-            } else if (item.operator !== undefined) {
-              initialState = false;
-              if (v === 0 || (v === 1 && item.operator === Operator.BETWEEN)) {
-                untouched = true;
-              }
+  const validateValues = () => {
+    let initialState = true;
+    let untouched = false;
+    const errors = formState.reduce((acc, item) => {
+      if (item.name !== ModifierType.ENCOUNTERS) {
+        item.values.forEach((val, v) => {
+          if (val !== undefined) {
+            initialState = false;
+            const error = validatorFuncs[item.name](val);
+            if (error) {
+              acc.add(error);
             }
-          });
-        } else if (item.values[0] !== undefined) {
-          initialState = false;
-        }
-        return acc;
-      }, new Set());
-      setFormErrors(Array.from(errors));
-      setFormUntouched(untouched);
-      setInitialFormState(initialState);
-    }
-
-    const selectChange = (sel: any, index: number) => {
-      AnalyticsTracker.CohortBuilder.ModifierDropdown(formState[index].label);
-      const { name } = formState[index];
-      if (name === ModifierType.ENCOUNTERS) {
-        formState[index].values = [sel];
-      } else if (!sel) {
-        formState[index].values = [undefined, undefined];
-      } else if (sel !== Operator.BETWEEN) {
-        formState[index].values[1] = undefined;
-      }
-      formState[index].operator = sel;
-      setCount(null);
-      setFormState(formState);
-      // TODO callback
-      validateValues();
-    };
-
-    const inputChange = (index: number, field: string, value: any) => {
-      formState[index].values[field] = value;
-      setCount(null);
-      setFormState(formState);
-      // TODO callback
-      validateValues();
-    };
-
-    const getModifiersFromForm = () => {
-      return formState.reduce((acc, mod) => {
-        const { name, operator, values } = mod;
-        if (operator) {
-          switch (name) {
-            case ModifierType.ENCOUNTERS:
-              acc.push({
-                name,
-                operator: Operator.IN,
-                operands: [operator.toString()],
-              });
-              break;
-            case ModifierType.EVENTDATE:
-              const formatted = values.map((val) =>
-                moment(val, 'YYYY-MM-DD', true).isValid()
-                  ? moment(val).format('YYYY-MM-DD')
-                  : undefined
-              );
-              acc.push({
-                name,
-                operator,
-                operands: formatted.filter((val) => !!val),
-              });
-              break;
-            default:
-              acc.push({
-                name,
-                operator,
-                operands: values.filter(
-                  (val) => !['', null, undefined].includes(val)
-                ),
-              });
+          } else if (item.operator !== undefined) {
+            initialState = false;
+            if (v === 0 || (v === 1 && item.operator === Operator.BETWEEN)) {
+              untouched = true;
+            }
           }
+        });
+      } else if (item.values[0] !== undefined) {
+        initialState = false;
+      }
+      return acc;
+    }, new Set());
+    setFormErrors(Array.from(errors));
+    setFormUntouched(untouched);
+    setInitialFormState(initialState);
+  };
+
+  const selectChange = (sel: any, index: number) => {
+    AnalyticsTracker.CohortBuilder.ModifierDropdown(formState[index].label);
+    const { name } = formState[index];
+    if (name === ModifierType.ENCOUNTERS) {
+      formState[index].values = [sel];
+    } else if (!sel) {
+      formState[index].values = [undefined, undefined];
+    } else if (sel !== Operator.BETWEEN) {
+      formState[index].values[1] = undefined;
+    }
+    formState[index].operator = sel;
+    setCount(null);
+    setFormState(formState);
+    // TODO callback
+    validateValues();
+  };
+
+  const inputChange = (index: number, field: string, value: any) => {
+    formState[index].values[field] = value;
+    setCount(null);
+    setFormState(formState);
+    // TODO callback
+    validateValues();
+  };
+
+  const getModifiersFromForm = () => {
+    return formState.reduce((acc, mod) => {
+      const { name, operator, values } = mod;
+      if (operator) {
+        switch (name) {
+          case ModifierType.ENCOUNTERS:
+            acc.push({
+              name,
+              operator: Operator.IN,
+              operands: [operator.toString()],
+            });
+            break;
+          case ModifierType.EVENTDATE:
+            const formatted = values.map((val) =>
+              moment(val, 'YYYY-MM-DD', true).isValid()
+                ? moment(val).format('YYYY-MM-DD')
+                : undefined
+            );
+            acc.push({
+              name,
+              operator,
+              operands: formatted.filter((val) => !!val),
+            });
+            break;
+          default:
+            acc.push({
+              name,
+              operator,
+              operands: values.filter(
+                (val) => !['', null, undefined].includes(val)
+              ),
+            });
         }
-        return acc;
-      }, []);
-    }
+      }
+      return acc;
+    }, []);
+  };
 
-    const updateMods = () => {
-      AnalyticsTracker.CohortBuilder.ModifiersAction(
-        `Apply modifiers - ${domainToTitle(cohortContext.domain)}`
-      );
-      cohortContext.item.modifiers = getModifiersFromForm();
-      currentCohortSearchContextStore.next(cohortContext);
-      closeModifiers(cohortContext.item.modifiers);
-    }
+  const updateMods = () => {
+    AnalyticsTracker.CohortBuilder.ModifiersAction(
+      `Apply modifiers - ${domainToTitle(cohortContext.domain)}`
+    );
+    cohortContext.item.modifiers = getModifiersFromForm();
+    currentCohortSearchContextStore.next(cohortContext);
+    closeModifiers(cohortContext.item.modifiers);
+  };
 
-    const calculate = async () => {
-      const { domain, role } = cohortContext;
-      const { id, namespace } = workspace;
-      AnalyticsTracker.CohortBuilder.ModifiersAction(
-        `Calculate - ${domainToTitle(domain)}`
-      );
-      try {
-        setCalculateError(false);
-        setCalculating(true);
-        setCount(null);
-        const request = {
-          includes: [],
-          excludes: [],
-          [role]: [
-            {
-              items: [
-                {
-                  type: domain,
-                  searchParameters: selections.map(mapParameter),
-                  modifiers: getModifiersFromForm(),
-                },
-              ],
-            },
-          ],
-          dataFilters: [],
-        };
-        await cohortBuilderApi()
+  const calculate = async () => {
+    const { domain, role } = cohortContext;
+    const { id, namespace } = workspace;
+    AnalyticsTracker.CohortBuilder.ModifiersAction(
+      `Calculate - ${domainToTitle(domain)}`
+    );
+    try {
+      setCalculateError(false);
+      setCalculating(true);
+      setCount(null);
+      const request = {
+        includes: [],
+        excludes: [],
+        [role]: [
+          {
+            items: [
+              {
+                type: domain,
+                searchParameters: selections.map(mapParameter),
+                modifiers: getModifiersFromForm(),
+              },
+            ],
+          },
+        ],
+        dataFilters: [],
+      };
+      await cohortBuilderApi()
         .countParticipants(namespace, id, request)
         .then((response) => {
           setCalculating(false);
           setCount(response);
         });
-      } catch (error) {
-        console.error(error);
-        setCalculateError(true);
-        setCalculating(false);
-      }
-    };
-
-    const optionTemplate = (opt: any, name: any) => {
-      if (name !== ModifierType.ENCOUNTERS || !opt.value) {
-        return opt.label;
-      }
-      return (
-        <div className='p-clearfix'>
-          {opt.label}
-          &nbsp;
-          <span style={styles.count}>
-            {visitCounts[opt.value].toLocaleString()}
-          </span>
-        </div>
-      );
-    };
-
-    const renderInput = (index: number, field: string, type) => {
-      const { values } = formState[index];
-      switch (type) {
-        case 'number':
-          return (
-            <NumberInput
-              style={{ padding: '0 0.25rem', width: '3rem' }}
-              value={values[field]}
-              min={0}
-              onChange={(v) => inputChange(index, field, v)}
-            />
-          );
-        case 'date':
-          return (
-            <div style={styles.date}>
-              <DatePicker
-                value={values[field]}
-                placeholder='YYYY-MM-DD'
-                onChange={(e) => inputChange(index, field, e)}
-                maxDate={new Date()}
-              />
-            </div>
-          );
-      }
+    } catch (error) {
+      console.error(error);
+      setCalculateError(true);
+      setCalculating(false);
     }
+  };
 
+  const optionTemplate = (opt: any, name: any) => {
+    if (name !== ModifierType.ENCOUNTERS || !opt.value) {
+      return opt.label;
+    }
     return (
-      <div id='modifiers-form'>
-        <h3 style={{ ...styles.header, marginTop: 0 }}>
-          Apply optional Modifiers
-        </h3>
-        <div style={{ marginTop: '1rem' }}>
-          <div>
-            The following modifiers are optional and apply to all selected
-            criteria
-          </div>
-          {calculateError && (
-            <div style={styles.error}>
-              <ClrIcon
-                style={{ margin: '0 0.5rem 0 0.25rem' }}
-                className='is-solid'
-                shape='exclamation-triangle'
-                size='22'
-              />
-              Sorry, the request cannot be completed. Please try again or
-              contact Support in the left hand navigation.
-            </div>
-          )}
-          {formErrors.length > 0 && (
-            <div style={styles.errors}>
-              {formErrors.map((err, e) => (
-                <div key={e} style={styles.errorItem}>
-                  {err}
-                </div>
-              ))}
-            </div>
-          )}
-          {loading ? (
-            <div style={{ margin: '1rem 0 2rem', textAlign: 'center' }}>
-              <Spinner />
-            </div>
-          ) : (
-            formState.map((mod, i) => {
-              const { label, name, options, operator } = mod;
-              return (
-                <div
-                  data-test-id={name}
-                  key={i}
-                  style={{ marginTop: '0.75rem' }}
-                >
-                  <label style={styles.label}>{label}</label>
-                  {name === ModifierType.EVENTDATE && (
-                    <TooltipTrigger content={<div>{dateTooltip}</div>}>
-                      <ClrIcon
-                        style={styles.info}
-                        className='is-solid'
-                        shape='info-standard'
-                      />
-                    </TooltipTrigger>
-                  )}
-                  <div style={styles.modifier}>
-                    <Dropdown
-                      value={operator}
-                      style={styles.select}
-                      onChange={(e) => selectChange(e.value, i)}
-                      options={options}
-                      optionValue='value'
-                      itemTemplate={(e) => optionTemplate(e, name)}
-                    />
-                    {operator && name !== ModifierType.ENCOUNTERS && (
-                      <div style={{ paddingTop: '1rem' }}>
-                        {renderInput(i, '0', mod.type)}
-                        {operator === Operator.BETWEEN && (
-                          <React.Fragment>
-                            <span style={{ margin: '0 0.25rem' }}>and</span>
-                            {renderInput(i, '1', mod.type)}
-                          </React.Fragment>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
-          <CalculateFooter
-            addButtonText='APPLY MODIFIERS'
-            addFn={() => updateMods()}
-            backFn={() => closeModifiers()}
-            calculateFn={() => calculate()}
-            calculating={calculating}
-            count={count}
-            disableAdd={formErrors.length > 0 || formUntouched}
-            disableCalculate={formErrors.length > 0 || formUntouched || initialFormState}
-          />
-        </div>
+      <div className='p-clearfix'>
+        {opt.label}
+        &nbsp;
+        <span style={styles.count}>
+          {visitCounts[opt.value].toLocaleString()}
+        </span>
       </div>
     );
-  }
-);
+  };
+
+  const renderInput = (index: number, field: string, type) => {
+    const { values } = formState[index];
+    switch (type) {
+      case 'number':
+        return (
+          <NumberInput
+            style={{ padding: '0 0.25rem', width: '3rem' }}
+            value={values[field]}
+            min={0}
+            onChange={(v) => inputChange(index, field, v)}
+          />
+        );
+      case 'date':
+        return (
+          <div style={styles.date}>
+            <DatePicker
+              value={values[field]}
+              placeholder='YYYY-MM-DD'
+              onChange={(e) => inputChange(index, field, e)}
+              maxDate={new Date()}
+            />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div id='modifiers-form'>
+      <h3 style={{ ...styles.header, marginTop: 0 }}>
+        Apply optional Modifiers
+      </h3>
+      <div style={{ marginTop: '1rem' }}>
+        <div>
+          The following modifiers are optional and apply to all selected
+          criteria
+        </div>
+        {calculateError && (
+          <div style={styles.error}>
+            <ClrIcon
+              style={{ margin: '0 0.5rem 0 0.25rem' }}
+              className='is-solid'
+              shape='exclamation-triangle'
+              size='22'
+            />
+            Sorry, the request cannot be completed. Please try again or contact
+            Support in the left hand navigation.
+          </div>
+        )}
+        {formErrors.length > 0 && (
+          <div style={styles.errors}>
+            {formErrors.map((err, e) => (
+              <div key={e} style={styles.errorItem}>
+                {err}
+              </div>
+            ))}
+          </div>
+        )}
+        {loading ? (
+          <div style={{ margin: '1rem 0 2rem', textAlign: 'center' }}>
+            <Spinner />
+          </div>
+        ) : (
+          formState.map((mod, i) => {
+            const { label, name, options, operator } = mod;
+            return (
+              <div data-test-id={name} key={i} style={{ marginTop: '0.75rem' }}>
+                <label style={styles.label}>{label}</label>
+                {name === ModifierType.EVENTDATE && (
+                  <TooltipTrigger content={<div>{dateTooltip}</div>}>
+                    <ClrIcon
+                      style={styles.info}
+                      className='is-solid'
+                      shape='info-standard'
+                    />
+                  </TooltipTrigger>
+                )}
+                <div style={styles.modifier}>
+                  <Dropdown
+                    value={operator}
+                    style={styles.select}
+                    onChange={(e) => selectChange(e.value, i)}
+                    options={options}
+                    optionValue='value'
+                    itemTemplate={(e) => optionTemplate(e, name)}
+                  />
+                  {operator && name !== ModifierType.ENCOUNTERS && (
+                    <div style={{ paddingTop: '1rem' }}>
+                      {renderInput(i, '0', mod.type)}
+                      {operator === Operator.BETWEEN && (
+                        <React.Fragment>
+                          <span style={{ margin: '0 0.25rem' }}>and</span>
+                          {renderInput(i, '1', mod.type)}
+                        </React.Fragment>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+        <CalculateFooter
+          addButtonText='APPLY MODIFIERS'
+          addFn={() => updateMods()}
+          backFn={() => closeModifiers()}
+          calculateFn={() => calculate()}
+          calculating={calculating}
+          count={count}
+          disableAdd={formErrors.length > 0 || formUntouched}
+          disableCalculate={
+            formErrors.length > 0 || formUntouched || initialFormState
+          }
+        />
+      </div>
+    </div>
+  );
+});
