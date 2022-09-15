@@ -219,9 +219,7 @@ export const ModifierPage = fp.flow(
   const [calculating, setCalculating] = useState(false);
   const [count, setCount] = useState(null);
   const [formErrors, setFormErrors] = useState([]);
-  const [formState, setFormState] = useState(
-    JSON.parse(JSON.stringify(defaultFormState))
-  );
+  const [formState, setFormState] = useState([...defaultFormState]);
   const [formUntouched, setFormUntouched] = useState(false);
   const [initialFormState, setInitialFormState] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -393,7 +391,6 @@ export const ModifierPage = fp.flow(
     formState[index].operator = sel;
     setCount(null);
     setFormState(formState);
-    // TODO callback
     validateValues();
   };
 
@@ -401,7 +398,6 @@ export const ModifierPage = fp.flow(
     formState[index].values[field] = value;
     setCount(null);
     setFormState(formState);
-    // TODO callback
     validateValues();
   };
 
