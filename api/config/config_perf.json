@@ -117,7 +117,7 @@
     "ccSupportWhenAdminLocking": false,
     "enableMultiReview": false,
     "enableUpdatedDemographicSurvey": true,
-    "enableDrugWildcardSearch": false
+    "enableDrugWildcardSearch": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
