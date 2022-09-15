@@ -524,7 +524,7 @@ export default class CohortParticipantsGroup {
     const enterTextAndSearch = async (searchString: string): Promise<boolean> => {
       const responsePromise = this.page.waitForResponse(
         (response) => {
-          return response.url().includes('/criteria/') && response.request().method() === 'GET';
+          return response.url().includes('/criteria/') && response.request().method() === 'POST';
         },
         { timeout: 60000 }
       );
