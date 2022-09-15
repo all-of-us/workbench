@@ -55,6 +55,7 @@ describe('Updating runtime compute type', () => {
     const numPreemptibleWorkers = 1;
     const numCpus = 2;
     const ramGbs = 13;
+    const masterDisk = 150;
     const workerDisk = 150;
 
     await runtimePanel.pickComputeType(ComputeType.Dataproc);
@@ -62,6 +63,7 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.pickDataprocNumPreemptibleWorkers(numPreemptibleWorkers);
     await runtimePanel.pickWorkerCpus(numCpus);
     await runtimePanel.pickWorkerRamGbs(ramGbs);
+    await runtimePanel.pickStandardDiskGbs(masterDisk);
     await runtimePanel.pickWorkerDisk(workerDisk);
 
     // Apply changes and wait for new runtime running

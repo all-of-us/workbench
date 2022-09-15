@@ -112,6 +112,9 @@ describe('Genomics Extraction Test', () => {
     // Start creating runtime but NOT wait until finish.
     await runtimePanel.createRuntime({ waitForComplete: false });
 
+    // Pick master node disk size.
+    await runtimePanel.pickStandardDiskGbs(150);
+
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // EXTRACTING GENOMIC TO CREATE VCF FILES.
 
