@@ -370,6 +370,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + " count(*) as count "
               + "from cb_criteria "
               + "where match(full_text) against(:term in boolean mode) "
+              + "and full_text like '%_rank1%' "
               + "and is_standard = :standard "
               + "group by 1 "
               + "order by count desc",
