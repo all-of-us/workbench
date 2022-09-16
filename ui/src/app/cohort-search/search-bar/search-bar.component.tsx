@@ -58,7 +58,7 @@ const styles = reactStyles({
     overflowY: 'auto',
     width: '100%',
     borderRadius: '.125rem',
-    zIndex: 1000,
+    zIndex: 105,
   },
   dropdownItem: {
     height: '1rem',
