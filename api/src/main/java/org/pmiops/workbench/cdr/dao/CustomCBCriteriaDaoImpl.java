@@ -179,9 +179,11 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
           + "where match(full_text) against(:"
           + BIND_VAR_TERM
           + " in boolean mode)\n"
+          + "and full_text like '%_rank1%'\n"
           + "and is_standard = :"
           + BIND_VAR_STANDARD
           + "\n"
+          + DOMAIN_ID_IN_DOMAINS
           + "and ("
           + SQL_ENDS_WITH
           + ") \n"
@@ -433,11 +435,10 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public List<DbCardCount> findDomainCountsByTermAndNameEndsWithAndStandardAndDomains(
       String term, List<String> endsWithList, Boolean standard, List<String> domains) {
-    StringBuilder termBuilder = new StringBuilder(term);
-    domains.forEach(d -> termBuilder.append(" [" + d + "_rank1]"));
     Object[][] params = {
       {BIND_VAR_STANDARD, standard},
-      {BIND_VAR_TERM, termBuilder.toString()}
+      {BIND_VAR_TERM, term},
+      {VAR_IN_DOMAINS, domains}
     };
     return queryForDbCardCountList(
         generateQueryAndParameters(DOMAIN_COUNTS_TERM_ENDS_WITH, params, endsWithList));
