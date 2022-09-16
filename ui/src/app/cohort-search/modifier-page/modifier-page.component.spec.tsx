@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { mount, shallow } from 'enzyme';
+import { MemoryRouter, Route } from 'react-router-dom';
+import { mount } from 'enzyme';
 
 import {
   CohortBuilderApi,
@@ -27,6 +28,10 @@ describe('ModifierPage', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
 
+    currentCohortSearchContextStore.next({
+      domain: Domain.CONDITION,
+      item: { modifiers: [] },
+    });
     currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.set({
       config: {
@@ -39,10 +44,22 @@ describe('ModifierPage', () => {
     });
   });
 
-  it('should render', () => {
-    const wrapper = shallow(
-      <ModifierPage closeModifiers={() => {}} selections={[]} />
+  const component = () => {
+    return mount(
+      <MemoryRouter
+        initialEntries={[
+          `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/cohorts/build`,
+        ]}
+      >
+        <Route exact path='/workspaces/:ns/:wsid/data/cohorts/build'>
+          <ModifierPage closeModifiers={() => {}} selections={[]} />
+        </Route>
+      </MemoryRouter>
     );
+  };
+
+  it('should render', () => {
+    const wrapper = component();
     expect(wrapper.exists()).toBeTruthy();
   });
 
@@ -51,9 +68,7 @@ describe('ModifierPage', () => {
       domain: Domain.SURVEY,
       item: { modifiers: [] },
     });
-    const wrapper = mount(
-      <ModifierPage closeModifiers={() => {}} selections={[]} />
-    );
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
     expect(
