@@ -537,7 +537,7 @@ export function validateInputForMySQL(
     inputErrors.add('There is an unclosed " in the search string');
   }
   // check each endsWith term - terms that start with *
-  searchString.split(' ').forEach((word) => {
+  searchString.trim().split(' ').forEach((word) => {
     // consecutive special chars
     if (word.match(/[+*-]{2,}/)) {
       inputErrors.add(
