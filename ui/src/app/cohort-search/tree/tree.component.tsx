@@ -221,6 +221,7 @@ export const CriteriaTree = fp.flow(
           domain,
           node: { id, isStandard, parentId, subtype, type },
           selectedSurvey,
+          source,
         } = this.props;
         this.setState({ loading: true });
         const {
@@ -295,15 +296,20 @@ export const CriteriaTree = fp.flow(
           });
           this.setState({ children });
         } else if (domain === Domain.SURVEY && selectedSurvey) {
-          // Temp: This should be handle in API
-          this.updatePpiSurveys(
-            rootNodes,
-            rootNodes.items.filter((child) => child.name === selectedSurvey)
-          );
-        } else if (
-          domain === Domain.SURVEY &&
-          this.props.source === 'conceptSetDetails'
-        ) {
+          if (source === 'cohort' && selectedSurvey !== 'All Surveys') {
+            this.setState({
+              children: rootNodes.items.filter(
+                (child) => child.name === selectedSurvey
+              ),
+            });
+          } else {
+            // Temp: This should be handle in API
+            this.updatePpiSurveys(
+              rootNodes,
+              rootNodes.items.filter((child) => child.name === selectedSurvey)
+            );
+          }
+        } else if (domain === Domain.SURVEY && source === 'conceptSetDetails') {
           this.updatePpiSurveys(
             rootNodes,
             rootNodes.items.filter((child) => child.id === parentId)
