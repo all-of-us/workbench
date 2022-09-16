@@ -74,13 +74,13 @@ class SearchTermTest {
     return Stream.of(
         Arguments.of("Search term: ", "12-5", "12-5"),
         Arguments.of("Search term: ", "+12-5", "12-5"),
-        Arguments.of("Search term: ", "-12-5", "12-5"),
+        Arguments.of("Search term: ", "-12-5", "-12-5"),
         Arguments.of("Search term: ", "*12-5", "12-5"),
         Arguments.of("Search term: ", "+12-5*", "12-5"),
-        Arguments.of("Search term: ", "-12-5*", "12-5"),
+        Arguments.of("Search term: ", "-12-5*", "-12-5"),
         Arguments.of("Search term: ", "*12-5*", "12-5"),
         Arguments.of("Search term: ", "+12-5*", "12-5"),
-        Arguments.of("Search term: ", "-12-5*", "12-5"));
+        Arguments.of("Search term: ", "-12-5*", "-12-5"));
   }
 
   @ParameterizedTest(name = "checkEndsWithTerms: {0} {1}=>{2}")
