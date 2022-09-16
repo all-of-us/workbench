@@ -109,9 +109,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   default List<DbCardCount> findDomainCounts(
       SearchTerm searchTerm, Boolean standard, List<String> domainNames) {
     if (searchTerm.hasModifiedTermOnly()) {
-      StringBuilder termBuilder = new StringBuilder(searchTerm.getModifiedTerm());
-      domainNames.forEach(d -> termBuilder.append(" [" + d + "_rank1]"));
-      return findDomainCountsByTermAndStandardAndDomains(termBuilder.toString(), standard);
+      return findDomainCountsByTermAndStandardAndDomains(
+          searchTerm.getModifiedTerm(), standard, domainNames);
     } else if (searchTerm.hasEndsWithOnly()) {
       return findDomainCountsByNameEndsWithAndStandardAndDomains(
           searchTerm.getEndsWithTerms(), standard, domainNames);
@@ -372,11 +371,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "where match(full_text) against(:term in boolean mode) "
               + "and full_text like '%_rank1%' "
               + "and is_standard = :standard "
+              + "and domain_id in (:domains) "
               + "group by 1 "
               + "order by count desc",
       nativeQuery = true)
   List<DbCardCount> findDomainCountsByTermAndStandardAndDomains(
-      @Param("term") String term, @Param("standard") Boolean standard);
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      @Param("domains") List<String> domains);
 
   @Query(
       value =
@@ -407,7 +409,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "and subtype = 'QUESTION' "
               + "and concept_id in ( select concept_id "
               + "from cb_criteria "
-              + "where match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
+              + "where domain_id = 'SURVEY' "
+              + "and match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
               + "group by survey_version_concept_id"
               + ") a on c.id = a.survey_version_concept_id "
               + "order by count desc",

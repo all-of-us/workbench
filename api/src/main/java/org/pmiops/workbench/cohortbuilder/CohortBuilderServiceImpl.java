@@ -557,11 +557,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     strDomains.removeAll(
         cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
     // modify search term and call
-    StringBuilder stringBuilder = new StringBuilder(modifyTermMatch(term));
-    domains.forEach(d -> stringBuilder.append(" [" + d + "_rank1]"));
     cardCounts.addAll(
         cbCriteriaDao.findDomainCountsByTermAndStandardAndDomains(
-            stringBuilder.toString(), standard));
+            modifyTermMatch(term), standard, strDomains));
 
     return cardCounts.stream()
         .filter(cardCount -> cardCount.getCount() > 0)
