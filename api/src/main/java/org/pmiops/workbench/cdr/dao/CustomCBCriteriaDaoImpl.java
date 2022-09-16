@@ -433,11 +433,11 @@ public class CustomCBCriteriaDaoImpl implements CustomCBCriteriaDao {
   @Override
   public List<DbCardCount> findDomainCountsByTermAndNameEndsWithAndStandardAndDomains(
       String term, List<String> endsWithList, Boolean standard, List<String> domains) {
-    StringBuilder stringBuilder = new StringBuilder(term);
-    domains.forEach(d -> stringBuilder.append(" [" + d + "_rank1]"));
+    StringBuilder termBuilder = new StringBuilder(term);
+    domains.forEach(d -> termBuilder.append(" [" + d + "_rank1]"));
     Object[][] params = {
       {BIND_VAR_STANDARD, standard},
-      {BIND_VAR_TERM, stringBuilder.toString()}
+      {BIND_VAR_TERM, termBuilder.toString()}
     };
     return queryForDbCardCountList(
         generateQueryAndParameters(DOMAIN_COUNTS_TERM_ENDS_WITH, params, endsWithList));

@@ -109,9 +109,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   default List<DbCardCount> findDomainCounts(
       SearchTerm searchTerm, Boolean standard, List<String> domainNames) {
     if (searchTerm.hasModifiedTermOnly()) {
-      StringBuilder stringBuilder = new StringBuilder(searchTerm.getModifiedTerm());
-      domainNames.forEach(d -> stringBuilder.append(" [" + d + "_rank1]"));
-      return findDomainCountsByTermAndStandardAndDomains(stringBuilder.toString(), standard);
+      StringBuilder termBuilder = new StringBuilder(searchTerm.getModifiedTerm());
+      domainNames.forEach(d -> termBuilder.append(" [" + d + "_rank1]"));
+      return findDomainCountsByTermAndStandardAndDomains(termBuilder.toString(), standard);
     } else if (searchTerm.hasEndsWithOnly()) {
       return findDomainCountsByNameEndsWithAndStandardAndDomains(
           searchTerm.getEndsWithTerms(), standard, domainNames);
