@@ -397,8 +397,7 @@ export const ListSearch = fp.flow(
               updateCriteriaSelectionStore(response.items, domain)
             );
         }
-        const searchString = searchTerms || '';
-        this.getResultsBySourceOrStandard(searchString);
+        this.getResultsBySourceOrStandard(searchTerms || '');
       }
     }
 
@@ -463,7 +462,7 @@ export const ListSearch = fp.flow(
           apiError: false,
           inputErrors: [],
           loading: true,
-          searching: true,
+          searching: value !== '',
         });
         const {
           searchContext: { domain, source, selectedSurvey },
@@ -726,6 +725,21 @@ export const ListSearch = fp.flow(
       );
     }
 
+    clearSearch() {
+      if (this.props.searchContext.source === 'conceptSetDetails') {
+        this.setState({
+          data: this.props.concept,
+          inputErrors: [],
+          searching: false,
+          searchTerms: '',
+        });
+      } else {
+        this.setState({ searchTerms: '' }, () =>
+          this.getResultsBySourceOrStandard('')
+        );
+      }
+    }
+
     renderRow(row: any, child: boolean, elementId: string) {
       const { hoverId, childNodes } = this.state;
       const attributes =
@@ -896,7 +910,6 @@ export const ListSearch = fp.flow(
 
     render() {
       const {
-        concept,
         searchContext: { domain, source },
       } = this.props;
       const {
@@ -949,16 +962,10 @@ export const ListSearch = fp.flow(
                   onChange={(e) => this.setState({ searchTerms: e })}
                   onKeyPress={this.handleInput}
                 />
-                {source === 'conceptSetDetails' && searching && (
+                {searching && (
                   <Clickable
                     style={styles.clearSearchIcon}
-                    onClick={() =>
-                      this.setState({
-                        data: concept,
-                        searching: false,
-                        searchTerms: '',
-                      })
-                    }
+                    onClick={() => this.clearSearch()}
                   >
                     <ClrIcon size={24} shape='times-circle' />
                   </Clickable>
