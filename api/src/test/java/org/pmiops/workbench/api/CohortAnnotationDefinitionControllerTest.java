@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -31,6 +32,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -65,6 +67,8 @@ public class CohortAnnotationDefinitionControllerTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CohortAnnotationDefinitionMapper cohortAnnotationDefinitionMapper;
   @Autowired private FakeClock fakeClock;
+  @Autowired private Provider<DbUser> userProvider;
+
   @Mock private BigQueryService bigQueryService;
   @Mock private CohortBuilderService cohortBuilderService;
   @Mock private CohortReviewDao cohortReviewDao;
@@ -104,7 +108,8 @@ public class CohortAnnotationDefinitionControllerTest {
             participantCohortStatusDao,
             participantCohortStatusMapper,
             reviewQueryBuilder,
-            fakeClock);
+            fakeClock,
+            userProvider);
     CohortAnnotationDefinitionService cohortAnnotationDefinitionService =
         new CohortAnnotationDefinitionServiceImpl(
             cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);

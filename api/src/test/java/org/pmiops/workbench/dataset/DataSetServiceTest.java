@@ -129,6 +129,7 @@ public class DataSetServiceTest {
   @Import({FakeClockConfiguration.class, DataSetMapperImpl.class, DataSetServiceImpl.class})
   @MockBean({
     BigQueryService.class,
+    DbUser.class,
     CommonMappers.class,
     CohortService.class,
     ConceptBigQueryService.class,

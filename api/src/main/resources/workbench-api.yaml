@@ -4666,6 +4666,7 @@ definitions:
       etag: "\"1\""
       googleBucketName: "gcs-bucket-AAAAAAAA-BBBBB"
       id: "mynewestworkspace"
+      lastModifiedBy: "user@aou-domain.org"
       lastModifiedTime: 1588097211621
       name: "my newest workspace"
       namespace: "aou-rw-test-11112222"
@@ -4737,6 +4738,9 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      lastModifiedBy:
+        type: string
+        description: the username of the user to last update a workspace
       lastModifiedTime:
         type: integer
         format: int64
@@ -5162,6 +5166,9 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      lastModifiedBy:
+        type: string
+        description: The user who last modified this resource.
       lastModifiedTime:
         type: integer
         format: int64
@@ -5223,6 +5230,9 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      lastModifiedBy:
+        type: string
+        description: The user who last modified this resource.
       lastModifiedTime:
         type: integer
         format: int64
@@ -5422,6 +5432,9 @@ definitions:
       workspaceId:
         type: integer
         format: int64
+      lastModifiedBy:
+        type: string
+        description: The user who last modified this resource.
       lastModifiedTime:
         type: integer
         format: int64
@@ -6267,6 +6280,9 @@ definitions:
       path:
         type: string
         description: The path is in format of gs://bucket-name/name
+      lastModifiedBy:
+        type: string
+        description: The user who last modified this resource.
       lastModifiedTime:
         type: integer
         format: int64
@@ -6493,6 +6509,9 @@ definitions:
         "$ref": "#/definitions/ConceptSet"
       dataSet:
         "$ref": "#/definitions/DataSet"
+      lastModifiedBy:
+        description: The user who last modified this resource.
+        type: string
       lastModifiedEpochMillis:
         description: the resource's last modified time, in milliseconds since the epoch
         type: integer
@@ -7336,6 +7355,9 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      lastModifiedBy:
+        type: string
+        description: The user who last modified this resource.
       lastModifiedTime:
         type: integer
         format: int64

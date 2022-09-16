@@ -31,6 +31,7 @@ public class DbDataset {
   private String description;
   private long creatorId;
   private Timestamp creationTime;
+  private String lastModifiedBy;
   private Timestamp lastModifiedTime;
   private Boolean invalid;
   private Boolean includesAllParticipants;
@@ -146,6 +147,16 @@ public class DbDataset {
     return this;
   }
 
+  @Column(name = "last_modified_by")
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public DbDataset setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
+    return this;
+  }
+
   @Column(name = "last_modified_time")
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
@@ -257,6 +268,7 @@ public class DbDataset {
         && Objects.equals(name, dbDataset.name)
         && Objects.equals(description, dbDataset.description)
         && Objects.equals(creationTime, dbDataset.creationTime)
+        && Objects.equals(lastModifiedBy, dbDataset.lastModifiedBy)
         && Objects.equals(lastModifiedTime, dbDataset.lastModifiedTime)
         && Objects.equals(invalid, dbDataset.invalid)
         && Objects.equals(includesAllParticipants, dbDataset.includesAllParticipants)
@@ -274,6 +286,7 @@ public class DbDataset {
         description,
         creatorId,
         creationTime,
+        lastModifiedBy,
         lastModifiedTime,
         invalid,
         includesAllParticipants,

@@ -77,6 +77,7 @@ public interface ConceptSetMapper {
       target = "creationTime",
       source = "conceptSet.creationTime",
       qualifiedByName = "toTimestampCurrentIfNull")
+  @Mapping(target = "lastModifiedBy", source = "conceptSet.lastModifiedBy")
   @Mapping(
       target = "lastModifiedTime",
       source = "conceptSet.lastModifiedTime",

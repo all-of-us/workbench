@@ -244,7 +244,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             prefixProvider,
             userRecentResourceService,
             workbenchConfigProvider,
-            CLOCK);
+            CLOCK,
+            userProvider);
     controller =
         spy(
             new DataSetController(

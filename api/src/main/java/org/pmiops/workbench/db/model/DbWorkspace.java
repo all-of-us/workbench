@@ -74,6 +74,7 @@ public class DbWorkspace {
   private String firecloudName;
   private DbCdrVersion cdrVersion;
   private DbUser creator;
+  private String lastModifiedBy;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp lastAccessedTime;
@@ -210,6 +211,16 @@ public class DbWorkspace {
 
   public DbWorkspace setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
+  }
+
+  @Column(name = "last_modified_by")
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public DbWorkspace setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
     return this;
   }
 

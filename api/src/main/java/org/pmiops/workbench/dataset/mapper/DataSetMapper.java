@@ -53,6 +53,7 @@ public interface DataSetMapper {
   @Mapping(target = "creatorId", ignore = true)
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "invalid", ignore = true)
+  @Mapping(target = "lastModifiedBy", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "values", source = "domainValuePairs")
   @Mapping(target = "prePackagedConceptSetEnum", ignore = true)

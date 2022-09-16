@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -76,6 +77,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -142,6 +144,7 @@ public class WorkspaceAdminServiceTest {
     LeonardoNotebooksClient.class,
     UserMapper.class,
     UserService.class,
+    WorkspaceAuthService.class,
     WorkspaceService.class
   })
   static class Configuration {
@@ -240,7 +243,8 @@ public class WorkspaceAdminServiceTest {
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
                 .storageBucketPath("gs://bucket"));
-    verify(mockNotebooksService, atLeastOnce()).getNotebooksAsService(any());
+    verify(mockNotebooksService, atLeastOnce())
+        .getNotebooksAsService(any(), anyString(), anyString());
 
     // Regression check: the admin service should never call the end-user variants of these methods.
     verify(mockNotebooksService, never()).getNotebooks(any(), any());
@@ -321,7 +325,7 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
-    when(mockCloudStorageClient.blobToFileDetail(any(), anyString()))
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
         .thenReturn(
             expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
