@@ -111,8 +111,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
     if (searchTerm.hasModifiedTermOnly()) {
       StringBuilder stringBuilder = new StringBuilder(searchTerm.getModifiedTerm());
       domainNames.forEach(d -> stringBuilder.append(" [" + d + "_rank1]"));
-      return findDomainCountsByTermAndStandardAndDomains(
-          stringBuilder.toString(), standard);
+      return findDomainCountsByTermAndStandardAndDomains(stringBuilder.toString(), standard);
     } else if (searchTerm.hasEndsWithOnly()) {
       return findDomainCountsByNameEndsWithAndStandardAndDomains(
           searchTerm.getEndsWithTerms(), standard, domainNames);
@@ -376,8 +375,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "order by count desc",
       nativeQuery = true)
   List<DbCardCount> findDomainCountsByTermAndStandardAndDomains(
-      @Param("term") String term,
-      @Param("standard") Boolean standard);
+      @Param("term") String term, @Param("standard") Boolean standard);
 
   @Query(
       value =

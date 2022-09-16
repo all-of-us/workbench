@@ -29,7 +29,7 @@ public class SearchTerm {
 
   public String getCodeTerm() {
     // could just be a static method
-      return term.replaceAll("[()+\"*]", "");
+    return term.replaceAll("[()+\"*]", "");
   }
 
   public String getModifiedTerm() {
