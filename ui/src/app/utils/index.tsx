@@ -537,26 +537,29 @@ export function validateInputForMySQL(
     inputErrors.add('There is an unclosed " in the search string');
   }
   // check each endsWith term - terms that start with *
-  searchString.split(' ').forEach((word) => {
-    // consecutive special chars
-    if (word.match(/[+*-]{2,}/)) {
-      inputErrors.add(
-        `Search term [${word}] cannot contain consecutive special characters `
-      );
-    }
-    if (word.match(/^\*.*\*$/)) {
-      inputErrors.add(
-        `Search term [${word}] cannot start and end in wild character '*'`
-      );
-    }
-    // length of every word without the special chars mut be >= searchTrigger
-    // for hyphenated word there will be at least 2 letters, if hyphen is removed
-    if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
-      inputErrors.add(
-        `Search term [${word}] length must be at least ${searchTrigger} characters without special characters`
-      );
-    }
-  });
+  searchString
+    .trim()
+    .split(' ')
+    .forEach((word) => {
+      // consecutive special chars
+      if (word.match(/[+*-]{2,}/)) {
+        inputErrors.add(
+          `Search term [${word}] cannot contain consecutive special characters `
+        );
+      }
+      if (word.match(/^\*.*\*$/)) {
+        inputErrors.add(
+          `Search term [${word}] cannot start and end in wild character '*'`
+        );
+      }
+      // length of every word without the special chars mut be >= searchTrigger
+      // for hyphenated word there will be at least 2 letters, if hyphen is removed
+      if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
+        inputErrors.add(
+          `Search term [${word}] length must be at least ${searchTrigger} characters without special characters`
+        );
+      }
+    });
   return Array.from(inputErrors);
 }
 

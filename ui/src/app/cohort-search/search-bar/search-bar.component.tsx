@@ -58,7 +58,7 @@ const styles = reactStyles({
     overflowY: 'auto',
     width: '100%',
     borderRadius: '.125rem',
-    zIndex: 1000,
+    zIndex: 105,
   },
   dropdownItem: {
     height: '1rem',
@@ -405,7 +405,7 @@ export class SearchBar extends React.Component<Props, State> {
     const { highlightedOption, inputErrors, loading, options } = this.state;
     const inputValue =
       highlightedOption !== null
-        ? options[highlightedOption].name
+        ? options?.[highlightedOption].name
         : this.props.searchTerms;
     return (
       <div style={{ display: 'flex', position: 'relative', width: '100%' }}>
