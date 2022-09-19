@@ -475,7 +475,7 @@ export const ListSearch = fp.flow(
           domain,
           standard: !searchSource,
           term: value.trim(),
-          surveyName: 'All Surveys' ? 'All' : surveyName,
+          surveyName,
           removeDrugBrand,
         };
         const resp = await cohortBuilderApi().findCriteriaByDomain(
