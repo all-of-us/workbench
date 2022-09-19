@@ -36,6 +36,7 @@ import { currentCohortStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import outdated from 'assets/icons/outdated.svg';
 import moment from 'moment';
 
 const css = `
@@ -224,6 +225,7 @@ export interface QueryReportState {
   chartsLoading: boolean;
   cohortDefinition: CohortDefinition;
   cohortLoading: boolean;
+  outdatedDefinition: boolean;
   participantCount: number;
 }
 
@@ -246,6 +248,7 @@ export const QueryReport = fp.flow(
         chartsLoading: true,
         cohortDefinition: null,
         cohortLoading: true,
+        outdatedDefinition: false,
         participantCount: null,
       };
     }
@@ -321,7 +324,12 @@ export const QueryReport = fp.flow(
     }
 
     async getRequestFromCohortReview() {
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const {
+        cohort,
+        match: {
+          params: { ns, wsid, cid, crid },
+        },
+      } = this.props;
       const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.Asc };
       let request: CohortDefinition;
       await cohortReviewApi()
@@ -331,6 +339,8 @@ export const QueryReport = fp.flow(
           this.setState({
             cohortLoading: false,
             dateCreated: moment(cohortReview.creationTime).format('YYYY-MM-DD'),
+            outdatedDefinition:
+              cohortReview.creationTime < cohort.lastModifiedTime,
           });
         });
       return request;
@@ -387,12 +397,7 @@ export const QueryReport = fp.flow(
     }
 
     render() {
-      const {
-        cohort,
-        match: {
-          params: { crid },
-        },
-      } = this.props;
+      const { cohort } = this.props;
       const {
         cdrName,
         data,
@@ -401,6 +406,7 @@ export const QueryReport = fp.flow(
         chartsLoading,
         cohortDefinition,
         cohortLoading,
+        outdatedDefinition,
         participantCount,
       } = this.state;
       return (
@@ -423,8 +429,14 @@ export const QueryReport = fp.flow(
                 <div style={styles.row}>
                   <div style={columns.col6}>
                     <div style={styles.container}>
-                      {!!crid && (
-                        <div style={styles.queryHeader}>Cohort Snapshot</div>
+                      {outdatedDefinition && (
+                        <div style={styles.queryHeader}>
+                          Cohort Snapshot{' '}
+                          <img
+                            src={outdated}
+                            title='Outdated Cohort Definition'
+                          />
+                        </div>
                       )}
                       <div style={styles.row}>
                         <div style={columns.col6}>
@@ -437,7 +449,8 @@ export const QueryReport = fp.flow(
                         </div>
                         <div style={columns.col6}>
                           <div style={styles.queryTitle}>
-                            Date {!!crid && <span>snapshot</span>} created
+                            Date {outdatedDefinition && <span>snapshot</span>}{' '}
+                            created
                           </div>
                           <div style={styles.queryContent}>{dateCreated}</div>
                           <div style={styles.queryTitle}>Dataset</div>
