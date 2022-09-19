@@ -312,7 +312,7 @@ export const QueryReport = fp.flow(
                   'YYYY-MM-DD'
                 ),
               });
-              request = JSON.parse(cohort.criteria);
+              request = JSON.parse(cohortResponse.criteria);
             }
             this.setState({ cohortLoading: false });
           });
