@@ -116,8 +116,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableMultiReview": false,
-    "enableUpdatedDemographicSurvey": true,
-    "enableDrugWildcardSearch": true
+    "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
