@@ -159,10 +159,12 @@ export const CohortReviewPage = fp.flow(
       });
   };
 
-  // sets the cohort review id as a url param
-  const updateUrlWithCohortReviewId = (cohortReviewId: number) =>
+  // sets the cohort review id as a url param or removes it if no id is passed
+  const updateUrlWithCohortReviewId = (cohortReviewId?: number) =>
     history.push(
-      `/workspaces/${ns}/${wsid}/data/cohorts/${cid}/reviews/${cohortReviewId}`
+      `/workspaces/${ns}/${wsid}/data/cohorts/${cid}/reviews/${
+        cohortReviewId || ''
+      }`
     );
 
   const loadCohortAndReviews = async () => {
@@ -195,6 +197,15 @@ export const CohortReviewPage = fp.flow(
       setActiveReview(selectedReview);
       getParticipantData(selectedReview.cohortReviewId);
     } else {
+      // no reviews exist for this cohort
+      if (activeReview) {
+        // clear charts in overview section
+        setActiveReview(undefined);
+      }
+      if (crid) {
+        // remove crid param from url
+        updateUrlWithCohortReviewId();
+      }
       hideSpinner();
     }
     setLoading(false);
