@@ -86,7 +86,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_43",
+      "cdrDbName": "synth_r_2019q4_44",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -100,7 +100,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_43",
+      "cdrDbName": "synth_r_2019q4_44",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -117,7 +117,7 @@
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_c_2019q4_39",
+      "cdrDbName": "synth_c_2019q4_40",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "storageBasePath": "v1",
