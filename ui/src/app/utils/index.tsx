@@ -560,7 +560,7 @@ export function validateInputForMySQL(
   });
   if (termsArray.length === 1 && termsArray[0].match(/^-/)) {
     inputErrors.add(
-      "The minus character '-' cannot be used with a single search term"
+      `Search term [${termsArray[0]}] with one word cannot start with a minus character '-'`
     );
   }
   return Array.from(inputErrors);
