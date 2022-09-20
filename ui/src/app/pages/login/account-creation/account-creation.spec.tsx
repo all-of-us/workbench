@@ -1,20 +1,32 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
+import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
 
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import colors from 'app/styles/colors';
 import { serverConfigStore } from 'app/utils/stores';
 
-import { AccountCreation, AccountCreationProps } from './account-creation';
+import {
+  AccountCreation,
+  AccountCreationProps,
+  countryDropdownOption,
+} from './account-creation';
 
 let props: AccountCreationProps;
 const component = () => {
   return mount(<AccountCreation {...props} />);
 };
 
+const shallowComponent = () => {
+  return shallow(<AccountCreation {...props} />);
+};
+
 function getCharactersLimitProps(wrapper: ReactWrapper) {
   return wrapper.find('[data-test-id="characterLimit"]').get(0).props;
+}
+
+function findCountryInputField(wrapper: ShallowWrapper) {
+  return wrapper.find('[data-test-id="non-usa-country-input"]');
 }
 
 const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
@@ -150,4 +162,19 @@ it('should display characters over message if research purpose character length 
   expect(getCharactersLimitProps(wrapper).style.color).toBe(colors.danger);
   // Characters remaining message should not be displayed
   expect(wrapper.find('[data-test-id="charRemaining"]').get(0)).toBeUndefined();
+});
+
+it('should display a text input field for non-US countries', () => {
+  const wrapper = shallowComponent();
+  expect(wrapper.find('[data-test-id="country-input"]').exists()).toBeFalsy();
+  wrapper
+    .find('[data-test-id="country-dropdown"]')
+    .simulate('change', countryDropdownOption.unitedStates);
+  expect(wrapper.find('[data-test-id="country-input"]').exists()).toBeFalsy();
+  wrapper
+    .find('[data-test-id="country-dropdown"]')
+    .simulate('change', countryDropdownOption.other);
+  expect(findCountryInputField(wrapper).exists()).toBeTruthy();
+  findCountryInputField(wrapper).simulate('change', 'Canada');
+  expect(findCountryInputField(wrapper).prop('value')).toEqual('Canada');
 });

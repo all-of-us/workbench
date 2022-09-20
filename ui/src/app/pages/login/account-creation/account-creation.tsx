@@ -12,8 +12,10 @@ import { ClrIcon, InfoIcon, ValidationIcon } from 'app/components/icons';
 import {
   ErrorMessage,
   FormValidationErrorMessage,
+  Select,
   styles as inputStyles,
   TextAreaWithLengthValidationMessage,
+  TextInput,
   TextInputWithLabel,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
@@ -73,6 +75,11 @@ const researchPurposeList = [
 
 const nameLength = 80;
 
+export enum countryDropdownOption {
+  unitedStates = 'United States of America',
+  other = 'Other',
+}
+
 export const MultiSelectWithLabel = (props) => {
   return (
     <FlexColumn style={{ width: '12rem', ...props.containerStyle }}>
@@ -110,6 +117,7 @@ export interface AccountCreationState {
   showMostInterestedInKnowingBlurb: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
+  countryDropdownSelection: countryDropdownOption | null;
 }
 
 export class AccountCreation extends React.Component<
@@ -132,6 +140,7 @@ export class AccountCreation extends React.Component<
       showMostInterestedInKnowingBlurb: false,
       usernameCheckInProgress: false,
       usernameConflictError: false,
+      countryDropdownSelection: null,
     };
 
     return state;
@@ -203,6 +212,18 @@ export class AccountCreation extends React.Component<
 
   updateProfileObject(attribute: string, value) {
     this.setState(fp.set(['profile', attribute], value));
+  }
+
+  updateCountryDropdownSelection(value) {
+    this.setState({
+      countryDropdownSelection: value,
+    });
+
+    if (value === countryDropdownOption.unitedStates) {
+      this.updateAddress('country', value);
+    } else {
+      this.updateAddress('country', '');
+    }
   }
 
   updateAddress(attribute: string, value) {
@@ -594,15 +615,46 @@ export class AccountCreation extends React.Component<
                     labelText='Zip code'
                     onChange={(value) => this.updateAddress('zipCode', value)}
                   />
-                  <TextInputWithLabel
-                    dataTestId='country'
-                    inputName='country'
-                    placeholder='Country'
-                    value={country}
-                    labelText='Country'
-                    containerStyle={styles.multiInputSpacing}
-                    onChange={(value) => this.updateAddress('country', value)}
-                  />
+                  <FlexColumn
+                    style={{ width: '12rem', ...styles.multiInputSpacing }}
+                  >
+                    <label style={{ fontWeight: 600, color: colors.primary }}>
+                      Country
+                    </label>
+                    <Select
+                      value={this.state.countryDropdownSelection}
+                      options={[
+                        {
+                          value: countryDropdownOption.unitedStates,
+                          label: countryDropdownOption.unitedStates,
+                        },
+                        {
+                          value: countryDropdownOption.other,
+                          label: countryDropdownOption.other,
+                        },
+                      ]}
+                      onChange={(value) =>
+                        this.updateCountryDropdownSelection(value)
+                      }
+                      data-test-id='country-dropdown'
+                    />
+                    {this.state.countryDropdownSelection ===
+                      countryDropdownOption.other && (
+                      <div style={{ marginTop: '0.2rem' }}>
+                        <TextInput
+                          data-test-id='non-usa-country-input'
+                          id='country'
+                          name='country'
+                          placeholder='Please specify'
+                          value={country}
+                          onChange={(value) =>
+                            this.updateAddress('country', value)
+                          }
+                          style={{ ...commonStyles.sectionInput }}
+                        />
+                      </div>
+                    )}
+                  </FlexColumn>
                 </FlexRow>
               </FlexColumn>
             </Section>
