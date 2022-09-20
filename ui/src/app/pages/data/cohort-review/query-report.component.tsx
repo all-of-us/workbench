@@ -36,6 +36,7 @@ import { currentCohortStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import outdated from 'assets/icons/outdated.svg';
 import moment from 'moment';
 
 const css = `
@@ -89,6 +90,12 @@ const styles = reactStyles({
     backgroundColor: colors.white,
     paddingTop: '1rem',
     marginTop: '0.5rem',
+  },
+  queryHeader: {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: colors.primary,
+    lineHeight: '24px',
   },
   queryTitle: {
     fontSize: '16px',
@@ -212,10 +219,13 @@ export interface QueryReportProps
 export interface QueryReportState {
   cdrName: string;
   data: DemoChartInfo[];
+  dateCreated: string;
   displayCohort: Cohort;
   groupedData: any;
   chartsLoading: boolean;
+  cohortDefinition: CohortDefinition;
   cohortLoading: boolean;
+  outdatedDefinition: boolean;
   participantCount: number;
 }
 
@@ -232,10 +242,13 @@ export const QueryReport = fp.flow(
       this.state = {
         cdrName: null,
         data: null,
+        dateCreated: null,
         displayCohort: null,
         groupedData: null,
         chartsLoading: true,
+        cohortDefinition: null,
         cohortLoading: true,
+        outdatedDefinition: false,
         participantCount: null,
       };
     }
@@ -248,7 +261,7 @@ export const QueryReport = fp.flow(
       } = this.props;
       hideSpinner();
       const { ns, wsid } = this.props.match.params;
-      const searchRequest = await this.getRequestFromCohort();
+      const cohortDefinition = await this.getRequestFromCohort();
       const cdrName = findCdrVersion(
         cdrVersionId,
         cdrVersionTiersResponse
@@ -261,15 +274,16 @@ export const QueryReport = fp.flow(
             wsid,
             GenderOrSexType[GenderOrSexType.GENDER],
             AgeType[AgeType.AGE],
-            searchRequest
+            cohortDefinition
           ),
-          cohortBuilderApi().findEthnicityInfo(ns, wsid, searchRequest),
-          cohortBuilderApi().countParticipants(ns, wsid, searchRequest),
+          cohortBuilderApi().findEthnicityInfo(ns, wsid, cohortDefinition),
+          cohortBuilderApi().countParticipants(ns, wsid, cohortDefinition),
         ]);
       this.groupChartData([...demoChartInfo.items, ...ethnicityInfo.items]);
       this.setState({
         data: demoChartInfo.items,
         chartsLoading: false,
+        cohortDefinition,
         participantCount,
       });
     }
@@ -280,17 +294,29 @@ export const QueryReport = fp.flow(
       let request: CohortDefinition;
       if (cohort?.id === +cid) {
         this.setState({ cohortLoading: false });
-        request = crid
-          ? this.getRequestFromCohortReview()
-          : JSON.parse(cohort.criteria);
+        if (crid) {
+          request = await this.getRequestFromCohortReview();
+        } else {
+          this.setState({
+            dateCreated: moment(cohort.creationTime).format('YYYY-MM-DD'),
+          });
+          request = JSON.parse(cohort.criteria);
+        }
       } else {
         await cohortsApi()
           .getCohort(ns, wsid, +cid)
-          .then((cohortResponse) => {
+          .then(async (cohortResponse) => {
             currentCohortStore.next(cohortResponse);
-            request = crid
-              ? this.getRequestFromCohortReview()
-              : JSON.parse(cohortResponse.criteria);
+            if (crid) {
+              request = await this.getRequestFromCohortReview();
+            } else {
+              this.setState({
+                dateCreated: moment(cohortResponse.creationTime).format(
+                  'YYYY-MM-DD'
+                ),
+              });
+              request = JSON.parse(cohortResponse.criteria);
+            }
             this.setState({ cohortLoading: false });
           });
       }
@@ -298,14 +324,24 @@ export const QueryReport = fp.flow(
     }
 
     async getRequestFromCohortReview() {
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const {
+        cohort,
+        match: {
+          params: { ns, wsid, cid, crid },
+        },
+      } = this.props;
       const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.Asc };
       let request: CohortDefinition;
       await cohortReviewApi()
         .getParticipantCohortStatuses(ns, wsid, +cid, +crid, filterRequest)
         .then(({ cohortReview }) => {
           request = JSON.parse(cohortReview.cohortDefinition);
-          this.setState({ cohortLoading: false });
+          this.setState({
+            cohortLoading: false,
+            dateCreated: moment(cohortReview.creationTime).format('YYYY-MM-DD'),
+            outdatedDefinition:
+              cohortReview.creationTime < cohort.lastModifiedTime,
+          });
         });
       return request;
     }
@@ -365,15 +401,14 @@ export const QueryReport = fp.flow(
       const {
         cdrName,
         data,
+        dateCreated,
         groupedData,
         chartsLoading,
+        cohortDefinition,
         cohortLoading,
+        outdatedDefinition,
         participantCount,
       } = this.state;
-      // TODO can we use the creation time from the review instead of the cohort here?
-      const created = !!cohort
-        ? moment(cohort.creationTime).format('YYYY-MM-DD')
-        : null;
       return (
         <React.Fragment>
           <style>{css}</style>
@@ -394,6 +429,24 @@ export const QueryReport = fp.flow(
                 <div style={styles.row}>
                   <div style={columns.col6}>
                     <div style={styles.container}>
+                      {outdatedDefinition && (
+                        <div style={styles.queryHeader}>
+                          Cohort Snapshot{' '}
+                          <span
+                            style={{
+                              color: colors.warning,
+                              fontSize: '14px',
+                              fontWeight: 'normal',
+                            }}
+                          >
+                            <img
+                              src={outdated}
+                              title='Outdated Cohort Definition'
+                            />{' '}
+                            Outdated
+                          </span>
+                        </div>
+                      )}
                       <div style={styles.row}>
                         <div style={columns.col6}>
                           <div style={styles.queryTitle}>Cohort Name</div>
@@ -404,13 +457,20 @@ export const QueryReport = fp.flow(
                           </div>
                         </div>
                         <div style={columns.col6}>
-                          <div style={styles.queryTitle}>Date created</div>
-                          <div style={styles.queryContent}>{created}</div>
+                          <div style={styles.queryTitle}>
+                            Date {outdatedDefinition && <span>snapshot</span>}{' '}
+                            created
+                          </div>
+                          <div style={styles.queryContent}>{dateCreated}</div>
                           <div style={styles.queryTitle}>Dataset</div>
                           <div style={styles.queryContent}>{cdrName}</div>
                         </div>
                         <div style={columns.col12}>
-                          <CohortDefinitionComponent cohort={cohort} />
+                          {!!cohortDefinition && (
+                            <CohortDefinitionComponent
+                              cohortDefinition={cohortDefinition}
+                            />
+                          )}
                         </div>
                       </div>
                     </div>

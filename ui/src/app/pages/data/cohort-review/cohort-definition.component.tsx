@@ -2,7 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
-  Cohort,
+  CohortDefinition,
   Criteria,
   CriteriaType,
   Domain,
@@ -100,7 +100,7 @@ const modifierOperatorDisplay = (operator: Operator) => {
 };
 
 interface Props extends RouteComponentProps<MatchParams> {
-  cohort: Cohort;
+  cohortDefinition: CohortDefinition;
 }
 
 interface State {
@@ -128,14 +128,11 @@ export const CohortDefinitionComponent = withRouter(
     }
 
     mapDefinition() {
-      const {
-        cohort: { criteria },
-      } = this.props;
-      const def = JSON.parse(criteria);
+      const { cohortDefinition } = this.props;
       const definition = ['includes', 'excludes'].reduce((acc, role) => {
-        if (def[role].length) {
+        if (cohortDefinition[role].length) {
           const roleObj = { role, groups: [] };
-          def[role].forEach((group) => {
+          cohortDefinition[role].forEach((group) => {
             roleObj.groups.push(this.mapGroup(group));
           });
           acc.push(roleObj);
