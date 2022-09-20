@@ -31,7 +31,6 @@ import {
   currentConceptStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 const styles = reactStyles({
