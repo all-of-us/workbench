@@ -179,9 +179,15 @@ export const CohortReviewPage = fp.flow(
     if (cohortReviewResponse.items.length > 0) {
       let selectedReview = cohortReviewResponse.items[0];
       if (crid) {
-        selectedReview = cohortReviewResponse.items.find(
+        const reviewIndex = cohortReviewResponse.items.findIndex(
           (cr) => cr.cohortReviewId === +crid
         );
+        if (reviewIndex > -1) {
+          selectedReview = cohortReviewResponse.items[reviewIndex];
+        } else {
+          // Review with id from url doesn't exist, use the first review from the response
+          updateUrlWithCohortReviewId(selectedReview.cohortReviewId);
+        }
       } else {
         updateUrlWithCohortReviewId(selectedReview.cohortReviewId);
       }
