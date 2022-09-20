@@ -32,7 +32,6 @@ describe('SearchBar', () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        enableDrugWildcardSearch: false,
       },
     });
   });

@@ -53,7 +53,6 @@ describe('CohortSearch', () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        enableDrugWildcardSearch: false,
       },
     });
   });

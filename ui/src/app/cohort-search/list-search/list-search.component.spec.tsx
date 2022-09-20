@@ -16,7 +16,6 @@ beforeEach(() => {
   serverConfigStore.set({
     config: {
       ...defaultServerConfig,
-      enableDrugWildcardSearch: false,
     },
   });
 });

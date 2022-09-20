@@ -44,7 +44,6 @@ describe('ConceptHomepage', () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        enableDrugWildcardSearch: false,
       },
     });
   });

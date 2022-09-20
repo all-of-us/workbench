@@ -489,15 +489,13 @@ export const ConceptHomepage = fp.flow(
                   />
                 </Clickable>
               )}
-              {serverConfigStore.get().config.enableDrugWildcardSearch && (
-                <TooltipTrigger side='top' content={searchTooltip}>
-                  <ClrIcon
-                    style={styles.infoIcon}
-                    className='is-solid'
-                    shape='info-standard'
-                  />
-                </TooltipTrigger>
-              )}
+              <TooltipTrigger side='top' content={searchTooltip}>
+                <ClrIcon
+                  style={styles.infoIcon}
+                  className='is-solid'
+                  shape='info-standard'
+                />
+              </TooltipTrigger>
             </div>
             {inputErrors.map((error, e) => (
               <AlertDanger key={e} style={styles.inputAlert}>

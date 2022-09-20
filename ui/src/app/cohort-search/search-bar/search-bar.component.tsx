@@ -430,16 +430,15 @@ export class SearchBar extends React.Component<Props, State> {
           ))}
         </div>
         <div style={{ float: 'right' }}>
-          {serverConfigStore.get().config.enableDrugWildcardSearch &&
-            this.doesDomainIncludeToolTip() && (
-              <TooltipTrigger side='top' content={searchTooltip}>
-                <ClrIcon
-                  style={styles.infoIcon}
-                  className='is-solid'
-                  shape='info-standard'
-                />
-              </TooltipTrigger>
-            )}
+          {this.doesDomainIncludeToolTip() && (
+            <TooltipTrigger side='top' content={searchTooltip}>
+              <ClrIcon
+                style={styles.infoIcon}
+                className='is-solid'
+                shape='info-standard'
+              />
+            </TooltipTrigger>
+          )}
         </div>
         {options !== null && (
           <div ref={(el) => (this.dropdown = el)} style={styles.dropdownMenu}>

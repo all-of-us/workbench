@@ -978,7 +978,7 @@ export const ListSearch = fp.flow(
               ))}
             </div>
             <div style={{ float: 'right', width: '20%' }}>
-              {serverConfigStore.get().config.enableDrugWildcardSearch && (
+              {
                 <TooltipTrigger side='top' content={searchTooltip}>
                   <ClrIcon
                     style={styles.infoIcon}
@@ -986,7 +986,7 @@ export const ListSearch = fp.flow(
                     shape='info-standard'
                   />
                 </TooltipTrigger>
-              )}
+              }
             </div>
           </div>
           <div style={{ display: 'table', height: '100%', width: '100%' }}>
@@ -1086,25 +1086,24 @@ export const ListSearch = fp.flow(
                     />
                   </span>
                 )}
-                {this.checkDrug &&
-                  serverConfigStore.get().config.enableDrugWildcardSearch && (
-                    <span style={{ float: 'right' }}>
-                      <span
-                        style={{
-                          display: 'table-cell',
-                          paddingRight: '0.35rem',
-                        }}
-                      >
-                        Remove Brand Names
-                      </span>
-                      <InputSwitch
-                        checked={removeDrugBrand}
-                        disabled={loading}
-                        onChange={() => this.toggleDrugBrand()}
-                        style={{ display: 'table-cell', boxShadow: 0 }}
-                      />
+                {this.checkDrug && (
+                  <span style={{ float: 'right' }}>
+                    <span
+                      style={{
+                        display: 'table-cell',
+                        paddingRight: '0.35rem',
+                      }}
+                    >
+                      Remove Brand Names
                     </span>
-                  )}
+                    <InputSwitch
+                      checked={removeDrugBrand}
+                      disabled={loading}
+                      onChange={() => this.toggleDrugBrand()}
+                      style={{ display: 'table-cell', boxShadow: 0 }}
+                    />
+                  </span>
+                )}
               </div>
             </div>
           </div>
