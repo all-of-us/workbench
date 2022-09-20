@@ -432,10 +432,19 @@ export const QueryReport = fp.flow(
                       {outdatedDefinition && (
                         <div style={styles.queryHeader}>
                           Cohort Snapshot{' '}
-                          <img
-                            src={outdated}
-                            title='Outdated Cohort Definition'
-                          />
+                          <span
+                            style={{
+                              color: colors.warning,
+                              fontSize: '14px',
+                              fontWeight: 'normal',
+                            }}
+                          >
+                            <img
+                              src={outdated}
+                              title='Outdated Cohort Definition'
+                            />{' '}
+                            Outdated
+                          </span>
                         </div>
                       )}
                       <div style={styles.row}>
