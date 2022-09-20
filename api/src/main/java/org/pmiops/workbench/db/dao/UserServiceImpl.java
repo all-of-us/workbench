@@ -40,6 +40,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -346,6 +347,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
+        null,
         dbVerifiedAffiliation);
   }
 
@@ -361,6 +363,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       List<Degree> degrees,
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,
+      DbDemographicSurveyV2 dbDemographicSurveyV2,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
@@ -376,6 +379,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser.setDegreesEnum(degrees);
     }
     dbUser.setDemographicSurvey(dbDemographicSurvey);
+    dbUser.setDemographicSurveyV2(dbDemographicSurveyV2);
 
     // For existing user that do not have address
     if (dbAddress != null) {
@@ -383,6 +387,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     if (dbDemographicSurvey != null) {
       dbDemographicSurvey.setUser(dbUser);
+    }
+    if (dbDemographicSurveyV2 != null) {
+      dbDemographicSurveyV2.setUser(dbUser);
     }
 
     Timestamp now = clockNow();

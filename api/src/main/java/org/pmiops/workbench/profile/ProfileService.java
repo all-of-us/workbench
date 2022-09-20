@@ -282,10 +282,6 @@ public class ProfileService {
         demographicSurveyMapper.toDbDemographicSurveyV2(updatedProfile.getDemographicSurveyV2());
 
     if (newDemoSurvey != null) {
-      DbDemographicSurveyV2 existingSurvey = dbUser.getDemographicSurveyV2();
-      if (existingSurvey != null) {
-        newDemoSurvey.setId(existingSurvey.getId());
-      }
       dbUser.setDemographicSurveyV2(newDemoSurvey);
       // needed to trigger an RDR Export refresh for this Researcher
       dbUser.setLastModifiedTime(lastModifiedTime);

@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -50,6 +51,7 @@ public interface UserService {
       List<Degree> degrees,
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,
+      DbDemographicSurveyV2 dbDemographicSurveyv2,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar

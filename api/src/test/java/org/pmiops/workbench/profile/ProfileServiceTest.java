@@ -565,6 +565,42 @@ public class ProfileServiceTest {
   }
 
   @Test
+  public void updateProfile_with_existing_demo_survey_v2() {
+    DemographicSurveyV2 v2Survey =
+        new DemographicSurveyV2()
+            .ethnicCategories(
+                ImmutableList.of(
+                    EthnicCategory.ASIAN, EthnicCategory.ASIAN_CHINESE, EthnicCategory.WHITE))
+            .genderIdentities(ImmutableList.of(GenderIdentityV2.MAN, GenderIdentityV2.TRANS_MAN))
+            .sexualOrientations(ImmutableList.of(SexualOrientationV2.QUEER))
+            .sexAtBirth(SexAtBirthV2.PREFER_NOT_TO_ANSWER)
+            .yearOfBirthPreferNot(true)
+            .disabilityHearing(YesNoPreferNot.NO)
+            .disabilitySeeing(YesNoPreferNot.YES)
+            .education(EducationV2.DOCTORATE)
+            .disadvantaged(YesNoPreferNot.PREFER_NOT_TO_ANSWER);
+
+    Profile previousProfile = createValidProfile().demographicSurveyV2(v2Survey);
+    Profile updatedProfile =
+        createValidProfile().demographicSurveyV2(v2Survey).areaOfResearch("Some research");
+
+    DbUser targetUser =
+        userDao.save(new DbUser().setUserId(10).setGivenName("John").setFamilyName("Doe"));
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile);
+
+    TestMockFactory.assertEqualDemographicSurveys(
+        profileService.getProfile(targetUser).getDemographicSurveyV2(),
+        updatedProfile.getDemographicSurveyV2());
+
+    assertThat(profileService.getProfile(targetUser).getAreaOfResearch())
+        .isEqualTo("Some research");
+  }
+
+  @Test
   public void updateProfile_demo_survey_update_v2() {
     DemographicSurveyV2 v2Survey =
         new DemographicSurveyV2()

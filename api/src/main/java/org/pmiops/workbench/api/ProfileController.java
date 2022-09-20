@@ -244,6 +244,7 @@ public class ProfileController implements ProfileApiDelegate {
               addressMapper.addressToDbAddress(profile.getAddress()),
               demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
                   profile.getDemographicSurvey()),
+              demographicSurveyMapper.toDbDemographicSurveyV2(profile.getDemographicSurveyV2()),
               verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
                   profile.getVerifiedInstitutionalAffiliation(), institutionService));
     } catch (Exception e) {
