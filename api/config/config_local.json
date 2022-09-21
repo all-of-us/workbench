@@ -116,6 +116,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableMultiReview": true,
+    "enableDrugWildcardSearch": true,
     "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {

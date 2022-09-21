@@ -307,6 +307,8 @@ public class WorkbenchConfig {
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
     // If true, enable Multiple Reviews for Cohort Review - both backend and UI
+    public boolean enableDrugWildcardSearch;
+    // If true, enable Drug Wildcard Search for Cohort Builder - backend
     public boolean enableMultiReview;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
