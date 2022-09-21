@@ -7,10 +7,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
@@ -52,18 +50,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private final CohortBuilderService cohortBuilderService;
   private final ChartService chartService;
   private final WorkspaceAuthService workspaceAuthService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   CohortBuilderController(
       CohortBuilderService cohortBuilderService,
       ChartService chartService,
-      WorkspaceAuthService workspaceAuthService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceAuthService workspaceAuthService) {
     this.cohortBuilderService = cohortBuilderService;
     this.chartService = chartService;
     this.workspaceAuthService = workspaceAuthService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override

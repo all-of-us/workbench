@@ -198,8 +198,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     when(firecloudService.isUserMemberOfGroupWithCache(anyString(), anyString())).thenReturn(true);
 
     controller =
-        new CohortBuilderController(
-            cohortBuilderService, chartService, workspaceAuthService, workbenchConfigProvider);
+        new CohortBuilderController(cohortBuilderService, chartService, workspaceAuthService);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
