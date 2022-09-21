@@ -45,7 +45,6 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
@@ -978,15 +977,13 @@ export const ListSearch = fp.flow(
               ))}
             </div>
             <div style={{ float: 'right', width: '20%' }}>
-              {serverConfigStore.get().config.enableDrugWildcardSearch && (
-                <TooltipTrigger side='top' content={searchTooltip}>
-                  <ClrIcon
-                    style={styles.infoIcon}
-                    className='is-solid'
-                    shape='info-standard'
-                  />
-                </TooltipTrigger>
-              )}
+              <TooltipTrigger side='top' content={searchTooltip}>
+                <ClrIcon
+                  style={styles.infoIcon}
+                  className='is-solid'
+                  shape='info-standard'
+                />
+              </TooltipTrigger>
             </div>
           </div>
           <div style={{ display: 'table', height: '100%', width: '100%' }}>
@@ -1086,25 +1083,24 @@ export const ListSearch = fp.flow(
                     />
                   </span>
                 )}
-                {this.checkDrug &&
-                  serverConfigStore.get().config.enableDrugWildcardSearch && (
-                    <span style={{ float: 'right' }}>
-                      <span
-                        style={{
-                          display: 'table-cell',
-                          paddingRight: '0.35rem',
-                        }}
-                      >
-                        Remove Brand Names
-                      </span>
-                      <InputSwitch
-                        checked={removeDrugBrand}
-                        disabled={loading}
-                        onChange={() => this.toggleDrugBrand()}
-                        style={{ display: 'table-cell', boxShadow: 0 }}
-                      />
+                {this.checkDrug && (
+                  <span style={{ float: 'right' }}>
+                    <span
+                      style={{
+                        display: 'table-cell',
+                        paddingRight: '0.35rem',
+                      }}
+                    >
+                      Remove Brand Names
                     </span>
-                  )}
+                    <InputSwitch
+                      checked={removeDrugBrand}
+                      disabled={loading}
+                      onChange={() => this.toggleDrugBrand()}
+                      style={{ display: 'table-cell', boxShadow: 0 }}
+                    />
+                  </span>
+                )}
               </div>
             </div>
           </div>

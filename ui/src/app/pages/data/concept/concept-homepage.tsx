@@ -31,7 +31,6 @@ import {
   currentConceptStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 const styles = reactStyles({
@@ -489,15 +488,13 @@ export const ConceptHomepage = fp.flow(
                   />
                 </Clickable>
               )}
-              {serverConfigStore.get().config.enableDrugWildcardSearch && (
-                <TooltipTrigger side='top' content={searchTooltip}>
-                  <ClrIcon
-                    style={styles.infoIcon}
-                    className='is-solid'
-                    shape='info-standard'
-                  />
-                </TooltipTrigger>
-              )}
+              <TooltipTrigger side='top' content={searchTooltip}>
+                <ClrIcon
+                  style={styles.infoIcon}
+                  className='is-solid'
+                  shape='info-standard'
+                />
+              </TooltipTrigger>
             </div>
             {inputErrors.map((error, e) => (
               <AlertDanger key={e} style={styles.inputAlert}>

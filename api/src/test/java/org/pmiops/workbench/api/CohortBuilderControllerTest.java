@@ -142,10 +142,6 @@ public class CohortBuilderControllerTest {
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
 
-    WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableDrugWildcardSearch = true;
-    doReturn(workbenchConfig).when(workbenchConfigProvider).get();
-
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     DbWorkspace dbWorkspace = new DbWorkspace();

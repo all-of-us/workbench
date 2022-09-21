@@ -14,7 +14,6 @@ import {
   validateInputForMySQL,
   withCurrentWorkspace,
 } from 'app/utils';
-import { serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   cardBlock: {
@@ -306,15 +305,13 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
             <div style={styles.searchContainer}>
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
-                {serverConfigStore.get().config.enableDrugWildcardSearch && (
-                  <TooltipTrigger side='top' content={searchTooltip}>
-                    <ClrIcon
-                      style={styles.infoIcon}
-                      className='is-solid'
-                      shape='info-standard'
-                    />
-                  </TooltipTrigger>
-                )}
+                <TooltipTrigger side='top' content={searchTooltip}>
+                  <ClrIcon
+                    style={styles.infoIcon}
+                    className='is-solid'
+                    shape='info-standard'
+                  />
+                </TooltipTrigger>
               </span>
               <div style={styles.searchBar}>
                 {domainCountsLoading ? (

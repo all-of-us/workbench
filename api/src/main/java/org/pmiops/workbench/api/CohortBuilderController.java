@@ -79,17 +79,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateDomain(domain);
     validateType(type);
     validateTerm(term);
-    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaAutoCompleteV2(
-                      domain, term, ImmutableList.of(type), standard)));
-    } else {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(cohortBuilderService.findCriteriaAutoComplete(domain, term, type, standard)));
-    }
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(
+                cohortBuilderService.findCriteriaAutoCompleteV2(
+                    domain, term, ImmutableList.of(type), standard)));
   }
 
   @Override
@@ -99,17 +93,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateSurveyName(surveyName);
     validateTerm(term);
-    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(cohortBuilderService.findSurveyAutoComplete(surveyName, term)));
-    } else {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaAutoComplete(
-                      Domain.SURVEY.toString(), term, CriteriaType.PPI.toString(), false)));
-    }
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(cohortBuilderService.findSurveyAutoComplete(surveyName, term)));
   }
 
   @Override
@@ -117,15 +103,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, String value, Integer limit) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(cohortBuilderService.findDrugBrandOrIngredientByValueV2(value, limit)));
-    } else {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
-    }
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(cohortBuilderService.findDrugBrandOrIngredientByValueV2(value, limit)));
   }
 
   @Override
@@ -170,11 +150,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(request.getDomain(), request.getSurveyName());
-    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomainV2(request));
-    } else {
-      return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomain(request));
-    }
+    return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomainV2(request));
   }
 
   @Override
@@ -260,13 +236,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateTerm(term);
 
-    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(
-          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCountsV2(term)));
-    } else {
-      return ResponseEntity.ok(
-          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
-    }
+    return ResponseEntity.ok(
+        new CardCountResponse().items(cohortBuilderService.findUniversalDomainCountsV2(term)));
   }
 
   @Override
@@ -284,13 +255,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateTerm(term);
-    if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(
-          new CardCountResponse().items(cohortBuilderService.findDomainCountsV2(term)));
-    } else {
-      return ResponseEntity.ok(
-          new CardCountResponse().items(cohortBuilderService.findDomainCounts(term)));
-    }
+    return ResponseEntity.ok(
+        new CardCountResponse().items(cohortBuilderService.findDomainCountsV2(term)));
   }
 
   @Override
