@@ -46,7 +46,6 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -100,8 +99,6 @@ public class CohortBuilderControllerTest {
 
   @Mock private WorkspaceAuthService workspaceAuthService;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
-  @MockBean private Provider<WorkbenchConfig> workbenchConfigProvider;
-
   private static final String WORKSPACE_ID = "workspaceId";
   private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
@@ -137,7 +134,7 @@ public class CohortBuilderControllerTest {
 
     controller =
         new CohortBuilderController(
-            cohortBuilderService, chartService, workspaceAuthService, workbenchConfigProvider);
+            cohortBuilderService, chartService, workspaceAuthService);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();

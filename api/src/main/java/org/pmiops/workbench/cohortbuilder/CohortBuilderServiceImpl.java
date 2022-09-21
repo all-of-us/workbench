@@ -205,7 +205,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Criteria> findCriteriaAutoCompleteV2(
+  public List<Criteria> findCriteriaAutoComplete(
       String domain, String term, List<String> types, Boolean standard) {
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
@@ -273,7 +273,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public CriteriaListWithCountResponse findCriteriaByDomainV2(CriteriaSearchRequest request) {
+  public CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request) {
     boolean removeDrugBrand = request.getRemoveDrugBrand();
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
 
@@ -340,7 +340,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CardCount> findUniversalDomainCountsV2(String term) {
+  public List<CardCount> findUniversalDomainCounts(String term) {
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<CardCount> cardCounts =
@@ -366,7 +366,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CardCount> findDomainCountsV2(String term) {
+  public List<CardCount> findDomainCounts(String term) {
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<CardCount> cardCounts =
@@ -423,7 +423,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Criteria> findDrugBrandOrIngredientByValueV2(String term, Integer limit) {
+  public List<Criteria> findDrugBrandOrIngredientByValue(String term, Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
 
