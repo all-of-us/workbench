@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.common.collect.Table;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CardCount;
@@ -22,27 +21,6 @@ import org.pmiops.workbench.model.SurveyVersion;
 
 public interface CohortBuilderService {
 
-  class ConceptIds {
-
-    private final List<Long> standardConceptIds;
-    private final List<Long> sourceConceptIds;
-
-    public ConceptIds(List<Long> standardConceptIds, List<Long> sourceConceptIds) {
-      this.standardConceptIds = standardConceptIds;
-      this.sourceConceptIds = sourceConceptIds;
-    }
-
-    public List<Long> getStandardConceptIds() {
-      return standardConceptIds;
-    }
-
-    public List<Long> getSourceConceptIds() {
-      return sourceConceptIds;
-    }
-  }
-
-  ConceptIds classifyConceptIds(Set<Long> conceptIds);
-
   List<Criteria> findCriteriaByDomainIdAndConceptIds(
       String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds);
 
@@ -55,9 +33,6 @@ public interface CohortBuilderService {
 
   List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId);
 
-  List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, String type, Boolean standard);
-
   List<Criteria> findCriteriaAutoCompleteV2(
       String domain, String term, List<String> types, Boolean standard);
 
@@ -65,25 +40,17 @@ public interface CohortBuilderService {
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
-  CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request);
-
   CriteriaListWithCountResponse findCriteriaByDomainV2(CriteriaSearchRequest request);
 
   List<CriteriaMenu> findCriteriaMenuByParentId(long parentId);
 
   List<DataFilter> findDataFilters();
 
-  List<CardCount> findUniversalDomainCounts(String term);
-
   List<CardCount> findUniversalDomainCountsV2(String term);
-
-  List<CardCount> findDomainCounts(String term);
 
   List<CardCount> findDomainCountsV2(String term);
 
   List<DomainCard> findDomainCards();
-
-  List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
   List<Criteria> findDrugBrandOrIngredientByValueV2(String value, Integer limit);
 
