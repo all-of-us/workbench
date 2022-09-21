@@ -15,11 +15,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import javax.inject.Provider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -38,7 +36,6 @@ import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -147,8 +144,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private AccessTierDao accessTierDao;
 
-  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
-
   private DbCriteria drugNode1;
   private DbCriteria drugNode2;
   private DbCriteria criteriaParent;
@@ -191,15 +186,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @BeforeEach
   public void setUp() {
-    WorkbenchConfig testConfig = WorkbenchConfig.createEmptyConfig();
-
-    when(workbenchConfigProvider.get()).thenReturn(testConfig);
 
     when(firecloudService.isUserMemberOfGroupWithCache(anyString(), anyString())).thenReturn(true);
 
     controller =
         new CohortBuilderController(
-            cohortBuilderService, chartService, workspaceAuthService, workbenchConfigProvider);
+            cohortBuilderService, chartService, workspaceAuthService);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
