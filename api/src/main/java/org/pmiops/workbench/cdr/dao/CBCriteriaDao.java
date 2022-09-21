@@ -317,20 +317,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   @Query(
       value =
           "select * from cb_criteria c "
-              + "where c.domain_id = 'DRUG' "
-              + "and c.type in ('ATC', 'BRAND', 'RXNORM') "
-              + "and c.is_selectable = 1 "
-              + "and (upper(c.name) like upper(concat('%',:value,'%')) "
-              + "or upper(c.code) like upper(concat('%',:value,'%'))) "
-              + "order by c.name asc "
-              + "limit :limit",
-      nativeQuery = true)
-  List<DbCriteria> findDrugBrandOrIngredientByValue(
-      @Param("value") String value, @Param("limit") Integer limit);
-
-  @Query(
-      value =
-          "select * from cb_criteria c "
               + "inner join ( "
               + "select distinct cr.concept_id_2 from cb_criteria_relationship cr "
               + "join cb_criteria c1 on (cr.concept_id_2 = c1.concept_id "
