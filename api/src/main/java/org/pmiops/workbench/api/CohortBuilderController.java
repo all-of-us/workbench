@@ -88,7 +88,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
-              .items(cohortBuilderService.findCriteriaAutoComplete(domain, term, ImmutableList.of(type), standard)));
+              .items(
+                  cohortBuilderService.findCriteriaAutoComplete(
+                      domain, term, ImmutableList.of(type), standard)));
     }
   }
 
