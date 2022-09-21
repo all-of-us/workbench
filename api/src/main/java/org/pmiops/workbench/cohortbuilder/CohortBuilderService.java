@@ -56,9 +56,6 @@ public interface CohortBuilderService {
   List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId);
 
   List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, String type, Boolean standard);
-
-  List<Criteria> findCriteriaAutoCompleteV2(
       String domain, String term, List<String> types, Boolean standard);
 
   List<Criteria> findSurveyAutoComplete(String surveyName, String term);
@@ -67,25 +64,17 @@ public interface CohortBuilderService {
 
   CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request);
 
-  CriteriaListWithCountResponse findCriteriaByDomainV2(CriteriaSearchRequest request);
-
   List<CriteriaMenu> findCriteriaMenuByParentId(long parentId);
 
   List<DataFilter> findDataFilters();
 
   List<CardCount> findUniversalDomainCounts(String term);
 
-  List<CardCount> findUniversalDomainCountsV2(String term);
-
   List<CardCount> findDomainCounts(String term);
-
-  List<CardCount> findDomainCountsV2(String term);
 
   List<DomainCard> findDomainCards();
 
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
-
-  List<Criteria> findDrugBrandOrIngredientByValueV2(String value, Integer limit);
 
   List<Criteria> findDrugIngredientByConceptId(Long conceptId);
 
