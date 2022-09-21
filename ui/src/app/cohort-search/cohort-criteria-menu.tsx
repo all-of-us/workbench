@@ -305,15 +305,13 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
             <div style={styles.searchContainer}>
               <span style={styles.dropdownHeaderText}>
                 Search or browse all domains
-                {
-                  <TooltipTrigger side='top' content={searchTooltip}>
-                    <ClrIcon
-                      style={styles.infoIcon}
-                      className='is-solid'
-                      shape='info-standard'
-                    />
-                  </TooltipTrigger>
-                }
+                <TooltipTrigger side='top' content={searchTooltip}>
+                  <ClrIcon
+                    style={styles.infoIcon}
+                    className='is-solid'
+                    shape='info-standard'
+                  />
+                </TooltipTrigger>
               </span>
               <div style={styles.searchBar}>
                 {domainCountsLoading ? (

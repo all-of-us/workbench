@@ -977,15 +977,13 @@ export const ListSearch = fp.flow(
               ))}
             </div>
             <div style={{ float: 'right', width: '20%' }}>
-              {
-                <TooltipTrigger side='top' content={searchTooltip}>
-                  <ClrIcon
-                    style={styles.infoIcon}
-                    className='is-solid'
-                    shape='info-standard'
-                  />
-                </TooltipTrigger>
-              }
+              <TooltipTrigger side='top' content={searchTooltip}>
+                <ClrIcon
+                  style={styles.infoIcon}
+                  className='is-solid'
+                  shape='info-standard'
+                />
+              </TooltipTrigger>
             </div>
           </div>
           <div style={{ display: 'table', height: '100%', width: '100%' }}>
