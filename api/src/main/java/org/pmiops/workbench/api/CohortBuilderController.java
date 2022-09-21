@@ -83,12 +83,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       return ResponseEntity.ok(
           new CriteriaListResponse()
               .items(
-                  cohortBuilderService.findCriteriaAutoCompleteV2(
+                  cohortBuilderService.findCriteriaAutoComplete(
                       domain, term, ImmutableList.of(type), standard)));
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
-              .items(cohortBuilderService.findCriteriaAutoComplete(domain, term, type, standard)));
+              .items(cohortBuilderService.findCriteriaAutoComplete(domain, term, ImmutableList.of(type), standard)));
     }
   }
 
@@ -106,9 +106,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaAutoComplete(
-                      Domain.SURVEY.toString(), term, CriteriaType.PPI.toString(), false)));
+              .items(cohortBuilderService.findSurveyAutoComplete(surveyName, term)));
     }
   }
 
@@ -120,7 +118,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
       return ResponseEntity.ok(
           new CriteriaListResponse()
-              .items(cohortBuilderService.findDrugBrandOrIngredientByValueV2(value, limit)));
+              .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
     } else {
       return ResponseEntity.ok(
           new CriteriaListResponse()
@@ -171,7 +169,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(request.getDomain(), request.getSurveyName());
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
-      return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomainV2(request));
+      return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomain(request));
     } else {
       return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomain(request));
     }
@@ -262,7 +260,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
       return ResponseEntity.ok(
-          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCountsV2(term)));
+          new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
     } else {
       return ResponseEntity.ok(
           new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
@@ -286,7 +284,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateTerm(term);
     if (workbenchConfigProvider.get().featureFlags.enableDrugWildcardSearch) {
       return ResponseEntity.ok(
-          new CardCountResponse().items(cohortBuilderService.findDomainCountsV2(term)));
+          new CardCountResponse().items(cohortBuilderService.findDomainCounts(term)));
     } else {
       return ResponseEntity.ok(
           new CardCountResponse().items(cohortBuilderService.findDomainCounts(term)));
