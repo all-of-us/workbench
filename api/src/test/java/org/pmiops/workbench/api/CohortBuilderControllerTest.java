@@ -133,8 +133,7 @@ public class CohortBuilderControllerTest {
             bigQueryService, chartQueryBuilder, cohortBuilderMapper, cohortReviewMapper);
 
     controller =
-        new CohortBuilderController(
-            cohortBuilderService, chartService, workspaceAuthService);
+        new CohortBuilderController(cohortBuilderService, chartService, workspaceAuthService);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
