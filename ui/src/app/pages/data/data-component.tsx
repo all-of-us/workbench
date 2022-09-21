@@ -19,6 +19,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
+import { ResourcesList } from 'app/utils/resource-list';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
@@ -336,20 +337,12 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             padding: '0 0.5rem 1rem',
           }}
         >
-          {filteredList.map((resource: WorkspaceResource, index: number) => {
-            return (
-              <div key={index}>
-                {' '}
-                {renderResourceCard({
-                  resource: resource,
-                  existingNameList: getExistingNameList(resource),
-                  onUpdate: () => loadResources(),
-                  menuOnly: false,
-                })}{' '}
-              </div>
-            );
-          })}
-
+          {
+            <ResourcesList
+              workspaceResources={filteredList}
+              onUpdate={() => loadResources()}
+            />
+          }
           {isLoading && <SpinnerOverlay />}
         </div>
       </FadeBox>
