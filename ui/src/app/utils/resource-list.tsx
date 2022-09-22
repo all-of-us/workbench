@@ -113,11 +113,13 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
           >
             <Column field='menu' style={styles.menu} />
             <Column
+              data-test-id={'resource-type'}
               field='resourceType'
               header='Item type'
               style={styles.typeColumn}
             />
             <Column
+              data-test-id={'resource-name'}
               field='resourceName'
               header='Name'
               style={styles.column}

@@ -127,16 +127,17 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     workspace.accessLevel === WorkspaceAccessLevel.WRITER;
 
   const filteredList = resourceList.filter((resource) => {
-    if (activeTab === Tabs.SHOWALL) {
-      return true;
-    } else if (activeTab === Tabs.COHORTS) {
-      return resource.cohort;
-    } else if (activeTab === Tabs.COHORTREVIEWS) {
-      return resource.cohortReview;
-    } else if (activeTab === Tabs.CONCEPTSETS) {
-      return resource.conceptSet;
-    } else if (activeTab === Tabs.DATASETS) {
-      return resource.dataSet;
+    switch (activeTab) {
+      case Tabs.SHOWALL:
+        return true;
+      case Tabs.COHORTS:
+        return resource.cohort;
+      case Tabs.COHORTREVIEWS:
+        return resource.cohortReview;
+      case Tabs.CONCEPTSETS:
+        return resource.conceptSet;
+      case Tabs.DATASETS:
+        return resource.dataSet;
     }
   });
 
