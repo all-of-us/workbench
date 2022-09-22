@@ -529,40 +529,54 @@ export function validateInputForMySQL(
       inputErrors.add(
         `Trailing ${character} characters are not allowed in the search string`
       );
-      continue;
     }
   }
   if (unclosedQuotes) {
     // unclosed quote
     inputErrors.add('There is an unclosed " in the search string');
   }
-  const termsArray = searchString.trim().split(' ');
-  // check each endsWith term - terms that start with *
-  termsArray.forEach((word) => {
-    // consecutive special chars
-    if (word.match(/[+*-]{2,}/)) {
-      inputErrors.add(
-        `Search term [${word}] cannot contain consecutive special characters `
-      );
-    }
-    if (word.match(/^\*.*\*$/)) {
-      inputErrors.add(
-        `Search term [${word}] cannot start and end in wild character '*'`
-      );
-    }
-    // length of every word without the special chars mut be >= searchTrigger
-    // for hyphenated word there will be at least 2 letters, if hyphen is removed
-    if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
-      inputErrors.add(
-        `Search term [${word}] length must be at least ${searchTrigger} characters without special characters`
-      );
-    }
-  });
-  if (termsArray.length === 1 && termsArray[0].match(/^-/)) {
-    inputErrors.add(
-      `Search term [${termsArray[0]}] with one word cannot start with a minus character '-'`
-    );
-  }
+  const quotesPattern = /([+\-]?"[^"]*")/;
+  searchString
+    .trim()
+    .split(quotesPattern)
+    .filter((subString) => subString.length > 0)
+    .forEach((subString) => {
+      // Only validate strings that aren't inside quotes
+      if (!subString.match(quotesPattern)) {
+        // check each endsWith term - terms that start with *
+        const termsArray = subString.trim().split(' ');
+        termsArray.forEach((word) => {
+          // consecutive special chars
+          if (word.match(/[+*-]{2,}/)) {
+            inputErrors.add(
+              `Search term [${word}] cannot contain consecutive special characters `
+            );
+          }
+          if (word.match(/^\*.*\*$/)) {
+            inputErrors.add(
+              `Search term [${word}] cannot start and end in wild character '*'`
+            );
+          }
+          // length of every word without the special chars mut be >= searchTrigger
+          // for hyphenated word there will be at least 2 letters, if hyphen is removed
+          if (word.replace(/[+*"'-]/g, '').length < searchTrigger) {
+            inputErrors.add(
+              `Search term [${word}] length must be at least ${searchTrigger} characters without special characters`
+            );
+          }
+        });
+        if (termsArray.length === 1 && termsArray[0].match(/^-/)) {
+          inputErrors.add(
+            `Search term [${termsArray[0]}] with one word cannot start with a minus character '-'`
+          );
+        }
+      } else if (subString.replace(/[+*"'-]/g, '').length < searchTrigger) {
+        // Still need to check the quoted string for length
+        inputErrors.add(
+          `Search term [${subString}] length must be at least ${searchTrigger} characters without special characters`
+        );
+      }
+    });
   return Array.from(inputErrors);
 }
 
