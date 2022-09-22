@@ -115,7 +115,7 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": true,
-    "enableMultiReview": false,
+    "enableMultiReview": true,
     "enableUpdatedDemographicSurvey": true,
     "enableDrugWildcardSearch": true
   },
