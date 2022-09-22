@@ -1,17 +1,12 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import {
-  ResourceType,
-  WorkspaceAccessLevel,
-  WorkspaceResource,
-} from 'generated/fetch';
+import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { renderResourceCard } from 'app/components/render-resource-card';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
@@ -126,41 +121,6 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => {
     loadResources();
   }, [workspace.namespace, workspace.id]);
-
-  const getExistingNameList = (resourceType) => {
-    if (resourceType.dataSet) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.dataSet !== null && resource.dataSet !== undefined
-        )
-        .map((resource) => resource.dataSet.name);
-    } else if (resourceType.conceptSet) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.conceptSet !== null && resource.conceptSet !== undefined
-        )
-        .map((resource) => resource.conceptSet.name);
-    } else if (resourceType.cohort) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.cohort !== null && resource.cohort !== undefined
-        )
-        .map((resource) => resource.cohort.name);
-    } else if (resourceType.cohortReview) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.cohortReview !== null &&
-            resource.cohortReview !== undefined
-        )
-        .map((resource) => resource.cohortReview.cohortName);
-    } else {
-      return [];
-    }
-  };
 
   const writePermission =
     workspace.accessLevel === WorkspaceAccessLevel.OWNER ||

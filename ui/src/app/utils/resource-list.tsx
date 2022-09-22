@@ -15,6 +15,8 @@ import { reactStyles, withCdrVersions } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { getDisplayName } from 'app/utils/resources';
 
+import { TOTAL_ROWS_PER_PAGE } from './constants';
+
 const styles = reactStyles({
   column: {
     textAlign: 'left',
@@ -105,7 +107,9 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             value={tableData}
             scrollable={true}
             sortMode='multiple'
-            style={{ width: '40rem' }}
+            style={{ width: '44rem' }}
+            paginator
+            rows={TOTAL_ROWS_PER_PAGE}
           >
             <Column field='menu' style={styles.menu} />
             <Column

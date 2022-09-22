@@ -19,3 +19,6 @@ export const DISABILITY_ERRANDS = 'disabilityErrands';
 export const YEAR_OF_BIRTH = 'yearOfBirth';
 export const EDUCATION = 'education';
 export const DISADVANTAGED = 'disadvantaged';
+
+// Resource table
+export const TOTAL_ROWS_PER_PAGE = 10;

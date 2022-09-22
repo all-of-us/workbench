@@ -10,9 +10,9 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { ResourceCardBase } from 'app/components/card';
 import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { TOTAL_ROWS_PER_PAGE } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -51,6 +51,13 @@ describe('DataPage', () => {
     );
   };
 
+  const resourceTableRows = (wrapper) => {
+    return wrapper
+      .find('[data-test-id="resource-list"]')
+      .find('tbody')
+      .find('tr');
+  };
+
   it('should render', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -66,8 +73,21 @@ describe('DataPage', () => {
       cohortReviewStubs.length +
       DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
+
+    // Since we have pagination only 10 rows at a time should be displayed
+    expect(resourceTableRows(wrapper).length).toBe(TOTAL_ROWS_PER_PAGE);
+    const paginationNextButton = wrapper
+      .find('button')
+      .findWhere(
+        (element) =>
+          element.prop('className') ===
+          'p-paginator-next p-paginator-element p-link'
+      );
+    paginationNextButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(
+      resourceCardsExpected - TOTAL_ROWS_PER_PAGE
+    );
   });
 
   it('should show only cohorts when selected', async () => {
@@ -80,7 +100,7 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
   });
 
   it('should show only cohort reviews when selected', async () => {
@@ -93,7 +113,7 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
   });
 
   it('should show only conceptSets when selected', async () => {
@@ -106,7 +126,7 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
   });
 
   it('should show only dataSets when selected', async () => {
@@ -119,6 +139,6 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
   });
 });
