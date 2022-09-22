@@ -18,15 +18,15 @@ export default class DataResourceCard extends BaseCard {
   }
 
   getNameTestId(): string {
-    return '@data-test-id="resource-name"';
+    return '@data-test-id="card-name"';
   }
 
   getCardTypeTestId(): string {
-    return '@data-test-id="resource-type"';
+    return '@data-test-id="card-type"';
   }
 
   getRootXpath(): string {
-    return '//*[@data-test-id="resource-list"]';
+    return '//*[@data-test-id="card"]';
   }
 
   getCardTypeXpath(cardType: string): string {
