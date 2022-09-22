@@ -7,10 +7,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
@@ -52,18 +50,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private final CohortBuilderService cohortBuilderService;
   private final ChartService chartService;
   private final WorkspaceAuthService workspaceAuthService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   CohortBuilderController(
       CohortBuilderService cohortBuilderService,
       ChartService chartService,
-      WorkspaceAuthService workspaceAuthService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceAuthService workspaceAuthService) {
     this.cohortBuilderService = cohortBuilderService;
     this.chartService = chartService;
     this.workspaceAuthService = workspaceAuthService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -82,7 +77,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                cohortBuilderService.findCriteriaAutoCompleteV2(
+                cohortBuilderService.findCriteriaAutoComplete(
                     domain, term, ImmutableList.of(type), standard)));
   }
 
@@ -105,7 +100,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(cohortBuilderService.findDrugBrandOrIngredientByValueV2(value, limit)));
+            .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
   }
 
   @Override
@@ -150,7 +145,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(request.getDomain(), request.getSurveyName());
-    return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomainV2(request));
+    return ResponseEntity.ok(cohortBuilderService.findCriteriaByDomain(request));
   }
 
   @Override
@@ -237,7 +232,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateTerm(term);
 
     return ResponseEntity.ok(
-        new CardCountResponse().items(cohortBuilderService.findUniversalDomainCountsV2(term)));
+        new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
   }
 
   @Override
@@ -256,7 +251,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateTerm(term);
     return ResponseEntity.ok(
-        new CardCountResponse().items(cohortBuilderService.findDomainCountsV2(term)));
+        new CardCountResponse().items(cohortBuilderService.findDomainCounts(term)));
   }
 
   @Override
