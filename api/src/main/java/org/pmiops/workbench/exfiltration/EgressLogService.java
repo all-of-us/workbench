@@ -48,8 +48,13 @@ public class EgressLogService {
           new EgressTerraRuntimeLogPattern("File downloads", "%download%"),
           new EgressTerraRuntimeLogPattern("Errors", "%error%"));
 
+  private static final String GCE_LOG_LOCATION = "WorkspaceRuntimeLogs.cos_containers";
+  private static final String DATAPROC_LOG_LOCATION = "WorkspaceRuntimeLogs.jupyter";
+
+
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
+
 
   @Autowired
   public EgressLogService(
