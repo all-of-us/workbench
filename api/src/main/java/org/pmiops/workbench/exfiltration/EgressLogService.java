@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,6 +73,9 @@ public class EgressLogService {
     Instant endTime = event.getCreationTime().toInstant();
     Optional<SumologicEgressEvent> maybeSumologicEvent =
         maybeParseSumologicEvent(event.getSumologicEvent());
+    if (!maybeSumologicEvent.isPresent()) {
+      return new ArrayList<>();
+    }
     Instant startTime =
         maybeSumologicEvent
             .map(SumologicEgressEvent::getTimeWindowStart)
