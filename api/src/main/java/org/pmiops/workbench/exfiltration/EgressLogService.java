@@ -147,14 +147,14 @@ public class EgressLogService {
   }
 
   private String getDatasetId(Optional<SumologicEgressEvent> sumologicEgressEvent) {
-    // If getGceEgressMib is not null, we see this egress triggered by GCE, otherwise, it's
+    // If getGceEgressMib is more than zero, we see this egress triggered by GCE, otherwise, it's
     // Dataproc.
     // TODO(yonghao): Revisit this logic and probably make an enum once we understand what does GKE
     // sumologic event looks like.
     boolean isGce =
         sumologicEgressEvent
             .map(SumologicEgressEvent::getGceEgressMib)
-            .map(d -> d == 0)
+            .map(d -> d > 0)
             .orElse(false);
     return isGce
         ? workbenchConfigProvider.get().firecloud.workspaceLogsProject + GCE_LOG_LOCATION
