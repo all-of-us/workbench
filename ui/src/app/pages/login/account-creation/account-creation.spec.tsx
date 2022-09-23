@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
+import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import colors from 'app/styles/colors';
@@ -10,6 +10,7 @@ import {
   AccountCreation,
   AccountCreationProps,
   countryDropdownOption,
+  stateCodeErrorMessage,
 } from './account-creation';
 
 let props: AccountCreationProps;
@@ -23,6 +24,14 @@ const shallowComponent = () => {
 
 function getCharactersLimitProps(wrapper: ReactWrapper) {
   return wrapper.find('[data-test-id="characterLimit"]').get(0).props;
+}
+
+function findStateField(wrapper: ShallowWrapper) {
+  return wrapper.find('[dataTestId="state"]');
+}
+
+function findCountryDropdownField(wrapper: ShallowWrapper) {
+  return wrapper.find('[data-test-id="country-dropdown"]');
 }
 
 function findCountryInputField(wrapper: ShallowWrapper) {
@@ -167,14 +176,55 @@ it('should display characters over message if research purpose character length 
 it('should display a text input field for non-US countries', () => {
   const wrapper = shallowComponent();
   expect(wrapper.find('[data-test-id="country-input"]').exists()).toBeFalsy();
-  wrapper
-    .find('[data-test-id="country-dropdown"]')
-    .simulate('change', countryDropdownOption.unitedStates);
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
   expect(wrapper.find('[data-test-id="country-input"]').exists()).toBeFalsy();
-  wrapper
-    .find('[data-test-id="country-dropdown"]')
-    .simulate('change', countryDropdownOption.other);
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.other
+  );
   expect(findCountryInputField(wrapper).exists()).toBeTruthy();
   findCountryInputField(wrapper).simulate('change', 'Canada');
   expect(findCountryInputField(wrapper).prop('value')).toEqual('Canada');
+});
+
+it('should capitalize a state code when selecting USA', function () {
+  const wrapper = shallowComponent();
+  findStateField(wrapper).simulate('change', 'ny');
+  expect(findStateField(wrapper).prop('value')).toEqual('ny');
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  expect(findStateField(wrapper).prop('value')).toEqual('NY');
+});
+
+it('should change a state name to a state code after selecting USA', function () {
+  const wrapper = shallowComponent();
+  findStateField(wrapper).simulate('change', 'new york');
+  expect(findStateField(wrapper).prop('value')).toEqual('new york');
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  expect(findStateField(wrapper).prop('value')).toEqual('NY');
+});
+
+it('should mark US states as invalid if not a 2-letter code', function () {
+  const wrapper = shallowComponent();
+  expect(wrapper.exists('#stateError')).toBeFalsy();
+  expect(
+    (wrapper.instance() as AccountCreation).validate()['address.state']
+  ).not.toContain(stateCodeErrorMessage);
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  findStateField(wrapper).simulate('change', 'new york');
+  expect(wrapper.exists('#stateError')).toBeTruthy();
+  expect(
+    (wrapper.instance() as AccountCreation).validate()['address.state']
+  ).toContain(stateCodeErrorMessage);
 });

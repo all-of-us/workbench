@@ -32,6 +32,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { STATE_CODE_MAPPING } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -79,6 +80,9 @@ export enum countryDropdownOption {
   unitedStates = 'United States of America',
   other = 'Other',
 }
+
+export const stateCodeErrorMessage =
+  'State must be a valid 2-letter code (CA, TX, etc.)';
 
 export const MultiSelectWithLabel = (props) => {
   return (
@@ -221,9 +225,37 @@ export class AccountCreation extends React.Component<
 
     if (value === countryDropdownOption.unitedStates) {
       this.updateAddress('country', value);
+
+      const stateCodeGuess = this.autoSelectStateCode(
+        this.state.profile.address.state
+      );
+      if (stateCodeGuess != null) {
+        this.updateAddress('state', stateCodeGuess);
+      }
     } else {
       this.updateAddress('country', '');
     }
+  }
+
+  stateInvalidError(): boolean {
+    const { state, country } = this.state.profile.address;
+    if (country !== countryDropdownOption.unitedStates) {
+      return false;
+    }
+    return !Object.values(STATE_CODE_MAPPING).includes(state);
+  }
+
+  // For a given user inputted state, returns our best guess
+  // for which state code they are referring to.
+  autoSelectStateCode(state: string): string | null {
+    const formattedState = state.trim().toUpperCase();
+    if (Object.values(STATE_CODE_MAPPING).includes(formattedState)) {
+      return formattedState;
+    }
+    if (Object.keys(STATE_CODE_MAPPING).includes(formattedState)) {
+      return STATE_CODE_MAPPING[formattedState];
+    }
+    return null;
   }
 
   updateAddress(attribute: string, value) {
@@ -315,6 +347,17 @@ export class AccountCreation extends React.Component<
         length: {
           maximum: 95,
           message: '^State must be 95 characters or fewer',
+        },
+        inclusion: (_value, attributes) => {
+          if (
+            attributes.address.country === countryDropdownOption.unitedStates
+          ) {
+            return {
+              within: Object.values(STATE_CODE_MAPPING),
+              message: `^${stateCodeErrorMessage}`,
+            };
+          }
+          return false;
         },
       },
       'address.zipCode': {
@@ -596,15 +639,29 @@ export class AccountCreation extends React.Component<
                     labelText='City'
                     onChange={(value) => this.updateAddress('city', value)}
                   />
-                  <TextInputWithLabel
-                    dataTestId='state'
-                    inputName='state'
-                    placeholder='State'
-                    value={state}
-                    labelText='State'
-                    containerStyle={styles.multiInputSpacing}
-                    onChange={(value) => this.updateAddress('state', value)}
-                  />
+                  <FlexColumn>
+                    <TextInputWithLabel
+                      dataTestId='state'
+                      inputName='state'
+                      placeholder='State'
+                      value={state}
+                      labelText='State'
+                      containerStyle={styles.multiInputSpacing}
+                      onChange={(value) => this.updateAddress('state', value)}
+                    />
+                    {this.stateInvalidError() && (
+                      <div
+                        style={{
+                          height: '1.5rem',
+                          ...styles.multiInputSpacing,
+                        }}
+                      >
+                        <FormValidationErrorMessage id='stateError'>
+                          {stateCodeErrorMessage}
+                        </FormValidationErrorMessage>
+                      </div>
+                    )}
+                  </FlexColumn>
                 </FlexRow>
                 <FlexRow style={{ marginTop: '1rem' }}>
                   <TextInputWithLabel
