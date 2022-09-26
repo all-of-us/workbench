@@ -1,20 +1,41 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import colors from 'app/styles/colors';
 import { serverConfigStore } from 'app/utils/stores';
 
-import { AccountCreation, AccountCreationProps } from './account-creation';
+import {
+  AccountCreation,
+  AccountCreationProps,
+  countryDropdownOption,
+  stateCodeErrorMessage,
+} from './account-creation';
 
 let props: AccountCreationProps;
 const component = () => {
   return mount(<AccountCreation {...props} />);
 };
 
+const shallowComponent = () => {
+  return shallow(<AccountCreation {...props} />);
+};
+
 function getCharactersLimitProps(wrapper: ReactWrapper) {
   return wrapper.find('[data-test-id="characterLimit"]').get(0).props;
+}
+
+function findStateField(wrapper: ShallowWrapper) {
+  return wrapper.find('[dataTestId="state"]');
+}
+
+function findCountryDropdownField(wrapper: ShallowWrapper) {
+  return wrapper.find('[data-test-id="country-dropdown"]');
+}
+
+function findCountryInputField(wrapper: ShallowWrapper) {
+  return wrapper.find('[data-test-id="non-usa-country-input"]');
 }
 
 const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
@@ -150,4 +171,60 @@ it('should display characters over message if research purpose character length 
   expect(getCharactersLimitProps(wrapper).style.color).toBe(colors.danger);
   // Characters remaining message should not be displayed
   expect(wrapper.find('[data-test-id="charRemaining"]').get(0)).toBeUndefined();
+});
+
+it('should display a text input field for non-US countries', () => {
+  const wrapper = shallowComponent();
+  expect(wrapper.find('[data-test-id="country-input"]').exists()).toBeFalsy();
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  expect(wrapper.find('[data-test-id="country-input"]').exists()).toBeFalsy();
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.other
+  );
+  expect(findCountryInputField(wrapper).exists()).toBeTruthy();
+  findCountryInputField(wrapper).simulate('change', 'Canada');
+  expect(findCountryInputField(wrapper).prop('value')).toEqual('Canada');
+});
+
+it('should capitalize a state code when selecting USA', function () {
+  const wrapper = shallowComponent();
+  findStateField(wrapper).simulate('change', 'ny');
+  expect(findStateField(wrapper).prop('value')).toEqual('ny');
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  expect(findStateField(wrapper).prop('value')).toEqual('NY');
+});
+
+it('should change a state name to a state code after selecting USA', function () {
+  const wrapper = shallowComponent();
+  findStateField(wrapper).simulate('change', 'new york');
+  expect(findStateField(wrapper).prop('value')).toEqual('new york');
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  expect(findStateField(wrapper).prop('value')).toEqual('NY');
+});
+
+it('should mark US states as invalid if not a 2-letter code', function () {
+  const wrapper = shallowComponent();
+  expect(wrapper.exists('#stateError')).toBeFalsy();
+  expect(
+    (wrapper.instance() as AccountCreation).validate()['address.state']
+  ).not.toContain(stateCodeErrorMessage);
+  findCountryDropdownField(wrapper).simulate(
+    'change',
+    countryDropdownOption.unitedStates
+  );
+  findStateField(wrapper).simulate('change', 'new york');
+  expect(wrapper.exists('#stateError')).toBeTruthy();
+  expect(
+    (wrapper.instance() as AccountCreation).validate()['address.state']
+  ).toContain(stateCodeErrorMessage);
 });
