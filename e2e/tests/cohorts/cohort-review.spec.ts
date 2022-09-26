@@ -21,12 +21,10 @@ describe('Cohort review set tests', () => {
     await signInWithAccessToken(page);
   });
 
-  const multiReviewDisabled = process.env.WORKBENCH_ENV === 'staging';
-
   const workspaceName = 'e2eCohortReviewTest';
   const cohortName = makeRandomName('auotest', { includeHyphen: false });
-  const cohortReview1Name = multiReviewDisabled ? cohortName : makeRandomName('auotest', { includeHyphen: false });
-  const cohortReview2Name = multiReviewDisabled ? cohortName : makeRandomName('auotest', { includeHyphen: false });
+  const cohortReview1Name = makeRandomName('auotest', { includeHyphen: false });
+  const cohortReview2Name = makeRandomName('auotest', { includeHyphen: false });
 
   const reviewSetNumberOfParticipants_1 = 50;
   const reviewSetNumberOfParticipants_2 = 100;
@@ -42,34 +40,20 @@ describe('Cohort review set tests', () => {
 
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
-    let cohortReviewPage;
-    if (multiReviewDisabled) {
-      const modal = new CohortReviewModal(page);
-      await modal.waitForLoad();
+    const cohortReviewPage = new CohortReviewPage(page);
+    await cohortReviewPage.waitForLoad();
 
-      await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
-      await modal.clickButton(LinkText.CreateSet, { waitForClose: true });
+    await waitForText(page, `Review Sets for ${cohortName}`);
 
-      cohortReviewPage = new CohortReviewPage(page);
-      await cohortReviewPage.waitForLoad();
+    const createReviewIcon = cohortReviewPage.getCreateCohortReviewIcon();
+    await createReviewIcon.click();
 
-      await waitForText(page, `Review Sets for ${cohortName}`);
-    } else {
-      cohortReviewPage = new CohortReviewPage(page);
-      await cohortReviewPage.waitForLoad();
+    const modal = new CohortReviewModal(page);
+    await modal.waitForLoad();
 
-      await waitForText(page, `Review Sets for ${cohortName}`);
-
-      const createReviewIcon = cohortReviewPage.getCreateCohortReviewIcon();
-      await createReviewIcon.click();
-
-      const modal = new CohortReviewModal(page);
-      await modal.waitForLoad();
-
-      await modal.fillInNameOfReview(cohortReview1Name);
-      await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
-      await modal.clickButton(LinkText.CreateSet, { waitForClose: true });
-    }
+    await modal.fillInNameOfReview(cohortReview1Name);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
+    await modal.clickButton(LinkText.CreateSet, { waitForClose: true });
 
     // Verify table pagination records count.
     const participantsTable = cohortReviewPage.getDataTable();
@@ -117,32 +101,19 @@ describe('Cohort review set tests', () => {
     const cohortCard = await findOrCreateCohortCard(page, cohortName);
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
 
-    let cohortReviewPage;
-    if (multiReviewDisabled) {
-      const modal = new CohortReviewModal(page);
-      await modal.waitForLoad();
-      await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
-      await modal.clickButton(LinkText.CreateSet);
-      console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
+    let cohortReviewPage = new CohortReviewPage(page);
+    await cohortReviewPage.waitForLoad();
+    await waitForText(page, `Review Sets for ${cohortName}`);
 
-      cohortReviewPage = new CohortReviewPage(page);
-      await cohortReviewPage.waitForLoad();
-      await waitForText(page, `Review Sets for ${cohortName}`);
-    } else {
-      cohortReviewPage = new CohortReviewPage(page);
-      await cohortReviewPage.waitForLoad();
-      await waitForText(page, `Review Sets for ${cohortName}`);
+    const createReviewIcon = cohortReviewPage.getCreateCohortReviewIcon();
+    await createReviewIcon.click();
 
-      const createReviewIcon = cohortReviewPage.getCreateCohortReviewIcon();
-      await createReviewIcon.click();
-
-      const modal = new CohortReviewModal(page);
-      await modal.waitForLoad();
-      await modal.fillInNameOfReview(cohortReview2Name);
-      await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
-      await modal.clickButton(LinkText.CreateSet);
-      console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
-    }
+    const modal = new CohortReviewModal(page);
+    await modal.waitForLoad();
+    await modal.fillInNameOfReview(cohortReview2Name);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
+    await modal.clickButton(LinkText.CreateSet);
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
 
     // Verify table pagination records count.
     let participantsTable = cohortReviewPage.getDataTable();
