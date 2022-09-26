@@ -2345,7 +2345,25 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
+  @ParameterizedTest(name = "findCohortReviewDemoChartInfoWrongWorkspace WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER"})
+  public void findCohortReviewDemoChartInfoWrongWorkspace(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace2, workspaceAccessLevel);
 
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.findCohortReviewDemoChartInfo(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortReview.getCohortReviewId()));
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
+  }
 
   ////////// getVocabularies - See CohortReviewControllerBQTest   //////////
   @ParameterizedTest(name = "getVocabulariesAllowedAccessLevel WorkspaceAccessLevel={0}")
