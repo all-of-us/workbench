@@ -2173,8 +2173,7 @@ public class CohortReviewControllerTest {
   }
 
   ////////// getCohortReviewsByCohortId  //////////
-  @ParameterizedTest(
-      name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
