@@ -73,7 +73,7 @@ describe('Copy Concept Set to another workspace', () => {
     expect(url).toContain(destWorkspace.toLowerCase());
 
     const resourceCard = new DataResourceCard(page);
-    const exists = await resourceCard.resourceTableEntryExists(conceptSetCopyName, ResourceCard.ConceptSet);
+    const exists = await resourceCard.resourceTableEntryExists(conceptSetCopyName);
     expect(exists).toBe(true);
 
     console.log(

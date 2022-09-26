@@ -168,11 +168,7 @@ export default class DataResourceCard extends BaseCard {
    * @param {string} cardName
    * @param {CardType} cardType
    */
-  async resourceTableEntryExists(
-    cardName: string,
-    cardType: ResourceCard,
-    opts: { timeout?: number } = {}
-  ): Promise<boolean> {
+  async resourceTableEntryExists(cardName: string): Promise<boolean> {
     return (await this.findResourceTableEntryByName({ name: cardName })) !== null;
   }
 
