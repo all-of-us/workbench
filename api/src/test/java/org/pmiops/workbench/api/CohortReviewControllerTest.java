@@ -45,7 +45,7 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
-import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
@@ -96,6 +96,7 @@ import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
@@ -254,6 +255,7 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     ChartServiceImpl.class,
     ChartQueryBuilder.class,
+    CohortBuilderMapperImpl.class,
     CohortBuilderServiceImpl.class,
     CohortReviewController.class,
     CohortReviewMapperImpl.class,
@@ -281,7 +283,6 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
-    CohortBuilderMapper.class,
     ComplianceService.class,
     DataSetService.class,
     DirectoryService.class,
@@ -2171,8 +2172,14 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
+<<<<<<< HEAD
   ////////// getCohortReviewsInWorkspace  //////////
   @ParameterizedTest(name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
+=======
+  ////////// getCohortReviewsByCohortId  //////////
+  @ParameterizedTest(
+      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
+>>>>>>> 926440817 (Applied security check for workspace auth)
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
@@ -2292,6 +2299,53 @@ public class CohortReviewControllerTest {
 
     assertForbiddenException(exception);
   }
+
+  ////////// findCohortReviewDemoChartInfo  //////////
+  @ParameterizedTest(
+      name = "findCohortReviewDemoChartInfoAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void findCohortReviewDemoChartInfoAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    stubBigQueryDemoChartData();
+
+    List<DemoChartInfo> actual =
+        Objects.requireNonNull(
+                cohortReviewController
+                    .findCohortReviewDemoChartInfo(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohortReview.getCohortReviewId())
+                    .getBody())
+            .getItems();
+
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @ParameterizedTest(
+      name = "findCohortReviewDemoChartInfoForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void findCohortReviewDemoChartInfoForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.findCohortReviewDemoChartInfo(
+                    workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId()));
+
+    assertForbiddenException(exception);
+  }
+
+
 
   ////////// getVocabularies - See CohortReviewControllerBQTest   //////////
   @ParameterizedTest(name = "getVocabulariesAllowedAccessLevel WorkspaceAccessLevel={0}")
@@ -2481,6 +2535,28 @@ public class CohortReviewControllerTest {
       default:
     }
     return participantCohortAnnotation;
+  }
+
+  private void stubBigQueryDemoChartData() {
+    Field name = Field.of("name", LegacySQLTypeName.STRING);
+    Field race = Field.of("race", LegacySQLTypeName.STRING);
+    Field ageRange = Field.of("ageRange", LegacySQLTypeName.STRING);
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+
+    Schema schema = Schema.of(name, race, ageRange, count);
+
+    FieldValue nameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "Male");
+    FieldValue raceValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "Hispanic");
+    FieldValue ageRangeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "44-60");
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "10");
+
+    List<FieldValueList> tableRows =
+        Collections.singletonList(
+            FieldValueList.of(Arrays.asList(nameValue, raceValue, ageRangeValue, countValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
   }
 
   private void stubBigQueryParticipantChartData() {
