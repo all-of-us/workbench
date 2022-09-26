@@ -40,7 +40,7 @@ describe('Cohort review set tests', () => {
 
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
-    let cohortReviewPage = new CohortReviewPage(page);
+    const cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();
 
     await waitForText(page, `Review Sets for ${cohortName}`);
