@@ -2172,8 +2172,7 @@ public class CohortReviewControllerTest {
   }
 
   ////////// getCohortReviewsInWorkspace  //////////
-  @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
@@ -2207,7 +2206,7 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getCohortReviewsByCohortIdForbiddenAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
@@ -2225,6 +2224,23 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(), workspace.getId(), cohort.getCohortId()));
 
     assertForbiddenException(exception);
+  }
+
+  @ParameterizedTest(name = "getCohortReviewsByCohortIdWrongWorkspace WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER"})
+  public void getCohortReviewsByCohortIdWrongWorkspace(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace2, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getCohortReviewsByCohortId(
+                    workspace2.getNamespace(), workspace2.getId(), cohort.getCohortId()));
+    assertNotFoundExceptionNoCohort(cohort.getCohortId(), exception);
   }
 
   ////////// getParticipantChartData - See CohortReviewControllerBQTest   //////////
