@@ -54,9 +54,9 @@ describe('Genomics Extraction Test', () => {
     let totalCount = await cohortBuildPage.getTotalCount();
     expect(group1Count).toEqual(totalCount);
 
-    // Group 2: Include Demographics Age. range: 20 - 21 to have smallest number of participants.
-    const minAge = 20;
-    const maxAge = 21;
+    // Group 2: Include Demographics Age. range: 21 - 22 to have smallest number of participants.
+    const minAge = 21;
+    const maxAge = 22;
     const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
     await group2.includeAge(minAge, maxAge, AgeSelectionRadioButton.CurrentAge);
 
