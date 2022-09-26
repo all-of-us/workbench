@@ -2172,14 +2172,9 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
-<<<<<<< HEAD
-  ////////// getCohortReviewsInWorkspace  //////////
-  @ParameterizedTest(name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
-=======
   ////////// getCohortReviewsByCohortId  //////////
   @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
->>>>>>> 926440817 (Applied security check for workspace auth)
+      name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
