@@ -164,6 +164,19 @@ export default class DataResourceCard extends BaseCard {
   }
 
   /**
+   * Determine if resource entry with specified name exists.
+   * @param {string} cardName
+   * @param {CardType} cardType
+   */
+  async resourceTableEntryExists(
+    cardName: string,
+    cardType: ResourceCard,
+    opts: { timeout?: number } = {}
+  ): Promise<boolean> {
+    return (await this.findResourceTableEntryByName({ name: cardName })) !== null;
+  }
+
+  /**
    * Determine if resource card with specified name exists.
    * @param {string} cardName
    * @param {CardType} cardType

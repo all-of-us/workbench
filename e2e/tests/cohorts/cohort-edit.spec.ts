@@ -57,8 +57,8 @@ describe('Editing Cohort Test', () => {
 
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
-    const cohortCard = await dataPage.findCohortCard(cohortName);
-    await cohortCard.clickName();
+    const cohortCard = await dataPage.findCohortEntry(cohortName);
+    await cohortCard.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
