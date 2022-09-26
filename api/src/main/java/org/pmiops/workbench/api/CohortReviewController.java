@@ -247,12 +247,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<CohortReviewListResponse> getCohortReviewsByCohortId(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
 
     return ResponseEntity.ok(
         new CohortReviewListResponse()
-            .items(cohortReviewService.getCohortReviewsByCohortId(cohortId)));
+            .items(cohortReviewService.getCohortReviewsByCohortId(dbCohort.getCohortId())));
   }
 
   @Override
