@@ -116,7 +116,6 @@ export const vocabOptions = new BehaviorSubject<any>(null);
 export const participantStore = new BehaviorSubject<ParticipantCohortStatus>(
   null
 );
-export const queryResultSizeStore = new BehaviorSubject<number>(undefined);
 export const reviewPaginationStore = new BehaviorSubject<any>(
   initialPaginationState
 );
