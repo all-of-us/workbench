@@ -12,11 +12,9 @@ import { LeonardoAppLauncher } from 'app/pages/analysis/leonardo-app-launcher';
 import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { NotebookList } from 'app/pages/analysis/notebook-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
-import { CohortReview } from 'app/pages/data/cohort-review/cohort-review';
 import { CohortReviewPage } from 'app/pages/data/cohort-review/cohort-review-page';
 import { DetailPage } from 'app/pages/data/cohort-review/detail-page';
 import { QueryReport } from 'app/pages/data/cohort-review/query-report.component';
-import { ParticipantsTable } from 'app/pages/data/cohort-review/table-page';
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { ConceptSearch } from 'app/pages/data/concept/concept-search';
 import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
@@ -35,10 +33,6 @@ const CohortActionsPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(CohortActions);
-const CohortReviewRoute = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(CohortReview);
 const CohortReviewPagePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -82,10 +76,6 @@ const LeonardoSparkConsoleRedirectPage = fp.flow(
   // Force remounting on parameter change.
   withParamsKey('sparkConsolePath')
 )(LeonardoAppLauncher);
-const ParticipantsTablePage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(ParticipantsTable);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(
   withRouteData,
@@ -293,35 +283,7 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/data/cohorts/:cid/review/participants`}
-        guards={[adminLockedGuard(ns, wsid)]}
-      >
-        <ParticipantsTablePage
-          routeData={{
-            title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.CohortReview,
-            workspaceNavBarTab: 'data',
-            pageKey: 'reviewParticipants',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/review/participants/:pid`}
-        guards={[adminLockedGuard(ns, wsid)]}
-      >
-        <DetailPagePage
-          routeData={{
-            title: 'Participant Detail',
-            breadcrumb: BreadcrumbType.Participant,
-            workspaceNavBarTab: 'data',
-            pageKey: 'reviewParticipantDetail',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/review/cohort-description`}
+        path={`${path}/data/cohorts/:cid/reviews/cohort-description`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <QueryReportPage
@@ -344,20 +306,6 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Cohort,
             workspaceNavBarTab: 'data',
             pageKey: 'cohortDescription',
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/data/cohorts/:cid/review`}
-        guards={[adminLockedGuard(ns, wsid)]}
-      >
-        <CohortReviewRoute
-          routeData={{
-            title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
-            workspaceNavBarTab: 'data',
-            pageKey: 'reviewParticipants',
           }}
         />
       </AppRoute>
