@@ -418,7 +418,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
-      String workspaceNamespace, String workspaceId, Boolean force) {
+      String workspaceNamespace, String workspaceId) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     workspaceService.deleteWorkspace(dbWorkspace);

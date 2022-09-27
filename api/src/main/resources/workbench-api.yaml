@@ -999,12 +999,6 @@ paths:
           schema:
             "$ref": "#/definitions/Workspace"
     delete:
-      parameters:
-      - in: query
-        name: force
-        required: false
-        default: false
-        type: boolean
       tags:
       - workspaces
       description: Deletes the workspace definition with the specified ID and namespace
