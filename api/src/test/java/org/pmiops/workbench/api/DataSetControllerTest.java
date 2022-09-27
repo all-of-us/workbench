@@ -93,7 +93,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -249,7 +249,7 @@ public class DataSetControllerTest {
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
-    ObjectNameLengthService.class,
+    ObjectNameLengthServiceImpl.class,
     BucketAuditQueryService.class,
   })
   @MockBean({

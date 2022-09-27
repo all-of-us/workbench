@@ -62,7 +62,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.exfiltration.impl.EgressInternalRemediationService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -189,7 +189,7 @@ public class CohortsControllerTest {
     WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
-    ObjectNameLengthService.class,
+    ObjectNameLengthServiceImpl.class,
     BucketAuditQueryServiceImpl.class,
     EgressInternalRemediationService.class,
   })

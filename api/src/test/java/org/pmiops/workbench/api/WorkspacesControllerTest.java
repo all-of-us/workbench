@@ -22,7 +22,12 @@ import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.PageImpl;
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -50,6 +55,7 @@ import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -190,7 +196,6 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -338,7 +343,8 @@ public class WorkspacesControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-    ObjectNameSizeService.class,
+    ObjectNameLengthService.class,
+    BucketAuditQueryService.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -699,7 +705,7 @@ public class WorkspacesControllerTest {
       workspace = workspacesController.createWorkspace(workspace).getBody();
       uniqueIds.add(workspace.getId());
 
-      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName(), true);
+      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     }
     assertThat(uniqueIds.size()).isEqualTo(1);
   }
@@ -1018,7 +1024,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName(), true);
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     verify(mockWorkspaceAuditor).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
@@ -1738,7 +1744,7 @@ public class WorkspacesControllerTest {
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
     assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
 
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId(), true);
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
