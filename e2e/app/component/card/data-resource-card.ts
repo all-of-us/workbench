@@ -112,6 +112,22 @@ export default class DataResourceCard extends BaseCard {
     return null;
   }
 
+  async selectSnowmanMenu(options: MenuOption, opt: { name?: string; waitForNav?: boolean } = {}): Promise<void> {
+    const { name } = opt;
+    const snowmanIcon = await this.findResourceSnowManEntryByName({ name });
+    if (!snowmanIcon) {
+      throw new Error(` card "${name}"`);
+    }
+
+    const snowMan = new Link(this.page, snowmanIcon);
+    await snowMan.click();
+    await snowMan.dispose();
+    const snowmanMenu = new SnowmanMenu(this.page);
+    await snowmanMenu.waitUntilVisible();
+    await snowmanMenu.select(options, { waitForNav: false });
+    return;
+  }
+
   async findCard(
     opts: { name?: string; cardType?: ResourceCard; timeout?: number } = {}
   ): Promise<DataResourceCard | null> {

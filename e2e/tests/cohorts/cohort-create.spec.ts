@@ -14,6 +14,7 @@ import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import ClrIconLink from 'app/element/clr-icon-link';
 import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import { Page } from 'puppeteer';
+import { getPropValue } from 'utils/element-utils';
 
 describe('Create Cohorts Test', () => {
   const workspaceName = makeWorkspaceName();
@@ -158,12 +159,13 @@ describe('Create Cohorts Test', () => {
     await openTab(page, Tabs.Data, dataPage);
 
     // In Show All tab, new cohort card is found.
-    const cohortCard = await dataPage.findCohortCard(cohortName);
-    expect(await cohortCard.getName()).toEqual(cohortName);
+    const cohortCard = await dataPage.findCohortEntry(cohortName);
+    const cohortCardValue = await getPropValue<string>(cohortCard, 'textContent');
+    expect(cohortCardValue).toEqual(cohortName);
 
     // Delete cohort in Workspace Data page.
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
-    expect(await dataPage.findCohortCard(cohortName)).toBeFalsy();
+    await dataPage.deleteResourceFromTable(cohortName, ResourceCard.Cohort);
+    expect(await dataPage.findCohortEntry(cohortName)).toBeFalsy();
   });
 
   test('Create cohort from EKG conditions with modifiers', async () => {
