@@ -128,6 +128,20 @@ export default class DataResourceCard extends BaseCard {
     return;
   }
 
+  async getSnowmanMenuForTable(name): Promise<SnowmanMenu> {
+    const snowmanIcon = await this.findResourceSnowManEntryByName({ name });
+    if (!snowmanIcon) {
+      throw new Error(` card "${name}"`);
+    }
+
+    const snowMan = new Link(this.page, snowmanIcon);
+    await snowMan.click();
+    await snowMan.dispose();
+    const snowmanMenu = new SnowmanMenu(this.page);
+    await snowmanMenu.waitUntilVisible();
+    return snowmanMenu;
+  }
+
   async findCard(
     opts: { name?: string; cardType?: ResourceCard; timeout?: number } = {}
   ): Promise<DataResourceCard | null> {
