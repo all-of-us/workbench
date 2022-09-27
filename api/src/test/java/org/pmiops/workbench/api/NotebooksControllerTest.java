@@ -20,13 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.db.model.DbUser;
@@ -47,6 +43,7 @@ import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
+import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -292,7 +289,7 @@ public class NotebooksControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                notebooksController.notebookLockingEmailHash(
+                NotebookLockingUtils.notebookLockingEmailHash(
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -343,7 +340,7 @@ public class NotebooksControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                notebooksController.notebookLockingEmailHash(
+                NotebookLockingUtils.notebookLockingEmailHash(
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -402,7 +399,7 @@ public class NotebooksControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                notebooksController.notebookLockingEmailHash(
+                NotebookLockingUtils.notebookLockingEmailHash(
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -415,12 +412,6 @@ public class NotebooksControllerTest {
             .lastLockedBy("UNKNOWN");
 
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
-  }
-
-  @ParameterizedTest
-  @MethodSource("notebookLockingCases")
-  public void testNotebookLockingEmailHash(String bucket, String email, String hash) {
-    assertThat(notebooksController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
   }
 
   @Test
@@ -558,27 +549,6 @@ public class NotebooksControllerTest {
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
-  }
-
-  private static Stream<Arguments> notebookLockingCases() {
-    return Stream.of(
-        Arguments.of(
-            "fc-bucket-id-1",
-            "user@aou",
-            "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"),
-        Arguments.of(
-            "fc-bucket-id-1",
-            "another-user@aou",
-            "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"),
-        Arguments.of(
-            "fc-bucket-id-2",
-            "user@aou",
-            "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"),
-        // catches an edge case where the hash has a leading 0
-        Arguments.of(
-            "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
-            "brubenst2@fake-research-aou.org",
-            "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"));
   }
 
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {

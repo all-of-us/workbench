@@ -6,13 +6,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.BaseEncoding;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,8 +17,8 @@ import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 
 public class CloudStorageClientImpl implements CloudStorageClient {
 
@@ -163,26 +158,6 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     return fileDetail;
   }
 
-  @VisibleForTesting
-  static String notebookLockingEmailHash(String bucket, String email) {
-    String toHash = String.format("%s:%s", bucket, email);
-    try {
-      MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-      byte[] hash = sha256.digest(toHash.getBytes(StandardCharsets.UTF_8));
-      // convert to printable hex text
-      return BaseEncoding.base16().lowerCase().encode(hash);
-    } catch (final NoSuchAlgorithmException e) {
-      throw new ServerErrorException(e);
-    }
-  }
-
-  static String findHashedUser(String bucket, Set<String> workspaceUsers, String hash) {
-    return workspaceUsers.stream()
-        .filter(email -> notebookLockingEmailHash(bucket, email).equals(hash))
-        .findAny()
-        .orElse("UNKNOWN");
-  }
-
   @Override
   public FileDetail blobToFileDetail(Blob blob, String bucketName, Set<String> workspaceUsers) {
     FileDetail fileDetail = blobToFileDetail(blob, bucketName);
@@ -190,7 +165,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     if (null != fileMetadata) {
       String hash = fileMetadata.getOrDefault("lastLockedBy", null);
       if (hash != null) {
-        String userName = findHashedUser(bucketName, workspaceUsers, hash);
+        String userName = NotebookLockingUtils.findHashedUser(bucketName, workspaceUsers, hash);
         fileDetail.setLastModifiedBy(userName);
       }
     }

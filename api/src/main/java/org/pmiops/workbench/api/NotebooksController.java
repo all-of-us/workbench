@@ -1,10 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.BaseEncoding;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +9,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
@@ -26,6 +20,7 @@ import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
+import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,7 +173,8 @@ public class NotebooksController implements NotebooksApiDelegate {
                 .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
                 .keySet();
 
-        response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
+        response.lastLockedBy(
+            NotebookLockingUtils.findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
       }
     }
 
@@ -199,25 +195,5 @@ public class NotebooksController implements NotebooksApiDelegate {
     }
 
     return ResponseEntity.ok(response);
-  }
-
-  private String findHashedUser(String bucket, Set<String> workspaceUsers, String hash) {
-    return workspaceUsers.stream()
-        .filter(email -> notebookLockingEmailHash(bucket, email).equals(hash))
-        .findAny()
-        .orElse("UNKNOWN");
-  }
-
-  @VisibleForTesting
-  static String notebookLockingEmailHash(String bucket, String email) {
-    String toHash = String.format("%s:%s", bucket, email);
-    try {
-      MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-      byte[] hash = sha256.digest(toHash.getBytes(StandardCharsets.UTF_8));
-      // convert to printable hex text
-      return BaseEncoding.base16().lowerCase().encode(hash);
-    } catch (final NoSuchAlgorithmException e) {
-      throw new ServerErrorException(e);
-    }
   }
 }
