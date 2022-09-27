@@ -27,7 +27,6 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressSumologicJiraHandler.class.getName());
 
-
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final EgressEventMapper egressEventMapper;
 
