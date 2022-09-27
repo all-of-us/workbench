@@ -20,7 +20,8 @@ public class WorkspaceDaoImpl implements WorkspaceDaoCustom {
 
   @Lazy @Autowired private WorkspaceDao workspaceDao;
 
-  private DbWorkspace saveWithLastModified(DbWorkspace workspace, Timestamp ts) {
+  private DbWorkspace saveWithLastModified(DbWorkspace workspace, String username, Timestamp ts) {
+    workspace.setLastModifiedBy(username);
     workspace.setLastModifiedTime(ts);
     try {
       return workspaceDao.save(workspace);
@@ -31,7 +32,7 @@ public class WorkspaceDaoImpl implements WorkspaceDaoCustom {
   }
 
   @Override
-  public DbWorkspace saveWithLastModified(DbWorkspace workspace) {
-    return saveWithLastModified(workspace, new Timestamp(clock.instant().toEpochMilli()));
+  public DbWorkspace saveWithLastModified(DbWorkspace workspace, String username) {
+    return saveWithLastModified(workspace, username, new Timestamp(clock.instant().toEpochMilli()));
   }
 }

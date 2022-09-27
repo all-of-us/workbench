@@ -400,7 +400,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workspace.getBillingAccountName());
     } catch (ServerErrorException e) {
-      new ServerErrorException("Could not update the workspace's billing account", e);
+      throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
     return dbWorkspace;
@@ -496,15 +496,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.updateWorkspaceBillingAccount(
             dbWorkspace, request.getWorkspace().getBillingAccountName());
       } catch (ServerErrorException e) {
-        new ServerErrorException("Could not update the workspace's billing account", e);
+        throw new ServerErrorException("Could not update the workspace's billing account", e);
       }
     }
 
     try {
-      dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
-      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+      dbWorkspace =
+          workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get().getUsername());
     } catch (Exception e) {
       // Tell Google Cloud to set the billing account back to the original one since our
       // update database call failed
@@ -601,7 +601,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, clonedRoles);
     }
 
-    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get().getUsername());
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
     workspaceAuditor.fireDuplicateAction(
@@ -725,9 +725,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     dbWorkspace.setNeedsReviewPrompt(false);
-    dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
     try {
-      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+      dbWorkspace =
+          workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get().getUsername());
     } catch (Exception e) {
       throw e;
     }
