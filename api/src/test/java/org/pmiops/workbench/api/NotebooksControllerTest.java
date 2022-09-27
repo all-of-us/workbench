@@ -49,6 +49,7 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -76,7 +77,7 @@ public class NotebooksControllerTest {
   @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
     }

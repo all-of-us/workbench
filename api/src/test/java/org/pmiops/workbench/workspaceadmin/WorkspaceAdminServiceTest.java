@@ -46,6 +46,7 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -80,11 +81,13 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
 public class WorkspaceAdminServiceTest {
@@ -119,6 +122,7 @@ public class WorkspaceAdminServiceTest {
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   private DbCdrVersion cdrVersion;
+  private static DbUser currentUser;
 
   @TestConfiguration
   @Import({
@@ -152,10 +156,18 @@ public class WorkspaceAdminServiceTest {
     public WorkbenchConfig getConfig() {
       return WorkbenchConfig.createEmptyConfig();
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser user() {
+      return currentUser;
+    }
   }
 
   @BeforeEach
   public void setUp() {
+    currentUser = new DbUser();
+
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
     when(mockFirecloudService.getWorkspaceAsService(any(), any()))

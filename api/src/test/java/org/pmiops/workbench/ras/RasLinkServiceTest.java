@@ -175,7 +175,7 @@ public class RasLinkServiceTest {
     }
 
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
     }

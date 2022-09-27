@@ -22,7 +22,12 @@ import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.PageImpl;
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -187,6 +192,7 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -360,13 +366,13 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
     }
 
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
     }

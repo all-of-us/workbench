@@ -141,7 +141,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   static class Configuration {
 
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
     }
