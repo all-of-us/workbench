@@ -72,9 +72,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableGpu", source = "config.featureFlags.enableGpu")
   @Mapping(target = "enablePersistentDisk", source = "config.featureFlags.enablePersistentDisk")
   @Mapping(target = "enableMultiReview", source = "config.featureFlags.enableMultiReview")
-  @Mapping(
-      target = "enableDrugWildcardSearch",
-      source = "config.featureFlags.enableDrugWildcardSearch")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
