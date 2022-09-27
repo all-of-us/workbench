@@ -107,7 +107,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
-  Set<DbWorkspace> findAllByCreatorAndActiveStatus(DbUser user, short activeStatus);
+  Set<DbWorkspace> findAllByActiveStatus(short activeStatus);
 
   List<DbWorkspace> findAllByNeedsResearchPurposeReviewPrompt(short researchPurposeReviewed);
 

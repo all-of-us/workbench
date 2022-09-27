@@ -29,6 +29,7 @@ public class WorkbenchConfig {
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
   public ActionAuditConfig actionAudit;
+  public BucketAuditConfig bucketAudit;
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
@@ -63,6 +64,7 @@ public class WorkbenchConfig {
     config.server = new ServerConfig();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.zendesk = new ZendeskConfig();
+    config.bucketAudit = new BucketAuditConfig();
     return config;
   }
 
@@ -331,6 +333,12 @@ public class WorkbenchConfig {
     public String bigQueryTable;
     // The column used to partition the action audit dataset.
     public String partitionColumn;
+  }
+
+  public static class BucketAuditConfig {
+    public String logProjectId;
+    public String bigQueryDataset;
+    public String bigQueryTable;
   }
 
   public static class RdrExportConfig {

@@ -2,7 +2,6 @@ package org.pmiops.workbench.workspaces;
 
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
@@ -26,15 +25,10 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public boolean deleteWorkspace(DbWorkspace dbWorkspace) {
-    return true;
-  }
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {}
 
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {}
-
-  @Override
-  public void forceDeleteWorkspace(DbWorkspace dbWorkspace) {}
 
   @Override
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
@@ -57,7 +51,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public Set<DbWorkspace> getActiveWorkspacesForUser(DbUser user) {
+  public Set<DbWorkspace> getActiveWorkspaces() {
     return null;
   }
 

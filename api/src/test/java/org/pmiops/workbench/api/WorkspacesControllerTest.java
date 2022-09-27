@@ -22,12 +22,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.PageImpl;
-import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
-import com.google.cloud.bigquery.Schema;
-import com.google.cloud.bigquery.TableResult;
+import com.google.cloud.bigquery.*;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -112,7 +107,8 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
+import org.pmiops.workbench.exfiltration.EgressRemediationService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -193,6 +189,7 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -281,7 +278,7 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
-  @Autowired ObjectNameSizeService objectNameSizeService;
+  @Autowired ObjectNameLengthService objectNameLengthService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
@@ -291,6 +288,11 @@ public class WorkspacesControllerTest {
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
+  @MockBean BucketAuditQueryService bucketAuditQueryService;
+
+  @MockBean
+  @Qualifier("internal-remediation-service")
+  EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
@@ -369,13 +371,13 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Scope("prototype")
     DbUser user() {
       return currentUser;
     }
 
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Scope("prototype")
     WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
     }

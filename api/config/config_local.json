@@ -124,6 +124,11 @@
     "bigQueryTable": "workbench_action_audit_local",
     "partitionColumn": "_PARTITIONTIME"
   },
+  "bucketAudit": {
+    "logProjectId": "fc-aou-logs-test",
+    "bigQueryDataset": "WorkspaceStorageLogs",
+    "bigQueryTable": "cloudaudit_googleapis_com_data_access"
+  },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrExportQueue",

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -95,20 +96,11 @@ public abstract class EgressRemediationService {
     // Execute the action, if any
     escalation.ifPresent(
         e -> {
-          EgressRemediationAction action;
-          if (e.disableUser != null) {
-            disableUser(user);
-            action = EgressRemediationAction.DISABLE_USER;
-          } else if (e.suspendCompute != null) {
-            suspendUserCompute(user, Duration.ofMinutes(e.suspendCompute.durationMinutes));
-            action = EgressRemediationAction.SUSPEND_COMPUTE;
-          } else {
-            throw new ServerErrorException("egress alert policy is invalid: " + e);
-          }
+          EgressRemediationAction action = getEgressRemediationAction(user, e);
 
           if (egressPolicy != null && egressPolicy.enableJiraTicketing) {
             try {
-              logEventToJira(event, action);
+              logEvent(event, action);
             } catch (ApiException ex) {
               throw new ServerErrorException("failed to log event to Jira", ex);
             }
@@ -128,10 +120,25 @@ public abstract class EgressRemediationService {
     egressEventAuditor.fireRemediateEgressEvent(event, escalation.orElse(null));
   }
 
+  @NotNull
+  private EgressRemediationAction getEgressRemediationAction(DbUser user, Escalation e) {
+    EgressRemediationAction action;
+    if (e.disableUser != null) {
+      disableUser(user);
+      action = EgressRemediationAction.DISABLE_USER;
+    } else if (e.suspendCompute != null) {
+      suspendUserCompute(user, Duration.ofMinutes(e.suspendCompute.durationMinutes));
+      action = EgressRemediationAction.SUSPEND_COMPUTE;
+    } else {
+      throw new ServerErrorException("egress alert policy is invalid: " + e);
+    }
+    return action;
+  }
+
   protected abstract void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
       throws MessagingException;
 
-  protected abstract void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
+  protected abstract void logEvent(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;
 
   /**
@@ -244,7 +251,7 @@ public abstract class EgressRemediationService {
     stopUserRuntimes(user.getUsername());
   }
 
-  private void disableUser(DbUser user) {
+  protected void disableUser(DbUser user) {
     userService.updateUserWithRetries(
         u -> {
           u.setDisabled(true);

@@ -52,6 +52,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -91,7 +92,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
+import org.pmiops.workbench.exfiltration.EgressRemediationService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -211,6 +213,11 @@ public class DataSetControllerTest {
   @MockBean private FireCloudService fireCloudService;
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
   @MockBean private NotebooksService mockNotebooksService;
+  @MockBean BucketAuditQueryService bucketAuditQueryService;
+
+  @MockBean
+  @Qualifier("internal-remediation-service")
+  EgressRemediationService egressRemediationService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
@@ -242,7 +249,8 @@ public class DataSetControllerTest {
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
-    ObjectNameSizeService.class,
+    ObjectNameLengthService.class,
+    BucketAuditQueryService.class,
   })
   @MockBean({
     AccessModuleService.class,

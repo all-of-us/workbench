@@ -56,8 +56,7 @@ Include the special key "aou_skip_reason" to skip a cron in a given environment
 You can test a cron endpoint locally with curl:
 
 ```
-curl --header "X-AppEngine-Cron: true" localhost:8081/v1/cron/checkObjectNameSize
-v1/cron/updateWidgetConfiguration
+curl --header "X-AppEngine-Cron: true" localhost:8081/v1/cron/updateWidgetConfiguration
 ```
 
 Not ideal but you can test the schedule string for your cron by deploying an instance and reading

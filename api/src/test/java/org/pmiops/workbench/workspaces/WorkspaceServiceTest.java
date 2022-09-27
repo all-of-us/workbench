@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -38,6 +39,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -46,7 +48,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
+import org.pmiops.workbench.exfiltration.EgressRemediationService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -62,6 +65,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -86,7 +90,7 @@ public class WorkspaceServiceTest {
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
     CloudStorageClientImpl.class,
-    ObjectNameSizeService.class,
+    ObjectNameLengthService.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -125,6 +129,12 @@ public class WorkspaceServiceTest {
   @MockBean private AccessTierService accessTierService;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
+  @MockBean private BucketAuditQueryService bucketAuditQueryService;
+  @MockBean UserService userService;
+
+  @MockBean
+  @Qualifier("internal-remediation-service")
+  EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;
 
@@ -435,7 +445,7 @@ public class WorkspaceServiceTest {
   @Test
   public void deleteWorkspace() {
     DbWorkspace ws = dbWorkspaces.get(0); // arbitrary choice of those defined for testing
-    workspaceService.forceDeleteWorkspace(ws);
+    workspaceService.deleteWorkspace(ws);
     assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
 
     String billingProject = ws.getWorkspaceNamespace();
@@ -453,7 +463,7 @@ public class WorkspaceServiceTest {
         .when(mockFireCloudService)
         .deleteBillingProject(anyString());
 
-    workspaceService.forceDeleteWorkspace(ws);
+    workspaceService.deleteWorkspace(ws);
 
     // deletion succeeds
 

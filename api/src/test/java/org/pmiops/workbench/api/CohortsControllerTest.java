@@ -25,6 +25,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -61,7 +62,8 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
+import org.pmiops.workbench.exfiltration.impl.EgressInternalRemediationService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -187,7 +189,9 @@ public class CohortsControllerTest {
     WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
-    ObjectNameSizeService.class,
+    ObjectNameLengthService.class,
+    BucketAuditQueryServiceImpl.class,
+    EgressInternalRemediationService.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -218,6 +222,7 @@ public class CohortsControllerTest {
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
+    EgressInternalRemediationService.class,
   })
   static class Configuration {
     @Bean

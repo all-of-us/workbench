@@ -46,7 +46,8 @@ public class IamServiceImpl implements IamService {
    * <p>If the user has not yet accepted the latest Terms of Service, impersonation will not be
    * possible, and we will return Empty instead.
    */
-  private Optional<String> getOrCreatePetServiceAccountUsingImpersonation(
+  @Override
+  public Optional<String> getOrCreatePetServiceAccountUsingImpersonation(
       String googleProject, String userEmail) throws IOException, ApiException {
 
     boolean userAcceptedLatestTos =

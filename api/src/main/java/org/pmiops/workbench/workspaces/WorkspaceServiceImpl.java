@@ -40,7 +40,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exfiltration.ObjectNameSizeService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -90,7 +89,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceAuthService workspaceAuthService;
-  private final ObjectNameSizeService objectNameSizeService;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -110,8 +108,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceAuthService workspaceAuthService,
-      ObjectNameSizeService objectNameSizeService) {
+      WorkspaceAuthService workspaceAuthService) {
     this.accessTierService = accessTierService;
     this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
@@ -129,7 +126,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceAuthService = workspaceAuthService;
-    this.objectNameSizeService = objectNameSizeService;
   }
 
   @Override
@@ -205,18 +201,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
-  public boolean deleteWorkspace(DbWorkspace dbWorkspace) {
-    if (objectNameSizeService.calculateObjectNameLength(dbWorkspace) > 10000) { // FIXME
-      return false;
-    }
-
-    forceDeleteWorkspace(dbWorkspace);
-    return true;
-  }
-
-  @Transactional
-  @Override
-  public void forceDeleteWorkspace(DbWorkspace dbWorkspace) {
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
@@ -375,9 +360,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public Set<DbWorkspace> getActiveWorkspacesForUser(DbUser user) {
-    return workspaceDao.findAllByCreatorAndActiveStatus(
-        user, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  public Set<DbWorkspace> getActiveWorkspaces() {
+    return workspaceDao.findAllByActiveStatus(
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   private DbUserRecentWorkspace updateRecentWorkspaces(

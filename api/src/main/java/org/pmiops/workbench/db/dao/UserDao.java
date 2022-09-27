@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -53,6 +54,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "    OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
   List<DbUser> findUsersBySearchStringAndTier(
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
+
+  Set<DbUser> findUserByUsernameInAndDisabledFalse(List<String> usernames);
 
   interface UserCountByDisabledAndAccessTiers {
     Long getUserCount();

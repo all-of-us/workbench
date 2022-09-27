@@ -49,12 +49,12 @@ public class EgressInternalRemediationService extends EgressRemediationService {
   @Override
   protected void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
       throws MessagingException {
+    disableUser(user);
     mailService.sendInternalEgressRemediationEmail(user, action);
   }
 
   @Override
-  protected void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
-      throws ApiException {
+  protected void logEvent(DbEgressEvent event, EgressRemediationAction action) throws ApiException {
     egressJiraHandler.logEventToJira(event, action);
   }
 }

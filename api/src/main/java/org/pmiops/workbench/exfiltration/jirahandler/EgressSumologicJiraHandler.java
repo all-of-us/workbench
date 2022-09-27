@@ -1,6 +1,5 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
-import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
@@ -15,36 +14,32 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
-import org.pmiops.workbench.jira.JiraService.IssueProperty;
-import org.pmiops.workbench.jira.JiraService.IssueType;
 import org.pmiops.workbench.jira.model.AtlassianContent;
-import org.pmiops.workbench.jira.model.CreatedIssue;
-import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("sumologic-jira-handler")
-public class EgressSumologicJiraHandler implements EgressJiraHandler {
+public class EgressSumologicJiraHandler extends EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressSumologicJiraHandler.class.getName());
 
-  private final Clock clock;
+
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final EgressEventMapper egressEventMapper;
-  private final JiraService jiraService;
 
+  @Autowired
   public EgressSumologicJiraHandler(
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       EgressEventMapper egressEventMapper,
       JiraService jiraService) {
-    this.clock = clock;
+    super(clock, jiraService);
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.egressEventMapper = egressEventMapper;
-    this.jiraService = jiraService;
   }
 
   /**
@@ -56,52 +51,17 @@ public class EgressSumologicJiraHandler implements EgressJiraHandler {
       throws ApiException {
     String envShortName = workbenchConfigProvider.get().server.shortName;
     SearchResults results =
-        jiraService.searchIssues(
-            // Ideally we would use Resolution = Unresolved here, but due to a misconfiguration of
-            // RW Jira, transitioning to Won't Fix / Duplicate do not currently resolve an issue.
-            String.format(
-                "\"%s\" ~ \"%s\""
-                    + " AND \"%s\" ~ \"%s\""
-                    + " AND status not in (Done, \"Won't Fix\", Duplicate)"
-                    + " ORDER BY created DESC",
-                IssueProperty.EGRESS_VM_PREFIX.key(),
-                event.getUser().getRuntimeName(),
-                IssueProperty.RW_ENVIRONMENT.key(),
-                envShortName));
+        searchJiraIssuesWithLabels(event, envShortName, new String[] {"high-egress"});
 
     if (results.getIssues().isEmpty()) {
-      CreatedIssue createdIssue =
-          jiraService.createIssue(
-              IssueType.TASK,
-              JiraContent.contentAsMinimalAtlassianDocument(jiraEventDescription(event, action)),
-              ImmutableMap.<IssueProperty, Object>builder()
-                  .put(
-                      IssueProperty.SUMMARY,
-                      String.format(
-                          "(%s) Investigate egress from %s",
-                          JiraService.summaryDateFormat.format(clock.instant()),
-                          event.getUser().getUsername()))
-                  .put(IssueProperty.EGRESS_VM_PREFIX, event.getUser().getRuntimeName())
-                  .put(IssueProperty.RW_ENVIRONMENT, envShortName)
-                  .put(IssueProperty.LABELS, new String[] {"high-egress"})
-                  .build());
-      log.info("created new egress Jira ticket: " + createdIssue.getKey());
+      createJiraIssueWithLabels(event, action, envShortName, new String[] {"high-egress"});
     } else {
-      IssueBean existingIssue = results.getIssues().get(0);
-      if (results.getIssues().size() > 1) {
-        log.warning(
-            String.format(
-                "found multiple (%d) open Jira tickets for the same user VM prefix, updating the most recent ticket",
-                results.getIssues().size()));
-      }
-      jiraService.commentIssue(
-          existingIssue.getId(),
-          JiraContent.contentAsMinimalAtlassianDocument(jiraEventComment(event, action)));
-      log.info("commented on existing egress Jira ticket: " + existingIssue.getKey());
+      createJiraComment(event, action, results);
     }
   }
 
-  private Stream<AtlassianContent> jiraEventDescription(
+  @Override
+  protected Stream<AtlassianContent> jiraEventDescription(
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
@@ -129,8 +89,8 @@ public class EgressSumologicJiraHandler implements EgressJiraHandler {
         jiraEventDescriptionShort(event, action));
   }
 
-  private Stream<AtlassianContent> jiraEventComment(
-      DbEgressEvent event, EgressRemediationAction action) {
+  @Override
+  Stream<AtlassianContent> jiraEventComment(DbEgressEvent event, EgressRemediationAction action) {
     return Stream.concat(
         Stream.of(JiraContent.text("Additional egress detected\n\n")),
         jiraEventDescriptionShort(event, action));
