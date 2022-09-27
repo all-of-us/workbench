@@ -173,13 +173,12 @@ public class EgressLogService {
         QueryJobConfiguration.newBuilder(
                 String.format(
                     "SELECT timestamp, jsonPayload.message AS message"
-                        + " FROM "
-                        + datasetId
+                        + " FROM %s"
                         + " WHERE resource.labels.project_id = @project_id"
                         + "  AND timestamp BETWEEN @start_time AND @end_time"
                         + "  AND jsonPayload.message LIKE @log_pattern"
                         + " ORDER BY timestamp DESC",
-                    workbenchConfigProvider.get().firecloud.workspaceLogsProject))
+                    datasetId))
             .setNamedParameters(
                 ImmutableMap.<String, QueryParameterValue>builder()
                     .putAll(baseParams)
