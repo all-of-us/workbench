@@ -275,10 +275,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> findCohortReviewDemoChartInfo(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
 
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    Set<Long> participantIds = cohortReviewService.findParticipantIdsByCohortReview(cohortReviewId);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+
+    Set<Long> participantIds =
+        cohortReviewService.findParticipantIdsByCohortReview(cohortReview.getCohortReviewId());
 
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     return ResponseEntity.ok(
