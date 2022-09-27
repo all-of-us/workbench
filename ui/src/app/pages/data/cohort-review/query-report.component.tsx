@@ -33,7 +33,7 @@ import {
 } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { currentCohortStore, NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import outdated from 'assets/icons/outdated.svg';
@@ -380,20 +380,16 @@ export const QueryReport = fp.flow(
 
     goBack() {
       const { ns, wsid, cid, crid } = this.props.match.params;
-      this.props.navigate(
-        serverConfigStore.get().config.enableMultiReview
-          ? ['workspaces', ns, wsid, 'data', 'cohorts', cid, 'reviews', crid]
-          : [
-              'workspaces',
-              ns,
-              wsid,
-              'data',
-              'cohorts',
-              cid,
-              'review',
-              'participants',
-            ]
-      );
+      this.props.navigate([
+        'workspaces',
+        ns,
+        wsid,
+        'data',
+        'cohorts',
+        cid,
+        'reviews',
+        crid,
+      ]);
     }
 
     render() {
@@ -418,8 +414,7 @@ export const QueryReport = fp.flow(
               type='button'
               onClick={() => this.goBack()}
             >
-              Back to review set
-              {serverConfigStore.get().config.enableMultiReview ? 's' : ''}
+              Back to review sets
             </button>
           )}
           {cohortLoading && <SpinnerOverlay />}

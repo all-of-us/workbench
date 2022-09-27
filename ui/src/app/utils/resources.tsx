@@ -12,7 +12,6 @@ import {
 } from 'generated/fetch';
 
 import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
-import { serverConfigStore } from 'app/utils/stores';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { WorkspaceData } from './workspace-data';
@@ -87,9 +86,7 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isCohortReview,
       (r) => ({
-        url: serverConfigStore.get().config.enableMultiReview
-          ? `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`
-          : `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/review`,
+        url: `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
       }),
     ],
     [
