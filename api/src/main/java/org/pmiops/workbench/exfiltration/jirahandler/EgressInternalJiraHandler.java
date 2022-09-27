@@ -15,7 +15,6 @@ import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +27,7 @@ public class EgressInternalJiraHandler extends EgressJiraHandler {
 
   @Autowired
   public EgressInternalJiraHandler(
-      Clock clock,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      EgressEventMapper egressEventMapper,
-      JiraService jiraService) {
+      Clock clock, Provider<WorkbenchConfig> workbenchConfigProvider, JiraService jiraService) {
     super(clock, jiraService);
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -41,8 +37,11 @@ public class EgressInternalJiraHandler extends EgressJiraHandler {
       throws ApiException {
     String envShortName = workbenchConfigProvider.get().server.shortName;
     SearchResults results =
-        searchJiraIssuesWithLabels(event, envShortName, new String[] {"file-length-high-egress"});
-
+        searchJiraIssuesWithLabel(event, envShortName, "file-length-high-egress");
+    log.info(
+        String.format(
+            "Found %d jira issues with label: file-length-high-egress",
+            results.getIssues().size()));
     if (results.getIssues().isEmpty()) {
       createJiraIssueWithLabels(
           event, action, envShortName, new String[] {"file-length-high-egress"});

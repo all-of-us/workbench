@@ -1,77 +1,77 @@
 cron:
-- description: 'Periodic notebook runtime checks'
-  url: /v1/cron/checkRuntimes
-  schedule: every 3 hours
-  timezone: UTC
-  target: api
-- description: >
-    Daily persistent disk checks / notifications. Note: rerunning may result in duplicate email
-    notifications. This endpoint's logic depends on it running once daily.
-  url: /v1/cron/checkPersistentDisks
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: 'Daily audit of gcp resources that users have access to'
-  url: /v1/cron/bulkAuditProjectAccess
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: 'Find and alert users that have exceeded their free tier billing usage'
-  url: /v1/cron/checkFreeTierBillingUsage
-  schedule: every 30 minutes
-  timezone: UTC
-  target: api
-- description: >
-    Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
-    the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
-    cron job.
-  url: /v1/cron/monitoring/updateGaugeMetrics
-  schedule: every 1 minutes
-  timezone: UTC
-  target: api
-- description: >
-    Export user and workspace data to RDR.
-    RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
-    that is (1) after the close of normal business working hours, and (2) early enough in the evening that the
-    entire export (and downstream data flows) can complete before start of the next business day.
-  url: /v1/cron/exportToRdr
-  schedule: every day 22:00
-  timezone: America/Chicago
-  target: api
-- description: >
-    For each workspace update the attribute need_rp_prompt if it has been created 15 days/an Year earlier
-  url: /v1/cron/updateResearchPurposeReviewPrompt
-  schedule: every day 21:00
-  timezone: America/Chicago
-  target: api
-- description: >
-    Compile a snapshot of workbench data for reporting and upload it to  BigQuery.
-  url: /v1/cron/uploadReportingSnapshot
-  schedule: every day 19:00
-  timezone: America/Chicago
-  target: api
-- description: >
-    Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
-  url: /v1/cron/synchronizeUserAccess
-  schedule: every day 23:00
-  timezone: America/Chicago
-  target: api
-- description: Re-enqueues any egress events which have been pending for too long.
-  url: /v1/cron/checkPendingEgressEvents
-  schedule: every 1 hours
-  timezone: UTC
-  target: api
-- description: >
-    Check each user to determine when they will no longer meet compliance guidelines.
-    Send warning emails to those users who will be expiring soon, and expiration emails for
-    those who have expired in the last 24 hours.
-  url: /v1/cron/sendAccessExpirationEmails
-  schedule: every day 23:30
-  timezone: America/Chicago
-  target: api
-- description: Check object name sizes to prevent exfiltration.
-  url: /v1/cron/checkObjectNameSize
-  schedule: every 1 hours
-  timezone: UTC
-  target: api
+  - description: 'Periodic notebook runtime checks'
+    url: /v1/cron/checkRuntimes
+    schedule: every 3 hours
+    timezone: UTC
+    target: api
+  - description: >
+      Daily persistent disk checks / notifications. Note: rerunning may result in duplicate email
+      notifications. This endpoint's logic depends on it running once daily.
+    url: /v1/cron/checkPersistentDisks
+    schedule: every 24 hours
+    timezone: UTC
+    target: api
+  - description: 'Daily audit of gcp resources that users have access to'
+    url: /v1/cron/bulkAuditProjectAccess
+    schedule: every 24 hours
+    timezone: UTC
+    target: api
+  - description: 'Find and alert users that have exceeded their free tier billing usage'
+    url: /v1/cron/checkFreeTierBillingUsage
+    schedule: every 30 minutes
+    timezone: UTC
+    target: api
+  - description: >
+      Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
+      the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
+      cron job.
+    url: /v1/cron/monitoring/updateGaugeMetrics
+    schedule: every 1 minutes
+    timezone: UTC
+    target: api
+  - description: >
+      Export user and workspace data to RDR.
+      RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
+      that is (1) after the close of normal business working hours, and (2) early enough in the evening that the
+      entire export (and downstream data flows) can complete before start of the next business day.
+    url: /v1/cron/exportToRdr
+    schedule: every day 22:00
+    timezone: America/Chicago
+    target: api
+  - description: >
+      For each workspace update the attribute need_rp_prompt if it has been created 15 days/an Year earlier
+    url: /v1/cron/updateResearchPurposeReviewPrompt
+    schedule: every day 21:00
+    timezone: America/Chicago
+    target: api
+  - description: >
+      Compile a snapshot of workbench data for reporting and upload it to  BigQuery.
+    url: /v1/cron/uploadReportingSnapshot
+    schedule: every day 19:00
+    timezone: America/Chicago
+    target: api
+  - description: >
+      Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
+    url: /v1/cron/synchronizeUserAccess
+    schedule: every day 23:00
+    timezone: America/Chicago
+    target: api
+  - description: Re-enqueues any egress events which have been pending for too long.
+    url: /v1/cron/checkPendingEgressEvents
+    schedule: every 1 hours
+    timezone: UTC
+    target: api
+  - description: >
+      Check each user to determine when they will no longer meet compliance guidelines.
+      Send warning emails to those users who will be expiring soon, and expiration emails for
+      those who have expired in the last 24 hours.
+    url: /v1/cron/sendAccessExpirationEmails
+    schedule: every day 23:30
+    timezone: America/Chicago
+    target: api
+  - description: 'Check object name sizes to prevent exfiltration.'
+    url: /v1/cron/checkObjectNameSize
+    schedule: every 6 hours
+    timezone: UTC
+    target: api
 

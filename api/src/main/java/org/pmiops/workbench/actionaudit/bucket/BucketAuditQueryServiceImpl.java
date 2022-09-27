@@ -26,7 +26,9 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
   private static final String QUERY =
       "SELECT \n"
           + "  protopayload_auditlog.authenticationInfo.principalEmail AS pet_account, \n"
-          + "  sum(CHARACTER_LENGTH(REGEXP_EXTRACT(protopayload_auditlog.resourceName, r'/([^/]+)/?$'))) as file_lengths\n"
+          + "  sum(CHARACTER_LENGTH(REGEXP_EXTRACT(protopayload_auditlog.resourceName, r'/([^/]+)/?$'))) as file_lengths, \n"
+          + "  min(timestamp) AS MIN_TIME, \n"
+          + "  max(timestamp) AS MAX_TIME \n"
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
@@ -49,7 +51,7 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
       String bucket, String googleProjectId) {
 
     final String queryString = String.format(QUERY, getTableName());
-    final String bucketName = String.format("%%projects/_/buckets/%s", bucket);
+    final String bucketName = String.format("%%projects/_/buckets/%s%%", bucket);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -87,6 +89,8 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
     BucketAuditEntry bucketAuditEntry = new BucketAuditEntry();
     FieldValues.getString(row, "pet_account").ifPresent(bucketAuditEntry::setPetAccount);
     FieldValues.getLong(row, "file_lengths").ifPresent(bucketAuditEntry::setFileLengths);
+    FieldValues.getDateTime(row, "MIN_TIME").ifPresent(bucketAuditEntry::setMinTime);
+    FieldValues.getDateTime(row, "MAX_TIME").ifPresent(bucketAuditEntry::setMaxTime);
     return bucketAuditEntry;
   }
 }

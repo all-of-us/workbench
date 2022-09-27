@@ -39,15 +39,15 @@ public abstract class EgressJiraHandler {
   abstract Stream<AtlassianContent> jiraEventComment(
       DbEgressEvent event, EgressRemediationAction action);
 
-  protected SearchResults searchJiraIssuesWithLabels(
-      DbEgressEvent event, String envShortName, String[] labels) throws ApiException {
+  protected SearchResults searchJiraIssuesWithLabel(
+      DbEgressEvent event, String envShortName, String label) throws ApiException {
     return jiraService.searchIssues(
         // Ideally we would use Resolution = Unresolved here, but due to a misconfiguration of
         // RW Jira, transitioning to Won't Fix / Duplicate do not currently resolve an issue.
         String.format(
             "\"%s\" ~ \"%s\""
                 + " AND \"%s\" ~ \"%s\""
-                + " AND \"%s\" ~ \"%s\""
+                + " AND \"%s\" = \"%s\""
                 + " AND status not in (Done, \"Won't Fix\", Duplicate)"
                 + " ORDER BY created DESC",
             IssueProperty.EGRESS_VM_PREFIX.key(),
@@ -55,7 +55,7 @@ public abstract class EgressJiraHandler {
             IssueProperty.RW_ENVIRONMENT.key(),
             envShortName,
             IssueProperty.LABELS,
-            labels));
+            label));
   }
 
   protected void createJiraIssueWithLabels(

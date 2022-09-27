@@ -110,7 +110,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
                 && petServiceAccount.get().equals(bucketAuditEntry.getPetAccount())) {
               // Create an egress alert.
               Optional<DbEgressEvent> maybeEvent =
-                  this.maybePersistEgressEvent(bucketAuditEntry.getFileLengths(), user, workspace);
+                  this.maybePersistEgressEvent(bucketAuditEntry, user, workspace);
               // There's no need to push this event to the executor because it's not expected that
               // it happens frequently. And if it happens, it has to be handled immediately.
               egressRemediationService.remediateEgressEvent(maybeEvent.get().getEgressEventId());
@@ -156,7 +156,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
   }
 
   private Optional<DbEgressEvent> maybePersistEgressEvent(
-      Long objectNameLengths, DbUser dbUser, DbWorkspace dbWorkspace) {
+      BucketAuditEntry bucketAuditEntry, DbUser dbUser, DbWorkspace dbWorkspace) {
 
     return Optional.of(
         egressEventDao.save(
@@ -165,10 +165,11 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
                 .setWorkspace(dbWorkspace)
                 .setSumologicEvent("{}")
                 .setEgressMegabytes(
-                    Optional.ofNullable(objectNameLengths)
+                    Optional.ofNullable(bucketAuditEntry.getFileLengths())
                         // bytes -> Megabytes (10^6 bytes)
                         .map(bytes -> (float) (bytes / (1024 * 1024)))
                         .orElse(null))
+                .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDuration())
                 .setStatus(DbEgressEventStatus.PENDING)));
   }
 }

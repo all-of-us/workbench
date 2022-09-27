@@ -49,7 +49,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -90,7 +90,7 @@ public class WorkspaceServiceTest {
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
     CloudStorageClientImpl.class,
-    ObjectNameLengthService.class,
+    ObjectNameLengthServiceImpl.class,
   })
   @MockBean({
     AccessTierService.class,

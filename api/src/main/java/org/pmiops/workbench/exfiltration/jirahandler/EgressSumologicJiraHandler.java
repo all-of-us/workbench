@@ -49,9 +49,9 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
   public void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException {
     String envShortName = workbenchConfigProvider.get().server.shortName;
-    SearchResults results =
-        searchJiraIssuesWithLabels(event, envShortName, new String[] {"high-egress"});
-
+    SearchResults results = searchJiraIssuesWithLabel(event, envShortName, "high-egress");
+    log.info(
+        String.format("Found %d jira issues with label: high-egress", results.getIssues().size()));
     if (results.getIssues().isEmpty()) {
       createJiraIssueWithLabels(event, action, envShortName, new String[] {"high-egress"});
     } else {
