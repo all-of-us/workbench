@@ -131,26 +131,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
     DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
-    CohortReview cohortReview;
 
-    if (workbenchConfigProvider.get().featureFlags.enableMultiReview) {
-      cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
-      cohortReview.setCohortName(request.getName());
-      cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
-    } else {
-      try {
-        cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
-      } catch (NotFoundException nfe) {
-        cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
-        cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
-      }
-      if (cohortReview.getReviewSize() > 0) {
-        throw new BadRequestException(
-            String.format(
-                "Bad Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
-                cohortId, cdrVersionId));
-      }
-    }
+    CohortReview cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
+    cohortReview.setCohortName(request.getName());
+    cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
 
     List<DbParticipantCohortStatus> participantCohortStatuses =
         cohortReviewService.createDbParticipantCohortStatusesList(
