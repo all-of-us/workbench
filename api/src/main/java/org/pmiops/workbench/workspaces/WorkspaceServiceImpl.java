@@ -210,7 +210,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     fireCloudService.deleteWorkspace(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get().getUsername());
+    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
     try {

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,8 @@ public class WorkspaceDaoImpl implements WorkspaceDaoCustom {
 
   @Lazy @Autowired private WorkspaceDao workspaceDao;
 
-  private DbWorkspace saveWithLastModified(DbWorkspace workspace, String username, Timestamp ts) {
-    workspace.setLastModifiedBy(username);
+  private DbWorkspace saveWithLastModified(DbWorkspace workspace, DbUser user, Timestamp ts) {
+    workspace.setLastModifiedBy(user.getUsername());
     workspace.setLastModifiedTime(ts);
     try {
       return workspaceDao.save(workspace);
@@ -32,7 +33,7 @@ public class WorkspaceDaoImpl implements WorkspaceDaoCustom {
   }
 
   @Override
-  public DbWorkspace saveWithLastModified(DbWorkspace workspace, String username) {
-    return saveWithLastModified(workspace, username, new Timestamp(clock.instant().toEpochMilli()));
+  public DbWorkspace saveWithLastModified(DbWorkspace workspace, DbUser user) {
+    return saveWithLastModified(workspace, user, new Timestamp(clock.instant().toEpochMilli()));
   }
 }

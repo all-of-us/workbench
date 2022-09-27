@@ -399,7 +399,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         Collections.singletonList(aclUpdate));
 
     dbWorkspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get().getUsername());
+    return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results

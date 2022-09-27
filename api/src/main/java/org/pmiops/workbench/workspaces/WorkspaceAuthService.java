@@ -176,6 +176,6 @@ public class WorkspaceAuthService {
         updatedAclsMap,
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
-    return workspaceDao.saveWithLastModified(workspace, userProvider.get().getUsername());
+    return workspaceDao.saveWithLastModified(workspace, userProvider.get());
   }
 }
