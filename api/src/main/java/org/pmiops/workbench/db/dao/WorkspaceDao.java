@@ -86,7 +86,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   List<DbWorkspace> findAllByGoogleProjectIn(Collection<String> googleProjects);
 
-
   default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     DbWorkspace workspace = findById(workspaceId).orElse(null);
     if (workspace == null || !workspace.isActive()) {

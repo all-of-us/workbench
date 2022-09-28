@@ -63,7 +63,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
   }
 
   /**
-   * For the given workspace, get its file access info from BQ grouped by the pet account. If the
+   * Get file access info from BQ grouped by the pet account, google project and bucket. If the
    * lengths of the filenames is greater than the threshold, an alert is triggered for the user who
    * created the files.
    *
@@ -77,7 +77,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
   public void calculateObjectNameLength() {
 
     // Call BQ to get the files created by each owner in the past 24 hours. This will only return
-    // the entries>THRESHOLD
+    // the entries with file lengths > THRESHOLD
     List<BucketAuditEntry> fileAccessInfoFromBQ = getFileAccessInfoFromBQ();
 
     // Get the workspaces for these entries. To only find relevant ones.
@@ -88,6 +88,9 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
                 .collect(Collectors.toSet()));
 
     for (BucketAuditEntry bucketAuditEntry : fileAccessInfoFromBQ) {
+      // If the returned google project ID from BQ doesn't exist in the DB, do nothing. This may
+      // happen in a shared env environment such as test. I am not sure if it would happen in other
+      // envs.
       if (!projectIdToDbWorkspace.containsKey(bucketAuditEntry.getGoogleProjectId())) {
         continue;
       }
@@ -105,6 +108,9 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
       final String bucketName = fsWorkspace.getWorkspace().getBucketName();
+
+      // We're only concerned about the workspace bucket, any other buckets should be ignored
+      // because the researcher doesn't have access on them.
       if (StringUtils.isNoneEmpty(bucketName)
           && bucketName.equals(bucketAuditEntry.getBucketName())) {
 
@@ -112,7 +118,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
             String.format("Bucket found for the offending workspace, bucket name: %s", bucketName));
         // Get the user which caused the egress alert from his pet account.
         // There is no known straightforward way to find this other than getting the
-        // users of this workspace and lookup which user does the pet account corresponds to.
+        // users of this workspace and lookup which user the pet account corresponds to.
         final List<UserRole> workspaceOwners = getWorkspaceOwners(workspace);
         final Set<DbUser> activeUsers =
             userService.findActiveUsersByUsernames(

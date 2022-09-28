@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+/** Controller to audit users who created objects in their buckets with very long names */
 public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApiDelegate {
 
   private static final Logger LOGGER =

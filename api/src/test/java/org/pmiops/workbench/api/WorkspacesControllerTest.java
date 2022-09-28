@@ -56,6 +56,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -115,6 +116,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -196,6 +198,7 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -343,8 +346,8 @@ public class WorkspacesControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-    ObjectNameLengthService.class,
-    BucketAuditQueryService.class,
+    ObjectNameLengthServiceImpl.class,
+    BucketAuditQueryServiceImpl.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -377,13 +380,13 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
     }
 
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
     }
