@@ -69,9 +69,7 @@ export default class DataResourceCard extends BaseCard {
 
   async findResourceTableEntryByName(opts: { name?: string }): Promise<ElementHandle> {
     const { name } = opts;
-
     await waitWhileLoading(this.page);
-
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
 
@@ -84,7 +82,6 @@ export default class DataResourceCard extends BaseCard {
       }
       index++;
     }
-
     return null;
   }
 
@@ -95,9 +92,9 @@ export default class DataResourceCard extends BaseCard {
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
 
-    const e = await datatable.exists();
-    if (e) {
-      const dataTableRows = await datatable?.getRowCount();
+    const tableExist = await datatable.exists();
+    if (tableExist) {
+      const dataTableRows = await datatable.getRowCount();
       let index = 1;
       while (index <= dataTableRows) {
         const resourceTypeCell = await datatable.getCellValue(index, 3);
@@ -110,8 +107,7 @@ export default class DataResourceCard extends BaseCard {
     return null;
   }
 
-  async selectSnowmanMenu(options: MenuOption, opt: { name?: string; waitForNav?: boolean } = {}): Promise<void> {
-    const { name } = opt;
+  async getSnowManLink(name) {
     const snowmanIcon = await this.findResourceSnowManEntryByName({ name });
     if (!snowmanIcon) {
       throw new Error(` card "${name}"`);
@@ -120,24 +116,23 @@ export default class DataResourceCard extends BaseCard {
     const snowMan = new Link(this.page, snowmanIcon);
     await snowMan.click();
     await snowMan.dispose();
-    const snowmanMenu = new SnowmanMenu(this.page);
-    await snowmanMenu.waitUntilVisible();
-    await snowmanMenu.select(options, { waitForNav: false });
     return;
   }
 
   async getSnowmanMenuForTable(name): Promise<SnowmanMenu> {
-    const snowmanIcon = await this.findResourceSnowManEntryByName({ name });
-    if (!snowmanIcon) {
-      throw new Error(` card "${name}"`);
-    }
-
-    const snowMan = new Link(this.page, snowmanIcon);
-    await snowMan.click();
-    await snowMan.dispose();
+    await this.getSnowManLink(name);
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
     return snowmanMenu;
+  }
+
+  async selectSnowmanMenu(options: MenuOption, opt: { name?: string; waitForNav?: boolean } = {}): Promise<void> {
+    const { name } = opt;
+    await this.getSnowManLink(name);
+    const snowmanMenu = new SnowmanMenu(this.page);
+    await snowmanMenu.waitUntilVisible();
+    await snowmanMenu.select(options, { waitForNav: false });
+    return;
   }
 
   async findCard(
@@ -216,49 +211,18 @@ export default class DataResourceCard extends BaseCard {
     }
 
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
-    const modal = new Modal(this.page);
-    await modal.waitForLoad();
-    const modalTextContent = await modal.getTextContent();
-
-    let link;
-    switch (cardType) {
-      case ResourceCard.Cohort:
-        link = LinkText.DeleteCohort;
-        break;
-      case ResourceCard.ConceptSet:
-        link = LinkText.DeleteConceptSet;
-        break;
-      case ResourceCard.Dataset:
-        link = LinkText.DeleteDataset;
-        break;
-      case ResourceCard.Notebook:
-        link = LinkText.DeleteNotebook;
-        break;
-      case ResourceCard.CohortReview:
-        link = MenuOption.Delete;
-        break;
-      default:
-        throw new Error(`Case ${cardType} handling is not defined.`);
-    }
-    await modal.clickButton(link, { waitForClose: true });
-    await waitWhileLoading(this.page);
-    logger.info(`Deleted ${cardType} "${name}"`);
-    return modalTextContent;
+    return await this.deleteFromSnowMan(cardType);
   }
 
   async deleteFromTable(name: string, cardType: ResourceCard): Promise<string[]> {
-    const snowmanIcon = await this.findResourceSnowManEntryByName({ name });
-    if (!snowmanIcon) {
-      throw new Error(`ERROR: Failed to find ${cardType} card "${name}"`);
-    }
-
-    const snowMan = new Link(this.page, snowmanIcon);
-    await snowMan.click();
-    await snowMan.dispose();
+    await this.getSnowManLink(name);
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
     await snowmanMenu.select(MenuOption.Delete, { waitForNav: false });
+    await this.deleteFromSnowMan(cardType);
+  }
 
+  async deleteFromSnowMan(cardType: ResourceCard) {
     const modal = new Modal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();

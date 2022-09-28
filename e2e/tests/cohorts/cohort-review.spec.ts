@@ -11,7 +11,7 @@ import { getPropValue } from 'utils/element-utils';
 import AnnotationsSidebar, { ReviewStatus } from 'app/sidebar/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import CohortBuildPage from 'app/page/cohort-build-page';
 
 jest.setTimeout(20 * 60 * 1000);
@@ -35,7 +35,7 @@ describe('Cohort review set tests', () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     const cohortCard = await findOrCreateCohortCard(page, cohortName);
-    await cohortCard.clickName();
+    await cohortCard.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -92,13 +92,12 @@ describe('Cohort review set tests', () => {
 
     // Verify Cohort Review card exists
     const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findCard({
-      name: cohortReview1Name,
-      cardType: ResourceCard.CohortReview
+    const reviewCohortCard = await resourceCard.findResourceTableEntryByName({
+      name: cohortReview1Name
     });
     expect(reviewCohortCard).toBeTruthy();
 
-    await dataPage.deleteResource(cohortReview1Name, ResourceCard.CohortReview);
+    await dataPage.deleteResourceFromTable(cohortReview1Name, ResourceCard.CohortReview);
   });
 
   /**
@@ -114,8 +113,9 @@ describe('Cohort review set tests', () => {
   test('Create review set from cohort card', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
-    const cohortCard = await findOrCreateCohortCard(page, cohortName);
-    await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
+    const dataResourcePage = new DataResourceCard(page);
+    await findOrCreateCohortCard(page, cohortName);
+    await dataResourcePage.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
 
     let cohortReviewPage;
     if (multiReviewDisabled) {
@@ -303,23 +303,23 @@ describe('Cohort review set tests', () => {
     await dataPage.renameResource(cohortReview2Name, newCohortReviewName, ResourceCard.CohortReview);
 
     // Verify Rename Cohort Review is successful.
-    expect(await new DataResourceCard(page).findCard({ name: newCohortReviewName })).toBeTruthy();
+    expect(await new DataResourceCard(page).findResourceTableEntryByName({ name: newCohortReviewName })).toBeTruthy();
 
     // Delete Cohort Review
-    const modalTextContent = await dataPage.deleteResource(newCohortReviewName, ResourceCard.CohortReview);
+    const modalTextContent = await dataPage.deleteResourceFromTable(newCohortReviewName, ResourceCard.CohortReview);
 
     // Verify Delete Cohort Review dialog content text
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
 
     // Verify Delete Cohort Review successful.
-    expect(await new DataResourceCard(page).findCard({ name: newCohortReviewName })).toBeFalsy();
+    expect(await new DataResourceCard(page).findResourceTableEntryByName({ name: newCohortReviewName })).toBeFalsy();
   });
 
-  async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<DataResourceCard> {
+  async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<ElementHandle> {
     const dataPage = new WorkspaceDataPage(page);
 
     // Search for Cohort first. If found, return Cohort card.
-    const existingCohortsCard = await dataPage.findCohortCard(cohortName);
+    const existingCohortsCard = await dataPage.findCohortEntry(cohortName);
     if (existingCohortsCard) {
       return existingCohortsCard;
     }
@@ -353,7 +353,8 @@ describe('Cohort review set tests', () => {
     await cohortActionsPage.waitForLoad();
 
     await openTab(page, Tabs.Data, dataPage);
-    const cohortCard: DataResourceCard = await dataPage.findCohortCard(cohortName);
+    await dataPage.waitForLoad();
+    const cohortCard: ElementHandle = await dataPage.findCohortEntry(cohortName);
     return cohortCard;
   }
 });
