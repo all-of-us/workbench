@@ -35,7 +35,6 @@ import {
   getResourceUrl,
   getType,
 } from 'app/utils/resources';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 interface Props
@@ -75,9 +74,7 @@ export const CohortResourceCard = fp.flow(
 
       return (
         `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-        `/data/cohorts/${cohort.id}/review${
-          serverConfigStore.get().config.enableMultiReview ? 's' : ''
-        }`
+        `/data/cohorts/${cohort.id}/reviews`
       );
     }
 

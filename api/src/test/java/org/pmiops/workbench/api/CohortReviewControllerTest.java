@@ -555,44 +555,7 @@ public class CohortReviewControllerTest {
 
   ////////// createCohortReview  //////////
   @Test
-  public void createCohortReviewLessThanMinSize() {
-    // use existing cohort
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () ->
-                cohortReviewController.createCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    new CreateReviewRequest().size(0)));
-
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
-  }
-
-  @Test
-  public void createCohortReviewMoreThanMaxSize() {
-    // use existing cohort
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () ->
-                cohortReviewController.createCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    new CreateReviewRequest().size(10001)));
-
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
-  }
-
-  @Test
-  public void createCohortReviewAlreadyExists() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+  public void createCohortReviewNoName() {
     // use existing cohort
     Throwable exception =
         assertThrows(
@@ -606,10 +569,64 @@ public class CohortReviewControllerTest {
 
     assertThat(exception)
         .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Bad Request: Cohort Review already created for cohortId: %d, cdrVersionId: %d",
-                cohort.getCohortId(), cdrVersion.getCdrVersionId()));
+        .isEqualTo("Bad Request: Cohort Review name cannot be null");
+  }
+
+  @Test
+  public void createCohortReviewLessThanMinSize() {
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    new CreateReviewRequest().size(0).name("review1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review size must be between 1 and 10000");
+  }
+
+  @Test
+  public void createCohortReviewMoreThanMaxSize() {
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    new CreateReviewRequest().size(10001).name("review1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review size must be between 1 and 10000");
+  }
+
+  @Test
+  public void createCohortReviewAlreadyExists() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    // use existing cohort
+    stubBigQueryCreateCohortReview();
+    // create a new review
+    cohortReviewController.createCohortReview(
+        workspace.getNamespace(),
+        workspace.getId(),
+        cohort.getCohortId(),
+        new CreateReviewRequest().size(1).name("review1"));
+    List<CohortReview> cohortReviewList =
+        cohortReviewController
+            .getCohortReviewsByCohortId(
+                workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+            .getBody()
+            .getItems();
+
+    assertThat(cohortReviewList).hasSize(2);
   }
 
   @Test
@@ -625,7 +642,7 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortId,
-                    new CreateReviewRequest().size(1)));
+                    new CreateReviewRequest().size(1).name("review1")));
 
     assertNotFoundExceptionNoCohort(cohortId, exception);
   }
@@ -638,17 +655,17 @@ public class CohortReviewControllerTest {
     stubBigQueryCreateCohortReview();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-
+    String reviewName = "review1";
     CohortReview cohortReview =
         cohortReviewController
             .createCohortReview(
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohortWithoutReview.getCohortId(),
-                new CreateReviewRequest().size(1))
+                new CreateReviewRequest().size(1).name(reviewName))
             .getBody();
 
-    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview));
+    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview), reviewName);
   }
 
   @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
@@ -668,7 +685,7 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortWithoutReview.getCohortId(),
-                    new CreateReviewRequest().size(1)));
+                    new CreateReviewRequest().size(1).name("review1")));
 
     assertForbiddenException(exception);
   }
@@ -2436,9 +2453,9 @@ public class CohortReviewControllerTest {
     assertThat(actual).isEqualTo(expected);
   }
 
-  private void assertNewlyCreatedCohortReview(CohortReview cohortReview) {
+  private void assertNewlyCreatedCohortReview(CohortReview cohortReview, String reviewName) {
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getCohortName()).isEqualTo(cohortWithoutReview.getName());
+    assertThat(cohortReview.getCohortName()).isEqualTo(reviewName);
     assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
@@ -2624,10 +2641,15 @@ public class CohortReviewControllerTest {
   private void stubBigQueryParticipantCount() {
     // construct the first TableResult call
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
-    Schema schema = Schema.of(count);
+    Field birthDatetime = Field.of("birth_datetime", LegacySQLTypeName.STRING);
+
+    Schema schema = Schema.of(count, birthDatetime);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0");
+    FieldValue birthDatetimeValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, String.valueOf(NOW.getEpochSecond()));
     List<FieldValueList> tableRows =
-        Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+        Collections.singletonList(FieldValueList.of(Arrays.asList(countValue, birthDatetimeValue)));
+
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 

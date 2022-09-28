@@ -40,7 +40,7 @@ import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -447,9 +447,7 @@ export const ListOverview = fp.flow(
           break;
         case 'review':
           AnalyticsTracker.CohortBuilder.CohortAction('Review cohort');
-          url += `data/cohorts/${cohort.id}/review${
-            serverConfigStore.get().config.enableMultiReview ? 's' : ''
-          }`;
+          url += `data/cohorts/${cohort.id}/reviews`;
           break;
       }
       this.props.navigateByUrl(url);

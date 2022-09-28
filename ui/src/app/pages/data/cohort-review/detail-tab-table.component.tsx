@@ -29,7 +29,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import moment from 'moment';
 
 const styles = reactStyles({
@@ -513,7 +513,6 @@ export const DetailTabTable = fp.flow(
 
     async callDataApi(request: PageFilterRequest) {
       const {
-        cohortReview: { cohortReviewId },
         domain,
         match: {
           params: { ns, wsid, crid },
@@ -522,16 +521,9 @@ export const DetailTabTable = fp.flow(
       } = this.props;
       let data = [];
       await cohortReviewApi()
-        .getParticipantData(
-          ns,
-          wsid,
-          serverConfigStore.get().config.enableMultiReview
-            ? +crid
-            : cohortReviewId,
-          participantId,
-          request,
-          { signal: this.dataAborter.signal }
-        )
+        .getParticipantData(ns, wsid, +crid, participantId, request, {
+          signal: this.dataAborter.signal,
+        })
         .then((response) => {
           data = response.items.map((item) => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
@@ -554,7 +546,6 @@ export const DetailTabTable = fp.flow(
 
     async callCountApi(request: PageFilterRequest) {
       const {
-        cohortReview: { cohortReviewId },
         match: {
           params: { ns, wsid, crid },
         },
@@ -562,16 +553,9 @@ export const DetailTabTable = fp.flow(
       } = this.props;
       let count = null;
       await cohortReviewApi()
-        .getParticipantCount(
-          ns,
-          wsid,
-          serverConfigStore.get().config.enableMultiReview
-            ? +crid
-            : cohortReviewId,
-          participantId,
-          request,
-          { signal: this.countAborter.signal }
-        )
+        .getParticipantCount(ns, wsid, +crid, participantId, request, {
+          signal: this.countAborter.signal,
+        })
         .then((response) => {
           count = response.count;
         });

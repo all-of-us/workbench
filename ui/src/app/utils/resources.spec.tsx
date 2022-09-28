@@ -8,9 +8,6 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { serverConfigStore } from 'app/utils/stores';
-
-import defaultServerConfig from 'testing/default-server-config';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
@@ -95,15 +92,6 @@ const testNotebook = {
 } as WorkspaceResource;
 
 describe('resources.tsx', () => {
-  beforeEach(() => {
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableMultiReview: true,
-      },
-    });
-  });
-
   it('should identify resource types', () => {
     expect(isCohort(testCohort)).toBeTruthy();
     expect(getType(testCohort)).toEqual(ResourceType.COHORT);

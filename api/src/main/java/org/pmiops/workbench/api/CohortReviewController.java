@@ -57,6 +57,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
+  public static final Integer MIN_REVIEW_SIZE = 1;
   public static final Integer MAX_REVIEW_SIZE = 10000;
   public static final Integer MIN_LIMIT = 1;
   public static final Integer MAX_LIMIT = 20;
@@ -118,10 +119,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<CohortReview> createCohortReview(
       String workspaceNamespace, String workspaceId, Long cohortId, CreateReviewRequest request) {
-    if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
+    if (request.getSize() < MIN_REVIEW_SIZE || request.getSize() > MAX_REVIEW_SIZE) {
       throw new BadRequestException(
           String.format(
-              "Bad Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
+              "Bad Request: Cohort Review size must be between %s and %s",
+              MIN_REVIEW_SIZE, MAX_REVIEW_SIZE));
+    }
+
+    if (request.getName() == null) {
+      throw new BadRequestException("Bad Request: Cohort Review name cannot be null");
     }
 
     // this validates that the user is in the proper workspace
@@ -131,26 +137,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
 
     DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
-    CohortReview cohortReview;
 
-    if (workbenchConfigProvider.get().featureFlags.enableMultiReview) {
-      cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
-      cohortReview.setCohortName(request.getName());
-      cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
-    } else {
-      try {
-        cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
-      } catch (NotFoundException nfe) {
-        cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
-        cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
-      }
-      if (cohortReview.getReviewSize() > 0) {
-        throw new BadRequestException(
-            String.format(
-                "Bad Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
-                cohortId, cdrVersionId));
-      }
-    }
+    CohortReview cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
+    cohortReview.setCohortName(request.getName());
+    cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
 
     List<DbParticipantCohortStatus> participantCohortStatuses =
         cohortReviewService.createDbParticipantCohortStatusesList(

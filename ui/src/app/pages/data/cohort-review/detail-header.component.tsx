@@ -38,7 +38,7 @@ import {
   currentCohortReviewStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
@@ -292,27 +292,16 @@ export const DetailHeader = fp.flow(
 
     backToTable() {
       const { ns, wsid, cid, crid } = this.props.match.params;
-      serverConfigStore.get().config.enableMultiReview
-        ? this.props.navigate([
-            'workspaces',
-            ns,
-            wsid,
-            'data',
-            'cohorts',
-            cid,
-            'reviews',
-            crid,
-          ])
-        : this.props.navigate([
-            'workspaces',
-            ns,
-            wsid,
-            'data',
-            'cohorts',
-            cid,
-            'review',
-            'participants',
-          ]);
+      this.props.navigate([
+        'workspaces',
+        ns,
+        wsid,
+        'data',
+        'cohorts',
+        cid,
+        'reviews',
+        crid,
+      ]);
     }
 
     previous = () => {
@@ -343,20 +332,13 @@ export const DetailHeader = fp.flow(
           sortOrder: SortOrder.Asc,
           filters: { items: this.getRequestFilters() },
         } as PageFilterRequest;
-        const getCohortReview = serverConfigStore.get().config.enableMultiReview
-          ? cohortReviewApi().getParticipantCohortStatuses(
-              ns,
-              wsid,
-              +cid,
-              +crid,
-              request
-            )
-          : cohortReviewApi().getParticipantCohortStatusesOld(
-              ns,
-              wsid,
-              +cid,
-              request
-            );
+        const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
+          ns,
+          wsid,
+          +cid,
+          +crid,
+          request
+        );
         getCohortReview.then((response) => {
           currentCohortReviewStore.next(response.cohortReview);
           const status = statusGetter(
@@ -369,30 +351,18 @@ export const DetailHeader = fp.flow(
 
     navigateById = (id: number): void => {
       const { ns, wsid, cid, crid } = this.props.match.params;
-      serverConfigStore.get().config.enableMultiReview
-        ? this.props.navigate([
-            'workspaces',
-            ns,
-            wsid,
-            'data',
-            'cohorts',
-            cid,
-            'reviews',
-            crid,
-            'participants',
-            id,
-          ])
-        : this.props.navigate([
-            'workspaces',
-            ns,
-            wsid,
-            'data',
-            'cohorts',
-            cid,
-            'review',
-            'participants',
-            id,
-          ]);
+      this.props.navigate([
+        'workspaces',
+        ns,
+        wsid,
+        'data',
+        'cohorts',
+        cid,
+        'reviews',
+        crid,
+        'participants',
+        id,
+      ]);
     };
 
     getRequestFilters = () => {
@@ -514,8 +484,7 @@ export const DetailHeader = fp.flow(
             title='Go Back to the review set table'
             onClick={() => this.backToTable()}
           >
-            Back to review set
-            {serverConfigStore.get().config.enableMultiReview ? 's' : ''}
+            Back to review sets
           </button>
           <h4 style={styles.title}>{cohortName}</h4>
           <div style={styles.description}>{description}</div>
