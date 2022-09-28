@@ -265,9 +265,8 @@ public class AuthInterceptorTest {
 
   @Test
   public void authorityCheckDeniesWhenUserHasWrongAuthority() throws Exception {
-    DbUser userWithWrongAuthorities = new DbUser();
-    userWithWrongAuthorities.setAuthoritiesEnum(
-        Collections.singleton(Authority.COMMUNICATIONS_ADMIN));
+    DbUser userWithWrongAuthorities =
+        new DbUser().setAuthoritiesEnum(Collections.singleton(Authority.COMMUNICATIONS_ADMIN));
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithWrongAuthorities);
     Method apiControllerMethod = FakeController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isFalse();
@@ -275,8 +274,8 @@ public class AuthInterceptorTest {
 
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
-    DbUser userWithAuthorities = new DbUser();
-    userWithAuthorities.setAuthoritiesEnum(Collections.singleton(Authority.SECURITY_ADMIN));
+    DbUser userWithAuthorities =
+        new DbUser().setAuthoritiesEnum(Collections.singleton(Authority.SECURITY_ADMIN));
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
