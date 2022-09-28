@@ -24,7 +24,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import {
   filterStateStore,
   getVocabOptions,
-  queryResultSizeStore,
   reviewPaginationStore,
   vocabOptions,
 } from 'app/services/review-state.service';
@@ -254,8 +253,7 @@ interface State {
   error: boolean;
   demoFilters: any;
 }
-
-export const ParticipantsTable = fp.flow(
+fp.flow(
   withCurrentCohortReview(),
   withCurrentWorkspace(),
   withNavigation,
@@ -300,7 +298,6 @@ export const ParticipantsTable = fp.flow(
             (response) => {
               const { cohortReview: review, queryResultSize } = response;
               currentCohortReviewStore.next(review);
-              queryResultSizeStore.next(queryResultSize);
               if (!vocabOptions.getValue()) {
                 getVocabOptions(ns, wsid, review.cohortReviewId);
               }
@@ -317,11 +314,9 @@ export const ParticipantsTable = fp.flow(
         );
       } else {
         const { page } = reviewPaginationStore.getValue();
-        const total = queryResultSizeStore.getValue();
         this.setState({
           data: cohortReview.participantCohortStatuses.map(this.mapData),
           page: page,
-          total: total,
         });
       }
       promises.push(
