@@ -85,7 +85,8 @@ public final class DbStorageEnums {
   // Authority
   private static final BiMap<Authority, Short> CLIENT_TO_STORAGE_AUTHORITY =
       ImmutableBiMap.<Authority, Short>builder()
-          .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
+          // obsolete - removed
+          // .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
           .put(Authority.DEVELOPER, (short) 1)
           .put(Authority.ACCESS_CONTROL_ADMIN, (short) 2)
           .put(Authority.FEATURED_WORKSPACE_ADMIN, (short) 3)
