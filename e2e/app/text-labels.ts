@@ -68,7 +68,7 @@ export enum LinkText {
   Audit = 'AUDIT',
   Back = 'Back',
   BackToCohort = 'Back to cohort',
-  BackToReviewSet = 'Back to review set',
+  BackToReviewSet = 'Back to review sets',
   Calculate = 'Calculate',
   Cancel = 'Cancel',
   Confirm = 'Confirm',
