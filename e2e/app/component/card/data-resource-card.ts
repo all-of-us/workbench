@@ -211,7 +211,7 @@ export default class DataResourceCard extends BaseCard {
     }
 
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
-    return await this.deleteFromSnowMan(cardType);
+    return await this.deleteFromSnowMan(name, cardType);
   }
 
   async deleteFromTable(name: string, cardType: ResourceCard): Promise<string[]> {
@@ -219,10 +219,10 @@ export default class DataResourceCard extends BaseCard {
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
     await snowmanMenu.select(MenuOption.Delete, { waitForNav: false });
-    return await this.deleteFromSnowMan(cardType);
+    return await this.deleteFromSnowMan(name, cardType);
   }
 
-  async deleteFromSnowMan(cardType: ResourceCard): Promise<string[]> {
+  async deleteFromSnowMan(name: string, cardType: ResourceCard): Promise<string[]> {
     const modal = new Modal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
