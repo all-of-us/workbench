@@ -317,7 +317,7 @@ public class DbCohortReview {
         .append("cohortDefinition", cohortDefinition)
         .append("cohortName", cohortName)
         .append("description", description)
-        .append("lastModifiedBy", lastModifiedTime)
+        .append("lastModifiedBy", lastModifiedBy)
         .append("lastModifiedTime", lastModifiedTime)
         .append("matchedParticipantCount", matchedParticipantCount)
         .append("reviewSize", reviewSize)

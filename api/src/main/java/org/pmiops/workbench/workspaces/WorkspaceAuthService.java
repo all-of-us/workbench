@@ -6,9 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.access.AccessTierService;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -31,17 +32,15 @@ public class WorkspaceAuthService {
   public static final String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
   private static final String FC_OWNER_ROLE = "OWNER";
 
-  private final AccessTierService accessTierService;
   private final FireCloudService fireCloudService;
+  private final Provider<DbUser> userProvider;
   private final WorkspaceDao workspaceDao;
 
   @Autowired
   public WorkspaceAuthService(
-      AccessTierService accessTierService,
-      FireCloudService fireCloudService,
-      WorkspaceDao workspaceDao) {
-    this.accessTierService = accessTierService;
+      FireCloudService fireCloudService, Provider<DbUser> userProvider, WorkspaceDao workspaceDao) {
     this.fireCloudService = fireCloudService;
+    this.userProvider = userProvider;
     this.workspaceDao = workspaceDao;
   }
 
@@ -177,6 +176,6 @@ public class WorkspaceAuthService {
         updatedAclsMap,
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
-    return workspaceDao.saveWithLastModified(workspace);
+    return workspaceDao.saveWithLastModified(workspace, userProvider.get());
   }
 }

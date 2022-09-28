@@ -230,7 +230,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     }
 
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig workbenchConfig() {
       return config;
     }
