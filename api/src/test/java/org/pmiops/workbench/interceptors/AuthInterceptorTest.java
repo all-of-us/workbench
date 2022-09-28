@@ -51,9 +51,9 @@ class FakeApiController {
   public void handle() {}
 }
 
-/** mimicing our implementation, annotated */
+/** mimicking our implementation, annotated */
 class FakeController {
-  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
   public void handle() {}
 }
 
@@ -268,7 +268,7 @@ public class AuthInterceptorTest {
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
     DbUser userWithAuthorities = new DbUser();
     Set<Authority> required = new HashSet<>();
-    required.add(Authority.REVIEW_RESEARCH_PURPOSE);
+    required.add(Authority.SECURITY_ADMIN);
     userWithAuthorities.setAuthoritiesEnum(required);
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
