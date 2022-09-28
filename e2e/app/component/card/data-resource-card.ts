@@ -222,7 +222,7 @@ export default class DataResourceCard extends BaseCard {
     await this.deleteFromSnowMan(cardType);
   }
 
-  async deleteFromSnowMan(cardType: ResourceCard) {
+  async deleteFromSnowMan(cardType: ResourceCard): Promise<string[]> {
     const modal = new Modal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
