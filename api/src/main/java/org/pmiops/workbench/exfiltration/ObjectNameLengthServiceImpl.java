@@ -1,14 +1,14 @@
 package org.pmiops.workbench.exfiltration;
 
-import static org.pmiops.workbench.exfiltration.ObjectNameSizeConstants.THRESHOLD;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditEntry;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
@@ -71,26 +71,45 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
    * user, emailing him about the problem, and creating the jira ticket. By disabled the user we
    * make sure that the user doesn't get multiple alerts for the same problem because this method
    * filters only the active users.
-   *
-   * @param workspace The workspace to check for the filtration attempt.
    */
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void calculateObjectNameLength(DbWorkspace workspace) {
+  public void calculateObjectNameLength() {
 
-    // Get the workspace from firecloud. In order to get the bucket name. The bucket name is needed
-    // to filter entries from BQ
-    final FirecloudWorkspaceResponse fsWorkspace =
-        fireCloudService.getWorkspaceAsService(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    final String bucketName = fsWorkspace.getWorkspace().getBucketName();
+    // Call BQ to get the files created by each owner in the past 24 hours. This will only return
+    // the entries>THRESHOLD
+    List<BucketAuditEntry> fileAccessInfoFromBQ = getFileAccessInfoFromBQ();
 
-    // Call BQ to get the files created by each owner in the past 24 hours
-    List<BucketAuditEntry> fileAccessInfoFromBQ =
-        getFileAccessInfoFromBQ(bucketName, workspace.getGoogleProject());
+    // Get the workspaces for these entries. To only find relevant ones.
+    Map<String, DbWorkspace> projectIdToDbWorkspace =
+        workspaceService.getWorkspacesByGoogleProject(
+            fileAccessInfoFromBQ.stream()
+                .map(BucketAuditEntry::getGoogleProjectId)
+                .collect(Collectors.toSet()));
 
     for (BucketAuditEntry bucketAuditEntry : fileAccessInfoFromBQ) {
-      if (bucketAuditEntry.getFileLengths() > THRESHOLD) {
+      if (!projectIdToDbWorkspace.containsKey(bucketAuditEntry.getGoogleProjectId())) {
+        continue;
+      }
+
+      DbWorkspace workspace = projectIdToDbWorkspace.get(bucketAuditEntry.getGoogleProjectId());
+      LOGGER.info(
+          String.format(
+              "Found an audit entry that exceeds the threshold, workspace ID: %s, google ID: %s",
+              workspace.getWorkspaceId(), workspace.getGoogleProject()));
+
+      // Get the workspace from firecloud. In order to get the bucket name. To avoid processing
+      // other buckets not related to the user actions.
+      final FirecloudWorkspaceResponse fsWorkspace =
+          fireCloudService.getWorkspaceAsService(
+              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+
+      final String bucketName = fsWorkspace.getWorkspace().getBucketName();
+      if (StringUtils.isNoneEmpty(bucketName)
+          && bucketName.equals(bucketAuditEntry.getBucketName())) {
+
+        LOGGER.info(
+            String.format("Bucket found for the offending workspace, bucket name: %s", bucketName));
         // Get the user which caused the egress alert from his pet account.
         // There is no known straightforward way to find this other than getting the
         // users of this workspace and lookup which user does the pet account corresponds to.
@@ -99,32 +118,41 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
             userService.findActiveUsersByUsernames(
                 workspaceOwners.stream().map(UserRole::getEmail).collect(Collectors.toList()));
 
-        for (DbUser user : activeUsers) {
-          // Get user pet account
-          try {
-            Optional<String> petServiceAccount =
-                iamService.getOrCreatePetServiceAccountUsingImpersonation(
-                    workspace.getGoogleProject(), user.getUsername());
+        maybeAlertUsers(bucketAuditEntry, workspace, activeUsers);
+      }
+    }
+  }
 
-            if (petServiceAccount.isPresent()
-                && petServiceAccount.get().equals(bucketAuditEntry.getPetAccount())) {
-              // Create an egress alert.
-              Optional<DbEgressEvent> maybeEvent =
-                  this.maybePersistEgressEvent(bucketAuditEntry, user, workspace);
-              // There's no need to push this event to the executor because it's not expected that
-              // it happens frequently. And if it happens, it has to be handled immediately.
-              egressRemediationService.remediateEgressEvent(maybeEvent.get().getEgressEventId());
-            }
+  private void maybeAlertUsers(
+      BucketAuditEntry bucketAuditEntry, DbWorkspace workspace, Set<DbUser> activeUsers) {
+    for (DbUser user : activeUsers) {
+      // Get user pet account
+      try {
+        Optional<String> petServiceAccount =
+            iamService.getOrCreatePetServiceAccountUsingImpersonation(
+                workspace.getGoogleProject(), user.getUsername());
 
-          } catch (IOException | ApiException e) {
-            // Log and continue nothing we can do.
-            LOGGER.log(
-                Level.WARNING,
-                String.format(
-                    "Unable to get file info from BQ for workspace %s and user %s",
-                    workspace.getWorkspaceId(), user.getUsername()));
-          }
+        if (petServiceAccount.isPresent()
+            && petServiceAccount.get().equals(bucketAuditEntry.getPetAccount())) {
+          LOGGER.info(
+              String.format(
+                  "Alerting user with ID: %s, workspace with long file names is: %s",
+                  user.getUserId(), workspace.getWorkspaceId()));
+          // Create an egress alert.
+          Optional<DbEgressEvent> maybeEvent =
+              this.maybePersistEgressEvent(bucketAuditEntry, user, workspace);
+          // There's no need to push this event to the executor because it's not expected that
+          // it happens frequently. And if it happens, it has to be handled immediately.
+          egressRemediationService.remediateEgressEvent(maybeEvent.get().getEgressEventId());
         }
+
+      } catch (IOException | ApiException e) {
+        // Log and continue nothing we can do.
+        LOGGER.log(
+            Level.WARNING,
+            String.format(
+                "Unable to get file info from BQ for workspace %s and user %s",
+                workspace.getWorkspaceId(), user.getUsername()));
       }
     }
   }
@@ -149,10 +177,8 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
         .collect(Collectors.toList());
   }
 
-  private List<BucketAuditEntry> getFileAccessInfoFromBQ(
-      String bucketName, String googleProjectId) {
-    return bucketAuditQueryService.queryBucketFileInformationGroupedByPetAccount(
-        bucketName, googleProjectId);
+  private List<BucketAuditEntry> getFileAccessInfoFromBQ() {
+    return bucketAuditQueryService.queryBucketFileInformationGroupedByPetAccount();
   }
 
   private Optional<DbEgressEvent> maybePersistEgressEvent(

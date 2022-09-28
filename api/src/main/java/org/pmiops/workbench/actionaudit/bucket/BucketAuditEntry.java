@@ -7,6 +7,8 @@ public class BucketAuditEntry {
 
   private String petAccount;
   private long fileLengths;
+  private String googleProjectId;
+  private String bucketName;
   private OffsetDateTime minTime;
   private OffsetDateTime maxTime;
 
@@ -40,6 +42,22 @@ public class BucketAuditEntry {
 
   public void setMaxTime(OffsetDateTime maxTime) {
     this.maxTime = maxTime;
+  }
+
+  public String getGoogleProjectId() {
+    return googleProjectId;
+  }
+
+  public void setGoogleProjectId(String googleProjectId) {
+    this.googleProjectId = googleProjectId;
+  }
+
+  public String getBucketName() {
+    return bucketName;
+  }
+
+  public void setBucketName(String bucketName) {
+    this.bucketName = bucketName;
   }
 
   public long getTimeWindowDuration() {

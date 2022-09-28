@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.javers.common.collections.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +47,7 @@ public class ObjectNameLengthServiceTest {
   public static final String FIRECLOUD_NAME = "firecloud-name";
   public static final String USER_EMAIL = "test@aou.com";
   public static final String NAMESPACE = "namespace";
+  public static final String PET_ACCOUNT = "pet@service.com";
 
   @InjectMocks private ObjectNameLengthServiceImpl objectNameLengthService;
 
@@ -57,23 +60,12 @@ public class ObjectNameLengthServiceTest {
   @Mock private EgressInternalRemediationService egressRemediationService;
 
   @Test
-  void calculateObjectNameLength_noAlertsFired_WhenFileLengthIsLessThanThreshold() {
-    FirecloudWorkspaceResponse response =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().bucketName("some-bucket"));
-
-    doReturn(response).when(fireCloudService).getWorkspaceAsService(NAMESPACE, FIRECLOUD_NAME);
-
+  void calculateObjectNameLength_noAlertsFired_WhenNoFileInfoReturned() {
     doReturn(Collections.emptyList())
         .when(bucketAuditQueryService)
-        .queryBucketFileInformationGroupedByPetAccount(
-            response.getWorkspace().getBucketName(), GOOGLE_PROJECT);
+        .queryBucketFileInformationGroupedByPetAccount();
 
-    objectNameLengthService.calculateObjectNameLength(
-        new DbWorkspace()
-            .setWorkspaceNamespace(NAMESPACE)
-            .setFirecloudName(FIRECLOUD_NAME)
-            .setGoogleProject(GOOGLE_PROJECT));
+    objectNameLengthService.calculateObjectNameLength();
 
     verifyZeroInteractions(iamService);
     verifyZeroInteractions(egressEventDao);
@@ -84,20 +76,24 @@ public class ObjectNameLengthServiceTest {
   void calculateObjectNameLength_firesAlert_WhenFileLengthIsGreaterThanThreshold()
       throws IOException, ApiException {
 
+    List<BucketAuditEntry> entries =
+        Collections.singletonList(getBucketAuditEntry(PET_ACCOUNT, THRESHOLD + 1));
+    doReturn(entries).when(bucketAuditQueryService).queryBucketFileInformationGroupedByPetAccount();
+
+    DbWorkspace dbWorkspace =
+        new DbWorkspace()
+            .setGoogleProject(GOOGLE_PROJECT)
+            .setWorkspaceNamespace(NAMESPACE)
+            .setFirecloudName(FIRECLOUD_NAME);
+    Map<String, DbWorkspace> workspaces = Maps.of(GOOGLE_PROJECT, dbWorkspace);
+    doReturn(workspaces)
+        .when(workspaceService)
+        .getWorkspacesByGoogleProject(Sets.newHashSet(GOOGLE_PROJECT));
+
     FirecloudWorkspaceResponse response =
         new FirecloudWorkspaceResponse()
             .workspace(new FirecloudWorkspaceDetails().bucketName("some-bucket"));
-
     doReturn(response).when(fireCloudService).getWorkspaceAsService(NAMESPACE, FIRECLOUD_NAME);
-
-    List<BucketAuditEntry> entries = new ArrayList<>();
-    BucketAuditEntry entry = getBucketAuditEntry("pet@service.com", THRESHOLD + 1);
-    entries.add(entry);
-
-    doReturn(entries)
-        .when(bucketAuditQueryService)
-        .queryBucketFileInformationGroupedByPetAccount(
-            response.getWorkspace().getBucketName(), GOOGLE_PROJECT);
 
     List<UserRole> userRoles =
         Collections.singletonList(
@@ -111,77 +107,14 @@ public class ObjectNameLengthServiceTest {
         .when(userService)
         .findActiveUsersByUsernames(Collections.singletonList(USER_EMAIL));
 
-    doReturn(Optional.of("pet@service.com"))
+    doReturn(Optional.of(PET_ACCOUNT))
         .when(iamService)
         .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, aUser.getUsername());
 
     DbEgressEvent egressEvent = new DbEgressEvent();
     doReturn(egressEvent).when(egressEventDao).save(any(DbEgressEvent.class));
 
-    objectNameLengthService.calculateObjectNameLength(
-        new DbWorkspace()
-            .setWorkspaceNamespace(NAMESPACE)
-            .setFirecloudName(FIRECLOUD_NAME)
-            .setGoogleProject(GOOGLE_PROJECT));
-
-    verify(iamService, times(1))
-        .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, aUser.getUsername());
-
-    verify(egressEventDao, times(1)).save(any(DbEgressEvent.class));
-  }
-
-  @Test
-  void calculateObjectNameLength_firesAlertsForOneUserOnly_WhenFileLengthIsGreaterThanThreshold()
-      throws IOException, ApiException {
-
-    FirecloudWorkspaceResponse response =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().bucketName("some-bucket"));
-
-    doReturn(response).when(fireCloudService).getWorkspaceAsService(NAMESPACE, FIRECLOUD_NAME);
-
-    List<BucketAuditEntry> entries = new ArrayList<>();
-    BucketAuditEntry entry = getBucketAuditEntry("pet@service.com", THRESHOLD + 1);
-    entries.add(entry);
-    entry = getBucketAuditEntry("pet2@service.com", THRESHOLD - 1);
-    entries.add(entry);
-
-    doReturn(entries)
-        .when(bucketAuditQueryService)
-        .queryBucketFileInformationGroupedByPetAccount(
-            response.getWorkspace().getBucketName(), GOOGLE_PROJECT);
-
-    List<UserRole> userRoles =
-        Lists.newArrayList(
-            new UserRole().role(WorkspaceAccessLevel.OWNER).email(USER_EMAIL),
-            new UserRole().role(WorkspaceAccessLevel.WRITER).email("1" + USER_EMAIL));
-    doReturn(userRoles).when(workspaceService).getFirecloudUserRoles(NAMESPACE, FIRECLOUD_NAME);
-
-    DbUser aUser = new DbUser().setUsername(USER_EMAIL);
-    DbUser anotherUser = new DbUser().setUsername("1" + USER_EMAIL);
-
-    Set<DbUser> dbUsers = Sets.newHashSet(aUser, anotherUser);
-
-    doReturn(dbUsers)
-        .when(userService)
-        .findActiveUsersByUsernames(Lists.newArrayList(USER_EMAIL, "1" + USER_EMAIL));
-
-    doReturn(Optional.of("pet@service.com"))
-        .when(iamService)
-        .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, aUser.getUsername());
-
-    doReturn(Optional.of("pet2@service.com"))
-        .when(iamService)
-        .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, anotherUser.getUsername());
-
-    DbEgressEvent egressEvent = new DbEgressEvent();
-    doReturn(egressEvent).when(egressEventDao).save(any(DbEgressEvent.class));
-
-    objectNameLengthService.calculateObjectNameLength(
-        new DbWorkspace()
-            .setWorkspaceNamespace(NAMESPACE)
-            .setFirecloudName(FIRECLOUD_NAME)
-            .setGoogleProject(GOOGLE_PROJECT));
+    objectNameLengthService.calculateObjectNameLength();
 
     verify(iamService, times(1))
         .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, aUser.getUsername());
@@ -193,22 +126,28 @@ public class ObjectNameLengthServiceTest {
   void calculateObjectNameLength_firesAlertsForMultipleUser_WhenFileLengthIsGreaterThanThreshold()
       throws IOException, ApiException {
 
+    List<BucketAuditEntry> entries = new ArrayList<>();
+    BucketAuditEntry entry = getBucketAuditEntry(PET_ACCOUNT, THRESHOLD + 1);
+    entries.add(entry);
+    entry = getBucketAuditEntry("pet2@service.com", THRESHOLD + 1);
+    entries.add(entry);
+    doReturn(entries).when(bucketAuditQueryService).queryBucketFileInformationGroupedByPetAccount();
+
+    DbWorkspace dbWorkspace =
+        new DbWorkspace()
+            .setGoogleProject(GOOGLE_PROJECT)
+            .setWorkspaceNamespace(NAMESPACE)
+            .setFirecloudName(FIRECLOUD_NAME);
+    Map<String, DbWorkspace> workspaces = Maps.of(GOOGLE_PROJECT, dbWorkspace);
+    doReturn(workspaces)
+        .when(workspaceService)
+        .getWorkspacesByGoogleProject(Sets.newHashSet(GOOGLE_PROJECT));
+
     FirecloudWorkspaceResponse response =
         new FirecloudWorkspaceResponse()
             .workspace(new FirecloudWorkspaceDetails().bucketName("some-bucket"));
 
     doReturn(response).when(fireCloudService).getWorkspaceAsService(NAMESPACE, FIRECLOUD_NAME);
-
-    List<BucketAuditEntry> entries = new ArrayList<>();
-    BucketAuditEntry entry = getBucketAuditEntry("pet@service.com", THRESHOLD + 1);
-    entries.add(entry);
-    entry = getBucketAuditEntry("pet2@service.com", THRESHOLD + 1);
-    entries.add(entry);
-
-    doReturn(entries)
-        .when(bucketAuditQueryService)
-        .queryBucketFileInformationGroupedByPetAccount(
-            response.getWorkspace().getBucketName(), GOOGLE_PROJECT);
 
     List<UserRole> userRoles =
         Lists.newArrayList(
@@ -225,7 +164,7 @@ public class ObjectNameLengthServiceTest {
         .when(userService)
         .findActiveUsersByUsernames(Lists.newArrayList(USER_EMAIL, "1" + USER_EMAIL));
 
-    doReturn(Optional.of("pet@service.com"))
+    doReturn(Optional.of(PET_ACCOUNT))
         .when(iamService)
         .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, aUser.getUsername());
 
@@ -236,11 +175,7 @@ public class ObjectNameLengthServiceTest {
     DbEgressEvent egressEvent = new DbEgressEvent();
     doReturn(egressEvent).when(egressEventDao).save(any(DbEgressEvent.class));
 
-    objectNameLengthService.calculateObjectNameLength(
-        new DbWorkspace()
-            .setWorkspaceNamespace(NAMESPACE)
-            .setFirecloudName(FIRECLOUD_NAME)
-            .setGoogleProject(GOOGLE_PROJECT));
+    objectNameLengthService.calculateObjectNameLength();
 
     verify(iamService, times(2))
         .getOrCreatePetServiceAccountUsingImpersonation(GOOGLE_PROJECT, aUser.getUsername());
@@ -254,6 +189,8 @@ public class ObjectNameLengthServiceTest {
     BucketAuditEntry entry = new BucketAuditEntry();
     entry.setPetAccount(petAccount);
     entry.setFileLengths(fileLengths);
+    entry.setBucketName("some-bucket");
+    entry.setGoogleProjectId(GOOGLE_PROJECT);
     return entry;
   }
 }

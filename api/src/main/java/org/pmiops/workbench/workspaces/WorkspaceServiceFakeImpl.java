@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -51,7 +52,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public Set<DbWorkspace> getActiveWorkspaces() {
+  public Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet) {
     return null;
   }
 
