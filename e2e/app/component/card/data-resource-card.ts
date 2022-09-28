@@ -219,7 +219,7 @@ export default class DataResourceCard extends BaseCard {
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
     await snowmanMenu.select(MenuOption.Delete, { waitForNav: false });
-    await this.deleteFromSnowMan(cardType);
+    return await this.deleteFromSnowMan(cardType);
   }
 
   async deleteFromSnowMan(cardType: ResourceCard): Promise<string[]> {
