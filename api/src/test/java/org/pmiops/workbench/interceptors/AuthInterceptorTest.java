@@ -11,8 +11,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
@@ -65,7 +64,6 @@ public class AuthInterceptorTest {
   @MockBean private UserInfoService userInfoService;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private UserDao userDao;
-  @MockBean private UserService userService;
   @MockBean private DevUserRegistrationService devUserRegistrationService;
 
   private static WorkbenchConfig workbenchConfig;
@@ -81,6 +79,7 @@ public class AuthInterceptorTest {
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, AuthInterceptor.class})
+  @MockBean({UserService.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -145,7 +144,7 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void preHandleGet_userInfoError() throws Exception {
+  public void preHandleGet_userInfoError() {
     mockGetCallWithBearerToken();
     when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
 
@@ -267,9 +266,7 @@ public class AuthInterceptorTest {
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
     DbUser userWithAuthorities = new DbUser();
-    Set<Authority> required = new HashSet<>();
-    required.add(Authority.SECURITY_ADMIN);
-    userWithAuthorities.setAuthoritiesEnum(required);
+    userWithAuthorities.setAuthoritiesEnum(Collections.singleton(Authority.SECURITY_ADMIN));
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
