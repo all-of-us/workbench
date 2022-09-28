@@ -124,6 +124,11 @@
     "bigQueryTable": "workbench_action_audit_perf",
     "partitionColumn": "_PARTITIONTIME"
   },
+  "bucketAudit": {
+    "logProjectId": "fc-aou-logs-perf",
+    "bigQueryDataset": "WorkspaceStorageLogs",
+    "bigQueryTable": "cloudaudit_googleapis_com_data_access"
+  },
   "captcha": {
     "enableCaptcha": true,
     "useTestCaptcha": true
