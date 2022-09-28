@@ -555,6 +555,24 @@ public class CohortReviewControllerTest {
 
   ////////// createCohortReview  //////////
   @Test
+  public void createCohortReviewNoName() {
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    new CreateReviewRequest().size(1)));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review name cannot be null");
+  }
+
+  @Test
   public void createCohortReviewLessThanMinSize() {
     // use existing cohort
     Throwable exception =
@@ -565,11 +583,11 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohort.getCohortId(),
-                    new CreateReviewRequest().size(0)));
+                    new CreateReviewRequest().size(0).name("review1")));
 
     assertThat(exception)
         .hasMessageThat()
-        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
+        .isEqualTo("Bad Request: Cohort Review size must be between 1 and 10000");
   }
 
   @Test
@@ -583,11 +601,11 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohort.getCohortId(),
-                    new CreateReviewRequest().size(10001)));
+                    new CreateReviewRequest().size(10001).name("review1")));
 
     assertThat(exception)
         .hasMessageThat()
-        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
+        .isEqualTo("Bad Request: Cohort Review size must be between 1 and 10000");
   }
 
   @Test
@@ -600,7 +618,7 @@ public class CohortReviewControllerTest {
         workspace.getNamespace(),
         workspace.getId(),
         cohort.getCohortId(),
-        new CreateReviewRequest().size(1));
+        new CreateReviewRequest().size(1).name("review1"));
     List<CohortReview> cohortReviewList =
         cohortReviewController
             .getCohortReviewsByCohortId(
@@ -624,7 +642,7 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortId,
-                    new CreateReviewRequest().size(1)));
+                    new CreateReviewRequest().size(1).name("review1")));
 
     assertNotFoundExceptionNoCohort(cohortId, exception);
   }
@@ -637,17 +655,17 @@ public class CohortReviewControllerTest {
     stubBigQueryCreateCohortReview();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-
+    String reviewName = "review1";
     CohortReview cohortReview =
         cohortReviewController
             .createCohortReview(
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohortWithoutReview.getCohortId(),
-                new CreateReviewRequest().size(1).name("review1"))
+                new CreateReviewRequest().size(1).name(reviewName))
             .getBody();
 
-    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview));
+    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview), reviewName);
   }
 
   @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
@@ -667,7 +685,7 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortWithoutReview.getCohortId(),
-                    new CreateReviewRequest().size(1)));
+                    new CreateReviewRequest().size(1).name("review1")));
 
     assertForbiddenException(exception);
   }
@@ -2435,9 +2453,9 @@ public class CohortReviewControllerTest {
     assertThat(actual).isEqualTo(expected);
   }
 
-  private void assertNewlyCreatedCohortReview(CohortReview cohortReview) {
+  private void assertNewlyCreatedCohortReview(CohortReview cohortReview, String reviewName) {
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getCohortName()).isNotNull();
+    assertThat(cohortReview.getCohortName()).isEqualTo(reviewName);
     assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
