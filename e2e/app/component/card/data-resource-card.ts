@@ -75,9 +75,7 @@ export default class DataResourceCard extends BaseCard {
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
 
-    const dataTableExist = await datatable.exists();
-    if (dataTableExist) {
-      const dataTableRows = await datatable.getRowCount();
+     const dataTableRows = await datatable.getRowCount();
       let index = 1;
       while (index <= dataTableRows) {
         const nameCell = await datatable.getCellValue(index, 3);
@@ -86,7 +84,7 @@ export default class DataResourceCard extends BaseCard {
         }
         index++;
       }
-    }
+    
     return null;
   }
 
