@@ -75,16 +75,16 @@ export default class DataResourceCard extends BaseCard {
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
 
-     const dataTableRows = await datatable.getRowCount();
-      let index = 1;
-      while (index <= dataTableRows) {
-        const nameCell = await datatable.getCellValue(index, 3);
-        if (nameCell === name) {
-          return await datatable.getCell(index, 3);
-        }
-        index++;
+    const dataTableRows = await datatable.getRowCount();
+    let index = 1;
+    while (index <= dataTableRows) {
+      const nameCell = await datatable.getCellValue(index, 3);
+      if (nameCell === name) {
+        return await datatable.getCell(index, 3);
       }
-    
+      index++;
+    }
+
     return null;
   }
 
