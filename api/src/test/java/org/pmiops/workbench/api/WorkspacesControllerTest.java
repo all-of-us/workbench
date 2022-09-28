@@ -1442,8 +1442,7 @@ public class WorkspacesControllerTest {
     c2 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c2).getBody();
 
     stubBigQueryCohortCalls();
-    CreateReviewRequest reviewReq = new CreateReviewRequest();
-    reviewReq.setSize(1);
+    CreateReviewRequest reviewReq = new CreateReviewRequest().size(1).name("review1");
     CohortReview cr1 =
         cohortReviewController
             .createCohortReview(workspace.getNamespace(), workspace.getId(), c1.getId(), reviewReq)
@@ -2840,7 +2839,7 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohort.getId(),
-                new CreateReviewRequest().size(1))
+                new CreateReviewRequest().size(1).name("review1"))
             .getBody();
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
