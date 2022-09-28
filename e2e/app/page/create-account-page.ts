@@ -8,11 +8,12 @@ import { findIframe } from 'app/xpath-finder';
 import BasePage from 'app/page/base-page';
 import { ElementType } from 'app/xpath-options';
 import { Frame, Page } from 'puppeteer';
-import { defaultFieldValues } from 'resources/data/user-registration-data';
+import { defaultCountrySelection, defaultFieldValues } from 'resources/data/user-registration-data';
 import { config } from 'resources/workbench-config';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { LinkText, Institution, InstitutionRole } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
+import ReactSelect from 'app/element/react-select';
 
 const faker = require('faker/locale/en_US');
 
@@ -72,6 +73,9 @@ export const FieldSelector = {
       containsText: 'describes your role',
       ancestorLevel: 2
     }
+  },
+  AddressCountry: {
+    name: 'Country'
   }
 };
 
@@ -118,6 +122,11 @@ export default class CreateAccountPage extends BasePage {
 
   getResearchBackgroundTextarea(): Textarea {
     return Textarea.findByName(this.page, { normalizeSpace: LabelAlias.ResearchBackground });
+  }
+
+  async selectAddressCountry(selectTextValue: string): Promise<void> {
+    const select = new ReactSelect(this.page, { name: FieldSelector.AddressCountry.name });
+    return select.selectOption(selectTextValue);
   }
 
   async getUsernameDomain(): Promise<string> {
@@ -202,6 +211,7 @@ export default class CreateAccountPage extends BasePage {
   // Step 3: Fill out user information with default values
   async fillOutUserInformation(): Promise<string> {
     const newUserName = await this.fillInFormFields(defaultFieldValues);
+    await this.selectAddressCountry(defaultCountrySelection);
     await this.getResearchBackgroundTextarea().type(faker.lorem.word());
     return newUserName;
   }
