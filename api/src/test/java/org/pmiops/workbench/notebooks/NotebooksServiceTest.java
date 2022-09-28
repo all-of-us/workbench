@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,7 +111,7 @@ public class NotebooksServiceTest {
     MockNotebook(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
-      Set<String> workspaceUsersSet = new HashSet();
+      Set<String> workspaceUsersSet = new HashSet<>();
 
       String[] parts = path.split("/");
       String fileName = parts[parts.length - 1];
