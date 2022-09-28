@@ -45,7 +45,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 
-/** mimicing a Swagger-generated wrapper */
+/** mimicking a Swagger-generated wrapper */
 class FakeApiController {
   public void handle() {}
 }
@@ -252,7 +252,7 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void authorityCheckPermitsWithNoAnnotation() throws Exception {
+  public void authorityCheckPermitsWithNoAnnotation() {
     assertThat(interceptor.hasRequiredAuthority(getTestMethod(), new DbUser())).isTrue();
   }
 
@@ -260,6 +260,16 @@ public class AuthInterceptorTest {
   public void authorityCheckDeniesWhenUserMissingAuthority() throws Exception {
     Method apiControllerMethod = FakeController.class.getMethod("handle");
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(user);
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isFalse();
+  }
+
+  @Test
+  public void authorityCheckDeniesWhenUserHasWrongAuthority() throws Exception {
+    DbUser userWithWrongAuthorities = new DbUser();
+    userWithWrongAuthorities.setAuthoritiesEnum(
+        Collections.singleton(Authority.COMMUNICATIONS_ADMIN));
+    when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithWrongAuthorities);
+    Method apiControllerMethod = FakeController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isFalse();
   }
 
