@@ -22,7 +22,6 @@ import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
-  serverConfigStore,
   withStore,
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -163,9 +162,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohortReview ? cohortReview.cohortName : '...',
-          serverConfigStore.get().config.enableMultiReview
-            ? `${prefix}/data/cohorts/${cid}/reviews/${crid}`
-            : `${prefix}/data/cohorts/${cid}/review/participants`
+          `${prefix}/data/cohorts/${cid}/reviews/${crid}`
         ),
       ];
     case BreadcrumbType.Participant:
@@ -180,9 +177,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           `Participant ${pid}`,
-          serverConfigStore.get().config.enableMultiReview
-            ? `${prefix}/data/cohorts/${cid}/reviews/${crid}/participants/${pid}`
-            : `${prefix}/data/cohorts/${cid}/review/participants/${pid}`
+          `${prefix}/data/cohorts/${cid}/reviews/${crid}/participants/${pid}`
         ),
       ];
     case BreadcrumbType.CohortAdd:

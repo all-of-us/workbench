@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +49,9 @@ public class EgressLogService {
           new EgressTerraRuntimeLogPattern("File downloads", "%download%"),
           new EgressTerraRuntimeLogPattern("Errors", "%error%"));
 
+  private static final String GCE_LOG_LOCATION = "WorkspaceRuntimeLogs.cos_containers";
+  private static final String DATAPROC_LOG_LOCATION = "WorkspaceRuntimeLogs.jupyter";
+
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
 
@@ -67,8 +71,13 @@ public class EgressLogService {
   public List<AuditEgressRuntimeLogGroup> getRuntimeLogGroups(DbEgressEvent event) {
     Duration windowSize = Duration.ofSeconds(event.getEgressWindowSeconds());
     Instant endTime = event.getCreationTime().toInstant();
+    Optional<SumologicEgressEvent> maybeSumologicEvent =
+        maybeParseSumologicEvent(event.getSumologicEvent());
+    if (!maybeSumologicEvent.isPresent()) {
+      return new ArrayList<>();
+    }
     Instant startTime =
-        maybeParseSumologicEvent(event.getSumologicEvent())
+        maybeSumologicEvent
             .map(SumologicEgressEvent::getTimeWindowStart)
             .filter(Objects::nonNull)
             .map(Instant::ofEpochMilli)
@@ -91,7 +100,9 @@ public class EgressLogService {
             .collect(
                 Collectors.toMap(
                     Function.identity(),
-                    (runtimeLogPattern) -> startBigQueryJob(runtimeLogPattern, baseParams)));
+                    (runtimeLogPattern) ->
+                        startBigQueryJob(
+                            runtimeLogPattern, baseParams, getDatasetId(maybeSumologicEvent))));
 
     return terraRuntimeLogPatterns.stream()
         .map(
@@ -139,18 +150,35 @@ public class EgressLogService {
         .message(fvl.get("message").getStringValue());
   }
 
+  private String getDatasetId(Optional<SumologicEgressEvent> sumologicEgressEvent) {
+    // If getGceEgressMib is more than zero, we see this egress triggered by GCE, otherwise, it's
+    // Dataproc.
+    // TODO(yonghao): Revisit this logic and probably make an enum once we understand what does GKE
+    // sumologic event looks like.
+    boolean isGce =
+        sumologicEgressEvent
+            .map(SumologicEgressEvent::getGceEgressMib)
+            .map(d -> d > 0)
+            .orElse(false);
+    return isGce
+        ? workbenchConfigProvider.get().firecloud.workspaceLogsProject + GCE_LOG_LOCATION
+        : workbenchConfigProvider.get().firecloud.workspaceLogsProject + DATAPROC_LOG_LOCATION;
+  }
+
   private Job startBigQueryJob(
-      EgressTerraRuntimeLogPattern runtimeLogPattern, Map<String, QueryParameterValue> baseParams) {
+      EgressTerraRuntimeLogPattern runtimeLogPattern,
+      Map<String, QueryParameterValue> baseParams,
+      String datasetId) {
     return bigQueryService.startQuery(
         QueryJobConfiguration.newBuilder(
                 String.format(
                     "SELECT timestamp, jsonPayload.message AS message"
-                        + " FROM `%s.WorkspaceRuntimeLogs.cos_containers`"
+                        + " FROM %s"
                         + " WHERE resource.labels.project_id = @project_id"
                         + "  AND timestamp BETWEEN @start_time AND @end_time"
                         + "  AND jsonPayload.message LIKE @log_pattern"
                         + " ORDER BY timestamp DESC",
-                    workbenchConfigProvider.get().firecloud.workspaceLogsProject))
+                    datasetId))
             .setNamedParameters(
                 ImmutableMap.<String, QueryParameterValue>builder()
                     .putAll(baseParams)

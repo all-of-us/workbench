@@ -45,7 +45,7 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
-import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
@@ -96,6 +96,7 @@ import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
@@ -254,6 +255,7 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     ChartServiceImpl.class,
     ChartQueryBuilder.class,
+    CohortBuilderMapperImpl.class,
     CohortBuilderServiceImpl.class,
     CohortReviewController.class,
     CohortReviewMapperImpl.class,
@@ -281,7 +283,6 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
-    CohortBuilderMapper.class,
     ComplianceService.class,
     DataSetService.class,
     DirectoryService.class,
@@ -554,44 +555,7 @@ public class CohortReviewControllerTest {
 
   ////////// createCohortReview  //////////
   @Test
-  public void createCohortReviewLessThanMinSize() {
-    // use existing cohort
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () ->
-                cohortReviewController.createCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    new CreateReviewRequest().size(0)));
-
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
-  }
-
-  @Test
-  public void createCohortReviewMoreThanMaxSize() {
-    // use existing cohort
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () ->
-                cohortReviewController.createCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    new CreateReviewRequest().size(10001)));
-
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
-  }
-
-  @Test
-  public void createCohortReviewAlreadyExists() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+  public void createCohortReviewNoName() {
     // use existing cohort
     Throwable exception =
         assertThrows(
@@ -605,10 +569,64 @@ public class CohortReviewControllerTest {
 
     assertThat(exception)
         .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Bad Request: Cohort Review already created for cohortId: %d, cdrVersionId: %d",
-                cohort.getCohortId(), cdrVersion.getCdrVersionId()));
+        .isEqualTo("Bad Request: Cohort Review name cannot be null");
+  }
+
+  @Test
+  public void createCohortReviewLessThanMinSize() {
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    new CreateReviewRequest().size(0).name("review1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review size must be between 1 and 10000");
+  }
+
+  @Test
+  public void createCohortReviewMoreThanMaxSize() {
+    // use existing cohort
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                cohortReviewController.createCohortReview(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    cohort.getCohortId(),
+                    new CreateReviewRequest().size(10001).name("review1")));
+
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("Bad Request: Cohort Review size must be between 1 and 10000");
+  }
+
+  @Test
+  public void createCohortReviewAlreadyExists() {
+    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    // use existing cohort
+    stubBigQueryCreateCohortReview();
+    // create a new review
+    cohortReviewController.createCohortReview(
+        workspace.getNamespace(),
+        workspace.getId(),
+        cohort.getCohortId(),
+        new CreateReviewRequest().size(1).name("review1"));
+    List<CohortReview> cohortReviewList =
+        cohortReviewController
+            .getCohortReviewsByCohortId(
+                workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+            .getBody()
+            .getItems();
+
+    assertThat(cohortReviewList).hasSize(2);
   }
 
   @Test
@@ -624,7 +642,7 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortId,
-                    new CreateReviewRequest().size(1)));
+                    new CreateReviewRequest().size(1).name("review1")));
 
     assertNotFoundExceptionNoCohort(cohortId, exception);
   }
@@ -637,17 +655,17 @@ public class CohortReviewControllerTest {
     stubBigQueryCreateCohortReview();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-
+    String reviewName = "review1";
     CohortReview cohortReview =
         cohortReviewController
             .createCohortReview(
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohortWithoutReview.getCohortId(),
-                new CreateReviewRequest().size(1))
+                new CreateReviewRequest().size(1).name(reviewName))
             .getBody();
 
-    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview));
+    assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview), reviewName);
   }
 
   @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
@@ -667,7 +685,7 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(),
                     workspace.getId(),
                     cohortWithoutReview.getCohortId(),
-                    new CreateReviewRequest().size(1)));
+                    new CreateReviewRequest().size(1).name("review1")));
 
     assertForbiddenException(exception);
   }
@@ -2171,9 +2189,8 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
-  ////////// getCohortReviewsInWorkspace  //////////
-  @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
+  ////////// getCohortReviewsByCohortId  //////////
+  @ParameterizedTest(name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
@@ -2207,7 +2224,7 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getCohortReviewsByCohortIdForbiddenAccessLevel WorkspaceAccessLevel={0}")
   @EnumSource(
       value = WorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
@@ -2225,6 +2242,23 @@ public class CohortReviewControllerTest {
                     workspace.getNamespace(), workspace.getId(), cohort.getCohortId()));
 
     assertForbiddenException(exception);
+  }
+
+  @ParameterizedTest(name = "getCohortReviewsByCohortIdWrongWorkspace WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER"})
+  public void getCohortReviewsByCohortIdWrongWorkspace(WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace2, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.getCohortReviewsByCohortId(
+                    workspace2.getNamespace(), workspace2.getId(), cohort.getCohortId()));
+    assertNotFoundExceptionNoCohort(cohort.getCohortId(), exception);
   }
 
   ////////// getParticipantChartData - See CohortReviewControllerBQTest   //////////
@@ -2275,6 +2309,71 @@ public class CohortReviewControllerTest {
                     1));
 
     assertForbiddenException(exception);
+  }
+
+  ////////// findCohortReviewDemoChartInfo  //////////
+  @ParameterizedTest(
+      name = "findCohortReviewDemoChartInfoAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"OWNER", "WRITER", "READER"})
+  public void findCohortReviewDemoChartInfoAllowedAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+    stubBigQueryDemoChartData();
+
+    List<DemoChartInfo> actual =
+        Objects.requireNonNull(
+                cohortReviewController
+                    .findCohortReviewDemoChartInfo(
+                        workspace.getNamespace(),
+                        workspace.getId(),
+                        cohortReview.getCohortReviewId())
+                    .getBody())
+            .getItems();
+
+    assertThat(actual.size()).isEqualTo(1);
+  }
+
+  @ParameterizedTest(
+      name = "findCohortReviewDemoChartInfoForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"NO_ACCESS"})
+  public void findCohortReviewDemoChartInfoForbiddenAccessLevel(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            ForbiddenException.class,
+            () ->
+                cohortReviewController.findCohortReviewDemoChartInfo(
+                    workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId()));
+
+    assertForbiddenException(exception);
+  }
+
+  @ParameterizedTest(name = "findCohortReviewDemoChartInfoWrongWorkspace WorkspaceAccessLevel={0}")
+  @EnumSource(
+      value = WorkspaceAccessLevel.class,
+      names = {"READER"})
+  public void findCohortReviewDemoChartInfoWrongWorkspace(
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    // change access, call and check
+    stubWorkspaceAccessLevel(workspace2, workspaceAccessLevel);
+
+    Throwable exception =
+        assertThrows(
+            NotFoundException.class,
+            () ->
+                cohortReviewController.findCohortReviewDemoChartInfo(
+                    workspace2.getNamespace(),
+                    workspace2.getId(),
+                    cohortReview.getCohortReviewId()));
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
   }
 
   ////////// getVocabularies - See CohortReviewControllerBQTest   //////////
@@ -2354,9 +2453,9 @@ public class CohortReviewControllerTest {
     assertThat(actual).isEqualTo(expected);
   }
 
-  private void assertNewlyCreatedCohortReview(CohortReview cohortReview) {
+  private void assertNewlyCreatedCohortReview(CohortReview cohortReview, String reviewName) {
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getCohortName()).isEqualTo(cohortWithoutReview.getName());
+    assertThat(cohortReview.getCohortName()).isEqualTo(reviewName);
     assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
@@ -2467,6 +2566,28 @@ public class CohortReviewControllerTest {
     return participantCohortAnnotation;
   }
 
+  private void stubBigQueryDemoChartData() {
+    Field name = Field.of("name", LegacySQLTypeName.STRING);
+    Field race = Field.of("race", LegacySQLTypeName.STRING);
+    Field ageRange = Field.of("ageRange", LegacySQLTypeName.STRING);
+    Field count = Field.of("count", LegacySQLTypeName.INTEGER);
+
+    Schema schema = Schema.of(name, race, ageRange, count);
+
+    FieldValue nameValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "Male");
+    FieldValue raceValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "Hispanic");
+    FieldValue ageRangeValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "44-60");
+    FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "10");
+
+    List<FieldValueList> tableRows =
+        Collections.singletonList(
+            FieldValueList.of(Arrays.asList(nameValue, raceValue, ageRangeValue, countValue)));
+    TableResult result =
+        new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+
+    when(bigQueryService.filterBigQueryConfigAndExecuteQuery(any())).thenReturn(result);
+  }
+
   private void stubBigQueryParticipantChartData() {
     // construct the first TableResult call
     Field standardName = Field.of("standardName", LegacySQLTypeName.STRING);
@@ -2520,10 +2641,15 @@ public class CohortReviewControllerTest {
   private void stubBigQueryParticipantCount() {
     // construct the first TableResult call
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
-    Schema schema = Schema.of(count);
+    Field birthDatetime = Field.of("birth_datetime", LegacySQLTypeName.STRING);
+
+    Schema schema = Schema.of(count, birthDatetime);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0");
+    FieldValue birthDatetimeValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, String.valueOf(NOW.getEpochSecond()));
     List<FieldValueList> tableRows =
-        Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+        Collections.singletonList(FieldValueList.of(Arrays.asList(countValue, birthDatetimeValue)));
+
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 

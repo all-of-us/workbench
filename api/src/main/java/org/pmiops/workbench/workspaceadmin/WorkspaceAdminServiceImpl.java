@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.access.AccessTierService;
@@ -89,6 +90,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
+  private final Provider<DbUser> userProvider;
   private final UserMapper userMapper;
   private final UserService userService;
   private final WorkspaceDao workspaceDao;
@@ -112,6 +114,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,
+      Provider<DbUser> userProvider,
       UserMapper userMapper,
       UserService userService,
       WorkspaceDao workspaceDao,
@@ -132,6 +135,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.mailService = mailService;
     this.notebooksService = notebooksService;
+    this.userProvider = userProvider;
     this.userMapper = userMapper;
     this.userService = userService;
     this.workspaceDao = workspaceDao;
@@ -395,7 +399,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         Collections.singletonList(aclUpdate));
 
     dbWorkspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(dbWorkspace);
+    return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results

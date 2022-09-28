@@ -12,8 +12,10 @@ import { ClrIcon, InfoIcon, ValidationIcon } from 'app/components/icons';
 import {
   ErrorMessage,
   FormValidationErrorMessage,
+  Select,
   styles as inputStyles,
   TextAreaWithLengthValidationMessage,
+  TextInput,
   TextInputWithLabel,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
@@ -30,6 +32,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { STATE_CODE_MAPPING } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -73,6 +76,14 @@ const researchPurposeList = [
 
 const nameLength = 80;
 
+export enum countryDropdownOption {
+  unitedStates = 'United States of America',
+  other = 'Other',
+}
+
+export const stateCodeErrorMessage =
+  'State must be a valid 2-letter code (CA, TX, etc.)';
+
 export const MultiSelectWithLabel = (props) => {
   return (
     <FlexColumn style={{ width: '12rem', ...props.containerStyle }}>
@@ -110,6 +121,7 @@ export interface AccountCreationState {
   showMostInterestedInKnowingBlurb: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
+  countryDropdownSelection: countryDropdownOption | null;
 }
 
 export class AccountCreation extends React.Component<
@@ -132,6 +144,7 @@ export class AccountCreation extends React.Component<
       showMostInterestedInKnowingBlurb: false,
       usernameCheckInProgress: false,
       usernameConflictError: false,
+      countryDropdownSelection: null,
     };
 
     return state;
@@ -203,6 +216,46 @@ export class AccountCreation extends React.Component<
 
   updateProfileObject(attribute: string, value) {
     this.setState(fp.set(['profile', attribute], value));
+  }
+
+  updateCountryDropdownSelection(value) {
+    this.setState({
+      countryDropdownSelection: value,
+    });
+
+    if (value === countryDropdownOption.unitedStates) {
+      this.updateAddress('country', value);
+
+      const stateCodeGuess = this.autoSelectStateCode(
+        this.state.profile.address.state
+      );
+      if (stateCodeGuess != null) {
+        this.updateAddress('state', stateCodeGuess);
+      }
+    } else {
+      this.updateAddress('country', '');
+    }
+  }
+
+  stateInvalidError(): boolean {
+    const { state, country } = this.state.profile.address;
+    if (country !== countryDropdownOption.unitedStates) {
+      return false;
+    }
+    return !Object.values(STATE_CODE_MAPPING).includes(state);
+  }
+
+  // For a given user inputted state, returns our best guess
+  // for which state code they are referring to.
+  autoSelectStateCode(state: string): string | null {
+    const formattedState = state.trim().toUpperCase();
+    if (Object.values(STATE_CODE_MAPPING).includes(formattedState)) {
+      return formattedState;
+    }
+    if (Object.keys(STATE_CODE_MAPPING).includes(formattedState)) {
+      return STATE_CODE_MAPPING[formattedState];
+    }
+    return null;
   }
 
   updateAddress(attribute: string, value) {
@@ -294,6 +347,17 @@ export class AccountCreation extends React.Component<
         length: {
           maximum: 95,
           message: '^State must be 95 characters or fewer',
+        },
+        inclusion: (_value, attributes) => {
+          if (
+            attributes.address.country === countryDropdownOption.unitedStates
+          ) {
+            return {
+              within: Object.values(STATE_CODE_MAPPING),
+              message: `^${stateCodeErrorMessage}`,
+            };
+          }
+          return false;
         },
       },
       'address.zipCode': {
@@ -575,15 +639,29 @@ export class AccountCreation extends React.Component<
                     labelText='City'
                     onChange={(value) => this.updateAddress('city', value)}
                   />
-                  <TextInputWithLabel
-                    dataTestId='state'
-                    inputName='state'
-                    placeholder='State'
-                    value={state}
-                    labelText='State'
-                    containerStyle={styles.multiInputSpacing}
-                    onChange={(value) => this.updateAddress('state', value)}
-                  />
+                  <FlexColumn>
+                    <TextInputWithLabel
+                      dataTestId='state'
+                      inputName='state'
+                      placeholder='State'
+                      value={state}
+                      labelText='State'
+                      containerStyle={styles.multiInputSpacing}
+                      onChange={(value) => this.updateAddress('state', value)}
+                    />
+                    {this.stateInvalidError() && (
+                      <div
+                        style={{
+                          height: '1.5rem',
+                          ...styles.multiInputSpacing,
+                        }}
+                      >
+                        <FormValidationErrorMessage id='stateError'>
+                          {stateCodeErrorMessage}
+                        </FormValidationErrorMessage>
+                      </div>
+                    )}
+                  </FlexColumn>
                 </FlexRow>
                 <FlexRow style={{ marginTop: '1rem' }}>
                   <TextInputWithLabel
@@ -594,15 +672,46 @@ export class AccountCreation extends React.Component<
                     labelText='Zip code'
                     onChange={(value) => this.updateAddress('zipCode', value)}
                   />
-                  <TextInputWithLabel
-                    dataTestId='country'
-                    inputName='country'
-                    placeholder='Country'
-                    value={country}
-                    labelText='Country'
-                    containerStyle={styles.multiInputSpacing}
-                    onChange={(value) => this.updateAddress('country', value)}
-                  />
+                  <FlexColumn
+                    style={{ width: '12rem', ...styles.multiInputSpacing }}
+                  >
+                    <label style={{ fontWeight: 600, color: colors.primary }}>
+                      Country
+                    </label>
+                    <Select
+                      value={this.state.countryDropdownSelection}
+                      options={[
+                        {
+                          value: countryDropdownOption.unitedStates,
+                          label: countryDropdownOption.unitedStates,
+                        },
+                        {
+                          value: countryDropdownOption.other,
+                          label: countryDropdownOption.other,
+                        },
+                      ]}
+                      onChange={(value) =>
+                        this.updateCountryDropdownSelection(value)
+                      }
+                      data-test-id='country-dropdown'
+                    />
+                    {this.state.countryDropdownSelection ===
+                      countryDropdownOption.other && (
+                      <div style={{ marginTop: '0.2rem' }}>
+                        <TextInput
+                          data-test-id='non-usa-country-input'
+                          id='country'
+                          name='country'
+                          placeholder='Please specify'
+                          value={country}
+                          onChange={(value) =>
+                            this.updateAddress('country', value)
+                          }
+                          style={{ ...commonStyles.sectionInput }}
+                        />
+                      </div>
+                    )}
+                  </FlexColumn>
                 </FlexRow>
               </FlexColumn>
             </Section>

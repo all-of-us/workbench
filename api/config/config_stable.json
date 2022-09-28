@@ -115,9 +115,8 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableMultiReview": false,
-    "enableUpdatedDemographicSurvey": true,
-    "enableDrugWildcardSearch": true
+    "enableMultiReview": true,
+    "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

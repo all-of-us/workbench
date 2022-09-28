@@ -2,6 +2,8 @@ import faker from 'faker';
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 
+export const defaultCountrySelection = 'United States of America';
+
 export const defaultFieldValues = [
   {
     label: 'New Username',
@@ -30,9 +32,5 @@ export const defaultFieldValues = [
   {
     label: 'Zip code',
     value: faker.address.zipCode()
-  },
-  {
-    label: 'Country',
-    value: 'U.S.A'
   }
 ];

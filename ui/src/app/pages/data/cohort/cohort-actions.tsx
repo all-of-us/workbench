@@ -20,7 +20,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -158,9 +158,7 @@ export const CohortActions = fp.flow(
           queryParams = { cohortId: cohort.id };
           break;
         case 'review':
-          url += `data/cohorts/${cohort.id}/review${
-            serverConfigStore.get().config.enableMultiReview ? 's' : ''
-          }`;
+          url += `data/cohorts/${cohort.id}/reviews`;
           break;
         case 'notebook':
           url += 'notebooks';

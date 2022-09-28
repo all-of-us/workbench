@@ -17,7 +17,6 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
-import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -83,7 +82,6 @@ public class DeleteWorkspaces {
       Provider<DbUser> dbUserProvider,
       CloudBillingClient cloudBillingClient,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
       WorkspaceDao workspaceDao) {
     return new WorkspaceServiceImpl(
         accessTierService,
@@ -100,7 +98,6 @@ public class DeleteWorkspaces {
         null,
         null,
         userRecentWorkspaceDao,
-        userRecentlyModifiedResourceDao,
         workspaceDao,
         null,
         null);

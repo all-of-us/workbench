@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -124,23 +123,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
-    ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
-    ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
-    cbCriteriaDao
-        .findByConceptIdIn(conceptIds.stream().map(String::valueOf).collect(Collectors.toList()))
-        .forEach(
-            c -> {
-              if (c.getStandard()) {
-                standardConceptIds.add(Long.valueOf(c.getConceptId()));
-              } else {
-                sourceConceptIds.add(Long.valueOf(c.getConceptId()));
-              }
-            });
-    return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
-  }
-
-  @Override
   public List<Criteria> findCriteriaByDomainIdAndConceptIds(
       String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds) {
     List<DbCriteria> criteriaList = new ArrayList<>();
@@ -224,29 +206,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, String type, Boolean standard) {
-    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
-
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
-            domain,
-            ImmutableList.of(type),
-            standard,
-            ImmutableList.of(true),
-            modifyTermMatch(term),
-            pageRequest);
-    if (criteriaList.isEmpty()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, ImmutableList.of(type), standard, ImmutableList.of(true), term, pageRequest);
-    }
-    return criteriaList.stream()
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<Criteria> findCriteriaAutoCompleteV2(
       String domain, String term, List<String> types, Boolean standard) {
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
@@ -315,54 +274,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request) {
-    PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
-
-    // if search term is empty find the top counts for the domain
-    if (isTopCountsSearch(request.getTerm())) {
-      return getTopCountsSearchWithStandard(request, pageRequest);
-    }
-    String modifiedSearchTerm = modifyTermMatch(request.getTerm());
-    // if the modified search term is empty return an empty result
-    if (modifiedSearchTerm.isEmpty()) {
-      return new CriteriaListWithCountResponse().totalCount(0L);
-    }
-
-    // if domain type is survey then search survey by term.
-    if (isSurveyDomain(request.getDomain())) {
-      return findSurveyCriteriaBySearchTerm(
-          request.getSurveyName(), pageRequest, modifiedSearchTerm);
-    }
-
-    // find a match on concept code
-    Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            request.getDomain(),
-            new SearchTerm(request.getTerm(), new ArrayList<>()).getCodeTerm(),
-            request.getStandard(),
-            CriteriaType.NONE.toString(),
-            pageRequest);
-
-    // if no match is found on concept code then find match on full text index by term
-    if (dbCriteriaPage.getContent().isEmpty() && !request.getTerm().contains(".")) {
-      dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandardAndNotType(
-              request.getDomain(),
-              modifiedSearchTerm,
-              request.getStandard(),
-              CriteriaType.NONE.toString(),
-              pageRequest);
-    }
-
-    return new CriteriaListWithCountResponse()
-        .items(
-            dbCriteriaPage.getContent().stream()
-                .map(cohortBuilderMapper::dbModelToClient)
-                .collect(Collectors.toList()))
-        .totalCount(dbCriteriaPage.getTotalElements());
-  }
-
-  @Override
-  public CriteriaListWithCountResponse findCriteriaByDomainV2(CriteriaSearchRequest request) {
     boolean removeDrugBrand = request.getRemoveDrugBrand();
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
 
@@ -430,28 +341,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<CardCount> findUniversalDomainCounts(String term) {
-    List<CardCount> cardCounts =
-        findDomainCounts(
-            term,
-            true,
-            ImmutableList.of(
-                Domain.CONDITION,
-                Domain.DRUG,
-                Domain.MEASUREMENT,
-                Domain.OBSERVATION,
-                Domain.PROCEDURE,
-                Domain.DEVICE,
-                Domain.VISIT));
-    cardCounts.addAll(findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT)));
-    Long sum = findSurveyCounts(term).stream().map(CardCount::getCount).reduce(0L, Long::sum);
-    if (sum > 0) {
-      cardCounts.add(new CardCount().domain(Domain.SURVEY).name("Survey").count(sum));
-    }
-    return cardCounts;
-  }
-
-  @Override
-  public List<CardCount> findUniversalDomainCountsV2(String term) {
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<CardCount> cardCounts =
@@ -478,25 +367,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<CardCount> findDomainCounts(String term) {
-    List<CardCount> cardCounts =
-        findDomainCounts(
-            term,
-            true,
-            ImmutableList.of(
-                Domain.CONDITION,
-                Domain.DRUG,
-                Domain.MEASUREMENT,
-                Domain.OBSERVATION,
-                Domain.PROCEDURE,
-                Domain.DEVICE));
-    cardCounts.addAll(
-        findDomainCounts(term, false, ImmutableList.of(Domain.PHYSICAL_MEASUREMENT_CSS)));
-    cardCounts.addAll(findSurveyCounts(term));
-    return cardCounts;
-  }
-
-  @Override
-  public List<CardCount> findDomainCountsV2(String term) {
     SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
 
     List<CardCount> cardCounts =
@@ -544,36 +414,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
-  private List<CardCount> findDomainCounts(String term, Boolean standard, List<Domain> domains) {
-    List<String> strDomains = domains.stream().map(Domain::toString).collect(Collectors.toList());
-    List<DbCardCount> cardCounts =
-        cbCriteriaDao
-            .findDomainCountsByCode(
-                new SearchTerm(term, new ArrayList<>()).getCodeTerm(), standard, strDomains)
-            .stream()
-            .filter(cardCount -> cardCount.getCount() > 0)
-            .collect(Collectors.toList());
-    // filter strDomains to remove domains that have a cardCount by domain
-    strDomains.removeAll(
-        cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
-    // modify search term and call
-    cardCounts.addAll(
-        cbCriteriaDao.findDomainCountsByTermAndStandardAndDomains(
-            modifyTermMatch(term), standard, strDomains));
-
-    return cardCounts.stream()
-        .filter(cardCount -> cardCount.getCount() > 0)
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
-  }
-
-  private List<CardCount> findSurveyCounts(String term) {
-    return cbCriteriaDao.findSurveyCountsByTerm(modifyTermMatch(term)).stream()
-        .filter(cardCount -> cardCount.getCount() > 0)
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
-  }
-
   @Override
   public List<DomainCard> findDomainCards() {
     return domainCardDao.findByOrderById().stream()
@@ -583,17 +423,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit) {
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findDrugBrandOrIngredientByValue(
-            value, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
-    return criteriaList.stream()
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<Criteria> findDrugBrandOrIngredientByValueV2(String term, Integer limit) {
+  public List<Criteria> findDrugBrandOrIngredientByValue(String term, Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
 
@@ -750,24 +580,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     if (dbCriteriaPage == null) {
       return new CriteriaListWithCountResponse();
-    }
-    return new CriteriaListWithCountResponse()
-        .items(
-            dbCriteriaPage.getContent().stream()
-                .map(cohortBuilderMapper::dbModelToClient)
-                .collect(Collectors.toList()))
-        .totalCount(dbCriteriaPage.getTotalElements());
-  }
-
-  private CriteriaListWithCountResponse findSurveyCriteriaBySearchTerm(
-      String surveyName, PageRequest pageRequest, String modifiedSearchTerm) {
-    Page<DbCriteria> dbCriteriaPage;
-    if (surveyName.equals("All")) {
-      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByTerm(modifiedSearchTerm, pageRequest);
-    } else {
-      Long id = cbCriteriaDao.findSurveyId(surveyName);
-      dbCriteriaPage =
-          cbCriteriaDao.findSurveyQuestionByPathAndTerm(id, modifiedSearchTerm, pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(

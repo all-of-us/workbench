@@ -17,8 +17,9 @@ surveys = ['ENGLISHBasics_DataDictionary',
            'ENGLISHOverallHealth_DataDictionary',
            'ENGLISHPersonalMedicalHistory_DataDictionary',
            'ENGLISHHealthCareAccessUtiliza_DataDictionary',
-           'ENGLISHWinterMinuteSurveyOnCOV_DataDictionary',
-           'ENGLISHSocialDeterminantsOfHea_DataDictionary']
+           'ENGLISHNewYearMinuteSurveyOnCO_DataDictionary',
+           'ENGLISHSocialDeterminantsOfHea_DataDictionary',
+           'ENGLISHPersonalAndFamilyHealth_DataDictionary']
 
 # these are the column names for the controlled and registered output files
 headers = ['concept_code', 'survey_name', 'topic', 'answers']
@@ -162,7 +163,7 @@ def parse_args():
 def read_csv(file):
     blob = get_blob(file)
     blob = blob.download_as_string()
-    blob = blob.decode('utf-8')
+    blob = blob.decode('utf-8-sig')
     blob = StringIO(blob)  # tranform bytes to string
     return csv.DictReader(blob)  # then use csv library to read the content
 

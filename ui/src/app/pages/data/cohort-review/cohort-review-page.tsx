@@ -285,7 +285,7 @@ export const CohortReviewPage = fp.flow(
                     'data',
                     'cohorts',
                     cid,
-                    'review',
+                    'reviews',
                     'cohort-description',
                   ])
                 }

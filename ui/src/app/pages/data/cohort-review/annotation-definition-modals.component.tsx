@@ -19,7 +19,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { cohortAnnotationDefinitionApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -254,9 +253,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
         const {
           params: { ns, wsid, cid },
         } = matchPath(location.pathname, {
-          path: serverConfigStore.get().config.enableMultiReview
-            ? '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews/:crid'
-            : '/workspaces/:ns/:wsid/data/cohorts/:cid/review',
+          path: '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews/:crid',
         });
         this.setState({ busy: true });
         await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(
@@ -284,9 +281,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
         const {
           params: { ns, wsid, cid },
         } = matchPath(location.pathname, {
-          path: serverConfigStore.get().config.enableMultiReview
-            ? '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews'
-            : '/workspaces/:ns/:wsid/data/cohorts/:cid/review',
+          path: '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews',
         });
         const { editId, editValue } = this.state;
         if (
