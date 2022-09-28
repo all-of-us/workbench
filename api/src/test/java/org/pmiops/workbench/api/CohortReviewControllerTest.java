@@ -594,22 +594,21 @@ public class CohortReviewControllerTest {
   public void createCohortReviewAlreadyExists() {
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     // use existing cohort
-    Throwable exception =
-        assertThrows(
-            BadRequestException.class,
-            () ->
-                cohortReviewController.createCohortReview(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    new CreateReviewRequest().size(1)));
+    stubBigQueryCreateCohortReview();
+    // create a new review
+    cohortReviewController.createCohortReview(
+        workspace.getNamespace(),
+        workspace.getId(),
+        cohort.getCohortId(),
+        new CreateReviewRequest().size(1));
+    List<CohortReview> cohortReviewList =
+        cohortReviewController
+            .getCohortReviewsByCohortId(
+                workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+            .getBody()
+            .getItems();
 
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Bad Request: Cohort Review already created for cohortId: %d, cdrVersionId: %d",
-                cohort.getCohortId(), cdrVersion.getCdrVersionId()));
+    assertThat(cohortReviewList).hasSize(2);
   }
 
   @Test
@@ -645,7 +644,7 @@ public class CohortReviewControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 cohortWithoutReview.getCohortId(),
-                new CreateReviewRequest().size(1))
+                new CreateReviewRequest().size(1).name("review1"))
             .getBody();
 
     assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview));
@@ -2438,7 +2437,7 @@ public class CohortReviewControllerTest {
 
   private void assertNewlyCreatedCohortReview(CohortReview cohortReview) {
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getCohortName()).isEqualTo(cohortWithoutReview.getName());
+    assertThat(cohortReview.getCohortName()).isNotNull();
     assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
@@ -2624,10 +2623,15 @@ public class CohortReviewControllerTest {
   private void stubBigQueryParticipantCount() {
     // construct the first TableResult call
     Field count = Field.of("count", LegacySQLTypeName.INTEGER);
-    Schema schema = Schema.of(count);
+    Field birthDatetime = Field.of("birth_datetime", LegacySQLTypeName.STRING);
+
+    Schema schema = Schema.of(count, birthDatetime);
     FieldValue countValue = FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0");
+    FieldValue birthDatetimeValue =
+        FieldValue.of(FieldValue.Attribute.PRIMITIVE, String.valueOf(NOW.getEpochSecond()));
     List<FieldValueList> tableRows =
-        Collections.singletonList(FieldValueList.of(Collections.singletonList(countValue)));
+        Collections.singletonList(FieldValueList.of(Arrays.asList(countValue, birthDatetimeValue)));
+
     TableResult result =
         new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
