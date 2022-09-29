@@ -125,7 +125,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
     // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
     const resourceCard = new DataResourceCard(page);
     const dataSetCard = await resourceCard.findResourceTableEntryByName({ name: datasetName });
-    expect(dataSetCard).toBeTruthy();
+    expect(dataSetCard).not.toBeNull();
 
     switch (assign.accessRole) {
       case WorkspaceAccessLevel.Reader:

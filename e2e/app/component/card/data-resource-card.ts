@@ -78,7 +78,7 @@ export default class DataResourceCard extends BaseCard {
     while (index <= dataTableRows) {
       const nameCell = await datatable.getCellValue(index, 3);
       if (nameCell === name) {
-        return await datatable.getCell(index, 3);
+        return await datatable.getCellLink(index, 3);
       }
       index++;
     }

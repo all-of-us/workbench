@@ -22,7 +22,7 @@ export default class Table extends Container {
   }
 
   async getCellLink(rowIndex: number, columnIndex: number): Promise<ElementHandle> {
-    const cellXpath = this.getCellXpath(rowIndex, columnIndex) + '/a';
+    const cellXpath = this.getCellXpath(rowIndex, columnIndex) + '//a';
     return this.page.waitForXPath(cellXpath, { visible: true });
   }
 
