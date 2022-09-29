@@ -21,10 +21,12 @@ public class CohortQueryBuilder extends QueryBuilder {
           + "WHERE ";
 
   private static final String RANDOM_SQL_TEMPLATE =
-      "SELECT RAND() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, CASE WHEN death.person_id IS NULL THEN false ELSE true END as deceased\n"
+      "SELECT RAND() as x, person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, deceased\n"
+          + "FROM (SELECT person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, CASE WHEN death.person_id IS NULL THEN false ELSE true END as deceased\n"
           + "FROM `${projectId}.${dataSetId}.person` person\n"
           + "LEFT JOIN `${projectId}.${dataSetId}.death` death ON (person.person_id = death.person_id)\n"
-          + "WHERE person.person_id IN (${innerSql})";
+          + "WHERE person.person_id IN (${innerSql})\n"
+          + "GROUP BY person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, deceased)\n";
 
   private static final String RANDOM_SQL_ORDER_BY = "ORDER BY x\nLIMIT";
 
