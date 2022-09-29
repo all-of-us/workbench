@@ -3,3 +3,21 @@ cron:
   aou_skip_reason: "RW-6538"
 - url: /v1/cron/checkFreeTierBillingUsage
   aou_skip_reason: "RW-6280"
+- url: /v1/cron/checkRuntimes
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/checkPersistentDisks
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/updateGaugeMetrics
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/exportToRdr
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/updateResearchPurposeReviewPrompt
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/uploadReportingSnapshot
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/synchronizeUserAccess
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/checkPendingEgressEvents
+  aou_skip_reason: "RW-8945"
+- url: /v1/cron/sendAccessExpirationEmails
+  aou_skip_reason: "RW-8945"
