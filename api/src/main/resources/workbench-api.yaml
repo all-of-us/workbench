@@ -90,6 +90,15 @@ parameters:
     type: string
     description: The Workspace ID (a.k.a. the workspace's Firecloud name)
     required: true
+  appType:
+    in: path
+    name: appType
+    type: string
+    enum:
+      - RSTUDIO
+      - SAS
+    description: The app type that workbench supports
+    required: true
   cohortId:
     in: path
     name: cohortId
@@ -802,6 +811,61 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/apps/{workspaceNamespace}/{appType}":
+    get:
+      summary: Get the user's app by type.
+      description: "Returns the current user's app by type."
+      operationId: getApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/appType"
+      responses:
+        200:
+          description: The runtime for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Runtime"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    post:
+      summary: Create a workspace APP.
+      description: |
+        Creates a new runtime for the current user in the given billing project. If a runtime already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
+        TODO(RW-3697): Custom runtime creation params should be added as a body param here.
+      operationId: createRuntime
+      tags:
+        - runtime
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/appType"
+        - in: body
+          name: app
+          description: APP definition
+          required: true
+          schema:
+            "$ref": "#/definitions/App"
+      responses:
+        200:
+          description: Runtime was created successfully
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        409:
+          description: A runtime for this user and workspace already exists.
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
   "/v1/disks/{workspaceNamespace}":
     get:
       summary: Get the user's workspace persistent disk.
@@ -6153,6 +6217,58 @@ definitions:
       blockSize:
         type: integer
         description: The block size in bytes that the persistent disk is to be updated to.
+
+  CreateAppRequest:
+    description: the configuration of an app.
+    type: object
+    properties:
+      diskConfig:
+        $ref: '#/components/schemas/PersistentDiskRequest'
+      kubernetesRuntimeConfig:
+        $ref: '#/components/schemas/KubernetesRuntimeConfig'
+  App:
+    googleProject:
+      type: string
+      description: The Google Project used to create the app. Read only.
+    appname:
+      type: string
+      description: The user-supplied name for the app. Read only.
+    createdDate:
+      type: string
+      description: The date and time the app was created, in ISO-8601 format. Read only.
+    status:
+      "$ref": "#/definitions/AppStatus"
+      description: App status. Read only.
+    autopauseThreshold:
+      type: integer
+      description: The number of minutes of idle time to elapse before the cluster is
+        autopaused. If autopause is set to false, this value is disregarded.
+        A value of 0 is equivalent to autopause being turned off.
+    kubernetesRuntimeConfig:
+      type: string
+      description: configuration for a kubernetes app
+    diskConfig:
+      $ref: '#/components/schemas/PersistentDiskRequest'
+
+  KubernetesRuntimeConfig:
+    description: configuration for a kubernetes app
+    type: object
+    required:
+      - numNodes
+      - machineType
+      - autoscalingEnabled
+    properties:
+      numNodes:
+        type: integer
+        description: number of nodes for the kubernetes app
+      machineType:
+        type: string
+        description: the machine type for the nodes the kubernetes app will run on
+        example: n1-standard-1
+      autoscalingEnabled:
+        type: boolean
+        description: whether or not the nodes autoscale up and down for this app
+
   PersistentDiskRequest:
     description: configuration to create a disk
     type: object
