@@ -37,6 +37,10 @@ export const zendeskWidgetKey = () => {
   return zendeskConfigs[environment.zendeskEnv].widgetKey;
 };
 
+export const zendeskBaseUrl = () => {
+  return zendeskConfigs[environment.zendeskEnv].baseUrl;
+};
+
 /**
  * A set of support URLs for the current environment. These need to be
  * parameterized per environment since the Zendesk support content IDs are not

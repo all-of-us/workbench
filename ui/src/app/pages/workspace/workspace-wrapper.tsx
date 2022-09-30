@@ -34,6 +34,7 @@ import {
   runtimeStore,
   useStore,
 } from 'app/utils/stores';
+import { zendeskBaseUrl } from 'app/utils/zendesk';
 
 const styles = reactStyles({
   newCtNotification: {
@@ -59,21 +60,26 @@ interface NotificationProps {
   onCancel: () => void;
 }
 const MaybeNewCtNotification = (props: NotificationProps) => {
-  const dataPaths =
-    'https://aousupporthelp.zendesk.com/hc/en-us/articles/4616869437204-Controlled-CDR-Directory';
-  const dataFiles =
-    'https://aousupporthelp.zendesk.com/hc/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized';
-  const cohortBuilder =
-    'https://aousupporthelp.zendesk.com/hc/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool';
-
   const dataPathsLink = (
-    <StyledExternalLink href={dataPaths}>This resource</StyledExternalLink>
+    <StyledExternalLink
+      href={`${zendeskBaseUrl()}/hc/en-us/articles/4616869437204-Controlled-CDR-Directory`}
+    >
+      This resource
+    </StyledExternalLink>
   );
   const dataFilesLink = (
-    <StyledExternalLink href={dataFiles}>this resource</StyledExternalLink>
+    <StyledExternalLink
+      href={`${zendeskBaseUrl()}/hc/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
+    >
+      this resource
+    </StyledExternalLink>
   );
   const cohortBuilderLink = (
-    <StyledExternalLink href={cohortBuilder}>this resource</StyledExternalLink>
+    <StyledExternalLink
+      href={`${zendeskBaseUrl()}/hc/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
+    >
+      this resource
+    </StyledExternalLink>
   );
 
   return (
