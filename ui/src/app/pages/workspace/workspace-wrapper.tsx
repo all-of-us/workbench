@@ -62,21 +62,21 @@ interface NotificationProps {
 const MaybeNewCtNotification = (props: NotificationProps) => {
   const dataPathsLink = (
     <StyledExternalLink
-      href={`${zendeskBaseUrl()}/hc/en-us/articles/4616869437204-Controlled-CDR-Directory`}
+      href={`${zendeskBaseUrl()}/en-us/articles/4616869437204-Controlled-CDR-Directory`}
     >
       This resource
     </StyledExternalLink>
   );
   const dataFilesLink = (
     <StyledExternalLink
-      href={`${zendeskBaseUrl()}/hc/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
+      href={`${zendeskBaseUrl()}/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
     >
       this resource
     </StyledExternalLink>
   );
   const cohortBuilderLink = (
     <StyledExternalLink
-      href={`${zendeskBaseUrl()}/hc/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
+      href={`${zendeskBaseUrl()}/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
     >
       this resource
     </StyledExternalLink>
