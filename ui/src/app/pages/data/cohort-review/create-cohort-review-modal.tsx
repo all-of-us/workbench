@@ -4,6 +4,7 @@ import { validate } from 'validate.js';
 
 const { useState } = React;
 
+import { AlertWarning } from 'app/components/alert';
 import { Button } from 'app/components/buttons';
 import { NumberInput, TextInput, ValidationError } from 'app/components/inputs';
 import {
@@ -58,6 +59,7 @@ export const CreateCohortReviewModal = ({
   participantCount,
 }) => {
   const { ns, wsid, cid } = useParams<MatchParams>();
+  const [createError, setCreateError] = useState(false);
   const [creating, setCreating] = useState(false);
   const [numberOfParticipants, setNumberOfParticipants] = useState(undefined);
   const [reviewName, setReviewName] = useState(undefined);
@@ -93,6 +95,7 @@ export const CreateCohortReviewModal = ({
 
   const createReview = () => {
     setCreating(true);
+    setCreateError(false);
     const request = {
       name: reviewName,
       size: parseInt(numberOfParticipants, 10),
@@ -104,12 +107,23 @@ export const CreateCohortReviewModal = ({
         currentCohortReviewStore.next(response);
         setCreating(false);
         created(response);
+      })
+      .catch((error) => {
+        console.error(error);
+        setCreateError(true);
+        setCreating(false);
       });
   };
 
   return (
     <Modal onRequestClose={() => canceled()}>
       <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
+      {createError && (
+        <AlertWarning>
+          Sorry, the request cannot be completed. Please try again or contact
+          Support in the left hand navigation.
+        </AlertWarning>
+      )}
       <ModalBody style={styles.body}>
         <TextInput
           autoFocus
