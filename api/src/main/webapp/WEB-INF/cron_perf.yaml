@@ -7,7 +7,7 @@ cron:
   aou_skip_reason: "RW-8945"
 - url: /v1/cron/checkPersistentDisks
   aou_skip_reason: "RW-8945"
-- url: /v1/cron/updateGaugeMetrics
+- url: /v1/cron/monitoring/updateGaugeMetrics
   aou_skip_reason: "RW-8945"
 - url: /v1/cron/exportToRdr
   aou_skip_reason: "RW-8945"
