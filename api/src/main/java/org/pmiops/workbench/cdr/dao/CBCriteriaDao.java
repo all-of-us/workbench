@@ -137,9 +137,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where standard = :standard "
-              + "and conceptId in (:conceptIds) "
-              + "and match(fullText, concat('+[', :domainId, '_rank1]')) > 0")
+              + "where c.standard = :standard "
+              + "and c.conceptId in (:conceptIds) "
+              + "and match(c.fullText, concat('+[', :domainId, '_rank1]')) > 0")
   List<DbCriteria> findCriteriaByDomainIdAndStandardAndConceptIds(
       @Param("domainId") String domainId,
       @Param("standard") Boolean standard,
@@ -189,9 +189,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where domainId=:domain "
-              + "and type=:type "
-              + "order by id asc")
+              + "where c.domainId=:domain "
+              + "and c.type=:type "
+              + "order by c.id asc")
   List<DbCriteria> findCriteriaByDomainAndTypeOrderByIdAsc(
       @Param("domain") String domain, @Param("type") String type);
 
@@ -199,10 +199,10 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where standard=:standard "
-              + "and code like upper(concat(:term,'%')) "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
-              + "and type != :type "
+              + "where c.standard=:standard "
+              + "and c.code like upper(concat(:term,'%')) "
+              + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "and c.type != :type "
               + "order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndCodeAndStandardAndNotType(
       @Param("domain") String domain,
@@ -215,9 +215,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where standard=:standard "
-              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
-              + "and type != :type "
+              + "where c.standard=:standard "
+              + "and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "and c.type != :type "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandardAndNotType(
       @Param("domain") String domain,
@@ -230,9 +230,9 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where selectable = 1 "
-              + "and standard=:standard "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "where c.selectable = 1 "
+              + "and c.standard=:standard "
+              + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaTopCountsByStandard(
       @Param("domain") String domain, @Param("standard") Boolean standard, Pageable page);
@@ -283,11 +283,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where type in (:types) "
-              + "and standard=:standard "
-              + "and hierarchy in (:hierarchies) "
-              + "and code like upper(concat(:term,'%')) "
-              + "and match(fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "where c.type in (:types) "
+              + "and c.standard=:standard "
+              + "and c.hierarchy in (:hierarchies) "
+              + "and c.code like upper(concat(:term,'%')) "
+              + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndCode(
       @Param("domain") String domain,
@@ -301,10 +301,10 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where type in (:types) "
-              + "and standard = :standard "
-              + "and hierarchy in (:hierarchies) "
-              + "and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "where c.type in (:types) "
+              + "and c.standard = :standard "
+              + "and c.hierarchy in (:hierarchies) "
+              + "and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, name asc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndFullText(
       @Param("domain") String domain,
@@ -354,12 +354,12 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where type=:type "
-              + "and match(fullText, concat('+[', :domainId, '_rank1]')) > 0")
+              + "where c.type=:type "
+              + "and match(c.fullText, concat('+[', :domainId, '_rank1]')) > 0")
   List<DbCriteria> findByDomainIdAndType(
       @Param("domainId") String domainId, @Param("type") String type, Sort sort);
 
-  @Query(value = "select c.id from DbCriteria c where domainId = 'SURVEY' and name = :name")
+  @Query(value = "select c.id from DbCriteria c where c.domainId = 'SURVEY' and c.name = :name")
   Long findSurveyId(@Param("name") String name);
 
   @Query(
