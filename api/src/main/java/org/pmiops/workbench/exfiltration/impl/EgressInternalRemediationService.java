@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@Service("internal-remediation-service")
+@Service("internalEgressService")
 public class EgressInternalRemediationService extends EgressRemediationService {
 
   private final EgressJiraHandler egressJiraHandler;
@@ -33,7 +33,7 @@ public class EgressInternalRemediationService extends EgressRemediationService {
       LeonardoNotebooksClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      @Qualifier("internal-jira-handler") EgressJiraHandler egressJiraHandler,
+      @Qualifier("internalJiraHandler") EgressJiraHandler egressJiraHandler,
       MailService mailService) {
     super(
         clock,

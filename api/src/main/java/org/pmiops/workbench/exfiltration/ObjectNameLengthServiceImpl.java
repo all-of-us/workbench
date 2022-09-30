@@ -51,8 +51,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
       IamService iamService,
       UserService userService,
       EgressEventDao egressEventDao,
-      @Qualifier("internal-remediation-service")
-          EgressRemediationService egressRemediationService) {
+      @Qualifier("internalEgressService") EgressRemediationService egressRemediationService) {
     this.fireCloudService = fireCloudService;
     this.workspaceService = workspaceService;
     this.bucketAuditQueryService = bucketAuditQueryService;
@@ -98,8 +97,8 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
       DbWorkspace workspace = projectIdToDbWorkspace.get(bucketAuditEntry.getGoogleProjectId());
       LOGGER.info(
           String.format(
-              "Found an audit entry that exceeds the threshold, workspace ID: %s, google ID: %s",
-              workspace.getWorkspaceId(), workspace.getGoogleProject()));
+              "Found an audit entry that exceeds the threshold, workspace namespace: %s, google ID: %s",
+              workspace.getWorkspaceNamespace(), workspace.getGoogleProject()));
 
       // Get the workspace from firecloud. In order to get the bucket name. To avoid processing
       // other buckets not related to the user actions.

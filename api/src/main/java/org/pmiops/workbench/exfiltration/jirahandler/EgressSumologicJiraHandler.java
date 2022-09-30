@@ -22,7 +22,7 @@ import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("sumologic-jira-handler")
+@Service("sumologicJiraHandler")
 public class EgressSumologicJiraHandler extends EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressSumologicJiraHandler.class.getName());

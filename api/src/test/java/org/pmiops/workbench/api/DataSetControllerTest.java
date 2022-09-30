@@ -216,7 +216,7 @@ public class DataSetControllerTest {
   @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
-  @Qualifier("internal-remediation-service")
+  @Qualifier("internalEgressService")
   EgressRemediationService egressRemediationService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;

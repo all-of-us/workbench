@@ -299,7 +299,7 @@ public class WorkspacesControllerTest {
   @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
-  @Qualifier("internal-remediation-service")
+  @Qualifier("internalEgressService")
   EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;

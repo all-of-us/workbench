@@ -90,7 +90,7 @@ public class EgressRemediationServiceTest {
   @Autowired private UserDao userDao;
 
   @Autowired
-  @Qualifier("sumologic-egress-service")
+  @Qualifier("sumologicEgressService")
   private EgressRemediationService egressRemediationService;
 
   @Autowired private EgressJiraHandler egressJiraHandler;

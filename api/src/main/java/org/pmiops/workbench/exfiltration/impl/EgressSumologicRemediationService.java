@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@Service("sumologic-egress-service")
+@Service("sumologicEgressService")
 public class EgressSumologicRemediationService extends EgressRemediationService {
 
   private final EgressJiraHandler egressJiraHandler;
@@ -33,7 +33,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
       LeonardoNotebooksClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      @Qualifier("sumologic-jira-handler") EgressJiraHandler egressJiraHandler,
+      @Qualifier("sumologicJiraHandler") EgressJiraHandler egressJiraHandler,
       MailService mailService) {
     super(
         clock,

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CloudTaskEgressController implements CloudTaskEgressApiDelegate {
 
   @Autowired
-  @Qualifier("sumologic-egress-service")
+  @Qualifier("sumologicEgressService")
   private EgressRemediationService egressRemediationService;
 
   @Override

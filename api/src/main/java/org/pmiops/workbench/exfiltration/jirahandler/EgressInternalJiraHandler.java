@@ -18,7 +18,7 @@ import org.pmiops.workbench.jira.model.SearchResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("internal-jira-handler")
+@Service("internalJiraHandler")
 public class EgressInternalJiraHandler extends EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressInternalJiraHandler.class.getName());

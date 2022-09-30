@@ -133,7 +133,7 @@ public class WorkspaceServiceTest {
   @MockBean UserService userService;
 
   @MockBean
-  @Qualifier("internal-remediation-service")
+  @Qualifier("internalEgressService")
   EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;
