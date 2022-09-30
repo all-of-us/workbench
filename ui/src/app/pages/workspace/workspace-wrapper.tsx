@@ -111,7 +111,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
     const params = useParams<MatchParams>();
     const { ns, wsid } = params;
 
-    const [showNewCTNotification, setShowNewCTNotification] = useState(false);
+    const [showNewCtNotification, setShowNewCtNotification] = useState(false);
 
     useEffect(() => {
       const updateStores = async (namespace) => {
@@ -198,7 +198,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
         workspace?.accessTierShortName === AccessTierShortNames.Controlled;
       const tenMinutesAgo = Date.now() - 10 * 60 * 1000; // arbitrary notion of 'new' workspace
       const isNew = workspace?.creationTime > tenMinutesAgo;
-      setShowNewCTNotification(isControlled && isNew);
+      setShowNewCtNotification(isControlled && isNew);
     }, [workspace]);
 
     return (
@@ -209,8 +209,8 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
               <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
             )}
             <MaybeNewCtNotification
-              isNewCT={showNewCTNotification}
-              onCancel={() => setShowNewCTNotification(false)}
+              isNewCT={showNewCtNotification}
+              onCancel={() => setShowNewCtNotification(false)}
             />
             <HelpSidebar pageKey={routeData.pageKey} />
             <div
