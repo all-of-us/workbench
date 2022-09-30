@@ -329,7 +329,7 @@ public class FreeTierBillingService {
 
     if (remainingBalance < 0 && previousRemainingBalance > 0) {
       try {
-        mailService.alertUserFreeTierExpiration(user);
+        mailService.alertUserInitialCreditsExpiration(user);
       } catch (MessagingException e) {
         logger.log(Level.WARNING, "failed to mail free tier expiration email", e);
       }
@@ -358,7 +358,7 @@ public class FreeTierBillingService {
         // only alert if we have not done so previously
         if (CostComparisonUtils.compareCostFractions(previousFraction, threshold) <= 0) {
           try {
-            mailService.alertUserFreeTierDollarThreshold(
+            mailService.alertUserInitialCreditsDollarThreshold(
                 user, threshold, currentCost, remainingBalance);
           } catch (final MessagingException e) {
             logger.log(Level.WARNING, "failed to mail threshold email", e);

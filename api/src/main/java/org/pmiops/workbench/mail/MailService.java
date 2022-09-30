@@ -25,11 +25,11 @@ public interface MailService {
       final String contactEmail, final String userInstructions, final String username)
       throws MessagingException;
 
-  void alertUserFreeTierDollarThreshold(
+  void alertUserInitialCreditsDollarThreshold(
       final DbUser user, double threshold, double currentUsage, double remainingBalance)
       throws MessagingException;
 
-  void alertUserFreeTierExpiration(final DbUser user) throws MessagingException;
+  void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException;
 
   void alertUserRegisteredTierWarningThreshold(
       final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException;

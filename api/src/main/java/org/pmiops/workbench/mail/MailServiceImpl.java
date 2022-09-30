@@ -57,25 +57,25 @@ public class MailServiceImpl implements MailService {
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
-  private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
-
-  private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
-  private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
-  private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
-      "emails/dollarthresholdemail/content.html";
-  private static final String FREE_TIER_EXPIRATION_RESOURCE =
-      "emails/freecreditsexpirationemail/content.html";
-  private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
-      "emails/rt_access_threshold_email/content.html";
+  private static final String EGRESS_REMEDIATION_RESOURCE =
+      "emails/egress_remediation/content.html";
+  private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
+      "emails/initial_credits_dollar_threshold/content.html";
+  private static final String INITIAL_CREDITS_EXPIRATION_RESOURCE =
+      "emails/initial_credits_expiration/content.html";
+  private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
-      "emails/rt_access_expired_email/content.html";
-  private static final String SETUP_BILLING_ACCOUNT_EMAIL =
-      "emails/setup_gcp_billing_account_email/content.html";
-  private static final String EGRESS_REMEDIATION_EMAIL =
-      "emails/egress_remediation_email/content.html";
-  private static final String WORKSPACE_ADMIN_LOCKING_EMAIL =
-      "emails/workspace_admin_locking_email/content.html";
-  private static final String UNUSED_DISK_EMAIL = "emails/unused_disk_email/content.html";
+      "emails/rt_access_expired/content.html";
+  private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
+      "emails/rt_access_threshold/content.html";
+  private static final String SETUP_BILLING_ACCOUNT_RESOURCE =
+      "emails/setup_gcp_billing_account/content.html";
+  private static final String UNUSED_DISK_RESOURCE = "emails/unused_disk/content.html";
+  private static final String WELCOME_RESOURCE = "emails/welcome/content.html";
+  private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
+      "emails/workspace_admin_locking/content.html";
+
+  private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
   private static final String OPEN_LI_TAG = "<li>";
   private static final String CLOSE_LI_TAG = "</li>";
@@ -151,20 +151,20 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserFreeTierDollarThreshold(
+  public void alertUserInitialCreditsDollarThreshold(
       final DbUser user, double threshold, double currentUsage, double remainingBalance)
       throws MessagingException {
 
     final String logMsg =
         String.format(
-            "User %s has passed the %.2f free tier dollar threshold.  Current total usage is $%.2f with remaining balance $%.2f",
+            "User %s has passed the %.2f initial credits dollar threshold.  Current total usage is $%.2f with remaining balance $%.2f",
             user.getUsername(), threshold, currentUsage, remainingBalance);
     log.info(logMsg);
 
     final String htmlMessage =
         buildHtml(
-            FREE_TIER_DOLLAR_THRESHOLD_RESOURCE,
-            freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
+            INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE,
+            initialCreditsDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -172,19 +172,20 @@ public class MailServiceImpl implements MailService {
         String.format(
             "Reminder - %s Initial credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
-        String.format("User %s passed a free tier dollar threshold", user.getUsername()),
+        String.format("User %s passed an initial credits dollar threshold", user.getUsername()),
         htmlMessage);
   }
 
   @Override
-  public void alertUserFreeTierExpiration(final DbUser user) throws MessagingException {
+  public void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException {
 
     final String expirationMsg =
         String.format("Initial credits have expired for User %s", user.getUsername());
     log.info(expirationMsg);
 
     final String htmlMessage =
-        buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
+        buildHtml(
+            INITIAL_CREDITS_EXPIRATION_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -258,7 +259,7 @@ public class MailServiceImpl implements MailService {
       throws MessagingException {
     final String htmlMessage =
         buildHtml(
-            UNUSED_DISK_EMAIL,
+            UNUSED_DISK_RESOURCE,
             ImmutableMap.<EmailSubstitutionField, String>builder()
                 .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
                 .put(
@@ -294,7 +295,8 @@ public class MailServiceImpl implements MailService {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     final String htmlMessage =
-        buildHtml(SETUP_BILLING_ACCOUNT_EMAIL, setupBillingAccountEmailMap(dbUser, emailRequest));
+        buildHtml(
+            SETUP_BILLING_ACCOUNT_RESOURCE, setupBillingAccountEmailMap(dbUser, emailRequest));
 
     List<String> receiptEmails = new ArrayList<>();
     receiptEmails.add(dbUser.getContactEmail());
@@ -325,7 +327,7 @@ public class MailServiceImpl implements MailService {
             .get(action);
     String htmlMessage =
         buildHtml(
-            EGRESS_REMEDIATION_EMAIL,
+            EGRESS_REMEDIATION_RESOURCE,
             ImmutableMap.<EmailSubstitutionField, String>builder()
                 .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
                 .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
@@ -368,7 +370,7 @@ public class MailServiceImpl implements MailService {
             "Admin locking email for workspace '%s' (%s) sent to owners %s",
             workspace.getName(), workspace.getWorkspaceNamespace(), ownersInfoStr),
         buildHtml(
-            WORKSPACE_ADMIN_LOCKING_EMAIL,
+            WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
   }
 
@@ -429,13 +431,14 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private String getFreeCreditsResolutionText() {
-    return "you can request additional free credits by contacting support "
-        + "or provide a new billing account in the Workbench to continue with your analyses. "
-        + "Instructions for providing a new billing account are provided in the Workbench.";
+  private String getInitialCreditsResolutionText() {
+    return String.format(
+        "can provide a new billing account in the Workbench to continue with your analyses. "
+            + "Instructions for providing a new billing account are provided in the %s.",
+        getSupportHubUrlAsHref());
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsDollarThresholdSubstitutionMap(
       final DbUser user, double currentUsage, double remainingBalance) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
@@ -445,11 +448,11 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
-        .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
+        .put(EmailSubstitutionField.INITIAL_CREDITS_RESOLUTION, getInitialCreditsResolutionText())
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> freeTierExpirationSubstitutionMap(
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExpirationSubstitutionMap(
       DbUser user) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
@@ -457,7 +460,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
+        .put(EmailSubstitutionField.INITIAL_CREDITS_RESOLUTION, getInitialCreditsResolutionText())
         .build();
   }
 
@@ -469,7 +472,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
         .put(EmailSubstitutionField.USERNAME, username)
-        .put(EmailSubstitutionField.URL, getURLAsHref())
+        .put(EmailSubstitutionField.URL, getUiUrlAsHref())
         .build();
   }
 
@@ -704,8 +707,19 @@ public class MailServiceImpl implements MailService {
         workspace.getFirecloudName());
   }
 
-  private String getURLAsHref() {
+  private String getUiUrlAsHref() {
     final String url = workbenchConfigProvider.get().server.uiBaseUrl;
-    return String.format("<a href=\"%s\">%s</a>", url, url);
+    return href(url, url);
+  }
+
+  private String getSupportHubUrlAsHref() {
+    final String host = workbenchConfigProvider.get().zendesk.host;
+    final String path =
+        "/hc/en-us/articles/360039539411-Initial-credits-and-how-to-create-a-billing-account";
+    return href(host + path, "User Support Hub");
+  }
+
+  private String href(String url, String text) {
+    return String.format("<a href=\"%s\">%s</a>", url, text);
   }
 }
