@@ -196,13 +196,13 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
     useEffect(() => {
       const isControlled =
         workspace?.accessTierShortName === AccessTierShortNames.Controlled;
-      const tenMinutesAgo = Date.now() - 1000 * 60 * 1000; // arbitrary notion of 'new' workspace
+      const tenMinutesAgo = Date.now() - 10 * 60 * 1000; // arbitrary notion of 'new' workspace
       const isNew = workspace?.creationTime > tenMinutesAgo;
       setShowNewCTNotification(isControlled && isNew);
     }, [workspace]);
 
     return (
-      <React.Fragment>
+      <>
         {workspace ? (
           <>
             {!routeData.minimizeChrome && (
@@ -235,7 +235,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
             <Spinner />
           </div>
         )}
-      </React.Fragment>
+      </>
     );
   }
 );
