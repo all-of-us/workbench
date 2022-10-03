@@ -48,7 +48,11 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {string} resourceName
    * @param {string} newResourceName
    */
-  async renameResourceFromTable(resourceName: string, newResourceName: string, resourceType: ResourceCard): Promise<string[]> {
+  async renameResourceFromTable(
+    resourceName: string,
+    newResourceName: string,
+    resourceType: ResourceCard
+  ): Promise<string[]> {
     return new DataResourceCard(this.page).renameFromTable(resourceName, newResourceName, resourceType);
   }
 

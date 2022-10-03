@@ -48,7 +48,7 @@ interface TableData {
 }
 
 interface Props {
-  existingNameList?: Function;
+  existingNameList: string[];
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
 }
@@ -60,11 +60,51 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     await props.onUpdate();
   };
 
+  const getExistingNameList = (resourceType) => {
+    const resourceList = props.workspaceResources;
+    if (resourceType.dataSet) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.dataSet !== null && resource.dataSet !== undefined
+        )
+        .map((resource) => resource.dataSet.name);
+    } else if (resourceType.conceptSet) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.conceptSet !== null && resource.conceptSet !== undefined
+        )
+        .map((resource) => resource.conceptSet.name);
+    } else if (resourceType.cohort) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.cohort !== null && resource.cohort !== undefined
+        )
+        .map((resource) => resource.cohort.name);
+    } else if (resourceType.cohortReview) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.cohortReview !== null &&
+            resource.cohortReview !== undefined
+        )
+        .map((resource) => resource.cohortReview.cohortName);
+    } else {
+      return [];
+    }
+  };
+
   const renderResourceMenu = (resource: WorkspaceResource) => {
+    const existingNameList = props.existingNameList
+      ? props.existingNameList
+      : getExistingNameList(resource);
+    console.log(existingNameList);
     return renderResourceCard({
       resource,
       menuOnly: true,
-      existingNameList: props.existingNameList(resource),
+      existingNameList: existingNameList,
       onUpdate: reloadResources,
     });
   };

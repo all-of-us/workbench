@@ -258,6 +258,7 @@ export const NotebookList = withCurrentWorkspace()(
                   </FlexRow>
                   {!loading && (
                     <ResourcesList
+                      existingNameList={notebookNameList}
                       workspaceResources={this.getNotebookListAsResources()}
                       onUpdate={() => this.loadNotebooks()}
                     />
