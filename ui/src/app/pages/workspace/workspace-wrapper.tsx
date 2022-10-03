@@ -63,21 +63,21 @@ const NewCtNotification = (props: NotificationProps) => {
     <StyledExternalLink
       href={`${zendeskBaseUrl()}/en-us/articles/4616869437204-Controlled-CDR-Directory`}
     >
-      This resource
+      Genomic data paths
     </StyledExternalLink>
   );
   const dataFilesLink = (
     <StyledExternalLink
       href={`${zendeskBaseUrl()}/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
     >
-      this resource
+      genomic data formatting
     </StyledExternalLink>
   );
   const cohortBuilderLink = (
     <StyledExternalLink
       href={`${zendeskBaseUrl()}/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
     >
-      this resource
+      how to build a cohort
     </StyledExternalLink>
   );
 
@@ -85,14 +85,8 @@ const NewCtNotification = (props: NotificationProps) => {
     <div style={styles.newCtNotification}>
       <FlexRow>
         <FlexColumn>
-          <div>
-            These resources will get you started using the genomic data.
-          </div>
-          <div>
-            {dataPathsLink} provides full genomic data paths, {dataFilesLink}{' '}
-            provides information about genomic data formatting, and{' '}
-            {cohortBuilderLink} describes how to build a cohort.
-          </div>
+          These resources will get you started using the genomic data:{' '}
+          {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
         </FlexColumn>
         <FontAwesomeIcon
           icon={faXmark}
