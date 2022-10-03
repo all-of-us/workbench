@@ -316,7 +316,7 @@ export default class DataResourceCard extends BaseCard {
     // Type description. Notebook rename modal does not have Description textarea.
     if (resourceType !== ResourceCard.Notebook) {
       const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
-      await descriptionTextarea.type(`Puppeteer automation test. Rename ${name}.`);
+      await descriptionTextarea.type(`Puppeteer automation test. Rename ${newName}.`);
     }
 
     let buttonLink;
@@ -342,7 +342,7 @@ export default class DataResourceCard extends BaseCard {
 
     await modal.clickButton(buttonLink, { waitForClose: true });
     await waitWhileLoading(this.page);
-    logger.info(`Renamed ${resourceType} "${name}" to "${newName}"`);
+    logger.info(`Renamed ${resourceType} to "${newName}"`);
     return modalTextContents;
   }
 }
