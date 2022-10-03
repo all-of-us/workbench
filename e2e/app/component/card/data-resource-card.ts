@@ -11,7 +11,6 @@ import Textarea from 'app/element/textarea';
 import DataTable from 'app/component/data-table';
 import SnowmanMenu from 'app/component/snowman-menu';
 import Link from 'app/element/link';
-// import Table from 'app/component/table';
 
 /**
  * DataResourceCard represents resource card found on Workspace's data page.

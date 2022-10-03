@@ -44,7 +44,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Rename Notebook, Concept Set, Dataset or Cohorts thru the snowman menu located inside the Dataset Resource card.
+   * Rename Notebook, Concept Set, Dataset or Cohorts thru the snowman menu located inside the Resource table.
    * @param {string} resourceName
    * @param {string} newResourceName
    */
