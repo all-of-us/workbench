@@ -85,10 +85,10 @@ describe('Dataset rename', () => {
 
     // Verify existences of old and new Datasets cards.
     const newDatasetExists = await resourceCard.findResourceTableEntryByName({ name: newDatasetName });
-    expect(newDatasetExists).toBe(true);
+    expect(newDatasetExists).not.toBeNull();
 
     const oldDatasetExists = await resourceCard.findResourceTableEntryByName({ name: datasetName });
-    expect(oldDatasetExists).toBe(false);
+    expect(oldDatasetExists).toBeNull();
 
     await dataPage.deleteResourceFromTable(newDatasetName, ResourceCard.Dataset);
   });
