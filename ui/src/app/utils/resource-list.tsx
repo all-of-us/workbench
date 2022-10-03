@@ -48,6 +48,7 @@ interface TableData {
 }
 
 interface Props {
+  existingNameList?: Function;
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
 }
@@ -63,7 +64,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     return renderResourceCard({
       resource,
       menuOnly: true,
-      existingNameList: [], // TODO existing bug RW-5847: does not populate names for rename modal
+      existingNameList: props.existingNameList(resource),
       onUpdate: reloadResources,
     });
   };

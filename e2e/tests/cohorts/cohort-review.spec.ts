@@ -99,7 +99,7 @@ describe('Cohort review set tests', () => {
 
     const dataResourcePage = new DataResourceCard(page);
     await findOrCreateCohortCard(page, cohortName);
-    await dataResourcePage.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
+    await dataResourcePage.selectSnowmanMenu(MenuOption.Review, { name: cohortName, waitForNav: true });
 
     let cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();
@@ -271,7 +271,7 @@ describe('Cohort review set tests', () => {
 
     // Rename Cohort Review
     const newCohortReviewName = makeRandomName();
-    await dataPage.renameResource(cohortReview2Name, newCohortReviewName, ResourceCard.CohortReview);
+    await dataPage.renameResourceFromTable(cohortReview2Name, newCohortReviewName, ResourceCard.CohortReview);
 
     // Verify Rename Cohort Review is successful.
     expect(await new DataResourceCard(page).findResourceTableEntryByName({ name: newCohortReviewName })).toBeTruthy();

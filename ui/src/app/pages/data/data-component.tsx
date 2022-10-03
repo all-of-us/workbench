@@ -141,6 +141,41 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     }
   });
 
+  const getExistingNameList = (resourceType) => {
+    if (resourceType.dataSet) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.dataSet !== null && resource.dataSet !== undefined
+        )
+        .map((resource) => resource.dataSet.name);
+    } else if (resourceType.conceptSet) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.conceptSet !== null && resource.conceptSet !== undefined
+        )
+        .map((resource) => resource.conceptSet.name);
+    } else if (resourceType.cohort) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.cohort !== null && resource.cohort !== undefined
+        )
+        .map((resource) => resource.cohort.name);
+    } else if (resourceType.cohortReview) {
+      return resourceList
+        .filter(
+          (resource) =>
+            resource.cohortReview !== null &&
+            resource.cohortReview !== undefined
+        )
+        .map((resource) => resource.cohortReview.cohortName);
+    } else {
+      return [];
+    }
+  };
+
   return (
     <React.Fragment>
       <div style={{ paddingLeft: '1.5rem' }}>
@@ -300,6 +335,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         >
           {
             <ResourcesList
+              existingNameList={getExistingNameList}
               workspaceResources={filteredList}
               onUpdate={() => loadResources()}
             />

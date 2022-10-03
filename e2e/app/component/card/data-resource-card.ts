@@ -317,4 +317,64 @@ export default class DataResourceCard extends BaseCard {
     logger.info(`Renamed ${resourceType} "${name}" to "${newName}"`);
     return modalTextContents;
   }
+
+  async renameFromTable(name: string, newName: string, resourceType: ResourceCard): Promise<string[]> {
+    // Find the Data resource card that match the resource name.
+    const resourceCard = new DataResourceCard(this.page);
+    const card = await resourceCard.findResourceTableEntryByName({ name });
+    if (!card) {
+      throw new Error(`ERROR: Failed to find ${resourceType} card "${name}"`);
+    }
+
+    let option: MenuOption;
+    switch (resourceType) {
+      case ResourceCard.Dataset:
+        option = MenuOption.RenameDataset;
+        break;
+      default:
+        option = MenuOption.Rename;
+        break;
+    }
+    await resourceCard.selectSnowmanMenu(option, { name: name, waitForNav: false });
+
+    const modal = new Modal(this.page);
+    await modal.waitForLoad();
+    const modalTextContents = await modal.getTextContent();
+
+    // Type new name.
+    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
+    await newNameTextbox.type(newName);
+
+    // Type description. Notebook rename modal does not have Description textarea.
+    if (resourceType !== ResourceCard.Notebook) {
+      const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
+      await descriptionTextarea.type(`Puppeteer automation test. Rename ${name}.`);
+    }
+
+    let buttonLink;
+    switch (resourceType) {
+      case ResourceCard.Cohort:
+        buttonLink = LinkText.RenameCohort;
+        break;
+      case ResourceCard.ConceptSet:
+        buttonLink = LinkText.RenameConceptSet;
+        break;
+      case ResourceCard.Dataset:
+        buttonLink = LinkText.RenameDataset;
+        break;
+      case ResourceCard.Notebook:
+        buttonLink = LinkText.RenameNotebook;
+        break;
+      case ResourceCard.CohortReview:
+        buttonLink = LinkText.RenameCohortReview;
+        break;
+      default:
+        throw new Error(`Case ${resourceType} handling is not defined.`);
+    }
+
+    await modal.clickButton(buttonLink, { waitForClose: true });
+    await waitWhileLoading(this.page);
+    logger.info(`Renamed ${resourceType} "${name}" to "${newName}"`);
+    return modalTextContents;
+  }
 }
