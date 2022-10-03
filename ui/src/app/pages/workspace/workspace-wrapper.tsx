@@ -6,7 +6,7 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { StyledExternalLink } from 'app/components/buttons';
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import { FlexRow } from 'app/components/flex';
 import { HelpSidebar } from 'app/components/help-sidebar';
 import { Spinner } from 'app/components/spinners';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
@@ -83,11 +83,11 @@ const NewCtNotification = (props: NotificationProps) => {
 
   return (
     <div style={styles.newCtNotification}>
-      <FlexRow>
-        <FlexColumn>
+      <FlexRow style={{ justifyContent: 'space-between' }}>
+        <div>
           These resources will get you started using the genomic data:{' '}
           {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
-        </FlexColumn>
+        </div>
         <FontAwesomeIcon
           icon={faXmark}
           style={{ fontSize: '21px', marginLeft: '1em' }}
