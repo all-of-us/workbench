@@ -277,45 +277,8 @@ export default class DataResourceCard extends BaseCard {
     }
     await card.selectSnowmanMenu(option, { waitForNav: false });
 
-    const modal = new Modal(this.page);
-    await modal.waitForLoad();
-    const modalTextContents = await modal.getTextContent();
-
-    // Type new name.
-    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameTextbox.type(newName);
-
-    // Type description. Notebook rename modal does not have Description textarea.
-    if (resourceType !== ResourceCard.Notebook) {
-      const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
-      await descriptionTextarea.type(`Puppeteer automation test. Rename ${name}.`);
-    }
-
-    let buttonLink;
-    switch (resourceType) {
-      case ResourceCard.Cohort:
-        buttonLink = LinkText.RenameCohort;
-        break;
-      case ResourceCard.ConceptSet:
-        buttonLink = LinkText.RenameConceptSet;
-        break;
-      case ResourceCard.Dataset:
-        buttonLink = LinkText.RenameDataset;
-        break;
-      case ResourceCard.Notebook:
-        buttonLink = LinkText.RenameNotebook;
-        break;
-      case ResourceCard.CohortReview:
-        buttonLink = LinkText.RenameCohortReview;
-        break;
-      default:
-        throw new Error(`Case ${resourceType} handling is not defined.`);
-    }
-
-    await modal.clickButton(buttonLink, { waitForClose: true });
-    await waitWhileLoading(this.page);
-    logger.info(`Renamed ${resourceType} "${name}" to "${newName}"`);
-    return modalTextContents;
+    const modalText = await this.renameModal(newName, resourceType);
+    return modalText;
   }
 
   async renameFromTable(name: string, newName: string, resourceType: ResourceCard): Promise<string[]> {
@@ -337,6 +300,11 @@ export default class DataResourceCard extends BaseCard {
     }
     await resourceCard.selectSnowmanMenu(option, { name: name, waitForNav: false });
 
+    const modalText = await this.renameModal(newName, resourceType);
+    return modalText;
+  }
+
+  async renameModal(newName: string, resourceType: ResourceCard): Promise<string[]> {
     const modal = new Modal(this.page);
     await modal.waitForLoad();
     const modalTextContents = await modal.getTextContent();
