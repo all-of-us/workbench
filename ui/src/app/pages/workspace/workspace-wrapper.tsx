@@ -56,10 +56,9 @@ const styles = reactStyles({
 });
 
 interface NotificationProps {
-  isNewCT: boolean;
   onCancel: () => void;
 }
-const MaybeNewCtNotification = (props: NotificationProps) => {
+const NewCtNotification = (props: NotificationProps) => {
   const dataPathsLink = (
     <StyledExternalLink
       href={`${zendeskBaseUrl()}/en-us/articles/4616869437204-Controlled-CDR-Directory`}
@@ -83,27 +82,25 @@ const MaybeNewCtNotification = (props: NotificationProps) => {
   );
 
   return (
-    props.isNewCT && (
-      <div style={styles.newCtNotification}>
-        <FlexRow>
-          <FlexColumn>
-            <div>
-              These resources will get you started using the genomic data.
-            </div>
-            <div>
-              {dataPathsLink} provides full genomic data paths, {dataFilesLink}{' '}
-              provides information about genomic data formatting, and{' '}
-              {cohortBuilderLink} describes how to build a cohort.
-            </div>
-          </FlexColumn>
-          <FontAwesomeIcon
-            icon={faXmark}
-            style={{ fontSize: '21px', marginLeft: '1em' }}
-            onClick={() => props.onCancel()}
-          />
-        </FlexRow>
-      </div>
-    )
+    <div style={styles.newCtNotification}>
+      <FlexRow>
+        <FlexColumn>
+          <div>
+            These resources will get you started using the genomic data.
+          </div>
+          <div>
+            {dataPathsLink} provides full genomic data paths, {dataFilesLink}{' '}
+            provides information about genomic data formatting, and{' '}
+            {cohortBuilderLink} describes how to build a cohort.
+          </div>
+        </FlexColumn>
+        <FontAwesomeIcon
+          icon={faXmark}
+          style={{ fontSize: '21px', marginLeft: '1em' }}
+          onClick={() => props.onCancel()}
+        />
+      </FlexRow>
+    </div>
   );
 };
 
@@ -214,10 +211,11 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
             {!routeData.minimizeChrome && (
               <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
             )}
-            <MaybeNewCtNotification
-              isNewCT={showNewCtNotification}
-              onCancel={() => setShowNewCtNotification(false)}
-            />
+            {showNewCtNotification && (
+              <NewCtNotification
+                onCancel={() => setShowNewCtNotification(false)}
+              />
+            )}
             <HelpSidebar pageKey={routeData.pageKey} />
             <div
               style={{
