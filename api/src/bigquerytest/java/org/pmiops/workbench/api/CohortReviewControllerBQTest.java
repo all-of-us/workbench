@@ -91,6 +91,7 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -99,7 +100,6 @@ import org.springframework.context.annotation.Scope;
 
 @Import({TestJpaConfig.class, CohortReviewControllerBQTest.Configuration.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
-
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
@@ -139,9 +139,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CloudBillingClientImpl.class
   })
   static class Configuration {
-
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
     }

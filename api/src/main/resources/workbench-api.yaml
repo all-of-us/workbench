@@ -4643,7 +4643,7 @@ definitions:
             for users, workspaces, and similar user-created content.
 
       The following authorities are deprecated and should no longer be used:
-        * REVIEW_RESEARCH_PURPOSE
+        * REVIEW_RESEARCH_PURPOSE (0)
 
       Note on enum names: Swagger trims any common prefix from enum values' corresponding
       Java fields by default; this has no side-effect currently as there is
@@ -4651,7 +4651,6 @@ definitions:
     type: string
     description: actions a user can have authority/permission to perform
     enum:
-    - REVIEW_RESEARCH_PURPOSE
     - DEVELOPER
     - ACCESS_CONTROL_ADMIN
     - FEATURED_WORKSPACE_ADMIN

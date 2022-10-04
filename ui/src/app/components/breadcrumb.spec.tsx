@@ -3,9 +3,7 @@ import { WorkspacesApi } from 'generated/fetch';
 import { getTrail } from 'app/components/breadcrumb';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 
-import defaultServerConfig from 'testing/default-server-config';
 import { cohortReviewStubs } from 'testing/stubs/cohort-review-service-stub';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
@@ -18,12 +16,6 @@ describe('getTrail', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableMultiReview: true,
-      },
-    });
   });
 
   it('works', () => {

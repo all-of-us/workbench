@@ -24,7 +24,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { currentCohortReviewStore } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 interface Props
@@ -65,20 +65,13 @@ export const DetailPage = fp.flow(
           sortOrder: SortOrder.Asc,
           filters: { items: [] },
         };
-        const getCohortReview = serverConfigStore.get().config.enableMultiReview
-          ? cohortReviewApi().getParticipantCohortStatuses(
-              ns,
-              wsid,
-              +cid,
-              +crid,
-              request
-            )
-          : cohortReviewApi().getParticipantCohortStatusesOld(
-              ns,
-              wsid,
-              +cid,
-              request
-            );
+        const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
+          ns,
+          wsid,
+          +cid,
+          +crid,
+          request
+        );
         await getCohortReview.then((response) => {
           cohortReview = response.cohortReview;
           currentCohortReviewStore.next(cohortReview);
@@ -111,9 +104,7 @@ export const DetailPage = fp.flow(
         await cohortReviewApi().getParticipantCohortStatus(
           ns,
           wsid,
-          serverConfigStore.get().config.enableMultiReview
-            ? +crid
-            : this.props.cohortReview.cohortReviewId,
+          +crid,
           +pid
         );
       participantStore.next(participantCohortStatus);

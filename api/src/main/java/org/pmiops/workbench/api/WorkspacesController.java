@@ -400,7 +400,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workspace.getBillingAccountName());
     } catch (ServerErrorException e) {
-      new ServerErrorException("Could not update the workspace's billing account", e);
+      throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
     return dbWorkspace;
@@ -496,15 +496,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.updateWorkspaceBillingAccount(
             dbWorkspace, request.getWorkspace().getBillingAccountName());
       } catch (ServerErrorException e) {
-        new ServerErrorException("Could not update the workspace's billing account", e);
+        throw new ServerErrorException("Could not update the workspace's billing account", e);
       }
     }
 
     try {
-      dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
-      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
     } catch (Exception e) {
       // Tell Google Cloud to set the billing account back to the original one since our
       // update database call failed
@@ -601,7 +600,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, clonedRoles);
     }
 
-    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
     workspaceAuditor.fireDuplicateAction(
@@ -678,12 +677,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
 
+    DbUser currentUser = userProvider.get();
     // Revoke lifescience permission before asking Firecloud to remove users; after unsharing
     // in Firecloud, we can no longer get the user's petSA from SAM using their credentials.
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
       List<String> finalWorkflowUsers =
           aclsByEmail.entrySet().stream()
-              .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(currentUser, entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
 
@@ -696,7 +696,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                       (WorkspaceAccessLevel.OWNER.equals(u.getRole())
                               || WorkspaceAccessLevel.WRITER.equals(u.getRole()))
                           && !finalWorkflowUsers.contains(u.getEmail())
-                          && !u.getEmail().equals(userProvider.get().getUsername()))
+                          && !u.getEmail().equals(currentUser.getUsername()))
               .map(UserRole::getEmail)
               .collect(Collectors.toList());
       List<String> failedRevocations =
@@ -725,9 +725,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     dbWorkspace.setNeedsReviewPrompt(false);
-    dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
     try {
-      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
+      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
     } catch (Exception e) {
       throw e;
     }

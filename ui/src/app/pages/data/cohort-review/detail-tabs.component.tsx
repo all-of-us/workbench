@@ -18,7 +18,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -460,9 +460,7 @@ export const DetailTabs = fp.flow(
         const { items } = await cohortReviewApi().getParticipantChartData(
           ns,
           wsid,
-          serverConfigStore.get().config.enableMultiReview
-            ? +crid
-            : this.props.cohortReview.cohortReviewId,
+          +crid,
           +pid,
           domainName,
           10

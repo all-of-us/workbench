@@ -146,7 +146,7 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
     verify(mailService)
-        .alertUserFreeTierDollarThreshold(
+        .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 50% threshold
@@ -164,7 +164,7 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
     verify(mailService)
-        .alertUserFreeTierDollarThreshold(
+        .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 75% threshold
@@ -181,7 +181,7 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // check that we do not alert twice for 100%
 
@@ -223,7 +223,7 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
     verify(mailService)
-        .alertUserFreeTierDollarThreshold(
+        .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 30% threshold
@@ -241,7 +241,7 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
     verify(mailService)
-        .alertUserFreeTierDollarThreshold(
+        .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 65% threshold
@@ -258,7 +258,7 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // check that we do not alert twice for 100%
 
@@ -282,7 +282,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
   }
@@ -300,7 +300,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
   }
@@ -393,7 +393,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 150.0);
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 150.0);
@@ -425,7 +425,7 @@ public class FreeTierBillingServiceTest {
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 300.0);
 
@@ -464,7 +464,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
 
     // confirm DB updates after checkFreeTierBillingUsage()
@@ -505,8 +505,8 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user1, user2));
-    verify(mailService).alertUserFreeTierExpiration(eq(user1));
-    verify(mailService).alertUserFreeTierExpiration(eq(user2));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user1));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user2));
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
 
@@ -538,7 +538,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
 
     Timestamp t0 = workspaceFreeTierUsageDao.findAll().iterator().next().getLastUpdateTime();
@@ -551,7 +551,7 @@ public class FreeTierBillingServiceTest {
     // we do not alert again, but the cost field is updated in the DB
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService, times(1)).alertUserFreeTierExpiration(eq(user));
+    verify(mailService, times(1)).alertUserInitialCreditsExpiration(eq(user));
 
     // retrieve from DB again to reflect update after cron
     DbWorkspace dbWorkspace = workspaceDao.findById(workspace.getWorkspaceId()).get();
@@ -578,7 +578,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // Simulate the user attaching their own billing account to the previously free tier workspace.
     TestTransaction.start();
@@ -735,7 +735,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, freeTierWorkspace, BillingStatus.INACTIVE, 100.01);
 
@@ -767,7 +767,7 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(100.1)).when(bigQueryService).executeQuery(any());
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
   }
 
   @Test
@@ -801,7 +801,7 @@ public class FreeTierBillingServiceTest {
         .executeQuery(any());
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user));
-    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 50);
     assertSingleWorkspaceTestDbState(user, anotherWorkspace, BillingStatus.INACTIVE, 100.1);

@@ -39,8 +39,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 /**
  * Intercepts all non-OPTIONS API requests to ensure they have an appropriate auth token.
  *
- * <p>Checks handler methods for annotations
- * like @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE}) to enforce granular permissions.
+ * <p>Checks handler methods for annotations like @AuthorityRequired({Authority.SECURITY_ADMIN}) to
+ * enforce granular permissions.
  */
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
