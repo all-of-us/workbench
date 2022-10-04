@@ -61,6 +61,7 @@ interface NotificationProps {
 const NewCtNotification = (props: NotificationProps) => {
   const dataPathsLink = (
     <StyledExternalLink
+      target='_blank'
       href={`${zendeskBaseUrl()}/en-us/articles/4616869437204-Controlled-CDR-Directory`}
     >
       Genomic data paths
@@ -68,6 +69,7 @@ const NewCtNotification = (props: NotificationProps) => {
   );
   const dataFilesLink = (
     <StyledExternalLink
+      target='_blank'
       href={`${zendeskBaseUrl()}/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
     >
       genomic data formatting
@@ -75,6 +77,7 @@ const NewCtNotification = (props: NotificationProps) => {
   );
   const cohortBuilderLink = (
     <StyledExternalLink
+      target='_blank'
       href={`${zendeskBaseUrl()}/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
     >
       how to build a cohort
