@@ -6,7 +6,7 @@ require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/environments"
 
 # Utilities for generating, managing, publishing genomic data files. At a high
-# level, this facilitiates the data flow:
+# level, this facilitates the data flow:
 #
 #   Genome Centers / Broad genomic curation / preprod
 #    -> CDR ingest bucket
@@ -30,7 +30,7 @@ require_relative "../../../libproject/environments"
 #
 # Intermediates:
 #
-# We generate one or more manifests of source/desintation GCS file paths, which
+# We generate one or more manifests of source/destination GCS file paths, which
 # describe how data will be copied.
 #
 # TODO(RW-8266): details on the publishing/copy process, details on manifest provenance
@@ -40,7 +40,6 @@ require_relative "../../../libproject/environments"
 
 PROD_BROAD_BUCKET = "gs://prod-drc-broad"
 OLD_ARRAYS_PATH_INFIX = "array_old_egt_files"
-
 
 CURATION_SYNTHETIC_SOURCE_CONFIG = {
   :wgs_aw4_prefix => "gs://all-of-us-workbench-test-genomics/aw4_wgs/test_aw4.csv"
@@ -311,7 +310,7 @@ def read_all_microarray_aw4s(project, rids)
   _read_aw4_rows_for_rids(FILE_ENVIRONMENTS[project][:source_config][:microarray_aw4_prefix], rids)
 end
 
-def _apply_filename_replacement(source_name, match, replace_tmpl, rid=nil)
+def _apply_filename_replacement(source_name, match, replace_tmpl, rid = nil)
   replace = replace_tmpl
   unless rid.nil?
     replace = replace_tmpl.sub("{RID}", rid)
@@ -332,8 +331,8 @@ def _apply_storage_class_staging_prefix(path, storage_class)
 end
 
 def _build_copy_manifest_row(
-    source_path, ingest_base_path, destination, input_section,
-    rid=nil, preprod_source_cdr_base_path=nil, preprod_source_ingest_base_path=nil)
+  source_path, ingest_base_path, destination, input_section,
+  rid = nil, preprod_source_cdr_base_path = nil, preprod_source_ingest_base_path = nil)
   source_name = File.basename(source_path)
   dest_name = source_name
   replace = input_section["filenameReplace"]
@@ -387,7 +386,7 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
 
   copy_manifest = aw4_rows.flat_map do |aw4_entry|
     unless output_manifest.nil?
-      out_row = {"person_id" => aw4_entry["research_id"]}
+      out_row = { "person_id" => aw4_entry["research_id"] }
       input_section["outputManifestSpec"].each do |aw4_col, out_col|
         row = _build_copy_manifest_row(aw4_entry[aw4_col], ingest_base_path, destination, input_section, aw4_entry["research_id"])
         destination_uri = File.join(row[:destination_dir], File.basename(row[:ingest_path]))
@@ -408,9 +407,9 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
     unpooled_destination = File.join(dest_bucket, unpooled_prefix)
     copy_manifest.push(_build_copy_manifest_row(
                          output_manifest_path, unpooled_ingest_base_path, unpooled_destination, {
-                           "filenameMatch" => File.basename(output_manifest_path),
-                           "filenameReplace" => "manifest.csv",
-                         }))
+                         "filenameMatch" => File.basename(output_manifest_path),
+                         "filenameReplace" => "manifest.csv",
+                       }))
   end
 
   return [copy_manifest, output_manifest]
@@ -554,25 +553,25 @@ end
 
 def _update_project_iam_object_viewer(sa_actor, sa_principal, project_id, add)
   Common.new.run_inline([
-    "gcloud",
-    "--impersonate-service-account",
-    sa_actor,
-    "--quiet",
-    "projects",
-    add ? "add-iam-policy-binding" : "remove-iam-policy-binding",
-    project_id,
-    "--member",
-    "serviceAccount:#{sa_principal}",
-    "--role",
-    "roles/storage.objectViewer"
-  ])
+                          "gcloud",
+                          "--impersonate-service-account",
+                          sa_actor,
+                          "--quiet",
+                          "projects",
+                          add ? "add-iam-policy-binding" : "remove-iam-policy-binding",
+                          project_id,
+                          "--member",
+                          "serviceAccount:#{sa_principal}",
+                          "--role",
+                          "roles/storage.objectViewer"
+                        ])
 end
 
 def _update_bucket_storage_admin(sa_actor, sa_principal, bucket, add)
   Common.new.run_inline(
     ["gsutil", "-i", sa_actor, "iam", "ch"] +
-    (add ? [] : ["-d"]) +
-    ["serviceAccount:#{sa_principal}:objectAdmin", bucket]
+      (add ? [] : ["-d"]) +
+      ["serviceAccount:#{sa_principal}:objectAdmin", bucket]
   )
 end
 
@@ -582,17 +581,20 @@ def _maybe_update_preprod_access(project, all_tasks, add)
   preprod_deploy_account = must_get_env_value("all-of-us-rw-preprod", :publisher_account)
   preprod_ingest_bucket = must_get_env_value("all-of-us-rw-preprod", :accessTiers)["controlled"][:ingest_cdr_bucket]
 
-  if(project == "all-of-us-workbench-test")
+  if (project == "all-of-us-workbench-test")
     return
   end
 
   needs_cross_env_grant = false
+
   preprod_source_projects = (
     all_tasks
-      .map { |task| task["preprod_source_project"] }
+      .filter { |k, v| k == "preprod_source_project" }
+      .map { |k, v| v }
       .filter { |p| !p.to_s.empty? }
       .to_set
   )
+
   needs_preprod_grant = !preprod_source_projects.empty?
   if needs_preprod_grant
     unless ["all-of-us-rw-prod", "all-of-us-rw-preprod"].include? project
@@ -648,43 +650,43 @@ def stage_files_by_manifest(project, all_tasks, logs_dir, concurrency = GSUTIL_T
     unless task["preprod_source_project"].to_s.empty?
       # preprod workspace -> (cp) -> preprod ingest -> (mv) -> prod ingest
       unless system(
-          "gsutil",
-          "-i",
-          preprod_deploy_account,
-          "-m",
-          "cp",
-          "-r",
-          task["source_path"],
-          task["preprod_source_cdr_path"],
-          :out => wout,
-          :err => werr)
+        "gsutil",
+        "-i",
+        preprod_deploy_account,
+        "-m",
+        "cp",
+        "-r",
+        task["source_path"],
+        task["preprod_source_cdr_path"],
+        :out => wout,
+        :err => werr)
         # Note: we use next here because this is inside a block; this yields the value up
         # to the caller which is yielding to this block, i.e. _process_files_by_manifest.
         next [ingest_path, false]
       end
       unless system(
-          "gsutil",
-          "-i",
-          preprod_deploy_account,
-          "-m",
-          "cp",
-          "-r",
-          task["preprod_source_cdr_path"],
-          task["preprod_source_ingest_path"],
-          :out => wout,
-          :err => werr)
+        "gsutil",
+        "-i",
+        preprod_deploy_account,
+        "-m",
+        "cp",
+        "-r",
+        task["preprod_source_cdr_path"],
+        task["preprod_source_ingest_path"],
+        :out => wout,
+        :err => werr)
         next [ingest_path, false]
       end
       next [ingest_path, system(
-         "gsutil",
-         "-i",
-         deploy_account,
-          "-m",
-         "mv",
-         task["preprod_source_ingest_path"],
-         ingest_path,
-         :out => wout,
-         :err => werr)]
+        "gsutil",
+        "-i",
+        deploy_account,
+        "-m",
+        "mv",
+        task["preprod_source_ingest_path"],
+        ingest_path,
+        :out => wout,
+        :err => werr)]
     end
     next [ingest_path, system(
       "gsutil",
@@ -702,7 +704,7 @@ end
 
 def _find_common_gcs_prefix(a, b)
   prefix = ""
-  for i in 0..a.length-1 do
+  for i in 0..a.length - 1 do
     if a[i] != b[i]
       break
     end
@@ -737,12 +739,10 @@ def build_publish_configs(manifest_paths)
       ingest_dir = File.dirname(row["ingest_path"])
       dest_dir = row["destination_dir"];
       unless ingest_dir.end_with?("/")
-        printf("ingest_dir doesn't end with /, adding it")
-        ingest_dir+="/";
+        ingest_dir += "/";
       end
       unless dest_dir.end_with?("/")
-        printf("destination_dir doesn't end with /, adding it")
-        dest_dir+="/";
+        dest_dir += "/";
       end
       unless config_by_source_dir.key? ingest_dir
         config_by_source_dir[ingest_dir] = {
@@ -802,17 +802,17 @@ def publish(project, config, job_name)
     maybe_args += ["--custom-storage-class=#{config[:storage_class]}"]
   end
   common.run_inline([
-      "gcloud",
-      "--impersonate-service-account",
-      deploy_account,
-      "transfer",
-      "jobs",
-      "create",
-      config[:source],
-      config[:dest],
-      "--project=#{project}",
-      "--name=#{job_name}",
-      "--description='#{job_name}: transfer job was automatically created by RW tooling and is intended to be run only once, see genomic_manifests.rb.'",
-      "--delete-from=source-after-transfer",
-  ] + maybe_args)
+                      "gcloud",
+                      "--impersonate-service-account",
+                      deploy_account,
+                      "transfer",
+                      "jobs",
+                      "create",
+                      config[:source],
+                      config[:dest],
+                      "--project=#{project}",
+                      "--name=#{job_name}",
+                      "--description='#{job_name}: transfer job was automatically created by RW tooling and is intended to be run only once, see genomic_manifests.rb.'",
+                      "--delete-from=source-after-transfer",
+                    ] + maybe_args)
 end
