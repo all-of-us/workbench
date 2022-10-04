@@ -2,13 +2,19 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import * as fp from 'lodash/fp';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { StyledExternalLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import { HelpSidebar } from 'app/components/help-sidebar';
 import { Spinner } from 'app/components/spinners';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { WorkspaceRoutes } from 'app/routing/workspace-app-routing';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { withCurrentWorkspace } from 'app/utils';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { reportError } from 'app/utils/errors';
 import {
   ExceededActionCountError,
@@ -28,6 +34,72 @@ import {
   runtimeStore,
   useStore,
 } from 'app/utils/stores';
+import { zendeskBaseUrl } from 'app/utils/zendesk';
+
+const styles = reactStyles({
+  newCtNotification: {
+    padding: 16,
+    marginTop: 16,
+    marginLeft: '2rem',
+    width: 'calc(100% - 5rem)',
+    boxSizing: 'border-box',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    letterSpacing: 0,
+    lineHeight: '22px',
+    borderColor: colors.accent,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85),
+  },
+});
+
+interface NotificationProps {
+  onCancel: () => void;
+}
+const NewCtNotification = (props: NotificationProps) => {
+  const dataPathsLink = (
+    <StyledExternalLink
+      target='_blank'
+      href={`${zendeskBaseUrl()}/en-us/articles/4616869437204-Controlled-CDR-Directory`}
+    >
+      Genomic data paths
+    </StyledExternalLink>
+  );
+  const dataFilesLink = (
+    <StyledExternalLink
+      target='_blank'
+      href={`${zendeskBaseUrl()}/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
+    >
+      genomic data formatting
+    </StyledExternalLink>
+  );
+  const cohortBuilderLink = (
+    <StyledExternalLink
+      target='_blank'
+      href={`${zendeskBaseUrl()}/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
+    >
+      how to build a cohort
+    </StyledExternalLink>
+  );
+
+  return (
+    <div style={styles.newCtNotification}>
+      <FlexRow style={{ justifyContent: 'space-between' }}>
+        <div>
+          These resources will get you started using the genomic data:{' '}
+          {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
+        </div>
+        <FontAwesomeIcon
+          icon={faXmark}
+          style={{ fontSize: '21px', marginLeft: '1em' }}
+          onClick={() => props.onCancel()}
+        />
+      </FlexRow>
+    </div>
+  );
+};
 
 export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
   ({ workspace, hideSpinner }) => {
@@ -38,6 +110,8 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
     const [pollAborter, setPollAborter] = useState(new AbortController());
     const params = useParams<MatchParams>();
     const { ns, wsid } = params;
+
+    const [showNewCtNotification, setShowNewCtNotification] = useState(false);
 
     useEffect(() => {
       const updateStores = async (namespace) => {
@@ -119,12 +193,25 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
       workspacesApi().updateRecentWorkspaces(ns, wsid);
     }, [ns, wsid]);
 
+    useEffect(() => {
+      const isControlled =
+        workspace?.accessTierShortName === AccessTierShortNames.Controlled;
+      const tenMinutesAgo = Date.now() - 10 * 60 * 1000; // arbitrary notion of 'new' workspace
+      const isNew = workspace?.creationTime > tenMinutesAgo;
+      setShowNewCtNotification(isControlled && isNew);
+    }, [workspace]);
+
     return (
-      <React.Fragment>
+      <>
         {workspace ? (
-          <React.Fragment>
+          <>
             {!routeData.minimizeChrome && (
               <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
+            )}
+            {showNewCtNotification && (
+              <NewCtNotification
+                onCancel={() => setShowNewCtNotification(false)}
+              />
             )}
             <HelpSidebar pageKey={routeData.pageKey} />
             <div
@@ -135,7 +222,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
             >
               <WorkspaceRoutes />
             </div>
-          </React.Fragment>
+          </>
         ) : (
           <div
             style={{
@@ -149,7 +236,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
             <Spinner />
           </div>
         )}
-      </React.Fragment>
+      </>
     );
   }
 );
