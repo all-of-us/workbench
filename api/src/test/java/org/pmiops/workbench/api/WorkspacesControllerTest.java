@@ -1649,12 +1649,13 @@ public class WorkspacesControllerTest {
             .getBody()
             .getItems();
     List<CohortReview> cohortReviews =
-            cohortReviewController
-                    .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getId())
-                    .getBody()
-                    .getItems();
+        cohortReviewController
+            .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getBody()
+            .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
-    Map<String, CohortReview> cohortReviewsByName = Maps.uniqueIndex(cohortReviews, c -> c.getCohortName());
+    Map<String, CohortReview> cohortReviewsByName =
+        Maps.uniqueIndex(cohortReviews, c -> c.getCohortName());
     assertThat(cohortsByName.keySet().size()).isEqualTo(2);
     assertThat(cohortsByName.keySet()).containsExactly("c1", "c2");
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
@@ -1665,7 +1666,7 @@ public class WorkspacesControllerTest {
             .getParticipantCohortStatuses(
                 cloned.getNamespace(),
                 cloned.getId(),
-                    cohortReviewsByName.get("review1").getCohortReviewId(),
+                cohortReviewsByName.get("review1").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
@@ -1690,7 +1691,6 @@ public class WorkspacesControllerTest {
     System.out.println(clonedPca1List.getItems().get(0).toString());
     System.out.println(pca1EnumResponse.getAnnotationId());
 
-
     assertParticipantCohortAnnotation(
         clonedPca1List,
         clonedCad1List,
@@ -1703,7 +1703,7 @@ public class WorkspacesControllerTest {
             .getParticipantCohortStatuses(
                 cloned.getNamespace(),
                 cloned.getId(),
-                    cohortReviewsByName.get("review2").getCohortReviewId(),
+                cohortReviewsByName.get("review2").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
