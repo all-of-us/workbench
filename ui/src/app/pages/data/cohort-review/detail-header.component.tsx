@@ -335,7 +335,6 @@ export const DetailHeader = fp.flow(
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
           ns,
           wsid,
-          +cid,
           +crid,
           request
         );
