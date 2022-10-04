@@ -1688,8 +1688,6 @@ public class WorkspacesControllerTest {
             .getParticipantCohortAnnotations(
                 cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
             .getBody();
-    System.out.println(clonedPca1List.getItems().get(0).toString());
-    System.out.println(pca1EnumResponse.getAnnotationId());
 
     assertParticipantCohortAnnotation(
         clonedPca1List,
