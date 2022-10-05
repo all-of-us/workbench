@@ -44,7 +44,7 @@ interface TableData {
   menu: JSX.Element;
   resourceType: JSX.Element;
   resourceName: JSX.Element;
-  name: string;
+  resourceNameAsString: string;
   formattedLastModified: string;
   lastModifiedDateAsString: string;
 }
@@ -103,7 +103,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
                 {getDisplayName(r)}
               </ResourceNavigation>
             ),
-            name: getDisplayName(r),
+            resourceNameAsString: getDisplayName(r),
             formattedLastModified: displayDateWithoutHours(
               r.lastModifiedEpochMillis
             ),
@@ -142,7 +142,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
               field='resourceName'
               header='Name'
               style={styles.column}
-              sortField={'name'}
+              sortField={'resourceNameAsString'}
               sortable
               filter
               filterPlaceholder={'Search Name'}
