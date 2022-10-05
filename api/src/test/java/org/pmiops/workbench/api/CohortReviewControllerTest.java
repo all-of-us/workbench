@@ -1890,8 +1890,6 @@ public class CohortReviewControllerTest {
   public void getParticipantCohortStatusesWrongWorkspace() {
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
 
-    Long cohortId = cohort.getCohortId();
-
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -1903,7 +1901,7 @@ public class CohortReviewControllerTest {
                     new PageFilterRequest()));
 
     // No CohortReview exists for cohortReviewId: 1 and cohortId: 1
-    assertNotFoundExceptionNoCohort(cohortId, exception);
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
   }
 
   @ParameterizedTest(

@@ -3,7 +3,6 @@ import {
   CohortReview,
   CohortReviewApi,
   CohortReviewListResponse,
-  CohortReviewWithCountResponse,
   CohortStatus,
   Domain,
   EmptyResponse,
