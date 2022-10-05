@@ -161,8 +161,8 @@ public class EgressLogService {
             .map(d -> d > 0)
             .orElse(false);
     return isGce
-        ? workbenchConfigProvider.get().firecloud.workspaceLogsProject + GCE_LOG_LOCATION
-        : workbenchConfigProvider.get().firecloud.workspaceLogsProject + DATAPROC_LOG_LOCATION;
+        ? workbenchConfigProvider.get().firecloud.workspaceLogsProject + "." + GCE_LOG_LOCATION
+        : workbenchConfigProvider.get().firecloud.workspaceLogsProject + "." + DATAPROC_LOG_LOCATION;
   }
 
   private Job startBigQueryJob(
