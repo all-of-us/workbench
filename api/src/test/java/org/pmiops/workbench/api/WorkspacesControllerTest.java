@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -299,7 +300,7 @@ public class WorkspacesControllerTest {
   @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
-  @Qualifier("internalEgressService")
+  @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;

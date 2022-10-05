@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -216,7 +217,7 @@ public class DataSetControllerTest {
   @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
-  @Qualifier("internalEgressService")
+  @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
