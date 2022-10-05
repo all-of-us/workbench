@@ -1,12 +1,17 @@
 package org.pmiops.workbench.billing;
 
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -28,6 +33,8 @@ public class FreeTierBillingBatchUpdateService {
   private final FreeTierBillingService freeTierBillingService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  private final BigQueryService bigQueryService;
+
   private static final int MIN_USERS_BATCH = 5;
   private static final int MAX_USERS_BATCH = 999;
   public static final Range<Integer> batchSizeRange =
@@ -37,10 +44,12 @@ public class FreeTierBillingBatchUpdateService {
   public FreeTierBillingBatchUpdateService(
       UserDao userDao,
       FreeTierBillingService freeTierBillingService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      BigQueryService bigQueryService) {
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.bigQueryService = bigQueryService;
   }
 
   /**
@@ -54,6 +63,10 @@ public class FreeTierBillingBatchUpdateService {
     long numberOfUsers = Iterators.size(freeTierActiveWorkspaceCreators.iterator());
     int count = 0;
 
+    Map<String, Double> allBQCosts = getFreeTierWorkspaceCostsFromBQ();
+
+    logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
+
     for (List<DbUser> usersPartition :
         Iterables.partition(
             freeTierActiveWorkspaceCreators, freeTierCronUserBatchSizeFromConfig())) {
@@ -61,10 +74,29 @@ public class FreeTierBillingBatchUpdateService {
           String.format(
               "Processing users batch of size/total: %d/%d. Current iteration is: %d",
               usersPartition.size(), numberOfUsers, count++));
-      freeTierBillingService.checkFreeTierBillingUsageForUsers(new HashSet<>(usersPartition));
+      freeTierBillingService.checkFreeTierBillingUsageForUsers(
+          new HashSet<>(usersPartition), allBQCosts);
     }
 
     logger.info("Checking Free Tier Billing usage - finish");
+  }
+
+  private Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {
+    final QueryJobConfiguration queryConfig =
+        QueryJobConfiguration.newBuilder(
+                "SELECT id, SUM(cost) cost FROM `"
+                    + workbenchConfigProvider.get().billing.exportBigQueryTable
+                    + "` WHERE id IS NOT NULL "
+                    + "GROUP BY id ORDER BY cost desc;")
+            .build();
+
+    final Map<String, Double> liveCostByWorkspace = new HashMap<>();
+    for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
+      final String googleProject = tableRow.get("id").getStringValue();
+      liveCostByWorkspace.put(googleProject, tableRow.get("cost").getDoubleValue());
+    }
+
+    return liveCostByWorkspace;
   }
 
   private int freeTierCronUserBatchSizeFromConfig() {

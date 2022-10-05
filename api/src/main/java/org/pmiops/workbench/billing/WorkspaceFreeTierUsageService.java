@@ -38,19 +38,29 @@ public class WorkspaceFreeTierUsageService {
    * database.
    *
    * @param dbCostByWorkspace Map that acts as a cache for all workspaces and their costs in the DB
-   * @param liveCostByWorkspace Map that links a workspace ID to its live cost in BQ.
+   * @param liveCostByProject Map that links a workspace ID to its live cost in BQ.
+   * @param workspaceByProject
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateWorkspaceFreeTierUsageInDB(
-      Map<Long, Double> dbCostByWorkspace, Map<Long, Double> liveCostByWorkspace) {
+      Map<Long, Double> dbCostByWorkspace,
+      Map<String, Double> liveCostByProject,
+      Map<String, Long> workspaceByProject) {
 
-    final List<Long> workspacesIdsToUpdate =
-        liveCostByWorkspace.keySet().stream()
+    final List<String> projectsToUpdate =
+        liveCostByProject.keySet().stream()
+            .filter(project -> workspaceByProject.containsKey(project))
             .filter(
-                currentId ->
+                project ->
                     CostComparisonUtils.compareCosts(
-                            dbCostByWorkspace.get(currentId), liveCostByWorkspace.get(currentId))
+                            dbCostByWorkspace.get(workspaceByProject.get(project)),
+                            liveCostByProject.get(project))
                         != 0)
+            .collect(Collectors.toList());
+
+    List<Long> workspacesIdsToUpdate =
+        projectsToUpdate.stream()
+            .map(project -> workspaceByProject.get(project))
             .collect(Collectors.toList());
 
     final Iterable<DbWorkspace> workspaceList = workspaceDao.findAllById(workspacesIdsToUpdate);
@@ -69,8 +79,8 @@ public class WorkspaceFreeTierUsageService {
             workspaceFreeTierUsageDao.updateCost(
                 workspaceIdToFreeTierUsageCache,
                 w,
-                liveCostByWorkspace.get(
-                    w.getWorkspaceId()))); // TODO updateCost queries for each workspace, can be
+                liveCostByProject.get(
+                    w.getGoogleProject()))); // TODO updateCost queries for each workspace, can be
     // optimized by getting all needed workspaces in one
     // query
 
