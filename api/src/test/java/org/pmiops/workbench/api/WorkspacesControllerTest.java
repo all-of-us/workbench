@@ -1507,6 +1507,7 @@ public class WorkspacesControllerTest {
 
     stubBigQueryCohortCalls();
     reviewReq.setSize(2);
+    reviewReq.setName("review2");
     CohortReview cr2 =
         cohortReviewController
             .createCohortReview(workspace.getNamespace(), workspace.getId(), c2.getId(), reviewReq)
@@ -1647,7 +1648,14 @@ public class WorkspacesControllerTest {
             .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId())
             .getBody()
             .getItems();
+    List<CohortReview> cohortReviews =
+        cohortReviewController
+            .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getBody()
+            .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
+    Map<String, CohortReview> cohortReviewsByName =
+        Maps.uniqueIndex(cohortReviews, c -> c.getCohortName());
     assertThat(cohortsByName.keySet().size()).isEqualTo(2);
     assertThat(cohortsByName.keySet()).containsExactly("c1", "c2");
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
@@ -1655,10 +1663,10 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr1 =
         cohortReviewController
-            .getParticipantCohortStatusesOld(
+            .getParticipantCohortStatuses(
                 cloned.getNamespace(),
                 cloned.getId(),
-                cohortsByName.get("c1").getId(),
+                cohortReviewsByName.get("review1").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
@@ -1680,6 +1688,7 @@ public class WorkspacesControllerTest {
             .getParticipantCohortAnnotations(
                 cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
             .getBody();
+
     assertParticipantCohortAnnotation(
         clonedPca1List,
         clonedCad1List,
@@ -1689,10 +1698,10 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr2 =
         cohortReviewController
-            .getParticipantCohortStatusesOld(
+            .getParticipantCohortStatuses(
                 cloned.getNamespace(),
                 cloned.getId(),
-                cohortsByName.get("c2").getId(),
+                cohortReviewsByName.get("review2").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
