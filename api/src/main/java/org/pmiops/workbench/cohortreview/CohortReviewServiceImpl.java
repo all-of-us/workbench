@@ -153,7 +153,9 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public CohortReview findCohortReviewForWorkspace(Long workspaceId, Long cohortReviewId) {
     CohortReview cohortReview = findCohortReview(cohortReviewId);
-    if (cohortReview == null) {
+    DbCohort dbCohort =
+        cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortReview.getCohortId());
+    if (dbCohort == null) {
       throw new NotFoundException(
           String.format(
               "Not Found: No CohortReview exists for cohortReviewId: %s and cohortId: %s",
