@@ -36,7 +36,7 @@ describe('Home page ui tests', () => {
       await expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check Workspace Action menu for listed actions
-      const snowmanMenu = await card.getSnowmanMenu();
+      const snowmanMenu = await card.getCardSnowmanMenu();
       // Assumption: test user is workspace Owner.
       // Check Workspace Actions snowman menu displayes the right set of options.
       const links = await snowmanMenu.getAllOptionTexts();
