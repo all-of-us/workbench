@@ -24,7 +24,7 @@ import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
-import { displayDate, sortableDateString } from 'app/utils/dates';
+import { sortableDateString } from 'app/utils/dates';
 import { getAdminUrl } from 'app/utils/institutions';
 import moment from 'moment';
 
