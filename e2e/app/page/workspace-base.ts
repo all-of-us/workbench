@@ -17,7 +17,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete Notebook, Concept Set, Dataset Cohort or Cohort Review via snowman menu located inside the data resource card.
+   * Delete Notebook, Concept Set, Dataset, Cohort or Cohort Review via snowman menu located inside the data resource card.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */
@@ -26,7 +26,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete Notebook, Concept Set, Dataset Cohort or Cohort Review via snowman menu located inside the data resource table.
+   * Delete Notebook, Concept Set, Dataset, Cohort or Cohort Review via snowman menu located inside the data resource table.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */

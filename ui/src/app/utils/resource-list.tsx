@@ -12,7 +12,7 @@ import {
   StyledResourceType,
 } from 'app/components/resource-card';
 import { reactStyles, withCdrVersions } from 'app/utils';
-import { displayDateWithoutHours } from 'app/utils/dates';
+import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
 import { getDisplayName, getType } from 'app/utils/resources';
 
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
@@ -44,7 +44,9 @@ interface TableData {
   menu: JSX.Element;
   resourceType: JSX.Element;
   resourceName: JSX.Element;
+  name: string;
   formattedLastModified: string;
+  lastModifiedDateAsString: string;
 }
 
 interface Props {
@@ -101,9 +103,11 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
                 {getDisplayName(r)}
               </ResourceNavigation>
             ),
+            name: getDisplayName(r),
             formattedLastModified: displayDateWithoutHours(
               r.lastModifiedEpochMillis
             ),
+            lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
           };
         })
       );
@@ -131,12 +135,14 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             <Column
               field='resourceType'
               header='Item type'
+              sortable
               style={styles.typeColumn}
             />
             <Column
               field='resourceName'
               header='Name'
               style={styles.column}
+              sortField={'name'}
               sortable
               filter
               filterPlaceholder={'Search Name'}
@@ -147,6 +153,8 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
               field='formattedLastModified'
               header='Last Modified Date'
               style={styles.modifiedDateColumn}
+              sortField={'lastModifiedDateAsString'}
+              sortable
             />
           </DataTable>
         )}
