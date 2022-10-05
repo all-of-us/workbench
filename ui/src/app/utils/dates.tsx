@@ -50,10 +50,3 @@ export function isDateValid(date: Date): boolean {
     !isNaN(date.valueOf())
   );
 }
-
-export function sortableDateString(
-  timeInEpochMillis: number | undefined
-): string {
-  const date = new Date(timeInEpochMillis);
-  return isDateValid(date) ? date.toISOString() : '';
-}
