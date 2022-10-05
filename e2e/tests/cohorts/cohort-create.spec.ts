@@ -159,9 +159,9 @@ describe('Create Cohorts Test', () => {
     await openTab(page, Tabs.Data, dataPage);
 
     // In Show All tab, new cohort entry is found in table.
-    const cohortCard = await dataPage.findCohortEntry(cohortName);
-    const cohortCardValue = await getPropValue<string>(cohortCard, 'textContent');
-    expect(cohortCardValue).toEqual(cohortName);
+    const cohortNameCell = await dataPage.findCohortEntry(cohortName);
+    const cohortCellValue = await getPropValue<string>(cohortNameCell, 'textContent');
+    expect(cohortCellValue).toEqual(cohortName);
 
     // Delete cohort in Workspace Data page.
     await dataPage.deleteResourceFromTable(cohortName, ResourceCard.Cohort);
