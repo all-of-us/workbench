@@ -31,7 +31,7 @@
       0.75
     ],
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
-    "freeTierCronUserBatchSize": 100,
+    "freeTierCronUserBatchSize": 200,
     "minutesBeforeLastFreeTierJob": 60,
     "numberOfDaysToConsiderForFreeTierUsageUpdate": 7
   },
@@ -98,10 +98,19 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
     "enforceRasLoginGovLinking": true,
-    "currentDuccVersions": [3, 4],
+    "currentDuccVersions": [
+      3,
+      4
+    ],
     "renewal": {
       "expiryDays": 365,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [
+        1,
+        3,
+        7,
+        15,
+        30
+      ],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
     }
@@ -150,15 +159,20 @@
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": true,
     "notifyFromEmail": "security-alerts@researchallofus.org",
-    "notifyCcEmails": ["security-alerts@researchallofus.org"],
-    "escalations": [{
-      "afterIncidentCount": 1,
-      "suspendCompute": {
-        "durationMinutes": 10
+    "notifyCcEmails": [
+      "security-alerts@researchallofus.org"
+    ],
+    "escalations": [
+      {
+        "afterIncidentCount": 1,
+        "suspendCompute": {
+          "durationMinutes": 10
+        }
+      },
+      {
+        "afterIncidentCount": 3,
+        "disableUser": {}
       }
-    }, {
-      "afterIncidentCount": 3,
-      "disableUser": {}
-    }]
+    ]
   }
 }
