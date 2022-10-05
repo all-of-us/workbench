@@ -1,5 +1,7 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
+
 import java.time.Clock;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -18,15 +20,16 @@ import org.pmiops.workbench.jira.model.SearchResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("internalJiraHandler")
-public class EgressInternalJiraHandler extends EgressJiraHandler {
+@Service(OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
+public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
 
-  private static final Logger log = Logger.getLogger(EgressInternalJiraHandler.class.getName());
+  private static final Logger log =
+      Logger.getLogger(EgressObjectLengthsJiraHandler.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public EgressInternalJiraHandler(
+  public EgressObjectLengthsJiraHandler(
       Clock clock, Provider<WorkbenchConfig> workbenchConfigProvider, JiraService jiraService) {
     super(clock, jiraService);
     this.workbenchConfigProvider = workbenchConfigProvider;

@@ -331,7 +331,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendInternalEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
+  public void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
     sendEgressRemediationEmailWithContent(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
   }

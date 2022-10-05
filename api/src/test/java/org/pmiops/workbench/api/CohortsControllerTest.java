@@ -63,7 +63,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
-import org.pmiops.workbench.exfiltration.impl.EgressInternalRemediationService;
+import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -191,7 +191,7 @@ public class CohortsControllerTest {
     AccessTierServiceImpl.class,
     ObjectNameLengthServiceImpl.class,
     BucketAuditQueryServiceImpl.class,
-    EgressInternalRemediationService.class,
+    EgressObjectLengthsRemediationService.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -222,7 +222,7 @@ public class CohortsControllerTest {
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
-    EgressInternalRemediationService.class,
+    EgressObjectLengthsRemediationService.class,
   })
   static class Configuration {
     @Bean

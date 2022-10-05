@@ -60,7 +60,7 @@ public class BucketAuditEntry {
     this.bucketName = bucketName;
   }
 
-  public long getTimeWindowDuration() {
+  public long getTimeWindowDurationInSeconds() {
     if (minTime == null || maxTime == null) {
       return 0l;
     }

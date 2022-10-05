@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.bucket;
 
-import static org.pmiops.workbench.exfiltration.ObjectNameSizeConstants.THRESHOLD;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.THRESHOLD_MB;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -58,7 +58,7 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .addNamedParameter("THRESHOLD", QueryParameterValue.int64(THRESHOLD))
+            .addNamedParameter("THRESHOLD", QueryParameterValue.int64(THRESHOLD_MB))
             .build();
 
     final TableResult result = bigQueryService.executeQuery(queryJobConfiguration);

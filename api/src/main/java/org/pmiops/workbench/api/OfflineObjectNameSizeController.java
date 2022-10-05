@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller to audit users who created objects in their buckets with very long names */
 public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApiDelegate {
 
-  private static final Logger LOGGER =
+  private static final Logger logger =
       Logger.getLogger(OfflineObjectNameSizeController.class.getName());
 
   private final ObjectNameLengthService objectNameLengthService;
@@ -21,11 +21,11 @@ public class OfflineObjectNameSizeController implements OfflineObjectNameSizeApi
   }
 
   public ResponseEntity<Void> checkObjectNameSize() {
-    LOGGER.info("Starting checking object lengths audit job");
+    logger.info("Starting checking object lengths audit job");
 
     objectNameLengthService.calculateObjectNameLength();
 
-    LOGGER.info("Finished checking object lengths audit job");
+    logger.info("Finished checking object lengths audit job");
     return ResponseEntity.noContent().build();
   }
 }

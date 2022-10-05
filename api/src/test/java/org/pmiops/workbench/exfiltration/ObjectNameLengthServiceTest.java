@@ -5,7 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.pmiops.workbench.exfiltration.ObjectNameSizeConstants.THRESHOLD;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.THRESHOLD_MB;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exfiltration.impl.EgressInternalRemediationService;
+import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -57,7 +57,7 @@ public class ObjectNameLengthServiceTest {
   @Mock private IamService iamService;
   @Mock private UserService userService;
   @Mock private EgressEventDao egressEventDao;
-  @Mock private EgressInternalRemediationService egressRemediationService;
+  @Mock private EgressObjectLengthsRemediationService egressRemediationService;
 
   @Test
   void calculateObjectNameLength_noAlertsFired_WhenNoFileInfoReturned() {
@@ -77,7 +77,7 @@ public class ObjectNameLengthServiceTest {
       throws IOException, ApiException {
 
     List<BucketAuditEntry> entries =
-        Collections.singletonList(getBucketAuditEntry(PET_ACCOUNT, THRESHOLD + 1));
+        Collections.singletonList(getBucketAuditEntry(PET_ACCOUNT, THRESHOLD_MB + 1));
     doReturn(entries).when(bucketAuditQueryService).queryBucketFileInformationGroupedByPetAccount();
 
     DbWorkspace dbWorkspace =
@@ -127,9 +127,9 @@ public class ObjectNameLengthServiceTest {
       throws IOException, ApiException {
 
     List<BucketAuditEntry> entries = new ArrayList<>();
-    BucketAuditEntry entry = getBucketAuditEntry(PET_ACCOUNT, THRESHOLD + 1);
+    BucketAuditEntry entry = getBucketAuditEntry(PET_ACCOUNT, THRESHOLD_MB + 1);
     entries.add(entry);
-    entry = getBucketAuditEntry("pet2@service.com", THRESHOLD + 1);
+    entry = getBucketAuditEntry("pet2@service.com", THRESHOLD_MB + 1);
     entries.add(entry);
     doReturn(entries).when(bucketAuditQueryService).queryBucketFileInformationGroupedByPetAccount();
 

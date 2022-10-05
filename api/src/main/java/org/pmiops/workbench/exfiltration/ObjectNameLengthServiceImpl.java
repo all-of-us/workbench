@@ -1,5 +1,7 @@
 package org.pmiops.workbench.exfiltration;
 
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
 
-  private static final Logger LOGGER =
+  private static final Logger logger =
       Logger.getLogger(ObjectNameLengthServiceImpl.class.getName());
 
   private final FireCloudService fireCloudService;
@@ -51,7 +53,8 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
       IamService iamService,
       UserService userService,
       EgressEventDao egressEventDao,
-      @Qualifier("internalEgressService") EgressRemediationService egressRemediationService) {
+      @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
+          EgressRemediationService egressRemediationService) {
     this.fireCloudService = fireCloudService;
     this.workspaceService = workspaceService;
     this.bucketAuditQueryService = bucketAuditQueryService;
@@ -95,7 +98,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
       }
 
       DbWorkspace workspace = projectIdToDbWorkspace.get(bucketAuditEntry.getGoogleProjectId());
-      LOGGER.info(
+      logger.warning(
           String.format(
               "Found an audit entry that exceeds the threshold, workspace namespace: %s, google ID: %s",
               workspace.getWorkspaceNamespace(), workspace.getGoogleProject()));
@@ -113,12 +116,12 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
       if (StringUtils.isNoneEmpty(bucketName)
           && bucketName.equals(bucketAuditEntry.getBucketName())) {
 
-        LOGGER.info(
+        logger.info(
             String.format("Bucket found for the offending workspace, bucket name: %s", bucketName));
         // Get the user which caused the egress alert from his pet account.
         // There is no known straightforward way to find this other than getting the
         // users of this workspace and lookup which user the pet account corresponds to.
-        final List<UserRole> workspaceOwners = getWorkspaceOwners(workspace);
+        final List<UserRole> workspaceOwners = getWorkspaceOwnersOrWriters(workspace);
         final Set<DbUser> activeUsers =
             userService.findActiveUsersByUsernames(
                 workspaceOwners.stream().map(UserRole::getEmail).collect(Collectors.toList()));
@@ -139,7 +142,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
 
         if (petServiceAccount.isPresent()
             && petServiceAccount.get().equals(bucketAuditEntry.getPetAccount())) {
-          LOGGER.info(
+          logger.info(
               String.format(
                   "Alerting user with ID: %s, workspace with long file names is: %s",
                   user.getUserId(), workspace.getWorkspaceId()));
@@ -153,7 +156,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
 
       } catch (IOException | ApiException e) {
         // Log and continue nothing we can do.
-        LOGGER.log(
+        logger.log(
             Level.WARNING,
             String.format(
                 "Unable to get file info from BQ for workspace %s and user %s",
@@ -171,7 +174,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
    * @return List of user roles that are either owners or writers on this workspace
    */
   @NotNull
-  private List<UserRole> getWorkspaceOwners(DbWorkspace workspace) {
+  private List<UserRole> getWorkspaceOwnersOrWriters(DbWorkspace workspace) {
     return workspaceService
         .getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName())
         .stream()
@@ -200,7 +203,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
                         // bytes -> Megabytes (10^6 bytes)
                         .map(bytes -> (float) (bytes / (1024 * 1024)))
                         .orElse(null))
-                .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDuration())
+                .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDurationInSeconds())
                 .setStatus(DbEgressEventStatus.PENDING)));
   }
 }

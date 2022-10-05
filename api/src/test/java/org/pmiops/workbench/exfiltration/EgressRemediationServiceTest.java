@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -90,7 +91,7 @@ public class EgressRemediationServiceTest {
   @Autowired private UserDao userDao;
 
   @Autowired
-  @Qualifier("sumologicEgressService")
+  @Qualifier(EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
   private EgressRemediationService egressRemediationService;
 
   @Autowired private EgressJiraHandler egressJiraHandler;

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
+
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CloudTaskEgressController implements CloudTaskEgressApiDelegate {
 
   @Autowired
-  @Qualifier("sumologicEgressService")
+  @Qualifier(EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
   private EgressRemediationService egressRemediationService;
 
   @Override

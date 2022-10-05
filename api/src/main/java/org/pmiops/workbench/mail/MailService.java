@@ -61,6 +61,6 @@ public interface MailService {
       final DbWorkspace workspace, final String lockingReason, List<DbUser> owners)
       throws MessagingException;
 
-  void sendInternalEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
+  void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
 }
