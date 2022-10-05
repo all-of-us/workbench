@@ -114,9 +114,9 @@ describe('Editing Cohort Test', () => {
 
     const resourceCard = new DataResourceCard(page);
     // Save as cohort is gone.
-    expect(await resourceCard.findResourceTableEntryByName({ name: newCohortName })).toBeFalsy();
+    expect(await resourceCard.findNameCellLinkFromTable({ name: newCohortName })).toBeFalsy();
     // Original cohort remains.
-    expect(await resourceCard.findResourceTableEntryByName({ name: cohortName })).toBeTruthy();
+    expect(await resourceCard.findNameCellLinkFromTable({ name: cohortName })).toBeTruthy();
   });
 
   // Helper functions

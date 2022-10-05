@@ -66,7 +66,7 @@ export default class DataResourceCard extends BaseCard {
     return resourceCards;
   }
 
-  async findResourceTableEntryByName(opts: { name?: string }): Promise<ElementHandle> {
+  async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
     const { name } = opts;
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
@@ -84,7 +84,7 @@ export default class DataResourceCard extends BaseCard {
     return null;
   }
 
-  async findResourceSnowManEntryByName(opts: { name?: string }): Promise<string> {
+  async findSnowManEntryCellXPath(opts: { name?: string }): Promise<string> {
     const { name } = opts;
     await waitWhileLoading(this.page);
 
@@ -107,7 +107,7 @@ export default class DataResourceCard extends BaseCard {
   }
 
   async getSnowManLink(name) {
-    const snowmanIcon = await this.findResourceSnowManEntryByName({ name });
+    const snowmanIcon = await this.findSnowManEntryCellXPath({ name });
     if (!snowmanIcon) {
       throw new Error(` card "${name}"`);
     }
@@ -118,7 +118,7 @@ export default class DataResourceCard extends BaseCard {
     return;
   }
 
-  async getSnowmanMenuForTable(name): Promise<SnowmanMenu> {
+  async getSnowmanMenuFromTable(name): Promise<SnowmanMenu> {
     await this.getSnowManLink(name);
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
@@ -191,7 +191,7 @@ export default class DataResourceCard extends BaseCard {
    * @param {CardType} cardType
    */
   async resourceTableEntryExists(cardName: string): Promise<boolean> {
-    return (await this.findResourceTableEntryByName({ name: cardName })) !== null;
+    return (await this.findNameCellLinkFromTable({ name: cardName })) !== null;
   }
 
   /**
@@ -283,7 +283,7 @@ export default class DataResourceCard extends BaseCard {
   async renameFromTable(name: string, newName: string, resourceType: ResourceCard): Promise<string[]> {
     // Find the Data resource card that match the resource name.
     const resourceCard = new DataResourceCard(this.page);
-    const card = await resourceCard.findResourceTableEntryByName({ name });
+    const card = await resourceCard.findNameCellLinkFromTable({ name });
     if (!card) {
       throw new Error(`ERROR: Failed to find ${resourceType} card "${name}"`);
     }

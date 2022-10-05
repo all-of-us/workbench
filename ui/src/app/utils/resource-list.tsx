@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { WorkspaceResource } from 'generated/fetch';
+import { ResourceType, WorkspaceResource } from 'generated/fetch';
 
 import { renderResourceCard } from 'app/components/render-resource-card';
 import {
@@ -13,9 +13,9 @@ import {
 } from 'app/components/resource-card';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { getDisplayName } from 'app/utils/resources';
+import { getDisplayName, getResourceType } from 'app/utils/resources';
 
-import { TOTAL_ROWS_PER_PAGE } from './constants';
+import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 
 const styles = reactStyles({
   column: {
@@ -60,51 +60,26 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     await props.onUpdate();
   };
 
-  const getExistingNameList = (resourceType) => {
-    const resourceList = props.workspaceResources;
-    if (resourceType.dataSet) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.dataSet !== null && resource.dataSet !== undefined
-        )
-        .map((resource) => resource.dataSet.name);
-    } else if (resourceType.conceptSet) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.conceptSet !== null && resource.conceptSet !== undefined
-        )
-        .map((resource) => resource.conceptSet.name);
-    } else if (resourceType.cohort) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.cohort !== null && resource.cohort !== undefined
-        )
-        .map((resource) => resource.cohort.name);
-    } else if (resourceType.cohortReview) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.cohortReview !== null &&
-            resource.cohortReview !== undefined
-        )
-        .map((resource) => resource.cohortReview.cohortName);
-    } else {
-      return [];
-    }
+  const getResourceMap = () => {
+    const resourceTypeNameListMap = new Map<ResourceType, string[]>();
+    props.workspaceResources.map((resource) => {
+      const resourceType = getResourceType(resource);
+      const resourceName = getDisplayName(resource);
+      const resourceNameList = resourceTypeNameListMap.get(resourceType);
+      const keyValue = !!resourceNameList
+        ? [...resourceNameList, resourceName]
+        : [resourceName];
+      resourceTypeNameListMap.set(resourceType, keyValue);
+    });
+    return resourceTypeNameListMap;
   };
+  const resourceTypeNameMap = getResourceMap();
 
   const renderResourceMenu = (resource: WorkspaceResource) => {
-    const existingNameList = props.existingNameList
-      ? props.existingNameList
-      : getExistingNameList(resource);
-    console.log(existingNameList);
     return renderResourceCard({
       resource,
       menuOnly: true,
-      existingNameList: existingNameList,
+      existingNameList: resourceTypeNameMap.get(getResourceType(resource)),
       onUpdate: reloadResources,
     });
   };
@@ -150,17 +125,15 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             sortMode='multiple'
             style={{ width: '44rem' }}
             paginator
-            rows={TOTAL_ROWS_PER_PAGE}
+            rows={ROWS_PER_PAGE_RESOURCE_TABLE}
           >
             <Column field='menu' style={styles.menu} />
             <Column
-              data-test-id={'resource-type'}
               field='resourceType'
               header='Item type'
               style={styles.typeColumn}
             />
             <Column
-              data-test-id={'resource-name'}
               field='resourceName'
               header='Name'
               style={styles.column}

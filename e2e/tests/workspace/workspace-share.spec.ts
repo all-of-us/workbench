@@ -124,13 +124,13 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
     const resourceCard = new DataResourceCard(page);
-    const dataSetCard = await resourceCard.findResourceTableEntryByName({ name: datasetName });
+    const dataSetCard = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
     expect(dataSetCard).not.toBeNull();
 
     switch (assign.accessRole) {
       case WorkspaceAccessLevel.Reader:
         {
-          const snowmanMenu = await resourceCard.getSnowmanMenuForTable(datasetName);
+          const snowmanMenu = await resourceCard.getSnowmanMenuFromTable(datasetName);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(true);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(true);
@@ -156,7 +156,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
         break;
       case WorkspaceAccessLevel.Writer:
         {
-          const snowmanMenu = await resourceCard.getSnowmanMenuForTable(datasetName);
+          const snowmanMenu = await resourceCard.getSnowmanMenuFromTable(datasetName);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(false);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(false);

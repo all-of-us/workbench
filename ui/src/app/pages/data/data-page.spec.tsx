@@ -12,7 +12,7 @@ import {
 
 import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { TOTAL_ROWS_PER_PAGE } from 'app/utils/constants';
+import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -74,8 +74,13 @@ describe('DataPage', () => {
       DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
 
+    expect(resourceCardsExpected).toBeGreaterThan(ROWS_PER_PAGE_RESOURCE_TABLE);
     // Since we have pagination only 10 rows at a time should be displayed
-    expect(resourceTableRows(wrapper).length).toBe(TOTAL_ROWS_PER_PAGE);
+    expect(resourceTableRows(wrapper).length).toBe(
+      ROWS_PER_PAGE_RESOURCE_TABLE
+    );
+
+    // Click the next button to confirm the number of rows
     const paginationNextButton = wrapper
       .find('button')
       .findWhere(
@@ -86,7 +91,7 @@ describe('DataPage', () => {
     paginationNextButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(resourceTableRows(wrapper).length).toBe(
-      resourceCardsExpected - TOTAL_ROWS_PER_PAGE
+      resourceCardsExpected - ROWS_PER_PAGE_RESOURCE_TABLE
     );
   });
 

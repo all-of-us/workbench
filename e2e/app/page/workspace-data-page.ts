@@ -76,7 +76,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async findCohortEntry(cohortName?: string): Promise<ElementHandle> {
     await openTab(this.page, Tabs.Cohorts);
     if (cohortName) {
-      const entry = new DataResourceCard(this.page).findResourceTableEntryByName({ name: cohortName });
+      const entry = new DataResourceCard(this.page).findNameCellLinkFromTable({ name: cohortName });
       return entry;
     }
     return null;

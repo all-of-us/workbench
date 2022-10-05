@@ -70,7 +70,7 @@ describe('Workspace UI Test', () => {
     expect(lastChangedTime === lastChangedTime).toBe(true);
 
     // Check snowman menu options contains expected options.
-    const snowmanMenu = await card.getSnowmanMenu();
+    const snowmanMenu = await card.getCardSnowmanMenu();
     const links = await snowmanMenu.getAllOptionTexts();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });

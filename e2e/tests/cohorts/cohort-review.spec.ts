@@ -76,7 +76,7 @@ describe('Cohort review set tests', () => {
 
     // Verify Cohort Review card exists
     const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findResourceTableEntryByName({
+    const reviewCohortCard = await resourceCard.findNameCellLinkFromTable({
       name: cohortReview1Name
     });
     expect(reviewCohortCard).toBeTruthy();
@@ -274,7 +274,7 @@ describe('Cohort review set tests', () => {
     await dataPage.renameResourceFromTable(cohortReview2Name, newCohortReviewName, ResourceCard.CohortReview);
 
     // Verify Rename Cohort Review is successful.
-    expect(await new DataResourceCard(page).findResourceTableEntryByName({ name: newCohortReviewName })).toBeTruthy();
+    expect(await new DataResourceCard(page).findNameCellLinkFromTable({ name: newCohortReviewName })).toBeTruthy();
 
     // Delete Cohort Review
     const modalTextContent = await dataPage.deleteResourceFromTable(newCohortReviewName, ResourceCard.CohortReview);
@@ -283,7 +283,7 @@ describe('Cohort review set tests', () => {
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
 
     // Verify Delete Cohort Review successful.
-    expect(await new DataResourceCard(page).findResourceTableEntryByName({ name: newCohortReviewName })).toBeFalsy();
+    expect(await new DataResourceCard(page).findNameCellLinkFromTable({ name: newCohortReviewName })).toBeFalsy();
   });
 
   async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<ElementHandle> {
