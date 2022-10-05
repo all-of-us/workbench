@@ -30,7 +30,7 @@ import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles, withCdrVersions } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
-import { displayDateWithoutHours } from 'app/utils/dates';
+import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
 import { getDisplayName, isNotebook } from 'app/utils/resources';
 
 const styles = reactStyles({
@@ -80,9 +80,13 @@ interface TableData {
   menu: JSX.Element;
   resourceType: JSX.Element;
   resourceName: JSX.Element;
+  resourceNameAsString: string;
   workspaceName: JSX.Element;
+  workspaceNameAsString: string;
   formattedLastModified: string;
+  lastModifiedDateAsString: string;
   cdrVersionName: string;
+  lastModifiedBy: string;
 }
 
 interface Props {
@@ -176,6 +180,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
                   {getDisplayName(r)}
                 </ResourceNavigation>
               ),
+              resourceNameAsString: getDisplayName(r),
               workspaceName: (
                 <WorkspaceNavigation
                   workspace={getWorkspace(r)}
@@ -183,10 +188,13 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
                   style={styles.navigation}
                 />
               ),
+              workspaceNameAsString: getWorkspace(r).name,
               formattedLastModified: displayDateWithoutHours(
                 r.lastModifiedEpochMillis
               ),
               cdrVersionName: getCdrVersionName(r),
+              lastModifiedBy: r.lastModifiedBy,
+              lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
             };
           })
       );
@@ -204,7 +212,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       ),
     ],
     [
-      resources && wsMap && !loading,
+      resources && resources.length > 0 && wsMap && !loading,
       () => (
         <React.Fragment>
           <SmallHeader>Recently Accessed Items</SmallHeader>
@@ -213,8 +221,10 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
               value={tableData}
               scrollable={true}
               paginator={true}
+              sortMode='multiple'
               paginatorTemplate='CurrentPageReport'
               currentPageReportTemplate='Showing {totalRecords} most recent items'
+              style={{ width: '65rem', border: 'none' }}
             >
               <Column field='menu' style={styles.menu} />
               <Column
@@ -226,20 +236,31 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
                 field='resourceName'
                 header='Name'
                 style={styles.column}
+                sortField='resourceNameAsString'
+                sortable
               />
               <Column
                 field='workspaceName'
                 header='Workspace name'
-                style={styles.column}
-              />
-              <Column
-                field='formattedLastModified'
-                header='Last changed'
+                sortField='workspaceNameAsString'
+                sortable
                 style={styles.column}
               />
               <Column
                 field='cdrVersionName'
-                header='Dataset'
+                header='Dataset Version'
+                style={{ ...styles.column, width: '8rem' }}
+              />
+              <Column
+                field='formattedLastModified'
+                header='Last changed'
+                sortField='lastModifiedDateAsString'
+                sortable
+                style={{ ...styles.column, width: '6.5rem' }}
+              />
+              <Column
+                field='lastModifiedBy'
+                header='Last Modified By'
                 style={styles.column}
               />
             </DataTable>
@@ -247,6 +268,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
         </React.Fragment>
       ),
     ],
+    [resources && resources.length === 0, () => <div></div>],
     [loading, () => <SpinnerOverlay />]
   );
 });
