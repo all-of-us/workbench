@@ -122,10 +122,10 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     await openTab(page, Tabs.Datasets, dataPage);
 
-    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
+    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click for Dataset entries.
     const resourceCard = new DataResourceCard(page);
-    const dataSetCard = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
-    expect(dataSetCard).not.toBeNull();
+    const dataSetNameCell = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
+    expect(dataSetNameCell).not.toBeNull();
 
     switch (assign.accessRole) {
       case WorkspaceAccessLevel.Reader:
@@ -137,7 +137,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
 
           // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
-          await dataSetCard.click();
+          await dataSetNameCell.click();
           const dataSetEditPage = new DatasetBuildPage(page);
           await dataSetEditPage.waitForLoad();
 
@@ -163,7 +163,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
 
           // User can click on dataset name and see the dataset details.
-          await dataSetCard.click();
+          await dataSetNameCell.click();
           const dataSetEditPage = new DatasetBuildPage(page);
           await dataSetEditPage.waitForLoad();
 

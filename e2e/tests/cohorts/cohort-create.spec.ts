@@ -158,7 +158,7 @@ describe('Create Cohorts Test', () => {
     // Verify cohort created successfully.
     await openTab(page, Tabs.Data, dataPage);
 
-    // In Show All tab, new cohort card is found.
+    // In Show All tab, new cohort entry is found in table.
     const cohortCard = await dataPage.findCohortEntry(cohortName);
     const cohortCardValue = await getPropValue<string>(cohortCard, 'textContent');
     expect(cohortCardValue).toEqual(cohortName);

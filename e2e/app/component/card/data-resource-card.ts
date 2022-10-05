@@ -109,7 +109,7 @@ export default class DataResourceCard extends BaseCard {
   async getSnowManLink(name) {
     const snowmanIcon = await this.findSnowManEntryCellXPath({ name });
     if (!snowmanIcon) {
-      throw new Error(` card "${name}"`);
+      throw new Error(` Could not find snowman for "${name}"`);
     }
 
     const snowMan = new Link(this.page, snowmanIcon);
@@ -186,11 +186,10 @@ export default class DataResourceCard extends BaseCard {
   }
 
   /**
-   * Determine if resource entry with specified name exists.
+   * Determine if resource with specified name exists in table.
    * @param {string} cardName
-   * @param {CardType} cardType
    */
-  async resourceTableEntryExists(cardName: string): Promise<boolean> {
+  async resourceExistsInTable(cardName: string): Promise<boolean> {
     return (await this.findNameCellLinkFromTable({ name: cardName })) !== null;
   }
 
@@ -210,18 +209,18 @@ export default class DataResourceCard extends BaseCard {
     }
 
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
-    return await this.deleteFromSnowMan(name, cardType);
+    return await this.deleteViaSnowMan(name, cardType);
   }
 
-  async deleteFromTable(name: string, cardType: ResourceCard): Promise<string[]> {
+  async deleteEntryFromTable(name: string, cardType: ResourceCard): Promise<string[]> {
     await this.getSnowManLink(name);
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
     await snowmanMenu.select(MenuOption.Delete, { waitForNav: false });
-    return await this.deleteFromSnowMan(name, cardType);
+    return await this.deleteViaSnowMan(name, cardType);
   }
 
-  async deleteFromSnowMan(name: string, cardType: ResourceCard): Promise<string[]> {
+  async deleteViaSnowMan(name: string, cardType: ResourceCard): Promise<string[]> {
     const modal = new Modal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
@@ -315,7 +314,7 @@ export default class DataResourceCard extends BaseCard {
     // Type description. Notebook rename modal does not have Description textarea.
     if (resourceType !== ResourceCard.Notebook) {
       const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
-      await descriptionTextarea.type(`Puppeteer automation test. Rename ${newName}.`);
+      await descriptionTextarea.type(`Puppeteer automation test. Rename to   ${newName}.`);
     }
 
     let buttonLink;
@@ -341,7 +340,7 @@ export default class DataResourceCard extends BaseCard {
 
     await modal.clickButton(buttonLink, { waitForClose: true });
     await waitWhileLoading(this.page);
-    logger.info(`Renamed ${resourceType} to "${newName}"`);
+    logger.info(`Renamed resource of type ${resourceType} to "${newName}"`);
     return modalTextContents;
   }
 }

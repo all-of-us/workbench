@@ -17,7 +17,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review via snowman menu located inside the data resource card.
+   * Delete Notebook, Concept Set, Dataset Cohort or Cohort Review via snowman menu located inside the data resource card.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */
@@ -26,12 +26,12 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review via snowman menu located inside the data resource card.
+   * Delete Notebook, Concept Set, Dataset Cohort or Cohort Review via snowman menu located inside the data resource card.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */
   async deleteResourceFromTable(resourceName: string, resourceType: ResourceCard): Promise<string[]> {
-    return new DataResourceCard(this.page).deleteFromTable(resourceName, resourceType);
+    return new DataResourceCard(this.page).deleteEntryFromTable(resourceName, resourceType);
   }
 
   /**
@@ -44,9 +44,10 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Rename Notebook, Concept Set, Dataset or Cohorts thru the snowman menu located inside the Resource table.
+   * Rename Notebook, Concept Set, Dataset, Cohorts or Cohort Review via the snowman menu from the Resource table.
    * @param {string} resourceName
    * @param {string} newResourceName
+   * @param {ResourceCard} resourceType
    */
   async renameResourceFromTable(
     resourceName: string,

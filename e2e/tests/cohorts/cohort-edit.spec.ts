@@ -57,8 +57,8 @@ describe('Editing Cohort Test', () => {
 
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
-    const cohortCard = await dataPage.findCohortEntry(cohortName);
-    await cohortCard.click();
+    const cohortNameCell = await dataPage.findCohortEntry(cohortName);
+    await cohortNameCell.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -85,8 +85,8 @@ describe('Editing Cohort Test', () => {
 
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
-    const cohortCard = await dataPage.findCohortEntry(cohortName);
-    await cohortCard.click();
+    const cohortNameCell = await dataPage.findCohortEntry(cohortName);
+    await cohortNameCell.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -112,11 +112,11 @@ describe('Editing Cohort Test', () => {
     // Back to the Data page.
     await dataPage.waitForLoad();
 
-    const resourceCard = new DataResourceCard(page);
+    const resourceTable = new DataResourceCard(page);
     // Save as cohort is gone.
-    expect(await resourceCard.findNameCellLinkFromTable({ name: newCohortName })).toBeFalsy();
+    expect(await resourceTable.findNameCellLinkFromTable({ name: newCohortName })).toBeFalsy();
     // Original cohort remains.
-    expect(await resourceCard.findNameCellLinkFromTable({ name: cohortName })).toBeTruthy();
+    expect(await resourceTable.findNameCellLinkFromTable({ name: cohortName })).toBeTruthy();
   });
 
   // Helper functions

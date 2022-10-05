@@ -32,8 +32,8 @@ describe('Cohort review set tests', () => {
   test('Create review set in cohort build page', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
-    const cohortCard = await findOrCreateCohortCard(page, cohortName);
-    await cohortCard.click();
+    const cohortNameCell = await findOrCreateCohort(page, cohortName);
+    await cohortNameCell.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -74,12 +74,12 @@ describe('Cohort review set tests', () => {
     const dataPage = new WorkspaceDataPage(page);
     await openTab(page, Tabs.Data, dataPage);
 
-    // Verify Cohort Review card exists
-    const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findNameCellLinkFromTable({
+    // Verify Cohort Review entry exists
+    const resourceTable = new DataResourceCard(page);
+    const reviewCohortNameCell = await resourceTable.findNameCellLinkFromTable({
       name: cohortReview1Name
     });
-    expect(reviewCohortCard).toBeTruthy();
+    expect(reviewCohortNameCell).toBeTruthy();
 
     await dataPage.deleteResourceFromTable(cohortReview1Name, ResourceCard.CohortReview);
   });
@@ -98,7 +98,7 @@ describe('Cohort review set tests', () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     const dataResourcePage = new DataResourceCard(page);
-    await findOrCreateCohortCard(page, cohortName);
+    await findOrCreateCohort(page, cohortName);
     await dataResourcePage.selectSnowmanMenu(MenuOption.Review, { name: cohortName, waitForNav: true });
 
     let cohortReviewPage = new CohortReviewPage(page);
@@ -286,13 +286,13 @@ describe('Cohort review set tests', () => {
     expect(await new DataResourceCard(page).findNameCellLinkFromTable({ name: newCohortReviewName })).toBeFalsy();
   });
 
-  async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<ElementHandle> {
+  async function findOrCreateCohort(page: Page, cohortName: string): Promise<ElementHandle> {
     const dataPage = new WorkspaceDataPage(page);
 
-    // Search for Cohort first. If found, return Cohort card.
-    const existingCohortsCard = await dataPage.findCohortEntry(cohortName);
-    if (existingCohortsCard) {
-      return existingCohortsCard;
+    // Search for Cohort first. If found, return Cohort name cell from Table.
+    const existingCohortNameCell = await dataPage.findCohortEntry(cohortName);
+    if (existingCohortNameCell) {
+      return existingCohortNameCell;
     }
 
     // Create new.
@@ -325,7 +325,7 @@ describe('Cohort review set tests', () => {
 
     await openTab(page, Tabs.Data, dataPage);
     await dataPage.waitForLoad();
-    const cohortCard: ElementHandle = await dataPage.findCohortEntry(cohortName);
-    return cohortCard;
+    const cohortNameCell: ElementHandle = await dataPage.findCohortEntry(cohortName);
+    return cohortNameCell;
   }
 });

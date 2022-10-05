@@ -26,13 +26,12 @@ describe('Dataset rename', () => {
     });
 
     const resourceCard = new DataResourceCard(page);
-    let datasetCard = await resourceCard.findNameCellLinkFromTable({
+    const datasetNameCell = await resourceCard.findNameCellLinkFromTable({
       name: datasetName
     });
-    expect(datasetCard).toBeTruthy();
+    expect(datasetNameCell).toBeTruthy();
 
     // Verify Dataset Build or Edit page renders correctly.
-    //await datasetCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
     await resourceCard.selectSnowmanMenu(MenuOption.Edit, { name: datasetName, waitForNav: true });
 
     const datasetEditPage = new DatasetBuildPage(page);
@@ -64,7 +63,6 @@ describe('Dataset rename', () => {
     await openTab(page, Tabs.Datasets, dataPage);
 
     // Rename Dataset.
-    datasetCard = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
     await resourceCard.selectSnowmanMenu(MenuOption.RenameDataset, { name: datasetName, waitForNav: false });
 
     const renameModal = new DatasetRenameModal(page);
@@ -83,7 +81,7 @@ describe('Dataset rename', () => {
     await renameModal.typeDescription('rename dataset test');
     await renameModal.clickButton(LinkText.RenameDataset, { waitForClose: true });
 
-    // Verify existences of old and new Datasets cards.
+    // Verify existences of old and new Datasets rows.
     const newDatasetExists = await resourceCard.findNameCellLinkFromTable({ name: newDatasetName });
     expect(newDatasetExists).not.toBeNull();
 
