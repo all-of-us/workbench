@@ -13,7 +13,7 @@ import {
 } from 'app/components/resource-card';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { getDisplayName, getResourceType } from 'app/utils/resources';
+import { getDisplayName, getType } from 'app/utils/resources';
 
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 
@@ -63,7 +63,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   const getResourceMap = () => {
     const resourceTypeNameListMap = new Map<ResourceType, string[]>();
     props.workspaceResources.map((resource) => {
-      const resourceType = getResourceType(resource);
+      const resourceType = getType(resource);
       const resourceName = getDisplayName(resource);
       const resourceNameList = resourceTypeNameListMap.get(resourceType);
       const keyValue = !!resourceNameList
@@ -79,7 +79,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     return renderResourceCard({
       resource,
       menuOnly: true,
-      existingNameList: resourceTypeNameMap.get(getResourceType(resource)),
+      existingNameList: resourceTypeNameMap.get(getType(resource)),
       onUpdate: reloadResources,
     });
   };

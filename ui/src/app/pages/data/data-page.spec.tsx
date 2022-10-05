@@ -67,14 +67,16 @@ describe('DataPage', () => {
 
   it('should show all datasets, cohorts, and concept sets', async () => {
     const wrapper = component();
-    const resourceCardsExpected =
+    const resourceTableRowsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
       exampleCohortStubs.length +
       cohortReviewStubs.length +
       DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
 
-    expect(resourceCardsExpected).toBeGreaterThan(ROWS_PER_PAGE_RESOURCE_TABLE);
+    expect(resourceTableRowsExpected).toBeGreaterThan(
+      ROWS_PER_PAGE_RESOURCE_TABLE
+    );
     // Since we have pagination only 10 rows at a time should be displayed
     expect(resourceTableRows(wrapper).length).toBe(
       ROWS_PER_PAGE_RESOURCE_TABLE
@@ -91,13 +93,13 @@ describe('DataPage', () => {
     paginationNextButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(resourceTableRows(wrapper).length).toBe(
-      resourceCardsExpected - ROWS_PER_PAGE_RESOURCE_TABLE
+      resourceTableRowsExpected - ROWS_PER_PAGE_RESOURCE_TABLE
     );
   });
 
   it('should show only cohorts when selected', async () => {
     const wrapper = component();
-    const resourceCardsExpected = exampleCohortStubs.length;
+    const resourceTableRowsExpected = exampleCohortStubs.length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     wrapper
@@ -105,12 +107,12 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceTableRowsExpected);
   });
 
   it('should show only cohort reviews when selected', async () => {
     const wrapper = component();
-    const resourceCardsExpected = cohortReviewStubs.length;
+    const resourceTableRowsExpected = cohortReviewStubs.length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     wrapper
@@ -118,12 +120,13 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceTableRowsExpected);
   });
 
   it('should show only conceptSets when selected', async () => {
     const wrapper = component();
-    const resourceCardsExpected = ConceptSetsApiStub.stubConceptSets().length;
+    const resourceTableRowsExpected =
+      ConceptSetsApiStub.stubConceptSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     wrapper
@@ -131,12 +134,12 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceTableRowsExpected);
   });
 
   it('should show only dataSets when selected', async () => {
     const wrapper = component();
-    const resourceCardsExpected = DataSetApiStub.stubDataSets().length;
+    const resourceTableRowsExpected = DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     wrapper
@@ -144,6 +147,6 @@ describe('DataPage', () => {
       .first()
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(resourceTableRows(wrapper).length).toBe(resourceCardsExpected);
+    expect(resourceTableRows(wrapper).length).toBe(resourceTableRowsExpected);
   });
 });

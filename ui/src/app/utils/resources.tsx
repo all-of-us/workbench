@@ -41,16 +41,6 @@ export function toDisplay(resourceType: ResourceType): string {
   ])(resourceType);
 }
 
-export function getResourceType(resource: WorkspaceResource): ResourceType {
-  return fp.cond([
-    [(wr) => isCohort(wr), () => ResourceType.COHORT],
-    [(wr) => isCohortReview(wr), () => ResourceType.COHORTREVIEW],
-    [(wr) => isConceptSet(wr), () => ResourceType.CONCEPTSET],
-    [(wr) => isDataSet(wr), () => ResourceType.DATASET],
-    [(wr) => isNotebook(wr), () => ResourceType.NOTEBOOK],
-  ])(resource);
-}
-
 export function getDescription(resource: WorkspaceResource): string {
   return fp.cond([
     [isCohort, (r) => r.cohort.description],
