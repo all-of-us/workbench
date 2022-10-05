@@ -24,6 +24,7 @@ import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
+import { displayDate, sortableDateString } from 'app/utils/dates';
 import { getAdminUrl } from 'app/utils/institutions';
 import moment from 'moment';
 
@@ -98,6 +99,7 @@ interface DataTableFields {
   dataAccess: JSX.Element;
   bypass: JSX.Element;
   firstSignInTime: string;
+  sortableFirstSignInTime: string;
 }
 
 interface Props extends WithSpinnerOverlayProps {
@@ -242,6 +244,7 @@ export const AdminUserTable = withUserProfile()(
           firstSignInTime: this.formattedTimestampOrEmptyString(
             user.firstSignInTime
           ),
+          sortableFirstSignInTime: sortableDateString(user.firstSignInTime),
         }))
         .sort((f1: DataTableFields, f2: DataTableFields) =>
           f1.nameText.localeCompare(f2.nameText)
@@ -332,7 +335,7 @@ export const AdminUserTable = withUserProfile()(
                 {buildColumn({
                   header: 'First Sign-in',
                   field: 'firstSignInTime',
-                  sortField: 'firstSignInTime',
+                  sortField: 'sortableFirstSignInTime',
                   filterable: false,
                   headerWidth: 180,
                 })}
