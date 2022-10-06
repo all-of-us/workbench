@@ -3,7 +3,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { makeWorkspaceName } from 'utils/str-utils';
-import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
+import { MenuOption, Tabs } from 'app/text-labels';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import Link from 'app/element/link';
 import { Visits } from 'app/page/cohort-participants-group';
@@ -57,8 +57,8 @@ describe('Editing Cohort Test', () => {
 
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
-    const cohortCard = await dataPage.findCohortCard(cohortName);
-    await cohortCard.clickName();
+    const cohortNameCell = await dataPage.findCohortEntry(cohortName);
+    await cohortNameCell.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -85,8 +85,8 @@ describe('Editing Cohort Test', () => {
 
     // Open previously created Cohort.
     const dataPage = new WorkspaceDataPage(page);
-    const cohortCard = await dataPage.findCohortCard(cohortName);
-    await cohortCard.clickName();
+    const cohortNameCell = await dataPage.findCohortEntry(cohortName);
+    await cohortNameCell.click();
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
@@ -112,11 +112,11 @@ describe('Editing Cohort Test', () => {
     // Back to the Data page.
     await dataPage.waitForLoad();
 
-    const resourceCard = new DataResourceCard(page);
+    const resourceTable = new DataResourceCard(page);
     // Save as cohort is gone.
-    expect(await resourceCard.findCard({ name: newCohortName, cardType: ResourceCard.Cohort })).toBeFalsy();
+    expect(await resourceTable.findNameCellLinkFromTable({ name: newCohortName })).toBeFalsy();
     // Original cohort remains.
-    expect(await resourceCard.findCard({ name: cohortName, cardType: ResourceCard.Cohort })).toBeTruthy();
+    expect(await resourceTable.findNameCellLinkFromTable({ name: cohortName })).toBeTruthy();
   });
 
   // Helper functions

@@ -20,6 +20,9 @@ export const YEAR_OF_BIRTH = 'yearOfBirth';
 export const EDUCATION = 'education';
 export const DISADVANTAGED = 'disadvantaged';
 
+// Resource table
+export const ROWS_PER_PAGE_RESOURCE_TABLE = 10;
+
 // source: https://www.faa.gov/air_traffic/publications/atpubs/cnt_html/appendix_a.html
 export const STATE_CODE_MAPPING = {
   ALASKA: 'AK',

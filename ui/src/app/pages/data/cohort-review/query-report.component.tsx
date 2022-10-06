@@ -327,13 +327,13 @@ export const QueryReport = fp.flow(
       const {
         cohort,
         match: {
-          params: { ns, wsid, cid, crid },
+          params: { ns, wsid, crid },
         },
       } = this.props;
       const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.Asc };
       let request: CohortDefinition;
       await cohortReviewApi()
-        .getParticipantCohortStatuses(ns, wsid, +cid, +crid, filterRequest)
+        .getParticipantCohortStatuses(ns, wsid, +crid, filterRequest)
         .then(({ cohortReview }) => {
           request = JSON.parse(cohortReview.cohortDefinition);
           this.setState({

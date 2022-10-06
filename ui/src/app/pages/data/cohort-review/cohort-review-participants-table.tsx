@@ -262,7 +262,6 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       return cohortReviewApi().getParticipantCohortStatuses(
         ns,
         wsid,
-        +cid,
         cohortReview.cohortReviewId,
         query
       );

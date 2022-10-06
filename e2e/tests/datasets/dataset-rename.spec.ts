@@ -26,15 +26,13 @@ describe('Dataset rename', () => {
     });
 
     const resourceCard = new DataResourceCard(page);
-    let datasetCard = await resourceCard.findCard({
-      name: datasetName,
-      cardType: ResourceCard.Dataset,
-      timeout: 30000
+    const datasetNameCell = await resourceCard.findNameCellLinkFromTable({
+      name: datasetName
     });
-    expect(datasetCard).toBeTruthy();
+    expect(datasetNameCell).toBeTruthy();
 
     // Verify Dataset Build or Edit page renders correctly.
-    await datasetCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
+    await resourceCard.selectSnowmanMenu(MenuOption.Edit, { name: datasetName, waitForNav: true });
 
     const datasetEditPage = new DatasetBuildPage(page);
     await datasetEditPage.waitForLoad();
@@ -65,8 +63,7 @@ describe('Dataset rename', () => {
     await openTab(page, Tabs.Datasets, dataPage);
 
     // Rename Dataset.
-    datasetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset });
-    await datasetCard.selectSnowmanMenu(MenuOption.RenameDataset, { waitForNav: false });
+    await resourceCard.selectSnowmanMenu(MenuOption.RenameDataset, { name: datasetName, waitForNav: false });
 
     const renameModal = new DatasetRenameModal(page);
     await renameModal.waitForLoad();
@@ -84,13 +81,13 @@ describe('Dataset rename', () => {
     await renameModal.typeDescription('rename dataset test');
     await renameModal.clickButton(LinkText.RenameDataset, { waitForClose: true });
 
-    // Verify existences of old and new Datasets cards.
-    const newDatasetExists = await resourceCard.cardExists(newDatasetName, ResourceCard.Dataset);
-    expect(newDatasetExists).toBe(true);
+    // Verify existences of old and new Datasets rows.
+    const newDatasetExists = await resourceCard.findNameCellLinkFromTable({ name: newDatasetName });
+    expect(newDatasetExists).not.toBeNull();
 
-    const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset, { timeout: 1000 });
-    expect(oldDatasetExists).toBe(false);
+    const oldDatasetExists = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
+    expect(oldDatasetExists).toBeNull();
 
-    await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
+    await dataPage.deleteResourceFromTable(newDatasetName, ResourceCard.Dataset);
   });
 });

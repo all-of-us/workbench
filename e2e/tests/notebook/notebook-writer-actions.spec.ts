@@ -149,7 +149,7 @@ describe('Workspace WRITER notebook tests', () => {
     });
 
     // open Snowman menu.
-    const snowmanMenu = await notebookCard.getSnowmanMenu();
+    const snowmanMenu = await notebookCard.getCardSnowmanMenu();
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);

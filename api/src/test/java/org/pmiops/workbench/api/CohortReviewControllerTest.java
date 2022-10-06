@@ -1885,139 +1885,11 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
-  ////////// getParticipantCohortStatusesOld  //////////
-  @Test
-  public void getParticipantCohortStatusesOldWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
-
-    Long cohortId = cohort.getCohortId();
-
-    Throwable exception =
-        assertThrows(
-            NotFoundException.class,
-            () ->
-                cohortReviewController.getParticipantCohortStatusesOld(
-                    workspace2.getNamespace(),
-                    workspace2.getId(),
-                    cohortId,
-                    new PageFilterRequest()));
-
-    assertNotFoundExceptionNoCohort(cohortId, exception);
-  }
-
-  @Test
-  public void getParticipantCohortStatusesOldNoCohort() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    Long wrongCohortId = -1L;
-
-    Throwable exception =
-        assertThrows(
-            NotFoundException.class,
-            () ->
-                cohortReviewController.getParticipantCohortStatusesOld(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    wrongCohortId,
-                    new PageFilterRequest()));
-
-    assertNotFoundExceptionNoCohort(wrongCohortId, exception);
-  }
-
-  @ParameterizedTest(
-      name = "getParticipantCohortStatusesOldSortByFilterColumn SortOrder={0}, FilterColumns={1}")
-  @MethodSource("paramsSortByFilterColumn")
-  public void getParticipantCohortStatusesOldSortByFilterColumn(
-      SortOrder sortOrder, FilterColumns filterColumns) {
-    CohortReview expectedReview =
-        createCohortReview(
-            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
-    // default filterColumn=participant_id
-    PageFilterRequest pageFilterRequest =
-        new PageFilterRequest().sortOrder(sortOrder).sortColumn(filterColumns);
-
-    CohortReview actualReview =
-        Objects.requireNonNull(
-                cohortReviewController
-                    .getParticipantCohortStatusesOld(
-                        workspace.getNamespace(),
-                        workspace.getId(),
-                        cohort.getCohortId(),
-                        pageFilterRequest)
-                    .getBody())
-            .getCohortReview();
-
-    verify(userRecentResourceService, atLeastOnce())
-        .updateCohortReviewEntry(anyLong(), anyLong(), anyLong());
-    assertCohortReviewParticipantCohortStatuses(
-        actualReview, expectedReview, filterColumns, sortOrder);
-  }
-
-  @ParameterizedTest(
-      name = "getParticipantCohortStatusesOldAllowedAccessLevel WorkspaceAccessLevel={0}")
-  @EnumSource(
-      value = WorkspaceAccessLevel.class,
-      names = {"OWNER", "WRITER", "READER"})
-  public void getParticipantCohortStatusesOldAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
-    CohortReview expectedReview =
-        createCohortReview(
-            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
-
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-
-    CohortReview actualReview =
-        Objects.requireNonNull(
-                cohortReviewController
-                    .getParticipantCohortStatusesOld(
-                        workspace.getNamespace(),
-                        workspace.getId(),
-                        cohort.getCohortId(),
-                        new PageFilterRequest())
-                    .getBody())
-            .getCohortReview();
-
-    verify(userRecentResourceService, atLeastOnce())
-        .updateCohortReviewEntry(anyLong(), anyLong(), anyLong());
-    // PageFilterRequest defaults to participantId, ascending (if not given)
-    assertCohortReviewParticipantCohortStatuses(
-        actualReview, expectedReview, FilterColumns.PARTICIPANTID, SortOrder.ASC);
-  }
-
-  @ParameterizedTest(
-      name = "getParticipantCohortStatusesOldForbiddenAccessLevel WorkspaceAccessLevel={0}")
-  @EnumSource(
-      value = WorkspaceAccessLevel.class,
-      names = {"NO_ACCESS"})
-  public void getParticipantCohortStatusesOldForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
-    createCohortReview(
-        cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
-
-    // change access, call and check
-    stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class,
-            () ->
-                cohortReviewController.getParticipantCohortStatusesOld(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    cohort.getCohortId(),
-                    new PageFilterRequest()));
-
-    assertForbiddenException(exception);
-  }
-
   ////////// getParticipantCohortStatuses  //////////
   @Test
   public void getParticipantCohortStatusesWrongWorkspace() {
     stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
 
-    Long cohortId = cohort.getCohortId();
-
     Throwable exception =
         assertThrows(
             NotFoundException.class,
@@ -2025,31 +1897,11 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortStatuses(
                     workspace2.getNamespace(),
                     workspace2.getId(),
-                    cohortId,
                     cohortReview.getCohortReviewId(),
                     new PageFilterRequest()));
 
-    assertNotFoundExceptionNoCohort(cohortId, exception);
-  }
-
-  @Test
-  public void getParticipantCohortStatusesNoCohort() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
-
-    Long wrongCohortId = -1L;
-
-    Throwable exception =
-        assertThrows(
-            NotFoundException.class,
-            () ->
-                cohortReviewController.getParticipantCohortStatuses(
-                    workspace.getNamespace(),
-                    workspace.getId(),
-                    wrongCohortId,
-                    cohortReview.getCohortReviewId(),
-                    new PageFilterRequest()));
-
-    assertNotFoundExceptionNoCohort(wrongCohortId, exception);
+    // No CohortReview exists for cohortReviewId: 1 and cohortId: 1
+    assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
   }
 
   @ParameterizedTest(
@@ -2070,7 +1922,6 @@ public class CohortReviewControllerTest {
                     .getParticipantCohortStatuses(
                         workspace.getNamespace(),
                         workspace.getId(),
-                        cohort.getCohortId(),
                         cohortReview.getCohortReviewId(),
                         pageFilterRequest)
                     .getBody())
@@ -2102,7 +1953,6 @@ public class CohortReviewControllerTest {
                     .getParticipantCohortStatuses(
                         workspace.getNamespace(),
                         workspace.getId(),
-                        cohort.getCohortId(),
                         cohortReview.getCohortReviewId(),
                         new PageFilterRequest())
                     .getBody())
@@ -2135,7 +1985,6 @@ public class CohortReviewControllerTest {
                 cohortReviewController.getParticipantCohortStatuses(
                     workspace.getNamespace(),
                     workspace.getId(),
-                    cohort.getCohortId(),
                     cohortReview.getCohortReviewId(),
                     new PageFilterRequest()));
 
