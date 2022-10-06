@@ -408,17 +408,17 @@ dependencies {
     compile 'com.google.auth:google-auth-library-appengine:1.7.0'
     compile 'com.google.auth:google-auth-library-oauth2-http:1.7.0'
     compile 'com.google.cloud.sql:mysql-socket-factory:1.6.1'
-    compile 'com.google.cloud:google-cloud-bigquery:2.13.2'
-    compile 'com.google.cloud:google-cloud-iamcredentials:2.2.0'
-    compile 'com.google.cloud:google-cloud-logging:3.9.0'
-    compile 'com.google.cloud:google-cloud-monitoring:3.3.0'
-    compile 'com.google.cloud:google-cloud-storage:2.8.1'
-    compile 'com.google.cloud:google-cloud-tasks:2.2.0'
+    compile 'com.google.cloud:google-cloud-bigquery:2.17.0'
+    compile 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
+    compile 'com.google.cloud:google-cloud-logging:3.11.5'
+    compile 'com.google.cloud:google-cloud-monitoring:3.4.6'
+    compile 'com.google.cloud:google-cloud-storage:2.13.0'
+    compile 'com.google.cloud:google-cloud-tasks:2.3.11'
     compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     compile 'com.google.guava:guava:31.1-jre'
     compile "com.google.http-client:google-http-client-apache:2.1.2"
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
-    compile 'com.google.protobuf:protobuf-java:3.21.1'
+    compile 'com.google.protobuf:protobuf-java:3.21.7'
     compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 
     compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
