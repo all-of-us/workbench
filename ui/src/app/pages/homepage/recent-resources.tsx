@@ -66,8 +66,13 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       resources && wsMap && !loading,
       () => (
         <React.Fragment>
-          <SmallHeader>Recently Accessed Items</SmallHeader>
-          <div data-test-id='recent-resources-table'>
+          {resources.length > 0 && (
+            <SmallHeader>Recently Accessed Items</SmallHeader>
+          )}
+          <div
+            data-test-id='recent-resources-table'
+            style={{ paddingTop: '1rem' }}
+          >
             <ResourcesList
               recentResourceSource
               workspaceResources={resources}

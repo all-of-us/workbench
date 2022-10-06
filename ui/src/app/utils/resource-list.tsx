@@ -174,7 +174,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             ),
             lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),
-            workspaceName: getWorkspace(r).name,
+            workspaceName: getWorkspace(r)?.name,
             lastModifiedBy: r.lastModifiedBy,
           };
         })
