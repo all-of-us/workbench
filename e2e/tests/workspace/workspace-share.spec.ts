@@ -1,4 +1,4 @@
-import { ConceptSets, LinkText, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import { ConceptSets, LinkText, MenuOption, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import {
   createDataset,
   findOrCreateWorkspace,
@@ -122,22 +122,22 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
     await openTab(page, Tabs.Datasets, dataPage);
 
-    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
+    // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click for Dataset entries.
     const resourceCard = new DataResourceCard(page);
-    const dataSetCard = await resourceCard.findCard({ name: datasetName, cardType: ResourceCard.Dataset });
-    expect(await dataSetCard.isVisible()).toBeTruthy();
+    const dataSetNameCell = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
+    expect(dataSetNameCell).not.toBeNull();
 
     switch (assign.accessRole) {
       case WorkspaceAccessLevel.Reader:
         {
-          const snowmanMenu = await dataSetCard.getSnowmanMenu();
+          const snowmanMenu = await resourceCard.getSnowmanMenuFromTable(datasetName);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(true);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(true);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
 
           // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
-          await dataSetCard.clickName();
+          await dataSetNameCell.click();
           const dataSetEditPage = new DatasetBuildPage(page);
           await dataSetEditPage.waitForLoad();
 
@@ -156,14 +156,14 @@ describe('Workspace Reader and Writer Permission Test', () => {
         break;
       case WorkspaceAccessLevel.Writer:
         {
-          const snowmanMenu = await dataSetCard.getSnowmanMenu();
+          const snowmanMenu = await resourceCard.getSnowmanMenuFromTable(datasetName);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.RenameDataset)).toBe(false);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.ExportToNotebook)).toBe(false);
           expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
 
           // User can click on dataset name and see the dataset details.
-          await dataSetCard.clickName();
+          await dataSetNameCell.click();
           const dataSetEditPage = new DatasetBuildPage(page);
           await dataSetEditPage.waitForLoad();
 

@@ -152,7 +152,7 @@ describe('Build cohort page actions', () => {
     expect(await cohortActionsPage.getCohortLink().exists()).toBeTruthy();
 
     await openTab(page, Tabs.Data, dataPage);
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
+    await dataPage.deleteResourceFromTable(cohortName, ResourceCard.Cohort);
   });
 
   test('Delete, edit, rename and suppress criteria', async () => {
