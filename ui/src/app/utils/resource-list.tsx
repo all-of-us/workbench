@@ -83,15 +83,14 @@ const WorkspaceNavigation = (props: NavProps) => {
 
 interface TableData {
   menu: JSX.Element;
-  resourceType: JSX.Element;
-  resourceTypeAsString: string;
-  resourceName: JSX.Element;
-  resourceNameAsString: string;
+  resourceType: string;
+  resourceName: string;
   formattedLastModified: string;
   lastModifiedDateAsString: string;
   lastModifiedBy: string;
-  workspaceName: JSX.Element;
+  workspaceName: string;
   cdrVersionName: string;
+  resource: WorkspaceResource;
 }
 
 interface Props {
@@ -166,32 +165,16 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
       setTableData(
         workspaceResources.map((r) => {
           return {
+            resource: r,
             menu: renderResourceMenu(r),
-            resourceType: (
-              <ResourceNavigation resource={r}>
-                <StyledResourceType resource={r} />
-              </ResourceNavigation>
-            ),
-            resourceTypeAsString: getTypeString(r),
-            resourceName: (
-              <ResourceNavigation resource={r} style={styles.navigation}>
-                {r.adminLocked && addAdminLockToNameColumn()}
-                {getDisplayName(r)}
-              </ResourceNavigation>
-            ),
-            resourceNameAsString: getDisplayName(r),
+            resourceType: getTypeString(r),
+            resourceName: getDisplayName(r),
             formattedLastModified: displayDateWithoutHours(
               r.lastModifiedEpochMillis
             ),
             lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),
-            workspaceName: (
-              <WorkspaceNavigation
-                workspace={getWorkspace(r)}
-                resource={r}
-                style={styles.navigation}
-              />
-            ),
+            workspaceName: getWorkspace(r).name,
             lastModifiedBy: r.lastModifiedBy,
           };
         })
@@ -199,8 +182,33 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     }
   }, [props.workspaceResources]);
 
-  const filterNameColumn = (value, filter) => {
-    return value.props.children.toUpperCase().startsWith(filter.toUpperCase());
+  const displayWorkspace = (rowData) => {
+    return (
+      <WorkspaceNavigation
+        workspace={getWorkspace(rowData.resource)}
+        resource={rowData.resource}
+        style={styles.navigation}
+      />
+    );
+  };
+
+  const displayResourceType = (rowData) => {
+    const { resource } = rowData;
+    return (
+      <ResourceNavigation resource={resource}>
+        <StyledResourceType resource={resource} />
+      </ResourceNavigation>
+    );
+  };
+
+  const displayResourceName = (rowData) => {
+    const { resource } = rowData;
+    return (
+      <ResourceNavigation resource={resource} style={styles.navigation}>
+        {resource.adminLocked && addAdminLockToNameColumn()}
+        {getDisplayName(resource)}
+      </ResourceNavigation>
+    );
   };
 
   return (
@@ -218,7 +226,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             <Column field='menu' style={styles.menu} />
             <Column
               field='resourceType'
-              sortField='resourceTypeAsString'
+              body={displayResourceType}
               header='Item type'
               sortable
               style={styles.typeColumn}
@@ -226,18 +234,18 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             <Column
               field='resourceName'
               header='Name'
+              body={displayResourceName}
               style={styles.column}
-              sortField={'resourceNameAsString'}
               sortable
               filter
               filterPlaceholder={'Search Name'}
-              filterMatchMode='custom'
-              filterFunction={filterNameColumn}
             />
             {props.recentResourceSource && (
               <Column
                 field='workspaceName'
                 header='Workspace name'
+                sortable
+                body={displayWorkspace}
                 style={styles.column}
               />
             )}
