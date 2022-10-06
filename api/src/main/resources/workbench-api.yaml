@@ -826,7 +826,7 @@ paths:
         200:
           description: The runtime for this user and workspace.
           schema:
-            "$ref": "#/definitions/Runtime"
+            "$ref": "#/definitions/App"
         404:
           description: No runtime exists for this user and workspace.
           schema:
@@ -6096,6 +6096,16 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  AppStatus:
+    type: string
+    enum:
+      - STATUS_UNSPECIFIED
+      - RUNNING
+      - ERROR
+      - DELETING
+      - DELETED
+      - PROVISIONING
+
   DiskStatus:
     type: string
     enum:
@@ -6106,6 +6116,7 @@ definitions:
       - Deleting
       - Deleted
       - Unknown
+
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user
@@ -6174,6 +6185,58 @@ definitions:
       timestamp:
         type: string
         description: timestamp for error in ISO 8601 format
+
+  App:
+    properties:
+      googleProject:
+        type: string
+        description: The Google Project used to create the runtime. Read only.
+      appName:
+        type: string
+        description: The user-supplied name for the runtime. Read only.
+      createdDate:
+        type: string
+        description: The date and time the app was created, in ISO-8601 format. Read only.
+      status:
+        "$ref": "#/definitions/AppStatus"
+        description: App status. Read only.
+      autopauseThreshold:
+        type: integer
+        description: The number of minutes of idle time to elapse before the cluster is
+          autopaused. If autopause is set to false, this value is disregarded.
+          A value of 0 is equivalent to autopause being turned off.
+      kubernetesRuntimeConfig:
+        description: kubernetesRuntimeConfig will be returned
+        "$ref": "#/definitions/KubernetesRuntimeConfig"
+      diskConfig:
+        description: Disk configuration
+        "$ref": "#/definitions/DiskConfig"
+      errors:
+        type: array
+        description: The list of errors that were encountered on APP create, if any.
+        items:
+          $ref: "#/definitions/KubernetesError"
+
+  KubernetesError:
+      description: a kubernetes app error
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: a helpful error message
+        timestamp:
+          type: string
+          description: timestamp for error in ISO 8601 format
+        action:
+          type: string
+          description: the api-level action associated with the error, e.g. createApp
+        source:
+          type: string
+          description: the internal source associated with the error
+        googleErrorCode:
+          type: integer
+          description: if the error is associated with an external API call, the error code will be propagated here
+
   DiskConfig:
     description: The configuration of a persistent disk, returned in runtime responses
     type: object
@@ -6225,29 +6288,6 @@ definitions:
         $ref: '#/components/schemas/PersistentDiskRequest'
       kubernetesRuntimeConfig:
         $ref: '#/components/schemas/KubernetesRuntimeConfig'
-  App:
-    googleProject:
-      type: string
-      description: The Google Project used to create the app. Read only.
-    appname:
-      type: string
-      description: The user-supplied name for the app. Read only.
-    createdDate:
-      type: string
-      description: The date and time the app was created, in ISO-8601 format. Read only.
-    status:
-      "$ref": "#/definitions/AppStatus"
-      description: App status. Read only.
-    autopauseThreshold:
-      type: integer
-      description: The number of minutes of idle time to elapse before the cluster is
-        autopaused. If autopause is set to false, this value is disregarded.
-        A value of 0 is equivalent to autopause being turned off.
-    kubernetesRuntimeConfig:
-      type: string
-      description: configuration for a kubernetes app
-    diskConfig:
-      $ref: '#/components/schemas/PersistentDiskRequest'
 
   KubernetesRuntimeConfig:
     description: configuration for a kubernetes app
