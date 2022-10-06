@@ -96,7 +96,7 @@ parameters:
     type: string
     enum:
       - RSTUDIO
-      - SAS
+      - CROMWELL
     description: The app type that workbench supports
     required: true
   cohortId:
@@ -838,9 +838,9 @@ paths:
     post:
       summary: Create a workspace APP.
       description: |
-        Creates a new runtime for the current user in the given billing project. If a runtime already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
-        TODO(RW-3697): Custom runtime creation params should be added as a body param here.
-      operationId: createRuntime
+        Creates a new app for the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
+        TODO(RW-3697): Custom app creation params should be added as a body param here.
+      operationId: createApp
       tags:
         - runtime
       parameters:
@@ -854,17 +854,86 @@ paths:
             "$ref": "#/definitions/App"
       responses:
         200:
-          description: Runtime was created successfully
+          description: App was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
         409:
-          description: A runtime for this user and workspace already exists.
+          description: A app for this user and workspace already exists.
           schema:
             "$ref": "#/definitions/EmptyResponse"
         412:
           description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+    patch:
+      summary: Updates the configuration of a app
+      description: In order to update the configuration of a app, it must first be running or paused
+      operationId: updateApp
+      tags:
+        - runtime
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/appType"
+        - in: body
+          name: app
+          schema:
+            "$ref": "#/definitions/App"
+      responses:
+        202:
+          description: App update request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        400:
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Server Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a workspace app.
+      operationId: deleteApp
+      tags:
+        - runtime
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/appType"
+        - in: query
+          name: deleteDisk
+          description: Whether or not disk should be deleted if the app is using persistent disk. Default to false if not specified
+          required: false
+          type: boolean
+          default: false
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No app exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/apps/":
+    get:
+      tags:
+        - app
+      summary: List apps
+      description: List apps the caller has access to, in all workspaces
+      operationId: listApp
+      responses:
+        "200":
+          description: List of apps
+          schema:
+            "$ref": "#/definitions/ListAppsResponse"
 
   "/v1/disks/{workspaceNamespace}":
     get:
@@ -6280,15 +6349,6 @@ definitions:
         type: integer
         description: The block size in bytes that the persistent disk is to be updated to.
 
-  CreateAppRequest:
-    description: the configuration of an app.
-    type: object
-    properties:
-      diskConfig:
-        $ref: '#/components/schemas/PersistentDiskRequest'
-      kubernetesRuntimeConfig:
-        $ref: '#/components/schemas/KubernetesRuntimeConfig'
-
   KubernetesRuntimeConfig:
     description: configuration for a kubernetes app
     type: object
@@ -6513,6 +6573,11 @@ definitions:
           requested files were localized. This is the "API" directory in Jupyter terms,
           which means it is a relative path in the Jupyter user-facing file system,
           e.g. "foo/bar.ipynb".'
+
+  ListAppsResponse:
+    type: array
+    items:
+      $ref: "#/components/schemas/App"
   UsernameTakenResponse:
     type: object
     required:
