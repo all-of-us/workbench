@@ -183,10 +183,11 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   }, [props.workspaceResources]);
 
   const displayWorkspace = (rowData) => {
+    const { resource } = rowData;
     return (
       <WorkspaceNavigation
-        workspace={getWorkspace(rowData.resource)}
-        resource={rowData.resource}
+        workspace={getWorkspace(resource)}
+        resource={resource}
         style={styles.navigation}
       />
     );
