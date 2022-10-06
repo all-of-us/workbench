@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -43,6 +44,9 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.impl.EgressSumologicRemediationService;
+import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
+import org.pmiops.workbench.exfiltration.jirahandler.EgressSumologicJiraHandler;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
@@ -60,6 +64,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -85,7 +90,11 @@ public class EgressRemediationServiceTest {
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private UserDao userDao;
 
-  @Autowired private EgressRemediationService egressRemediationService;
+  @Autowired
+  @Qualifier(EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
+  private EgressRemediationService egressRemediationService;
+
+  @Autowired private EgressJiraHandler egressJiraHandler;
 
   private long userId;
   private DbWorkspace dbWorkspace;
@@ -94,10 +103,11 @@ public class EgressRemediationServiceTest {
   @TestConfiguration
   @Import({
     EgressEventMapperImpl.class,
-    EgressRemediationService.class,
+    EgressSumologicRemediationService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
-    JiraService.class
+    JiraService.class,
+    EgressSumologicJiraHandler.class
   })
   @MockBean({
     CommonMappers.class,

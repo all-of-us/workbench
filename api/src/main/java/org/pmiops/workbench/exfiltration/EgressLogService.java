@@ -69,7 +69,8 @@ public class EgressLogService {
    * restricted to the approximate time frame of the event.
    */
   public List<AuditEgressRuntimeLogGroup> getRuntimeLogGroups(DbEgressEvent event) {
-    Duration windowSize = Duration.ofSeconds(event.getEgressWindowSeconds());
+    Duration windowSize =
+        Duration.ofSeconds(Optional.ofNullable(event.getEgressWindowSeconds()).orElse(0l));
     Instant endTime = event.getCreationTime().toInstant();
     Optional<SumologicEgressEvent> maybeSumologicEvent =
         maybeParseSumologicEvent(event.getSumologicEvent());

@@ -1844,6 +1844,17 @@ paths:
       responses:
         204:
           description: No content.
+  "/v1/cron/checkObjectNameSize":
+    get:
+      security: []
+      tags:
+      - offlineObjectNameSize
+      - cron
+      description: ''
+      operationId: checkObjectNameSize
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
     parameters:
