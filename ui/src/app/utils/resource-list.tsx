@@ -212,7 +212,6 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             value={tableData}
             scrollable={true}
             sortMode='multiple'
-            // style={{ width: '44rem' }}
             paginator
             rows={ROWS_PER_PAGE_RESOURCE_TABLE}
           >
@@ -239,7 +238,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
               <Column
                 field='workspaceName'
                 header='Workspace name'
-                style={{ ...styles.column }}
+                style={styles.column}
               />
             )}
             <Column
@@ -253,13 +252,13 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
               <Column
                 field='cdrVersionName'
                 header='Dataset'
-                style={{ ...styles.column }}
+                style={styles.column}
               />
             )}
             <Column
               field='lastModifiedBy'
               header='Last Modified By'
-              style={{ ...styles.column }}
+              style={styles.column}
             />
           </DataTable>
         )}
