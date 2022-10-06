@@ -69,4 +69,9 @@ cron:
   schedule: every day 23:30
   timezone: America/Chicago
   target: api
+- description: Check object name sizes to prevent exfiltration.
+  url: /v1/cron/checkObjectNameSize
+  schedule: every 6 hours
+  timezone: UTC
+  target: api
 

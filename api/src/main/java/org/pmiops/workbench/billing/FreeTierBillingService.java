@@ -2,10 +2,6 @@ package org.pmiops.workbench.billing;
 
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
-import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -46,8 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FreeTierBillingService {
 
-  public static final int WORKSPACES_BATCH_SIZE = 1000;
-  private final BigQueryService bigQueryService;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
@@ -68,7 +62,6 @@ public class FreeTierBillingService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       WorkspaceFreeTierUsageService workspaceFreeTierUsageService) {
-    this.bigQueryService = bigQueryService;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -92,10 +85,11 @@ public class FreeTierBillingService {
    * passing thresholds or exceeding limits. RW-6280 - REQUIRES_NEW transactional mode was added to
    * make the call to this method create a new transaction with each set of users. In order to
    * commit the transaction after the call. However, if the user has many workspaces, this method
-   * may still timeout. See {@link #updateFreeTierUsageInBatches(List, List)}
+   * may still timeout.
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void checkFreeTierBillingUsageForUsers(Set<DbUser> users) {
+  public void checkFreeTierBillingUsageForUsers(
+      Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
 
     // Current cost in DB
     List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(users);
@@ -112,8 +106,13 @@ public class FreeTierBillingService {
     List<WorkspaceCostView> workspacesThatRequireUpdate =
         findWorkspacesThatRequireUpdates(allCostsInDbForUsers);
 
-    final Map<Long, Double> liveCostsInBQ =
-        updateFreeTierUsageInBatches(allCostsInDbForUsers, workspacesThatRequireUpdate);
+    final Map<String, Long> workspaceByProject =
+        workspacesThatRequireUpdate.stream()
+            .collect(
+                Collectors.toMap(
+                    WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
+
+    updateFreeTierUsage(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
 
     // Cache cost in DB by creator
     final Map<Long, Double> dbCostByCreator =
@@ -134,9 +133,10 @@ public class FreeTierBillingService {
     // Cache cost in BQ by creator
     final Map<Long, Double> liveCostByCreator =
         liveCostsInBQ.entrySet().stream()
+            .filter(e -> workspaceByProject.containsKey(e.getKey()))
             .collect(
                 Collectors.groupingBy(
-                    e -> creatorByWorkspace.get(e.getKey()),
+                    e -> creatorByWorkspace.get(workspaceByProject.get(e.getKey())),
                     Collectors.summingDouble(Entry::getValue)));
 
     // Find users with changed costs only
@@ -378,39 +378,6 @@ public class FreeTierBillingService {
         users);
   }
 
-  private Map<Long, Double> getFreeTierWorkspaceCostsFromBQ(List<WorkspaceCostView> costInDB) {
-    final Map<String, Long> workspaceByProject =
-        costInDB.stream()
-            .collect(
-                Collectors.toMap(
-                    WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
-
-    final QueryJobConfiguration queryConfig =
-        QueryJobConfiguration.newBuilder(
-                "SELECT project.id, SUM(cost) cost FROM `"
-                    + workbenchConfigProvider.get().billing.exportBigQueryTable
-                    + "` WHERE project.id IS NOT NULL "
-                    + " AND project.id IN UNNEST(@projects) "
-                    + "GROUP BY project.id ORDER BY cost desc;")
-            .addNamedParameter(
-                "projects",
-                QueryParameterValue.array(
-                    workspaceByProject.keySet().toArray(new String[workspaceByProject.size()]),
-                    String.class))
-            .build();
-
-    final Map<Long, Double> liveCostByWorkspace = new HashMap<>();
-    for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
-      final String googleProject = tableRow.get("id").getStringValue();
-      if (workspaceByProject.containsKey(googleProject)) {
-        liveCostByWorkspace.put(
-            workspaceByProject.get(googleProject), tableRow.get("cost").getDoubleValue());
-      }
-    }
-
-    return liveCostByWorkspace;
-  }
-
   /**
    * Filter the costs further by getting the workspaces that are active, or deleted but their free
    * tier last updated time is before the workspace last updated time. This filtration ensures that
@@ -479,14 +446,13 @@ public class FreeTierBillingService {
    *
    * @param allCostsInDbForUsers List of {@link WorkspaceCostView} containing all workspaces for the
    *     current batch of users
-   * @param workspacesThatRequireUpdate List of {@link WorkspaceCostView} containing only the
-   *     workspaces that need to be updated
+   * @param workspaceByProject
    * @return a Map of all live costs.
    */
-  private Map<Long, Double> updateFreeTierUsageInBatches(
+  private void updateFreeTierUsage(
       List<WorkspaceCostView> allCostsInDbForUsers,
-      List<WorkspaceCostView> workspacesThatRequireUpdate) {
-    final Map<Long, Double> liveCostsInBQ = new HashMap<>();
+      Map<String, Double> allCostsInBqByProject,
+      Map<String, Long> workspaceByProject) {
 
     // Cache that maps a workspace ID to its current cost in the database
     final Map<Long, Double> dbCostByWorkspace =
@@ -496,16 +462,8 @@ public class FreeTierBillingService {
                     WorkspaceCostView::getWorkspaceId,
                     v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
 
-    // Partition the workspaces in batches, to avoid making BQ queries with thousands of workspaces
-    // as in test env, which will eventually time out each time.
-    for (List<WorkspaceCostView> workspacesPartition :
-        Lists.partition(workspacesThatRequireUpdate, WORKSPACES_BATCH_SIZE)) {
-      // Live cost in BQ
-      liveCostsInBQ.putAll(getFreeTierWorkspaceCostsFromBQ(workspacesPartition));
-      workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
-          dbCostByWorkspace, liveCostsInBQ);
-    }
-    return liveCostsInBQ;
+    workspaceFreeTierUsageService.updateWorkspaceFreeTierUsageInDB(
+        dbCostByWorkspace, allCostsInBqByProject, workspaceByProject);
   }
 
   /**

@@ -125,7 +125,7 @@ export default class WorkspaceCard extends BaseCard {
   async verifyWorkspaceCardMenuOptions(accessLevel?: string): Promise<void> {
     accessLevel = accessLevel || (await this.getAccessLevel());
 
-    const snowmanMenu = await this.getSnowmanMenu();
+    const snowmanMenu = await this.getCardSnowmanMenu();
     const links = await snowmanMenu.getAllOptionTexts();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
 
@@ -152,7 +152,7 @@ export default class WorkspaceCard extends BaseCard {
 
   // for a locked-workspace only the edit options is enabled
   async verifyLockedWorkspaceMenuOptions(): Promise<void> {
-    const snowmanMenu = await this.getSnowmanMenu();
+    const snowmanMenu = await this.getCardSnowmanMenu();
     const links = await snowmanMenu.getAllOptionTexts();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
 

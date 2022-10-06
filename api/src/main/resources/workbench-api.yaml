@@ -1968,6 +1968,17 @@ paths:
       responses:
         204:
           description: No content.
+  "/v1/cron/checkObjectNameSize":
+    get:
+      security: []
+      tags:
+      - offlineObjectNameSize
+      - cron
+      description: ''
+      operationId: checkObjectNameSize
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
     parameters:
@@ -3207,36 +3218,10 @@ paths:
           schema:
             type: integer
             format: int64
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/participants":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    - "$ref": "#/parameters/cohortId"
-    post:
-      tags:
-      - cohortReview
-      consumes:
-      - application/json
-      description: 'Returns a collection of participants for the specified cohortId.
-        This endpoint does pagination based on page, limit, order and column.'
-      operationId: getParticipantCohortStatusesOld
-      parameters:
-      - in: body
-        name: request
-        required: true
-        description: request body for getting list of ParticipantCohortStatuses.
-        schema:
-          "$ref": "#/definitions/PageFilterRequest"
-      responses:
-        200:
-          description: A collection of participants
-          schema:
-            "$ref": "#/definitions/CohortReviewWithCountResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cohortReviewId}/participants":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/cohortId"
       - "$ref": "#/parameters/cohortReviewId"
     post:
       tags:

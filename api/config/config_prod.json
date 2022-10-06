@@ -31,7 +31,7 @@
       0.75
     ],
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
-    "freeTierCronUserBatchSize": 100,
+    "freeTierCronUserBatchSize": 200,
     "minutesBeforeLastFreeTierJob": 60,
     "numberOfDaysToConsiderForFreeTierUsageUpdate": 7
   },
@@ -123,6 +123,11 @@
     "bigQueryDataset": "workbench_action_audit_prod",
     "bigQueryTable": "workbench_action_audit_prod",
     "partitionColumn": "_PARTITIONTIME"
+  },
+  "bucketAudit": {
+    "logProjectId": "fc-aou-logs-prod",
+    "bigQueryDataset": "WorkspaceStorageLogs",
+    "bigQueryTable": "cloudaudit_googleapis_com_data_access"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",

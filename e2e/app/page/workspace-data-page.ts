@@ -3,7 +3,7 @@ import Link from 'app/element/link';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Language, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { makeRandomName } from 'utils/str-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
@@ -71,6 +71,15 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     }
     // if Cohort name isn't specified, find any existing Cohort.
     return new DataResourceCard(this.page).findAnyCard(ResourceCard.Cohort);
+  }
+
+  async findCohortEntry(cohortName?: string): Promise<ElementHandle> {
+    await openTab(this.page, Tabs.Cohorts);
+    if (cohortName) {
+      const entry = new DataResourceCard(this.page).findNameCellLinkFromTable({ name: cohortName });
+      return entry;
+    }
+    return null;
   }
 
   /**

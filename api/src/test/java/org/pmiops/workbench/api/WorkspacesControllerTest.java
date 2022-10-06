@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -55,6 +56,8 @@ import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -112,6 +115,9 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.EgressRemediationService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -192,6 +198,7 @@ import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -280,6 +287,7 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
+  @Autowired ObjectNameLengthService objectNameLengthService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
@@ -289,6 +297,11 @@ public class WorkspacesControllerTest {
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
+  @MockBean BucketAuditQueryService bucketAuditQueryService;
+
+  @MockBean
+  @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
+  EgressRemediationService egressRemediationService;
 
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
@@ -334,6 +347,8 @@ public class WorkspacesControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
+    ObjectNameLengthServiceImpl.class,
+    BucketAuditQueryServiceImpl.class,
   })
   @MockBean({
     AccessTierService.class,
@@ -1507,6 +1522,7 @@ public class WorkspacesControllerTest {
 
     stubBigQueryCohortCalls();
     reviewReq.setSize(2);
+    reviewReq.setName("review2");
     CohortReview cr2 =
         cohortReviewController
             .createCohortReview(workspace.getNamespace(), workspace.getId(), c2.getId(), reviewReq)
@@ -1647,7 +1663,14 @@ public class WorkspacesControllerTest {
             .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId())
             .getBody()
             .getItems();
+    List<CohortReview> cohortReviews =
+        cohortReviewController
+            .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getBody()
+            .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
+    Map<String, CohortReview> cohortReviewsByName =
+        Maps.uniqueIndex(cohortReviews, c -> c.getCohortName());
     assertThat(cohortsByName.keySet().size()).isEqualTo(2);
     assertThat(cohortsByName.keySet()).containsExactly("c1", "c2");
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
@@ -1655,10 +1678,10 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr1 =
         cohortReviewController
-            .getParticipantCohortStatusesOld(
+            .getParticipantCohortStatuses(
                 cloned.getNamespace(),
                 cloned.getId(),
-                cohortsByName.get("c1").getId(),
+                cohortReviewsByName.get("review1").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();
@@ -1680,6 +1703,7 @@ public class WorkspacesControllerTest {
             .getParticipantCohortAnnotations(
                 cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
             .getBody();
+
     assertParticipantCohortAnnotation(
         clonedPca1List,
         clonedCad1List,
@@ -1689,10 +1713,10 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr2 =
         cohortReviewController
-            .getParticipantCohortStatusesOld(
+            .getParticipantCohortStatuses(
                 cloned.getNamespace(),
                 cloned.getId(),
-                cohortsByName.get("c2").getId(),
+                cohortReviewsByName.get("review2").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
             .getCohortReview();

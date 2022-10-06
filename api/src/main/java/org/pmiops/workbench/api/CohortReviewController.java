@@ -22,7 +22,6 @@ import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortReviewListResponse;
@@ -377,54 +376,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   /**
-   * Get all participants for the specified cohortId and cdrVersionId. This endpoint does pagination
-   * based on page, pageSize, sortOrder and sortColumn.
-   */
-  @Override
-  public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatusesOld(
-      String workspaceNamespace, String workspaceId, Long cohortId, PageFilterRequest request) {
-    DbWorkspace dbWorkspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    long cdrVersionId = dbWorkspace.getCdrVersion().getCdrVersionId();
-
-    CohortReview cohortReview;
-    List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
-    DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
-    PageRequest pageRequest = createPageRequest(request);
-    convertGenderRaceEthnicitySortOrder(pageRequest);
-
-    try {
-      cohortReview = cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
-      participantCohortStatuses =
-          cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
-    } catch (NotFoundException nfe) {
-      cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
-    }
-
-    cohortReview.participantCohortStatuses(participantCohortStatuses);
-
-    // Cohort review id will be null if the user is creating a new Cohort Review
-    // In such cases createCohort will update the entry in userrecentresource
-    // Cohort review id will be populated, if  user is viewing an existing cohort review
-    if (cohortReview.getCohortReviewId() != null) {
-      userRecentResourceService.updateCohortReviewEntry(
-          cohort.getWorkspaceId(),
-          userProvider.get().getUserId(),
-          cohortReview.getCohortReviewId());
-    }
-
-    return ResponseEntity.ok(
-        new CohortReviewWithCountResponse()
-            .cohortReview(cohortReview)
-            .queryResultSize(
-                pageRequest.getFilters().isEmpty()
-                    ? cohortReview.getReviewSize()
-                    : cohortReviewService.findCount(
-                        cohortReview.getCohortReviewId(), pageRequest)));
-  }
-
-  /**
    * Get all participants for the specified cohortId and cohortReviewId. This endpoint does
    * pagination based on page, pageSize, sortOrder and sortColumn.
    */
@@ -432,19 +383,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatuses(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
       Long cohortReviewId,
       PageFilterRequest request) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
     PageRequest pageRequest = createPageRequest(request);
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
     CohortReview cohortReview =
-        cohortReviewService.findCohortReviewForWorkspace(cohort.getWorkspaceId(), cohortReviewId);
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
     List<ParticipantCohortStatus> participantCohortStatuses =
         cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
 
@@ -455,7 +405,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     // Cohort review id will be populated, if  user is viewing an existing cohort review
     if (cohortReview.getCohortReviewId() != null) {
       userRecentResourceService.updateCohortReviewEntry(
-          cohort.getWorkspaceId(),
+          dbWorkspace.getWorkspaceId(),
           userProvider.get().getUserId(),
           cohortReview.getCohortReviewId());
     }

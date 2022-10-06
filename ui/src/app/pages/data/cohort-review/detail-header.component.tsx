@@ -325,7 +325,7 @@ export const DetailHeader = fp.flow(
           left ? statuses[statuses.length - 1] : statuses[0];
 
         const { page, pageSize } = reviewPaginationStore.getValue();
-        const { ns, wsid, cid, crid } = this.props.match.params;
+        const { ns, wsid, crid } = this.props.match.params;
         const request = {
           page: left ? page - 1 : page + 1,
           pageSize: pageSize,
@@ -335,7 +335,6 @@ export const DetailHeader = fp.flow(
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
           ns,
           wsid,
-          +cid,
           +crid,
           request
         );

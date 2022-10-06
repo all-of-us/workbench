@@ -73,7 +73,7 @@ describe('Copy Concept Set to another workspace', () => {
     expect(url).toContain(destWorkspace.toLowerCase());
 
     const resourceCard = new DataResourceCard(page);
-    const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
+    const exists = await resourceCard.resourceExistsInTable(conceptSetCopyName);
     expect(exists).toBe(true);
 
     console.log(
@@ -82,7 +82,7 @@ describe('Copy Concept Set to another workspace', () => {
     );
 
     // Delete Concept Set in destWorkspace.
-    await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
+    await dataPage.deleteResourceFromTable(conceptSetCopyName, ResourceCard.ConceptSet);
   });
 
   /**

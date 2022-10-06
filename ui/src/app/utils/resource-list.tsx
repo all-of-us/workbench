@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { WorkspaceResource } from 'generated/fetch';
+import { ResourceType, WorkspaceResource } from 'generated/fetch';
 
 import { renderResourceCard } from 'app/components/render-resource-card';
 import {
@@ -12,8 +12,10 @@ import {
   StyledResourceType,
 } from 'app/components/resource-card';
 import { reactStyles, withCdrVersions } from 'app/utils';
-import { displayDateWithoutHours } from 'app/utils/dates';
-import { getDisplayName } from 'app/utils/resources';
+import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
+import { getDisplayName, getType } from 'app/utils/resources';
+
+import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 
 const styles = reactStyles({
   column: {
@@ -42,10 +44,13 @@ interface TableData {
   menu: JSX.Element;
   resourceType: JSX.Element;
   resourceName: JSX.Element;
+  resourceNameAsString: string;
   formattedLastModified: string;
+  lastModifiedDateAsString: string;
 }
 
 interface Props {
+  existingNameList: string[];
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
 }
@@ -57,11 +62,26 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     await props.onUpdate();
   };
 
+  const getResourceMap = () => {
+    const resourceTypeNameListMap = new Map<ResourceType, string[]>();
+    props.workspaceResources.map((resource) => {
+      const resourceType = getType(resource);
+      const resourceName = getDisplayName(resource);
+      const resourceNameList = resourceTypeNameListMap.get(resourceType);
+      const keyValue = !!resourceNameList
+        ? [...resourceNameList, resourceName]
+        : [resourceName];
+      resourceTypeNameListMap.set(resourceType, keyValue);
+    });
+    return resourceTypeNameListMap;
+  };
+  const resourceTypeNameMap = getResourceMap();
+
   const renderResourceMenu = (resource: WorkspaceResource) => {
     return renderResourceCard({
       resource,
       menuOnly: true,
-      existingNameList: [], // TODO existing bug RW-5847: does not populate names for rename modal
+      existingNameList: resourceTypeNameMap.get(getType(resource)),
       onUpdate: reloadResources,
     });
   };
@@ -83,9 +103,11 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
                 {getDisplayName(r)}
               </ResourceNavigation>
             ),
+            resourceNameAsString: getDisplayName(r),
             formattedLastModified: displayDateWithoutHours(
               r.lastModifiedEpochMillis
             ),
+            lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
           };
         })
       );
@@ -105,18 +127,22 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
             value={tableData}
             scrollable={true}
             sortMode='multiple'
-            style={{ width: '40rem' }}
+            style={{ width: '44rem' }}
+            paginator
+            rows={ROWS_PER_PAGE_RESOURCE_TABLE}
           >
             <Column field='menu' style={styles.menu} />
             <Column
               field='resourceType'
               header='Item type'
+              sortable
               style={styles.typeColumn}
             />
             <Column
               field='resourceName'
               header='Name'
               style={styles.column}
+              sortField={'resourceNameAsString'}
               sortable
               filter
               filterPlaceholder={'Search Name'}
@@ -127,6 +153,8 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
               field='formattedLastModified'
               header='Last Modified Date'
               style={styles.modifiedDateColumn}
+              sortField={'lastModifiedDateAsString'}
+              sortable
             />
           </DataTable>
         )}

@@ -51,6 +51,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MailServiceImpl implements MailService {
+
+  public static final ImmutableMap<EgressRemediationAction, String> EGRESS_REMEDIATION_ACTION_MAP =
+      ImmutableMap.of(
+          EgressRemediationAction.DISABLE_USER,
+          "Your account has been disabled pending manual review by the <i>All of Us</i> "
+              + "security team.",
+          EgressRemediationAction.SUSPEND_COMPUTE,
+          "Your Workbench compute access has been temporarily suspended, and will be "
+              + "automatically restored after a brief duration.");
   private final Provider<MandrillApi> mandrillApiProvider;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -59,6 +68,8 @@ public class MailServiceImpl implements MailService {
 
   private static final String EGRESS_REMEDIATION_RESOURCE =
       "emails/egress_remediation/content.html";
+  private static final String FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL =
+      "emails/file_lengths_egress_remediation_email/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
       "emails/initial_credits_dollar_threshold/content.html";
   private static final String INITIAL_CREDITS_EXPIRATION_RESOURCE =
@@ -316,35 +327,13 @@ public class MailServiceImpl implements MailService {
   @Override
   public void sendEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
-    String remediationDescription =
-        ImmutableMap.of(
-                EgressRemediationAction.DISABLE_USER,
-                "Your account has been disabled pending manual review by the <i>All of Us</i> "
-                    + "security team.",
-                EgressRemediationAction.SUSPEND_COMPUTE,
-                "Your Workbench compute access has been temporarily suspended, and will be "
-                    + "automatically restored after a brief duration.")
-            .get(action);
-    String htmlMessage =
-        buildHtml(
-            EGRESS_REMEDIATION_RESOURCE,
-            ImmutableMap.<EmailSubstitutionField, String>builder()
-                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-                .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
-                .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
-                .build());
+    sendEgressRemediationEmailWithContent(dbUser, action, EGRESS_REMEDIATION_RESOURCE);
+  }
 
-    EgressAlertRemediationPolicy egressPolicy =
-        workbenchConfigProvider.get().egressAlertRemediationPolicy;
-    sendWithRetries(
-        egressPolicy.notifyFromEmail,
-        ImmutableList.of(dbUser.getContactEmail()),
-        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
-        ImmutableList.of(),
-        "[Response Required] AoU Researcher Workbench High Data Egress Alert",
-        String.format("Egress remediation email for %s", dbUser.getUsername()),
-        htmlMessage);
+  @Override
+  public void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
+      throws MessagingException {
+    sendEgressRemediationEmailWithContent(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
   }
 
   @Override
@@ -372,6 +361,32 @@ public class MailServiceImpl implements MailService {
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
+  }
+
+  private void sendEgressRemediationEmailWithContent(
+      DbUser dbUser, EgressRemediationAction action, String remediationEmail)
+      throws MessagingException {
+    String remediationDescription = EGRESS_REMEDIATION_ACTION_MAP.get(action);
+    String htmlMessage =
+        buildHtml(
+            remediationEmail,
+            ImmutableMap.<EmailSubstitutionField, String>builder()
+                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+                .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
+                .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
+                .build());
+
+    EgressAlertRemediationPolicy egressPolicy =
+        workbenchConfigProvider.get().egressAlertRemediationPolicy;
+    sendWithRetries(
+        egressPolicy.notifyFromEmail,
+        ImmutableList.of(dbUser.getContactEmail()),
+        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
+        ImmutableList.of(),
+        "[Response Required] AoU Researcher Workbench High Data Egress Alert",
+        String.format("Egress remediation email for %s", dbUser.getUsername()),
+        htmlMessage);
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(

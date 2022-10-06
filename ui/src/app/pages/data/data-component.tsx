@@ -1,17 +1,12 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import {
-  ResourceType,
-  WorkspaceAccessLevel,
-  WorkspaceResource,
-} from 'generated/fetch';
+import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { renderResourceCard } from 'app/components/render-resource-card';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
@@ -19,6 +14,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
+import { ResourcesList } from 'app/utils/resource-list';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
@@ -126,56 +122,22 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     loadResources();
   }, [workspace.namespace, workspace.id]);
 
-  const getExistingNameList = (resourceType) => {
-    if (resourceType.dataSet) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.dataSet !== null && resource.dataSet !== undefined
-        )
-        .map((resource) => resource.dataSet.name);
-    } else if (resourceType.conceptSet) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.conceptSet !== null && resource.conceptSet !== undefined
-        )
-        .map((resource) => resource.conceptSet.name);
-    } else if (resourceType.cohort) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.cohort !== null && resource.cohort !== undefined
-        )
-        .map((resource) => resource.cohort.name);
-    } else if (resourceType.cohortReview) {
-      return resourceList
-        .filter(
-          (resource) =>
-            resource.cohortReview !== null &&
-            resource.cohortReview !== undefined
-        )
-        .map((resource) => resource.cohortReview.cohortName);
-    } else {
-      return [];
-    }
-  };
-
   const writePermission =
     workspace.accessLevel === WorkspaceAccessLevel.OWNER ||
     workspace.accessLevel === WorkspaceAccessLevel.WRITER;
 
   const filteredList = resourceList.filter((resource) => {
-    if (activeTab === Tabs.SHOWALL) {
-      return true;
-    } else if (activeTab === Tabs.COHORTS) {
-      return resource.cohort;
-    } else if (activeTab === Tabs.COHORTREVIEWS) {
-      return resource.cohortReview;
-    } else if (activeTab === Tabs.CONCEPTSETS) {
-      return resource.conceptSet;
-    } else if (activeTab === Tabs.DATASETS) {
-      return resource.dataSet;
+    switch (activeTab) {
+      case Tabs.SHOWALL:
+        return true;
+      case Tabs.COHORTS:
+        return resource.cohort;
+      case Tabs.COHORTREVIEWS:
+        return resource.cohortReview;
+      case Tabs.CONCEPTSETS:
+        return resource.conceptSet;
+      case Tabs.DATASETS:
+        return resource.dataSet;
     }
   });
 
@@ -334,22 +296,15 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             position: 'relative',
             minHeight: 247,
             padding: '0 0.5rem 1rem',
+            paddingTop: '1.5rem',
           }}
         >
-          {filteredList.map((resource: WorkspaceResource, index: number) => {
-            return (
-              <div key={index}>
-                {' '}
-                {renderResourceCard({
-                  resource: resource,
-                  existingNameList: getExistingNameList(resource),
-                  onUpdate: () => loadResources(),
-                  menuOnly: false,
-                })}{' '}
-              </div>
-            );
-          })}
-
+          {
+            <ResourcesList
+              workspaceResources={filteredList}
+              onUpdate={() => loadResources()}
+            />
+          }
           {isLoading && <SpinnerOverlay />}
         </div>
       </FadeBox>

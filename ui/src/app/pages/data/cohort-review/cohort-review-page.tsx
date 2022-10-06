@@ -139,7 +139,6 @@ export const CohortReviewPage = fp.flow(
       .getParticipantCohortStatuses(
         ns,
         wsid,
-        +cid,
         cohortReviewId,
         defaultReviewQuery
       )

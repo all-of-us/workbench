@@ -34,7 +34,7 @@ export default abstract class BaseCard extends Container {
     return this;
   }
 
-  async getSnowmanMenu(): Promise<SnowmanMenu> {
+  async getCardSnowmanMenu(): Promise<SnowmanMenu> {
     await this.clickSnowmanIcon();
     const snowmanMenu = new SnowmanMenu(this.page);
     await snowmanMenu.waitUntilVisible();
@@ -42,7 +42,7 @@ export default abstract class BaseCard extends Container {
   }
 
   async selectSnowmanMenu(options: MenuOption, opt: { waitForNav?: boolean } = {}): Promise<void> {
-    return this.getSnowmanMenu().then((menu) => menu.select(options, opt));
+    return this.getCardSnowmanMenu().then((menu) => menu.select(options, opt));
   }
 
   async getName(): Promise<string> {

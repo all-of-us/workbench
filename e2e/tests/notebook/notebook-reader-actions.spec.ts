@@ -81,7 +81,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     const dataResourceCard = new DataResourceCard(page);
     let notebookCard = await dataResourceCard.findCard({ name: notebookName, cardType: ResourceCard.Notebook });
     // open Snowman menu.
-    const snowmanMenu = await notebookCard.getSnowmanMenu();
+    const snowmanMenu = await notebookCard.getCardSnowmanMenu();
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(true);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(true);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
@@ -138,7 +138,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
-    const copyNotebookCardMenu = await notebookCard.getSnowmanMenu();
+    const copyNotebookCardMenu = await notebookCard.getCardSnowmanMenu();
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
@@ -180,7 +180,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     const dataResourceCard = new DataResourceCard(page);
     const notebookCard = await dataResourceCard.findCard({ name: notebookName, cardType: ResourceCard.Notebook });
     // open Snowman menu.
-    const snowmanMenu = await notebookCard.getSnowmanMenu();
+    const snowmanMenu = await notebookCard.getCardSnowmanMenu();
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);

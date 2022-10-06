@@ -22,6 +22,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
+import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryServiceImpl;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -51,6 +52,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
+import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -221,6 +224,9 @@ public class ConceptSetsControllerTest {
     WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
+    ObjectNameLengthServiceImpl.class,
+    BucketAuditQueryServiceImpl.class,
+    EgressObjectLengthsRemediationService.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -251,6 +257,7 @@ public class ConceptSetsControllerTest {
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
     WorkspaceOperationMapper.class,
+    EgressObjectLengthsRemediationService.class,
   })
   static class Configuration {
     @Bean

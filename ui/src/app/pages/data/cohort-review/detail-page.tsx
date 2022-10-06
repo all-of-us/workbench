@@ -57,7 +57,7 @@ export const DetailPage = fp.flow(
       } = this.props;
       hideSpinner();
       let { cohortReview } = this.props;
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const { ns, wsid, crid } = this.props.match.params;
       if (!cohortReview) {
         const request = {
           page: 0,
@@ -68,7 +68,6 @@ export const DetailPage = fp.flow(
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
           ns,
           wsid,
-          +cid,
           +crid,
           request
         );
