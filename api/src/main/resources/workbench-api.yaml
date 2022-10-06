@@ -57,6 +57,10 @@ produces:
 - application/json
 security:
 - aou_oauth: []
+
+# Define an alias before using it. We can get rid of it after migrating to Swagger 3.0 definition.
+# See https://precisionmedicineinitiative.atlassian.net/browse/RW-8978
+
 parameters:
   userId:
     in: path
@@ -89,15 +93,6 @@ parameters:
     name: workspaceId
     type: string
     description: The Workspace ID (a.k.a. the workspace's Firecloud name)
-    required: true
-  appType:
-    in: path
-    name: appType
-    type: string
-    enum:
-      - RSTUDIO
-      - CROMWELL
-    description: The app type that workbench supports
     required: true
   cohortId:
     in: path
@@ -812,7 +807,7 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
-  "/v1/apps/{workspaceNamespace}/{appType}":
+  "/v1/apps/{workspaceNamespace}":
     get:
       summary: Get the user's app by type.
       description: "Returns the current user's app by type."
@@ -821,14 +816,13 @@ paths:
         - app
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
-        - "$ref": "#/parameters/appType"
       responses:
         200:
-          description: The runtime for this user and workspace.
+          description: The app for this user and workspace.
           schema:
             "$ref": "#/definitions/App"
         404:
-          description: No runtime exists for this user and workspace.
+          description: No app exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         412:
@@ -838,14 +832,13 @@ paths:
     post:
       summary: Create a workspace APP.
       description: |
-        Creates a new app for the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
+        Creates a new app for the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the app is still initializing or is not in a ready state).
         TODO(RW-3697): Custom app creation params should be added as a body param here.
       operationId: createApp
       tags:
-        - runtime
+        - app
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
-        - "$ref": "#/parameters/appType"
         - in: body
           name: app
           description: APP definition
@@ -870,10 +863,9 @@ paths:
       description: In order to update the configuration of a app, it must first be running or paused
       operationId: updateApp
       tags:
-        - runtime
+        - app
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
-        - "$ref": "#/parameters/appType"
         - in: body
           name: app
           schema:
@@ -899,10 +891,9 @@ paths:
       summary: Delete a workspace app.
       operationId: deleteApp
       tags:
-        - runtime
+        - app
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
-        - "$ref": "#/parameters/appType"
         - in: query
           name: deleteDisk
           description: Whether or not disk should be deleted if the app is using persistent disk. Default to false if not specified
@@ -6174,7 +6165,11 @@ definitions:
       - DELETING
       - DELETED
       - PROVISIONING
-
+  AppType:
+    type: string
+    enum:
+      - CROMWELL
+      - RSTUDIO
   DiskStatus:
     type: string
     enum:
@@ -6259,10 +6254,12 @@ definitions:
     properties:
       googleProject:
         type: string
-        description: The Google Project used to create the runtime. Read only.
+        description: The Google Project used to create the app. Read only.
       appName:
         type: string
-        description: The user-supplied name for the runtime. Read only.
+        description: The user-supplied name for the app. Read only.
+      appType:
+        "$ref": "#/definitions/AppType"
       createdDate:
         type: string
         description: The date and time the app was created, in ISO-8601 format. Read only.
@@ -6577,7 +6574,7 @@ definitions:
   ListAppsResponse:
     type: array
     items:
-      $ref: "#/components/schemas/App"
+      "$ref": "#/definitions/App"
   UsernameTakenResponse:
     type: object
     required:
