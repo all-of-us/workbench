@@ -52,6 +52,10 @@ public class EgressLogService {
   private static final String GCE_LOG_LOCATION = "WorkspaceRuntimeLogs.cos_containers";
   private static final String DATAPROC_LOG_LOCATION = "WorkspaceRuntimeLogs.jupyter";
 
+  // The text column which contains full log message.
+  private static final String GCE_TEXT_COLUMN_NAME = "jsonPayload.message";
+  private static final String DATAPROC_TEXT_COLUMN_NAME = "textPayload";
+
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final BigQueryService bigQueryService;
 
@@ -102,7 +106,10 @@ public class EgressLogService {
                     Function.identity(),
                     (runtimeLogPattern) ->
                         startBigQueryJob(
-                            runtimeLogPattern, baseParams, getDatasetId(maybeSumologicEvent))));
+                            runtimeLogPattern,
+                            baseParams,
+                            getDatasetId(maybeSumologicEvent),
+                            getTextColumnName(maybeSumologicEvent))));
 
     return terraRuntimeLogPatterns.stream()
         .map(
@@ -151,26 +158,33 @@ public class EgressLogService {
   }
 
   private String getDatasetId(Optional<SumologicEgressEvent> sumologicEgressEvent) {
-    // If getGceEgressMib is more than zero, we see this egress triggered by GCE, otherwise, it's
-    // Dataproc.
-    // TODO(yonghao): Revisit this logic and probably make an enum once we understand what does GKE
-    // sumologic event looks like.
-    boolean isGce =
-        sumologicEgressEvent
-            .map(SumologicEgressEvent::getGceEgressMib)
-            .map(d -> d > 0)
-            .orElse(false);
-    return isGce
+    return isGce(sumologicEgressEvent)
         ? workbenchConfigProvider.get().firecloud.workspaceLogsProject + "." + GCE_LOG_LOCATION
         : workbenchConfigProvider.get().firecloud.workspaceLogsProject
             + "."
             + DATAPROC_LOG_LOCATION;
   }
 
+  private String getTextColumnName(Optional<SumologicEgressEvent> sumologicEgressEvent) {
+    return isGce(sumologicEgressEvent) ? GCE_TEXT_COLUMN_NAME : DATAPROC_TEXT_COLUMN_NAME;
+  }
+
+  private boolean isGce(Optional<SumologicEgressEvent> sumologicEgressEvent) {
+    // If getGceEgressMib is more than zero, we see this egress triggered by GCE, otherwise, it's
+    // Dataproc.
+    // TODO(yonghao): Revisit this logic and probably make an enum once we understand what does GKE
+    // sumologic event looks like.
+    return sumologicEgressEvent
+        .map(SumologicEgressEvent::getGceEgressMib)
+        .map(d -> d > 0)
+        .orElse(false);
+  }
+
   private Job startBigQueryJob(
       EgressTerraRuntimeLogPattern runtimeLogPattern,
       Map<String, QueryParameterValue> baseParams,
-      String datasetId) {
+      String datasetId,
+      String textColumn) {
     return bigQueryService.startQuery(
         QueryJobConfiguration.newBuilder(
                 String.format(
@@ -178,9 +192,10 @@ public class EgressLogService {
                         + " FROM %s"
                         + " WHERE resource.labels.project_id = @project_id"
                         + "  AND timestamp BETWEEN @start_time AND @end_time"
-                        + "  AND jsonPayload.message LIKE @log_pattern"
+                        + "  AND %s"
+                        + " LIKE @log_pattern"
                         + " ORDER BY timestamp DESC",
-                    datasetId))
+                    datasetId, textColumn))
             .setNamedParameters(
                 ImmutableMap.<String, QueryParameterValue>builder()
                     .putAll(baseParams)
