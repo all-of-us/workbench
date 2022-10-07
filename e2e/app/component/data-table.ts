@@ -2,6 +2,7 @@ import { Page } from 'puppeteer';
 import Container from 'app/container';
 import { getPropValue } from 'utils/element-utils';
 import Table from './table';
+import Textbox from '../element/textbox';
 
 const defaultXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-datatable ")]';
 
@@ -52,5 +53,9 @@ export default class DataTable extends Table {
 
   private getPaginatorXpath(): string {
     return `${this.getXpath()}/*[contains(concat(normalize-space(@class), " "), "p-paginator ")]`;
+  }
+
+  public waitForSearchBox(): Textbox {
+    return Textbox.findByName(this.page, { name: 'Search Name' });
   }
 }

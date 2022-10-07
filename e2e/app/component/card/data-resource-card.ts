@@ -71,15 +71,13 @@ export default class DataResourceCard extends BaseCard {
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
+    const textBox = datatable.waitForSearchBox();
+    await textBox.type(name);
 
     const dataTableRows = await datatable.getRowCount();
-    let index = 1;
-    while (index <= dataTableRows) {
-      const nameCell = await datatable.getCellValue(index, 3);
-      if (nameCell === name) {
-        return await datatable.getCellLink(index, 3);
-      }
-      index++;
+    const index = 1;
+    if (index <= dataTableRows) {
+      return await datatable.getCellLink(index, 3);
     }
     return null;
   }
@@ -90,17 +88,15 @@ export default class DataResourceCard extends BaseCard {
 
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
+    const textBox = datatable.waitForSearchBox();
+    await textBox.type(name);
 
     const tableExist = await datatable.exists();
     if (tableExist) {
       const dataTableRows = await datatable.getRowCount();
-      let index = 1;
-      while (index <= dataTableRows) {
-        const resourceTypeCell = await datatable.getCellValue(index, 3);
-        if (name === resourceTypeCell) {
-          return datatable.getCellXpath(index, 1);
-        }
-        index++;
+      const index = 1;
+      if (index <= dataTableRows) {
+        return datatable.getCellXpath(index, 1);
       }
     }
     return null;
