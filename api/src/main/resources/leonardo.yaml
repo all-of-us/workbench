@@ -1878,12 +1878,14 @@ components:
     AppStatus:
       type: string
       enum:
-        - STATUS_UNSPECIFIED
-        - RUNNING
-        - ERROR
         - DELETING
         - DELETED
+        - ERROR
         - PROVISIONING
+        - RUNNING
+        - STATUS_UNSPECIFIED
+        - STOPPED
+        - STOPPING
     DiskType:
       type: string
       enum:

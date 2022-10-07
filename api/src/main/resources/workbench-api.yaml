@@ -832,7 +832,7 @@ paths:
     post:
       summary: Create a workspace APP.
       description: |
-        Creates a new app for the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the app is still initializing or is not in a ready state).
+        Creates a new app request is received the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the app is still initializing or is not in a ready state).
         TODO(RW-3697): Custom app creation params should be added as a body param here.
       operationId: createApp
       tags:
@@ -6144,12 +6144,14 @@ definitions:
   AppStatus:
     type: string
     enum:
-      - STATUS_UNSPECIFIED
-      - RUNNING
-      - ERROR
       - DELETING
       - DELETED
+      - ERROR
       - PROVISIONING
+      - RUNNING
+      - STATUS_UNSPECIFIED
+      - STOPPED
+      - STOPPING
   AppType:
     type: string
     enum:
