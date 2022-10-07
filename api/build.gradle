@@ -367,7 +367,7 @@ dependencies {
     __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
-    compile 'ch.qos.logback:logback-classic:1.4.3'
+    compile 'ch.qos.logback:logback-classic:1.2.11'
     compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
