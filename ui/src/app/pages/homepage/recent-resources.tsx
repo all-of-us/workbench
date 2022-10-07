@@ -45,7 +45,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     const { workspaces } = props;
     if (workspaces) {
       const workspaceTuples = workspaces.map(
-        (r) => [r.workspace.id, r.workspace] as [string, Workspace]
+        (r) => [r.workspace.namespace, r.workspace] as [string, Workspace]
       );
       setWorkspaceMap(new Map(workspaceTuples));
       loadResources();

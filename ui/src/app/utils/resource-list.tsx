@@ -135,7 +135,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
 
   const getWorkspace = (r: WorkspaceResource) => {
     const { workspaceMap } = props;
-    return workspaceMap?.get(r.workspaceFirecloudName);
+    return workspaceMap?.get(r.workspaceNamespace);
   };
 
   const getCdrVersionName = (r: WorkspaceResource) => {
