@@ -66,6 +66,18 @@ export default class DataResourceCard extends BaseCard {
     return resourceCards;
   }
 
+  async findAnyCellLinkFromTable(): Promise<ElementHandle> {
+    await waitWhileLoading(this.page);
+    const datatable = new DataTable(this.page);
+    await waitWhileLoading(this.page);
+
+    const dataTableRows = await datatable.getRowCount();
+    if (dataTableRows > 0) {
+      return await datatable.getCellLink(1, 3);
+    }
+    return null;
+  }
+
   async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
     const { name } = opts;
     await waitWhileLoading(this.page);

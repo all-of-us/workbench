@@ -605,7 +605,7 @@ export default class NotebookPage extends NotebookFrame {
    */
   async deleteNotebook(notebookName: string): Promise<void> {
     const analysisPage = await this.goAnalysisPage();
-    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResourceFromTable(notebookName, ResourceCard.Notebook);
   }
 
   /**
