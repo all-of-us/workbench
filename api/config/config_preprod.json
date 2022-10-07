@@ -124,6 +124,11 @@
     "bigQueryTable": "workbench_action_audit_preprod",
     "partitionColumn": "timestamp"
   },
+  "bucketAudit": {
+    "logProjectId": "fc-aou-logs-preprod",
+    "bigQueryDataset": "WorkspaceStorageLogs",
+    "bigQueryTable": "cloudaudit_googleapis_com_data_access"
+  },
   "captcha": {
     "enableCaptcha": true,
     "useTestCaptcha": false

@@ -30,12 +30,13 @@ public interface EgressEventMapper {
     if (sumoEvent == null) {
       return;
     }
+    if (sumoEvent.getTimeWindowStart() != null) {
+      long timeWindowStart = sumoEvent.getTimeWindowStart();
+      long timeWindowMillis = sumoEvent.getTimeWindowDuration() * 1000;
+      long timeWindowEnd = timeWindowStart + timeWindowMillis;
 
-    long timeWindowStart = sumoEvent.getTimeWindowStart();
-    long timeWindowMillis = sumoEvent.getTimeWindowDuration() * 1000;
-    long timeWindowEnd = timeWindowStart + timeWindowMillis;
-
-    target.timeWindowStartEpochMillis(timeWindowStart).timeWindowEndEpochMillis(timeWindowEnd);
+      target.timeWindowStartEpochMillis(timeWindowStart).timeWindowEndEpochMillis(timeWindowEnd);
+    }
   }
 
   DbEgressEventStatus toDbStatus(EgressEventStatus status);

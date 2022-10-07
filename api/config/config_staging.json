@@ -69,7 +69,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-staging.appspot.com",
-    "uiBaseUrl": "https:\/\/all-of-us-rw-staging.appspot.com",
+    "uiBaseUrl": "https:\/\/staging.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
@@ -78,7 +78,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login"
+    "loginUrl": "https:\/\/staging.fake-research-aou.org/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",
@@ -123,6 +123,11 @@
     "bigQueryDataset": "workspace_action_audit_staging",
     "bigQueryTable": "workbench_action_audit_staging",
     "partitionColumn": "_PARTITIONTIME"
+  },
+  "bucketAudit": {
+    "logProjectId": "fc-aou-logs-staging",
+    "bigQueryDataset": "WorkspaceStorageLogs",
+    "bigQueryTable": "cloudaudit_googleapis_com_data_access"
   },
   "captcha": {
     "enableCaptcha": true,

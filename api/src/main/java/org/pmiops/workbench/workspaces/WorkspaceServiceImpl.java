@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -356,6 +357,13 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return updateRecentWorkspaces(
         workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
+  }
+
+  @Override
+  public Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> googleProjectIds) {
+    List<DbWorkspace> workspaces = workspaceDao.findAllByGoogleProjectIn(googleProjectIds);
+    return workspaces.stream()
+        .collect(Collectors.toMap(DbWorkspace::getGoogleProject, Function.identity()));
   }
 
   private DbUserRecentWorkspace updateRecentWorkspaces(

@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import com.google.api.services.oauth2.model.Userinfo;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -92,6 +93,14 @@ public interface UserService {
 
   /** Loads all users given list of usernames. */
   List<DbUser> findUsersByUsernames(List<String> usernames);
+
+  /**
+   * Loads only active users given list of usernames.
+   *
+   * @param usernames usernames to search for
+   * @return a set of DbUser objects that are active only.
+   */
+  Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;

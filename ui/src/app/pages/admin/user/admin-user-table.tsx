@@ -97,7 +97,8 @@ interface DataTableFields {
   enabled: JSX.Element;
   dataAccess: JSX.Element;
   bypass: JSX.Element;
-  firstSignInTime: string;
+  firstSignInTime: number;
+  firstSignInTimeText: string;
 }
 
 interface Props extends WithSpinnerOverlayProps {
@@ -239,7 +240,8 @@ export const AdminUserTable = withUserProfile()(
             />
           ),
 
-          firstSignInTime: this.formattedTimestampOrEmptyString(
+          firstSignInTime: user.firstSignInTime,
+          firstSignInTimeText: this.formattedTimestampOrEmptyString(
             user.firstSignInTime
           ),
         }))
@@ -331,7 +333,7 @@ export const AdminUserTable = withUserProfile()(
                 })}
                 {buildColumn({
                   header: 'First Sign-in',
-                  field: 'firstSignInTime',
+                  field: 'firstSignInTimeText',
                   sortField: 'firstSignInTime',
                   filterable: false,
                   headerWidth: 180,

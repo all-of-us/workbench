@@ -1,6 +1,8 @@
 package org.pmiops.workbench.workspaces;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
@@ -46,4 +48,6 @@ public interface WorkspaceService {
   List<DbUserRecentWorkspace> getRecentWorkspaces();
 
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
+
+  Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet);
 }
