@@ -31,12 +31,14 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 
-import { getCdrVersion } from './cdr-versions';
+import { findCdrVersion } from './cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 
 const styles = reactStyles({
   column: {
     textAlign: 'left',
+    whiteSpace: 'nowrap',
+    overflow: 'auto',
   },
   typeColumn: {
     textAlign: 'left',
@@ -139,11 +141,9 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   };
 
   const getCdrVersionName = (r: WorkspaceResource) => {
-    const { cdrVersionTiersResponse, recentResourceSource } = props;
-    if (!recentResourceSource) {
-      return '';
-    }
-    const cdrVersion = getCdrVersion(getWorkspace(r), cdrVersionTiersResponse);
+    const { cdrVersionTiersResponse } = props;
+
+    const cdrVersion = findCdrVersion(r.cdrVersionId, cdrVersionTiersResponse);
     return cdrVersion?.name;
   };
 
