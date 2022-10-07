@@ -37,8 +37,6 @@ import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 const styles = reactStyles({
   column: {
     textAlign: 'left',
-    whiteSpace: 'nowrap',
-    overflow: 'auto',
   },
   typeColumn: {
     textAlign: 'left',
@@ -54,8 +52,10 @@ const styles = reactStyles({
   navigation: {
     fontFamily: 'Montserrat',
     fontSize: '14px',
-    letterSpacing: 0,
-    lineHeight: '22px',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    display: 'block',
+    overflow: 'hidden',
   },
 });
 
@@ -204,10 +204,13 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
 
   const displayResourceName = (rowData) => {
     const { resource } = rowData;
+    const displayName = getDisplayName(resource);
     return (
       <ResourceNavigation resource={resource} style={styles.navigation}>
         {resource.adminLocked && addAdminLockToNameColumn()}
-        {getDisplayName(resource)}
+        <TooltipTrigger content={displayName}>
+          <span>{displayName}</span>
+        </TooltipTrigger>
       </ResourceNavigation>
     );
   };
