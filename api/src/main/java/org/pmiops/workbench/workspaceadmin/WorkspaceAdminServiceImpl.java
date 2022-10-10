@@ -43,6 +43,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
@@ -61,7 +62,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -86,7 +86,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final DataSetDao dataSetDao;
   private final FireCloudService fireCloudService;
   private final LeonardoMapper leonardoMapper;
-  private final LeonardoNotebooksClient leonardoNotebooksClient;
+  private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
@@ -110,7 +110,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       DataSetDao dataSetDao,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
-      LeonardoNotebooksClient leonardoNotebooksClient,
+      LeonardoApiClient leonardoNotebooksClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,

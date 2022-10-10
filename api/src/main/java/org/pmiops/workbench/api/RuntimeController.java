@@ -29,6 +29,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -45,7 +46,6 @@ import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.SecuritySuspendedErrorParameters;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -73,7 +73,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
   private final Clock clock;
-  private final LeonardoNotebooksClient leonardoNotebooksClient;
+  private final LeonardoApiClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
@@ -85,7 +85,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Autowired
   RuntimeController(
       Clock clock,
-      LeonardoNotebooksClient leonardoNotebooksClient,
+      LeonardoApiClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,

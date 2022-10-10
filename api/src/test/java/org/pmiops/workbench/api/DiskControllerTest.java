@@ -41,6 +41,9 @@ import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
+import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
+import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -52,9 +55,6 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
-import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.test.FakeClock;
@@ -117,7 +117,7 @@ public class DiskControllerTest {
     DiskController.class,
     FirecloudMapperImpl.class,
     LeonardoMapperImpl.class,
-    LeonardoNotebooksClientImpl.class,
+    LeonardoApiClientImpl.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
@@ -169,7 +169,7 @@ public class DiskControllerTest {
   @MockBean WorkspaceService mockWorkspaceService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
 
-  @Qualifier(NotebooksConfig.USER_DISKS_API)
+  @Qualifier(LeonardoConfig.USER_DISKS_API)
   @MockBean
   DisksApi userDisksApi;
 

@@ -7,11 +7,11 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
+import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 public class NotebooksIntegrationTest extends BaseIntegrationTest {
-  @Autowired private LeonardoNotebooksClient leonardoNotebooksClient;
+  @Autowired private LeonardoApiClient leonardoApiClient;
 
   @MockBean LogsBasedMetricService mockLogsBasedMetricService;
   // Provide mock beans for dependencies of NotebooksServiceImpl (which is loaded as a bean within
@@ -37,10 +37,10 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @TestConfiguration
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package
   // where the class under test is defined. Adding that annotation
-  @ComponentScan(basePackageClasses = LeonardoNotebooksClientImpl.class)
+  @ComponentScan(basePackageClasses = LeonardoApiClientImpl.class)
   @Import({
     FirecloudApiClientFactory.class,
-    LeonardoNotebooksClientImpl.class,
+    LeonardoApiClientImpl.class,
     LeonardoApiClientFactory.class,
     StorageConfig.class,
     BaseIntegrationTest.Configuration.class
@@ -49,6 +49,6 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void testStatus() {
-    assertThat(leonardoNotebooksClient.getLeonardoStatus()).isTrue();
+    assertThat(leonardoApiClient.getLeonardoStatus()).isTrue();
   }
 }

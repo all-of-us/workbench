@@ -67,6 +67,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptSet;
@@ -90,7 +91,6 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -1440,7 +1440,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "sql,\n"
                 + "    dialect=\"standard\",\n"
                 + "    use_bqstorage_api=(\""
-                + LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
+                + LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
                 + "\" in os.environ),\n"
                 + "    progress_bar_type=\"tqdm_notebook\")\n\n"
                 + namespace

@@ -36,7 +36,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.leonardo.PersistentDisks;
+import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -280,7 +280,7 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.DISK_UNUSED_DAYS, Integer.toString(daysUnused))
                 .put(
                     EmailSubstitutionField.DISK_COST_PER_MONTH,
-                    String.format("$%.2f", PersistentDisks.costPerMonth(disk)))
+                    String.format("$%.2f", PersistentDiskUtils.costPerMonth(disk)))
                 .put(
                     EmailSubstitutionField.DISK_CREATION_DATE,
                     formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
