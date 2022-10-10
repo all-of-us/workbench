@@ -1265,8 +1265,10 @@ paths:
             - profile
   "/api/google/v1/apps/{googleProject}/{appName}":
     post:
-      summary: Creates a new app in the given project with the given name
-      description: Default labels appName, googleProject, serviceAccount, and creator cannot be overridden.
+      summary: Creates a new app in the given project with the given appName
+      description: >
+        The specified appName is suffixed and the resulting string must adhere to Google's name validation regex ?:[a-z](?:[-a-z0-9]{0,38}[a-z0-9])?.
+        Default labels appName, googleProject, serviceAccount, and creator cannot be overridden.
       operationId: createApp
       tags:
         - apps
@@ -1287,7 +1289,7 @@ paths:
         $ref: "#/components/requestBodies/CreateAppRequest"
       responses:
         "202":
-          description: App creation successful
+          description: App creation request has been received
         "400":
           description: Bad Request
           content:
@@ -1447,7 +1449,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorReport"
-
   "/api/google/v1/apps/{googleProject}/{appName}/start":
     post:
       summary: Starts an app with the given project and name
@@ -1877,12 +1878,14 @@ components:
     AppStatus:
       type: string
       enum:
-        - STATUS_UNSPECIFIED
-        - RUNNING
-        - ERROR
         - DELETING
         - DELETED
+        - ERROR
         - PROVISIONING
+        - RUNNING
+        - STATUS_UNSPECIFIED
+        - STOPPED
+        - STOPPING
     DiskType:
       type: string
       enum:
@@ -3045,11 +3048,18 @@ components:
 
     ListAppResponse:
       description: the configuration of an app
+      required:
+        - kubernetesRuntimeConfig
+        - status
+        - auditInfo
       type: object
       properties:
         googleProject:
           type: string
-          description: the project this app is associated with
+          description: Deprecated. The project this app is associated with
+        cloudContext:
+          type: string
+          description: Google project this app is associated with if the app is created in GCP; Azure's tenantId/subscriptionId/managedResourceGroupId if the app is created in Azure
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         errors:
@@ -3068,6 +3078,13 @@ components:
         appName:
           type: string
           description: the name of the app
+        appType:
+          $ref: '#/components/schemas/AppType'
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
+        labels:
+          type: object
+          description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
 
     KubernetesRuntimeConfig:
       description: configuration for a kubernetes app runtime
