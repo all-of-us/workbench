@@ -84,6 +84,7 @@ const defaultServerConfig: ConfigResponse = {
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
   enableUpdatedDemographicSurvey: false,
+  enableCustomApp:false,
 };
 
 export default defaultServerConfig;

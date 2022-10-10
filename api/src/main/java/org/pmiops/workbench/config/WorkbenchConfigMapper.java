@@ -80,5 +80,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableUpdatedDemographicSurvey",
       source = "config.featureFlags.enableUpdatedDemographicSurvey")
+  @Mapping(target = "enableGkeApp", source = "config.featureFlags.enableGkeApp")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
