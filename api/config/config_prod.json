@@ -115,7 +115,6 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": false,
     "ccSupportWhenAdminLocking": true,
-    "enableMultiReview": true,
     "enableUpdatedDemographicSurvey": true,
     "enableGkeApp": false
   },
