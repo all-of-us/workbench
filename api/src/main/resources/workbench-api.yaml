@@ -9332,6 +9332,15 @@ definitions:
       professionalUrl:
         type: string
         description: User's URL at primary place of work.
+      rasLoginGovBypassTime:
+        type: string
+        format: date-time
+        description: Time an administrator bypassed the RAS Login.gov requirement
+          for this user.
+      rasLoginGovCompletionTime:
+        type: string
+        format: date-time
+        description: Time user completed the RAS Login.gov account link.
       twoFactorAuthBypassTime:
         type: string
         format: date-time
