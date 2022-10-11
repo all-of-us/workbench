@@ -55,7 +55,7 @@ export default class DataTable extends Table {
     return `${this.getXpath()}/*[contains(concat(normalize-space(@class), " "), "p-paginator ")]`;
   }
 
-  public waitForSearchBox(): Textbox {
+  public getSearchNameBox(): Textbox {
     return Textbox.findByName(this.page, { name: 'Search Name' });
   }
 }

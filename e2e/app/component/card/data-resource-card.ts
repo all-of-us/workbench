@@ -71,7 +71,12 @@ export default class DataResourceCard extends BaseCard {
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
-    const textBox = datatable.waitForSearchBox();
+
+    const dataTableExist = await datatable.exists();
+    if (!dataTableExist) {
+      return null;
+    }
+    const textBox = datatable.getSearchNameBox();
     await textBox.type(name);
 
     const dataTableRows = await datatable.getRowCount();
@@ -88,8 +93,13 @@ export default class DataResourceCard extends BaseCard {
 
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
-    const textBox = datatable.waitForSearchBox();
-    await textBox.type(name);
+
+    const dataTableExist = await datatable.exists();
+    if (!dataTableExist) {
+      return null;
+    }
+    const searchNameTextBox = datatable.getSearchNameBox();
+    await searchNameTextBox.type(name);
 
     const tableExist = await datatable.exists();
     if (tableExist) {

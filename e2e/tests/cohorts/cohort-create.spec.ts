@@ -165,7 +165,7 @@ describe('Create Cohorts Test', () => {
 
     // Delete cohort in Workspace Data page.
     await dataPage.deleteResourceFromTable(cohortName, ResourceCard.Cohort);
-    expect(await dataPage.findCohortEntry(cohortName)).toBeFalsy();
+    expect(await dataPage.findCohortEntry(cohortName)).toBeNull();
   });
 
   test('Create cohort from EKG conditions with modifiers', async () => {
