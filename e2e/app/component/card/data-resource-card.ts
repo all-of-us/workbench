@@ -80,9 +80,8 @@ export default class DataResourceCard extends BaseCard {
     await textBox.type(name);
 
     const dataTableRows = await datatable.getRowCount();
-    const index = 1;
-    if (index <= dataTableRows) {
-      return await datatable.getCellLink(index, 3);
+    if (dataTableRows >= 1) {
+      return await datatable.getCellLink(1, 3);
     }
     return null;
   }
@@ -104,9 +103,8 @@ export default class DataResourceCard extends BaseCard {
     const tableExist = await datatable.exists();
     if (tableExist) {
       const dataTableRows = await datatable.getRowCount();
-      const index = 1;
-      if (index <= dataTableRows) {
-        return datatable.getCellXpath(index, 1);
+      if (dataTableRows >= 1) {
+        return datatable.getCellXpath(1, 1);
       }
     }
     return null;
