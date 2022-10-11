@@ -96,7 +96,7 @@ export default class DataResourceCard extends BaseCard {
   async findSnowManEntryCellXPath(opts: { name?: string }): Promise<string> {
     const datatable: DataTable = await this.confirmDataTableExist(opts.name);
     if (datatable) {
-      return await datatable.getCellXpath(1, 3);
+      return datatable.getCellXpath(1, 1);
     }
     return null;
   }
