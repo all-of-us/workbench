@@ -66,8 +66,7 @@ export default class DataResourceCard extends BaseCard {
     return resourceCards;
   }
 
-  async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
-    const { name } = opts;
+  async confirmDataTableExist(name): Promise<DataTable> {
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
@@ -81,31 +80,23 @@ export default class DataResourceCard extends BaseCard {
 
     const dataTableRows = await datatable.getRowCount();
     if (dataTableRows >= 1) {
+      return datatable;
+    }
+    return null;
+  }
+
+  async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
+    const datatable: DataTable = await this.confirmDataTableExist(opts.name);
+    if (datatable) {
       return await datatable.getCellLink(1, 3);
     }
     return null;
   }
 
   async findSnowManEntryCellXPath(opts: { name?: string }): Promise<string> {
-    const { name } = opts;
-    await waitWhileLoading(this.page);
-
-    const datatable = new DataTable(this.page);
-    await waitWhileLoading(this.page);
-
-    const dataTableExist = await datatable.exists();
-    if (!dataTableExist) {
-      return null;
-    }
-    const searchNameTextBox = datatable.getSearchNameBox();
-    await searchNameTextBox.type(name);
-
-    const tableExist = await datatable.exists();
-    if (tableExist) {
-      const dataTableRows = await datatable.getRowCount();
-      if (dataTableRows >= 1) {
-        return datatable.getCellXpath(1, 1);
-      }
+    const datatable: DataTable = await this.confirmDataTableExist(opts.name);
+    if (datatable) {
+      return await datatable.getCellXpath(1, 3);
     }
     return null;
   }
