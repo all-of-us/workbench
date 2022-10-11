@@ -35,6 +35,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -46,7 +47,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
@@ -82,11 +82,11 @@ public class OfflineRuntimeControllerTest {
     }
   }
 
-  @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
+  @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
   @MockBean
   private RuntimesApi mockRuntimesApi;
 
-  @Qualifier(NotebooksConfig.SERVICE_DISKS_API)
+  @Qualifier(LeonardoConfig.SERVICE_DISKS_API)
   @MockBean
   private DisksApi mockDisksApi;
 

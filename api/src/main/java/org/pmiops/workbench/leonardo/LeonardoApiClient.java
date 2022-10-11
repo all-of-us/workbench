@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.leonardo;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface
  * for internal use.
  */
-public interface LeonardoNotebooksClient {
+public interface LeonardoApiClient {
 
   String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   String BIGQUERY_STORAGE_API_ENABLED_ENV_KEY = "BIGQUERY_STORAGE_API_ENABLED";

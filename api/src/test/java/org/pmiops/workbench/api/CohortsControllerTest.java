@@ -73,6 +73,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
@@ -83,7 +84,6 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
@@ -210,7 +210,7 @@ public class CohortsControllerTest {
     DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
-    LeonardoNotebooksClient.class,
+    LeonardoApiClient.class,
     IamService.class,
     MailService.class,
     MonitoringService.class,

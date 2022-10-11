@@ -54,6 +54,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -70,7 +71,6 @@ import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -112,7 +112,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private NotebooksService mockNotebooksService;
 
@@ -145,7 +145,7 @@ public class WorkspaceAdminServiceTest {
     DataSetDao.class,
     DataSetMapper.class,
     FirecloudMapper.class,
-    LeonardoNotebooksClient.class,
+    LeonardoApiClient.class,
     UserMapper.class,
     UserService.class,
     WorkspaceAuthService.class,
