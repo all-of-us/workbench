@@ -58,7 +58,7 @@ const test: IEnvConfig = {
 // workbench staging environment
 const staging: IEnvConfig = {
   LOGIN_URL_DOMAIN_NAME: process.env.STAGING_LOGIN_URL || 'https://staging.fake-research-aou.org',
-  API_HOSTNAME: process.env.API_HOSTNAME || 'api-dot-all-of-us-rw-staging.appspot.com',
+  API_HOSTNAME: process.env.API_HOSTNAME || 'api.staging.fake-research-aou.org',
   EMAIL_DOMAIN_NAME: '@staging.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@staging.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
