@@ -66,7 +66,7 @@ export default class DataResourceCard extends BaseCard {
     return resourceCards;
   }
 
-  async confirmDataTableExist(name): Promise<DataTable> {
+  async confirmDataTableHasResults(name): Promise<DataTable> {
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
@@ -86,7 +86,7 @@ export default class DataResourceCard extends BaseCard {
   }
 
   async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
-    const datatable: DataTable = await this.confirmDataTableExist(opts.name);
+    const datatable: DataTable = await this.confirmDataTableHasResults(opts.name);
     if (datatable) {
       return await datatable.getCellLink(1, 3);
     }
@@ -94,7 +94,7 @@ export default class DataResourceCard extends BaseCard {
   }
 
   async findSnowManEntryCellXPath(opts: { name?: string }): Promise<string> {
-    const datatable: DataTable = await this.confirmDataTableExist(opts.name);
+    const datatable: DataTable = await this.confirmDataTableHasResults(opts.name);
     if (datatable) {
       return datatable.getCellXpath(1, 1);
     }
