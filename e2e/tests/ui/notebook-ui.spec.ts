@@ -3,12 +3,12 @@ import { LinkText, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import WorkspaceCard from 'app/component/card/workspace-card';
-import DataResourceCard from 'app/component/card/data-resource-card';
 import HomePage from 'app/page/home-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import { getPropValue } from '../../utils/element-utils';
 
 describe('Notebook and Runtime UI Test', () => {
   beforeEach(async () => {
@@ -19,9 +19,7 @@ describe('Notebook and Runtime UI Test', () => {
   const workspaceName = 'e2eCreatePythonKernelNotebookTest';
   let pyNotebookName: string;
 
-  /*Skipping the test below as they will be moved to the new version of e2e test.
-   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-  test.skip('Notebook name is unique', async () => {
+  test('Notebook name is unique', async () => {
     const existWorkspace = await openWorkspace(page, workspaceName);
     if (!existWorkspace) {
       logger.info(`Cannot find workspace "${workspaceName}". Test end early.`);
@@ -34,7 +32,7 @@ describe('Notebook and Runtime UI Test', () => {
       return;
     }
 
-    pyNotebookName = await pyNotebookCard.getName();
+    pyNotebookName = await getPropValue<string>(pyNotebookCard, 'textContent');
 
     // Attempt to create another notebook with same name. It should be blocked.
     const analysisPage = new WorkspaceAnalysisPage(page);
@@ -72,7 +70,7 @@ describe('Notebook and Runtime UI Test', () => {
     return true;
   }
 
-  async function openAnyNotebook(page: Page): Promise<DataResourceCard | null> {
+  async function openAnyNotebook(page: Page): Promise<ElementHandle | null> {
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
     return analysisPage.findNotebookCard();
