@@ -330,7 +330,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     event.stopPropagation();
     const {
       node,
-      node: { conceptId, domainId, group, parentId, subtype, value },
+      node: { domainId, group, parentId, subtype, value },
       select,
       selectedIds,
       source,
@@ -357,15 +357,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         if (question) {
           name = `${question.name} - ${name}`;
         }
-        const attribute =
-          conceptId === 1585747
-            ? {
-                name: AttrName.NUM,
-                operator: Operator.EQUAL,
-                operands: [value],
-              }
-            : { name: AttrName.CAT, operator: Operator.IN, operands: [value] };
-        attributes.push(attribute);
+        attributes.push({
+          name: AttrName.CAT,
+          operator: Operator.IN,
+          operands: [value],
+        });
       }
       const param = {
         ...(node as Object),

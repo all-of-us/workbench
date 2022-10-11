@@ -57,6 +57,10 @@ produces:
 - application/json
 security:
 - aou_oauth: []
+
+# Define an alias before using it. We can get rid of it after migrating to Swagger 3.0 definition.
+# See https://precisionmedicineinitiative.atlassian.net/browse/RW-8978
+
 parameters:
   userId:
     in: path
@@ -802,6 +806,126 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/apps/{workspaceNamespace}":
+    get:
+      summary: Get the user's app by type.
+      description: "Returns the current user's app by type."
+      operationId: getApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The app for this user and workspace.
+          schema:
+            "$ref": "#/definitions/App"
+        404:
+          description: No app exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    post:
+      summary: Create a workspace APP.
+      description: |
+        Creates a new app request is received the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the app is still initializing or is not in a ready state).
+        TODO(RW-3697): Custom app creation params should be added as a body param here.
+      operationId: createApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: body
+          name: app
+          description: APP definition
+          required: true
+          schema:
+            "$ref": "#/definitions/App"
+      responses:
+        200:
+          description: App was created successfully
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        409:
+          description: A app for this user and workspace already exists.
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    patch:
+      summary: Updates the configuration of a app
+      description: In order to update the configuration of a app, it must first be running or paused
+      operationId: updateApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: body
+          name: app
+          schema:
+            "$ref": "#/definitions/App"
+      responses:
+        202:
+          description: App update request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        400:
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Server Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a workspace app.
+      operationId: deleteApp
+      tags:
+        - app
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: deleteDisk
+          description: Whether or not disk should be deleted if the app is using persistent disk. Default to false if not specified
+          required: false
+          type: boolean
+          default: false
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No app exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/apps/":
+    get:
+      tags:
+        - app
+      summary: List apps
+      description: List apps the caller has access to, in all workspaces
+      operationId: listApp
+      responses:
+        "200":
+          description: List of apps
+          schema:
+            "$ref": "#/definitions/ListAppsResponse"
+
   "/v1/disks/{workspaceNamespace}":
     get:
       summary: Get the user's workspace persistent disk.
@@ -4424,6 +4548,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable Multiple Cohort Review feature in Cohort Review
+      enableGkeApp:
+        type: boolean
+        default: false
+        description: Whether to enable creating custom applications using Terra Leonardo
       rasHost:
         type: string
         description: The RAS base host name.
@@ -6017,6 +6145,22 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  AppStatus:
+    type: string
+    enum:
+      - DELETING
+      - DELETED
+      - ERROR
+      - PROVISIONING
+      - RUNNING
+      - STATUS_UNSPECIFIED
+      - STOPPED
+      - STOPPING
+  AppType:
+    type: string
+    enum:
+      - CROMWELL
+      - RSTUDIO
   DiskStatus:
     type: string
     enum:
@@ -6027,6 +6171,7 @@ definitions:
       - Deleting
       - Deleted
       - Unknown
+
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user
@@ -6095,6 +6240,60 @@ definitions:
       timestamp:
         type: string
         description: timestamp for error in ISO 8601 format
+
+  App:
+    properties:
+      googleProject:
+        type: string
+        description: The Google Project used to create the app. Read only.
+      appName:
+        type: string
+        description: The user-supplied name for the app. Read only.
+      appType:
+        "$ref": "#/definitions/AppType"
+      createdDate:
+        type: string
+        description: The date and time the app was created, in ISO-8601 format. Read only.
+      status:
+        "$ref": "#/definitions/AppStatus"
+        description: App status. Read only.
+      autopauseThreshold:
+        type: integer
+        description: The number of minutes of idle time to elapse before the cluster is
+          autopaused. If autopause is set to false, this value is disregarded.
+          A value of 0 is equivalent to autopause being turned off.
+      kubernetesRuntimeConfig:
+        description: kubernetesRuntimeConfig will be returned
+        "$ref": "#/definitions/KubernetesRuntimeConfig"
+      diskConfig:
+        description: Disk configuration
+        "$ref": "#/definitions/DiskConfig"
+      errors:
+        type: array
+        description: The list of errors that were encountered on APP create, if any.
+        items:
+          $ref: "#/definitions/KubernetesError"
+
+  KubernetesError:
+      description: a kubernetes app error
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: a helpful error message
+        timestamp:
+          type: string
+          description: timestamp for error in ISO 8601 format
+        action:
+          type: string
+          description: the api-level action associated with the error, e.g. createApp
+        source:
+          type: string
+          description: the internal source associated with the error
+        googleErrorCode:
+          type: integer
+          description: if the error is associated with an external API call, the error code will be propagated here
+
   DiskConfig:
     description: The configuration of a persistent disk, returned in runtime responses
     type: object
@@ -6137,6 +6336,26 @@ definitions:
       blockSize:
         type: integer
         description: The block size in bytes that the persistent disk is to be updated to.
+
+  KubernetesRuntimeConfig:
+    description: configuration for a kubernetes app
+    type: object
+    required:
+      - numNodes
+      - machineType
+      - autoscalingEnabled
+    properties:
+      numNodes:
+        type: integer
+        description: number of nodes for the kubernetes app
+      machineType:
+        type: string
+        description: the machine type for the nodes the kubernetes app will run on
+        example: n1-standard-1
+      autoscalingEnabled:
+        type: boolean
+        description: whether or not the nodes autoscale up and down for this app
+
   PersistentDiskRequest:
     description: configuration to create a disk
     type: object
@@ -6342,6 +6561,11 @@ definitions:
           requested files were localized. This is the "API" directory in Jupyter terms,
           which means it is a relative path in the Jupyter user-facing file system,
           e.g. "foo/bar.ipynb".'
+
+  ListAppsResponse:
+    type: array
+    items:
+      "$ref": "#/definitions/App"
   UsernameTakenResponse:
     type: object
     required:

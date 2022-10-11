@@ -293,6 +293,120 @@ FROM
         GROUP BY 1,2,3,4
     ) x"
 
+echo "MEASUREMENT - add other source concepts"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+      id
+      ,parent_id
+      ,domain_id
+      ,is_standard
+      ,type
+      ,concept_id
+      ,code
+      ,name
+      ,rollup_count
+      ,item_count
+      ,est_count
+      ,is_group
+      ,is_selectable
+      ,has_attribute
+      ,has_hierarchy
+      ,path
+    )
+SELECT
+    ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID
+    , -1
+    , 'MEASUREMENT'
+    , 0
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Measurement'
+            and vocabulary_id = 'CPT4'
+            and measurement_concept_id NOT IN
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'MEASUREMENT'
+                        and is_standard = 0
+                        and concept_id is not null
+                )
+        GROUP BY 1,2,3,4
+    ) x"
+
+echo "OBSERVATION - add other source concepts"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+      id
+      ,parent_id
+      ,domain_id
+      ,is_standard
+      ,type
+      ,concept_id
+      ,code
+      ,name
+      ,rollup_count
+      ,item_count
+      ,est_count
+      ,is_group
+      ,is_selectable
+      ,has_attribute
+      ,has_hierarchy
+      ,path
+    )
+SELECT
+    ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID
+    , -1
+    , 'OBSERVATION'
+    , 0
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.observation_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Observation'
+            and vocabulary_id = 'CPT4'
+            and observation_concept_id NOT IN
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'OBSERVATION'
+                        and is_standard = 0
+                        and concept_id is not null
+                )
+        GROUP BY 1,2,3,4
+    ) x"
+
 echo "DRUG_EXPOSURE - add other standard concepts not in hierarchies"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`

@@ -1,89 +1,21 @@
 import * as React from 'react';
-import { CSSProperties, useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
   Workspace,
-  WorkspaceResource,
   WorkspaceResourceResponse,
   WorkspaceResponse,
 } from 'generated/fetch';
 
 import { AlertWarning } from 'app/components/alert';
-import { Clickable } from 'app/components/buttons';
 import { SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
-import { TooltipTrigger } from 'app/components/popups';
-import { renderResourceCard } from 'app/components/render-resource-card';
-import {
-  ResourceNavigation,
-  StyledResourceType,
-} from 'app/components/resource-card';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import { cond, reactStyles, withCdrVersions } from 'app/utils';
-import { getCdrVersion } from 'app/utils/cdr-versions';
-import { displayDateWithoutHours } from 'app/utils/dates';
-import { getDisplayName, isNotebook } from 'app/utils/resources';
-
-const styles = reactStyles({
-  column: {
-    textAlign: 'left',
-  },
-  typeColumn: {
-    textAlign: 'left',
-    width: '130px',
-  },
-  menu: {
-    width: '30px',
-  },
-  navigation: {
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    letterSpacing: 0,
-    lineHeight: '22px',
-  },
-});
-
-interface NavProps {
-  workspace: Workspace;
-  resource: WorkspaceResource;
-  style?: CSSProperties;
-}
-
-const WorkspaceNavigation = (props: NavProps) => {
-  const {
-    workspace: { name, namespace, id },
-    resource,
-    style,
-  } = props;
-  const tab = isNotebook(resource) ? 'notebooks' : 'data';
-  const url = `/workspaces/${namespace}/${id}/${tab}`;
-
-  return (
-    <Clickable>
-      <RouterLink to={url} style={style} data-test-id='workspace-navigation'>
-        {name}
-      </RouterLink>
-    </Clickable>
-  );
-};
-
-interface TableData {
-  menu: JSX.Element;
-  resourceType: JSX.Element;
-  resourceName: JSX.Element;
-  workspaceName: JSX.Element;
-  formattedLastModified: string;
-  cdrVersionName: string;
-}
+import { cond, withCdrVersions } from 'app/utils';
+import { ResourcesList } from 'app/utils/resource-list';
 
 interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
@@ -94,7 +26,6 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
-  const [tableData, setTableData] = useState<TableData[]>();
   const [apiLoadError, setApiLoadError] = useState<string>(null);
 
   const loadResources = async () => {
@@ -114,84 +45,12 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     const { workspaces } = props;
     if (workspaces) {
       const workspaceTuples = workspaces.map(
-        (r) => [r.workspace.id, r.workspace] as [string, Workspace]
+        (r) => [r.workspace.namespace, r.workspace] as [string, Workspace]
       );
       setWorkspaceMap(new Map(workspaceTuples));
       loadResources();
     }
   }, [props.workspaces]);
-
-  const renderResourceMenu = (resource: WorkspaceResource) => {
-    return renderResourceCard({
-      resource,
-      menuOnly: true,
-      existingNameList: [], // TODO existing bug RW-5847: does not populate names for rename modal
-      onUpdate: loadResources,
-    });
-  };
-
-  useEffect(() => {
-    const getWorkspace = (r: WorkspaceResource) => {
-      return wsMap.get(r.workspaceFirecloudName);
-    };
-
-    const addAdminLockToNameColumn = () => {
-      return (
-        <TooltipTrigger
-          content={<div>Workspace compliance action required</div>}
-        >
-          <FontAwesomeIcon
-            style={{ color: colors.warning, marginRight: '0.5rem' }}
-            size={'sm'}
-            icon={faLockAlt}
-          />
-        </TooltipTrigger>
-      );
-    };
-
-    const getCdrVersionName = (r: WorkspaceResource) => {
-      const { cdrVersionTiersResponse } = props;
-      const cdrVersion = getCdrVersion(
-        getWorkspace(r),
-        cdrVersionTiersResponse
-      );
-      return cdrVersion?.name;
-    };
-
-    if (resources && wsMap) {
-      setTableData(
-        resources
-          .filter((r) => wsMap.has(r.workspaceFirecloudName))
-          .map((r) => {
-            return {
-              menu: renderResourceMenu(r),
-              resourceType: (
-                <ResourceNavigation resource={r}>
-                  <StyledResourceType resource={r} />
-                </ResourceNavigation>
-              ),
-              resourceName: (
-                <ResourceNavigation resource={r} style={styles.navigation}>
-                  {r.adminLocked && addAdminLockToNameColumn()}
-                  {getDisplayName(r)}
-                </ResourceNavigation>
-              ),
-              workspaceName: (
-                <WorkspaceNavigation
-                  workspace={getWorkspace(r)}
-                  resource={r}
-                  style={styles.navigation}
-                />
-              ),
-              formattedLastModified: displayDateWithoutHours(
-                r.lastModifiedEpochMillis
-              ),
-              cdrVersionName: getCdrVersionName(r),
-            };
-          })
-      );
-    }
-  }, [resources, wsMap]);
 
   return cond(
     [
@@ -207,42 +66,19 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       resources && wsMap && !loading,
       () => (
         <React.Fragment>
-          <SmallHeader>Recently Accessed Items</SmallHeader>
-          <div data-test-id='recent-resources-table'>
-            <DataTable
-              value={tableData}
-              scrollable={true}
-              paginator={true}
-              paginatorTemplate='CurrentPageReport'
-              currentPageReportTemplate='Showing {totalRecords} most recent items'
-            >
-              <Column field='menu' style={styles.menu} />
-              <Column
-                field='resourceType'
-                header='Item type'
-                style={styles.typeColumn}
-              />
-              <Column
-                field='resourceName'
-                header='Name'
-                style={styles.column}
-              />
-              <Column
-                field='workspaceName'
-                header='Workspace name'
-                style={styles.column}
-              />
-              <Column
-                field='formattedLastModified'
-                header='Last changed'
-                style={styles.column}
-              />
-              <Column
-                field='cdrVersionName'
-                header='Dataset'
-                style={styles.column}
-              />
-            </DataTable>
+          {resources.length > 0 && (
+            <SmallHeader>Recently Accessed Items</SmallHeader>
+          )}
+          <div
+            data-test-id='recent-resources-table'
+            style={{ paddingTop: '1rem' }}
+          >
+            <ResourcesList
+              recentResourceSource
+              workspaceResources={resources}
+              workspaceMap={wsMap}
+              onUpdate={loadResources}
+            />
           </div>
         </React.Fragment>
       ),
