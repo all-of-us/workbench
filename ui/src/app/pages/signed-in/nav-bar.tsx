@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { environment } from 'environments/environment';
-import { CTAvailableBannerMaybe } from 'app//components/ct-available-banner-maybe';
 import { Breadcrumb } from 'app/components/breadcrumb';
+import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
+import { AouHeaderWithDisplayTag } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { SideNav } from 'app/components/side-nav';
 import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
@@ -12,7 +12,6 @@ import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renew
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { profileStore, useStore } from 'app/utils/stores';
-import logo from 'assets/images/all-of-us-logo.svg';
 
 const styles = reactStyles({
   headerContainer: {
@@ -45,23 +44,6 @@ const styles = reactStyles({
   },
   sidenavIconHovering: {
     cursor: 'pointer',
-  },
-  headerImage: {
-    height: '57px',
-    width: '155px',
-    marginLeft: '1rem',
-  },
-  displayTag: {
-    marginLeft: '1rem',
-    height: '12px',
-    width: '155px',
-    borderRadius: '2px',
-    backgroundColor: colors.primary,
-    color: colors.white,
-    fontFamily: 'Montserrat',
-    fontSize: '8px',
-    lineHeight: '12px',
-    textAlign: 'center',
   },
 });
 
@@ -124,14 +106,7 @@ export const NavBar = () => {
           }
         ></ClrIcon>
       </div>
-      <div>
-        <a href={'/'}>
-          <img src={logo} style={styles.headerImage} />
-        </a>
-        {environment.shouldShowDisplayTag && (
-          <div style={styles.displayTag}>{environment.displayTag}</div>
-        )}
-      </div>
+      <AouHeaderWithDisplayTag />
       <Breadcrumb />
       <AccessRenewalNotificationMaybe />
       <StatusAlertBannerMaybe />

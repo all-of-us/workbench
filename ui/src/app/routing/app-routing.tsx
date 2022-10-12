@@ -9,6 +9,7 @@ import { Configuration } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
+import { AouHeaderWithDisplayTag } from 'app/components/headers';
 import { NotificationModal } from 'app/components/modals';
 import { TermsOfService } from 'app/components/terms-of-service';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
@@ -48,7 +49,6 @@ import {
   stackdriverErrorReporterStore,
   useStore,
 } from 'app/utils/stores';
-import logo from 'assets/images/all-of-us-logo.svg';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 
 declare const gapi: any;
@@ -329,9 +329,7 @@ export const AppRoutingComponent: React.FunctionComponent<
                 fontFamily: 'Montserrat',
               }}
             >
-              <div>
-                <img alt='logo' src={logo} width='155px' />
-              </div>
+              <AouHeaderWithDisplayTag />
               <div
                 style={{
                   fontSize: '20pt',

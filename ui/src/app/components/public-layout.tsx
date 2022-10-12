@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import headerImage from 'assets/images/all-of-us-logo.svg';
+
+import { AouHeaderWithDisplayTag } from './headers';
 
 const styles = reactStyles({
   content: {
@@ -10,8 +11,6 @@ const styles = reactStyles({
     margin: '1rem',
   },
 });
-
-export const PUBLIC_HEADER_IMAGE = headerImage;
 
 /**
  * A layout component suitable for display public-facing content, such as static
@@ -27,12 +26,7 @@ export const PublicLayout = ({ contentStyle = {}, children }) => {
           borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
         }}
       >
-        <a href='/'>
-          <img
-            style={{ height: '1.75rem', marginLeft: '1rem', marginTop: '1rem' }}
-            src={PUBLIC_HEADER_IMAGE}
-          />
-        </a>
+        <AouHeaderWithDisplayTag />
       </div>
       <div style={{ ...styles.content, ...contentStyle }}>{children}</div>
     </React.Fragment>
