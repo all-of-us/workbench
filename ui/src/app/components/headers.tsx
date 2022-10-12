@@ -49,8 +49,8 @@ export const styles = reactStyles({
     fontWeight: 400,
   },
   headerImageSignedIn: {
-    height: '57px',
-    width: '155px',
+    height: 57,
+    width: 155,
     marginLeft: '1rem',
   },
   headerImagePublic: {
@@ -60,9 +60,9 @@ export const styles = reactStyles({
   },
   displayTagSignedIn: {
     marginLeft: '1rem',
-    height: '12px',
-    width: '155px',
-    borderRadius: '2px',
+    height: 12,
+    width: 155,
+    borderRadius: 2,
     backgroundColor: colors.primary,
     color: colors.white,
     fontFamily: 'Montserrat',
@@ -72,9 +72,9 @@ export const styles = reactStyles({
   },
   displayTagPublic: {
     marginLeft: '1rem',
-    height: '12px',
-    width: '155px',
-    borderRadius: '2px',
+    height: 12,
+    width: 135,
+    borderRadius: 2,
     backgroundColor: colors.primary,
     color: colors.white,
     fontFamily: 'Montserrat',
