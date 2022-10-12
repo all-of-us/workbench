@@ -9,7 +9,7 @@ import { Configuration } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
 import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
-import { AouHeaderWithDisplayTag } from 'app/components/headers';
+import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { NotificationModal } from 'app/components/modals';
 import { TermsOfService } from 'app/components/terms-of-service';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
@@ -329,7 +329,7 @@ export const AppRoutingComponent: React.FunctionComponent<
                 fontFamily: 'Montserrat',
               }}
             >
-              <AouHeaderWithDisplayTag />
+              <SignedInAouHeaderWithDisplayTag />
               <div
                 style={{
                   fontSize: '20pt',

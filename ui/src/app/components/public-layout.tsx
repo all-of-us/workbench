@@ -3,7 +3,7 @@ import * as React from 'react';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-import { AouHeaderWithDisplayTag } from './headers';
+import { PublicAouHeaderWithDisplayTag } from './headers';
 
 const styles = reactStyles({
   content: {
@@ -26,7 +26,7 @@ export const PublicLayout = ({ contentStyle = {}, children }) => {
           borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
         }}
       >
-        <AouHeaderWithDisplayTag style={{ marginTop: '1rem' }} />
+        <PublicAouHeaderWithDisplayTag />
       </div>
       <div style={{ ...styles.content, ...contentStyle }}>{children}</div>
     </React.Fragment>

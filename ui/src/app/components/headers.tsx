@@ -48,12 +48,29 @@ export const styles = reactStyles({
     fontSize: '28px',
     fontWeight: 400,
   },
-  headerImage: {
+  headerImageSignedIn: {
     height: '57px',
     width: '155px',
     marginLeft: '1rem',
   },
-  displayTag: {
+  headerImagePublic: {
+    height: '1.75rem',
+    marginLeft: '1rem',
+    marginTop: '1rem',
+  },
+  displayTagSignedIn: {
+    marginLeft: '1rem',
+    height: '12px',
+    width: '155px',
+    borderRadius: '2px',
+    backgroundColor: colors.primary,
+    color: colors.white,
+    fontFamily: 'Montserrat',
+    fontSize: '8px',
+    lineHeight: '12px',
+    textAlign: 'center',
+  },
+  displayTagPublic: {
     marginLeft: '1rem',
     height: '12px',
     width: '155px',
@@ -77,17 +94,30 @@ export const SmallHeader = withStyle(styles.h4)('h4');
 export const ListPageHeader = withStyle(styles.listPageHeader)('h3');
 export const PageHeader = withStyle(styles.pageHeader)('h2');
 
-export const AouHeaderWithDisplayTag = (props: { style?: CSSProperties }) => (
+const AouHeaderWithDisplayTag = (props: {
+  headerStyle: CSSProperties;
+  tagStyle: CSSProperties;
+}) => (
   <div>
     <a href='/'>
-      <img
-        style={{ ...styles.headerImage, ...props.style }}
-        src={logo}
-        alt='all of us logo'
-      />
+      <img style={props.headerStyle} src={logo} alt='all of us logo' />
     </a>
     {environment.shouldShowDisplayTag && (
-      <div style={styles.displayTag}>{environment.displayTag}</div>
+      <div style={props.tagStyle}>{environment.displayTag}</div>
     )}
   </div>
+);
+
+export const SignedInAouHeaderWithDisplayTag = () => (
+  <AouHeaderWithDisplayTag
+    headerStyle={styles.headerImageSignedIn}
+    tagStyle={styles.displayTagSignedIn}
+  />
+);
+
+export const PublicAouHeaderWithDisplayTag = () => (
+  <AouHeaderWithDisplayTag
+    headerStyle={styles.headerImagePublic}
+    tagStyle={styles.displayTagPublic}
+  />
 );

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Breadcrumb } from 'app/components/breadcrumb';
 import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
-import { AouHeaderWithDisplayTag } from 'app/components/headers';
+import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { SideNav } from 'app/components/side-nav';
 import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
@@ -106,7 +106,7 @@ export const NavBar = () => {
           }
         ></ClrIcon>
       </div>
-      <AouHeaderWithDisplayTag />
+      <SignedInAouHeaderWithDisplayTag />
       <Breadcrumb />
       <AccessRenewalNotificationMaybe />
       <StatusAlertBannerMaybe />

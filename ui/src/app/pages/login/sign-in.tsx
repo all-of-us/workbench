@@ -10,7 +10,7 @@ import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import { DemographicSurveyValidationMessage } from 'app/components/demographic-survey-v2-validation-message';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
-import { AouHeaderWithDisplayTag } from 'app/components/headers';
+import { PublicAouHeaderWithDisplayTag } from 'app/components/headers';
 import { TooltipTrigger } from 'app/components/popups';
 import { TermsOfService } from 'app/components/terms-of-service';
 import {
@@ -305,7 +305,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             backgroundImages
           )}
         >
-          <AouHeaderWithDisplayTag style={{ marginTop: '1rem' }} />
+          <PublicAouHeaderWithDisplayTag />
           {this.renderSignInStep(this.state.currentStep)}
         </FlexColumn>
         {this.renderNavigation(this.state.currentStep)}
