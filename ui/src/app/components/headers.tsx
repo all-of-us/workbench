@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import { environment } from 'environments/environment';
 import colors from 'app/styles/colors';
@@ -76,10 +77,14 @@ export const SmallHeader = withStyle(styles.h4)('h4');
 export const ListPageHeader = withStyle(styles.listPageHeader)('h3');
 export const PageHeader = withStyle(styles.pageHeader)('h2');
 
-export const AouHeaderWithDisplayTag = () => (
+export const AouHeaderWithDisplayTag = (props: { style?: CSSProperties }) => (
   <div>
     <a href='/'>
-      <img style={styles.headerImage} src={logo} alt='all of us logo' />
+      <img
+        style={{ ...styles.headerImage, ...props.style }}
+        src={logo}
+        alt='all of us logo'
+      />
     </a>
     {environment.shouldShowDisplayTag && (
       <div style={styles.displayTag}>{environment.displayTag}</div>

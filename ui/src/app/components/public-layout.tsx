@@ -26,7 +26,7 @@ export const PublicLayout = ({ contentStyle = {}, children }) => {
           borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
         }}
       >
-        <AouHeaderWithDisplayTag />
+        <AouHeaderWithDisplayTag style={{ marginTop: '1rem' }} />
       </div>
       <div style={{ ...styles.content, ...contentStyle }}>{children}</div>
     </React.Fragment>

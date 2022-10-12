@@ -305,7 +305,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             backgroundImages
           )}
         >
-          <AouHeaderWithDisplayTag />
+          <AouHeaderWithDisplayTag style={{ marginTop: '1rem' }} />
           {this.renderSignInStep(this.state.currentStep)}
         </FlexColumn>
         {this.renderNavigation(this.state.currentStep)}
