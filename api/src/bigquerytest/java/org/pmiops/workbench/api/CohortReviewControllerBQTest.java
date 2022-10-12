@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -56,7 +55,6 @@ import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -606,8 +604,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAME,
                 reviewWithoutEHRData.getCohortReviewId(),
                 PARTICIPANT_ID,
-                Domain.CONDITION.name(),
-                null)
+                Domain.CONDITION.name())
             .getBody();
 
     ParticipantChartData expectedData1 =
@@ -627,42 +624,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     assertThat(Objects.requireNonNull(response).getItems().size()).isEqualTo(2);
     assertThat(expectedData1).isIn(response.getItems());
     assertThat(expectedData2).isIn(response.getItems());
-  }
-
-  @Test
-  public void getParticipantChartDataBadLimit() {
-    try {
-      controller.getParticipantChartData(
-          NAMESPACE,
-          NAME,
-          reviewWithoutEHRData.getCohortReviewId(),
-          PARTICIPANT_ID,
-          Domain.CONDITION.name(),
-          -1);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
-  public void getParticipantChartDataBadLimitOverHundred() {
-    try {
-      controller.getParticipantChartData(
-          NAMESPACE,
-          NAME,
-          reviewWithoutEHRData.getCohortReviewId(),
-          PARTICIPANT_ID,
-          Domain.CONDITION.name(),
-          101);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
   }
 
   @Test

@@ -41,9 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
-  public static final Integer MIN_LIMIT = 1;
-  public static final Integer MAX_LIMIT = 20;
-  public static final Integer DEFAULT_LIMIT = 5;
+  public static final Integer DEFAULT_COHORT_CHART_DATA_LIMIT = 10;
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
@@ -95,12 +93,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> findDrugBrandOrIngredientByValue(
-      String workspaceNamespace, String workspaceId, String value, Integer limit) {
+      String workspaceNamespace, String workspaceId, String value) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
+            .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, null)));
   }
 
   @Override
@@ -337,16 +335,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace,
       String workspaceId,
       String domain,
-      Integer limit,
       CohortDefinition cohortDefinition) {
-
-    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Please provide a chart limit between %d and %d.",
-              MIN_LIMIT, MAX_LIMIT));
-    }
 
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -359,7 +348,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 chartService.findCohortChartData(
                     cohortDefinition,
                     Objects.requireNonNull(Domain.fromValue(domain)),
-                    chartLimit)));
+                    DEFAULT_COHORT_CHART_DATA_LIMIT)));
   }
 
   protected void validateDomain(String domain) {

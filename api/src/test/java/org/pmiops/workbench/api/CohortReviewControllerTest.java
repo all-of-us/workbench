@@ -2128,8 +2128,7 @@ public class CohortReviewControllerTest {
                         workspace.getId(),
                         cohortReview.getCohortReviewId(),
                         participantCohortStatus1.getParticipantKey().getParticipantId(),
-                        Domain.CONDITION.toString(),
-                        1)
+                        Domain.CONDITION.toString())
                     .getBody())
             .getItems();
 
@@ -2154,8 +2153,7 @@ public class CohortReviewControllerTest {
                     workspace.getId(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
-                    Domain.CONDITION.toString(),
-                    1));
+                    Domain.CONDITION.toString()));
 
     assertForbiddenException(exception);
   }

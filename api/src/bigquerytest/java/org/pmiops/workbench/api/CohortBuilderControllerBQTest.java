@@ -892,7 +892,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void getCohortChartDataBadLimit() {
     try {
       controller.getCohortChartData(
-          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), -1, new CohortDefinition());
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), new CohortDefinition());
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -905,7 +905,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void getCohortChartDataBadLimitOverHundred() {
     try {
       controller.getCohortChartData(
-          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), 101, new CohortDefinition());
+          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), new CohortDefinition());
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -922,7 +922,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.LAB.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
@@ -942,7 +941,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.DRUG.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
@@ -960,7 +958,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.CONDITION.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
@@ -978,7 +975,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.PROCEDURE.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
