@@ -442,7 +442,7 @@ export const ConceptSearch = fp.flow(
         showMoreDescription,
       } = this.state;
       const errors = validate(
-        { editDescription, editName: editName.trim() },
+        { editDescription, editName: editName?.trim() },
         {
           editName: nameValidationFormat(
             existingNames,

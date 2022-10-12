@@ -258,7 +258,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
         selectedConceptsInDomain,
       } = this.state;
       const errors = validate(
-        { name: name.trim() },
+        { name: name?.trim() },
         {
           name: nameValidationFormat(
             conceptSets.map((concept: ConceptSet) => concept.name),
