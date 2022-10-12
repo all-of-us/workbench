@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 
-public final class PersistentDisks {
-  private static final Logger log = Logger.getLogger(PersistentDisks.class.getName());
+public final class PersistentDiskUtils {
+  private static final Logger log = Logger.getLogger(PersistentDiskUtils.class.getName());
 
   // See https://cloud.google.com/compute/pricing
   private static final Map<LeonardoDiskType, Double> DISK_PRICE_PER_GB_MONTH =
@@ -16,7 +16,7 @@ public final class PersistentDisks {
           .put(LeonardoDiskType.SSD, .17)
           .build();
 
-  private PersistentDisks() {}
+  private PersistentDiskUtils() {}
 
   // Keep in sync with ui/src/app/utils/machines.ts
   public static double costPerMonth(LeonardoListPersistentDiskResponse disk) {

@@ -27,6 +27,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
@@ -36,7 +37,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -76,8 +76,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       FireCloudService firecloudService,
       FreeTierBillingService freeTierBillingService,
       MailService mailService,
-      @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
-      @Qualifier(NotebooksConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
       UserDao userDao,

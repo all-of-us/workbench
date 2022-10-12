@@ -4544,10 +4544,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to persistent disk as the notebook storage
-      enableMultiReview:
-        type: boolean
-        default: false
-        description: Whether to enable Multiple Cohort Review feature in Cohort Review
       enableGkeApp:
         type: boolean
         default: false

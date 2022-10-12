@@ -62,6 +62,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
+import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
+import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -93,10 +97,6 @@ import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
-import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
@@ -171,7 +171,7 @@ public class RuntimeControllerTest {
     PublicInstitutionDetailsMapperImpl.class,
     UserServiceTestConfiguration.class,
     LeonardoMapperImpl.class,
-    LeonardoNotebooksClientImpl.class,
+    LeonardoApiClientImpl.class,
     NotebooksRetryHandler.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
@@ -217,11 +217,11 @@ public class RuntimeControllerTest {
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
 
-  @Qualifier(NotebooksConfig.USER_RUNTIMES_API)
+  @Qualifier(LeonardoConfig.USER_RUNTIMES_API)
   @MockBean
   RuntimesApi userRuntimesApi;
 
-  @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
+  @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
   @MockBean
   RuntimesApi serviceRuntimesApi;
 
@@ -1167,7 +1167,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .has(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
+                .has(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
         .isFalse();
   }
 
@@ -1191,7 +1191,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .getAsJsonPrimitive(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
   }
@@ -1216,7 +1216,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .getAsJsonPrimitive(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
   }
@@ -1241,9 +1241,9 @@ public class RuntimeControllerTest {
         new Gson()
             .toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
             .getAsJsonObject();
-    assertThat(envVars.get(LeonardoNotebooksClient.WORKSPACE_CDR_ENV_KEY).getAsString())
+    assertThat(envVars.get(LeonardoApiClient.WORKSPACE_CDR_ENV_KEY).getAsString())
         .isEqualTo(cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-    assertThat(envVars.get(LeonardoNotebooksClientImpl.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
+    assertThat(envVars.get(LeonardoApiClientImpl.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
         .isEqualTo("gs://cdr-bucket/v99/wgs/cram/manifest.csv");
   }
 

@@ -57,9 +57,9 @@ import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.IssueUpdateDetails;
 import org.pmiops.workbench.jira.model.SearchResults;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.SumologicEgressEvent;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
@@ -80,7 +80,7 @@ public class EgressRemediationServiceTest {
   private static WorkbenchConfig workbenchConfig;
 
   @MockBean private UserService mockUserService;
-  @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
   @MockBean private MailService mockMailService;
   @MockBean private JiraApi mockJiraApi;

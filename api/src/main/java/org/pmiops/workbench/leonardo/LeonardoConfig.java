@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.leonardo;
 
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
-public class NotebooksConfig {
+public class LeonardoConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
@@ -34,7 +34,7 @@ public class NotebooksConfig {
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceAPiClient";
 
-  private static final Logger log = Logger.getLogger(NotebooksConfig.class.getName());
+  private static final Logger log = Logger.getLogger(LeonardoConfig.class.getName());
 
   private static final List<String> NOTEBOOK_SCOPES =
       ImmutableList.of(
@@ -43,11 +43,11 @@ public class NotebooksConfig {
 
   @Bean(name = USER_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient notebooksApiClient(
+  public org.pmiops.workbench.notebooks.ApiClient notebooksApiClient(
       UserAuthentication userAuthentication,
       LeonardoApiClientFactory factory,
       HttpServletRequest req) {
-    ApiClient apiClient = factory.newNotebooksClient();
+    org.pmiops.workbench.notebooks.ApiClient apiClient = factory.newNotebooksClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
 
     // We pass-through the "Referer" header to outgoing Proxy API requests. Leonardo verifies this
@@ -87,8 +87,9 @@ public class NotebooksConfig {
 
   @Bean(name = SERVICE_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient workbenchServiceAccountClient(LeonardoApiClientFactory factory) {
-    ApiClient apiClient = factory.newNotebooksClient();
+  public org.pmiops.workbench.notebooks.ApiClient workbenchServiceAccountClient(
+      LeonardoApiClientFactory factory) {
+    org.pmiops.workbench.notebooks.ApiClient apiClient = factory.newNotebooksClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
@@ -126,7 +127,8 @@ public class NotebooksConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ProxyApi proxyApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
+  public ProxyApi proxyApi(
+      @Qualifier(USER_NOTEBOOKS_CLIENT) org.pmiops.workbench.notebooks.ApiClient apiClient) {
     ProxyApi api = new ProxyApi();
     api.setApiClient(apiClient);
     return api;
@@ -134,7 +136,8 @@ public class NotebooksConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public JupyterApi jupyterApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
+  public JupyterApi jupyterApi(
+      @Qualifier(USER_NOTEBOOKS_CLIENT) org.pmiops.workbench.notebooks.ApiClient apiClient) {
     JupyterApi api = new JupyterApi();
     api.setApiClient(apiClient);
     return api;

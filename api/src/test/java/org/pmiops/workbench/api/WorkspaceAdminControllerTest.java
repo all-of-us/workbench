@@ -28,6 +28,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -35,7 +36,6 @@ import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -66,7 +66,7 @@ public class WorkspaceAdminControllerTest {
   @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
   @MockBean private WorkspaceService mockWorkspaceService;
 

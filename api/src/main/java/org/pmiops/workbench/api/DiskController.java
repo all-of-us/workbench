@@ -10,11 +10,11 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DiskController implements DiskApiDelegate {
   private static final Logger log = Logger.getLogger(DiskController.class.getName());
-  private final LeonardoNotebooksClient leonardoNotebooksClient;
+  private final LeonardoApiClient leonardoNotebooksClient;
   private final WorkspaceDao workspaceDao;
   private final LeonardoMapper leonardoMapper;
   private final Provider<DbUser> userProvider;
 
   @Autowired
   public DiskController(
-      LeonardoNotebooksClient leonardoNotebooksClient,
+      LeonardoApiClient leonardoNotebooksClient,
       WorkspaceDao workspaceDao,
       Provider<DbUser> userProvider,
       LeonardoMapper leonardoMapper) {

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.leonardo;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
@@ -29,8 +29,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
@@ -47,6 +45,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -57,7 +56,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
+public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
@@ -84,7 +83,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
 
-  private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
+  private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
   private final LeonardoApiClientFactory leonardoApiClientFactory;
   private final Provider<RuntimesApi> runtimesApiProvider;
@@ -101,16 +100,16 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final WorkspaceDao workspaceDao;
 
   @Autowired
-  public LeonardoNotebooksClientImpl(
+  public LeonardoApiClientImpl(
       LeonardoApiClientFactory leonardoApiClientFactory,
-      @Qualifier(NotebooksConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
-      @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
+      @Qualifier(LeonardoConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
           Provider<RuntimesApi> serviceRuntimesApiProvider,
       Provider<ProxyApi> proxyApiProvider,
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
-      @Qualifier(NotebooksConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
+      @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
       FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,

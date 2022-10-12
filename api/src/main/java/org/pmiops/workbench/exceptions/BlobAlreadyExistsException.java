@@ -1,3 +1,3 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.exceptions;
 
 public class BlobAlreadyExistsException extends RuntimeException {}

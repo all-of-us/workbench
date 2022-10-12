@@ -305,7 +305,7 @@ then
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = d.survey_conduct_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = e.survey_conduct_id
   WHERE a.observation_source_concept_id is not null
       and a.observation_source_concept_id != 0"
 else
@@ -351,7 +351,7 @@ else
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = d.survey_conduct_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = e.survey_conduct_id
   WHERE a.observation_source_concept_id is not null
       and a.observation_source_concept_id != 0"
 fi

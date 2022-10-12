@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.leonardo;
 
 import com.google.auth.oauth2.OAuth2Credentials;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
-import org.pmiops.workbench.leonardo.ApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
