@@ -6,7 +6,7 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { StyledExternalLink } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { HelpSidebar } from 'app/components/help-sidebar';
 import { Spinner } from 'app/components/spinners';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
@@ -62,7 +62,7 @@ const NewCtNotification = (props: NotificationProps) => {
   const dataPathsLink = (
     <StyledExternalLink
       target='_blank'
-      href={`${zendeskBaseUrl()}/en-us/articles/4616869437204-Controlled-CDR-Directory`}
+      href={`${zendeskBaseUrl()}/articles/4616869437204-Controlled-CDR-Directory`}
     >
       Genomic data paths
     </StyledExternalLink>
@@ -70,7 +70,7 @@ const NewCtNotification = (props: NotificationProps) => {
   const dataFilesLink = (
     <StyledExternalLink
       target='_blank'
-      href={`${zendeskBaseUrl()}/en-us/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
+      href={`${zendeskBaseUrl()}/articles/4614687617556-How-the-All-of-Us-Genomic-data-are-organized`}
     >
       genomic data formatting
     </StyledExternalLink>
@@ -78,19 +78,30 @@ const NewCtNotification = (props: NotificationProps) => {
   const cohortBuilderLink = (
     <StyledExternalLink
       target='_blank'
-      href={`${zendeskBaseUrl()}/en-us/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
+      href={`${zendeskBaseUrl()}/articles/360039585591-Selecting-participants-using-the-Cohort-Builder-tool`}
     >
       how to build a cohort
+    </StyledExternalLink>
+  );
+  const supportHubLink = (
+    <StyledExternalLink target='_blank' href={zendeskBaseUrl()}>
+      User Support Hub
     </StyledExternalLink>
   );
 
   return (
     <div style={styles.newCtNotification}>
       <FlexRow style={{ justifyContent: 'space-between' }}>
-        <div>
-          These resources will get you started using the genomic data:{' '}
-          {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
-        </div>
+        <FlexColumn>
+          <div>
+            These resources will get you started using the genomic data:{' '}
+            {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
+          </div>
+          <div>
+            You can always learn more in the {supportHubLink} section on
+            Genomics.
+          </div>
+        </FlexColumn>
         <FontAwesomeIcon
           icon={faXmark}
           style={{ fontSize: '21px', marginLeft: '1em' }}
