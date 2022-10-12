@@ -177,7 +177,7 @@ public class EgressLogService {
     // sumologic event looks like.
     return sumologicEgressEvent
         .map(SumologicEgressEvent::getGceEgressMib)
-        .map(d -> d > 0)
+        .map(d -> d > 0.0)
         .orElse(false);
   }
 
@@ -189,14 +189,14 @@ public class EgressLogService {
     return bigQueryService.startQuery(
         QueryJobConfiguration.newBuilder(
                 String.format(
-                    "SELECT timestamp, jsonPayload.message AS message"
+                    "SELECT timestamp, %s AS message"
                         + " FROM %s"
                         + " WHERE resource.labels.project_id = @project_id"
                         + "  AND timestamp BETWEEN @start_time AND @end_time"
                         + "  AND %s"
                         + " LIKE @log_pattern"
                         + " ORDER BY timestamp DESC",
-                    datasetId, textColumn))
+                    textColumn, datasetId, textColumn))
             .setNamedParameters(
                 ImmutableMap.<String, QueryParameterValue>builder()
                     .putAll(baseParams)
