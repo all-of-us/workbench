@@ -87,7 +87,7 @@ export default class DataResourceCard extends BaseCard {
     return null;
   }
 
-  async findAnyCellLinkFromTable(): Promise<ElementHandle> {
+  async findAnyRowNameCellLinkFromTable(): Promise<ElementHandle> {
     const dataTable = await this.confirmDataTableHasResults(null);
     return await dataTable.getCellLink(1, 3);
   }

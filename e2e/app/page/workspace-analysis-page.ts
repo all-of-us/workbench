@@ -145,6 +145,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
       return new DataResourceCard(this.page).findNameCellLinkFromTable({ name: notebookName });
     }
     // if notebook name isn't specified, find any existing notebook.
-    return new DataResourceCard(this.page).findAnyCellLinkFromTable();
+    return new DataResourceCard(this.page).findAnyRowNameCellLinkFromTable();
   }
 }
