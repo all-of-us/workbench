@@ -89,7 +89,10 @@ export const CreateCohortReviewModal = ({
     },
   };
 
-  const errors = validate({ reviewName, numberOfParticipants }, validators);
+  const errors = validate(
+    { reviewName: reviewName?.trim(), numberOfParticipants },
+    validators
+  );
 
   const createDisabled = !reviewName || !numberOfParticipants || errors;
 
@@ -97,7 +100,7 @@ export const CreateCohortReviewModal = ({
     setCreating(true);
     setCreateError(false);
     const request = {
-      name: reviewName,
+      name: reviewName.trim(),
       size: parseInt(numberOfParticipants, 10),
     };
 

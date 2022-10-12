@@ -74,7 +74,7 @@ export const CreateModal = ({
   const onSave = async () => {
     setSaving(true);
     setSaveErrorMsg('');
-    save(name, description)
+    save(name.trim(), description)
       .then(() => close())
       .catch((e) => {
         setSaveErrorMsg(
