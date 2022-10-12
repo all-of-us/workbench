@@ -66,42 +66,37 @@ export default class DataResourceCard extends BaseCard {
     return resourceCards;
   }
 
-  async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
-    const { name } = opts;
+  async confirmDataTableHasResults(name): Promise<DataTable> {
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
 
+    const dataTableExist = await datatable.exists();
+    if (!dataTableExist) {
+      return null;
+    }
+    const textBox = datatable.getSearchNameBox();
+    await textBox.type(name);
+
     const dataTableRows = await datatable.getRowCount();
-    let index = 1;
-    while (index <= dataTableRows) {
-      const nameCell = await datatable.getCellValue(index, 3);
-      if (nameCell === name) {
-        return await datatable.getCellLink(index, 3);
-      }
-      index++;
+    if (dataTableRows >= 1) {
+      return datatable;
+    }
+    return null;
+  }
+
+  async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
+    const datatable: DataTable = await this.confirmDataTableHasResults(opts.name);
+    if (datatable) {
+      return await datatable.getCellLink(1, 3);
     }
     return null;
   }
 
   async findSnowManEntryCellXPath(opts: { name?: string }): Promise<string> {
-    const { name } = opts;
-    await waitWhileLoading(this.page);
-
-    const datatable = new DataTable(this.page);
-    await waitWhileLoading(this.page);
-
-    const tableExist = await datatable.exists();
-    if (tableExist) {
-      const dataTableRows = await datatable.getRowCount();
-      let index = 1;
-      while (index <= dataTableRows) {
-        const resourceTypeCell = await datatable.getCellValue(index, 3);
-        if (name === resourceTypeCell) {
-          return datatable.getCellXpath(index, 1);
-        }
-        index++;
-      }
+    const datatable: DataTable = await this.confirmDataTableHasResults(opts.name);
+    if (datatable) {
+      return datatable.getCellXpath(1, 1);
     }
     return null;
   }
