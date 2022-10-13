@@ -33,10 +33,7 @@ public interface CohortBuilderService {
 
   List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId);
 
-  List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, List<String> types, Boolean standard);
-
-  List<Criteria> findSurveyAutoComplete(String surveyName, String term);
+  List<Criteria> findCriteriaAutoComplete(CriteriaSearchRequest criteriaSearchRequest);
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 

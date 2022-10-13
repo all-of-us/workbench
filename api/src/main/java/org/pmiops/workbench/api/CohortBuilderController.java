@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.apphosting.api.DeadlineExceededException;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Objects;
@@ -61,34 +60,22 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
-      String workspaceNamespace,
-      String workspaceId,
-      String domain,
-      String term,
-      String type,
-      Boolean standard) {
+      String workspaceNamespace, String workspaceId, CriteriaSearchRequest criteriaSearchRequest) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateDomain(domain);
-    validateType(type);
-    validateTerm(term);
-    return ResponseEntity.ok(
-        new CriteriaListResponse()
-            .items(
-                cohortBuilderService.findCriteriaAutoComplete(
-                    domain, term, ImmutableList.of(type), standard)));
-  }
-
-  @Override
-  public ResponseEntity<CriteriaListResponse> findSurveyAutoComplete(
-      String workspaceNamespace, String workspaceId, String surveyName, String term) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateSurveyName(surveyName);
-    validateTerm(term);
-    return ResponseEntity.ok(
-        new CriteriaListResponse()
-            .items(cohortBuilderService.findSurveyAutoComplete(surveyName, term)));
+    validateDomain(criteriaSearchRequest.getDomain());
+    validateTerm(criteriaSearchRequest.getTerm());
+    if (Domain.SURVEY.equals(Domain.fromValue(criteriaSearchRequest.getDomain()))) {
+      validateSurveyName(criteriaSearchRequest.getSurveyName());
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findCriteriaAutoComplete(criteriaSearchRequest)));
+    } else {
+      validateType(criteriaSearchRequest.getType());
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(cohortBuilderService.findCriteriaAutoComplete(criteriaSearchRequest)));
+    }
   }
 
   @Override
