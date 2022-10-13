@@ -129,7 +129,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     // Open Copy modal
     const resourceCard = new DataResourceCard(this.page);
     await resourceCard.findNameCellLinkFromTable({ name: notebookName });
-    await resourceCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { waitForNav: false });
+    await resourceCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { name: notebookName, waitForNav: false });
     // Fill out modal fields.
     const copyModal = new CopyToWorkspaceModal(this.page);
     await copyModal.waitForLoad();
