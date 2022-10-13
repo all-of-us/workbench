@@ -1055,7 +1055,7 @@ public class CohortBuilderControllerTest {
             Objects.requireNonNull(
                     controller
                         .findDrugBrandOrIngredientByValue(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "drugN", null)
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "drugN")
                         .getBody())
                 .getItems()
                 .get(0))
@@ -1064,8 +1064,7 @@ public class CohortBuilderControllerTest {
     assertThat(
             Objects.requireNonNull(
                     controller
-                        .findDrugBrandOrIngredientByValue(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "rxN", null)
+                        .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "rxN")
                         .getBody())
                 .getItems()
                 .get(0))
@@ -1075,7 +1074,7 @@ public class CohortBuilderControllerTest {
             Objects.requireNonNull(
                     controller
                         .findDrugBrandOrIngredientByValue(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "LP6789", null)
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "LP6789")
                         .getBody())
                 .getItems()
                 .get(0))

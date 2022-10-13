@@ -3286,7 +3286,7 @@ paths:
     get:
       tags:
       - cohortReview
-      description: This endpoint will return a ParticipantCohortStatus
+      description: This endpoint returns ParticipantChartDataListResponse containing list of ParticipantChartData objects
       operationId: getParticipantChartData
       parameters:
       - in: path
@@ -3294,11 +3294,6 @@ paths:
         type: string
         required: true
         description: specifies which domain the chart data should belong to.
-      - in: query
-        name: limit
-        type: integer
-        required: false
-        description: the limit search results to
       responses:
         200:
           description: The Participant Chart data
@@ -3462,7 +3457,7 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/DemoChartInfoListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{cohortReviewId}/{domain}/{limit}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{cohortReviewId}/{domain}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3478,11 +3473,6 @@ paths:
           type: string
           required: true
           description: represents text domain
-        - in: path
-          name: limit
-          type: integer
-          required: true
-          description: represents top n-items to get
       responses:
         200:
           description: A collection of CohortChartData
@@ -3849,11 +3839,6 @@ paths:
         type: string
         required: true
         description: matches name or code of drug
-      - in: query
-        name: limit
-        type: integer
-        required: false
-        description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria
@@ -4058,7 +4043,7 @@ paths:
           description: A collection of ethnicity and counts
           schema:
             "$ref": "#/definitions/EthnicityInfoListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{domain}/{limit}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{domain}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -4075,11 +4060,6 @@ paths:
         type: string
         required: true
         description: represents gender or sex at birth
-      - in: path
-        name: limit
-        type: integer
-        required: true
-        description: represents age, age at consent or age at cdr
       - in: body
         name: request
         description: the cohort

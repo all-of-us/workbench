@@ -156,14 +156,12 @@ export const ParticipantsCharts = withCurrentWorkspace()(
             namespace,
             id,
             cohortReviewId,
-            domain,
-            10
+            domain
           )
         : await cohortBuilderApi().getCohortChartData(
             namespace,
             id,
             domain,
-            10,
             searchRequest
           );
       const data = chartResponse.items.map((item) => {

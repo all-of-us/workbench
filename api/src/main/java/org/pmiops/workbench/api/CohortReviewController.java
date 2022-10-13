@@ -58,9 +58,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer PAGE_SIZE = 25;
   public static final Integer MIN_REVIEW_SIZE = 1;
   public static final Integer MAX_REVIEW_SIZE = 10000;
-  public static final Integer MIN_LIMIT = 1;
-  public static final Integer MAX_LIMIT = 20;
-  public static final Integer DEFAULT_LIMIT = 5;
+  public static final Integer LIMIT_PARTICIPANT_CHART_DATA = 5;
+  public static final Integer LIMIT_COHORT_REVIEW_CHART_DATA = 10;
+
   public static final List<String> SEX_GENDER_RACE_ETHNICITY_TYPES =
       ImmutableList.of(
           FilterColumns.SEXATBIRTH.name(),
@@ -282,19 +282,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<CohortChartDataListResponse> getCohortReviewChartData(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortReviewId,
-      String domain,
-      Integer limit) {
-
-    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Please provide a chart limit between %d and %d.",
-              MIN_LIMIT, MAX_LIMIT));
-    }
+      String workspaceNamespace, String workspaceId, Long cohortReviewId, String domain) {
 
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -306,7 +294,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             .count((long) participantIds.size())
             .items(
                 chartService.findCohortReviewChartData(
-                    participantIds, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
+                    participantIds,
+                    Objects.requireNonNull(Domain.fromValue(domain)),
+                    LIMIT_COHORT_REVIEW_CHART_DATA)));
   }
 
   @Override
@@ -315,16 +305,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       String workspaceId,
       Long cohortReviewId,
       Long participantId,
-      String domain,
-      Integer limit) {
+      String domain) {
 
-    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Please provide a chart limit between %d and %d.",
-              MIN_LIMIT, MAX_LIMIT));
-    }
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -342,7 +324,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 chartService.findParticipantChartData(
                     pcs.getParticipantId(),
                     Objects.requireNonNull(Domain.fromValue(domain)),
-                    chartLimit)));
+                    LIMIT_PARTICIPANT_CHART_DATA)));
   }
 
   @Override

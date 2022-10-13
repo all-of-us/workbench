@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -889,32 +888,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataBadLimit() {
-    try {
-      controller.getCohortChartData(
-          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), -1, new CohortDefinition());
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
-  public void getCohortChartDataBadLimitOverHundred() {
-    try {
-      controller.getCohortChartData(
-          WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), 101, new CohortDefinition());
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
-    }
-  }
-
-  @Test
   public void getCohortChartDataLab() {
     CohortChartDataListResponse response =
         controller
@@ -922,7 +895,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.LAB.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
@@ -942,7 +914,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.DRUG.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
@@ -960,7 +931,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.CONDITION.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
@@ -978,7 +948,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
                 Domain.PROCEDURE.name(),
-                10,
                 createCohortDefinition(
                     Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>()))
             .getBody();
