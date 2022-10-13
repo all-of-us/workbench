@@ -8,6 +8,7 @@ import {
   CreateConceptSetRequest,
   Criteria,
   Domain,
+  ResourceType,
   UpdateConceptSetRequest,
 } from 'generated/fetch';
 
@@ -22,6 +23,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import { nameValidationFormat } from 'app/components/rename-modal';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -179,7 +181,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
         }
       } else {
         const conceptSet: ConceptSet = {
-          name,
+          name: name.trim(),
           description: newSetDescription,
           domain,
           criteriums: [],
@@ -256,15 +258,12 @@ export const ConceptAddModal = withCurrentWorkspace()(
         selectedConceptsInDomain,
       } = this.state;
       const errors = validate(
-        { name },
+        { name: name?.trim() },
         {
-          name: {
-            presence: { allowEmpty: false },
-            exclusion: {
-              within: conceptSets.map((concept: ConceptSet) => concept.name),
-              message: 'already exists',
-            },
-          },
+          name: nameValidationFormat(
+            conceptSets.map((concept: ConceptSet) => concept.name),
+            ResourceType.CONCEPTSET
+          ),
         }
       );
 

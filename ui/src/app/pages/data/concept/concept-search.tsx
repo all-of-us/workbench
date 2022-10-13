@@ -26,9 +26,11 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   TextAreaWithLengthValidationMessage,
   TextInput,
+  ValidationError,
 } from 'app/components/inputs';
 import { Modal, ModalFooter, ModalTitle } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
+import { nameValidationFormat } from 'app/components/rename-modal';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EditComponentReact } from 'app/icons/edit';
@@ -40,6 +42,7 @@ import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
+  summarizeErrors,
   withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -162,6 +165,7 @@ interface State {
   editSaving: boolean;
   error: boolean;
   errorMessage: string;
+  existingNames: string[];
   loading: boolean;
   showMoreDescription: boolean;
   // Show if trying to navigate away with unsaved changes
@@ -190,6 +194,7 @@ export const ConceptSearch = fp.flow(
         editSaving: false,
         error: false,
         errorMessage: '',
+        existingNames: [],
         deleting: false,
         loading: false,
         showMoreDescription: false,
@@ -296,7 +301,7 @@ export const ConceptSearch = fp.flow(
         this.setState({ editSaving: true });
         await conceptSetsApi().updateConceptSet(ns, wsid, +csid, {
           ...conceptSet,
-          name: editName,
+          name: editName.trim(),
           description: editDescription,
         });
         await this.getConceptSet();
@@ -328,6 +333,20 @@ export const ConceptSearch = fp.flow(
       return !!this.state.conceptSet && this.state.conceptSet.criteriums
         ? this.state.conceptSet.criteriums.length
         : 0;
+    }
+
+    onEditOpen() {
+      const { ns, wsid, csid } = this.props.match.params;
+      conceptSetsApi()
+        .getConceptSetsInWorkspace(ns, wsid)
+        .then((conceptSets) => {
+          this.setState({
+            editing: true,
+            existingNames: conceptSets.items
+              .filter((conceptSet) => conceptSet.id !== +csid)
+              .map((conceptSet) => conceptSet.name),
+          });
+        });
     }
 
     get displayDomainName() {
@@ -387,7 +406,7 @@ export const ConceptSearch = fp.flow(
     tooltipContent(errors) {
       return !!errors ? (
         <ul>
-          {errors.editName && <li>Name cannot be blank</li>}
+          {errors.editName && <li>{errors.editName}</li>}
           {errors.editDescription && (
             <li>Description cannot exceed 1000 characters</li>
           )}
@@ -417,14 +436,18 @@ export const ConceptSearch = fp.flow(
         error,
         errorMessage,
         editSaving,
+        existingNames,
         deleting,
         loading,
         showMoreDescription,
       } = this.state;
       const errors = validate(
-        { editDescription, editName },
+        { editDescription, editName: editName?.trim() },
         {
-          editName: { presence: { allowEmpty: false } },
+          editName: nameValidationFormat(
+            existingNames,
+            ResourceType.CONCEPTSET
+          ),
           editDescription: { length: { maximum: 1000 } },
         }
       );
@@ -455,7 +478,7 @@ export const ConceptSearch = fp.flow(
                             accessLevel
                           )}
                           onDelete={() => this.setState({ deleting: true })}
-                          onEdit={() => this.setState({ editing: true })}
+                          onEdit={() => this.onEditOpen()}
                           onCopy={() => this.setState({ copying: true })}
                         />
                         <div style={styles.conceptSetMetadataWrapper}>
@@ -469,6 +492,9 @@ export const ConceptSearch = fp.flow(
                                 data-test-id='edit-name'
                                 onChange={(v) => this.setState({ editName: v })}
                               />
+                              <ValidationError>
+                                {summarizeErrors(errors?.editName)}
+                              </ValidationError>
                               <TextAreaWithLengthValidationMessage
                                 initialText={editDescription}
                                 id='edit-description'
@@ -524,9 +550,7 @@ export const ConceptSearch = fp.flow(
                                   }
                                   style={{ marginLeft: '.5rem' }}
                                   data-test-id='edit-concept-set'
-                                  onClick={() =>
-                                    this.setState({ editing: true })
-                                  }
+                                  onClick={() => this.onEditOpen()}
                                 >
                                   <EditComponentReact
                                     enableHoverEffect={true}

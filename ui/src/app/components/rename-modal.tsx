@@ -94,7 +94,10 @@ export class RenameModal extends React.Component<Props, States> {
 
   onRename() {
     this.setState({ saving: true });
-    this.props.onRename(this.state.newName, this.state.resourceDescription);
+    this.props.onRename(
+      this.state.newName.trim(),
+      this.state.resourceDescription
+    );
   }
 
   render() {
@@ -105,7 +108,7 @@ export class RenameModal extends React.Component<Props, States> {
       newName = this.props.nameFormat(newName);
     }
     const errors = validate(
-      { newName: newName },
+      { newName: newName?.trim() },
       { newName: nameValidationFormat(existingNames, resourceType) }
     );
     return (
