@@ -83,7 +83,7 @@ export const QuickTourAndVideos = (props: Props) => {
     },
     {
       src: support,
-      onClick: () => openVideo('Ni4PEJVbmSk'),
+      onClick: () => openVideo('HbjPvGW2HtQ'),
     },
   ];
 
