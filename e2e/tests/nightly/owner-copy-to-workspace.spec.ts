@@ -33,7 +33,9 @@ describe('Workspace owner can copy notebook', () => {
   const destinationDefaultCdrWorkspace = 'e2eNightlyOwnerCopyNotebookDestinationWorkspace';
   const destinationOldCdrWorkspace = 'e2eNightlyOwnerCopyNotebookDestinationOldCdrWorkspace';
 
-  test(
+  // Copy to another workspace works, however the other modal giving user the option to go to copied notebook doesnt show up
+  // https://precisionmedicineinitiative.atlassian.net/browse/RW-9034 bugs is going to fix that
+  test.skip(
     'Copy notebook to another Workspace when CDR versions match',
     async () => {
       await createCustomCdrVersionWorkspace(defaultCdrWorkspace, config.DEFAULT_CDR_VERSION_NAME);
@@ -45,7 +47,7 @@ describe('Workspace owner can copy notebook', () => {
     30 * 60 * 1000
   );
 
-  test(
+  test.skip(
     'Copy notebook to another Workspace when CDR versions differ',
     async () => {
       // reuse same source workspace for all tests, but always create new destination workspace.
