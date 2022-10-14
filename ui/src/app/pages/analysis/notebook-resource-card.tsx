@@ -38,7 +38,7 @@ interface Props
     WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: () => Promise<void>;
+  onUpdate: Function;
   disableDuplicate: boolean;
   menuOnly: boolean;
 }
@@ -194,7 +194,7 @@ export const NotebookResourceCard = fp.flow(
               fromAccessTierShortName={resource.accessTierShortName}
               resourceType={getType(resource)}
               onClose={() => this.setState({ showCopyNotebookModal: false })}
-              onCopy={this.props.onUpdate}
+              onCopy={() => this.props.onUpdate}
               saveFunction={(copyRequest: CopyRequest) =>
                 this.copyNotebook(copyRequest)
               }
