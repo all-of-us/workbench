@@ -181,6 +181,10 @@ export const NotebookResourceCard = fp.flow(
       );
     }
 
+    onCopy() {
+      this.props.onUpdate();
+    }
+
     render() {
       const { resource, menuOnly } = this.props;
       return (
@@ -194,7 +198,7 @@ export const NotebookResourceCard = fp.flow(
               fromAccessTierShortName={resource.accessTierShortName}
               resourceType={getType(resource)}
               onClose={() => this.setState({ showCopyNotebookModal: false })}
-              onCopy={() => this.props.onUpdate()}
+              onCopy={() => this.onCopy}
               saveFunction={(copyRequest: CopyRequest) =>
                 this.copyNotebook(copyRequest)
               }
