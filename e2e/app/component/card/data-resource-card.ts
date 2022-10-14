@@ -15,6 +15,9 @@ import Link from 'app/element/link';
 /**
  * DataResourceCard represents resource card found on Workspace's data page.
  */
+
+const NAME_CELL_INDEX = 3;
+
 export default class DataResourceCard extends BaseCard {
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
@@ -66,7 +69,7 @@ export default class DataResourceCard extends BaseCard {
     return resourceCards;
   }
 
-  async confirmDataTableHasResults(name): Promise<DataTable> {
+  async confirmDataTableHasResults(name?: string): Promise<DataTable> {
     await waitWhileLoading(this.page);
     const datatable = new DataTable(this.page);
     await waitWhileLoading(this.page);
@@ -75,8 +78,10 @@ export default class DataResourceCard extends BaseCard {
     if (!dataTableExist) {
       return null;
     }
-    const textBox = datatable.getSearchNameBox();
-    await textBox.type(name);
+    if (name) {
+      const textBox = datatable.getSearchNameBox();
+      await textBox.type(name);
+    }
 
     const dataTableRows = await datatable.getRowCount();
     if (dataTableRows >= 1) {
@@ -85,10 +90,15 @@ export default class DataResourceCard extends BaseCard {
     return null;
   }
 
+  async findAnyRowNameCellLinkFromTable(): Promise<ElementHandle> {
+    const dataTable = await this.confirmDataTableHasResults();
+    return await dataTable.getCellLink(1, NAME_CELL_INDEX);
+  }
+
   async findNameCellLinkFromTable(opts: { name?: string }): Promise<ElementHandle> {
     const datatable: DataTable = await this.confirmDataTableHasResults(opts.name);
     if (datatable) {
-      return await datatable.getCellLink(1, 3);
+      return await datatable.getCellLink(1, NAME_CELL_INDEX);
     }
     return null;
   }

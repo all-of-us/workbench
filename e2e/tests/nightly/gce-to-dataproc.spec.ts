@@ -91,6 +91,6 @@ describe('Updating runtime compute type', () => {
 
     // Delete notebook
     const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();
-    await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
+    await workspaceAnalysisPage.deleteResourceFromTable(notebookName, ResourceCard.Notebook);
   });
 });

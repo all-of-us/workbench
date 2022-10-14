@@ -33,9 +33,8 @@ describe('Workspace owner can copy notebook', () => {
   const destinationDefaultCdrWorkspace = 'e2eNightlyOwnerCopyNotebookDestinationWorkspace';
   const destinationOldCdrWorkspace = 'e2eNightlyOwnerCopyNotebookDestinationOldCdrWorkspace';
 
-  /*Skipping the tests below as they will be moved to the new version of e2e test. Story tracking this
-  effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-
+  // Copy to another workspace works, however the other modal giving user the option to go to copied notebook doesnt show up
+  // https://precisionmedicineinitiative.atlassian.net/browse/RW-9034 bugs is going to fix that
   test.skip(
     'Copy notebook to another Workspace when CDR versions match',
     async () => {
@@ -116,7 +115,10 @@ describe('Workspace owner can copy notebook', () => {
     await modal.clickButton(LinkText.StayHere, { waitForClose: true });
 
     // Delete notebook
-    const deleteModalTextContent = await analysisPage.deleteResource(sourceNotebookName, ResourceCard.Notebook);
+    const deleteModalTextContent = await analysisPage.deleteResourceFromTable(
+      sourceNotebookName,
+      ResourceCard.Notebook
+    );
     expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${sourceNotebookName}?`);
 
     // Perform actions in copied notebook.
@@ -126,11 +128,11 @@ describe('Workspace owner can copy notebook', () => {
     // Verify copy-to notebook exists in destination Workspace
     await openTab(page, Tabs.Analysis, analysisPage);
     const dataResourceCard = new DataResourceCard(page);
-    const notebookCard = await dataResourceCard.findCard({ name: copiedNotebookName, cardType: ResourceCard.Notebook });
+    const notebookCard = await dataResourceCard.findNameCellLinkFromTable({ name: copiedNotebookName });
     expect(notebookCard).toBeTruthy();
 
     // Delete notebook
-    const modalTextContent = await analysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
+    const modalTextContent = await analysisPage.deleteResourceFromTable(copiedNotebookName, ResourceCard.Notebook);
     expect(modalTextContent).toContain('This will permanently delete the Notebook.');
 
     // Delete destination workspace

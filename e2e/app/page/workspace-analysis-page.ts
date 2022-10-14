@@ -2,8 +2,8 @@ import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
 import Link from 'app/element/link';
-import { Language, MenuOption, ResourceCard } from 'app/text-labels';
-import { Page } from 'puppeteer';
+import { Language, MenuOption } from 'app/text-labels';
+import { ElementHandle, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import NotebookPage from './notebook-page';
@@ -128,8 +128,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   ): Promise<void> {
     // Open Copy modal
     const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard({ name: notebookName, cardType: ResourceCard.Notebook });
-    await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { waitForNav: false });
+    await resourceCard.findNameCellLinkFromTable({ name: notebookName });
+    await resourceCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { name: notebookName, waitForNav: false });
     // Fill out modal fields.
     const copyModal = new CopyToWorkspaceModal(this.page);
     await copyModal.waitForLoad();
@@ -140,11 +140,11 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    *  Find Notebook that match specified notebook name.
    * @param notebookName
    */
-  async findNotebookCard(notebookName?: string): Promise<DataResourceCard | null> {
+  async findNotebookCard(notebookName?: string): Promise<ElementHandle | null> {
     if (notebookName) {
-      return new DataResourceCard(this.page).findCard({ name: notebookName, cardType: ResourceCard.Notebook });
+      return new DataResourceCard(this.page).findNameCellLinkFromTable({ name: notebookName });
     }
     // if notebook name isn't specified, find any existing notebook.
-    return new DataResourceCard(this.page).findAnyCard(ResourceCard.Notebook);
+    return new DataResourceCard(this.page).findAnyRowNameCellLinkFromTable();
   }
 }
