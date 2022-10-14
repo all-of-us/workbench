@@ -29,17 +29,16 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [apiLoadError, setApiLoadError] = useState<string>(null);
 
   const loadResources = async () => {
-    try {
-      setLoading(true);
-      setResources(await userMetricsApi().getUserRecentResources());
-    } catch (error) {
-      console.log(error);
-      setApiLoadError(
-        `An error occurred while loading recent resources. Please refresh the page to reload.`
-      );
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    await userMetricsApi()
+      .getUserRecentResources()
+      .then(setResources)
+      .catch(() => {
+        setApiLoadError(
+          'An error occurred while loading recent resources. Please refresh the page to reload.'
+        );
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
