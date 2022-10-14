@@ -67,15 +67,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateTerm(criteriaSearchRequest.getTerm());
     if (Domain.SURVEY.equals(Domain.fromValue(criteriaSearchRequest.getDomain()))) {
       validateSurveyName(criteriaSearchRequest.getSurveyName());
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(cohortBuilderService.findCriteriaAutoComplete(criteriaSearchRequest)));
     } else {
       validateType(criteriaSearchRequest.getType());
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(cohortBuilderService.findCriteriaAutoComplete(criteriaSearchRequest)));
     }
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(cohortBuilderService.findCriteriaAutoComplete(criteriaSearchRequest)));
   }
 
   @Override
