@@ -387,10 +387,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaAutoComplete(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.MEASUREMENT.toString(),
-                            "LP12",
-                            CriteriaType.LOINC.toString(),
-                            true)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.MEASUREMENT.toString())
+                                .term("LP12")
+                                .type(CriteriaType.LOINC.toString())
+                                .standard(true))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -417,10 +418,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaAutoComplete(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.MEASUREMENT.toString(),
-                            "LP12",
-                            CriteriaType.LOINC.toString(),
-                            true)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.MEASUREMENT.toString())
+                                .term("LP12")
+                                .type(CriteriaType.LOINC.toString())
+                                .standard(true))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -446,10 +448,11 @@ public class CohortBuilderControllerTest {
                         .findCriteriaAutoComplete(
                             WORKSPACE_NAMESPACE,
                             WORKSPACE_ID,
-                            Domain.CONDITION.toString(),
-                            "LP12",
-                            CriteriaType.SNOMED.toString(),
-                            true)
+                            new CriteriaSearchRequest()
+                                .domain(Domain.CONDITION.toString())
+                                .term("LP12")
+                                .type(CriteriaType.SNOMED.toString())
+                                .standard(true))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -462,15 +465,11 @@ public class CohortBuilderControllerTest {
         BadRequestException.class,
         () ->
             controller.findCriteriaAutoComplete(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null),
+                // null, "blah", null, null
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                new CriteriaSearchRequest().domain(null).term("blah")),
         "Bad Request: Please provide a valid domain. null is not valid.");
-
-    assertThrows(
-        BadRequestException.class,
-        () ->
-            controller.findCriteriaAutoComplete(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null),
-        "Bad Request: Please provide a valid domain. blah is not valid.");
 
     assertThrows(
         BadRequestException.class,
@@ -478,11 +477,23 @@ public class CohortBuilderControllerTest {
             controller.findCriteriaAutoComplete(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_ID,
-                Domain.CONDITION.toString(),
-                "blah",
-                "blah",
-                null),
+                new CriteriaSearchRequest()
+                    .domain(Domain.CONDITION.toString())
+                    .type("blah")
+                    .term("blah")),
         "Bad Request: Please provide a valid type. blah is not valid.");
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                new CriteriaSearchRequest()
+                    .domain(Domain.CONDITION.toString())
+                    .type(CriteriaType.SNOMED.toString())
+                    .term(null)),
+        "Bad Request: Please provide a valid search term. null is not valid.");
   }
 
   @Test
@@ -507,8 +518,13 @@ public class CohortBuilderControllerTest {
     assertThat(
             Objects.requireNonNull(
                     controller
-                        .findSurveyAutoComplete(
-                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "The Basics", "LP12")
+                        .findCriteriaAutoComplete(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            new CriteriaSearchRequest()
+                                .domain(Domain.SURVEY.toString())
+                                .surveyName("The Basics")
+                                .term("LP12"))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -537,7 +553,13 @@ public class CohortBuilderControllerTest {
     assertThat(
             Objects.requireNonNull(
                     controller
-                        .findSurveyAutoComplete(WORKSPACE_NAMESPACE, WORKSPACE_ID, "All", "LP12")
+                        .findCriteriaAutoComplete(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            new CriteriaSearchRequest()
+                                .domain(Domain.SURVEY.toString())
+                                .surveyName("All")
+                                .term("LP12"))
                         .getBody())
                 .getItems()
                 .get(0))
@@ -548,13 +570,21 @@ public class CohortBuilderControllerTest {
   public void findSurveyAutoCompleteExceptions() {
     assertThrows(
         BadRequestException.class,
-        () -> controller.findSurveyAutoComplete(WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah"),
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                new CriteriaSearchRequest().domain(Domain.SURVEY.toString()).term("LP12")),
         "Bad Request: Please provide a valid surveyName. null is not valid.");
 
     assertThrows(
         BadRequestException.class,
-        () -> controller.findSurveyAutoComplete(WORKSPACE_NAMESPACE, WORKSPACE_ID, "All", null),
-        "Bad Request: Please provide a valid term. blah is not valid.");
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                new CriteriaSearchRequest().domain(Domain.SURVEY.toString()).surveyName("All")),
+        "Bad Request: Please provide a valid search term. null is not valid.");
   }
 
   @Test

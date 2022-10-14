@@ -3763,62 +3763,24 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/search":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/autocomplete":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-    get:
+    post:
       tags:
       - cohortBuilder
-      description: Returns matches on criteria table by code or name
+      consumes:
+      - application/json
+      description: Returns matches on survey / criteria table by code or name
       operationId: findCriteriaAutoComplete
       parameters:
-      - in: path
-        name: domain
-        type: string
+      - in: body
+        name: request
         required: true
-        description: the specific domain of criteria to get
-      - in: query
-        name: type
-        type: string
-        required: false
-        description: the type of the criteria were search for
-      - in: query
-        name: standard
-        type: boolean
-        default: false
-        required: false
-        description: the type of the criteria were search for
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/survey/{surveyName}/{term}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-        - cohortBuilder
-      description: Returns matches on criteria table by code or name
-      operationId: findSurveyAutoComplete
-      parameters:
-        - in: path
-          name: surveyName
-          type: string
-          required: true
-          description: the specific survey to search
-        - in: path
-          name: term
-          type: string
-          required: true
-          description: the term to search for
+        description: CriteriaSearchRequest body
+        schema:
+          "$ref": "#/definitions/CriteriaSearchRequest"
       responses:
         200:
           description: A collection of criteria
@@ -8288,12 +8250,15 @@ definitions:
         description: the term to search for
         type: string
       surveyName:
-        description: name for the survey to search
+        description: name for the survey to search for
         type: string
       removeDrugBrand:
         description: True - remove brand names from results
         type: boolean
         default: false
+      type:
+        description: the type of the criteria to search for
+        type: string
   CohortDefinition:
     description: 'The CohortDefinition describes the state of the Cohort Builder at any
       given moment. It contains two keys, `include` and `exclude`, each of which specifies

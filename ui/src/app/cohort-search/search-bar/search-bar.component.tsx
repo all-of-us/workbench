@@ -1,7 +1,12 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { Criteria, CriteriaType, Domain } from 'generated/fetch';
+import {
+  Criteria,
+  CriteriaSearchRequest,
+  CriteriaType,
+  Domain,
+} from 'generated/fetch';
 
 import { domainToTitle } from 'app/cohort-search/utils';
 import { AlertDanger } from 'app/components/alert';
@@ -287,21 +292,29 @@ export class SearchBar extends React.Component<Props, State> {
         );
         break;
       case Domain.SURVEY.toString():
-        apiCall = cohortBuilderApi().findSurveyAutoComplete(
-          namespace,
-          id,
-          selectedSurvey || 'All surveys',
-          searchTerms
-        );
-        break;
-      default:
+        const surveyRequest: CriteriaSearchRequest = {
+          domain: Domain.SURVEY.toString(),
+          surveyName: selectedSurvey || 'All surveys',
+          term: searchTerms,
+          standard: true,
+        };
         apiCall = cohortBuilderApi().findCriteriaAutoComplete(
           namespace,
           id,
-          domainId,
-          searchTerms,
-          type,
-          isStandard
+          surveyRequest
+        );
+        break;
+      default:
+        const request: CriteriaSearchRequest = {
+          domain: domainId,
+          term: searchTerms,
+          type: type,
+          standard: isStandard,
+        };
+        apiCall = cohortBuilderApi().findCriteriaAutoComplete(
+          namespace,
+          id,
+          request
         );
     }
     apiCall.then(

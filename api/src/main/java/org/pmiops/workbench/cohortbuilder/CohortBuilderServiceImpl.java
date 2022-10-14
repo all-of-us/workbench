@@ -205,23 +205,40 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Criteria> findCriteriaAutoComplete(
-      String domain, String term, List<String> types, Boolean standard) {
+  public List<Criteria> findCriteriaAutoComplete(CriteriaSearchRequest criteriaSearchRequest) {
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
 
-    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
+    SearchTerm searchTerm =
+        new SearchTerm(
+            criteriaSearchRequest.getTerm(), mySQLStopWordsProvider.get().getStopWords());
 
+    if (Domain.SURVEY.equals(Domain.fromValue(criteriaSearchRequest.getDomain()))) {
+      return findSurveyCriteriaAutoComplete(
+          criteriaSearchRequest.getSurveyName(), searchTerm, pageRequest);
+
+    } else {
+      return findDomainCriteriaAutoComplete(criteriaSearchRequest, searchTerm, pageRequest);
+    }
+  }
+
+  private List<Criteria> findDomainCriteriaAutoComplete(
+      CriteriaSearchRequest criteriaSearchRequest, SearchTerm searchTerm, PageRequest pageRequest) {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaAutoComplete(
-            domain, types, standard, ImmutableList.of(true), searchTerm, pageRequest);
+            criteriaSearchRequest.getDomain(),
+            ImmutableList.of(criteriaSearchRequest.getType()),
+            criteriaSearchRequest.getStandard(),
+            ImmutableList.of(true),
+            searchTerm,
+            pageRequest);
 
     // find by code if auto complete return nothing.
     if (criteriaList.isEmpty()) {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain,
-              types,
-              standard,
+              criteriaSearchRequest.getDomain(),
+              ImmutableList.of(criteriaSearchRequest.getType()),
+              criteriaSearchRequest.getStandard(),
               ImmutableList.of(true),
               searchTerm.getCodeTerm(),
               pageRequest);
@@ -231,11 +248,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
-  @Override
-  public List<Criteria> findSurveyAutoComplete(String surveyName, String term) {
-    PageRequest pageRequest = PageRequest.of(0, DEFAULT_TREE_SEARCH_LIMIT);
-
-    SearchTerm searchTerm = new SearchTerm(term, mySQLStopWordsProvider.get().getStopWords());
+  private List<Criteria> findSurveyCriteriaAutoComplete(
+      String surveyName, SearchTerm searchTerm, PageRequest pageRequest) {
 
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findSurveyQuestions(surveyName, searchTerm, pageRequest);
