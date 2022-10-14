@@ -34,7 +34,9 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       setResources(await userMetricsApi().getUserRecentResources());
     } catch (error) {
       console.log(error);
-      setApiLoadError('hh');
+      setApiLoadError(
+        `An error occurred while loading recent resources. Please refresh the page to reload.`
+      );
     } finally {
       setLoading(false);
     }
