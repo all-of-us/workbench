@@ -6,7 +6,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -21,34 +20,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AppController implements AppApiDelegate {
-  private final Clock clock;
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
-  private final WorkspaceDao workspaceDao;
-  private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserRecentResourceService userRecentResourceService;
-  private final LeonardoMapper leonardoMapper;
 
   @Autowired
   public AppController(Clock clock,
       LeonardoApiClient leonardoApiClient,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
-      WorkspaceDao workspaceDao, FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserRecentResourceService userRecentResourceService,
-      LeonardoMapper leonardoMapper) {
-    this.clock = clock;
+      UserRecentResourceService userRecentResourceService) {
     this.leonardoApiClient = leonardoApiClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
-    this.workspaceDao = workspaceDao;
-    this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.userRecentResourceService = userRecentResourceService;
-    this.leonardoMapper = leonardoMapper;
   }
 
   @Override
