@@ -248,7 +248,7 @@ describe('Genomics Extraction Test', () => {
       let isSuccess = false;
       await genomicSidebar.open();
       // At the time of writing this test, it takes 30 - 40 minutes to create the VCF file.
-      isDone = !(await genomicSidebar.isInProgress(datasetName, pollInterval));
+      isDone = !(await genomicSidebar.isInProgress(datasetName));
       if (isDone) {
         isSuccess = await genomicSidebar.isJobSuccess(datasetName);
         if (!isSuccess) {
