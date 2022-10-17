@@ -56,7 +56,7 @@ export default class GenomicExtractionsSidebar extends BaseSidebar {
     const statusCell = await this.getStatusCell(datasetName);
     return (
       statusCell.getXpath() +
-      '/*[.//*[@data-icon="sync-alt" and @role="img" and contains(@style,"animation-name: spin")]]'
+      '/*[.//*[@data-icon="rotate" and @role="img" and contains(@style,"animation-name: spin")]]'
     );
   }
 
