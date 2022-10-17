@@ -250,10 +250,9 @@ export const AppRoutingComponent: React.FunctionComponent<
       {/* Check checkBrowserSupport() function defined in index.ts and implemented in setup.ts*/}
       {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
       <div id='outdated' />
+      <NotificationModal />
       {authLoaded && isUserDisabledInDb !== undefined && (
         <React.Fragment>
-          {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
-          <NotificationModal />
           {firstPartyCookiesEnabled && thirdPartyCookiesEnabled && (
             <AppRouter>
               <ScrollToTop />

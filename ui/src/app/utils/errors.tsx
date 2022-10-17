@@ -1,7 +1,12 @@
 import { ErrorCode, ErrorResponse } from 'generated/fetch';
 
+import { cond } from './index';
+import {
+  NotificationStore,
+  notificationStore,
+  stackdriverErrorReporterStore,
+} from './stores';
 import { systemErrorStore } from './navigation';
-import { stackdriverErrorReporterStore } from './stores';
 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
@@ -85,3 +90,53 @@ export async function fetchWithSystemErrorHandler<T>(
     }
   }
 }
+
+// TODO handle errorClassName and parameters?
+const defaultResponseFormatter = (errorResponse: ErrorResponse): string => {
+  const { message, statusCode, errorCode, errorUniqueId } = errorResponse;
+
+  const errorCodeStr = errorCode ? `of type ${errorCode.toString()} ` : '';
+  const messageStr = message ? `: ${message}` : '.';
+
+  const detailsStr = cond(
+    [
+      !!statusCode && !!errorUniqueId,
+      () =>
+        `with HTTP status code ${statusCode} and unique ID ${errorUniqueId}`,
+    ],
+    [!!statusCode, () => `with HTTP status code ${statusCode}`],
+    [!!errorUniqueId, () => `with unique ID ${errorUniqueId}`]
+  );
+
+  return `An API error ${errorCodeStr} occurred ${detailsStr}${messageStr}`;
+};
+
+/**
+ * Convert an API error response (of any type) to a format suitable for an error modal.  The caller may supply a
+ * formatter for expected responses; if it doesn't match, the defaultFormatter will be used.
+ *
+ * @param anyResponse The response from an API call, of any type
+ * @param expectedResponseFormatter An optional handler for expected responses; if missing or this handler returns
+ * undefined, the default formatter will be used.
+ */
+export const errorHandlerWithFallback = async (
+  anyResponse,
+  expectedResponseFormatter?: (ErrorResponse) => NotificationStore
+): Promise<NotificationStore> =>
+  convertAPIError(anyResponse).then(
+    (errorResponse) =>
+      expectedResponseFormatter?.(errorResponse) || {
+        title: 'An error occurred XYZ',
+        message: defaultResponseFormatter(errorResponse),
+      }
+  );
+
+export const callWithFallbackErrorModal = async (
+  wrappedFn: Function,
+  expectedResponseFormatter?: (ErrorResponse) => NotificationStore
+): Promise<void> =>
+  wrappedFn()
+    .catch((apiError) =>
+      errorHandlerWithFallback(apiError, expectedResponseFormatter)
+    )
+    .then(notificationStore.set);

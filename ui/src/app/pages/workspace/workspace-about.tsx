@@ -3,7 +3,12 @@ import * as fp from 'lodash/fp';
 import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  ErrorResponse,
+  Profile,
+  UserRole,
+} from 'generated/fetch';
 
 import {
   Button,
@@ -30,7 +35,9 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getCdrVersion } from 'app/utils/cdr-versions';
+import { callWithFallbackErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { NotificationStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -206,18 +213,24 @@ export const WorkspaceAbout = fp.flow(
       this.setState({ workspace });
     }
 
+    // untested
+    pocErrorHandler(er: ErrorResponse): NotificationStore {
+      return er.statusCode === 500 && { title: 'foo', message: 'bar' };
+    }
+
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      workspacesApi()
-        .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
-        .then((resp) => {
-          this.setState({
-            workspaceUserRoles: fp.sortBy('familyName', resp.items),
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      callWithFallbackErrorModal(
+        () =>
+          workspacesApi()
+            .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
+            .then((resp) => {
+              this.setState({
+                workspaceUserRoles: fp.sortBy('familyName', resp.items),
+              });
+            }),
+        (er) => this.pocErrorHandler(er)
+      );
     }
 
     get workspaceCreationTime(): string {
