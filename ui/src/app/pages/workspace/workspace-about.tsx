@@ -30,6 +30,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getCdrVersion } from 'app/utils/cdr-versions';
+import { convertAPIError } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -206,6 +207,12 @@ export const WorkspaceAbout = fp.flow(
       this.setState({ workspace });
     }
 
+    async handleError(error) {
+      console.log('handleError', error);
+      const errorResponse = await convertAPIError(error);
+      console.log('errorResponse', errorResponse);
+    }
+
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
       workspacesApi()
@@ -215,9 +222,7 @@ export const WorkspaceAbout = fp.flow(
             workspaceUserRoles: fp.sortBy('familyName', resp.items),
           });
         })
-        .catch((error) => {
-          console.error(error);
-        });
+        .catch((error) => this.handleError(error));
     }
 
     get workspaceCreationTime(): string {
