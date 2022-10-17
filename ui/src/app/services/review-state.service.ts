@@ -122,13 +122,12 @@ export const reviewPaginationStore = new BehaviorSubject<any>(
 
 export function getVocabOptions(
   workspaceNamespace: string,
-  workspaceId: string,
-  cohortReviewId: number
+  workspaceId: string
 ) {
   const vocabFilters = { source: {}, standard: {} };
   try {
     cohortReviewApi()
-      .getVocabularies(workspaceNamespace, workspaceId, cohortReviewId)
+      .getVocabularies(workspaceNamespace, workspaceId)
       .then((response) => {
         response.items.forEach((item) => {
           const type = item.type.toLowerCase();

@@ -628,10 +628,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getVocabularies() {
-    VocabularyListResponse response =
-        controller
-            .getVocabularies(NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId())
-            .getBody();
+    VocabularyListResponse response = controller.getVocabularies(NAMESPACE, NAME).getBody();
     List<Vocabulary> items = Objects.requireNonNull(response).getItems();
     assertThat(items.size()).isEqualTo(20);
     assertThat(items.get(0))
