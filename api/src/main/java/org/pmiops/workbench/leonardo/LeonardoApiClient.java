@@ -7,6 +7,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
@@ -76,6 +77,17 @@ public interface LeonardoApiClient {
   /** List all persistent disks by google project */
   List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
       String googleProject, boolean includeDeleted);
+
+  /**
+   * Creates a notebooks runtime owned by the current authenticated user.
+   *
+   * @param runtime the details for the runtime to create
+   * @param workspaceNamespace the workspace namespace to identify a workspace.
+   * @param workspaceFirecloudName the firecloudName of the workspace this runtime is associated
+   *     with
+   */
+  void createApp(App app, String workspaceNamespace, String workspaceFirecloudName)
+      throws WorkbenchException;
 
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();

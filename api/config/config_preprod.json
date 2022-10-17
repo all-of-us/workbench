@@ -145,5 +145,10 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50
+  },
+  "app" : {
+    "appDescriptorPath": {
+      "rstudio": ""
+    }
   }
 }

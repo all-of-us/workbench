@@ -36,6 +36,7 @@ public class WorkbenchConfig {
   public RasConfig ras;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
+  public AppConfig app;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -65,6 +66,7 @@ public class WorkbenchConfig {
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
+    config.app = new AppConfig();
     return config;
   }
 
@@ -428,5 +430,15 @@ public class WorkbenchConfig {
     public List<String> notifyCcEmails;
     public boolean enableJiraTicketing;
     public List<Escalation> escalations;
+  }
+
+  /** Configs for managing APP in RW. */
+  public static class AppConfig {
+    /** The descriptor path which defines Leonardo application configuration. */
+    public static class AppDescriptorPath {
+      public String rStudio;
+    }
+
+    public AppDescriptorPath appDescriptorPath;
   }
 }

@@ -1275,7 +1275,7 @@ public class RuntimeControllerTest {
     assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())
         .isEqualTo(
             Collections.singletonMap(
-                LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+                LeonardoMapper.LEONARDO_LABEL_AOU_CONFIG,
                 LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
                     RuntimeConfigurationType.USEROVERRIDE)));
   }

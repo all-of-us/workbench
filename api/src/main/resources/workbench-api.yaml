@@ -6261,9 +6261,9 @@ definitions:
       kubernetesRuntimeConfig:
         description: kubernetesRuntimeConfig will be returned
         "$ref": "#/definitions/KubernetesRuntimeConfig"
-      diskConfig:
-        description: Disk configuration
-        "$ref": "#/definitions/DiskConfig"
+      persistentDiskRequest:
+        description: Persistent disk configuration
+        "$ref": "#/definitions/PersistentDiskRequest"
       errors:
         type: array
         description: The list of errors that were encountered on APP create, if any.

@@ -165,5 +165,10 @@
       "afterIncidentCount": 3,
       "disableUser": {}
     }]
+  },
+  "app" : {
+    "appDescriptorPath": {
+      "rstudio": ""
+    }
   }
 }

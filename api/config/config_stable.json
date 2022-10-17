@@ -162,5 +162,10 @@
         "durationMinutes": 10
       }
     }]
+  },
+  "app" : {
+    "appDescriptorPath": {
+      "rstudio": ""
+    }
   }
 }
