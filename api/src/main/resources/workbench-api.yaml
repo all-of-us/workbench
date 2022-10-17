@@ -8573,6 +8573,7 @@ definitions:
     - NUM_OF_OCCURRENCES
     - EVENT_DATE
     - ENCOUNTERS
+    - CATI
   CriteriaType:
     type: string
     description: possible criteria types
