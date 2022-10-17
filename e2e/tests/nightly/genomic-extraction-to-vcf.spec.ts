@@ -109,11 +109,11 @@ describe('Genomics Extraction Test', () => {
     // while export to vcf file still in progress.
     await runtimePanel.pickAutoPauseTime(AutoPauseIdleTime.EightHours);
 
-    // Start creating runtime but NOT wait until finish.
-    await runtimePanel.createRuntime({ waitForComplete: false });
-
     // Pick master node disk size.
     await runtimePanel.pickStandardDiskGbs(150);
+
+    // Start creating runtime but NOT wait until finish.
+    await runtimePanel.createRuntime({ waitForComplete: false });
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // EXTRACTING GENOMIC TO CREATE VCF FILES.
