@@ -815,8 +815,8 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_NullBillingProject() {
-    doThrow(new NotFoundException()).when(workspaceService).lookupWorkspaceByNamespace(anyString());
-    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(null));
+    doThrow(new NotFoundException()).when(workspaceService).lookupWorkspaceByNamespace("123");
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime("123"));
   }
 
   @Test
