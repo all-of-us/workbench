@@ -11,6 +11,8 @@ import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__RAS_LOGIN_GOV_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__RAS_LOGIN_GOV_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_COMPLETION_TIME;
 
@@ -124,6 +126,7 @@ public class ReportingQueryServiceTest {
   private DbAccessModule twoFactorAuthModule;
   private DbAccessModule rtTrainingModule;
   private DbAccessModule eRACommonsModule;
+  private DbAccessModule rasLoginGovModule;
   private DbAccessModule duccModule;
 
   @BeforeEach
@@ -136,6 +139,7 @@ public class ReportingQueryServiceTest {
     rtTrainingModule =
         accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
     eRACommonsModule = accessModuleDao.findOneByName(DbAccessModuleName.ERA_COMMONS).get();
+    rasLoginGovModule = accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
     duccModule = accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
   }
 
@@ -502,6 +506,11 @@ public class ReportingQueryServiceTest {
           USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
       addUserAccessModule(
           user, eRACommonsModule, USER__ERA_COMMONS_BYPASS_TIME, USER__ERA_COMMONS_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          rasLoginGovModule,
+          USER__RAS_LOGIN_GOV_BYPASS_TIME,
+          USER__RAS_LOGIN_GOV_COMPLETION_TIME);
       addUserAccessModule(
           user,
           duccModule,
