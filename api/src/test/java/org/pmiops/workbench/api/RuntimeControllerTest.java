@@ -815,6 +815,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_NullBillingProject() {
+    doThrow(new NotFoundException()).when(workspaceService).lookupWorkspaceByNamespace(anyString());
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(null));
   }
 
@@ -1376,6 +1377,14 @@ public class RuntimeControllerTest {
 
   @Test
   public void testLocalize_differentNamespace() throws org.pmiops.workbench.notebooks.ApiException {
+    DbWorkspace otherWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace("other-proj")
+            .setGoogleProject(GOOGLE_PROJECT_ID_2)
+            .setFirecloudName("myotherworkspace")
+            .setCreator(user)
+            .setCdrVersion(cdrVersion);
+    doReturn(otherWorkspace).when(workspaceService).lookupWorkspaceByNamespace("other-proj");
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
