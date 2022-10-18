@@ -2,10 +2,8 @@ package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.App;
@@ -13,6 +11,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +22,7 @@ public class AppController implements AppApiDelegate {
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
   private final LeonardoApiHelper leonardoApiHelper;
 
   @Autowired
@@ -32,13 +31,13 @@ public class AppController implements AppApiDelegate {
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService,
       LeonardoApiHelper leonardoApiHelper) {
     this.leonardoApiClient = leonardoApiClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
     this.leonardoApiHelper = leonardoApiHelper;
   }
 
@@ -50,7 +49,7 @@ public class AppController implements AppApiDelegate {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
-    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
@@ -78,11 +77,5 @@ public class AppController implements AppApiDelegate {
   @Override
   public ResponseEntity<ListAppsResponse> listApp() {
     throw new UnsupportedOperationException("API not supported.");
-  }
-
-  private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {
-    return workspaceDao
-        .getByNamespace(workspaceNamespace)
-        .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
   }
 }

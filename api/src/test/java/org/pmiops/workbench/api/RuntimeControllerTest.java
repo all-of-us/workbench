@@ -228,9 +228,10 @@ public class RuntimeControllerTest {
   RuntimesApi serviceRuntimesApi;
 
   @MockBean ProxyApi proxyApi;
+  @MockBean WorkspaceDao workspaceDao;
+  @MockBean WorkspaceService workspaceService;
 
   @Autowired CdrVersionDao cdrVersionDao;
-  @MockBean WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
   @Autowired AccessTierDao accessTierDao;
   @Autowired RuntimeController runtimeController;
@@ -357,7 +358,9 @@ public class RuntimeControllerTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion);
-    doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
+    doReturn(Optional.of(testWorkspace))
+        .when(workspaceService)
+        .lookupWorkspaceByNamespace(WORKSPACE_NS);
   }
 
   private static FirecloudWorkspaceDetails createFcWorkspace(

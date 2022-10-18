@@ -464,4 +464,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
     return fireCloudService.workspaceFileTransferComplete(workspaceNamespace, workspaceId);
   }
+
+  @Override
+  public DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace)
+      throws NotFoundException {
+    return workspaceDao
+        .getByNamespace(workspaceNamespace)
+        .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
+  }
 }

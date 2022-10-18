@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
@@ -59,5 +60,11 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   @Override
   public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
     return false;
+  }
+
+  @Override
+  public DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace)
+      throws NotFoundException {
+    return null;
   }
 }

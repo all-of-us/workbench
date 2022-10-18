@@ -42,6 +42,14 @@ public class FileConfigs {
     JsonNode marshalledNode = jackson.readTree(marshalledJson);
     JsonNode marshalledDiff = JsonDiff.asJson(configJson, marshalledNode);
 
+    System.out.println("~~~~~~~~~~");
+    System.out.println("~~~~~~~~~~");
+    System.out.println("~~~~~~~~~~");
+    System.out.println(configJson);
+    System.out.println("~~~~~~~~~~");
+    System.out.println("~~~~~~~~~~");
+    System.out.println("~~~~~~~~~~");
+    System.out.println(marshalledNode);
     if (marshalledDiff.size() > 0) {
       throw new ConfigFormatException(marshalledDiff);
     }

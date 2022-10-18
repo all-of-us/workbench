@@ -36,7 +36,7 @@ public class WorkbenchConfig {
   public RasConfig ras;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
-  public AppConfig app;
+  public App app;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -66,7 +66,7 @@ public class WorkbenchConfig {
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
-    config.app = new AppConfig();
+    config.app = new App();
     return config;
   }
 
@@ -433,7 +433,7 @@ public class WorkbenchConfig {
   }
 
   /** Configs for managing APP in RW. */
-  public static class AppConfig {
+  public static class App {
     /** The descriptor path which defines RStudio application configuration. */
     public String rStudioDescriptorPath;
   }

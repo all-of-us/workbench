@@ -7,12 +7,10 @@ import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -24,6 +22,7 @@ import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -60,7 +59,7 @@ public class AppControllerTest {
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
-  @MockBean WorkspaceDao mockWorkspaceDao;
+  @MockBean WorkspaceService mockWorkspaceService;
 
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String WORKSPACE_NS = "workspace-ns";
@@ -84,7 +83,7 @@ public class AppControllerTest {
             .setGoogleProject(GOOGLE_PROJECT_ID)
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID);
-    doReturn(Optional.of(testWorkspace)).when(mockWorkspaceDao).getByNamespace(WORKSPACE_NS);
+    doReturn(testWorkspace).when(mockWorkspaceService).lookupWorkspaceByNamespace((WORKSPACE_NS));
   }
 
   @Test
