@@ -521,7 +521,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .labels(appLabels);
 
     if (app.getAppType().equals(AppType.RSTUDIO)) {
-      createAppRequest.descriptorPath(workbenchConfigProvider.get().app.appDescriptorPath.rStudio);
+      createAppRequest.descriptorPath(workbenchConfigProvider.get().app.rStudioDescriptorPath);
     }
 
     leonardoRetryHandler.run(

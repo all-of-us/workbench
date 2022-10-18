@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.pmiops.workbench.config.WorkbenchConfig.AppConfig.AppDescriptorPath;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -68,7 +67,6 @@ public class WorkbenchConfig {
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
     config.app = new AppConfig();
-    config.app.appDescriptorPath = new AppDescriptorPath();
     return config;
   }
 
@@ -436,11 +434,7 @@ public class WorkbenchConfig {
 
   /** Configs for managing APP in RW. */
   public static class AppConfig {
-    /** The descriptor path which defines Leonardo application configuration. */
-    public static class AppDescriptorPath {
-      public String rStudio;
-    }
-
-    public AppDescriptorPath appDescriptorPath;
+    /** The descriptor path which defines RStudio application configuration. */
+    public String rStudioDescriptorPath;
   }
 }
