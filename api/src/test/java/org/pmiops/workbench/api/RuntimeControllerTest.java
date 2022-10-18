@@ -65,6 +65,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
+import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -176,6 +177,7 @@ public class RuntimeControllerTest {
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
     AccessTierServiceImpl.class,
+    LeonardoApiHelper.class,
   })
   @MockBean({
     AccessModuleService.class,
