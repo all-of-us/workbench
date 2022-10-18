@@ -850,6 +850,10 @@ paths:
           description: App was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: The workspace being created app within not found.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
         409:
           description: A app for this user and workspace already exists.
           schema:

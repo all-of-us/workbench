@@ -48,7 +48,7 @@ public interface LeonardoMapper {
   String LEONARDO_LABEL_AOU = "all-of-us";
   String LEONARDO_LABEL_AOU_CONFIG = "all-of-us-config";
   String LEONARDO_LABEL_CREATED_BY = "created-by";
-  String LEONARDO_LABEL_APP_TYPE= "aou-app-type";
+  String LEONARDO_LABEL_APP_TYPE = "aou-app-type";
   BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
       ImmutableBiMap.of(
           RuntimeConfigurationType.USEROVERRIDE, "user-override",
@@ -87,8 +87,11 @@ public interface LeonardoMapper {
   @Mapping(target = "labels", ignore = true)
   PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
 
-  PersistentDiskRequest toPersistentDiskRequest(LeonardoPersistentDiskRequest leonardoPersistentDiskRequest);
-  LeonardoPersistentDiskRequest toLeonardoPersistentDiskRequest(PersistentDiskRequest persistentDiskRequest);
+  PersistentDiskRequest toPersistentDiskRequest(
+      LeonardoPersistentDiskRequest leonardoPersistentDiskRequest);
+
+  LeonardoPersistentDiskRequest toLeonardoPersistentDiskRequest(
+      PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
   @Mapping(target = "cloudService", ignore = true)
@@ -158,8 +161,11 @@ public interface LeonardoMapper {
         leonardoListRuntimeResponse.getDiskConfig());
   }
 
-  KubernetesRuntimeConfig toKubernetesRuntimeConfig(LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
-  LeonardoKubernetesRuntimeConfig toKubernetesRuntimeConfig(KubernetesRuntimeConfig kubernetesRuntimeConfig);
+  KubernetesRuntimeConfig toKubernetesRuntimeConfig(
+      LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
+
+  LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
+      KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
   @ValueMapping(source = "CROMWELL", target = "CROMWELL")
   @ValueMapping(source = "RSTUDIO", target = "CUSTOM")

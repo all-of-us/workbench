@@ -1,32 +1,53 @@
 package org.pmiops.workbench.leonardo;
 
-import java.util.Random;
-import org.junit.Test;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.api.RuntimeController;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.api.AppsApi;
+import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.App;
+import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.model.KubernetesRuntimeConfig;
+import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.pmiops.workbench.utils.mappers.LeonardoMapper;
-import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -37,17 +58,14 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 public class LeonardoApiClientTest {
   @TestConfiguration
   @Import({
-      FakeClockConfiguration.class,
-      RuntimeController.class,
-      CommonMappers.class,
-      UserServiceTestConfiguration.class,
-      LeonardoMapperImpl.class,
-      LeonardoApiClientImpl.class,
-      NotebooksRetryHandler.class,
-      LeonardoRetryHandler.class,
-      NoBackOffPolicy.class,
-      AccessTierServiceImpl.class,
-      LeonardoApiClientImpl.class,
+    FakeClockConfiguration.class,
+    CommonMappers.class,
+    LeonardoMapperImpl.class,
+    LeonardoApiClientImpl.class,
+    LeonardoRetryHandler.class,
+    LeonardoApiClientImpl.class,
+    NoBackOffPolicy.class,
+    NotebooksRetryHandler.class,
   })
   static class Configuration {
 
@@ -62,30 +80,35 @@ public class LeonardoApiClientTest {
     DbUser user() {
       return user;
     }
-
-    @Bean
-    Random random() {
-      return new FakeLongRandom(123);
-    }
   }
 
   @Qualifier(LeonardoConfig.USER_APPS_API)
   @MockBean
   AppsApi userAppsApi;
 
-  @Autowired
-  CdrVersionDao cdrVersionDao;
-  @MockBean
-  WorkspaceDao workspaceDao;
-  @Autowired
-  UserDao userDao;
-  @Autowired
-  LeonardoMapper leonardoMapper;
-  @Autowired
-  LeonardoApiClient leonardoApiClient;
+  @MockBean WorkspaceDao workspaceDao;
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
+  @MockBean FireCloudService mockFireCloudService;
 
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired UserDao userDao;
+  @Autowired LeonardoMapper leonardoMapper;
+  @Autowired LeonardoApiClient leonardoApiClient;
+
+  @Captor private ArgumentCaptor<LeonardoCreateAppRequest> createAppRequestArgumentCaptor;
+
+  private static final String WORKSPACE_NS = "workspace-ns";
+  private static final String WORKSPACE_ID = "myfirstworkspace";
+  private static final String WORKSPACE_NAME = "My First Workspace";
+  private static final String WORKSPACE_BUCKET = "workspace bucket";
+  private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
+  private static final String MACHINE_TYPE = "n1-standard-1";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
+  private static final String RSTUDIO_DESCRIPTOR_PATH = "rstudio/path";
+  private static final String CDR_BUCKET = "gs://cdr-bucket";
+  private static final String CDR_STORAGE_BASE_PATH = "v99";
+  private static final String WGS_PATH = "wgs/cram/manifest.csv";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
@@ -94,16 +117,34 @@ public class LeonardoApiClientTest {
   private LeonardoCreateAppRequest testCreateAppRequest;
 
   private App testApp;
+  private KubernetesRuntimeConfig kubernetesRuntimeConfig;
+  private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
+  private PersistentDiskRequest persistentDiskRequest;
+  private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
   private DbWorkspace testWorkspace;
+  private Map<String, String> appLabels = new HashMap<>();
+  private Map<String, String> customEnvironmentVariables = new HashMap<>();
 
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
-    config.server.apiBaseUrl = API_BASE_URL;
-    config.access.enableComplianceTraining = true;
-    config.firecloud.gceVmZone = "us-central-1";
+    config.app.appDescriptorPath.rStudio = RSTUDIO_DESCRIPTOR_PATH;
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
+
+    kubernetesRuntimeConfig =
+        new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
+    leonardoKubernetesRuntimeConfig =
+        new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
+    persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
+    leonardoPersistentDiskRequest =
+        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
+    testApp =
+        new App()
+            .appType(AppType.RSTUDIO)
+            .googleProject(GOOGLE_PROJECT_ID)
+            .kubernetesRuntimeConfig(kubernetesRuntimeConfig)
+            .persistentDiskRequest(persistentDiskRequest);
 
     cdrVersion =
         new DbCdrVersion()
@@ -111,69 +152,13 @@ public class LeonardoApiClientTest {
             // set the db name to be empty since test cases currently
             // run in the workbench schema only.
             .setCdrDbName("")
-            .setBigqueryDataset(BIGQUERY_DATASET)
+            .setBigqueryProject("cdr")
+            .setBigqueryDataset("bq")
             .setAccessTier(
                 TestMockFactory.createControlledTierForTests(accessTierDao)
-                    .setDatasetsBucket("gs://cdr-bucket"))
-            .setStorageBasePath("v99")
-            .setWgsCramManifestPath("wgs/cram/manifest.csv");
-
-    String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
-
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj, null);
-    gceConfig = tmpRuntime.getGceConfig();
-
-    testLeoRuntime =
-        new LeonardoGetRuntimeResponse()
-            .runtimeName(getRuntimeName())
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.DELETING)
-            .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
-            .autopauseThreshold(AUTOPAUSE_THRESHOLD)
-            .runtimeConfig(dataprocConfigObj)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
-    testLeoListRuntimeResponse =
-        new LeonardoListRuntimeResponse()
-            .runtimeName(getRuntimeName())
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING);
-    testRuntime =
-        new Runtime()
-            .runtimeName(getRuntimeName())
-            .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(RuntimeStatus.DELETING)
-            .toolDockerImage(TOOL_DOCKER_IMAGE)
-            .autopauseThreshold(AUTOPAUSE_THRESHOLD)
-            .dataprocConfig(dataprocConfig)
-            .createdDate(createdDate);
-
-    testLeoRuntime2 =
-        new LeonardoGetRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME)
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
-
-    testLeoListRuntimeResponse2 =
-        new LeonardoListRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME)
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING);
-
-    testLeoRuntimeDifferentProject =
-        new LeonardoGetRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
-            .googleProject(GOOGLE_PROJECT_ID_2)
-            .status(LeonardoRuntimeStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
-
-    testLeoListRuntimeResponseDifferentProject =
-        new LeonardoListRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
-            .googleProject(GOOGLE_PROJECT_ID_2)
-            .status(LeonardoRuntimeStatus.RUNNING);
-
+                    .setDatasetsBucket(CDR_BUCKET))
+            .setStorageBasePath(CDR_STORAGE_BASE_PATH)
+            .setWgsCramManifestPath(WGS_PATH);
     testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
@@ -181,9 +166,62 @@ public class LeonardoApiClientTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion);
-    doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
+    doReturn(testWorkspace).when(workspaceDao).getRequired(WORKSPACE_NS, WORKSPACE_NAME);
+
+    appLabels.put(LeonardoMapper.LEONARDO_LABEL_AOU, "true");
+    appLabels.put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
+
+    customEnvironmentVariables.put("WORKSPACE_CDR", "cdr.bq");
+    customEnvironmentVariables.put("WORKSPACE_NAMESPACE", WORKSPACE_NS);
+    customEnvironmentVariables.put("WORKSPACE_BUCKET", "gs://" + WORKSPACE_BUCKET);
+    customEnvironmentVariables.put("BIGQUERY_STORAGE_API_ENABLED", "true");
+    customEnvironmentVariables.put("CDR_STORAGE_PATH", CDR_BUCKET + "/" + CDR_STORAGE_BASE_PATH);
+    customEnvironmentVariables.put(
+        "WGS_CRAM_MANIFEST_PATH", CDR_BUCKET + "/" + CDR_STORAGE_BASE_PATH + "/" + WGS_PATH);
   }
 
   @Test
+  public void testCreateAppSuccess_success() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    leonardoApiClient.createApp(testApp, WORKSPACE_NS, WORKSPACE_NAME);
+    verify(userAppsApi)
+        .createApp(
+            eq(GOOGLE_PROJECT_ID),
+            eq(getAppName(AppType.RSTUDIO)),
+            createAppRequestArgumentCaptor.capture());
 
+    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    appLabels.put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString());
+    LeonardoCreateAppRequest expectedAppRequest =
+        new LeonardoCreateAppRequest()
+            .appType(LeonardoAppType.CUSTOM)
+            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
+            .descriptorPath(RSTUDIO_DESCRIPTOR_PATH)
+            .labels(appLabels)
+            .diskConfig(leonardoPersistentDiskRequest)
+            .customEnvironmentVariables(customEnvironmentVariables);
+
+    assertThat(createAppRequest).isEqualTo(expectedAppRequest);
+  }
+
+  private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {
+    FirecloudWorkspaceDetails fcWorkspaceDetail =
+        new FirecloudWorkspaceDetails()
+            .namespace(WORKSPACE_NS)
+            .name(WORKSPACE_NS)
+            .createdBy(LOGGED_IN_USER_EMAIL)
+            .googleProject(GOOGLE_PROJECT_ID)
+            .bucketName(WORKSPACE_BUCKET);
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    fcResponse.setWorkspace(fcWorkspaceDetail);
+    fcResponse.setAccessLevel(accessLevel.toString());
+    when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));
+    when(mockFireCloudService.getWorkspace(
+            fcWorkspaceDetail.getNamespace(), fcWorkspaceDetail.getName()))
+        .thenReturn(fcResponse);
+  }
+
+  private String getAppName(AppType appType) {
+    return "all-of-us-" + user.getUserId() + "-" + appType.toString().toLowerCase();
+  }
 }

@@ -512,18 +512,24 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, app.getAppType().toString())
             .build();
 
-    createAppRequest.appType(leonardoMapper.toLeonardoAppType(app.getAppType()))
-        .kubernetesRuntimeConfig(leonardoMapper.toKubernetesRuntimeConfig(app.getKubernetesRuntimeConfig()))
+    createAppRequest
+        .appType(leonardoMapper.toLeonardoAppType(app.getAppType()))
+        .kubernetesRuntimeConfig(
+            leonardoMapper.toLeonardoKubernetesRuntimeConfig(app.getKubernetesRuntimeConfig()))
         .diskConfig(leonardoMapper.toLeonardoPersistentDiskRequest(app.getPersistentDiskRequest()))
-        .customEnvironmentVariables(getBaseEnvironmentVariables(workspace)).labels(appLabels);
+        .customEnvironmentVariables(getBaseEnvironmentVariables(workspace))
+        .labels(appLabels);
 
-    if(app.getAppType().equals(AppType.RSTUDIO)) {
+    if (app.getAppType().equals(AppType.RSTUDIO)) {
       createAppRequest.descriptorPath(workbenchConfigProvider.get().app.appDescriptorPath.rStudio);
     }
 
     leonardoRetryHandler.run(
         (context) -> {
-          appsApi.createApp(app.getGoogleProject(), userProvider.get().getAppName(app.getAppType()), createAppRequest);
+          appsApi.createApp(
+              app.getGoogleProject(),
+              userProvider.get().getAppName(app.getAppType()),
+              createAppRequest);
           return null;
         });
   }
@@ -541,7 +547,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   /** The general environment variables that can be used in all Apps. */
-  private Map<String, String> getBaseEnvironmentVariables (DbWorkspace workspace) {
+  private Map<String, String> getBaseEnvironmentVariables(DbWorkspace workspace) {
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         fireCloudService

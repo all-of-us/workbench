@@ -79,12 +79,11 @@ public interface LeonardoApiClient {
       String googleProject, boolean includeDeleted);
 
   /**
-   * Creates a notebooks runtime owned by the current authenticated user.
+   * Creates Leonardo app owned by the current authenticated user.
    *
-   * @param runtime the details for the runtime to create
+   * @param app the details for the app to create
    * @param workspaceNamespace the workspace namespace to identify a workspace.
-   * @param workspaceFirecloudName the firecloudName of the workspace this runtime is associated
-   *     with
+   * @param workspaceFirecloudName the firecloudName of the workspace this app is associated with
    */
   void createApp(App app, String workspaceNamespace, String workspaceFirecloudName)
       throws WorkbenchException;

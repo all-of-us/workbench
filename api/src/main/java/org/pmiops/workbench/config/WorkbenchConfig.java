@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.pmiops.workbench.config.WorkbenchConfig.AppConfig.AppDescriptorPath;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -67,6 +68,7 @@ public class WorkbenchConfig {
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
     config.app = new AppConfig();
+    config.app.appDescriptorPath = new AppDescriptorPath();
     return config;
   }
 
