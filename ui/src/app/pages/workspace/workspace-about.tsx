@@ -12,6 +12,7 @@ import {
 } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
+import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { AoU, AouTitle } from 'app/components/text-wrappers';
@@ -169,14 +170,14 @@ export const WorkspaceAbout = fp.flow(
       };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       this.props.hideSpinner();
       this.setVisits();
       const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
       if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
         this.loadInitialCreditsUsage(workspace);
       }
-      this.loadUserRoles(workspace);
+      await this.loadUserRoles(workspace);
     }
 
     async loadInitialCreditsUsage(workspace: WorkspaceData) {
@@ -213,16 +214,28 @@ export const WorkspaceAbout = fp.flow(
       console.log('errorResponse', errorResponse);
     }
 
-    loadUserRoles(workspace: WorkspaceData) {
+    async loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      workspacesApi()
-        .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
-        .then((resp) => {
-          this.setState({
-            workspaceUserRoles: fp.sortBy('familyName', resp.items),
-          });
-        })
-        .catch((error) => this.handleError(error));
+      await withErrorModal(
+        {
+          title: 'withErrorModal title',
+          message: 'withErrorModal message',
+        },
+        async () => {
+          console.log('loadUserRoles');
+          return await workspacesApi()
+            .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
+            .then((resp) => {
+              this.setState({
+                workspaceUserRoles: fp.sortBy('familyName', resp.items),
+              });
+            })
+            .catch((e) => {
+              console.log('loadUserRoles catch', e);
+              throw e;
+            });
+        }
+      );
     }
 
     get workspaceCreationTime(): string {
@@ -275,10 +288,10 @@ export const WorkspaceAbout = fp.flow(
       }
     }
 
-    onShare() {
+    async onShare() {
       this.setState({ sharing: false });
       const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
-      this.loadUserRoles(workspace);
+      await this.loadUserRoles(workspace);
     }
 
     render() {

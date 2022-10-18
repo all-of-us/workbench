@@ -114,6 +114,8 @@ export const NotificationModal = () => {
 
   useEffect(() => onDismiss);
 
+  console.log('NotificationModal', notification);
+
   return (
     notification && (
       <Modal>
@@ -154,8 +156,18 @@ export const withErrorModal = fp.curry(
   (notificationState: NotificationStore, wrappedFn) =>
     async (...args) => {
       try {
-        return await wrappedFn(...args);
+        console.log('withErrorModal before run wrappedFn');
+        const fooP = wrappedFn(...args);
+        console.log('withErrorModal fooP', fooP);
+        const foo = await fooP;
+        console.log('withErrorModal foo', foo);
+        return foo;
       } catch (e) {
+        console.log('withErrorModal catch e', e);
+        console.log(
+          'withErrorModal catch notificationState',
+          notificationState
+        );
         notificationStore.set(notificationState);
       }
     }
