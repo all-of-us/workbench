@@ -215,7 +215,6 @@ public class RuntimeControllerTest {
   @MockBean FireCloudService mockFireCloudService;
   @MockBean UserRecentResourceService mockUserRecentResourceService;
   @MockBean UserServiceAuditor mockUserServiceAuditor;
-  @MockBean WorkspaceService mockWorkspaceService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
 

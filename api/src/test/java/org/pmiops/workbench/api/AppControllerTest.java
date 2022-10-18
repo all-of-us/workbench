@@ -115,4 +115,13 @@ public class AppControllerTest {
 
     assertThrows(ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, testApp));
   }
+
+  @Test
+  public void testCreateAppFail_validateActiveBilling() {
+    doThrow(ForbiddenException.class)
+        .when(mockWorkspaceAuthService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    assertThrows(ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, testApp));
+  }
 }

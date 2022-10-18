@@ -851,7 +851,7 @@ paths:
           schema:
             "$ref": "#/definitions/EmptyResponse"
         404:
-          description: The workspace being created app within not found.
+          description: The specified workspace was not found.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         409:
