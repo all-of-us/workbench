@@ -358,9 +358,7 @@ public class RuntimeControllerTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion);
-    doReturn(Optional.of(testWorkspace))
-        .when(workspaceService)
-        .lookupWorkspaceByNamespace(WORKSPACE_NS);
+    doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
   }
 
   private static FirecloudWorkspaceDetails createFcWorkspace(
