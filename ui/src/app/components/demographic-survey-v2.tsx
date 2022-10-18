@@ -474,8 +474,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: EthnicCategory.HISPANIC,
                 subOptions: [
                   {
-                    label: 'Columbian',
-                    value: EthnicCategory.HISPANICCOLUMBIAN,
+                    label: 'Colombian',
+                    value: EthnicCategory.HISPANICCOLOMBIAN,
                   },
                   { label: 'Cuban', value: EthnicCategory.HISPANICCUBAN },
                   {
