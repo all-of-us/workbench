@@ -208,7 +208,6 @@ export const WorkspaceAbout = fp.flow(
 
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-
       workspacesApi()
         .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
         .then((resp) => {
