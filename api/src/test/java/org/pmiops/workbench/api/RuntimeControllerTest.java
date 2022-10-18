@@ -358,6 +358,7 @@ public class RuntimeControllerTest {
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion);
     doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
+    doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
   private static FirecloudWorkspaceDetails createFcWorkspace(
@@ -1162,7 +1163,7 @@ public class RuntimeControllerTest {
 
     verify(userRuntimesApi)
         .createRuntime(
-            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
@@ -1186,7 +1187,7 @@ public class RuntimeControllerTest {
 
     verify(userRuntimesApi)
         .createRuntime(
-            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
@@ -1236,7 +1237,7 @@ public class RuntimeControllerTest {
 
     verify(userRuntimesApi)
         .createRuntime(
-            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     JsonObject envVars =

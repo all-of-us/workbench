@@ -113,15 +113,9 @@ public class LeonardoApiClientTest {
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
 
-  private DbCdrVersion cdrVersion;
-  private LeonardoCreateAppRequest testCreateAppRequest;
-
   private App testApp;
-  private KubernetesRuntimeConfig kubernetesRuntimeConfig;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
-  private PersistentDiskRequest persistentDiskRequest;
   private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
-  private DbWorkspace testWorkspace;
   private Map<String, String> appLabels = new HashMap<>();
   private Map<String, String> customEnvironmentVariables = new HashMap<>();
 
@@ -132,11 +126,12 @@ public class LeonardoApiClientTest {
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
-    kubernetesRuntimeConfig =
+    KubernetesRuntimeConfig kubernetesRuntimeConfig =
         new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     leonardoKubernetesRuntimeConfig =
         new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
-    persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
+    PersistentDiskRequest persistentDiskRequest =
+        new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
         new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
     testApp =
@@ -146,7 +141,7 @@ public class LeonardoApiClientTest {
             .kubernetesRuntimeConfig(kubernetesRuntimeConfig)
             .persistentDiskRequest(persistentDiskRequest);
 
-    cdrVersion =
+    DbCdrVersion cdrVersion =
         new DbCdrVersion()
             .setName("1")
             // set the db name to be empty since test cases currently
@@ -159,7 +154,7 @@ public class LeonardoApiClientTest {
                     .setDatasetsBucket(CDR_BUCKET))
             .setStorageBasePath(CDR_STORAGE_BASE_PATH)
             .setWgsCramManifestPath(WGS_PATH);
-    testWorkspace =
+    DbWorkspace testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
