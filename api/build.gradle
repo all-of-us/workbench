@@ -89,13 +89,18 @@ ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
 ext.SWAGGER_2_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger2codegen"
+ext.SWAGGER_3_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger3codegen"
 // Raw options passed to the Swagger codegen CLI.
 ext.SWAGGER_2_RAW_OPTS = [
         // By default, the ignore file within the output directory is used. Override
         // as we don't track the output directory in source.
         '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
 ]
-
+ext.SWAGGER_3_RAW_OPTS = [
+        // By default, the ignore file within the output directory is used. Override
+        // as we don't track the output directory in source.
+        '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
+]
 // Helper function to define a Java client Swagger codegen targets for the Gradle
 // Swagger Generator Plugin: https://github.com/int128/gradle-swagger-generator-plugin#code-generation
 def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
@@ -130,15 +135,11 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
             configuration = configurations.__swaggerCodegenV3__
             language = 'java'
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
-            templateDir = file("$projectDir/src/main/resources/swagger3codegen")
+            templateDir = file(SWAGGER_3_TEMPLATE_DIR)
             // Since the output directory is shared among these swagger tasks, wiping
             // the directory would result in task invalidation / churn.
             wipeOutputDir = false
-            rawOptions = [
-                    // By default, the ignore file within the output directory is used. Override
-                    // as we don't track the output directory in source.
-                    '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
-            ] + rawOptExtras
+            rawOptions = SWAGGER_3_RAW_OPTS + rawOptExtras
             additionalProperties = [
                     'sourceFolder'     : '',
                     'library'          : 'okhttp-gson',
@@ -193,12 +194,12 @@ swaggerSources {
     workbench {
         inputFile = file('src/main/resources/workbench-api.yaml')
         code {
-            configuration = configurations.__swaggerCodegenV2__
+            configuration = configurations.__swaggerCodegenV3__
             language = 'spring'
-            outputDir = file(SWAGGER_2_CODEGEN_DIR)
-            templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+            outputDir = file(SWAGGER_3_CODEGEN_DIR)
+            templateDir = file(SWAGGER_3_TEMPLATE_DIR)
             wipeOutputDir = false
-            rawOptions = SWAGGER_2_RAW_OPTS
+            rawOptions = SWAGGER_3_RAW_OPTS
             additionalProperties = [
                     'sourceFolder'   : '',
                     'modelPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.model",
