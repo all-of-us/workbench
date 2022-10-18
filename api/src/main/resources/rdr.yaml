@@ -579,7 +579,7 @@ definitions:
       - BLACK_OTHER           # Black / None of these fully describe me, and I want to specify
 
       - HISPANIC              # Hispanic, Latino, or Spanish descent
-      - HISPANIC_COLUMBIAN
+      - HISPANIC_COLOMBIAN
       - HISPANIC_CUBAN
       - HISPANIC_DOMINICAN
       - HISPANIC_ECUADORIAN
