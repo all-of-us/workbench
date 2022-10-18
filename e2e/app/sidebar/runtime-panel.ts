@@ -361,12 +361,6 @@ export default class RuntimePanel extends BaseSidebar {
     return Button.findByName(this.page, { normalizeSpace: LinkText.Customize }, this);
   }
 
-  // runtime status spinner.
-  async existStatusIcon(timeout?: number): Promise<boolean> {
-    const runtimeStatusSpinner = '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="sync-alt"]';
-    return exists(this.page, runtimeStatusSpinner, { timeout });
-  }
-
   /**
    * Open the Runtime sidebar, wait for the Running or Error status.
    * The Running or Error status in runtime creation process is considered as finished.

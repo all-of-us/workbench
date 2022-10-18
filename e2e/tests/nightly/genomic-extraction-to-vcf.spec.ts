@@ -109,11 +109,11 @@ describe('Genomics Extraction Test', () => {
     // while export to vcf file still in progress.
     await runtimePanel.pickAutoPauseTime(AutoPauseIdleTime.EightHours);
 
-    // Start creating runtime but NOT wait until finish.
-    await runtimePanel.createRuntime({ waitForComplete: false });
-
     // Pick master node disk size.
     await runtimePanel.pickStandardDiskGbs(150);
+
+    // Start creating runtime but NOT wait until finish.
+    await runtimePanel.createRuntime({ waitForComplete: false });
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // EXTRACTING GENOMIC TO CREATE VCF FILES.
@@ -248,7 +248,7 @@ describe('Genomics Extraction Test', () => {
       let isSuccess = false;
       await genomicSidebar.open();
       // At the time of writing this test, it takes 30 - 40 minutes to create the VCF file.
-      isDone = !(await genomicSidebar.isInProgress(datasetName, pollInterval));
+      isDone = !(await genomicSidebar.isInProgress(datasetName));
       if (isDone) {
         isSuccess = await genomicSidebar.isJobSuccess(datasetName);
         if (!isSuccess) {
