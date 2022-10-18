@@ -13,7 +13,7 @@ import { ExclamationTriangle } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
-import { withProfileErrorModal } from 'app/components/with-error-modal';
+import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';

@@ -16,7 +16,7 @@ import { TermsOfService } from 'app/components/terms-of-service';
 import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
-} from 'app/components/with-error-modal';
+} from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';

@@ -18,9 +18,9 @@ import {
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
 import {
-  withErrorModal,
   WithErrorModalProps,
-} from 'app/components/with-error-modal';
+  withErrorModalWrapper,
+} from 'app/components/with-error-modal-wrapper';
 import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
@@ -43,7 +43,7 @@ interface State {
 }
 
 export const CohortReviewResourceCard = fp.flow(
-  withErrorModal(),
+  withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()
 )(
