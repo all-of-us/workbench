@@ -850,6 +850,10 @@ paths:
           description: App was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: The specified workspace was not found.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
         409:
           description: A app for this user and workspace already exists.
           schema:
@@ -6203,9 +6207,9 @@ definitions:
       kubernetesRuntimeConfig:
         description: kubernetesRuntimeConfig will be returned
         "$ref": "#/definitions/KubernetesRuntimeConfig"
-      diskConfig:
-        description: Disk configuration
-        "$ref": "#/definitions/DiskConfig"
+      persistentDiskRequest:
+        description: Persistent disk configuration
+        "$ref": "#/definitions/PersistentDiskRequest"
       errors:
         type: array
         description: The list of errors that were encountered on APP create, if any.

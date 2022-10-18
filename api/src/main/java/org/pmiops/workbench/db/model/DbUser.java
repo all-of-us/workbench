@@ -28,6 +28,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.annotation.CreatedDate;
@@ -41,6 +42,7 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
+  private static final String APP_NAME_PREFIX = "all-of-us-";
   @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
@@ -450,6 +452,11 @@ public class DbUser {
             .toString()
             .substring(0, PD_UUID_SUFFIX_SIZE);
     return getUserPDNamePrefix() + "-" + randomString;
+  }
+
+  @Transient
+  public String getAppName(AppType appType) {
+    return APP_NAME_PREFIX + getUserId() + '-' + appType.toString().toLowerCase();
   }
 
   @Override

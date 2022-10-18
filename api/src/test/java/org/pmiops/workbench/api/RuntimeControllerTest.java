@@ -65,6 +65,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
+import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -176,6 +177,7 @@ public class RuntimeControllerTest {
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
     AccessTierServiceImpl.class,
+    LeonardoApiHelper.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -213,7 +215,6 @@ public class RuntimeControllerTest {
   @MockBean FireCloudService mockFireCloudService;
   @MockBean UserRecentResourceService mockUserRecentResourceService;
   @MockBean UserServiceAuditor mockUserServiceAuditor;
-  @MockBean WorkspaceService mockWorkspaceService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
 
@@ -226,9 +227,10 @@ public class RuntimeControllerTest {
   RuntimesApi serviceRuntimesApi;
 
   @MockBean ProxyApi proxyApi;
+  @MockBean WorkspaceDao workspaceDao;
+  @MockBean WorkspaceService workspaceService;
 
   @Autowired CdrVersionDao cdrVersionDao;
-  @MockBean WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
   @Autowired AccessTierDao accessTierDao;
   @Autowired RuntimeController runtimeController;
@@ -355,6 +357,7 @@ public class RuntimeControllerTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion);
+    doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
@@ -812,7 +815,8 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_NullBillingProject() {
-    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(null));
+    doThrow(new NotFoundException()).when(workspaceService).lookupWorkspaceByNamespace("123");
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime("123"));
   }
 
   @Test
@@ -1160,7 +1164,7 @@ public class RuntimeControllerTest {
 
     verify(userRuntimesApi)
         .createRuntime(
-            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
@@ -1184,7 +1188,7 @@ public class RuntimeControllerTest {
 
     verify(userRuntimesApi)
         .createRuntime(
-            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
@@ -1234,7 +1238,7 @@ public class RuntimeControllerTest {
 
     verify(userRuntimesApi)
         .createRuntime(
-            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     JsonObject envVars =
@@ -1275,7 +1279,7 @@ public class RuntimeControllerTest {
     assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())
         .isEqualTo(
             Collections.singletonMap(
-                LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+                LeonardoMapper.LEONARDO_LABEL_AOU_CONFIG,
                 LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
                     RuntimeConfigurationType.USEROVERRIDE)));
   }
@@ -1373,6 +1377,14 @@ public class RuntimeControllerTest {
 
   @Test
   public void testLocalize_differentNamespace() throws org.pmiops.workbench.notebooks.ApiException {
+    DbWorkspace otherWorkspace =
+        new DbWorkspace()
+            .setWorkspaceNamespace("other-proj")
+            .setGoogleProject(GOOGLE_PROJECT_ID_2)
+            .setFirecloudName("myotherworkspace")
+            .setCreator(user)
+            .setCdrVersion(cdrVersion);
+    doReturn(otherWorkspace).when(workspaceService).lookupWorkspaceByNamespace("other-proj");
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))

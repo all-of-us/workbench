@@ -163,5 +163,8 @@
         "durationMinutes": 10
       }
     }]
+  },
+  "app": {
+    "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/81d3a9a1ad9f106da5ffb987f7cb040748b41d19\/apps\/rstudio\/app.yaml"
   }
 }

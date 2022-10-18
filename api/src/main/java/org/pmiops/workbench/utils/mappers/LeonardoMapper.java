@@ -10,25 +10,31 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ValueMapping;
+import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskConfig;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -39,9 +45,10 @@ import org.pmiops.workbench.model.RuntimeStatus;
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
 
-  String RUNTIME_LABEL_AOU = "all-of-us";
-  String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
-  String RUNTIME_LABEL_CREATED_BY = "created-by";
+  String LEONARDO_LABEL_AOU = "all-of-us";
+  String LEONARDO_LABEL_AOU_CONFIG = "all-of-us-config";
+  String LEONARDO_LABEL_CREATED_BY = "created-by";
+  String LEONARDO_LABEL_APP_TYPE = "aou-app-type";
   BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
       ImmutableBiMap.of(
           RuntimeConfigurationType.USEROVERRIDE, "user-override",
@@ -79,6 +86,12 @@ public interface LeonardoMapper {
 
   @Mapping(target = "labels", ignore = true)
   PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
+
+  PersistentDiskRequest toPersistentDiskRequest(
+      LeonardoPersistentDiskRequest leonardoPersistentDiskRequest);
+
+  LeonardoPersistentDiskRequest toLeonardoPersistentDiskRequest(
+      PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
   @Mapping(target = "cloudService", ignore = true)
@@ -148,10 +161,20 @@ public interface LeonardoMapper {
         leonardoListRuntimeResponse.getDiskConfig());
   }
 
+  KubernetesRuntimeConfig toKubernetesRuntimeConfig(
+      LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
+
+  LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
+      KubernetesRuntimeConfig kubernetesRuntimeConfig);
+
+  @ValueMapping(source = "CROMWELL", target = "CROMWELL")
+  @ValueMapping(source = "RSTUDIO", target = "CUSTOM")
+  LeonardoAppType toLeonardoAppType(AppType appType);
+
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
     final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
-    if (runtimeLabels == null || runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG) == null) {
+    if (runtimeLabels == null || runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG) == null) {
       // If there's no label, fall back onto the old behavior where every Runtime was created with a
       // default Dataproc config
       runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
@@ -159,7 +182,7 @@ public interface LeonardoMapper {
       runtime.setConfigurationType(
           RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
               .inverse()
-              .get(runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG)));
+              .get(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG)));
     }
   }
 

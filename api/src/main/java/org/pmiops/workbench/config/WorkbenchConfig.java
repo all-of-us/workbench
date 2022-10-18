@@ -36,6 +36,7 @@ public class WorkbenchConfig {
   public RasConfig ras;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
+  public App app;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -65,6 +66,7 @@ public class WorkbenchConfig {
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
+    config.app = new App();
     return config;
   }
 
@@ -428,5 +430,11 @@ public class WorkbenchConfig {
     public List<String> notifyCcEmails;
     public boolean enableJiraTicketing;
     public List<Escalation> escalations;
+  }
+
+  /** Configs for managing APP in RW. */
+  public static class App {
+    /** The descriptor path which defines RStudio application configuration. */
+    public String rStudioDescriptorPath;
   }
 }

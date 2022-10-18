@@ -29,9 +29,11 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -42,6 +44,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
+import org.pmiops.workbench.model.App;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -93,6 +97,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> diskApiProvider;
+  private final Provider<AppsApi> appsApiProvider;
   private final FireCloudService fireCloudService;
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
@@ -110,6 +115,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
+      Provider<AppsApi> appsApiProvider,
       FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
@@ -123,6 +129,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
+    this.appsApiProvider = appsApiProvider;
     this.fireCloudService = fireCloudService;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
@@ -147,8 +154,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     Map<String, String> runtimeLabels =
         new ImmutableMap.Builder<String, String>()
-            .put(LeonardoMapper.RUNTIME_LABEL_AOU, "true")
-            .put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail)
+            .put(LeonardoMapper.LEONARDO_LABEL_AOU, "true")
+            .put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, userEmail)
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
@@ -261,34 +268,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
-        fireCloudService
-            .getWorkspace(workspace)
-            .orElseThrow(() -> new NotFoundException("workspace not found"));
 
-    DbCdrVersion cdrVersion = workspace.getCdrVersion();
-    Map<String, String> customEnvironmentVariables = new HashMap<>();
-    customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspaceNamespace);
-
-    // This variable is already made available by Leonardo, but it's only exported in certain
-    // notebooks contexts; this ensures it is always exported. See RW-7096.
-    customEnvironmentVariables.put(
-        WORKSPACE_BUCKET_KEY, "gs://" + fcWorkspaceResponse.getWorkspace().getBucketName());
-
-    // In Terra V2 workspaces, all compute users have the bigquery.readSessionUser role per CA-1179.
-    // In all workspaces, OWNERs have storage read session permission via the project viewer role.
-    // If this variable is exported (with any value), codegen will use the BQ storage API, which is
-    // ~200x faster for loading large dataframes from Bigquery.
-    // After CA-952 is complete, this should always be exported.
-    if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
-        || workspace.isTerraV2Workspace()) {
-      customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
-    }
-
-    customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
-
-    // See RW-6079
-    customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
+    Map<String, String> customEnvironmentVariables = getBaseEnvironmentVariables(workspace);
 
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
@@ -329,7 +310,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       RuntimeConfigurationType runtimeConfigurationType) {
     if (runtimeConfigurationType != null) {
       return Collections.singletonMap(
-          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+          LeonardoMapper.LEONARDO_LABEL_AOU_CONFIG,
           LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
               runtimeConfigurationType));
     } else {
@@ -390,7 +371,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 runtimesApiAsService.listRuntimes(
-                    LeonardoMapper.RUNTIME_LABEL_CREATED_BY + "=" + userEmail, false));
+                    LeonardoMapper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
 
     // Only the runtime creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
@@ -518,6 +499,42 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
+  public void createApp(App app, String workspaceNamespace, String workspaceFirecloudName)
+      throws WorkbenchException {
+    AppsApi appsApi = appsApiProvider.get();
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
+
+    LeonardoCreateAppRequest createAppRequest = new LeonardoCreateAppRequest();
+    Map<String, String> appLabels =
+        new ImmutableMap.Builder<String, String>()
+            .put(LeonardoMapper.LEONARDO_LABEL_AOU, "true")
+            .put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
+            .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, app.getAppType().toString())
+            .build();
+
+    createAppRequest
+        .appType(leonardoMapper.toLeonardoAppType(app.getAppType()))
+        .kubernetesRuntimeConfig(
+            leonardoMapper.toLeonardoKubernetesRuntimeConfig(app.getKubernetesRuntimeConfig()))
+        .diskConfig(leonardoMapper.toLeonardoPersistentDiskRequest(app.getPersistentDiskRequest()))
+        .customEnvironmentVariables(getBaseEnvironmentVariables(workspace))
+        .labels(appLabels);
+
+    if (app.getAppType().equals(AppType.RSTUDIO)) {
+      createAppRequest.descriptorPath(workbenchConfigProvider.get().app.rStudioDescriptorPath);
+    }
+
+    leonardoRetryHandler.run(
+        (context) -> {
+          appsApi.createApp(
+              app.getGoogleProject(),
+              userProvider.get().getAppName(app.getAppType()),
+              createAppRequest);
+          return null;
+        });
+  }
+
+  @Override
   public boolean getLeonardoStatus() {
     try {
       serviceInfoApiProvider.get().getSystemStatus();
@@ -527,5 +544,32 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       return false;
     }
     return true;
+  }
+
+  /** The general environment variables that can be used in all Apps. */
+  private Map<String, String> getBaseEnvironmentVariables(DbWorkspace workspace) {
+    Map<String, String> customEnvironmentVariables = new HashMap<>();
+    FirecloudWorkspaceResponse fcWorkspaceResponse =
+        fireCloudService
+            .getWorkspace(workspace)
+            .orElseThrow(() -> new NotFoundException("workspace not found"));
+    customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspace.getWorkspaceNamespace());
+    // This variable is already made available by Leonardo, but it's only exported in certain
+    // notebooks contexts; this ensures it is always exported. See RW-7096.
+    customEnvironmentVariables.put(
+        WORKSPACE_BUCKET_KEY, "gs://" + fcWorkspaceResponse.getWorkspace().getBucketName());
+    // In Terra V2 workspaces, all compute users have the bigquery.readSessionUser role per CA-1179.
+    // In all workspaces, OWNERs have storage read session permission via the project viewer role.
+    // If this variable is exported (with any value), codegen will use the BQ storage API, which is
+    // ~200x faster for loading large dataframes from Bigquery.
+    // After CA-952 is complete, this should always be exported.
+    if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
+        || workspace.isTerraV2Workspace()) {
+      customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
+    }
+
+    customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
+
+    return customEnvironmentVariables;
   }
 }

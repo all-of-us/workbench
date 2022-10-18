@@ -50,4 +50,6 @@ public interface WorkspaceService {
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
   Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet);
+
+  DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace);
 }
