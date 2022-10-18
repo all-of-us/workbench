@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="dolbeew" id="changelog-206-demographic-survey-v2-colombian-fix">
+    <sql>
+      ALTER TABLE demographic_survey_v2_ethnic_category
+        MODIFY COLUMN ethnic_category
+        ENUM(
+        'AI_AN', 'AI_AN_AMERICAN_INDIAN', 'AI_AN_ALASKA_NATIVE', 'AI_AN_CENTRAL_SOUTH',
+        'AI_AN_OTHER',
+
+        'ASIAN', 'ASIAN_INDIAN', 'ASIAN_CAMBODIAN', 'ASIAN_CHINESE', 'ASIAN_FILIPINO',
+        'ASIAN_HMONG', 'ASIAN_JAPANESE', 'ASIAN_KOREAN', 'ASIAN_LAO', 'ASIAN_PAKISTANI',
+        'ASIAN_VIETNAMESE', 'ASIAN_OTHER',
+
+        'BLACK', 'BLACK_AA', 'BLACK_BARBADIAN', 'BLACK_CARIBBEAN', 'BLACK_ETHIOPIAN',
+        'BLACK_GHANAIAN', 'BLACK_HAITIAN', 'BLACK_JAMAICAN', 'BLACK_LIBERIAN', 'BLACK_NIGERIAN',
+        'BLACK_SOMALI', 'BLACK_SOUTH_AFRICAN', 'BLACK_OTHER',
+
+        'HISPANIC', 'HISPANIC_COLOMBIAN', 'HISPANIC_CUBAN', 'HISPANIC_DOMINICAN',
+        'HISPANIC_ECUADORIAN', 'HISPANIC_HONDURAN', 'HISPANIC_MEXICAN', 'HISPANIC_PUERTO_RICAN',
+        'HISPANIC_SALVADORAN', 'HISPANIC_SPANISH', 'HISPANIC_OTHER',
+
+        'MENA', 'MENA_AFGHAN', 'MENA_ALGERIAN', 'MENA_EGYPTIAN', 'MENA_IRANIAN', 'MENA_IRAQI',
+        'MENA_ISRAELI', 'MENA_LEBANESE', 'MENA_MOROCCAN', 'MENA_SYRIAN', 'MENA_TUNISIAN',
+        'MENA_OTHER',
+
+        'NHPI', 'NHPI_CHAMORRO', 'NHPI_CHUUKESE', 'NHPI_FIJIAN', 'NHPI_MARSHALLESE',
+        'NHPI_HAWAIIAN', 'NHPI_PALAUAN', 'NHPI_SAMOAN', 'NHPI_TAHITIAN', 'NHPI_TONGAN',
+        'NHPI_OTHER',
+
+        'WHITE', 'WHITE_DUTCH', 'WHITE_ENGLISH', 'WHITE_EUROPEAN', 'WHITE_FRENCH',
+        'WHITE_GERMAN', 'WHITE_IRISH', 'WHITE_ITALIAN', 'WHITE_NORWEGIAN', 'WHITE_POLISH',
+        'WHITE_SCOTTISH', 'WHITE_SPANISH', 'WHITE_OTHER',
+
+        'OTHER', 'PREFER_NOT_TO_ANSWER'
+        )
+    </sql>
+  </changeSet>
+</databaseChangeLog>
