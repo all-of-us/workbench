@@ -14,7 +14,7 @@ import {
 } from 'generated/fetch';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { withProfileErrorModal } from 'app/components/with-error-modal';
+import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {

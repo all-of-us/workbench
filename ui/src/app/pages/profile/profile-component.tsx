@@ -28,7 +28,7 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
-} from 'app/components/with-error-modal';
+} from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { styles } from 'app/pages/profile/profile-styles';
