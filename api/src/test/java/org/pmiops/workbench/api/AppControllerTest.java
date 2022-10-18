@@ -69,7 +69,6 @@ public class AppControllerTest {
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
   private App testApp;
-  private DbWorkspace testWorkspace;
 
   @BeforeEach
   public void setUp() {
@@ -77,12 +76,11 @@ public class AppControllerTest {
     config.featureFlags.enableGkeApp = true;
 
     testApp = new App().appType(AppType.RSTUDIO).googleProject(GOOGLE_PROJECT_ID);
-    testWorkspace =
-        new DbWorkspace()
-            .setWorkspaceNamespace(WORKSPACE_NS)
-            .setGoogleProject(GOOGLE_PROJECT_ID)
-            .setName(WORKSPACE_NAME)
-            .setFirecloudName(WORKSPACE_ID);
+    DbWorkspace testWorkspace = new DbWorkspace()
+        .setWorkspaceNamespace(WORKSPACE_NS)
+        .setGoogleProject(GOOGLE_PROJECT_ID)
+        .setName(WORKSPACE_NAME)
+        .setFirecloudName(WORKSPACE_ID);
     doReturn(testWorkspace).when(mockWorkspaceService).lookupWorkspaceByNamespace((WORKSPACE_NS));
   }
 
