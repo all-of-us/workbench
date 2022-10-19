@@ -33,10 +33,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class AppControllerTest {
+public class AppsControllerTest {
   @TestConfiguration
   @Import({
-    AppController.class,
+    AppsController.class,
     FakeClockConfiguration.class,
     LeonardoApiHelper.class,
   })
@@ -55,7 +55,7 @@ public class AppControllerTest {
     }
   }
 
-  @Autowired private AppController controller;
+  @Autowired private AppsController controller;
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;

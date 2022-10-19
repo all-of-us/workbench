@@ -807,20 +807,20 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
-  "/v1/apps/{workspaceNamespace}":
+  "/v1/workspaces/{workspaceNamespace}/apps":
     get:
-      summary: Get the user's app by type.
-      description: "Returns the current user's app by type."
-      operationId: getApp
+      summary: List apps in workspace
+      description: List apps the caller has access to, in given workspaces
+      operationId: listAppsInWorkspace
       tags:
-        - app
+        - apps
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
       responses:
-        200:
-          description: The app for this user and workspace.
+        "200":
+          description: List of apps
           schema:
-            "$ref": "#/definitions/App"
+            "$ref": "#/definitions/ListAppsResponse"
         404:
           description: No app exists for this user and workspace.
           schema:
@@ -833,10 +833,9 @@ paths:
       summary: Create a workspace APP.
       description: |
         Creates a new app request is received the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the app is still initializing or is not in a ready state).
-        TODO(RW-3697): Custom app creation params should be added as a body param here.
       operationId: createApp
       tags:
-        - app
+        - apps
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: body
@@ -862,14 +861,47 @@ paths:
           description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
+  "/workspaces/{workspaceNamespace}/apps/{appName}":
+    get:
+      summary: Get the user's app by name in a workspace.
+      description: "Returns the current user's app by name in a workspace if exists."
+      operationId: getApp
+      tags:
+        - apps
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: appName
+          description: The name of app.
+          required: true
+          type: string
+      responses:
+        200:
+          description: The app for this user and workspace.
+          schema:
+            "$ref": "#/definitions/App"
+        404:
+          description: No app exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     patch:
       summary: Updates the configuration of a app
       description: In order to update the configuration of a app, it must first be running or paused
       operationId: updateApp
       tags:
-        - app
+        - apps
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: appName
+          description: The name of app.
+          required: true
+          type: string
         - in: body
           name: app
           schema:
@@ -895,9 +927,14 @@ paths:
       summary: Delete a workspace app.
       operationId: deleteApp
       tags:
-        - app
+        - apps
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: appName
+          description: The name of app.
+          required: true
+          type: string
         - in: query
           name: deleteDisk
           description: Whether or not disk should be deleted if the app is using persistent disk. Default to false if not specified
@@ -917,18 +954,6 @@ paths:
           description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/apps/":
-    get:
-      tags:
-        - app
-      summary: List apps
-      description: List apps the caller has access to, in all workspaces
-      operationId: listApp
-      responses:
-        "200":
-          description: List of apps
-          schema:
-            "$ref": "#/definitions/ListAppsResponse"
 
   "/v1/disks/{workspaceNamespace}":
     get:
