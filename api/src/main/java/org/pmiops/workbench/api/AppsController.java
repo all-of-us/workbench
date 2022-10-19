@@ -6,6 +6,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
+import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
@@ -81,5 +82,6 @@ public class AppsController implements AppsApiDelegate {
     if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
+    List<LeonardoListAppResponse>
   }
 }
