@@ -78,6 +78,8 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<ListAppsResponse> listAppsInWorkspace(String workspaceNamespace) {
-    throw new UnsupportedOperationException("API not supported.");
+    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
+      throw new UnsupportedOperationException("API not supported.");
+    }
   }
 }

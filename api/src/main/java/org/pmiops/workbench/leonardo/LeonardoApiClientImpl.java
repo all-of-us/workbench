@@ -37,6 +37,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -532,6 +533,15 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
               createAppRequest);
           return null;
         });
+  }
+
+  public List<App> listAppsInWorkspace(App app, String workspaceNamespace, String workspaceFirecloudName) {
+    AppsApi appsApi = appsApiProvider.get();
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
+    List<LeonardoListAppResponse> listAppResponses = leonardoRetryHandler.run(
+        (context) -> appsApi.listAppByProject(app.getGoogleProject(), /* labels= */ null, /* includeDeleted= */false,  /* includeLabels= */null));
+
+    listAppResponses.
   }
 
   @Override

@@ -17,8 +17,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -27,6 +29,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -35,6 +38,7 @@ import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
+import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -161,6 +165,49 @@ public interface LeonardoMapper {
         leonardoListRuntimeResponse.getDiskConfig());
   }
 
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  ListAppsResponse toApiListAppResponse(
+      LeonardoListAppResponse leonardoListAppResponse);
+
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "toolDockerImage", source = "appImages")
+  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
+  App toApiApp(LeonardoGetAppResponse app);
+
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "toolDockerImage", ignore = true)
+  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "errors", ignore = true)
+  App toApiApp(LeonardoListAppResponse app);
+
+  @AfterMapping
+  default void getAppAfterMapper(
+      @MappingTarget App app, LeonardoGetAppResponse leonardoGetAppResponse) {
+    mapLabels(app, leonardoGetAppResponse.getLabels());
+    mapAppConfig(
+        app,
+        leonardoGetAppResponse.getAppConfig(),
+        leonardoGetAppResponse.getDiskConfig());
+  }
+
+  @AfterMapping
+  default void listAppAfterMapper(
+      @MappingTarget App app, LeonardoListAppResponse leonardoListAppResponse) {
+    mapLabels(app, leonardoListAppResponse.getLabels());
+    mapAppConfig(
+        app,
+        leonardoListAppResponse.getAppConfig(),
+        leonardoListAppResponse.getDiskConfig());
+  }
+  
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
       LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
 
