@@ -162,6 +162,8 @@ public final class SearchGroupItemQueryBuilder {
   private static final String EVENT_DATE_SQL_TEMPLATE = " AND entry_date ";
   private static final String ENCOUNTERS_SQL_TEMPLATE = " AND visit_concept_id ";
 
+  private static final String CATI_FLAG_SQL_TEMPLATE = " AND is_cati ";
+
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =
       "EXISTS (\n"
@@ -180,7 +182,7 @@ public final class SearchGroupItemQueryBuilder {
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
 
-  /** Build the inner most sql using search parameters, modifiers and attributes. */
+  /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
       Map<String, QueryParameterValue> queryParams,
       List<String> queryParts,
@@ -203,7 +205,7 @@ public final class SearchGroupItemQueryBuilder {
     }
   }
 
-  /** Build the inner most sql */
+  /** Build the innermost sql */
   private static String buildBaseQuery(
       Map<String, QueryParameterValue> queryParams,
       SearchGroupItem searchGroupItem,
@@ -328,7 +330,8 @@ public final class SearchGroupItemQueryBuilder {
 
   /**
    * Implementation of temporal CB queries. Please reference the following google doc for details:
-   * https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
+   * <a href="https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8">CB
+   * Temporal Search Groups</a>
    */
   private static String buildInnerTemporalQuery(
       String modifiedSql,
@@ -354,8 +357,9 @@ public final class SearchGroupItemQueryBuilder {
   }
 
   /**
-   * The temporal group functionality description is here:
-   * https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
+   * The temporal group functionality description is here: <a
+   * href="https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8">CB
+   * Temporal Search Groups</a>
    */
   private static String buildOuterTemporalQuery(
       Map<String, QueryParameterValue> params, SearchGroup searchGroup) {
@@ -430,7 +434,7 @@ public final class SearchGroupItemQueryBuilder {
     StringBuilder sqlBuilder = new StringBuilder();
     for (Attribute attribute : attributes) {
       if (!AttrName.ANY.equals(attribute.getName())) {
-        // this makes an assumption that the UI adds systolic attribute first. Otherwise we will
+        // this makes an assumption that the UI adds systolic attribute first. Otherwise, we will
         // have to hard code the conceptId which is not optimal.
         String sqlTemplate =
             sqlBuilder.toString().contains("systolic") ? DIASTOLIC_SQL : SYSTOLIC_SQL;
@@ -575,6 +579,7 @@ public final class SearchGroupItemQueryBuilder {
     ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.AGE_AT_EVENT));
     ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.EVENT_DATE));
     ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.ENCOUNTERS));
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.CATI));
     StringBuilder modifierSql = new StringBuilder();
     for (Modifier modifier : ageDateAndEncounterModifiers) {
       if (modifier == null) {
@@ -585,7 +590,7 @@ public final class SearchGroupItemQueryBuilder {
         String modifierParameter =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams,
-                (isAgeAtEvent(modifier) || isEncounters(modifier))
+                (isAgeAtEvent(modifier) || isEncounters(modifier) || isCati(modifier))
                     ? QueryParameterValue.int64(new Long(operand))
                     : QueryParameterValue.date(operand));
         modifierParamList.add(modifierParameter);
@@ -599,6 +604,13 @@ public final class SearchGroupItemQueryBuilder {
             .append("\n");
       } else if (isEncounters(modifier)) {
         modifierSql.append(ENCOUNTERS_SQL_TEMPLATE);
+        modifierSql
+            .append(OperatorUtils.getSqlOperator(modifier.getOperator()))
+            .append(" (")
+            .append(modifierParamList.get(0))
+            .append(")\n");
+      } else if (isCati(modifier)) {
+        modifierSql.append(CATI_FLAG_SQL_TEMPLATE);
         modifierSql
             .append(OperatorUtils.getSqlOperator(modifier.getOperator()))
             .append(" (")
@@ -701,6 +713,10 @@ public final class SearchGroupItemQueryBuilder {
 
   private static boolean isEncounters(Modifier modifier) {
     return modifier.getName().equals(ModifierType.ENCOUNTERS);
+  }
+
+  private static boolean isCati(Modifier modifier) {
+    return modifier.getName().equals(ModifierType.CATI);
   }
 
   /** Validate attributes */
