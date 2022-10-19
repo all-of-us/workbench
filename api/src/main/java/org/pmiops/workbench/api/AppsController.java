@@ -7,7 +7,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.App;
-import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -61,7 +60,8 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteApp(String workspaceNamespace, String appName, Boolean deleteDisk) {
+  public ResponseEntity<EmptyResponse> deleteApp(
+      String workspaceNamespace, String appName, Boolean deleteDisk) {
     throw new UnsupportedOperationException("API not supported.");
   }
 
@@ -71,7 +71,8 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> updateApp(String workspaceNamespace, String appName, App app) {
+  public ResponseEntity<EmptyResponse> updateApp(
+      String workspaceNamespace, String appName, App app) {
     throw new UnsupportedOperationException("API not supported.");
   }
 
