@@ -5,6 +5,10 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="dolbeew" id="changelog-206-demographic-survey-v2-colombian-fix">
+    <!--
+      Add the new value of 'HISPANIC_COLOMBIAN' to the ethnic_category enum. This will replace the
+      old 'HISPANIC_COLUMBIAN' value after the update below
+    -->
     <sql>
       ALTER TABLE demographic_survey_v2_ethnic_category
         MODIFY COLUMN ethnic_category
@@ -39,11 +43,16 @@
         'OTHER', 'PREFER_NOT_TO_ANSWER'
         )
     </sql>
+    <!--
+      Update the ethnic_category column to replace the old 'HISPANIC_COLUMBIAN' value with the new
+      'HISPANIC_COLOMBIAN' value
+    -->
     <sql>
       UPDATE demographic_survey_v2_ethnic_category
-      SET ethnic_category = 'HISPANIC_COLOMBIAN'
-      WHERE ethnic_category = 'HISPANIC_COLUMBIAN'
+      SET ethnic_category = 'HISPANIC_COLOMBIAN' /* NEW */
+      WHERE ethnic_category = 'HISPANIC_COLUMBIAN' /* OLD */
     </sql>
+    <!--  Remove the old 'HISPANIC_COLUMBIAN' value from the enum  -->
     <sql>
       ALTER TABLE demographic_survey_v2_ethnic_category
         MODIFY COLUMN ethnic_category
