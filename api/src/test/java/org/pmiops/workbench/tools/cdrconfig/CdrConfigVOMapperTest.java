@@ -55,6 +55,8 @@ public class CdrConfigVOMapperTest {
     testVersionJson.cdrDbName = "data";
     testVersionJson.wgsBigqueryDataset = "wgs1";
     testVersionJson.hasFitbitData = false;
+    testVersionJson.hasFitbitSleepData = false;
+    testVersionJson.hasSurveyConductData = false;
     testVersionJson.hasCopeSurveyData = true;
     testVersionJson.wgsFilterSetName = "my_filter";
     testVersionJson.storageBasePath = "20";
@@ -162,6 +164,8 @@ public class CdrConfigVOMapperTest {
             .setCdrDbName(testVersionJson.cdrDbName)
             .setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset)
             .setHasFitbitData(testVersionJson.hasFitbitData)
+            .setHasFitbitSleepData(testVersionJson.hasFitbitData)
+            .setHasSurveyConductData(testVersionJson.hasFitbitData)
             .setHasCopeSurveyData(testVersionJson.hasCopeSurveyData)
             .setWgsFilterSetName(testVersionJson.wgsFilterSetName)
             .setWgsVcfMergedStoragePath(testVersionJson.wgsVcfMergedStoragePath)

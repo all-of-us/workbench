@@ -332,6 +332,8 @@ public class DbCdrVersion {
         wgsFilterSetName,
         hasFitbitData,
         hasCopeSurveyData,
+        hasFitbitSleepData,
+        hasSurveyConductData,
         storageBasePath,
         wgsVcfMergedStoragePath,
         wgsHailStoragePath,
@@ -365,6 +367,8 @@ public class DbCdrVersion {
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(wgsFilterSetName, that.wgsFilterSetName)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
+        && Objects.equals(hasFitbitSleepData, that.hasFitbitSleepData)
+        && Objects.equals(hasSurveyConductData, that.hasSurveyConductData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(storageBasePath, that.storageBasePath)
         && Objects.equals(wgsVcfMergedStoragePath, that.wgsVcfMergedStoragePath)

@@ -23,6 +23,8 @@ public class CdrVersionVO {
   public String wgsFilterSetName;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
+  public Boolean hasFitbitSleepData;
+  public Boolean hasSurveyConductData;
   public String storageBasePath;
   public String wgsVcfMergedStoragePath;
   public String wgsHailStoragePath;
