@@ -32,9 +32,9 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
       "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "hasCopeSurveyData": false,
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -76,6 +76,8 @@
       "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
+      "hasFitbitSleepData": false,
+      "hasSurveyConductData": false,
       "accessTier": "registered"
     },
     {
@@ -92,6 +94,8 @@
       "cdrDbName": "synth_c_2019q4_42",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
+      "hasFitbitSleepData": false,
+      "hasSurveyConductData": false,
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
@@ -102,7 +106,6 @@
       "cdrVersionId": 6,
       "isDefault": false,
       "archivalStatus": 1,
-      "accessTier": "registered",
       "name": "[Removed] Synthetic Dataset v3 with WGS",
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -111,7 +114,8 @@
       "numParticipants": 0,
       "cdrDbName": "synth_r_2019q4_19",
       "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "hasCopeSurveyData": false,
+      "accessTier": "registered"
     }
   ]
 }

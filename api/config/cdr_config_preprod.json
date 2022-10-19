@@ -31,9 +31,9 @@
       "releaseNumber": 3,
       "numParticipants": 224143,
       "cdrDbName": "r_2019q4_10",
-      "accessTier": "registered",
       "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "hasCopeSurveyData": false,
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -44,9 +44,9 @@
       "releaseNumber": 4,
       "numParticipants": 224001,
       "cdrDbName": "r_2019q4_10",
-      "accessTier": "registered",
       "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "hasCopeSurveyData": false,
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -115,12 +115,12 @@
       "cdrDbName": "c_2021q3_11",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "controlled",
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged/beta",
       "wgsHailStoragePath": "wgs/hail.mt",
       "microarrayHailStoragePath": "microarray/hail.mt",
-      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/alpha3"
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/alpha3",
+      "accessTier": "controlled"
     },
     {
       "cdrVersionId": 8,
@@ -134,6 +134,8 @@
       "cdrDbName": "r_2022q2_7",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
+      "hasFitbitSleepData": false,
+      "hasSurveyConductData": false,
       "accessTier": "registered"
     },
     {
@@ -150,6 +152,8 @@
       "cdrDbName": "c_2022q2_8",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
+      "hasFitbitSleepData": false,
+      "hasSurveyConductData": false,
       "accessTier": "controlled",
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged/beta",
