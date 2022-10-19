@@ -33,7 +33,7 @@ export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(
   undefined
 );
-export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
+export const systemErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(
   undefined
 );

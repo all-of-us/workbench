@@ -19,10 +19,10 @@ import colors from 'app/styles/colors';
 import {
   isBlank,
   reactStyles,
-  withGlobalError,
+  withSystemError,
   withUserProfile,
 } from 'app/utils';
-import { globalErrorStore } from 'app/utils/navigation';
+import { systemErrorStore } from 'app/utils/navigation';
 import { openZendeskWidget } from 'app/utils/zendesk';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -59,7 +59,7 @@ interface ServerDownStatus {
 }
 
 interface Props {
-  globalError: ErrorResponse;
+  systemError: ErrorResponse;
   profileState: { profile: Profile; reload: Function; updateCache: Function };
 }
 
@@ -73,9 +73,9 @@ interface State {
 // have it reconstruct/reinitialize with new errors.
 const shouldCheckStatus = new BehaviorSubject<any>(true);
 
-export const ErrorHandler = fp.flow(
+export const SystemErrorHandler = fp.flow(
   withUserProfile(),
-  withGlobalError()
+  withSystemError()
 )(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -95,10 +95,10 @@ export const ErrorHandler = fp.flow(
       if (this.state.serverDownStatus !== prevState.serverDownStatus) {
         this.setState({ serverStatusAcknowledged: false });
       }
-      const { globalError } = this.props;
-      if (globalError !== prevProps.globalError && globalError !== undefined) {
+      const { systemError } = this.props;
+      if (systemError !== prevProps.systemError && systemError !== undefined) {
         if (
-          (globalError.statusCode === 500 || globalError.statusCode === 503) &&
+          (systemError.statusCode === 500 || systemError.statusCode === 503) &&
           shouldCheckStatus.getValue()
         ) {
           // We don't want to spam our server if it is trying to recover and the server check returns a 500 or 503
@@ -132,7 +132,7 @@ export const ErrorHandler = fp.flow(
     }
 
     closeError() {
-      globalErrorStore.next(undefined);
+      systemErrorStore.next(undefined);
     }
 
     copyToClipboard() {
@@ -155,20 +155,20 @@ export const ErrorHandler = fp.flow(
     }
 
     render() {
-      const { globalError } = this.props;
+      const { systemError } = this.props;
       const {
         serverDownStatus: { apiDown, firecloudDown, notebooksDown },
       } = this.state;
 
       return (
-        globalError !== undefined && (
+        systemError !== undefined && (
           <React.Fragment>
-            {globalError.statusCode === 500 && (
+            {systemError.statusCode === 500 && (
               <div style={styles.errorHandler}>
                 <FlexRow style={styles.errorContent}>
                   <FlexColumn>
                     Unexpected Error
-                    {!isBlank(globalError.errorUniqueId) && (
+                    {!isBlank(systemError.errorUniqueId) && (
                       <div>
                         Please{' '}
                         <Button
@@ -182,7 +182,7 @@ export const ErrorHandler = fp.flow(
                         >
                           contact support
                         </Button>{' '}
-                        and use this error code: {globalError.errorUniqueId}
+                        and use this error code: {systemError.errorUniqueId}
                       </div>
                     )}
                   </FlexColumn>
@@ -194,7 +194,7 @@ export const ErrorHandler = fp.flow(
                 </FlexRow>
               </div>
             )}
-            {globalError.statusCode === 503 && (
+            {systemError.statusCode === 503 && (
               <div style={styles.errorHandler}>
                 Server is currently busy (503)
                 <FontAwesomeIcon
@@ -204,7 +204,7 @@ export const ErrorHandler = fp.flow(
                 />
               </div>
             )}
-            {globalError.errorCode === ErrorCode.USERDISABLED && (
+            {systemError.errorCode === ErrorCode.USERDISABLED && (
               <TextModal
                 title='This account has been disabled'
                 body='Please contact a system administrator to inquire about the status of your account.'

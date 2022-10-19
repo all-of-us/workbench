@@ -1,7 +1,4 @@
-import { ErrorCode } from 'generated/fetch';
-
-import { convertAPIError, isAbortError } from 'app/utils/errors';
-import { globalErrorStore } from 'app/utils/navigation';
+import { isAbortError } from 'app/utils/errors';
 
 // Retry a fetch `maxRetries` number of times with a `timeoutMillis` wait between retries
 // Respects fetch aborts
@@ -21,52 +18,6 @@ export async function fetchAbortableRetry<T>(
       }
       // effectively a sleep for timeoutMillis
       await new Promise((resolve) => setTimeout(resolve, timeoutMillis));
-    }
-  }
-}
-
-/*
- * A method to run an api call with our global error handling. It also adds retries on 503
- * errors. This will convert errors to our JavaScript object, and push them to our global
- * error handler.
- * Parameters:
- *    fetchFn: Lambda that will run an API call, in the form of () => apiClient.apiCall(args)
- *    maxRetries?: The number of times it will retry before failing. Defaults to 3.
- */
-
-export async function fetchWithGlobalErrorHandler<T>(
-  fetchFn: () => Promise<T>,
-  maxRetries: number = 3
-): Promise<T> {
-  let retries = 0;
-  while (true) {
-    try {
-      return await fetchFn();
-    } catch (e) {
-      retries++;
-      const errorResponse = await convertAPIError(e);
-      if (retries === maxRetries) {
-        globalErrorStore.next(errorResponse);
-        throw e;
-      }
-      switch (errorResponse.statusCode) {
-        case 503:
-          // Only retry on 503s
-          break;
-        case 500:
-          globalErrorStore.next(errorResponse);
-          throw e;
-        case 403:
-          if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
-            globalErrorStore.next(errorResponse);
-          }
-          throw e;
-        case 0:
-          globalErrorStore.next(errorResponse);
-          throw e;
-        default:
-          throw e;
-      }
     }
   }
 }
