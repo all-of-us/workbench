@@ -2236,10 +2236,7 @@ public class CohortReviewControllerTest {
     List<Vocabulary> actual =
         Objects.requireNonNull(
                 cohortReviewController
-                    .getVocabularies(
-                        workspace.getNamespace(),
-                        workspace.getId(),
-                        cohortReview.getCohortReviewId())
+                    .getVocabularies(workspace.getNamespace(), workspace.getId())
                     .getBody())
             .getItems();
 
@@ -2259,7 +2256,7 @@ public class CohortReviewControllerTest {
             ForbiddenException.class,
             () ->
                 cohortReviewController.getVocabularies(
-                    workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId()));
+                    workspace.getNamespace(), workspace.getId()));
 
     assertForbiddenException(exception);
   }

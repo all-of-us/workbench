@@ -459,7 +459,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<VocabularyListResponse> getVocabularies(
-      String workspaceNamespace, String workspaceId, Long cohortReviewId) {
+      String workspaceNamespace, String workspaceId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 

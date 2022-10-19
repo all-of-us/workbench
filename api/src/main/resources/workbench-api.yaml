@@ -3456,11 +3456,10 @@ paths:
           description: ParticipantCohortAnnotation deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/vocabularies":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
-    - "$ref": "#/parameters/cohortReviewId"
     get:
       tags:
       - cohortReview
