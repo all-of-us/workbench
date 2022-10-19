@@ -12,7 +12,7 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   currentWorkspaceStore,
-  globalErrorStore,
+  systemErrorStore,
 } from 'app/utils/navigation';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
@@ -317,8 +317,8 @@ export const withCurrentConceptSet = () => {
   return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
 };
 
-export const withGlobalError = () => {
-  return connectBehaviorSubject(globalErrorStore, 'globalError');
+export const withSystemError = () => {
+  return connectBehaviorSubject(systemErrorStore, 'systemError');
 };
 
 // HOC that provides a 'profileState' prop with current profile and a reload function

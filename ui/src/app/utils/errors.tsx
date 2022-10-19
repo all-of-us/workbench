@@ -1,5 +1,6 @@
 import { ErrorCode, ErrorResponse } from 'generated/fetch';
 
+import { systemErrorStore } from './navigation';
 import { stackdriverErrorReporterStore } from './stores';
 
 /**
@@ -37,5 +38,50 @@ export async function convertAPIError(e): Promise<ErrorResponse> {
     return { errorClassName, errorCode, errorUniqueId, message, statusCode };
   } catch {
     return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
+  }
+}
+
+/*
+ * A method to run an api call with our system-error handling. It also adds retries on 503
+ * errors. This will convert errors to our JavaScript object, and push them to our system
+ * error handler.
+ * Parameters:
+ *    fetchFn: Lambda that will run an API call, in the form of () => apiClient.apiCall(args)
+ *    maxRetries?: The number of times it will retry before failing. Defaults to 3.
+ */
+export async function fetchWithSystemErrorHandler<T>(
+  fetchFn: () => Promise<T>,
+  maxRetries: number = 3
+): Promise<T> {
+  let retries = 0;
+  while (true) {
+    try {
+      return await fetchFn();
+    } catch (e) {
+      retries++;
+      const errorResponse = await convertAPIError(e);
+      if (retries === maxRetries) {
+        systemErrorStore.next(errorResponse);
+        throw e;
+      }
+      switch (errorResponse.statusCode) {
+        case 503:
+          // Only retry on 503s
+          break;
+        case 500:
+          systemErrorStore.next(errorResponse);
+          throw e;
+        case 403:
+          if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
+            systemErrorStore.next(errorResponse);
+          }
+          throw e;
+        case 0:
+          systemErrorStore.next(errorResponse);
+          throw e;
+        default:
+          throw e;
+      }
+    }
   }
 }

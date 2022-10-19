@@ -19,7 +19,7 @@ import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 import * as StackTrace from 'stacktrace-js';
 
-import { ErrorHandler } from 'app/components/error-handler';
+import { SystemErrorHandler } from 'app/components/system-error-handler';
 import {
   checkBrowserSupport,
   exposeAccessTokenSetter,
@@ -41,5 +41,5 @@ ReactModal.defaultStyles.content = {};
 
 const domContainer = document.querySelector('#error-handler-root');
 const bodyContainer = document.querySelector('#root');
-ReactDOM.render(React.createElement(ErrorHandler), domContainer);
+ReactDOM.render(React.createElement(SystemErrorHandler), domContainer);
 ReactDOM.render(React.createElement(AppRoutingComponent), bodyContainer);
