@@ -76,16 +76,14 @@ export const withProfileErrorWrapper = (WrappedComponent) => {
     </React.Fragment>
   );
 
-  return ({ showErrorModal, ...props }) => {
-    return (
-      <WrappedComponent
-        showProfileErrorModal={(message) =>
-          showErrorModal('Error saving profile', body({ message }))
-        }
-        {...props}
-      />
-    );
-  };
+  return ({ showErrorModal, ...props }) => (
+    <WrappedComponent
+      showProfileErrorModal={(message) =>
+        showErrorModal('Error saving profile', body({ message }))
+      }
+      {...props}
+    />
+  );
 };
 
 export const withProfileErrorModal = fp.flow(
