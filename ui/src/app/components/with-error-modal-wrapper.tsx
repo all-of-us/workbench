@@ -15,7 +15,7 @@ export interface WithErrorModalProps {
   showErrorModal: (title: string, body: string) => void;
 }
 
-export const withErrorModal = () => {
+export const withErrorModalWrapper = () => {
   return (WrappedComponent) => {
     return class ErrorModalWrapper extends React.Component<any, State> {
       constructor(props) {
@@ -76,21 +76,17 @@ export const withProfileErrorWrapper = (WrappedComponent) => {
     </React.Fragment>
   );
 
-  const ProfileErrorWrapper = ({ showErrorModal, ...props }) => {
-    return (
-      <WrappedComponent
-        showProfileErrorModal={(message) =>
-          showErrorModal('Error saving profile', body({ message }))
-        }
-        {...props}
-      />
-    );
-  };
-
-  return ProfileErrorWrapper;
+  return ({ showErrorModal, ...props }) => (
+    <WrappedComponent
+      showProfileErrorModal={(message) =>
+        showErrorModal('Error saving profile', body({ message }))
+      }
+      {...props}
+    />
+  );
 };
 
 export const withProfileErrorModal = fp.flow(
   withProfileErrorWrapper,
-  withErrorModal()
+  withErrorModalWrapper()
 );
