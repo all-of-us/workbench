@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class AppController implements AppApiDelegate {
+public class AppsController implements AppsApiDelegate {
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
@@ -26,7 +26,7 @@ public class AppController implements AppApiDelegate {
   private final LeonardoApiHelper leonardoApiHelper;
 
   @Autowired
-  public AppController(
+  public AppsController(
       LeonardoApiClient leonardoApiClient,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
@@ -60,22 +60,24 @@ public class AppController implements AppApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteApp(String workspaceNamespace, Boolean deleteDisk) {
+  public ResponseEntity<EmptyResponse> deleteApp(
+      String workspaceNamespace, String appName, Boolean deleteDisk) {
     throw new UnsupportedOperationException("API not supported.");
   }
 
   @Override
-  public ResponseEntity<App> getApp(String workspaceNamespace) {
+  public ResponseEntity<App> getApp(String workspaceNamespace, String appName) {
     throw new UnsupportedOperationException("API not supported.");
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> updateApp(String workspaceNamespace, App app) {
+  public ResponseEntity<EmptyResponse> updateApp(
+      String workspaceNamespace, String appName, App app) {
     throw new UnsupportedOperationException("API not supported.");
   }
 
   @Override
-  public ResponseEntity<ListAppsResponse> listApp() {
+  public ResponseEntity<ListAppsResponse> listAppsInWorkspace(String workspaceNamespace) {
     throw new UnsupportedOperationException("API not supported.");
   }
 }
