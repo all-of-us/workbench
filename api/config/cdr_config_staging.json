@@ -32,9 +32,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -46,9 +44,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -60,9 +56,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 4,
@@ -74,9 +68,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 5,
@@ -108,7 +100,6 @@
     {
       "cdrVersionId": 7,
       "isDefault": true,
-      "accessTier": "controlled",
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-staging-ct",
       "bigqueryDataset": "test_R2019q4r3",
@@ -122,7 +113,8 @@
       "hasCopeSurveyData": true,
       "storageBasePath": "v1",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
-      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled"
     }
   ]
 }

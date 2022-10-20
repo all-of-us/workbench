@@ -30,7 +30,8 @@ public class DbCdrVersion {
   private String wgsFilterSetName;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
-
+  private Boolean hasFitbitSleepData;
+  private Boolean hasSurveyConductData;
   private String storageBasePath;
   private String wgsVcfMergedStoragePath;
   private String wgsHailStoragePath;
@@ -212,6 +213,26 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "has_fitbit_sleep_data")
+  public Boolean getHasFitbitSleepData() {
+    return hasFitbitSleepData == null ? false : hasFitbitSleepData;
+  }
+
+  public DbCdrVersion setHasFitbitSleepData(Boolean hasFitbitSleepData) {
+    this.hasFitbitSleepData = hasFitbitSleepData;
+    return this;
+  }
+
+  @Column(name = "has_survey_conduct_data")
+  public Boolean getHasSurveyConductData() {
+    return hasSurveyConductData == null ? false : hasSurveyConductData;
+  }
+
+  public DbCdrVersion setHasSurveyConductData(Boolean hasSurveyConductData) {
+    this.hasSurveyConductData = hasSurveyConductData;
+    return this;
+  }
+
   @Column(name = "storage_base_path")
   public String getStorageBasePath() {
     return storageBasePath;
@@ -311,6 +332,8 @@ public class DbCdrVersion {
         wgsFilterSetName,
         hasFitbitData,
         hasCopeSurveyData,
+        hasFitbitSleepData,
+        hasSurveyConductData,
         storageBasePath,
         wgsVcfMergedStoragePath,
         wgsHailStoragePath,
@@ -344,6 +367,8 @@ public class DbCdrVersion {
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(wgsFilterSetName, that.wgsFilterSetName)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
+        && Objects.equals(hasFitbitSleepData, that.hasFitbitSleepData)
+        && Objects.equals(hasSurveyConductData, that.hasSurveyConductData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
         && Objects.equals(storageBasePath, that.storageBasePath)
         && Objects.equals(wgsVcfMergedStoragePath, that.wgsVcfMergedStoragePath)

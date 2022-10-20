@@ -110,19 +110,51 @@ public class CdrVersionServiceTest {
 
     defaultCdrVersion =
         makeCdrVersion(
-            1L, /* isDefault */ true, "Test Registered CDR", registeredTier, null, false, false);
+            1L, /* isDefault */
+            true,
+            "Test Registered CDR",
+            registeredTier,
+            null,
+            false,
+            false,
+            false,
+            false);
     nonDefaultCdrVersion =
         makeCdrVersion(
-            2L, /* isDefault */ false, "Old Registered CDR", registeredTier, null, false, false);
+            2L, /* isDefault */
+            false,
+            "Old Registered CDR",
+            registeredTier,
+            null,
+            false,
+            false,
+            false,
+            false);
 
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     controlledCdrVersion =
         makeCdrVersion(
-            3L, /* isDefault */ true, "Test Controlled CDR", controlledTier, null, false, false);
+            3L, /* isDefault */
+            true,
+            "Test Controlled CDR",
+            controlledTier,
+            null,
+            false,
+            false,
+            false,
+            false);
     controlledNonDefaultCdrVersion =
         makeCdrVersion(
-            4L, /* isDefault */ false, "Old Controlled CDR", controlledTier, null, false, false);
+            4L, /* isDefault */
+            false,
+            "Old Controlled CDR",
+            controlledTier,
+            null,
+            false,
+            false,
+            false,
+            false);
   }
 
   @Test
@@ -211,6 +243,16 @@ public class CdrVersionServiceTest {
   }
 
   @Test
+  public void testGetCdrVersionsHasFitbitSleepData() {
+    testGetCdrVersionsHasDataType(CdrVersion::getHasFitbitSleepData);
+  }
+
+  @Test
+  public void testGetCdrVersionsHasSurveyConductData() {
+    testGetCdrVersionsHasDataType(CdrVersion::getHasSurveyConductData);
+  }
+
+  @Test
   public void testGetCdrVersionsHasCopeSurveyData() {
     testGetCdrVersionsHasDataType(CdrVersion::getHasCopeSurveyData);
   }
@@ -260,7 +302,8 @@ public class CdrVersionServiceTest {
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
-    makeCdrVersion(5L, true, "Test CDR With Data Types", registeredTier, "wgs", true, true);
+    makeCdrVersion(
+        5L, true, "Test CDR With Data Types", registeredTier, "wgs", true, true, true, true);
     final List<CdrVersion> newVersions =
         parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
 
@@ -294,7 +337,9 @@ public class CdrVersionServiceTest {
       DbAccessTier accessTier,
       String wgsDataset,
       boolean hasFitbit,
-      boolean hasCopeSurveyData) {
+      boolean hasCopeSurveyData,
+      boolean hasFitbitSleepData,
+      boolean hasSurevyConductData) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -306,6 +351,8 @@ public class CdrVersionServiceTest {
     cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
+    cdrVersion.setHasFitbitSleepData(hasFitbitSleepData);
+    cdrVersion.setHasSurveyConductData(hasSurevyConductData);
     return cdrVersionDao.save(cdrVersion);
   }
 
