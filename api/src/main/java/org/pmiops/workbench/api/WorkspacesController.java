@@ -742,9 +742,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    // TEMP HACK
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace + "_404", workspaceId);
-    // DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
     List<UserRole> userRoles =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
