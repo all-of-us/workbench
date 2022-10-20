@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
+import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -45,9 +46,6 @@ public class AppsController implements AppsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> createApp(
       String workspaceNamespace, CreateAppRequest createAppRequest) {
-    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
 
@@ -63,9 +61,6 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<App> getApp(String workspaceNamespace, String appName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
 
@@ -81,9 +76,6 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<ListAppsResponse> listAppsInWorkspace(String workspaceNamespace) {
-    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
 
@@ -92,8 +84,23 @@ public class AppsController implements AppsApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  /** */
-  private void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
+  /**
+   * Validates user is allowed to perform acc action.
+   *
+   * <p>App ACTION requires:
+   *
+   * <ul>
+   *   <li>Feature is enabled
+   *   <li>User compute is not suspend due to security reason (e.g. egress alert)
+   *   <li>User is OWNER or WRITER of the workspace
+   *   <li>Workspace has valid billing.
+   * </ul>
+   */
+  @VisibleForTesting
+  protected void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
+    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
+      throw new UnsupportedOperationException("API not supported.");
+    }
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();

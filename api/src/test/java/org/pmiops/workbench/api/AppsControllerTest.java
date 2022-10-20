@@ -97,43 +97,6 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateAppFail_featureNotEnabled() throws Exception {
-    config.featureFlags.enableGkeApp = false;
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> controller.createApp(WORKSPACE_NS, createAppRequest));
-  }
-
-  @Test
-  public void testCreateAppFail_securitySuspended() throws ApiException {
-    user.setComputeSecuritySuspendedUntil(
-        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
-    assertThrows(
-        FailedPreconditionException.class,
-        () -> controller.createApp(WORKSPACE_NS, createAppRequest));
-  }
-
-  @Test
-  public void testCreateAppFail_noWorkspacePermission() throws ApiException {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(
-        ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));
-  }
-
-  @Test
-  public void testCreateAppFail_validateActiveBilling() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
-
-    assertThrows(
-        ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));
-  }
-
-  @Test
   public void testGetAppSuccess() throws Exception {
     controller.getApp(WORKSPACE_NS, APP_NAME);
     verify(mockLeonardoApiClient).getAppByNameByProjectId(GOOGLE_PROJECT_ID, APP_NAME);
@@ -143,5 +106,42 @@ public class AppsControllerTest {
   public void testListAppSuccess() throws Exception {
     controller.listAppsInWorkspace(WORKSPACE_NS);
     verify(mockLeonardoApiClient).listAppsInProject(GOOGLE_PROJECT_ID);
+  }
+
+  @Test
+  public void testCanPerformAppActions_featureNotEnabled() throws Exception {
+    config.featureFlags.enableGkeApp = false;
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> controller.validateCanPerformApiAction(testWorkspace));
+  }
+
+  @Test
+  public void testCanPerformAppActions_securitySuspended() throws ApiException {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> controller.validateCanPerformApiAction(testWorkspace));
+  }
+
+  @Test
+  public void testCanPerformAppActions_noWorkspacePermission() throws ApiException {
+    doThrow(ForbiddenException.class)
+        .when(mockWorkspaceAuthService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
+
+    assertThrows(
+        ForbiddenException.class, () -> controller.validateCanPerformApiAction(testWorkspace));
+  }
+
+  @Test
+  public void testCanPerformAppActions_validateActiveBilling() {
+    doThrow(ForbiddenException.class)
+        .when(mockWorkspaceAuthService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    assertThrows(
+        ForbiddenException.class, () -> controller.validateCanPerformApiAction(testWorkspace));
   }
 }
