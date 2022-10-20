@@ -1,12 +1,12 @@
 import { ErrorCode, ErrorResponse } from 'generated/fetch';
 
 import { cond } from './index';
+import { systemErrorStore } from './navigation';
 import {
   NotificationStore,
   notificationStore,
   stackdriverErrorReporterStore,
 } from './stores';
-import { systemErrorStore } from './navigation';
 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
