@@ -32,8 +32,6 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -65,7 +63,6 @@
     },
     {
       "cdrVersionId": 4,
-      "isDefault": false,
       "archivalStatus": 1,
       "name": "[Removed] Synthetic Dataset v3 with Microarray",
       "bigqueryProject": "",
@@ -76,8 +73,6 @@
       "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "accessTier": "registered"
     },
     {
@@ -94,8 +89,6 @@
       "cdrDbName": "synth_c_2019q4_42",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
@@ -104,7 +97,6 @@
     },
     {
       "cdrVersionId": 6,
-      "isDefault": false,
       "archivalStatus": 1,
       "name": "[Removed] Synthetic Dataset v3 with WGS",
       "bigqueryProject": "",
@@ -113,8 +105,6 @@
       "releaseNumber": 3,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2019q4_19",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     }
   ]

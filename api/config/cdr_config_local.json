@@ -32,8 +32,6 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "cdr",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -61,13 +59,10 @@
       "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "accessTier": "registered"
     },
     {
       "cdrVersionId": 4,
-      "isDefault": false,
       "archivalStatus": 1,
       "name": "[Removed] Synthetic Dataset v3 with Microarray",
       "bigqueryProject": "",
@@ -94,8 +89,6 @@
       "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "storageBasePath": "5",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
@@ -104,7 +97,6 @@
     },
     {
       "cdrVersionId": 6,
-      "isDefault": false,
       "archivalStatus": 1,
       "name": "[Removed] Synthetic Dataset v3 with WGS",
       "bigqueryProject": "",
@@ -113,13 +105,10 @@
       "releaseNumber": 3,
       "numParticipants": 0,
       "cdrDbName": "cdr",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
       "cdrVersionId": 7,
-      "isDefault": false,
       "name": "Outdated CT CDR",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "test_R2019q4r3",
@@ -127,8 +116,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "controlled"
     }
   ]

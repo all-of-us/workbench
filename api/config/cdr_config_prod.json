@@ -31,8 +31,6 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_1",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -45,8 +43,6 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "r_2019q1_4",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -59,8 +55,6 @@
       "releaseNumber": 2,
       "numParticipants": 0,
       "cdrDbName": "r_2019q2_2",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -73,8 +67,6 @@
       "releaseNumber": 2,
       "numParticipants": 0,
       "cdrDbName": "r_2019q2_2",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -86,8 +78,6 @@
       "releaseNumber": 3,
       "numParticipants": 224143,
       "cdrDbName": "r_2019q4_10",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -149,8 +139,6 @@
       "cdrDbName": "r_2022q2_7",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "accessTier": "registered"
     },
     {
@@ -167,8 +155,6 @@
       "cdrDbName": "c_2022q2_8",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "storageBasePath": "v6",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsHailStoragePath": "wgs/hail.mt",

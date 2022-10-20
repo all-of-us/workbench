@@ -31,8 +31,6 @@
       "releaseNumber": 3,
       "numParticipants": 224143,
       "cdrDbName": "r_2019q4_10",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -44,8 +42,6 @@
       "releaseNumber": 4,
       "numParticipants": 224001,
       "cdrDbName": "r_2019q4_10",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false,
       "accessTier": "registered"
     },
     {
@@ -134,8 +130,6 @@
       "cdrDbName": "r_2022q2_7",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "accessTier": "registered"
     },
     {
@@ -152,8 +146,6 @@
       "cdrDbName": "c_2022q2_8",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasFitbitSleepData": false,
-      "hasSurveyConductData": false,
       "accessTier": "controlled",
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged/beta",
