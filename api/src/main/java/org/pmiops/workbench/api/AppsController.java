@@ -6,7 +6,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -44,7 +43,8 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> createApp(String workspaceNamespace, CreateAppRequest createAppRequest) {
+  public ResponseEntity<EmptyResponse> createApp(
+      String workspaceNamespace, CreateAppRequest createAppRequest) {
     if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
@@ -69,7 +69,8 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
 
-    return leonardoApiClient.
+    return ResponseEntity.ok(
+        leonardoApiClient.getAppByNameByProjectId(dbWorkspace.getGoogleProject(), appName));
   }
 
   @Override
@@ -86,12 +87,12 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
 
-    throw new UnsupportedOperationException("API not supported.");
+    ListAppsResponse response = new ListAppsResponse();
+    response.addAll(leonardoApiClient.listAppsInProject(dbWorkspace.getGoogleProject()));
+    return ResponseEntity.ok(response);
   }
 
-  /**
-   *
-   */
+  /** */
   private void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);

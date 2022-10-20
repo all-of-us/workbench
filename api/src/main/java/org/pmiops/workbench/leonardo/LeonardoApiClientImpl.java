@@ -518,12 +518,15 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .appType(leonardoMapper.toLeonardoAppType(app.getAppType()))
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(app.getKubernetesRuntimeConfig()))
-        .diskConfig(leonardoMapper.toLeonardoPersistentDiskRequest(createAppRequest.getPersistentDiskRequest()))
+        .diskConfig(
+            leonardoMapper.toLeonardoPersistentDiskRequest(
+                createAppRequest.getPersistentDiskRequest()))
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
 
     if (app.getAppType().equals(AppType.RSTUDIO)) {
-      leonardoCreateAppRequest.descriptorPath(workbenchConfigProvider.get().app.rStudioDescriptorPath);
+      leonardoCreateAppRequest.descriptorPath(
+          workbenchConfigProvider.get().app.rStudioDescriptorPath);
     }
 
     leonardoRetryHandler.run(
@@ -540,16 +543,22 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public App getAppByNameByProjectId(String googleProjectId, String appName) {
     AppsApi appsApi = appsApiProvider.get();
 
-    LeonardoGetAppResponse leonardoGetAppResponse = leonardoRetryHandler.run(
-        (context) -> appsApi.getApp(googleProjectId, appName));
+    LeonardoGetAppResponse leonardoGetAppResponse =
+        leonardoRetryHandler.run((context) -> appsApi.getApp(googleProjectId, appName));
     return leonardoMapper.toApiApp(leonardoGetAppResponse);
   }
 
   @Override
   public List<App> listAppsInProject(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
-    List<LeonardoListAppResponse> listAppResponses = leonardoRetryHandler.run(
-        (context) -> appsApi.listAppByProject(googleProjectId, /* labels= */ null, /* includeDeleted= */false,  /* includeLabels= */null));
+    List<LeonardoListAppResponse> listAppResponses =
+        leonardoRetryHandler.run(
+            (context) ->
+                appsApi.listAppByProject(
+                    googleProjectId,
+                    /* labels= */ null,
+                    /* includeDeleted= */ false,
+                    /* includeLabels= */ null));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }

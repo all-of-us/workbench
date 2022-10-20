@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -143,8 +142,8 @@ public class LeonardoApiClientTest {
             .appType(AppType.RSTUDIO)
             .googleProject(GOOGLE_PROJECT_ID)
             .kubernetesRuntimeConfig(kubernetesRuntimeConfig);
-    createAppRequest = new CreateAppRequest().app(testApp)
-            .persistentDiskRequest(persistentDiskRequest);
+    createAppRequest =
+        new CreateAppRequest().app(testApp).persistentDiskRequest(persistentDiskRequest);
 
     DbCdrVersion cdrVersion =
         new DbCdrVersion()
@@ -159,7 +158,7 @@ public class LeonardoApiClientTest {
                     .setDatasetsBucket(CDR_BUCKET))
             .setStorageBasePath(CDR_STORAGE_BASE_PATH)
             .setWgsCramManifestPath(WGS_PATH);
-     testWorkspace =
+    testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
@@ -181,7 +180,7 @@ public class LeonardoApiClientTest {
   }
 
   @Test
-  public void testCreateAppSuccess_success() throws Exception {
+  public void testCreateAppSuccess() throws Exception {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
     leonardoApiClient.createApp(createAppRequest, testWorkspace);
     verify(userAppsApi)
@@ -202,6 +201,18 @@ public class LeonardoApiClientTest {
             .customEnvironmentVariables(customEnvironmentVariables);
 
     assertThat(createAppRequest).isEqualTo(expectedAppRequest);
+  }
+
+  @Test
+  public void testGetAppSuccess() throws Exception {
+    leonardoApiClient.getAppByNameByProjectId(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
+    verify(userAppsApi).getApp(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
+  }
+
+  @Test
+  public void testListAppSuccess() throws Exception {
+    leonardoApiClient.listAppsInProject(GOOGLE_PROJECT_ID);
+    verify(userAppsApi).listAppByProject(GOOGLE_PROJECT_ID, null, null, null);
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {

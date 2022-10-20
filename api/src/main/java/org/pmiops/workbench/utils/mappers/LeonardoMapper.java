@@ -4,12 +4,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -41,7 +38,6 @@ import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
-import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -176,7 +172,6 @@ public interface LeonardoMapper {
   @Mapping(target = "autopauseThreshold", ignore = true)
   App toApiApp(LeonardoGetAppResponse app);
 
-
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
@@ -186,7 +181,8 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getAppAfterMapper(
       @MappingTarget App app, LeonardoGetAppResponse leonardoGetAppResponse) {
-    app.appName(leonardoGetAppResponse.getAppName()).googleProject(leonardoGetAppResponse.getGoogleProject());
+    app.appName(leonardoGetAppResponse.getAppName())
+        .googleProject(leonardoGetAppResponse.getGoogleProject());
     mapAppType(app, leonardoGetAppResponse.getAppName());
   }
 
