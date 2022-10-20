@@ -63,6 +63,7 @@
     },
     {
       "cdrVersionId": 4,
+      "isDefault": false,
       "archivalStatus": 1,
       "name": "[Removed] Synthetic Dataset v3 with Microarray",
       "bigqueryProject": "",
@@ -97,6 +98,7 @@
     },
     {
       "cdrVersionId": 6,
+      "isDefault": false,
       "archivalStatus": 1,
       "name": "[Removed] Synthetic Dataset v3 with WGS",
       "bigqueryProject": "",
