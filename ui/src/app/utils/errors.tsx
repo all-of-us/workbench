@@ -146,14 +146,13 @@ const errorHandlerWithFallback = (
 ): Promise<NotificationStore> =>
   convertAPIError(anyApiErrorResponse).then((errorResponse) => {
     // if this "error" is expected and should instead be considered a success
-    const expectedError: boolean = expectedResponseMatcher?.(errorResponse);
+    const expectedError = expectedResponseMatcher?.(errorResponse);
     // the custom error response for this error, if applicable
-    const customResponse: NotificationStore | undefined =
-      customErrorResponseFormatter?.(errorResponse);
+    const customResponse = customErrorResponseFormatter?.(errorResponse);
 
     return (
       !expectedError &&
-      (customResponse ?? {
+      (customResponse || {
         title: 'An error has occurred',
         message: defaultErrorResponseFormatter(errorResponse),
       })

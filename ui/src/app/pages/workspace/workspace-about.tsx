@@ -3,13 +3,7 @@ import * as fp from 'lodash/fp';
 import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import {
-  CdrVersionTiersResponse,
-  ErrorCode,
-  ErrorResponse,
-  Profile,
-  UserRole,
-} from 'generated/fetch';
+import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
 
 import {
   Button,
@@ -38,7 +32,6 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { NotificationStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -214,32 +207,16 @@ export const WorkspaceAbout = fp.flow(
       this.setState({ workspace });
     }
 
-    temp1(er: ErrorResponse): boolean {
-      return er.statusCode === 404;
-    }
-    temp2(er: ErrorResponse): NotificationStore {
-      return (
-        er.statusCode === 429 &&
-        er.errorCode === ErrorCode.USERDISABLED && {
-          title: 'USERDISABLED',
-          message: 'saw 429',
-        }
-      );
-    }
-
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      fetchWithErrorModal(
-        () =>
-          workspacesApi()
-            .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
-            .then((resp) => {
-              this.setState({
-                workspaceUserRoles: fp.sortBy('familyName', resp.items),
-              });
-            }),
-        (er) => this.temp1(er),
-        (er) => this.temp2(er)
+      fetchWithErrorModal(() =>
+        workspacesApi()
+          .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
+          .then((resp) => {
+            this.setState({
+              workspaceUserRoles: fp.sortBy('familyName', resp.items),
+            });
+          })
       );
     }
 
