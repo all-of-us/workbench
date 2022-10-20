@@ -92,25 +92,26 @@ export async function fetchWithSystemErrorHandler<T>(
 }
 
 // TODO handle errorClassName and parameters?
-const defaultErrorResponseFormatter = (
+export const defaultErrorResponseFormatter = (
   errorResponse: ErrorResponse
 ): string => {
   const { message, statusCode, errorCode, errorUniqueId } = errorResponse;
 
-  const errorCodeStr = errorCode ? `of type ${errorCode.toString()} ` : '';
+  const errorCodeStr = errorCode ? ` of type ${errorCode.toString()}` : '';
   const messageStr = message ? `: ${message}` : '.';
 
   const detailsStr = cond(
     [
       !!statusCode && !!errorUniqueId,
       () =>
-        `with HTTP status code ${statusCode} and unique ID ${errorUniqueId}`,
+        ` with HTTP status code ${statusCode} and unique ID ${errorUniqueId}`,
     ],
-    [!!statusCode, () => `with HTTP status code ${statusCode}`],
-    [!!errorUniqueId, () => `with unique ID ${errorUniqueId}`]
+    [!!statusCode, () => ` with HTTP status code ${statusCode}`],
+    [!!errorUniqueId, () => ` with unique ID ${errorUniqueId}`],
+    () => ''
   );
 
-  return `An API error ${errorCodeStr} occurred ${detailsStr}${messageStr}`;
+  return `An API error${errorCodeStr} occurred${detailsStr}${messageStr}`;
 };
 
 /**
