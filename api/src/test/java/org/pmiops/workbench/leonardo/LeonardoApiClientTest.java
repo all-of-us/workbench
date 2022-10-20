@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
@@ -113,7 +115,9 @@ public class LeonardoApiClientTest {
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
 
+  private DbWorkspace testWorkspace;
   private App testApp;
+  private CreateAppRequest createAppRequest;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
   private Map<String, String> appLabels = new HashMap<>();
@@ -138,7 +142,8 @@ public class LeonardoApiClientTest {
         new App()
             .appType(AppType.RSTUDIO)
             .googleProject(GOOGLE_PROJECT_ID)
-            .kubernetesRuntimeConfig(kubernetesRuntimeConfig)
+            .kubernetesRuntimeConfig(kubernetesRuntimeConfig);
+    createAppRequest = new CreateAppRequest().app(testApp)
             .persistentDiskRequest(persistentDiskRequest);
 
     DbCdrVersion cdrVersion =
@@ -154,7 +159,7 @@ public class LeonardoApiClientTest {
                     .setDatasetsBucket(CDR_BUCKET))
             .setStorageBasePath(CDR_STORAGE_BASE_PATH)
             .setWgsCramManifestPath(WGS_PATH);
-    DbWorkspace testWorkspace =
+     testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
@@ -178,7 +183,7 @@ public class LeonardoApiClientTest {
   @Test
   public void testCreateAppSuccess_success() throws Exception {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
-    leonardoApiClient.createApp(testApp, WORKSPACE_NS, WORKSPACE_NAME);
+    leonardoApiClient.createApp(createAppRequest, testWorkspace);
     verify(userAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),

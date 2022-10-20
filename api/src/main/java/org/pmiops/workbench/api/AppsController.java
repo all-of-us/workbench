@@ -8,6 +8,7 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.model.App;
+import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -43,20 +44,14 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> createApp(String workspaceNamespace, App app) {
+  public ResponseEntity<EmptyResponse> createApp(String workspaceNamespace, CreateAppRequest createAppRequest) {
     if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
-    DbUser user = userProvider.get();
-    leonardoApiHelper.enforceComputeSecuritySuspension(user);
-
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    validateCanPerformApiAction(dbWorkspace);
 
-    leonardoApiClient.createApp(app, workspaceNamespace, firecloudWorkspaceName);
+    leonardoApiClient.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -68,7 +63,13 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<App> getApp(String workspaceNamespace, String appName) {
-    throw new UnsupportedOperationException("API not supported.");
+    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
+      throw new UnsupportedOperationException("API not supported.");
+    }
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    validateCanPerformApiAction(dbWorkspace);
+
+    return leonardoApiClient.
   }
 
   @Override
@@ -82,5 +83,22 @@ public class AppsController implements AppsApiDelegate {
     if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    validateCanPerformApiAction(dbWorkspace);
+
+    throw new UnsupportedOperationException("API not supported.");
+  }
+
+  /**
+   *
+   */
+  private void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
+    DbUser user = userProvider.get();
+    leonardoApiHelper.enforceComputeSecuritySuspension(user);
+    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
   }
 }

@@ -6247,11 +6247,19 @@ definitions:
       diskName:
         type: string
         description: Read only. The name of the disk associated with this app
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the runtime was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
       errors:
         type: array
         description: The list of errors that were encountered on APP create, if any.
         items:
           $ref: "#/definitions/KubernetesError"
+      labels:
+        type: object
+        description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
 
   KubernetesError:
       description: a kubernetes app error

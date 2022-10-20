@@ -4,9 +4,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -165,49 +168,39 @@ public interface LeonardoMapper {
         leonardoListRuntimeResponse.getDiskConfig());
   }
 
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  ListAppsResponse toApiListAppResponse(
-      LeonardoListAppResponse leonardoListAppResponse);
-
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "createdDate", source = "diskName")
-  @Mapping(target = "kubernetesRuntimeConfig", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "createdDate", source = "app.auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "app.auditInfo.dateAccessed")
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "appName", source = "appName")
+  @Mapping(target = "googleProject", source = "googleProject")
+  @Mapping(target = "autopauseThreshold", ignore = true)
   App toApiApp(LeonardoGetAppResponse app);
 
+
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(target = "appType", ignore = true)
   @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(target = "toolDockerImage", ignore = true)
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
-  @Mapping(target = "errors", ignore = true)
   App toApiApp(LeonardoListAppResponse app);
 
   @AfterMapping
   default void getAppAfterMapper(
       @MappingTarget App app, LeonardoGetAppResponse leonardoGetAppResponse) {
-    mapLabels(app, leonardoGetAppResponse.getLabels());
-    mapAppConfig(
-        app,
-        leonardoGetAppResponse.getAppConfig(),
-        leonardoGetAppResponse.getDiskConfig());
+    app.appName(leonardoGetAppResponse.getAppName()).googleProject(leonardoGetAppResponse.getGoogleProject());
+    mapAppType(app, leonardoGetAppResponse.getAppName());
   }
 
   @AfterMapping
   default void listAppAfterMapper(
       @MappingTarget App app, LeonardoListAppResponse leonardoListAppResponse) {
-    mapLabels(app, leonardoListAppResponse.getLabels());
-    mapAppConfig(
-        app,
-        leonardoListAppResponse.getAppConfig(),
-        leonardoListAppResponse.getDiskConfig());
+    mapAppType(app, leonardoListAppResponse.getAppName());
   }
-  
+
+  default void mapAppType(App app, String appName) {
+    // App name format is all-of-us-{user-id}-{appType}.
+    app.appType(AppType.fromValue(appName.substring(appName.lastIndexOf('-') + 1).toUpperCase()));
+  }
+
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
       LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
 

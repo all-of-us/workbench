@@ -1,13 +1,16 @@
 package org.pmiops.workbench.leonardo;
 
+import java.net.CacheRequest;
 import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.App;
+import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
@@ -81,12 +84,26 @@ public interface LeonardoApiClient {
   /**
    * Creates Leonardo app owned by the current authenticated user.
    *
-   * @param app the details for the app to create
-   * @param workspaceNamespace the workspace namespace to identify a workspace.
-   * @param workspaceFirecloudName the firecloudName of the workspace this app is associated with
+   * @param createAppRequest the details for the app to create
+   * @param dbWorkspace the workspace to create App within.
    */
-  void createApp(App app, String workspaceNamespace, String workspaceFirecloudName)
+  void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException;
+
+  /**
+   * Gets Leonardo app owned by app name and workspace GCP project
+   *
+   * @param googleProjectId the GCP project if of the workpsace for the app to create
+   * @param appName the name of the app
+   */
+  App getAppByNameByProjectId(String googleProjectId, String appName);
+
+  /**
+   * Lists all apps the user have permission on in the given workspace GCP project
+   *
+   * @param googleProjectId the GCP project if of the workpsace for the app to create
+   */
+  List<App> listAppsInProject(String googleProjectId);
 
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();

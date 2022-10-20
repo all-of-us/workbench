@@ -3023,6 +3023,12 @@ components:
         - auditInfo
       type: object
       properties:
+        appName:
+          type: string
+          description: the name of the app
+        googleProject:
+          type: string
+          description: Deprecated. The project this app is associated with
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         errors:
@@ -3045,6 +3051,9 @@ components:
           $ref: "#/components/schemas/AuditInfo"
         appType:
           $ref: '#/components/schemas/AppType'
+        labels:
+          type: object
+          description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
 
     ListAppResponse:
       description: the configuration of an app
