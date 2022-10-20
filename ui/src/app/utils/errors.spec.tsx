@@ -1,8 +1,4 @@
-import {
-  ErrorCode,
-  ErrorResponse,
-  WorkspaceUserRolesResponse,
-} from 'generated/fetch';
+import { ErrorCode, ErrorResponse } from 'generated/fetch';
 
 import {
   defaultErrorResponseFormatter,
