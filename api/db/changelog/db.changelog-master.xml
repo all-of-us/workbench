@@ -214,6 +214,7 @@
   <include file="changelog/db.changelog-204-demographic-survey-fk-constraint.xml"/>
   <include file="changelog/db.changelog-205-last-modified-by.xml"/>
   <include file="changelog/db.changelog-206-demographic-survey-v2-colombian-fix.xml"/>
+  <include file="changelog/db.changelog-207-cdr-version-hasFitbitSleep-hasSurveyConduct-field.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
