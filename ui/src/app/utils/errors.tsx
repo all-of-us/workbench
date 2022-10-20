@@ -92,7 +92,9 @@ export async function fetchWithSystemErrorHandler<T>(
 }
 
 // TODO handle errorClassName and parameters?
-const defaultResponseFormatter = (errorResponse: ErrorResponse): string => {
+const defaultErrorResponseFormatter = (
+  errorResponse: ErrorResponse
+): string => {
   const { message, statusCode, errorCode, errorUniqueId } = errorResponse;
 
   const errorCodeStr = errorCode ? `of type ${errorCode.toString()} ` : '';
@@ -113,30 +115,93 @@ const defaultResponseFormatter = (errorResponse: ErrorResponse): string => {
 
 /**
  * Convert an API error response (of any type) to a format suitable for an error modal.  The caller may supply a
- * formatter for expected responses; if it doesn't match, the defaultFormatter will be used.
+ * matcher for expected error responses which should be considered successes, and a custom formatter for expected
+ * failure responses; if neither of these match, the defaultErrorResponseFormatter will be used.
  *
- * @param anyResponse The response from an API call, of any type
- * @param expectedResponseFormatter An optional handler for expected responses; if missing or this handler returns
+ * Example: an (async) API call getInfo() sometimes appropriately returns 404s which should not be considered errors,
+ * and there's a common error case (HTTP 429, Error Code TOO_FAST) which we want to handle specially.
+ *
+ * const responseP = getInfo();
+ * await responseP.then(resp =>
+ *  errorHandlerWithFallback(
+ *    resp,
+ *    (er) => er.statusCode === 404,
+ *    (er) =>
+ *      er.statusCode === 429 && er.errorCode === ErrorCode.TOO_FAST && {
+ *        title: 'Please try again',
+ *        message: 'The server is currently handling too many requests',
+ *      }
+ *    ));
+ *
+ * @param anyApiErrorResponse The error response from an API call, of any type
+ * @param expectedResponseMatcher An optional handler for errors which should be considered successes
+ * @param customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.
+ * @returns A NotificationStore object suitable for an error modal, if appropriate; undefined otherwise
  */
-export const errorHandlerWithFallback = async (
-  anyResponse,
-  expectedResponseFormatter?: (ErrorResponse) => NotificationStore
+const errorHandlerWithFallback = (
+  anyApiErrorResponse: any,
+  expectedResponseMatcher?: (ErrorResponse) => boolean,
+  customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
 ): Promise<NotificationStore> =>
-  convertAPIError(anyResponse).then(
-    (errorResponse) =>
-      expectedResponseFormatter?.(errorResponse) || {
-        title: 'An error occurred XYZ',
-        message: defaultResponseFormatter(errorResponse),
-      }
-  );
+  convertAPIError(anyApiErrorResponse).then((errorResponse) => {
+    // if this "error" is expected and should instead be considered a success
+    const expectedError: boolean = expectedResponseMatcher?.(errorResponse);
+    // the custom error response for this error, if applicable
+    const customResponse: NotificationStore | undefined =
+      customErrorResponseFormatter?.(errorResponse);
 
-export const callWithFallbackErrorModal = async (
-  wrappedFn: Function,
-  expectedResponseFormatter?: (ErrorResponse) => NotificationStore
-): Promise<void> =>
-  wrappedFn()
-    .catch((apiError) =>
-      errorHandlerWithFallback(apiError, expectedResponseFormatter)
-    )
-    .then(notificationStore.set);
+    return (
+      !expectedError &&
+      (customResponse ?? {
+        title: 'An error has occurred',
+        message: defaultErrorResponseFormatter(errorResponse),
+      })
+    );
+  });
+
+/**
+ * Call an (async) API function and return its response if successful.  If not, pop up a modal with a suitable message
+ * by setting the notificationStore (see NotificationModal for more details).
+ *
+ * The caller may supply a matcher for expected error responses which should be considered successes, and a custom
+ * formatter for expected failure responses; if neither of these match, the defaultErrorResponseFormatter will be used.
+ *
+ * Example: an API call getInfo() sometimes appropriately returns 404s which should not be considered errors,
+ * and there's a common error case (HTTP 429, Error Code TOO_FAST) which we want to handle specially.
+ *
+ * fetchWithErrorModal(
+ *  () => getInfo(),
+ *  (er) => er.statusCode === 404,
+ *  (er) =>
+ *    er.statusCode === 429 && er.errorCode === ErrorCode.TOO_FAST && {
+ *      title: 'Please try again',
+ *      message: 'The server is currently handling too many requests',
+ *    }
+ *  );
+ *
+ * @param apiCall The API function to call and handle
+ * @param expectedResponseMatcher An optional handler for errors which should be considered successes
+ * @param customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
+ * undefined, the default formatter will be used.
+ * @returns The result of the API function call, if successful; undefined otherwise
+ */
+export async function fetchWithErrorModal<T>(
+  apiCall: () => Promise<T>,
+  expectedResponseMatcher?: (ErrorResponse) => boolean,
+  customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
+): Promise<T> {
+  return apiCall().catch(async (apiError) => {
+    const notification = await errorHandlerWithFallback(
+      apiError,
+      expectedResponseMatcher,
+      customErrorResponseFormatter
+    );
+    if (notification) {
+      notificationStore.set(notification);
+    }
+
+    // without this, the overall fn would return Promise<T | void> which is annoying
+    return undefined;
+  });
+}

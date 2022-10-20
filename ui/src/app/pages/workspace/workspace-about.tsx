@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
+  ErrorCode,
   ErrorResponse,
   Profile,
   UserRole,
@@ -35,7 +36,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getCdrVersion } from 'app/utils/cdr-versions';
-import { callWithFallbackErrorModal } from 'app/utils/errors';
+import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { NotificationStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -213,14 +214,22 @@ export const WorkspaceAbout = fp.flow(
       this.setState({ workspace });
     }
 
-    // untested
-    pocErrorHandler(er: ErrorResponse): NotificationStore {
-      return er.statusCode === 500 && { title: 'foo', message: 'bar' };
+    temp1(er: ErrorResponse): boolean {
+      return er.statusCode === 404;
+    }
+    temp2(er: ErrorResponse): NotificationStore {
+      return (
+        er.statusCode === 429 &&
+        er.errorCode === ErrorCode.USERDISABLED && {
+          title: 'USERDISABLED',
+          message: 'saw 429',
+        }
+      );
     }
 
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      callWithFallbackErrorModal(
+      fetchWithErrorModal(
         () =>
           workspacesApi()
             .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
@@ -229,7 +238,8 @@ export const WorkspaceAbout = fp.flow(
                 workspaceUserRoles: fp.sortBy('familyName', resp.items),
               });
             }),
-        (er) => this.pocErrorHandler(er)
+        (er) => this.temp1(er),
+        (er) => this.temp2(er)
       );
     }
 
