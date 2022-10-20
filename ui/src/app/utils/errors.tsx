@@ -97,7 +97,10 @@ export const defaultErrorResponseFormatter = (
 ): string => {
   const { message, statusCode, errorCode, errorUniqueId } = errorResponse;
 
-  const errorCodeStr = errorCode ? ` of type ${errorCode.toString()}` : '';
+  const errorCodeStr =
+    errorCode && errorCode !== ErrorCode.PARSEERROR
+      ? ` of type ${errorCode.toString()}`
+      : '';
   const messageStr = message ? `: ${message}` : '.';
 
   const detailsStr = cond(
@@ -113,6 +116,8 @@ export const defaultErrorResponseFormatter = (
 
   return `An API error${errorCodeStr} occurred${detailsStr}${messageStr}`;
 };
+
+export const FALLBACK_ERROR_TITLE = 'An error has occurred';
 
 /**
  * Convert an API error response (of any type) to a format suitable for an error modal.  The caller may supply a
@@ -140,23 +145,23 @@ export const defaultErrorResponseFormatter = (
  * undefined, the default formatter will be used.
  * @returns A NotificationStore object suitable for an error modal, if appropriate; undefined otherwise
  */
-const errorHandlerWithFallback = (
+export const errorHandlerWithFallback = (
   anyApiErrorResponse: any,
   expectedResponseMatcher?: (ErrorResponse) => boolean,
   customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
 ): Promise<NotificationStore> =>
   convertAPIError(anyApiErrorResponse).then((errorResponse) => {
     // if this "error" is expected and should instead be considered a success
-    const expectedError = expectedResponseMatcher?.(errorResponse);
-    // the custom error response for this error, if applicable
-    const customResponse = customErrorResponseFormatter?.(errorResponse);
+    if (expectedResponseMatcher?.(errorResponse)) {
+      return undefined;
+    }
 
+    // the custom error response for this error, if applicable
     return (
-      !expectedError &&
-      (customResponse || {
-        title: 'An error has occurred',
+      customErrorResponseFormatter?.(errorResponse) || {
+        title: FALLBACK_ERROR_TITLE,
         message: defaultErrorResponseFormatter(errorResponse),
-      })
+      }
     );
   });
 
