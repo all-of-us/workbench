@@ -82,6 +82,5 @@ public class AppsController implements AppsApiDelegate {
     if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
-    List<LeonardoListAppResponse>
   }
 }

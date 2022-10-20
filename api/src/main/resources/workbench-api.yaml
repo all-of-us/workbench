@@ -843,7 +843,7 @@ paths:
           description: APP definition
           required: true
           schema:
-            "$ref": "#/definitions/App"
+            "$ref": "#/definitions/CreateAppRequest"
       responses:
         200:
           description: App was created successfully
@@ -6208,6 +6208,15 @@ definitions:
         type: string
         description: timestamp for error in ISO 8601 format
 
+  CreateAppRequest:
+    description: Create APP request body
+    properties:
+      app:
+        $ref: "#/definitions/App"
+      persistentDiskRequest:
+        description: Persistent disk configuration
+        "$ref": "#/definitions/PersistentDiskRequest"
+
   App:
     properties:
       googleProject:
@@ -6232,9 +6241,12 @@ definitions:
       kubernetesRuntimeConfig:
         description: kubernetesRuntimeConfig will be returned
         "$ref": "#/definitions/KubernetesRuntimeConfig"
-      persistentDiskRequest:
-        description: Persistent disk configuration
-        "$ref": "#/definitions/PersistentDiskRequest"
+      proxyUrls:
+        type: object
+        description: Read only. Map of service name to proxyUrl
+      diskName:
+        type: string
+        description: Read only. The name of the disk associated with this app
       errors:
         type: array
         description: The list of errors that were encountered on APP create, if any.

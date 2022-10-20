@@ -171,8 +171,8 @@ public interface LeonardoMapper {
       LeonardoListAppResponse leonardoListAppResponse);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "toolDockerImage", source = "appImages")
-  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(target = "createdDate", source = "diskName")
+  @Mapping(target = "kubernetesRuntimeConfig", ignore = true)
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
