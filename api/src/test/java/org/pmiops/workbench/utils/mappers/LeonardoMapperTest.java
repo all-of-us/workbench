@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesError;
@@ -134,7 +135,7 @@ public class LeonardoMapperTest {
             .appName(APP_NAME)
             .errors(leonardoKubernetesErrors)
             .proxyUrls(proxyUrls)
-            .cloudContext(GOOGLE_PROJECT)
+            .cloudContext(new LeonardoCloudContext().cloudResource(GOOGLE_PROJECT))
             .labels(labels);
     assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app);
   }
@@ -153,7 +154,7 @@ public class LeonardoMapperTest {
             .labels(labels)
             .appName(APP_NAME)
             .googleProject(GOOGLE_PROJECT)
-            .cloudContext(GOOGLE_PROJECT);
+            .cloudContext(new LeonardoCloudContext().cloudResource(GOOGLE_PROJECT));
     assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app);
   }
 }

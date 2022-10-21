@@ -143,7 +143,10 @@ public class LeonardoApiClientTest {
             .googleProject(GOOGLE_PROJECT_ID)
             .kubernetesRuntimeConfig(kubernetesRuntimeConfig);
     createAppRequest =
-        new CreateAppRequest().app(testApp).persistentDiskRequest(persistentDiskRequest);
+        new CreateAppRequest()
+            .appType(AppType.RSTUDIO)
+            .kubernetesRuntimeConfig(kubernetesRuntimeConfig)
+            .persistentDiskRequest(persistentDiskRequest);
 
     DbCdrVersion cdrVersion =
         new DbCdrVersion()
@@ -212,7 +215,7 @@ public class LeonardoApiClientTest {
   @Test
   public void testListAppSuccess() throws Exception {
     leonardoApiClient.listAppsInProject(GOOGLE_PROJECT_ID);
-    verify(userAppsApi).listAppByProject(GOOGLE_PROJECT_ID, null, null, null);
+    verify(userAppsApi).listAppByProject(GOOGLE_PROJECT_ID, null, false, null);
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {

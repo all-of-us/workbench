@@ -18,7 +18,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -76,17 +75,16 @@ public class AppsControllerTest {
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbWorkspace testWorkspace;
+  private static DbUser user;
   private CreateAppRequest createAppRequest;
-  private DbUser user = new DbUser();
-  private App testApp;
 
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableGkeApp = true;
 
-    testApp = new App().appType(AppType.RSTUDIO).googleProject(GOOGLE_PROJECT_ID);
-    createAppRequest = new CreateAppRequest().app(testApp);
+    user = new DbUser();
+    createAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
     testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
@@ -100,6 +98,16 @@ public class AppsControllerTest {
   public void testCreateAppSuccess() throws Exception {
     controller.createApp(WORKSPACE_NS, createAppRequest);
     verify(mockLeonardoApiClient).createApp(createAppRequest, testWorkspace);
+  }
+
+  @Test
+  public void testCreateAppFail_validateActiveBilling() {
+    doThrow(ForbiddenException.class)
+        .when(mockWorkspaceAuthService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    assertThrows(
+        ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));
   }
 
   @Test
@@ -136,16 +144,6 @@ public class AppsControllerTest {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(
-        ForbiddenException.class, () -> controller.validateCanPerformApiAction(testWorkspace));
-  }
-
-  @Test
-  public void testCanPerformAppActions_validateActiveBilling() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     assertThrows(
         ForbiddenException.class, () -> controller.validateCanPerformApiAction(testWorkspace));

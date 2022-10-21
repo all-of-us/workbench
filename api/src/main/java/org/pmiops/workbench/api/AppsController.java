@@ -47,6 +47,7 @@ public class AppsController implements AppsApiDelegate {
   public ResponseEntity<EmptyResponse> createApp(
       String workspaceNamespace, CreateAppRequest createAppRequest) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
     validateCanPerformApiAction(dbWorkspace);
 
     leonardoApiClient.createApp(createAppRequest, dbWorkspace);
@@ -85,7 +86,7 @@ public class AppsController implements AppsApiDelegate {
   }
 
   /**
-   * Validates user is allowed to perform acc action.
+   * Validates user is allowed to perform APP action.
    *
    * <p>App ACTION requires:
    *
@@ -107,6 +108,5 @@ public class AppsController implements AppsApiDelegate {
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
   }
 }

@@ -505,26 +505,26 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
-    App app = createAppRequest.getApp();
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoMapper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
-            .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, app.getAppType().toString())
+            .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, createAppRequest.getAppType().toString())
             .build();
 
     leonardoCreateAppRequest
-        .appType(leonardoMapper.toLeonardoAppType(app.getAppType()))
+        .appType(leonardoMapper.toLeonardoAppType(createAppRequest.getAppType()))
         .kubernetesRuntimeConfig(
-            leonardoMapper.toLeonardoKubernetesRuntimeConfig(app.getKubernetesRuntimeConfig()))
+            leonardoMapper.toLeonardoKubernetesRuntimeConfig(
+                createAppRequest.getKubernetesRuntimeConfig()))
         .diskConfig(
             leonardoMapper.toLeonardoPersistentDiskRequest(
                 createAppRequest.getPersistentDiskRequest()))
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
 
-    if (app.getAppType().equals(AppType.RSTUDIO)) {
+    if (createAppRequest.getAppType().equals(AppType.RSTUDIO)) {
       leonardoCreateAppRequest.descriptorPath(
           workbenchConfigProvider.get().app.rStudioDescriptorPath);
     }
@@ -532,8 +532,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     leonardoRetryHandler.run(
         (context) -> {
           appsApi.createApp(
-              app.getGoogleProject(),
-              userProvider.get().getAppName(app.getAppType()),
+              dbWorkspace.getGoogleProject(),
+              userProvider.get().getAppName(createAppRequest.getAppType()),
               leonardoCreateAppRequest);
           return null;
         });

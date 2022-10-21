@@ -92,7 +92,7 @@ public interface LeonardoApiClient {
   /**
    * Gets Leonardo app owned by app name and workspace GCP project
    *
-   * @param googleProjectId the GCP project if of the workpsace for the app to create
+   * @param googleProjectId the GCP project the app belongs to
    * @param appName the name of the app
    */
   App getAppByNameByProjectId(String googleProjectId, String appName);
@@ -100,7 +100,7 @@ public interface LeonardoApiClient {
   /**
    * Lists all apps the user have permission on in the given workspace GCP project
    *
-   * @param googleProjectId the GCP project if of the workpsace for the app to create
+   * @param googleProjectId the GCP project the app belongs to
    */
   List<App> listAppsInProject(String googleProjectId);
 

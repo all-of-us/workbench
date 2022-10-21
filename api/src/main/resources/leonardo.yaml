@@ -1891,6 +1891,11 @@ components:
       enum:
         - pd-standard
         - pd-ssd
+    CloudProvider:
+      type: string
+      enum:
+        - GCP
+        - AZURE
     RuntimeStatus:
       type: string
       enum:
@@ -3027,8 +3032,7 @@ components:
           type: string
           description: the name of the app
         cloudContext:
-          type: string
-          description: Google project this app is associated with if the app is created in GCP; Azure's tenantId/subscriptionId/managedResourceGroupId if the app is created in Azure
+          $ref: '#/components/schemas/CloudContext'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         errors:
@@ -3067,8 +3071,7 @@ components:
           type: string
           description: Deprecated. The project this app is associated with
         cloudContext:
-          type: string
-          description: Google project this app is associated with if the app is created in GCP; Azure's tenantId/subscriptionId/managedResourceGroupId if the app is created in Azure
+          $ref: '#/components/schemas/CloudContext'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         errors:
@@ -3094,6 +3097,19 @@ components:
         labels:
           type: object
           description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
+
+    CloudContext:
+      description: Cloud platform which holds context for a workspace.
+      type: object
+      required:
+        - cloudProvider
+        - cloudResource
+      properties:
+        cloudProvider:
+          $ref: '#/components/schemas/CloudProvider'
+        cloudResource:
+          type: string
+          description: Cloud resource name. Google project if cloud provider is GCP OR Azure's tenantId/subscriptionId/managedResourceGroupId if in Azure
 
     KubernetesRuntimeConfig:
       description: configuration for a kubernetes app runtime
