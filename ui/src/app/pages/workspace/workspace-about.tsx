@@ -252,6 +252,17 @@ export const WorkspaceAbout = fp.flow(
         : '';
     }
 
+    get workspaceBucketUrl(): string {
+      return this.state.workspace
+        ? 'https://console.cloud.google.com/storage/browser/' +
+            this.state.workspace.googleBucketName +
+            '?project=' +
+            this.state.workspace.googleProject +
+            '&authuser=' +
+            this.props.profileState.profile.username
+        : '';
+    }
+
     async publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
       const { namespace, id } = workspace;
@@ -473,6 +484,16 @@ export const WorkspaceAbout = fp.flow(
                 </StyledExternalLink>
               </div>
             </TooltipTrigger>
+            <div>
+              <h3 style={{ marginBottom: '0.5rem' }}>File Management</h3>
+              <StyledExternalLink
+                data-test-id='workspace-bucket-url'
+                href={this.workspaceBucketUrl}
+                target='_blank'
+              >
+                Browse files in Google Cloud Platform
+              </StyledExternalLink>
+            </div>
           </div>
           {sharing && (
             <WorkspaceShare
