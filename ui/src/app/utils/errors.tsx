@@ -165,9 +165,14 @@ export const errorHandlerWithFallback = (
     );
   });
 
+interface FetchOptions<T, U> {
+  onSuccess?: (t: T) => U;
+  expectedResponseMatcher?: (ErrorResponse) => boolean;
+  customErrorResponseFormatter?: (ErrorResponse) => NotificationStore;
+}
 /**
- * Call an (async) API function and execute another function if successful.  If not, pop up a modal with a suitable
- * messagemby setting the notificationStore (see NotificationModal for more details).
+ * Call an (async) API function and optionally execute another function if successful.  If not, pop up a modal with a
+ * suitable message by setting the notificationStore (see NotificationModal for more details).
  *
  * The caller may supply a matcher for expected error responses which should be considered successes, and a custom
  * formatter for expected failure responses; if neither of these match, the defaultErrorResponseFormatter will be used.
@@ -177,27 +182,30 @@ export const errorHandlerWithFallback = (
  *
  * fetchWithErrorModal(
  *  () => getInfo(),
- *  (er) => er.statusCode === 404,
- *  (er) =>
- *    er.statusCode === 429 && er.errorCode === ErrorCode.TOO_FAST && {
- *      title: 'Please try again',
- *      message: 'The server is currently handling too many requests',
- *    }
- *  );
+ *  {
+ *    onSuccess: (ir: InfoResult) => handleInfoResult(ir),
+ *    expectedResponseMatcher: (er: ErrorResponse) => er.statusCode === 404,
+ *    customErrorResponseFormatter: (er: ErrorResponse) =>
+ *      er.statusCode === 429 && er.errorCode === ErrorCode.TOO_FAST && {
+ *        title: 'Please try again',
+ *        message: 'The server is currently handling too many requests',
+ *      }
+ *  });
  *
  * @param apiCall The API function to call and handle
- * @param onSuccess The (optional) action to take if the API call is successful
- * @param expectedResponseMatcher An optional handler for errors which should be considered successes
- * @param customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
+ * @param options:
+ *  onSuccess The optional action to take if the API call is successful
+ *  expectedResponseMatcher An optional handler for errors which should be considered successes
+ *  customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.
  * @returns The result of the API function call, if successful; undefined otherwise
  */
 export async function fetchWithErrorModal<T, U>(
   apiCall: () => Promise<T>,
-  onSuccess?: (T) => U,
-  expectedResponseMatcher?: (ErrorResponse) => boolean,
-  customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
+  options?: FetchOptions<T, U>
 ): Promise<U> {
+  const { onSuccess, expectedResponseMatcher, customErrorResponseFormatter } =
+    options;
   return apiCall()
     .then(onSuccess)
     .catch(async (apiError) => {

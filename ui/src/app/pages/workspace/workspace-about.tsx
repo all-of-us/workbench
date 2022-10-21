@@ -3,7 +3,13 @@ import * as fp from 'lodash/fp';
 import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  Profile,
+  UserRole,
+  WorkspaceBillingUsageResponse,
+  WorkspaceUserRolesResponse,
+} from 'generated/fetch';
 
 import {
   Button,
@@ -183,7 +189,10 @@ export const WorkspaceAbout = fp.flow(
       fetchWithErrorModal(
         () =>
           workspacesApi().getBillingUsage(workspace.namespace, workspace.id),
-        (usage) => this.setState({ workspaceInitialCreditsUsage: usage.cost })
+        {
+          onSuccess: (usage: WorkspaceBillingUsageResponse) =>
+            this.setState({ workspaceInitialCreditsUsage: usage.cost }),
+        }
       );
     }
 
@@ -217,10 +226,11 @@ export const WorkspaceAbout = fp.flow(
             workspace.namespace,
             workspace.id
           ),
-        (resp) => {
-          this.setState({
-            workspaceUserRoles: fp.sortBy('familyName', resp.items),
-          });
+        {
+          onSuccess: (resp: WorkspaceUserRolesResponse) =>
+            this.setState({
+              workspaceUserRoles: fp.sortBy('familyName', resp.items),
+            }),
         }
       );
     }
@@ -277,7 +287,10 @@ export const WorkspaceAbout = fp.flow(
           publish
             ? workspaceAdminApi().publishWorkspace(namespace, id)
             : workspaceAdminApi().unpublishWorkspace(namespace, id),
-        () => this.updateWorkspaceState({ ...workspace, published: publish })
+        {
+          onSuccess: () =>
+            this.updateWorkspaceState({ ...workspace, published: publish }),
+        }
       ).finally(() => this.setState({ publishing: false }));
     }
 
