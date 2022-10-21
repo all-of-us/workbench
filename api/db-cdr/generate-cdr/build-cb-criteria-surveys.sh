@@ -281,7 +281,7 @@ and x.concept_id = y.ancestor_concept_id"
 echo "PPI SURVEYS - update Minute Survey Name"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-SET x.name = 'COVID-19 Participant Experience (COPE) Survey'
+SET x.name = 'COVID-19 Vaccine Survey'
 WHERE code = 'cope_vaccine4'
 AND domain_id = 'SURVEY'"
 
