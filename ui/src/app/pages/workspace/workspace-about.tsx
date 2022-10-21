@@ -256,7 +256,7 @@ export const WorkspaceAbout = fp.flow(
       return this.state.workspace
         ? 'https://console.cloud.google.com/storage/browser/' +
             this.state.workspace.googleBucketName +
-            ';project=' +
+            '?project=' +
             this.state.workspace.googleProject +
             '&authuser=' +
             this.props.profileState.profile.username
