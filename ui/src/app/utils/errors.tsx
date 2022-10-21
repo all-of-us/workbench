@@ -166,8 +166,8 @@ export const errorHandlerWithFallback = (
   });
 
 /**
- * Call an (async) API function and return its response if successful.  If not, pop up a modal with a suitable message
- * by setting the notificationStore (see NotificationModal for more details).
+ * Call an (async) API function and execute another function if successful.  If not, pop up a modal with a suitable
+ * messagemby setting the notificationStore (see NotificationModal for more details).
  *
  * The caller may supply a matcher for expected error responses which should be considered successes, and a custom
  * formatter for expected failure responses; if neither of these match, the defaultErrorResponseFormatter will be used.
@@ -186,27 +186,30 @@ export const errorHandlerWithFallback = (
  *  );
  *
  * @param apiCall The API function to call and handle
+ * @param onSuccess The action to take if the API call is successful
  * @param expectedResponseMatcher An optional handler for errors which should be considered successes
  * @param customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.
  * @returns The result of the API function call, if successful; undefined otherwise
  */
-export async function fetchWithErrorModal<T>(
+export async function fetchWithErrorModal<T, U>(
   apiCall: () => Promise<T>,
+  onSuccess: (T) => U,
   expectedResponseMatcher?: (ErrorResponse) => boolean,
   customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
-): Promise<T> {
-  return apiCall().catch(async (apiError) => {
-    const notification = await errorHandlerWithFallback(
-      apiError,
-      expectedResponseMatcher,
-      customErrorResponseFormatter
-    );
-    if (notification) {
-      notificationStore.set(notification);
-    }
-
-    // without this, the overall fn would return Promise<T | void> which is annoying
-    return undefined;
-  });
+): Promise<U> {
+  return apiCall()
+    .then(onSuccess)
+    .catch(async (apiError) => {
+      const notification = await errorHandlerWithFallback(
+        apiError,
+        expectedResponseMatcher,
+        customErrorResponseFormatter
+      );
+      if (notification) {
+        notificationStore.set(notification);
+      }
+      // changes the return signature from Promise<U | void> to Promise<U>
+      return undefined;
+    });
 }
