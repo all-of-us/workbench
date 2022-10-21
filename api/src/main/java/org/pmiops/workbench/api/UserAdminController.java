@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -103,8 +104,9 @@ public class UserAdminController implements UserAdminApiDelegate {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
-    long userId = userProvider.get().getUserId();
-    accessModuleService.updateBypassTime(userId, request);
+    final DbUser user = userProvider.get();
+    accessModuleService.updateBypassTime(user.getUserId(), request);
+    userService.updateUserAccessTiers(user, Agent.asUser(user));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
