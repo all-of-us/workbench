@@ -1,12 +1,14 @@
 package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
+import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.App;
+import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -42,20 +44,13 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> createApp(String workspaceNamespace, App app) {
-    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
-    DbUser user = userProvider.get();
-    leonardoApiHelper.enforceComputeSecuritySuspension(user);
-
+  public ResponseEntity<EmptyResponse> createApp(
+      String workspaceNamespace, CreateAppRequest createAppRequest) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
+    validateCanPerformApiAction(dbWorkspace);
 
-    leonardoApiClient.createApp(app, workspaceNamespace, firecloudWorkspaceName);
+    leonardoApiClient.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -67,7 +62,11 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<App> getApp(String workspaceNamespace, String appName) {
-    throw new UnsupportedOperationException("API not supported.");
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    validateCanPerformApiAction(dbWorkspace);
+
+    return ResponseEntity.ok(
+        leonardoApiClient.getAppByNameByProjectId(dbWorkspace.getGoogleProject(), appName));
   }
 
   @Override
@@ -78,6 +77,36 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<ListAppsResponse> listAppsInWorkspace(String workspaceNamespace) {
-    throw new UnsupportedOperationException("API not supported.");
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    validateCanPerformApiAction(dbWorkspace);
+
+    ListAppsResponse response = new ListAppsResponse();
+    response.addAll(leonardoApiClient.listAppsInProject(dbWorkspace.getGoogleProject()));
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Validates user is allowed to perform APP action.
+   *
+   * <p>App ACTION requires:
+   *
+   * <ul>
+   *   <li>Feature is enabled
+   *   <li>User compute is not suspend due to security reason (e.g. egress alert)
+   *   <li>User is OWNER or WRITER of the workspace
+   *   <li>Workspace has valid billing.
+   * </ul>
+   */
+  @VisibleForTesting
+  protected void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
+    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
+      throw new UnsupportedOperationException("API not supported.");
+    }
+    DbUser user = userProvider.get();
+    leonardoApiHelper.enforceComputeSecuritySuspension(user);
+    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
   }
 }

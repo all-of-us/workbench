@@ -35,8 +35,10 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -46,6 +48,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -499,39 +502,65 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public void createApp(App app, String workspaceNamespace, String workspaceFirecloudName)
+  public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
-
-    LeonardoCreateAppRequest createAppRequest = new LeonardoCreateAppRequest();
+    LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoMapper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
-            .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, app.getAppType().toString())
+            .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, createAppRequest.getAppType().toString())
             .build();
 
-    createAppRequest
-        .appType(leonardoMapper.toLeonardoAppType(app.getAppType()))
+    leonardoCreateAppRequest
+        .appType(leonardoMapper.toLeonardoAppType(createAppRequest.getAppType()))
         .kubernetesRuntimeConfig(
-            leonardoMapper.toLeonardoKubernetesRuntimeConfig(app.getKubernetesRuntimeConfig()))
-        .diskConfig(leonardoMapper.toLeonardoPersistentDiskRequest(app.getPersistentDiskRequest()))
-        .customEnvironmentVariables(getBaseEnvironmentVariables(workspace))
+            leonardoMapper.toLeonardoKubernetesRuntimeConfig(
+                createAppRequest.getKubernetesRuntimeConfig()))
+        .diskConfig(
+            leonardoMapper.toLeonardoPersistentDiskRequest(
+                createAppRequest.getPersistentDiskRequest()))
+        .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
 
-    if (app.getAppType().equals(AppType.RSTUDIO)) {
-      createAppRequest.descriptorPath(workbenchConfigProvider.get().app.rStudioDescriptorPath);
+    if (createAppRequest.getAppType().equals(AppType.RSTUDIO)) {
+      leonardoCreateAppRequest.descriptorPath(
+          workbenchConfigProvider.get().app.rStudioDescriptorPath);
     }
 
     leonardoRetryHandler.run(
         (context) -> {
           appsApi.createApp(
-              app.getGoogleProject(),
-              userProvider.get().getAppName(app.getAppType()),
-              createAppRequest);
+              dbWorkspace.getGoogleProject(),
+              userProvider.get().getAppName(createAppRequest.getAppType()),
+              leonardoCreateAppRequest);
           return null;
         });
+  }
+
+  @Override
+  public App getAppByNameByProjectId(String googleProjectId, String appName) {
+    AppsApi appsApi = appsApiProvider.get();
+
+    LeonardoGetAppResponse leonardoGetAppResponse =
+        leonardoRetryHandler.run((context) -> appsApi.getApp(googleProjectId, appName));
+    return leonardoMapper.toApiApp(leonardoGetAppResponse);
+  }
+
+  @Override
+  public List<App> listAppsInProject(String googleProjectId) {
+    AppsApi appsApi = appsApiProvider.get();
+    List<LeonardoListAppResponse> listAppResponses =
+        leonardoRetryHandler.run(
+            (context) ->
+                appsApi.listAppByProject(
+                    googleProjectId,
+                    /* labels= */ null,
+                    /* includeDeleted= */ false,
+                    /* includeLabels= */ null));
+
+    return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
 
   @Override

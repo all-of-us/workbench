@@ -17,8 +17,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -27,6 +29,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -159,6 +162,40 @@ public interface LeonardoMapper {
         runtime,
         leonardoListRuntimeResponse.getRuntimeConfig(),
         leonardoListRuntimeResponse.getDiskConfig());
+  }
+
+  @Mapping(target = "createdDate", source = "app.auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "app.auditInfo.dateAccessed")
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "appName", source = "appName")
+  @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  App toApiApp(LeonardoGetAppResponse app);
+
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
+  App toApiApp(LeonardoListAppResponse app);
+
+  @AfterMapping
+  default void getAppAfterMapper(
+      @MappingTarget App app, LeonardoGetAppResponse leonardoGetAppResponse) {
+    app.appName(leonardoGetAppResponse.getAppName())
+        .googleProject(leonardoGetAppResponse.getCloudContext().getCloudResource());
+    mapAppType(app, leonardoGetAppResponse.getAppName());
+  }
+
+  @AfterMapping
+  default void listAppAfterMapper(
+      @MappingTarget App app, LeonardoListAppResponse leonardoListAppResponse) {
+    mapAppType(app, leonardoListAppResponse.getAppName());
+  }
+
+  default void mapAppType(App app, String appName) {
+    // App name format is all-of-us-{user-id}-{appType}.
+    app.appType(AppType.fromValue(appName.substring(appName.lastIndexOf('-') + 1).toUpperCase()));
   }
 
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(

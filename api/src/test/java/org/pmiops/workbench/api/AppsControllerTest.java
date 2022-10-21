@@ -18,8 +18,8 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -31,8 +31,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AppsControllerTest {
   @TestConfiguration
   @Import({
@@ -61,22 +67,25 @@ public class AppsControllerTest {
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
   @MockBean WorkspaceService mockWorkspaceService;
 
+  private static final String APP_NAME = "all-of-us-123-cromwell";
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String WORKSPACE_NAME = "workspace name";
   private static final String WORKSPACE_ID = "myfirstworkspace";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
-  private static DbUser user = new DbUser();
-  private App testApp;
+  private static DbWorkspace testWorkspace;
+  private static DbUser user;
+  private CreateAppRequest createAppRequest;
 
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableGkeApp = true;
 
-    testApp = new App().appType(AppType.RSTUDIO).googleProject(GOOGLE_PROJECT_ID);
-    DbWorkspace testWorkspace =
+    user = new DbUser();
+    createAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
+    testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
@@ -87,32 +96,8 @@ public class AppsControllerTest {
 
   @Test
   public void testCreateAppSuccess() throws Exception {
-    controller.createApp(WORKSPACE_NS, testApp);
-    verify(mockLeonardoApiClient).createApp(testApp, WORKSPACE_NS, WORKSPACE_ID);
-  }
-
-  @Test
-  public void testCreateAppFail_featureNotEnabled() throws Exception {
-    config.featureFlags.enableGkeApp = false;
-    assertThrows(
-        UnsupportedOperationException.class, () -> controller.createApp(WORKSPACE_NS, testApp));
-  }
-
-  @Test
-  public void testCreateAppFail_securitySuspended() throws ApiException {
-    user.setComputeSecuritySuspendedUntil(
-        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
-    assertThrows(
-        FailedPreconditionException.class, () -> controller.createApp(WORKSPACE_NS, testApp));
-  }
-
-  @Test
-  public void testCreateAppFail_noWorkspacePermission() throws ApiException {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, testApp));
+    controller.createApp(WORKSPACE_NS, createAppRequest);
+    verify(mockLeonardoApiClient).createApp(createAppRequest, testWorkspace);
   }
 
   @Test
@@ -121,6 +106,46 @@ public class AppsControllerTest {
         .when(mockWorkspaceAuthService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
-    assertThrows(ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, testApp));
+    assertThrows(
+        ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));
+  }
+
+  @Test
+  public void testGetAppSuccess() throws Exception {
+    controller.getApp(WORKSPACE_NS, APP_NAME);
+    verify(mockLeonardoApiClient).getAppByNameByProjectId(GOOGLE_PROJECT_ID, APP_NAME);
+  }
+
+  @Test
+  public void testListAppSuccess() throws Exception {
+    controller.listAppsInWorkspace(WORKSPACE_NS);
+    verify(mockLeonardoApiClient).listAppsInProject(GOOGLE_PROJECT_ID);
+  }
+
+  @Test
+  public void testCanPerformAppActions_featureNotEnabled() throws Exception {
+    config.featureFlags.enableGkeApp = false;
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> controller.validateCanPerformApiAction(testWorkspace));
+  }
+
+  @Test
+  public void testCanPerformAppActions_securitySuspended() throws ApiException {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> controller.validateCanPerformApiAction(testWorkspace));
+  }
+
+  @Test
+  public void testCanPerformAppActions_noWorkspacePermission() throws ApiException {
+    doThrow(ForbiddenException.class)
+        .when(mockWorkspaceAuthService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
+
+    assertThrows(
+        ForbiddenException.class, () -> controller.validateCanPerformApiAction(testWorkspace));
   }
 }
