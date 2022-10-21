@@ -294,8 +294,8 @@ export const ModifierPage = fp.flow(
           workspace.cdrVersionId,
           cdrVersionTiersResponse
         );
-        // TODO check the cdrVersion.hasSurveyConductData property once DT-61 is complete
-        if (cdrVersion) {
+        // Add CATI modifier for cdrs with hasSurveyConductData
+        if (cdrVersion.hasSurveyConductData) {
           formState.push({
             name: ModifierType.CATI,
             label: 'CATI(Computer Assisted Telephone Interview)',
