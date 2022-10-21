@@ -54,7 +54,7 @@ ds_visit_occurrence
 function cpTableToBackupDataset(){
   echo "Copying $BQ_PROJECT:$BQ_DATASET.$1 to $OUTPUT_PROJECT:$BACKUP_DATASET.$1"
   # --force to overwrite if backup dataset exists
-  bq cp --force --project_id  "$BQ_PROJECT:$BQ_DATASET.$1" "$OUTPUT_PROJECT:$BACKUP_DATASET.$1"
+  bq cp --force "$BQ_PROJECT:$BQ_DATASET.$1" "$OUTPUT_PROJECT:$BACKUP_DATASET.$1"
 }
 
 for t in "${backup_tables[@]}"
