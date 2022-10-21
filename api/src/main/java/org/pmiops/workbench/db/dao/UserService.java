@@ -148,7 +148,7 @@ public interface UserService {
    * @deprecated Use {@link org.pmiops.workbench.access.AccessModuleService#updateBypassTime(long,
    *     AccessBypassRequest)}
    */
-  @Deprecated
+  @Deprecated // use accessModuleService.updateBypassTime()
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 
   boolean hasAuthority(long userId, Authority required);
