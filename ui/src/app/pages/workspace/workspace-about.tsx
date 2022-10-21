@@ -187,12 +187,14 @@ export const WorkspaceAbout = fp.flow(
       );
     }
 
-    async setVisits() {
+    setVisits() {
       const {
         profileState: { profile },
       } = this.props;
       if (!profile.pageVisits.some((v) => v.page === pageId)) {
-        await profileApi().updatePageVisits({ page: pageId });
+        fetchWithErrorModal(() =>
+          profileApi().updatePageVisits({ page: pageId })
+        );
       }
     }
 
@@ -266,7 +268,7 @@ export const WorkspaceAbout = fp.flow(
         : '';
     }
 
-    async publishUnpublishWorkspace(publish: boolean) {
+    publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
       const { namespace, id } = workspace;
       this.setState({ publishing: true });

@@ -186,7 +186,7 @@ export const errorHandlerWithFallback = (
  *  );
  *
  * @param apiCall The API function to call and handle
- * @param onSuccess The action to take if the API call is successful
+ * @param onSuccess The (optional) action to take if the API call is successful
  * @param expectedResponseMatcher An optional handler for errors which should be considered successes
  * @param customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.
@@ -194,7 +194,7 @@ export const errorHandlerWithFallback = (
  */
 export async function fetchWithErrorModal<T, U>(
   apiCall: () => Promise<T>,
-  onSuccess: (T) => U,
+  onSuccess?: (T) => U,
   expectedResponseMatcher?: (ErrorResponse) => boolean,
   customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
 ): Promise<U> {
