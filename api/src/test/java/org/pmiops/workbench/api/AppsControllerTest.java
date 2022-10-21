@@ -75,9 +75,9 @@ public class AppsControllerTest {
   private static final String WORKSPACE_ID = "myfirstworkspace";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
-  private static DbUser user = new DbUser();
   private static DbWorkspace testWorkspace;
   private CreateAppRequest createAppRequest;
+  private DbUser user = new DbUser();
   private App testApp;
 
   @BeforeEach

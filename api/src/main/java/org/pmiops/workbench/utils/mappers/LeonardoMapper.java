@@ -168,7 +168,7 @@ public interface LeonardoMapper {
   @Mapping(target = "dateAccessed", source = "app.auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "appName", source = "appName")
-  @Mapping(target = "googleProject", source = "googleProject")
+  @Mapping(target = "googleProject", source = "cloudContext")
   @Mapping(target = "autopauseThreshold", ignore = true)
   App toApiApp(LeonardoGetAppResponse app);
 
@@ -176,6 +176,7 @@ public interface LeonardoMapper {
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "googleProject", source = "cloudContext")
   App toApiApp(LeonardoListAppResponse app);
 
   @AfterMapping

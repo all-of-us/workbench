@@ -132,9 +132,9 @@ public class LeonardoMapperTest {
             .diskName(DISK_NAME)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
             .appName(APP_NAME)
-            .googleProject(GOOGLE_PROJECT)
             .errors(leonardoKubernetesErrors)
             .proxyUrls(proxyUrls)
+            .cloudContext(GOOGLE_PROJECT)
             .labels(labels);
     assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app);
   }
@@ -152,7 +152,8 @@ public class LeonardoMapperTest {
             .proxyUrls(proxyUrls)
             .labels(labels)
             .appName(APP_NAME)
-            .googleProject(GOOGLE_PROJECT);
+            .googleProject(GOOGLE_PROJECT)
+            .cloudContext(GOOGLE_PROJECT);
     assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app);
   }
 }

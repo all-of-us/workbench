@@ -3026,9 +3026,9 @@ components:
         appName:
           type: string
           description: the name of the app
-        googleProject:
+        cloudContext:
           type: string
-          description: Deprecated. The project this app is associated with
+          description: Google project this app is associated with if the app is created in GCP; Azure's tenantId/subscriptionId/managedResourceGroupId if the app is created in Azure
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         errors:
