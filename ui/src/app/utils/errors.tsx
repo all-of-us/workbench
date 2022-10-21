@@ -205,7 +205,7 @@ export async function fetchWithErrorModal<T, U>(
   options?: FetchOptions<T, U>
 ): Promise<U> {
   const { onSuccess, expectedResponseMatcher, customErrorResponseFormatter } =
-    options;
+    options || {};
   return apiCall()
     .then(onSuccess)
     .catch(async (apiError) => {
