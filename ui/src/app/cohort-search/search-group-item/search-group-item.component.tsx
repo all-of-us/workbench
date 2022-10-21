@@ -371,6 +371,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
               <b>{MODIFIERS_MAP[name].name}</b> {visit}
             </span>
           );
+        case ModifierType.CATI:
+          return <span>{MODIFIERS_MAP[name].operators[operands[0]]}</span>;
         case ModifierType.NUMOFOCCURRENCES:
           return (
             <span>
