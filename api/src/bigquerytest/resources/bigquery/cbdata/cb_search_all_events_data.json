@@ -367,7 +367,7 @@
     "value_as_concept_id": 7,
     "value_source_concept_id": 7,
     "is_standard": 0,
-    "is_cati": 1
+    "cati_concept_id": 42530794
   },
   {
     "person_id": 1,

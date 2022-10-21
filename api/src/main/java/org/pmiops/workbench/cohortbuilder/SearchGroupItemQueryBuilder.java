@@ -162,7 +162,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String EVENT_DATE_SQL_TEMPLATE = " AND entry_date ";
   private static final String ENCOUNTERS_SQL_TEMPLATE = " AND visit_concept_id ";
 
-  private static final String CATI_FLAG_SQL_TEMPLATE = " AND is_cati ";
+  private static final String CATI_FLAG_SQL_TEMPLATE = " AND cati_concept_id ";
 
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =

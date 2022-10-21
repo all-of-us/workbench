@@ -76,7 +76,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "is_cati",
+    "name": "cati_concept_id",
     "type": "integer"
   }
 ]
