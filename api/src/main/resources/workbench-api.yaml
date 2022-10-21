@@ -1515,8 +1515,10 @@ paths:
       - userAdmin
       consumes:
       - application/json
-      description: 'Updates the given user to bypass the request access requirement,
-        e.g. "eraCommons", or "twoFactorAuth"'
+      description: >
+        [DEPRECATED. use updateAccountProperties()]
+        Updates the given user to bypass the request access requirement,
+        e.g. "eraCommons", or "twoFactorAuth"
       parameters:
       - "$ref": "#/parameters/userId"
       - in: body
@@ -6012,11 +6014,6 @@ definitions:
             type: array
             items:
               "$ref": "#/definitions/AccessModuleStatus"
-          anyModuleHasExpired:
-            type: boolean
-            description: >
-              DEPRECATED - RW-8236. Remove after one cycle. Whether any modules have expired. Expiration information is also included with each
-              module in the array; this field is provided for convenience.
       demographicSurveyV2:
         $ref: '#/definitions/DemographicSurveyV2'
 
