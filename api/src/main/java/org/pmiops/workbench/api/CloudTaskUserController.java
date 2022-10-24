@@ -9,9 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -49,20 +49,20 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           "762320479256"); // terra_prod_aou_prod_2
   private static final Logger log = Logger.getLogger(CloudTaskUserController.class.getName());
 
-  private final UserDao userDao;
-  private final CloudResourceManagerService cloudResourceManagerService;
-  private final UserService userService;
   private final AccessModuleService accessModuleService;
+  private final AccessSyncService accessSyncService;
+  private final CloudResourceManagerService cloudResourceManagerService;
+  private final UserDao userDao;
 
   CloudTaskUserController(
-      UserDao userDao,
+      AccessModuleService accessModuleService,
+      AccessSyncService accessSyncService,
       CloudResourceManagerService cloudResourceManagerService,
-      UserService userService,
-      AccessModuleService accessModuleService) {
-    this.userDao = userDao;
-    this.cloudResourceManagerService = cloudResourceManagerService;
-    this.userService = userService;
+      UserDao userDao) {
     this.accessModuleService = accessModuleService;
+    this.accessSyncService = accessSyncService;
+    this.cloudResourceManagerService = cloudResourceManagerService;
+    this.userDao = userDao;
   }
 
   @Override
@@ -130,7 +130,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           Optional<AccessModuleStatus> status =
               accessModuleService.getAccessModuleStatus(user, DbAccessModuleName.TWO_FACTOR_AUTH);
           if (status.isPresent() && status.get().getCompletionEpochMillis() != null) {
-            user = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
+            user = accessSyncService.syncTwoFactorAuthStatus(user, Agent.asSystem());
           }
         }
 
@@ -138,7 +138,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // of *all* modules, so this serves as a general fallback as well (e.g. due to partial
         // system failures or bugs), ensuring that the database and access tier groups are
         // consistent with access module statuses.
-        user = userService.syncDuccVersionStatus(user, Agent.asSystem());
+        user = accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
       } catch (WorkbenchException e) {
         log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
         errorCount++;

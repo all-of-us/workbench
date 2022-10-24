@@ -5,47 +5,71 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
 import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccessSyncServiceImpl implements AccessSyncService {
   private static final Logger log = Logger.getLogger(AccessSyncServiceImpl.class.getName());
 
+  private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private final AccessTierService accessTierService;
   private final AccessModuleService accessModuleService;
+  private final ComplianceService complianceService;
+  private final Clock clock;
+  private final DirectoryService directoryService;
   private final InstitutionService institutionService;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
 
   @Autowired
   public AccessSyncServiceImpl(
+      Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       AccessTierService accessTierService,
+      AccessModuleNameMapper accessModuleNameMapper,
       AccessModuleService accessModuleService,
+      ComplianceService complianceService,
+      Clock clock,
+      DirectoryService directoryService,
       InstitutionService institutionService,
       UserDao userDao,
       UserServiceAuditor userServiceAuditor) {
+    this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
+    this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessModuleService = accessModuleService;
+    this.complianceService = complianceService;
+    this.clock = clock;
+    this.directoryService = directoryService;
     this.institutionService = institutionService;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
@@ -73,6 +97,169 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
     return userDao.save(dbUser);
+  }
+
+  @Override
+  public void syncTwoFactorAuthStatus() {
+    DbUser user = userProvider.get();
+    syncTwoFactorAuthStatus(user, Agent.asUser(user));
+  }
+
+  @Override
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
+    return syncTwoFactorAuthStatus(
+        targetUser,
+        agent,
+        directoryService.getUserOrThrow(targetUser.getUsername()).getIsEnrolledIn2Sv());
+  }
+
+  @Override
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA) {
+    if (isServiceAccount(targetUser)) {
+      // Skip sync for service account user rows.
+      return targetUser;
+    }
+
+    if (isEnrolledIn2FA) {
+      final boolean needsDbCompletionUpdate =
+          accessModuleService
+              .getAccessModuleStatus(targetUser, DbAccessModuleName.TWO_FACTOR_AUTH)
+              .map(status -> status.getCompletionEpochMillis() == null)
+              .orElse(true);
+
+      if (needsDbCompletionUpdate) {
+        accessModuleService.updateCompletionTime(
+            targetUser, DbAccessModuleName.TWO_FACTOR_AUTH, clockNow());
+      }
+    } else {
+      accessModuleService.updateCompletionTime(
+          targetUser, DbAccessModuleName.TWO_FACTOR_AUTH, null);
+    }
+
+    return updateUserAccessTiers(targetUser, agent);
+  }
+
+  /** Syncs the current user's training status from Moodle. */
+  @Override
+  public DbUser syncComplianceTrainingStatusV2()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV2(user, Agent.asUser(user));
+  }
+
+  /**
+   * Updates the given user's training status from Moodle.
+   *
+   * <p>We can fetch Moodle data for arbitrary users since we use an API key to access Moodle,
+   * rather than user-specific OAuth tokens.
+   *
+   * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
+   * valid, we store their completion dates in the database. If they are marked invalid, we clear
+   * the completion dates from the database as the user will need to complete a new training.
+   */
+  @Override
+  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    // Skip sync for service account user rows.
+    if (isServiceAccount(dbUser)) {
+      return dbUser;
+    }
+
+    try {
+      Map<BadgeName, BadgeDetailsV2> userBadgesByName =
+          complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
+
+      /**
+       * Determine the logical completion time for this user for the given compliance access module.
+       * Three logical outcomes are possible:
+       *
+       * <ul>
+       *   <li>Incomplete or invalid training badge: empty
+       *   <li>Badge has been issued for the first time, or has been reissued since we last marked
+       *       the training complete: now
+       *   <li>Else: existing completion time, i.e. no change
+       * </ul>
+       */
+      Function<BadgeName, Optional<Timestamp>> determineCompletionTime =
+          (badgeName) -> {
+            Optional<BadgeDetailsV2> badge =
+                Optional.ofNullable(userBadgesByName.get(badgeName))
+                    .filter(BadgeDetailsV2::getValid);
+
+            if (!badge.isPresent()) {
+              return Optional.empty();
+            }
+
+            if (badge.get().getLastissued() == null) {
+              log.warning(
+                  String.format(
+                      "badge %s is indicated as valid by Moodle, but is missing the lastissued "
+                          + "time, this is unexpected - treating this as an incomplete training",
+                      badgeName));
+              return Optional.empty();
+            }
+            Instant badgeTime = Instant.ofEpochSecond(badge.get().getLastissued());
+            Instant dbCompletionTime =
+                accessModuleService
+                    .getAccessModuleStatus(
+                        dbUser, accessModuleNameMapper.moduleFromBadge(badgeName))
+                    .map(AccessModuleStatus::getCompletionEpochMillis)
+                    .map(Instant::ofEpochMilli)
+                    .orElse(Instant.EPOCH);
+
+            if (badgeTime.isAfter(dbCompletionTime)) {
+              // First-time badge or renewal: our system recognizes the user as having
+              // completed training right now, though the badge has been issued some
+              // time in the past.
+              return Optional.of(clockNow());
+            }
+
+            // No change
+            return Optional.of(Timestamp.from(dbCompletionTime));
+          };
+
+      Map<DbAccessModuleName, Optional<Timestamp>> completionTimes =
+          Arrays.stream(BadgeName.values())
+              .collect(
+                  Collectors.toMap(
+                      accessModuleNameMapper::moduleFromBadge, determineCompletionTime));
+
+      completionTimes.forEach(
+          (accessModuleName, timestamp) ->
+              accessModuleService.updateCompletionTime(
+                  dbUser, accessModuleName, timestamp.orElse(null)));
+
+      return updateUserAccessTiers(dbUser, agent);
+    } catch (NumberFormatException e) {
+      log.severe("Incorrect date expire format from Moodle");
+      throw e;
+    } catch (org.pmiops.workbench.moodle.ApiException ex) {
+      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
+        log.severe(
+            String.format(
+                "Error while querying Moodle for badges for %s: %s ",
+                dbUser.getUsername(), ex.getMessage()));
+        throw new NotFoundException(ex.getMessage());
+      } else {
+        log.severe(String.format("Error while syncing compliance training: %s", ex.getMessage()));
+      }
+      throw ex;
+    }
+  }
+
+  @Override
+  public DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent) {
+    if (isServiceAccount(targetUser)) {
+      // Skip sync for service account user rows.
+      return targetUser;
+    }
+
+    if (!accessModuleService.hasUserSignedACurrentDucc(targetUser)) {
+      accessModuleService.updateCompletionTime(
+          targetUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+    }
+
+    return updateUserAccessTiers(targetUser, agent);
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
@@ -127,5 +314,13 @@ public class AccessSyncServiceImpl implements AccessSyncService {
         && (!eRARequiredForTier || eraCompliant)
         && institutionalEmailValidForTier
         && allStandardRequiredModulesCompliant;
+  }
+
+  private boolean isServiceAccount(DbUser user) {
+    return workbenchConfigProvider.get().auth.serviceAccountApiUsers.contains(user.getUsername());
+  }
+
+  private Timestamp clockNow() {
+    return new Timestamp(clock.instant().toEpochMilli());
   }
 }

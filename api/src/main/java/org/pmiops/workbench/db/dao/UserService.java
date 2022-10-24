@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
@@ -95,40 +96,8 @@ public interface UserService {
    */
   Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
-  DbUser syncComplianceTrainingStatusV2()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
-
-  DbUser syncComplianceTrainingStatusV2(DbUser user, Agent agent)
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
-
+  // TODO migrate to AccessTierSyncService
   DbUser syncEraCommonsStatus();
-
-  /**
-   * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench
-   * database and the gsuite directory API. This may affect the user's enabled access tiers. This
-   * can only be called within the context of a user-authenticated API request.
-   */
-  void syncTwoFactorAuthStatus();
-
-  /**
-   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
-   * gsuite directory API, acting as the provided agent type. This may affect the user's enabled
-   * access tiers. This can be called administratively, or from an offline cron.
-   */
-  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
-
-  /**
-   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
-   * provided 2FA status, acting as the provided agent type. This may affect the user's enabled
-   * access tiers. This can be called administratively, or from an offline cron.
-   *
-   * <p>This method is provided to allow for optimization to the lookup of the enrolled 2FA status,
-   * enables batch 2FA synchronization to be implemented without repeated calls to Gsuite. The
-   * source value for isEnrolledIn2FA should always be Gsuite.
-   */
-  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
-
-  DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent);
 
   Optional<DbUser> getByUsername(String username);
 
