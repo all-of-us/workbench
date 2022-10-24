@@ -92,10 +92,17 @@ export async function fetchWithSystemErrorHandler<T>(
 }
 
 // TODO handle errorClassName and parameters?
-export const defaultErrorResponseFormatter = (
-  errorResponse: ErrorResponse
-): string => {
-  const { message, statusCode, errorCode, errorUniqueId } = errorResponse;
+export const defaultErrorResponseFormatter = async (
+  errorResponse: Response
+): Promise<string> => {
+  const { status, statusText, type } = errorResponse;
+  const { errorCode, errorUniqueId, message } = await errorResponse
+    .json()
+    .catch(() => ({}));
+
+  console.log('errorResponse', errorResponse);
+  console.log('statusText', statusText);
+  console.log('type', type);
 
   const errorCodeStr =
     errorCode && errorCode !== ErrorCode.PARSEERROR
@@ -105,11 +112,10 @@ export const defaultErrorResponseFormatter = (
 
   const detailsStr = cond(
     [
-      !!statusCode && !!errorUniqueId,
-      () =>
-        ` with HTTP status code ${statusCode} and unique ID ${errorUniqueId}`,
+      !!status && !!errorUniqueId,
+      () => ` with HTTP status code ${status} and unique ID ${errorUniqueId}`,
     ],
-    [!!statusCode, () => ` with HTTP status code ${statusCode}`],
+    [!!status, () => ` with HTTP status code ${status}`],
     [!!errorUniqueId, () => ` with unique ID ${errorUniqueId}`],
     () => ''
   );
@@ -146,11 +152,11 @@ export const FALLBACK_ERROR_TITLE = 'An error has occurred';
  * @returns A NotificationStore object suitable for an error modal, if appropriate; undefined otherwise
  */
 export const errorHandlerWithFallback = (
-  anyApiErrorResponse: any,
+  anyApiErrorResponse: Response,
   expectedResponseMatcher?: (ErrorResponse) => boolean,
   customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
 ): Promise<NotificationStore> =>
-  convertAPIError(anyApiErrorResponse).then((errorResponse) => {
+  convertAPIError(anyApiErrorResponse).then(async (errorResponse) => {
     // if this "error" is expected and should instead be considered a success
     if (expectedResponseMatcher?.(errorResponse)) {
       return undefined;
@@ -160,7 +166,7 @@ export const errorHandlerWithFallback = (
     return (
       customErrorResponseFormatter?.(errorResponse) || {
         title: FALLBACK_ERROR_TITLE,
-        message: defaultErrorResponseFormatter(errorResponse),
+        message: await defaultErrorResponseFormatter(anyApiErrorResponse),
       }
     );
   });

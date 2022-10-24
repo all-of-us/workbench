@@ -53,8 +53,8 @@ describe('defaultErrorResponseFormatter', () => {
     ],
   ])(
     'Should return the expected result when %s',
-    (desc: string, errorResponse: ErrorResponse, expected: string) => {
-      expect(defaultErrorResponseFormatter(errorResponse)).toBe(expected);
+    async (desc: string, errorResponse: Response, expected: string) => {
+      expect(await defaultErrorResponseFormatter(errorResponse)).toBe(expected);
     }
   );
 });
@@ -130,7 +130,7 @@ describe('errorHandlerWithFallback', () => {
     ) => {
       expect(
         await errorHandlerWithFallback(
-          apiErrorResponse,
+          apiErrorResponse as any as Response,
           expectedResponseMatcher,
           customErrorResponseFormatter
         )
