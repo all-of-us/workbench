@@ -813,7 +813,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return new Modifier()
         .name(ModifierType.CATI)
         .operator(Operator.EQUAL)
-        .operands(ImmutableList.of("1"));
+        .operands(ImmutableList.of("42530794"));
   }
 
   private static List<Attribute> wheelchairAttributes() {
