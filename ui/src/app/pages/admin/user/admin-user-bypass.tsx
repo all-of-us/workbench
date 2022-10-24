@@ -78,16 +78,20 @@ export class AdminUserBypass extends React.Component<Props, State> {
 
   async save() {
     const { selectedModules } = this.state;
-    const { user } = this.props;
+    const {
+      user,
+      user: { username },
+    } = this.props;
     const changedModules = fp.xor(getBypassedModules(user), selectedModules);
     this.setState({ isSaving: true });
     try {
-      for (const module of changedModules) {
-        await userAdminApi().bypassAccessRequirement(user.userId, {
-          isBypassed: selectedModules.includes(module),
-          moduleName: module,
-        });
-      }
+      await userAdminApi().updateAccountProperties({
+        username,
+        accessBypassRequests: changedModules.map((moduleName) => ({
+          moduleName,
+          isBypassed: selectedModules.includes(moduleName),
+        })),
+      });
       this.setState({ isSaving: false });
       this.resetState();
       this.closePopup();
