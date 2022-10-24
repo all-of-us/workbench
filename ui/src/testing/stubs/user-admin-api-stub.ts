@@ -1,9 +1,4 @@
-import {
-  AdminUserListResponse,
-  EmptyResponse,
-  Profile,
-  UserAdminApi,
-} from 'generated/fetch';
+import { AdminUserListResponse, Profile, UserAdminApi } from 'generated/fetch';
 
 import { ProfileStubVariables } from './profile-api-stub';
 import { stubNotImplementedError } from './stub-utils';
