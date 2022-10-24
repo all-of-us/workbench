@@ -11,6 +11,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -68,6 +69,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileController implements ProfileApiDelegate {
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
+  private final AccessSyncService accessSyncService;
   private final AddressMapper addressMapper;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
@@ -90,6 +92,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(
+      AccessSyncService accessSyncService,
       AddressMapper addressMapper,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
@@ -109,6 +112,7 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService) {
+    this.accessSyncService = accessSyncService;
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -350,7 +354,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      userService.syncComplianceTrainingStatusV2();
+      accessSyncService.syncComplianceTrainingStatusV2();
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
@@ -367,7 +371,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> syncTwoFactorAuthStatus() {
-    userService.syncTwoFactorAuthStatus();
+    accessSyncService.syncTwoFactorAuthStatus();
     return getProfileResponse(userProvider.get());
   }
 

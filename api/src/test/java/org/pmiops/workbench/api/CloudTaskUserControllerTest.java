@@ -17,7 +17,6 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudResourceManagerService;
@@ -44,7 +43,7 @@ public class CloudTaskUserControllerTest {
   @Autowired private UserDao userDao;
 
   @Autowired private AccessModuleService mockAccessModuleService;
-  @Autowired private UserService mockUserService;
+  @Autowired private AccessSyncService mockAccessSyncService;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
@@ -52,7 +51,6 @@ public class CloudTaskUserControllerTest {
     AccessModuleService.class,
     AccessSyncService.class,
     CloudResourceManagerService.class,
-    UserService.class,
   })
   static class Configuration {}
 
@@ -92,7 +90,7 @@ public class CloudTaskUserControllerTest {
         .thenReturn(Optional.of(new AccessModuleStatus()));
 
     // kluge to ensure a valid return value for syncTwoFactorAuthStatus()
-    when(mockUserService.syncTwoFactorAuthStatus(userA, Agent.asSystem())).thenReturn(userA);
+    when(mockAccessSyncService.syncTwoFactorAuthStatus(userA, Agent.asSystem())).thenReturn(userA);
 
     controller.synchronizeUserAccess(
         new SynchronizeUserAccessRequest()
@@ -103,12 +101,14 @@ public class CloudTaskUserControllerTest {
     // unfortunately UserService is too sprawling to replicate in a unit test.
 
     // we only sync 2FA users with completed 2FA
-    verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
+    verify(mockAccessSyncService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
 
     // we sync DUCC for all users
-    verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem());
-    verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
+    verify(mockAccessSyncService).syncDuccVersionStatus(userA, Agent.asSystem());
+    verify(mockAccessSyncService).syncDuccVersionStatus(userB, Agent.asSystem());
 
-    verifyNoMoreInteractions(mockUserService);
+    // normally we would expect the sync methods to add to this count, but the service
+    // is mocked so we only see the direct calls from synchronizeUserAccess(), one per user
+    verifyNoMoreInteractions(mockAccessSyncService);
   }
 }
