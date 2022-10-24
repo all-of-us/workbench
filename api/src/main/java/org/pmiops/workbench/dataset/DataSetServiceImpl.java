@@ -141,6 +141,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.FITBIT_HEART_RATE_LEVEL,
           Domain.FITBIT_HEART_RATE_SUMMARY,
           Domain.FITBIT_INTRADAY_STEPS,
+          Domain.FITBIT_SLEEP_DAILY_SUMMARY,
+          Domain.FITBIT_SLEEP_LEVEL,
           Domain.WHOLE_GENOME_VARIANT,
           Domain.ZIP_CODE_SOCIOECONOMIC);
 

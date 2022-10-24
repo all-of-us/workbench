@@ -315,9 +315,11 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL, (short) 5)
               .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_SUMMARY, (short) 6)
               .put(PrePackagedConceptSetEnum.FITBIT_INTRADAY_STEPS, (short) 7)
-              .put(PrePackagedConceptSetEnum.FITBIT, (short) 8)
-              .put(PrePackagedConceptSetEnum.WHOLE_GENOME, (short) 9)
-              .put(PrePackagedConceptSetEnum.ZIP_CODE_SOCIOECONOMIC, (short) 10)
+              .put(PrePackagedConceptSetEnum.FITBIT_SLEEP_DAILY_SUMMARY, (short) 8)
+              .put(PrePackagedConceptSetEnum.FITBIT_SLEEP_LEVEL, (short) 9)
+              .put(PrePackagedConceptSetEnum.FITBIT, (short) 10)
+              .put(PrePackagedConceptSetEnum.WHOLE_GENOME, (short) 11)
+              .put(PrePackagedConceptSetEnum.ZIP_CODE_SOCIOECONOMIC, (short) 12)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
