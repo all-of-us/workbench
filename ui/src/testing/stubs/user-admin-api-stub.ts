@@ -15,10 +15,6 @@ export class UserAdminApiStub extends UserAdminApi {
     });
   }
 
-  public bypassAccessRequirement(): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(() => {});
-  }
-
   public getAllUsers(): Promise<AdminUserListResponse> {
     return Promise.resolve({
       users: [

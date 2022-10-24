@@ -57,15 +57,6 @@ public class UserAdminController implements UserAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  @Deprecated // use updateAccountProperties()
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(
-      Long userId, AccessBypassRequest request) {
-    userService.updateBypassTime(userId, request);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<AdminUserListResponse> getAllUsers() {
     return ResponseEntity.ok(
         new AdminUserListResponse().users(profileService.getAdminTableUsers()));

@@ -134,10 +134,6 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
-  public bypassAccessRequirement(): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(() => {});
-  }
-
   public submitDUCC(duccVersion: number) {
     this.profile.duccSignedVersion = duccVersion;
     return Promise.resolve(this.profile);
