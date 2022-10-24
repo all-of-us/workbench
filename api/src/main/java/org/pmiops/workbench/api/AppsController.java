@@ -94,7 +94,6 @@ public class AppsController implements AppsApiDelegate {
    *   <li>Feature is enabled
    *   <li>User compute is not suspend due to security reason (e.g. egress alert)
    *   <li>User is OWNER or WRITER of the workspace
-   *   <li>Workspace has valid billing.
    * </ul>
    */
   @VisibleForTesting
