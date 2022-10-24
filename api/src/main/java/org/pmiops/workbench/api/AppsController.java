@@ -57,7 +57,10 @@ public class AppsController implements AppsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteApp(
       String workspaceNamespace, String appName, Boolean deleteDisk) {
-    throw new UnsupportedOperationException("API not supported.");
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    validateCanPerformApiAction(dbWorkspace);
+    leonardoApiClient.deleteApp(appName, dbWorkspace, deleteDisk);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

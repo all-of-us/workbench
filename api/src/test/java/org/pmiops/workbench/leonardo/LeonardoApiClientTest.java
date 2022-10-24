@@ -218,6 +218,14 @@ public class LeonardoApiClientTest {
     verify(userAppsApi).listAppByProject(GOOGLE_PROJECT_ID, null, false, null);
   }
 
+  @Test
+  public void testDeleteAppSuccess() throws Exception {
+    String appName = "app-name";
+    boolean deleteDisk = true;
+    leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
+    verify(userAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
+  }
+
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {
     FirecloudWorkspaceDetails fcWorkspaceDetail =
         new FirecloudWorkspaceDetails()
