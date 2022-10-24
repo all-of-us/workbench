@@ -17,7 +17,7 @@ import {
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
