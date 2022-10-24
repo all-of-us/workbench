@@ -58,7 +58,6 @@ public class AccessSyncServiceTest {
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
 
-  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessSyncService accessSyncService;
 
   @Autowired private AccessModuleDao accessModuleDao;
@@ -66,6 +65,7 @@ public class AccessSyncServiceTest {
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
 
+  @MockBean private AccessModuleService mockAccessModuleService;
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
 
@@ -226,7 +226,7 @@ public class AccessSyncServiceTest {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    accessModuleService.updateCompletionTime(
+    mockAccessModuleService.updateCompletionTime(
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
@@ -243,9 +243,7 @@ public class AccessSyncServiceTest {
   public void testSyncComplianceTrainingStatusBadgeNotFoundV2() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME))
-        .thenThrow(
-            new org.pmiops.workbench.moodle.ApiException(
-                HttpStatus.NOT_FOUND.value(), "user not found"));
+        .thenThrow(new ApiException(HttpStatus.NOT_FOUND.value(), "user not found"));
     assertThrows(NotFoundException.class, () -> accessSyncService.syncComplianceTrainingStatusV2());
   }
 
@@ -293,7 +291,7 @@ public class AccessSyncServiceTest {
           user.setDuccAgreement(signDucc(user, version));
           user = userDao.save(user);
           accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
-          verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
+          verify(mockAccessModuleService, never()).updateCompletionTime(any(), any(), any());
         });
   }
 
@@ -307,7 +305,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
-    verify(accessModuleService)
+    verify(mockAccessModuleService)
         .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
@@ -317,7 +315,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
-    verify(accessModuleService)
+    verify(mockAccessModuleService)
         .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
