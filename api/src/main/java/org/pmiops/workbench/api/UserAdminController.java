@@ -102,6 +102,16 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
+  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirements() {
+    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
+      throw new ForbiddenException("Self bypass is disallowed in this environment.");
+    }
+    long userId = userProvider.get().getUserId();
+    accessModuleService.updateBypassTime(userId);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Profile> updateAccountProperties(AccountPropertyUpdate request) {
     return ResponseEntity.ok(profileService.updateAccountProperties(request));

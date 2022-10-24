@@ -15,13 +15,12 @@ import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { profileApi } from 'app/services/swagger-fetch-clients';
+import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,
-  bypassAll,
   DARPageMode,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -363,11 +362,10 @@ const handleRasCallback = (
 
 const selfBypass = async (
   spinnerProps: WithSpinnerOverlayProps,
-  reloadProfile: Function,
-  modules: AccessModule[] = allInitialModules
+  reloadProfile: Function
 ) => {
   spinnerProps.showSpinner();
-  await bypassAll(modules, true);
+  await userAdminApi().unsafeSelfBypassAccessRequirements();
   spinnerProps.hideSpinner();
   reloadProfile();
 };
