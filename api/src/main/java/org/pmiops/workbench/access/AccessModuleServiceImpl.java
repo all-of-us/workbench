@@ -65,10 +65,15 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateAllBypassTimes(long userId) {
-    dbAccessModulesProvider.get().stream().filter(DbAccessModule::getBypassable).forEach(module -> updateBypassTime(
-        userId,
-        // TODO rm double conversion
-        accessModuleNameMapper.storageAccessModuleToClient(module.getName()), true));
+    dbAccessModulesProvider.get().stream()
+        .filter(DbAccessModule::getBypassable)
+        .forEach(
+            module ->
+                updateBypassTime(
+                    userId,
+                    // TODO rm double conversion
+                    accessModuleNameMapper.storageAccessModuleToClient(module.getName()),
+                    true));
   }
 
   @Override
