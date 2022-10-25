@@ -101,17 +101,14 @@ const toApiErrorResponse = async (apiError): Promise<ApiErrorResponse> => ({
   responseJson: typeof apiError.json === 'function' && (await apiError.json()),
 });
 
-export const defaultAPIErrorFormatter = (
+export const defaultApiErrorFormatter = (
   apiError: ApiErrorResponse
 ): string => {
   const { originalResponse, responseJson } = apiError || {};
   const { status, statusText } = originalResponse || {};
   const { errorCode, errorUniqueId, message } = responseJson || {};
 
-  const errorCodeStr =
-    errorCode && errorCode !== ErrorCode.PARSEERROR
-      ? ` of type ${errorCode.toString()}`
-      : '';
+  const errorCodeStr = errorCode ? ` of type ${errorCode.toString()}` : '';
   const statusStr =
     status && statusText && `HTTP status code ${status} (${statusText})`;
   const messageStr = message ? `: ${message}` : '.';
@@ -134,7 +131,7 @@ export const FALLBACK_ERROR_TITLE = 'An error has occurred';
 /**
  * Convert an API error response to a format suitable for an error modal.  The caller may supply a
  * matcher for expected error responses which should not pop up error modals, and a custom formatter for expected
- * failure responses; if neither of these match, the defaultAPIErrorFormatter will be used.
+ * failure responses; if neither of these match, the defaultApiErrorFormatter will be used.
  *
  * Example: an (async) API call getInfo() sometimes appropriately returns 404s which should not be considered errors,
  * and there's a common error case (HTTP 429, Error Code TOO_FAST) which we want to handle specially.
@@ -173,7 +170,7 @@ export const errorHandlerWithFallback = async (
   return (
     customResponse || {
       title: FALLBACK_ERROR_TITLE,
-      message: defaultAPIErrorFormatter(errorWithCachedJson),
+      message: defaultApiErrorFormatter(errorWithCachedJson),
     }
   );
 };
@@ -187,7 +184,7 @@ interface FetchOptions {
  * notificationStore (see NotificationModal for more details).
  *
  * The caller may supply a matcher for expected error responses which should not pop up error modals, and a custom
- * formatter for expected failure responses; if neither of these match, the defaultAPIErrorFormatter will be used.
+ * formatter for expected failure responses; if neither of these match, the defaultApiErrorFormatter will be used.
  *
  * Example: an API call getInfo() sometimes appropriately returns 404s which should not be considered errors,
  * and there's a common error case (HTTP 429, Error Code TOO_FAST) which we want to handle specially.

@@ -2,7 +2,7 @@ import { ErrorCode } from 'generated/fetch';
 
 import {
   ApiErrorResponse,
-  defaultAPIErrorFormatter,
+  defaultApiErrorFormatter,
   errorHandlerWithFallback,
   FALLBACK_ERROR_TITLE,
 } from './errors';
@@ -56,7 +56,7 @@ describe('defaultErrorResponseFormatter', () => {
   ])(
     'Should return the expected result when %s',
     (desc: string, errorResponse: ApiErrorResponse, expected: string) => {
-      expect(defaultAPIErrorFormatter(errorResponse)).toBe(expected);
+      expect(defaultApiErrorFormatter(errorResponse)).toBe(expected);
     }
   );
 });
