@@ -186,13 +186,10 @@ export const WorkspaceAbout = fp.flow(
     }
 
     loadInitialCreditsUsage(workspace: WorkspaceData) {
-      fetchWithErrorModal(
-        () =>
-          workspacesApi().getBillingUsage(workspace.namespace, workspace.id),
-        {
-          onSuccess: (usage: WorkspaceBillingUsageResponse) =>
-            this.setState({ workspaceInitialCreditsUsage: usage.cost }),
-        }
+      fetchWithErrorModal(() =>
+        workspacesApi().getBillingUsage(workspace.namespace, workspace.id)
+      ).then((usage: WorkspaceBillingUsageResponse) =>
+        this.setState({ workspaceInitialCreditsUsage: usage.cost })
       );
     }
 
@@ -220,18 +217,15 @@ export const WorkspaceAbout = fp.flow(
 
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      fetchWithErrorModal(
-        () =>
-          workspacesApi().getFirecloudWorkspaceUserRoles(
-            workspace.namespace,
-            workspace.id
-          ),
-        {
-          onSuccess: (resp: WorkspaceUserRolesResponse) =>
-            this.setState({
-              workspaceUserRoles: fp.sortBy('familyName', resp.items),
-            }),
-        }
+      fetchWithErrorModal(() =>
+        workspacesApi().getFirecloudWorkspaceUserRoles(
+          workspace.namespace,
+          workspace.id
+        )
+      ).then((resp: WorkspaceUserRolesResponse) =>
+        this.setState({
+          workspaceUserRoles: fp.sortBy('familyName', resp.items),
+        })
       );
     }
 
@@ -282,16 +276,15 @@ export const WorkspaceAbout = fp.flow(
       const { workspace } = this.state;
       const { namespace, id } = workspace;
       this.setState({ publishing: true });
-      fetchWithErrorModal(
-        () =>
-          publish
-            ? workspaceAdminApi().publishWorkspace(namespace, id)
-            : workspaceAdminApi().unpublishWorkspace(namespace, id),
-        {
-          onSuccess: () =>
-            this.updateWorkspaceState({ ...workspace, published: publish }),
-        }
-      ).finally(() => this.setState({ publishing: false }));
+      fetchWithErrorModal(() =>
+        publish
+          ? workspaceAdminApi().publishWorkspace(namespace, id)
+          : workspaceAdminApi().unpublishWorkspace(namespace, id)
+      )
+        .then(() =>
+          this.updateWorkspaceState({ ...workspace, published: publish })
+        )
+        .finally(() => this.setState({ publishing: false }));
     }
 
     onShare() {

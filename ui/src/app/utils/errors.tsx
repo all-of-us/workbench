@@ -91,14 +91,13 @@ export async function fetchWithSystemErrorHandler<T>(
   }
 }
 
-// TODO handle errorClassName and parameters?
+// TODO handle statusText and type?
 export const defaultErrorResponseFormatter = async (
   errorResponse: Response
 ): Promise<string> => {
-  const { status, statusText, type } = errorResponse;
-  const { errorCode, errorUniqueId, message } = await errorResponse
-    .json()
-    .catch(() => ({}));
+  const { status, statusText, type, json } = errorResponse;
+  const { errorCode, errorUniqueId, message } =
+    typeof json === 'function' && (await json());
 
   console.log('errorResponse', errorResponse);
   console.log('statusText', statusText);
@@ -126,7 +125,7 @@ export const defaultErrorResponseFormatter = async (
 export const FALLBACK_ERROR_TITLE = 'An error has occurred';
 
 /**
- * Convert an API error response (of any type) to a format suitable for an error modal.  The caller may supply a
+ * Convert an API error response to a format suitable for an error modal.  The caller may supply a
  * matcher for expected error responses which should be considered successes, and a custom formatter for expected
  * failure responses; if neither of these match, the defaultErrorResponseFormatter will be used.
  *
@@ -137,46 +136,58 @@ export const FALLBACK_ERROR_TITLE = 'An error has occurred';
  * await responseP.then(resp =>
  *  errorHandlerWithFallback(
  *    resp,
- *    (er) => er.statusCode === 404,
+ *    (er) => er.status === 404,
  *    (er) =>
- *      er.statusCode === 429 && er.errorCode === ErrorCode.TOO_FAST && {
+ *
+ *
+ *    xxxxx todo update
+ *
+ *
+ *
+ *      er.status === 429 && er.errorCode === ErrorCode.TOO_FAST && {
  *        title: 'Please try again',
  *        message: 'The server is currently handling too many requests',
  *      }
  *    ));
  *
- * @param anyApiErrorResponse The error response from an API call, of any type
+ * @param errorResponse The error response from an API call
  * @param expectedResponseMatcher An optional handler for errors which should be considered successes
  * @param customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.
  * @returns A NotificationStore object suitable for an error modal, if appropriate; undefined otherwise
  */
-export const errorHandlerWithFallback = (
-  anyApiErrorResponse: Response,
-  expectedResponseMatcher?: (ErrorResponse) => boolean,
-  customErrorResponseFormatter?: (ErrorResponse) => NotificationStore
-): Promise<NotificationStore> =>
-  convertAPIError(anyApiErrorResponse).then(async (errorResponse) => {
-    // if this "error" is expected and should instead be considered a success
-    if (expectedResponseMatcher?.(errorResponse)) {
-      return undefined;
+export const errorHandlerWithFallback = async (
+  errorResponse: Response,
+  expectedResponseMatcher?: (Response) => boolean,
+  customErrorResponseFormatter?: (Response) => NotificationStore
+): Promise<NotificationStore> => {
+  // if this "error" is expected and should instead be considered a success
+  if (expectedResponseMatcher?.(errorResponse)) {
+    return undefined;
+  }
+
+  // the custom error response for this error, if applicable
+  return (
+    customErrorResponseFormatter?.(errorResponse) || {
+      title: FALLBACK_ERROR_TITLE,
+      message: await defaultErrorResponseFormatter(errorResponse),
     }
+  );
+};
 
-    // the custom error response for this error, if applicable
-    return (
-      customErrorResponseFormatter?.(errorResponse) || {
-        title: FALLBACK_ERROR_TITLE,
-        message: await defaultErrorResponseFormatter(anyApiErrorResponse),
-      }
-    );
-  });
-
-interface FetchOptions<T, U> {
-  onSuccess?: (t: T) => U;
-  expectedResponseMatcher?: (ErrorResponse) => boolean;
-  customErrorResponseFormatter?: (ErrorResponse) => NotificationStore;
+interface FetchOptions {
+  expectedResponseMatcher?: (Response) => boolean;
+  customErrorResponseFormatter?: (Response) => NotificationStore;
 }
 /**
+ *
+ *
+ *
+ * xxxxxx todo update
+ *
+ *
+ *
+ *
  * Call an (async) API function and optionally execute another function if successful.  If not, pop up a modal with a
  * suitable message by setting the notificationStore (see NotificationModal for more details).
  *
@@ -200,30 +211,27 @@ interface FetchOptions<T, U> {
  *
  * @param apiCall The API function to call and handle
  * @param options:
- *  onSuccess The optional action to take if the API call is successful
  *  expectedResponseMatcher An optional handler for errors which should be considered successes
  *  customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.
  * @returns The result of the API function call, if successful; undefined otherwise
  */
-export async function fetchWithErrorModal<T, U>(
+export async function fetchWithErrorModal<T>(
   apiCall: () => Promise<T>,
-  options?: FetchOptions<T, U>
-): Promise<U> {
-  const { onSuccess, expectedResponseMatcher, customErrorResponseFormatter } =
+  options?: FetchOptions
+): Promise<T> {
+  const { expectedResponseMatcher, customErrorResponseFormatter } =
     options || {};
-  return apiCall()
-    .then(onSuccess)
-    .catch(async (apiError) => {
-      const notification = await errorHandlerWithFallback(
-        apiError,
-        expectedResponseMatcher,
-        customErrorResponseFormatter
-      );
-      if (notification) {
-        notificationStore.set(notification);
-      }
-      // changes the return signature from Promise<U | void> to Promise<U>
-      return undefined;
-    });
+  return apiCall().catch(async (apiError) => {
+    const notification = await errorHandlerWithFallback(
+      apiError,
+      expectedResponseMatcher,
+      customErrorResponseFormatter
+    );
+    if (notification) {
+      notificationStore.set(notification);
+    }
+    // changes the return signature from Promise<U | void> to Promise<U>
+    throw apiError;
+  });
 }
