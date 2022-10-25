@@ -1,5 +1,8 @@
 package org.pmiops.workbench.leonardo;
 
+import static org.pmiops.workbench.leonardo.PersistentDiskUtils.PD_LABEL_KEY_APP_TYPE;
+import static org.pmiops.workbench.leonardo.PersistentDiskUtils.upsertPdLabel;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
@@ -10,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -520,7 +524,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 createAppRequest.getKubernetesRuntimeConfig()))
         .diskConfig(
             leonardoMapper.toLeonardoPersistentDiskRequest(
-                createAppRequest.getPersistentDiskRequest()))
+                createAppRequest.getPersistentDiskRequest()).labels(upsertPdLabel(createAppRequest.getPersistentDiskRequest().getLabels(), PD_LABEL_KEY_APP_TYPE, createAppRequest.getAppType().toString().toLowerCase())))
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
 

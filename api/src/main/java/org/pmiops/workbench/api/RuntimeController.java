@@ -1,5 +1,9 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.leonardo.PersistentDiskUtils.upsertPdLabel;
+import static org.pmiops.workbench.leonardo.PersistentDiskUtils.PD_LABEL_RUNTIME_KEY;
+import static org.pmiops.workbench.leonardo.PersistentDiskUtils.PD_LABEL_RUNTIME_VALUE;
+
 import com.google.common.base.Strings;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -192,7 +196,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
       if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
-        persistentDiskRequest.setName(userProvider.get().generatePDName());
+        persistentDiskRequest.name(userProvider.get().generatePDName()).labels(upsertPdLabel(persistentDiskRequest.getLabels(), PD_LABEL_RUNTIME_KEY, PD_LABEL_RUNTIME_VALUE));
       }
     }
     long configCount =
