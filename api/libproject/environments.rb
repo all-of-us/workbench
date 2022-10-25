@@ -63,7 +63,7 @@ ENVIRONMENTS = {
     }
   }),
   "all-of-us-rw-staging" => env_with_defaults("staging", {
-    :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
+    :api_endpoint_host => "api.staging.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :gae_vars => make_gae_vars(0, 10, 'F2'),
     :source_cdr_project => "all-of-us-ehr-dev",
