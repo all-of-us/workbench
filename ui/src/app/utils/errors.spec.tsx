@@ -17,8 +17,8 @@ describe('defaultErrorResponseFormatter', () => {
     ],
     [
       'an HTTP status code is present',
-      { status: 400 } as Response,
-      'An API error occurred with HTTP status code 400.',
+      { status: 400, statusText: 'Not Found' } as Response,
+      'An API error occurred with HTTP status code 400 (Not Found).',
     ],
     [
       'an error code is present',
@@ -43,13 +43,14 @@ describe('defaultErrorResponseFormatter', () => {
       'an HTTP status code, an error code, a unique ID, and a message are all present',
       {
         status: 404,
+        statusText: 'Not Found',
         json: () => ({
           errorCode: ErrorCode.USERDISABLED,
           errorUniqueId: 'abcdef',
           message: 'You do not have access to workspace my-test-data',
         }),
       },
-      'An API error of type USER_DISABLED occurred with HTTP status code 404 and unique ID abcdef: ' +
+      'An API error of type USER_DISABLED occurred with HTTP status code 404 (Not Found) and unique ID abcdef: ' +
         'You do not have access to workspace my-test-data',
     ],
   ])(
@@ -79,18 +80,26 @@ describe('errorHandlerWithFallback', () => {
     ],
     [
       'the API response is parseable and there are no custom handlers',
-      { status: 404, json: () => ({ message: 'User not found' }) },
+      {
+        status: 404,
+        statusText: 'Not Found',
+        json: () => ({ message: 'User not found' }),
+      },
       undefined,
       undefined,
       {
         title: FALLBACK_ERROR_TITLE,
         message:
-          'An API error occurred with HTTP status code 404: User not found',
+          'An API error occurred with HTTP status code 404 (Not Found): User not found',
       },
     ],
     [
       'the API response is parseable and should be treated as a non-error',
-      { status: 404, json: () => ({ message: 'User not found' }) },
+      {
+        status: 404,
+        statusText: 'Not Found',
+        json: () => ({ message: 'User not found' }),
+      },
       // expectedResponseMatcher -> true
       (er: Response) => er.status === 404,
       undefined,
@@ -98,7 +107,11 @@ describe('errorHandlerWithFallback', () => {
     ],
     [
       'the API response is parseable and a custom response handler is applied',
-      { status: 409, json: () => ({ message: 'Conflict' }) },
+      {
+        status: 409,
+        statusText: 'Conflict',
+        json: () => ({ message: 'Conflict' }),
+      },
       // expectedResponseMatcher -> false
       (er: Response) => er.status === 404,
       // customErrorResponseFormatter -> matches, returns custom409Response
@@ -107,7 +120,11 @@ describe('errorHandlerWithFallback', () => {
     ],
     [
       'the API response is parseable and a custom response handler is not applicable',
-      { status: 400, json: () => ({ message: 'Unknown Error' }) },
+      {
+        status: 400,
+        statusText: 'Whoops',
+        json: () => ({ message: 'Unknown Error' }),
+      },
       // expectedResponseMatcher -> false
       (er: Response) => er.status === 404,
       // customErrorResponseFormatter -> does not match, returns undefined
@@ -115,7 +132,7 @@ describe('errorHandlerWithFallback', () => {
       {
         title: FALLBACK_ERROR_TITLE,
         message:
-          'An API error occurred with HTTP status code 400: Unknown Error',
+          'An API error occurred with HTTP status code 400 (Whoops): Unknown Error',
       },
     ],
   ])(

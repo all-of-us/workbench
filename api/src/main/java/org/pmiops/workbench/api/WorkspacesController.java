@@ -742,6 +742,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
+    //DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace + "404", workspaceId);
 
     List<UserRole> userRoles =
