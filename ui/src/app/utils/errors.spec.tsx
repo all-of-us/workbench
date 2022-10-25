@@ -55,8 +55,8 @@ describe('defaultErrorResponseFormatter', () => {
     ],
   ])(
     'Should return the expected result when %s',
-    async (desc: string, errorResponse: ApiErrorResponse, expected: string) => {
-      expect(await defaultAPIErrorFormatter(errorResponse)).toBe(expected);
+    (desc: string, errorResponse: ApiErrorResponse, expected: string) => {
+      expect(defaultAPIErrorFormatter(errorResponse)).toBe(expected);
     }
   );
 });
@@ -101,8 +101,7 @@ describe('errorHandlerWithFallback', () => {
         json: () => ({ message: 'User not found' }),
       },
       // expectedResponseMatcher -> true
-      (er: ApiErrorResponse): Promise<boolean> =>
-        new Promise((resolve) => resolve(er?.originalResponse?.status === 404)),
+      (er: ApiErrorResponse) => er?.originalResponse?.status === 404,
       undefined,
       undefined,
     ],
@@ -114,15 +113,10 @@ describe('errorHandlerWithFallback', () => {
         json: () => ({ message: 'Conflict' }),
       },
       // expectedResponseMatcher -> false
-      (er: ApiErrorResponse): Promise<boolean> =>
-        new Promise((resolve) => resolve(er?.originalResponse?.status === 404)),
+      (er: ApiErrorResponse) => er?.originalResponse?.status === 404,
       // customErrorResponseFormatter -> matches, returns custom409Response
-      (er: ApiErrorResponse): Promise<NotificationStore> =>
-        new Promise((resolve) =>
-          resolve(
-            er?.originalResponse?.status === 409 ? custom409Response : undefined
-          )
-        ),
+      (er: ApiErrorResponse) =>
+        er?.originalResponse?.status === 409 ? custom409Response : undefined,
       custom409Response,
     ],
     [
@@ -133,15 +127,10 @@ describe('errorHandlerWithFallback', () => {
         json: () => ({ message: 'Unknown Error' }),
       },
       // expectedResponseMatcher -> false
-      (er: ApiErrorResponse): Promise<boolean> =>
-        new Promise((resolve) => resolve(er?.originalResponse?.status === 404)),
+      (er: ApiErrorResponse) => er?.originalResponse?.status === 404,
       // customErrorResponseFormatter -> does not match, returns undefined
-      (er: ApiErrorResponse): Promise<NotificationStore> =>
-        new Promise((resolve) =>
-          resolve(
-            er?.originalResponse?.status === 409 ? custom409Response : undefined
-          )
-        ),
+      (er: ApiErrorResponse) =>
+        er?.originalResponse?.status === 409 ? custom409Response : undefined,
       {
         title: FALLBACK_ERROR_TITLE,
         message:
@@ -153,10 +142,8 @@ describe('errorHandlerWithFallback', () => {
     async (
       desc: string,
       apiErrorResponse,
-      expectedResponseMatcher: (ErrorWithCachedJson) => Promise<boolean>,
-      customErrorResponseFormatter: (
-        ErrorWithCachedJson
-      ) => Promise<NotificationStore>,
+      expectedResponseMatcher: (ApiErrorResponse) => boolean,
+      customErrorResponseFormatter: (ApiErrorResponse) => NotificationStore,
       expected: NotificationStore
     ) => {
       expect(

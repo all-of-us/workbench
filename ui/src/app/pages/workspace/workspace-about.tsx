@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
-  ErrorCode,
   Profile,
   UserRole,
   WorkspaceBillingUsageResponse,
@@ -37,7 +36,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getCdrVersion } from 'app/utils/cdr-versions';
-import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
+import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -218,20 +217,11 @@ export const WorkspaceAbout = fp.flow(
 
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      fetchWithErrorModal(
-        () =>
-          workspacesApi().getFirecloudWorkspaceUserRoles(
-            workspace.namespace,
-            workspace.id
-          ),
-        {
-          customErrorResponseFormatter: async (er: ApiErrorResponse) =>
-            er?.originalResponse?.status &&
-            er?.responseJson?.errorCode === ErrorCode.USERDISABLED && {
-              title: 'Please try again',
-              message: 'The server is currently handling too many requests',
-            },
-        }
+      fetchWithErrorModal(() =>
+        workspacesApi().getFirecloudWorkspaceUserRoles(
+          workspace.namespace,
+          workspace.id
+        )
       ).then((resp: WorkspaceUserRolesResponse) =>
         this.setState({
           workspaceUserRoles: fp.sortBy('familyName', resp.items),
