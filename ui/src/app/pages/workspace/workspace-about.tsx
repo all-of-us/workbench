@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
+  ErrorCode,
   Profile,
   UserRole,
   WorkspaceBillingUsageResponse,
@@ -217,11 +218,20 @@ export const WorkspaceAbout = fp.flow(
 
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      fetchWithErrorModal(() =>
-        workspacesApi().getFirecloudWorkspaceUserRoles(
-          workspace.namespace,
-          workspace.id
-        )
+      fetchWithErrorModal(
+        () =>
+          workspacesApi().getFirecloudWorkspaceUserRoles(
+            workspace.namespace,
+            workspace.id
+          ),
+        {
+          customErrorResponseFormatter: async (er: Response) =>
+            er.status === 404 &&
+            (await er.json()).errorCode === ErrorCode.USERDISABLED && {
+              title: 'Please try again',
+              message: 'The server is currently handling too many requests',
+            },
+        }
       ).then((resp: WorkspaceUserRolesResponse) =>
         this.setState({
           workspaceUserRoles: fp.sortBy('familyName', resp.items),

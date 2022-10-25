@@ -1,7 +1,7 @@
 import { ErrorCode } from 'generated/fetch';
 
 import {
-  defaultErrorResponseFormatter,
+  defaultAPIErrorFormatter,
   errorHandlerWithFallback,
   FALLBACK_ERROR_TITLE,
 } from './errors';
@@ -56,7 +56,7 @@ describe('defaultErrorResponseFormatter', () => {
   ])(
     'Should return the expected result when %s',
     async (desc: string, errorResponse: Response, expected: string) => {
-      expect(await defaultErrorResponseFormatter(errorResponse)).toBe(expected);
+      expect(await defaultAPIErrorFormatter(errorResponse)).toBe(expected);
     }
   );
 });
@@ -101,7 +101,8 @@ describe('errorHandlerWithFallback', () => {
         json: () => ({ message: 'User not found' }),
       },
       // expectedResponseMatcher -> true
-      (er: Response) => er.status === 404,
+      (er: Response): Promise<boolean> =>
+        new Promise((resolve) => resolve(er.status === 404)),
       undefined,
       undefined,
     ],
@@ -113,9 +114,13 @@ describe('errorHandlerWithFallback', () => {
         json: () => ({ message: 'Conflict' }),
       },
       // expectedResponseMatcher -> false
-      (er: Response) => er.status === 404,
+      (er: Response): Promise<boolean> =>
+        new Promise((resolve) => resolve(er.status === 404)),
       // customErrorResponseFormatter -> matches, returns custom409Response
-      (er: Response) => (er.status === 409 ? custom409Response : undefined),
+      (er: Response): Promise<NotificationStore> =>
+        new Promise((resolve) =>
+          resolve(er.status === 409 ? custom409Response : undefined)
+        ),
       custom409Response,
     ],
     [
@@ -126,9 +131,13 @@ describe('errorHandlerWithFallback', () => {
         json: () => ({ message: 'Unknown Error' }),
       },
       // expectedResponseMatcher -> false
-      (er: Response) => er.status === 404,
+      (er: Response): Promise<boolean> =>
+        new Promise((resolve) => resolve(er.status === 404)),
       // customErrorResponseFormatter -> does not match, returns undefined
-      (er: Response) => (er.status === 409 ? custom409Response : undefined),
+      (er: Response): Promise<NotificationStore> =>
+        new Promise((resolve) =>
+          resolve(er.status === 409 ? custom409Response : undefined)
+        ),
       {
         title: FALLBACK_ERROR_TITLE,
         message:
@@ -140,13 +149,13 @@ describe('errorHandlerWithFallback', () => {
     async (
       desc: string,
       apiErrorResponse,
-      expectedResponseMatcher: (Response) => boolean,
-      customErrorResponseFormatter: (Response) => NotificationStore,
+      expectedResponseMatcher: (Response) => Promise<boolean>,
+      customErrorResponseFormatter: (Response) => Promise<NotificationStore>,
       expected: NotificationStore
     ) => {
       expect(
         await errorHandlerWithFallback(
-          apiErrorResponse as any as Response,
+          apiErrorResponse,
           expectedResponseMatcher,
           customErrorResponseFormatter
         )
