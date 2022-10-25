@@ -107,7 +107,7 @@ public class UserAdminController implements UserAdminApiDelegate {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    accessModuleService.updateBypassTime(userId);
+    accessModuleService.updateAllBypassTimes(userId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

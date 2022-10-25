@@ -16,6 +16,9 @@ public interface AccessModuleService {
   /** Updates bypass time for a module. */
   void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed);
 
+  /** Updates bypass times for all modules in the environment. */
+  void updateAllBypassTimes(long userId);
+
   /** Update module status to complete for a user. */
   void updateCompletionTime(
       DbUser dbUser, DbAccessModuleName accessModuleName, Timestamp timestamp);
