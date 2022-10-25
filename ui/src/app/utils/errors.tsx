@@ -158,19 +158,19 @@ export const errorHandlerWithFallback = async (
   expectedResponseMatcher?: (ApiErrorResponse) => boolean,
   customErrorResponseFormatter?: (ApiErrorResponse) => NotificationStore
 ): Promise<NotificationStore> => {
-  const errorWithCachedJson = await toApiErrorResponse(apiError);
+  const parsedResponse = await toApiErrorResponse(apiError);
 
   // if this "error" is expected and should instead be considered a success
-  if (expectedResponseMatcher?.(errorWithCachedJson)) {
+  if (expectedResponseMatcher?.(parsedResponse)) {
     return undefined;
   }
 
   // the custom error response for this error, if applicable
-  const customResponse = customErrorResponseFormatter?.(errorWithCachedJson);
+  const customResponse = customErrorResponseFormatter?.(parsedResponse);
   return (
     customResponse || {
       title: FALLBACK_ERROR_TITLE,
-      message: defaultApiErrorFormatter(errorWithCachedJson),
+      message: defaultApiErrorFormatter(parsedResponse),
     }
   );
 };
