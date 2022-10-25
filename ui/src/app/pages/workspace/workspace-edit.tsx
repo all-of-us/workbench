@@ -1492,6 +1492,9 @@ export const WorkspaceEdit = fp.flow(
                     autoFocus
                     placeholder='Workspace Name'
                     value={name}
+                    onBlur={(v) =>
+                      this.setState(fp.set(['workspace', 'name'], v.trim()))
+                    }
                     onChange={(v) =>
                       this.setState(fp.set(['workspace', 'name'], v))
                     }
