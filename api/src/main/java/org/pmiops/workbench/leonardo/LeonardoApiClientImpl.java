@@ -1,7 +1,8 @@
 package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.leonardo.PersistentDiskUtils.PD_LABEL_KEY_APP_TYPE;
-import static org.pmiops.workbench.leonardo.PersistentDiskUtils.upsertPdLabel;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
@@ -13,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -161,8 +161,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     Map<String, String> runtimeLabels =
         new ImmutableMap.Builder<String, String>()
-            .put(LeonardoMapper.LEONARDO_LABEL_AOU, "true")
-            .put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, userEmail)
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userEmail)
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
@@ -317,7 +317,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       RuntimeConfigurationType runtimeConfigurationType) {
     if (runtimeConfigurationType != null) {
       return Collections.singletonMap(
-          LeonardoMapper.LEONARDO_LABEL_AOU_CONFIG,
+          LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG,
           LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
               runtimeConfigurationType));
     } else {
@@ -378,7 +378,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 runtimesApiAsService.listRuntimes(
-                    LeonardoMapper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
+                    LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
 
     // Only the runtime creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
@@ -512,9 +512,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
         new ImmutableMap.Builder<String, String>()
-            .put(LeonardoMapper.LEONARDO_LABEL_AOU, "true")
-            .put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
-            .put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, createAppRequest.getAppType().toString())
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
+            .put(
+                LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
+                appTypeToLabelValue(createAppRequest.getAppType()))
             .build();
 
     leonardoCreateAppRequest
@@ -523,8 +525,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(
                 createAppRequest.getKubernetesRuntimeConfig()))
         .diskConfig(
-            leonardoMapper.toLeonardoPersistentDiskRequest(
-                createAppRequest.getPersistentDiskRequest()).labels(upsertPdLabel(createAppRequest.getPersistentDiskRequest().getLabels(), PD_LABEL_KEY_APP_TYPE, createAppRequest.getAppType().toString().toLowerCase())))
+            leonardoMapper
+                .toLeonardoPersistentDiskRequest(createAppRequest.getPersistentDiskRequest())
+                .labels(
+                    upsertLeonardoLabel(
+                        createAppRequest.getPersistentDiskRequest().getLabels(),
+                        LEONARDO_LABEL_APP_TYPE,
+                        appTypeToLabelValue(createAppRequest.getAppType()))))
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
 

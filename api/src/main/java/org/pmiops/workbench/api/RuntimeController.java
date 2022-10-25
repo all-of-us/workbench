@@ -1,8 +1,8 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.leonardo.PersistentDiskUtils.upsertPdLabel;
-import static org.pmiops.workbench.leonardo.PersistentDiskUtils.PD_LABEL_RUNTIME_KEY;
-import static org.pmiops.workbench.leonardo.PersistentDiskUtils.PD_LABEL_RUNTIME_VALUE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
 import java.net.MalformedURLException;
@@ -30,6 +30,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -167,7 +168,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (runtimeLabels != null
         && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
             .values()
-            .contains(runtimeLabels.get(LeonardoMapper.LEONARDO_LABEL_AOU_CONFIG))) {
+            .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
@@ -196,7 +197,13 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
       if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
-        persistentDiskRequest.name(userProvider.get().generatePDName()).labels(upsertPdLabel(persistentDiskRequest.getLabels(), PD_LABEL_RUNTIME_KEY, PD_LABEL_RUNTIME_VALUE));
+        persistentDiskRequest
+            .name(userProvider.get().generatePDName())
+            .labels(
+                upsertLeonardoLabel(
+                    persistentDiskRequest.getLabels(),
+                    LEONARDO_LABEL_IS_RUNTIME,
+                    LEONARDO_LABEL_IS_RUNTIME_TRUE));
       }
     }
     long configCount =

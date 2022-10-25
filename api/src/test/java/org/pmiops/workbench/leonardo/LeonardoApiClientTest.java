@@ -170,8 +170,8 @@ public class LeonardoApiClientTest {
             .setCdrVersion(cdrVersion);
     doReturn(testWorkspace).when(workspaceDao).getRequired(WORKSPACE_NS, WORKSPACE_NAME);
 
-    appLabels.put(LeonardoMapper.LEONARDO_LABEL_AOU, "true");
-    appLabels.put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true");
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
 
     customEnvironmentVariables.put("WORKSPACE_CDR", "cdr.bq");
     customEnvironmentVariables.put("WORKSPACE_NAMESPACE", WORKSPACE_NS);
@@ -193,14 +193,14 @@ public class LeonardoApiClientTest {
             createAppRequestArgumentCaptor.capture());
 
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
-    appLabels.put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString());
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString());
     LeonardoCreateAppRequest expectedAppRequest =
         new LeonardoCreateAppRequest()
             .appType(LeonardoAppType.CUSTOM)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
             .descriptorPath(RSTUDIO_DESCRIPTOR_PATH)
             .labels(appLabels)
-            .diskConfig(leonardoPersistentDiskRequest)
+            .diskConfig(leonardoPersistentDiskRequest.labels(appLabels))
             .customEnvironmentVariables(customEnvironmentVariables);
 
     assertThat(createAppRequest).isEqualTo(expectedAppRequest);

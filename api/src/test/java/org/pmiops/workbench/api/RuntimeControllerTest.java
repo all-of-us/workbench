@@ -12,6 +12,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
@@ -23,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -67,6 +70,7 @@ import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -942,6 +946,9 @@ public class RuntimeControllerTest {
                             .name(getPdName())
                             .size(500))));
 
+    Map<String, String> diskLabels = new HashMap<>();
+    diskLabels.put(LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -965,6 +972,7 @@ public class RuntimeControllerTest {
         .isEqualTo(LeonardoDiskType.SSD);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
     assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
   }
 
@@ -1279,7 +1287,7 @@ public class RuntimeControllerTest {
     assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())
         .isEqualTo(
             Collections.singletonMap(
-                LeonardoMapper.LEONARDO_LABEL_AOU_CONFIG,
+                LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG,
                 LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
                     RuntimeConfigurationType.USEROVERRIDE)));
   }
