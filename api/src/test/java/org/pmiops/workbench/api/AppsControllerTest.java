@@ -123,6 +123,13 @@ public class AppsControllerTest {
   }
 
   @Test
+  public void testDeleteAppSuccess() {
+    boolean deleteDisk = true;
+    controller.deleteApp(WORKSPACE_NS, APP_NAME, deleteDisk);
+    verify(mockLeonardoApiClient).deleteApp(APP_NAME, testWorkspace, deleteDisk);
+  }
+
+  @Test
   public void testCanPerformAppActions_featureNotEnabled() throws Exception {
     config.featureFlags.enableGkeApp = false;
     assertThrows(

@@ -104,6 +104,16 @@ public interface LeonardoApiClient {
    */
   List<App> listAppsInProject(String googleProjectId);
 
+  /**
+   * Deletes a Leonardo app
+   *
+   * @param appName the name of the app
+   * @param dbWorkspace the workspace to delete the app in
+   * @param deleteDisk whether the app's persistent disk should also be deleted
+   */
+  void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
+      throws WorkbenchException;
+
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
 }
