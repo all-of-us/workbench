@@ -3,7 +3,13 @@ import * as fp from 'lodash/fp';
 import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  Profile,
+  UserRole,
+  WorkspaceBillingUsageResponse,
+  WorkspaceUserRolesResponse,
+} from 'generated/fetch';
 
 import {
   Button,
@@ -30,6 +36,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getCdrVersion } from 'app/utils/cdr-versions';
+import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -178,20 +185,22 @@ export const WorkspaceAbout = fp.flow(
       this.loadUserRoles(workspace);
     }
 
-    async loadInitialCreditsUsage(workspace: WorkspaceData) {
-      const usage = await workspacesApi().getBillingUsage(
-        workspace.namespace,
-        workspace.id
+    loadInitialCreditsUsage(workspace: WorkspaceData) {
+      fetchWithErrorModal(() =>
+        workspacesApi().getBillingUsage(workspace.namespace, workspace.id)
+      ).then((usage: WorkspaceBillingUsageResponse) =>
+        this.setState({ workspaceInitialCreditsUsage: usage.cost })
       );
-      this.setState({ workspaceInitialCreditsUsage: usage.cost });
     }
 
-    async setVisits() {
+    setVisits() {
       const {
         profileState: { profile },
       } = this.props;
       if (!profile.pageVisits.some((v) => v.page === pageId)) {
-        await profileApi().updatePageVisits({ page: pageId });
+        fetchWithErrorModal(() =>
+          profileApi().updatePageVisits({ page: pageId })
+        );
       }
     }
 
@@ -208,16 +217,16 @@ export const WorkspaceAbout = fp.flow(
 
     loadUserRoles(workspace: WorkspaceData) {
       this.setState({ workspaceUserRoles: [] });
-      workspacesApi()
-        .getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id)
-        .then((resp) => {
-          this.setState({
-            workspaceUserRoles: fp.sortBy('familyName', resp.items),
-          });
+      fetchWithErrorModal(() =>
+        workspacesApi().getFirecloudWorkspaceUserRoles(
+          workspace.namespace,
+          workspace.id
+        )
+      ).then((resp: WorkspaceUserRolesResponse) =>
+        this.setState({
+          workspaceUserRoles: fp.sortBy('familyName', resp.items),
         })
-        .catch((error) => {
-          console.error(error);
-        });
+      );
     }
 
     get workspaceCreationTime(): string {
@@ -263,22 +272,19 @@ export const WorkspaceAbout = fp.flow(
         : '';
     }
 
-    async publishUnpublishWorkspace(publish: boolean) {
+    publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
       const { namespace, id } = workspace;
       this.setState({ publishing: true });
-      try {
-        if (publish) {
-          await workspaceAdminApi().publishWorkspace(namespace, id);
-        } else {
-          await workspaceAdminApi().unpublishWorkspace(namespace, id);
-        }
-        this.updateWorkspaceState({ ...workspace, published: publish });
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.setState({ publishing: false });
-      }
+      fetchWithErrorModal(() =>
+        publish
+          ? workspaceAdminApi().publishWorkspace(namespace, id)
+          : workspaceAdminApi().unpublishWorkspace(namespace, id)
+      )
+        .then(() =>
+          this.updateWorkspaceState({ ...workspace, published: publish })
+        )
+        .finally(() => this.setState({ publishing: false }));
     }
 
     onShare() {
