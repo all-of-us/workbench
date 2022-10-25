@@ -91,30 +91,27 @@ export async function fetchWithSystemErrorHandler<T>(
   }
 }
 
-// TODO handle statusText and type?
 export const defaultErrorResponseFormatter = async (
   errorResponse: Response
 ): Promise<string> => {
-  const { status, statusText, type, json } = errorResponse;
+  const { status, statusText } = errorResponse;
   const { errorCode, errorUniqueId, message } =
-    typeof json === 'function' && (await json());
-
-  console.log('errorResponse', errorResponse);
-  console.log('statusText', statusText);
-  console.log('type', type);
+    typeof errorResponse.json === 'function' && (await errorResponse.json());
 
   const errorCodeStr =
     errorCode && errorCode !== ErrorCode.PARSEERROR
       ? ` of type ${errorCode.toString()}`
       : '';
+  const statusStr =
+    status && statusText && `HTTP status code ${status} (${statusText})`;
   const messageStr = message ? `: ${message}` : '.';
 
   const detailsStr = cond(
     [
-      !!status && !!errorUniqueId,
-      () => ` with HTTP status code ${status} and unique ID ${errorUniqueId}`,
+      !!status && !!statusText && !!errorUniqueId,
+      () => ` with ${statusStr} and unique ID ${errorUniqueId}`,
     ],
-    [!!status, () => ` with HTTP status code ${status}`],
+    [!!status && !!statusText, () => ` with ${statusStr}`],
     [!!errorUniqueId, () => ` with unique ID ${errorUniqueId}`],
     () => ''
   );
