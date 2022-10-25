@@ -37,7 +37,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { getCdrVersion } from 'app/utils/cdr-versions';
-import { fetchWithErrorModal } from 'app/utils/errors';
+import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -225,9 +225,9 @@ export const WorkspaceAbout = fp.flow(
             workspace.id
           ),
         {
-          customErrorResponseFormatter: async (er: Response) =>
-            er.status === 404 &&
-            (await er.json()).errorCode === ErrorCode.USERDISABLED && {
+          customErrorResponseFormatter: async (er: ApiErrorResponse) =>
+            er?.originalResponse?.status &&
+            er?.responseJson?.errorCode === ErrorCode.USERDISABLED && {
               title: 'Please try again',
               message: 'The server is currently handling too many requests',
             },

@@ -91,12 +91,22 @@ export async function fetchWithSystemErrorHandler<T>(
   }
 }
 
+// the json() function of the Response object can only be called once; call it and store with the original.
+export interface ApiErrorResponse {
+  originalResponse;
+  responseJson;
+}
+const toApiErrorResponse = async (apiError): Promise<ApiErrorResponse> => ({
+  originalResponse: apiError,
+  responseJson: typeof apiError.json === 'function' && (await apiError.json()),
+});
+
 export const defaultAPIErrorFormatter = async (
-  apiError: Response
+  apiError: ApiErrorResponse
 ): Promise<string> => {
-  const { status, statusText } = apiError;
-  const { errorCode, errorUniqueId, message } =
-    typeof apiError.json === 'function' && (await apiError.json());
+  const { originalResponse, responseJson } = apiError || {};
+  const { status, statusText } = originalResponse || {};
+  const { errorCode, errorUniqueId, message } = responseJson || {};
 
   const errorCodeStr =
     errorCode && errorCode !== ErrorCode.PARSEERROR
@@ -129,12 +139,18 @@ export const FALLBACK_ERROR_TITLE = 'An error has occurred';
  * Example: an (async) API call getInfo() sometimes appropriately returns 404s which should not be considered errors,
  * and there's a common error case (HTTP 429, Error Code TOO_FAST) which we want to handle specially.
  *
+ *
+ *
+ * TODO again
+ *
+ *
+ *
  * const responseP = getInfo();
  * await responseP.then(resp =>
  *  errorHandlerWithFallback(
  *    resp,
- *    (er: Response) => er.status === 404,
- *    async (er: Response) => er.status === 429 && (await er.json()).errorCode === ErrorCode.TOO_FAST && {
+ *    (er: ApiErrorResponse) => er.status === 404,
+ *    async (er: ApiErrorResponse) => er.status === 429 && (await er.json()).errorCode === ErrorCode.TOO_FAST && {
  *        title: 'Please try again',
  *        message: 'The server is currently handling too many requests',
  *      }
@@ -148,29 +164,38 @@ export const FALLBACK_ERROR_TITLE = 'An error has occurred';
  */
 export const errorHandlerWithFallback = async (
   apiError,
-  expectedResponseMatcher?: (Response) => Promise<boolean>,
-  customErrorResponseFormatter?: (Response) => Promise<NotificationStore>
+  expectedResponseMatcher?: (ApiErrorResponse) => Promise<boolean>,
+  customErrorResponseFormatter?: (
+    ApiErrorResponse
+  ) => Promise<NotificationStore>
 ): Promise<NotificationStore> => {
+  const errorWithCachedJson = await toApiErrorResponse(apiError);
+
   // if this "error" is expected and should instead be considered a success
-  if (expectedResponseMatcher && (await expectedResponseMatcher(apiError))) {
+  if (
+    expectedResponseMatcher &&
+    (await expectedResponseMatcher(errorWithCachedJson))
+  ) {
     return undefined;
   }
 
   // the custom error response for this error, if applicable
   const customResponse =
     customErrorResponseFormatter &&
-    (await customErrorResponseFormatter(apiError));
+    (await customErrorResponseFormatter(errorWithCachedJson));
   return (
     customResponse || {
       title: FALLBACK_ERROR_TITLE,
-      message: await defaultAPIErrorFormatter(apiError),
+      message: await defaultAPIErrorFormatter(errorWithCachedJson),
     }
   );
 };
 
 interface FetchOptions {
-  expectedResponseMatcher?: (Response) => Promise<boolean>;
-  customErrorResponseFormatter?: (Response) => Promise<NotificationStore>;
+  expectedResponseMatcher?: (ApiErrorResponse) => Promise<boolean>;
+  customErrorResponseFormatter?: (
+    ApiErrorResponse
+  ) => Promise<NotificationStore>;
 }
 /**
  * Call an (async) API function, and if unsuccessful pop up a modal with a suitable message by setting the
@@ -185,9 +210,16 @@ interface FetchOptions {
  * fetchWithErrorModal(
  *  () => getInfo(),
  *  {
+ *
+ *
+ *
+ *  TODO again
+ *
+ *
+ *
  *    onSuccess: (ir: InfoResult) => handleInfoResult(ir),
- *    expectedResponseMatcher: (er: Response) => er.status === 404,
- *    customErrorResponseFormatter: async (er: Response) =>
+ *    expectedResponseMatcher: (er: ApiErrorResponse) => er.status === 404,
+ *    customErrorResponseFormatter: async (er: ApiErrorResponse) =>
  *      er.status === 429 && (await er.json()).errorCode === ErrorCode.TOO_FAST && {
  *        title: 'Please try again',
  *        message: 'The server is currently handling too many requests',
