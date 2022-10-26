@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.pmiops.workbench.model.AppType;
 
-/** Helper class tp set Leonardo label keys and values */
+/** Helper class for setting Leonardo labels. */
 public class LeonardoLabelHelper {
   private LeonardoLabelHelper() {}
 

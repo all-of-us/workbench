@@ -454,7 +454,7 @@ public class DbUser {
     return getUserPDNamePrefix() + "-" + randomString;
   }
 
-  /** Returns a name for the Persistent Disk to be created for this user. */
+  /** Returns a name for the persistent disk used in APP to be created for this user. */
   @Transient
   public String generatePDNameForApp(AppType appType) {
     String randomString =
