@@ -90,9 +90,9 @@ interface TableData {
   formattedLastModified: string;
   lastModifiedDateAsString: string;
   lastModifiedBy: string;
-  workspaceName: string;
   cdrVersionName: string;
   resource: WorkspaceResource;
+  workspace: Workspace;
 }
 
 interface Props {
@@ -163,31 +163,41 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     const { workspaceResources } = props;
     if (workspaceResources) {
       setTableData(
-        workspaceResources.map((r) => {
-          return {
-            resource: r,
-            menu: renderResourceMenu(r),
-            resourceType: getTypeString(r),
-            resourceName: getDisplayName(r),
-            formattedLastModified: displayDateWithoutHours(
-              r.lastModifiedEpochMillis
-            ),
-            lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
-            cdrVersionName: getCdrVersionName(r),
-            workspaceName: getWorkspace(r)?.name,
-            lastModifiedBy: r.lastModifiedBy,
-          };
-        })
+        fp.flatMap((r) => {
+          const workspace = getWorkspace(r);
+          return (
+            // Don't return resources where we no longer have access to the workspace.
+            // For example: the owner has unshared the workspace, but a recent-resource entry remains.
+            workspace
+              ? [
+                  {
+                    resource: r,
+                    workspace,
+                    menu: renderResourceMenu(r),
+                    resourceType: getTypeString(r),
+                    resourceName: getDisplayName(r),
+                    formattedLastModified: displayDateWithoutHours(
+                      r.lastModifiedEpochMillis
+                    ),
+                    lastModifiedDateAsString: displayDate(
+                      r.lastModifiedEpochMillis
+                    ),
+                    cdrVersionName: getCdrVersionName(r),
+                    lastModifiedBy: r.lastModifiedBy,
+                  },
+                ]
+              : []
+          );
+        }, workspaceResources)
       );
     }
   }, [props.workspaceResources]);
 
   const displayWorkspace = (rowData) => {
-    const { resource } = rowData;
+    const { workspace, resource } = rowData;
     return (
       <WorkspaceNavigation
-        workspace={getWorkspace(resource)}
-        resource={resource}
+        {...{ workspace, resource }}
         style={styles.navigation}
       />
     );
