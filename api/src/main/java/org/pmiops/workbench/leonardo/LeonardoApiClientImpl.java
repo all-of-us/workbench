@@ -1,6 +1,5 @@
 package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
@@ -526,7 +525,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .labels(
                 upsertLeonardoLabel(
                     createAppRequest.getPersistentDiskRequest().getLabels(),
-                    LEONARDO_LABEL_APP_TYPE,
+                    LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
                     appTypeToLabelValue(createAppRequest.getAppType())));
     // If diskRequest is not set or missing name from request, that means creating new disk.
     if (diskRequest != null && Strings.isNullOrEmpty(diskRequest.getName())) {

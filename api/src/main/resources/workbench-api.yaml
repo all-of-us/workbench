@@ -960,7 +960,7 @@ paths:
       summary: Get the user's workspace persistent disk.
       description: Returns the current user's latest created persistent disk, if any, which has been created
         for the given workspace.
-      operationId: getDisk
+      operationId: listDisks
       tags:
         - disk
       parameters:

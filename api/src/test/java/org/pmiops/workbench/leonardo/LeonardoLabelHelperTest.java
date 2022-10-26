@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.model.AppType;
 
 public class LeonardoLabelHelperTest {
 
@@ -21,5 +22,11 @@ public class LeonardoLabelHelperTest {
     labelMap.put("key", "value1");
     LeonardoLabelHelper.upsertLeonardoLabel(labelMap, "key", "value2");
     assertThat(labelMap).containsExactly("key", "value2");
+  }
+
+  @Test
+  public void testAppTypeToLabelValue() throws Exception {
+    assertThat(LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO)).isEqualTo("rstudio");
+    assertThat(LeonardoLabelHelper.appTypeToLabelValue(AppType.CROMWELL)).isEqualTo("cromwell");
   }
 }
