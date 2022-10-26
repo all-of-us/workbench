@@ -87,8 +87,6 @@ public interface LeonardoApiClient {
    * @param dbWorkspace the workspace to create App within.
    */
   void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
-<<<<<<< HEAD
-=======
       throws WorkbenchException;
 
   /**
@@ -114,23 +112,7 @@ public interface LeonardoApiClient {
    * @param deleteDisk whether the app's persistent disk should also be deleted
    */
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
->>>>>>> origin/main
       throws WorkbenchException;
-
-  /**
-   * Gets Leonardo app owned by app name and workspace GCP project
-   *
-   * @param googleProjectId the GCP project the app belongs to
-   * @param appName the name of the app
-   */
-  App getAppByNameByProjectId(String googleProjectId, String appName);
-
-  /**
-   * Lists all apps the user have permission on in the given workspace GCP project
-   *
-   * @param googleProjectId the GCP project the app belongs to
-   */
-  List<App> listAppsInProject(String googleProjectId);
 
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
