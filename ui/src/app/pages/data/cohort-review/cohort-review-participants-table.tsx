@@ -278,7 +278,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
           ({ cohortReview: review, queryResultSize }) => {
             currentCohortReviewStore.next(review);
             if (!vocabOptions.getValue()) {
-              getVocabOptions(ns, wsid, review.cohortReviewId);
+              getVocabOptions(ns, wsid);
             }
             setData(review.participantCohortStatuses.map(mapData));
             setTotalCount(queryResultSize);

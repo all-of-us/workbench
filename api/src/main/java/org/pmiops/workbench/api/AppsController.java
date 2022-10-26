@@ -57,7 +57,10 @@ public class AppsController implements AppsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteApp(
       String workspaceNamespace, String appName, Boolean deleteDisk) {
-    throw new UnsupportedOperationException("API not supported.");
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    validateCanPerformApiAction(dbWorkspace);
+    leonardoApiClient.deleteApp(appName, dbWorkspace, deleteDisk);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
@@ -94,7 +97,6 @@ public class AppsController implements AppsApiDelegate {
    *   <li>Feature is enabled
    *   <li>User compute is not suspend due to security reason (e.g. egress alert)
    *   <li>User is OWNER or WRITER of the workspace
-   *   <li>Workspace has valid billing.
    * </ul>
    */
   @VisibleForTesting

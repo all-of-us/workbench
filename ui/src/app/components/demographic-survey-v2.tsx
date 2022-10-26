@@ -14,7 +14,7 @@ import {
 } from 'generated/fetch';
 
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { withProfileErrorModal } from 'app/components/with-error-modal';
+import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
@@ -474,8 +474,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 value: EthnicCategory.HISPANIC,
                 subOptions: [
                   {
-                    label: 'Columbian',
-                    value: EthnicCategory.HISPANICCOLUMBIAN,
+                    label: 'Colombian',
+                    value: EthnicCategory.HISPANICCOLOMBIAN,
                   },
                   { label: 'Cuban', value: EthnicCategory.HISPANICCUBAN },
                   {

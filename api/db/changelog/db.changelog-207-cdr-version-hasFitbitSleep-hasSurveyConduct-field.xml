@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="chenchals" id="changelog-206-cdr-version-hasFitbitSleep-hasSurveyConduct-field">
+    <addColumn tableName="cdr_version">
+      <column name="has_fitbit_sleep_data" type="boolean" defaultValueBoolean="false"/>
+      <column name="has_survey_conduct_data" type="boolean" defaultValueBoolean="false"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

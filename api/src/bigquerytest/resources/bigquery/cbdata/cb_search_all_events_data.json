@@ -359,6 +359,17 @@
     "is_standard": 0
   },
   {
+    "person_id": 2,
+    "entry_date": "2009-12-03",
+    "concept_id": 1585899,
+    "domain": "Observation",
+    "value_as_number": 7,
+    "value_as_concept_id": 7,
+    "value_source_concept_id": 7,
+    "is_standard": 0,
+    "cati_concept_id": 42530794
+  },
+  {
     "person_id": 1,
     "entry_date": "2009-12-03",
     "concept_id": 3,

@@ -18,8 +18,8 @@ import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 import { NavigationProps, useNavigation } from 'app/utils/navigation';
-import { fetchWithGlobalErrorHandler } from 'app/utils/retry';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { supportUrls } from 'app/utils/zendesk';
 import analysisIcon from 'assets/images/analysis-icon.svg';
@@ -285,7 +285,7 @@ export const Homepage = fp.flow(
     }
 
     async checkWorkspaces() {
-      return fetchWithGlobalErrorHandler(() =>
+      return fetchWithSystemErrorHandler(() =>
         workspacesApi().getWorkspaces()
       ).then((response) => this.setState({ userWorkspacesResponse: response }));
     }

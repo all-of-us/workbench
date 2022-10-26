@@ -31,9 +31,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -45,9 +43,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -59,9 +55,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 4,
@@ -73,9 +67,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 5,
@@ -118,10 +110,10 @@
       "cdrDbName": "synth_c_2019q4_40",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "controlled",
       "storageBasePath": "v5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
-      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample"
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled"
     }
   ]
 }

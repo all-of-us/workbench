@@ -809,6 +809,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .operands(ImmutableList.of("2009-12-03"));
   }
 
+  private static Modifier catiModifier() {
+    return new Modifier()
+        .name(ModifierType.CATI)
+        .operator(Operator.EQUAL)
+        .operands(ImmutableList.of("42530794"));
+  }
+
   private static List<Attribute> wheelchairAttributes() {
     return ImmutableList.of(
         new Attribute()
@@ -2006,7 +2013,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsSurvey() {
+  public void countSubjectsSurveyAll() {
     // Survey
     CohortDefinition cohortDefinition =
         createCohortDefinition(
@@ -2015,7 +2022,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
-    assertParticipants(response, 1);
+    assertParticipants(response, 2);
+  }
+
+  @Test
+  public void countSubjectsSurveyCatiModifier() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(survey().conceptId(1585899L)),
+            ImmutableList.of(catiModifier()));
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -2076,13 +2094,28 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsQuestion() {
+  public void countSubjectsQuestionAll() {
     // Question
     SearchParameter ppiQuestion =
         survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
     CohortDefinition cohortDefinition =
         createCohortDefinition(
             ppiQuestion.getDomain(), ImmutableList.of(ppiQuestion), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
+    assertParticipants(response, 2);
+  }
+
+  @Test
+  public void countSubjectsQuestionCatiModifier() {
+    // Question
+    SearchParameter ppiQuestion =
+        survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            ppiQuestion.getDomain(),
+            ImmutableList.of(ppiQuestion),
+            ImmutableList.of(catiModifier()));
     ResponseEntity<Long> response =
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition);
     assertParticipants(response, 1);

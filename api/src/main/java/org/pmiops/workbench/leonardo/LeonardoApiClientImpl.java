@@ -528,7 +528,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     createAppRequest.getPersistentDiskRequest().getLabels(),
                     LEONARDO_LABEL_APP_TYPE,
                     appTypeToLabelValue(createAppRequest.getAppType())));
-
     // If diskRequest is not set or missing name from request, that means creating new disk.
     if (diskRequest != null && Strings.isNullOrEmpty(diskRequest.getName())) {
       diskRequest.setName(userProvider.get().generatePDNameForApp(appType));
@@ -552,7 +551,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         (context) -> {
           appsApi.createApp(
               dbWorkspace.getGoogleProject(),
-              userProvider.get().getAppName(createAppRequest.getAppType()),
+              userProvider.get().getAppName(appType),
               leonardoCreateAppRequest);
           return null;
         });
@@ -580,6 +579,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* includeLabels= */ null));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
+  }
+
+  @Override
+  public void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
+      throws WorkbenchException {
+    AppsApi appsApi = appsApiProvider.get();
+
+    leonardoRetryHandler.run(
+        (context) -> {
+          appsApi.deleteApp(dbWorkspace.getGoogleProject(), appName, deleteDisk);
+          return null;
+        });
   }
 
   @Override

@@ -13,7 +13,6 @@ import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
@@ -143,13 +142,6 @@ public interface UserService {
   DbUser getByUsernameOrThrow(String username);
 
   Optional<DbUser> getByDatabaseId(long databaseId);
-
-  /**
-   * @deprecated Use {@link org.pmiops.workbench.access.AccessModuleService#updateBypassTime(long,
-   *     AccessBypassRequest)}
-   */
-  @Deprecated
-  void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 
   boolean hasAuthority(long userId, Authority required);
 

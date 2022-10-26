@@ -281,7 +281,7 @@ then
           , value_source_concept_id
           , survey_version_concept_id
           , survey_concept_id
-          , is_cati
+          , cati_concept_id
       )
   SELECT
         b.person_id
@@ -300,7 +300,7 @@ then
       , a.value_source_concept_id
       , c.survey_version_concept_id
       , e.survey_concept_id
-      , CASE WHEN e.collection_method_concept_id = 42530794 THEN 1 ELSE 0 END AS is_cati
+      , e.collection_method_concept_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
@@ -329,7 +329,7 @@ else
           , value_as_concept_id
           , value_source_concept_id
           , survey_concept_id
-          , is_cati
+          , cati_concept_id
       )
   SELECT
         b.person_id
@@ -347,7 +347,7 @@ else
       , a.value_as_concept_id
       , a.value_source_concept_id
       , e.survey_concept_id
-      , CASE WHEN e.collection_method_concept_id = 42530794 THEN 1 ELSE 0 END AS is_cati
+      , e.collection_method_concept_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id

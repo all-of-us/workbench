@@ -218,6 +218,7 @@ public class LeonardoApiClientTest {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
     leonardoApiClient.createApp(
         createAppRequest.persistentDiskRequest(persistentDiskRequest), testWorkspace);
+
     verify(userAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
@@ -240,6 +241,14 @@ public class LeonardoApiClientTest {
   public void testListAppSuccess() throws Exception {
     leonardoApiClient.listAppsInProject(GOOGLE_PROJECT_ID);
     verify(userAppsApi).listAppByProject(GOOGLE_PROJECT_ID, null, false, null);
+  }
+
+  @Test
+  public void testDeleteAppSuccess() throws Exception {
+    String appName = "app-name";
+    boolean deleteDisk = true;
+    leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
+    verify(userAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {

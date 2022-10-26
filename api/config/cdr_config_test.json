@@ -32,9 +32,7 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -58,7 +56,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_46",
+      "cdrDbName": "synth_r_2019q4_47",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -102,7 +100,6 @@
       "cdrVersionId": 6,
       "isDefault": false,
       "archivalStatus": 1,
-      "accessTier": "registered",
       "name": "[Removed] Synthetic Dataset v3 with WGS",
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -110,8 +107,7 @@
       "releaseNumber": 3,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2019q4_19",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "accessTier": "registered"
     }
   ]
 }

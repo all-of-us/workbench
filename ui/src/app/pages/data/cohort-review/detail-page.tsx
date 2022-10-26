@@ -77,7 +77,7 @@ export const DetailPage = fp.flow(
         });
       }
       if (!vocabOptions.getValue()) {
-        getVocabOptions(namespace, id, cohortReview.cohortReviewId);
+        getVocabOptions(namespace, id);
       }
       this.updateParticipantStore();
       this.subscription = participantStore.subscribe((participant) =>

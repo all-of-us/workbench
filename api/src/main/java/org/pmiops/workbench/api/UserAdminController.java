@@ -5,7 +5,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -28,34 +30,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserAdminController implements UserAdminApiDelegate {
 
-  private final UserService userService;
-  private final ProfileService profileService;
+  private final AccessModuleService accessModuleService;
   private final ActionAuditQueryService actionAuditQueryService;
+  private final ProfileService profileService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
+  private final UserService userService;
 
   public UserAdminController(
-      UserService userService,
-      ProfileService profileService,
+      AccessModuleService accessModuleService,
       ActionAuditQueryService actionAuditQueryService,
+      ProfileService profileService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      TaskQueueService taskQueueService) {
-    this.userService = userService;
-    this.profileService = profileService;
+      TaskQueueService taskQueueService,
+      UserService userService) {
+    this.accessModuleService = accessModuleService;
     this.actionAuditQueryService = actionAuditQueryService;
-    this.userProvider = userProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.profileService = profileService;
     this.taskQueueService = taskQueueService;
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(
-      Long userId, AccessBypassRequest request) {
-    userService.updateBypassTime(userId, request);
-    return ResponseEntity.ok(new EmptyResponse());
+    this.userProvider = userProvider;
+    this.userService = userService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -98,8 +95,9 @@ public class UserAdminController implements UserAdminApiDelegate {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
-    long userId = userProvider.get().getUserId();
-    userService.updateBypassTime(userId, request);
+    final DbUser user = userProvider.get();
+    accessModuleService.updateBypassTime(user.getUserId(), request);
+    userService.updateUserAccessTiers(user, Agent.asUser(user));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -117,7 +115,7 @@ public class UserAdminController implements UserAdminApiDelegate {
             .cloudTaskNames(
                 taskQueueService.groupAndPushSynchronizeAccessTasks(
                     userService.findUsersByUsernames(request.getUsernames()).stream()
-                        .map(u -> u.getUserId())
+                        .map(DbUser::getUserId)
                         .collect(Collectors.toList()))));
   }
 }

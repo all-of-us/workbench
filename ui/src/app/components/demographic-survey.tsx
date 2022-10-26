@@ -27,7 +27,7 @@ import { AouTitle } from 'app/components/text-wrappers';
 import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
-} from 'app/components/with-error-modal';
+} from 'app/components/with-error-modal-wrapper';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import {
   DropDownSection,

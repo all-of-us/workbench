@@ -1,9 +1,4 @@
-import {
-  AdminUserListResponse,
-  EmptyResponse,
-  Profile,
-  UserAdminApi,
-} from 'generated/fetch';
+import { AdminUserListResponse, Profile, UserAdminApi } from 'generated/fetch';
 
 import { ProfileStubVariables } from './profile-api-stub';
 import { stubNotImplementedError } from './stub-utils';
@@ -13,10 +8,6 @@ export class UserAdminApiStub extends UserAdminApi {
     super(undefined, undefined, (..._: any[]) => {
       throw stubNotImplementedError;
     });
-  }
-
-  public bypassAccessRequirement(): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(() => {});
   }
 
   public getAllUsers(): Promise<AdminUserListResponse> {

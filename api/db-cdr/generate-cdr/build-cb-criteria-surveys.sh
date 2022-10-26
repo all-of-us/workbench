@@ -276,7 +276,14 @@ FROM
         GROUP BY 1
     ) y
 WHERE x.domain_id = 'SURVEY'
-    and x.concept_id = y.ancestor_concept_id"
+and x.concept_id = y.ancestor_concept_id"
+
+echo "PPI SURVEYS - update Minute Survey Name"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.name = 'COVID-19 Vaccine Survey'
+WHERE code = 'cope_vaccine4'
+AND domain_id = 'SURVEY'"
 
 ## wait for process to end before copying
 wait

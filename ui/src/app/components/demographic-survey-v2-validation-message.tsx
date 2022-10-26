@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { withProfileErrorModal } from 'app/components/with-error-modal';
+import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 
 import {
   possiblePreferNotToAnswerErrors,

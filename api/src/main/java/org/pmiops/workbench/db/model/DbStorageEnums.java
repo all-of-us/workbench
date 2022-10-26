@@ -212,6 +212,8 @@ public final class DbStorageEnums {
           .put(Domain.WHOLE_GENOME_VARIANT, (short) 20)
           .put(Domain.ZIP_CODE_SOCIOECONOMIC, (short) 21)
           .put(Domain.ARRAY_DATA, (short) 22)
+          .put(Domain.FITBIT_SLEEP_DAILY_SUMMARY, (short) 23)
+          .put(Domain.FITBIT_SLEEP_LEVEL, (short) 24)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -236,6 +238,8 @@ public final class DbStorageEnums {
           .put(Domain.FITBIT_HEART_RATE_LEVEL, "Fitbit: Heart Rate - Minute-Level")
           .put(Domain.FITBIT_ACTIVITY, "Fitbit: Activity - Daily Summary")
           .put(Domain.FITBIT_INTRADAY_STEPS, "Fitbit: Intraday Steps - Minute-Level")
+          .put(Domain.FITBIT_SLEEP_DAILY_SUMMARY, "Fitbit: Sleep - Daily Summary")
+          .put(Domain.FITBIT_SLEEP_LEVEL, "Fitbit: Sleep - Minute-Level")
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, "Physical Measurement CSS")
           .put(Domain.WHOLE_GENOME_VARIANT, "Whole Genome Variant")
           .put(Domain.ZIP_CODE_SOCIOECONOMIC, "Zip Code Socioeconomic Status")
@@ -318,6 +322,8 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.FITBIT, (short) 8)
               .put(PrePackagedConceptSetEnum.WHOLE_GENOME, (short) 9)
               .put(PrePackagedConceptSetEnum.ZIP_CODE_SOCIOECONOMIC, (short) 10)
+              .put(PrePackagedConceptSetEnum.FITBIT_SLEEP_LEVEL, (short) 11)
+              .put(PrePackagedConceptSetEnum.FITBIT_SLEEP_DAILY_SUMMARY, (short) 12)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
