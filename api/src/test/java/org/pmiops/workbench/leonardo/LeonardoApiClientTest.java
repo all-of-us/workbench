@@ -198,8 +198,10 @@ public class LeonardoApiClientTest {
     diskLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
-    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString());
+
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    appLabels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
 
     LeonardoCreateAppRequest expectedAppRequest =
         new LeonardoCreateAppRequest()
