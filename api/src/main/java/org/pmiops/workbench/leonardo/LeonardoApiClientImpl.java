@@ -46,6 +46,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
@@ -509,33 +510,40 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
+    AppType appType = createAppRequest.getAppType();
+
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
-            .put(
-                LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
-                appTypeToLabelValue(createAppRequest.getAppType()))
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType))
             .build();
 
+    LeonardoPersistentDiskRequest diskRequest =
+        leonardoMapper
+            .toLeonardoPersistentDiskRequest(createAppRequest.getPersistentDiskRequest())
+            .labels(
+                upsertLeonardoLabel(
+                    createAppRequest.getPersistentDiskRequest().getLabels(),
+                    LEONARDO_LABEL_APP_TYPE,
+                    appTypeToLabelValue(createAppRequest.getAppType())));
+
+    // If diskRequest is not set or missing name from request, that means creating new disk.
+    if (diskRequest != null && Strings.isNullOrEmpty(diskRequest.getName())) {
+      diskRequest.setName(userProvider.get().generatePDNameForApp(appType));
+    }
+
     leonardoCreateAppRequest
-        .appType(leonardoMapper.toLeonardoAppType(createAppRequest.getAppType()))
+        .appType(leonardoMapper.toLeonardoAppType(appType))
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(
                 createAppRequest.getKubernetesRuntimeConfig()))
-        .diskConfig(
-            leonardoMapper
-                .toLeonardoPersistentDiskRequest(createAppRequest.getPersistentDiskRequest())
-                .labels(
-                    upsertLeonardoLabel(
-                        createAppRequest.getPersistentDiskRequest().getLabels(),
-                        LEONARDO_LABEL_APP_TYPE,
-                        appTypeToLabelValue(createAppRequest.getAppType()))))
+        .diskConfig(diskRequest)
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
 
-    if (createAppRequest.getAppType().equals(AppType.RSTUDIO)) {
+    if (appType.equals(AppType.RSTUDIO)) {
       leonardoCreateAppRequest.descriptorPath(
           workbenchConfigProvider.get().app.rStudioDescriptorPath);
     }

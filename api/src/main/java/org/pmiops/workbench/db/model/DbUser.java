@@ -454,6 +454,17 @@ public class DbUser {
     return getUserPDNamePrefix() + "-" + randomString;
   }
 
+  /** Returns a name for the Persistent Disk to be created for this user. */
+  @Transient
+  public String generatePDNameForApp(AppType appType) {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PD_UUID_SUFFIX_SIZE);
+    return getUserPDNamePrefix() + '-' + appType.toString().toLowerCase() + "-" + randomString;
+  }
+
   @Transient
   public String getAppName(AppType appType) {
     return APP_NAME_PREFIX + getUserId() + '-' + appType.toString().toLowerCase();

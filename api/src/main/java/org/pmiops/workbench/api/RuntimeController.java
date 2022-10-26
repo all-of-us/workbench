@@ -197,14 +197,13 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
       if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
-        persistentDiskRequest
-            .name(userProvider.get().generatePDName())
-            .labels(
-                upsertLeonardoLabel(
-                    persistentDiskRequest.getLabels(),
-                    LEONARDO_LABEL_IS_RUNTIME,
-                    LEONARDO_LABEL_IS_RUNTIME_TRUE));
+        persistentDiskRequest.name(userProvider.get().generatePDName());
       }
+      persistentDiskRequest.labels(
+          upsertLeonardoLabel(
+              persistentDiskRequest.getLabels(),
+              LEONARDO_LABEL_IS_RUNTIME,
+              LEONARDO_LABEL_IS_RUNTIME_TRUE));
     }
     long configCount =
         Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
