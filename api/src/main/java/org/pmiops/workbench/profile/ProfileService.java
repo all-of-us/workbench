@@ -36,7 +36,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
-import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountDisabledStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
@@ -134,19 +133,8 @@ public class ProfileService {
         accessTierService.getAccessTierShortNamesForUser(user);
     final List<UserTierEligibility> userTierEligibilities =
         institutionService.getUserTierEligibilities(user);
-
-    final List<AccessModuleStatus> accessModuleStatuses =
-        accessModuleService.getAccessModuleStatus(userLite);
-    // TODO RW-8236 Remove anyModuleHasExpired after release.
     final ProfileAccessModules accessModules =
-        new ProfileAccessModules()
-            .modules(accessModuleStatuses)
-            .anyModuleHasExpired(
-                accessModuleStatuses.stream()
-                    .anyMatch(
-                        a ->
-                            (a.getExpirationEpochMillis() != null
-                                && clock.instant().toEpochMilli() > a.getExpirationEpochMillis())));
+        new ProfileAccessModules().modules(accessModuleService.getAccessModuleStatus(userLite));
 
     return profileMapper.toModel(
         user,
@@ -543,11 +531,9 @@ public class ProfileService {
         .ifPresent(
             newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
-    // dual bypass time to DbUser and UserAccessModule. And eventually we want to deprecate DbUser
-    // update.
     request
         .getAccessBypassRequests()
-        .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
+        .forEach(bypass -> accessModuleService.updateBypassTime(dbUser.getUserId(), bypass));
 
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));

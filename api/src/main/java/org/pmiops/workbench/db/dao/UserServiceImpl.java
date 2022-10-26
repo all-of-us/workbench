@@ -55,7 +55,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
@@ -827,18 +826,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public Optional<DbUser> getByDatabaseId(long databaseId) {
     return Optional.ofNullable(userDao.findUserByUserId(databaseId));
-  }
-
-  @Override
-  public void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest) {
-    final DbUser user =
-        getByDatabaseId(userDatabaseId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("User with database ID %d not found", userDatabaseId)));
-    accessModuleService.updateBypassTime(userDatabaseId, accessBypassRequest);
-    updateUserAccessTiers(user, Agent.asUser(user));
   }
 
   @Override

@@ -5,7 +5,7 @@ import {
   Profile,
   ProfileApi,
 } from 'generated/fetch';
-import { AdminUserListResponse, EmptyResponse } from 'generated/fetch/api';
+import { AdminUserListResponse } from 'generated/fetch/api';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
@@ -132,10 +132,6 @@ export class ProfileApiStub extends ProfileApi {
 
   public syncTwoFactorAuthStatus() {
     return Promise.resolve(this.profile);
-  }
-
-  public bypassAccessRequirement(): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(() => {});
   }
 
   public submitDUCC(duccVersion: number) {
