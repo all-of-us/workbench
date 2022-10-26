@@ -40,8 +40,7 @@ const record = async (req, res, resBody) => {
   // so related URLs are sorted together alphabetically.
   const fname =
     req.index.toString().padStart(2, '0')+' '
-    req.url.pathname.replace(/[/]/g, '|')+req.url.search+'.'+req.method.toLowerCase()
-    +'.mjs'
+    +req.url.pathname.replace(/[/]/g, '|')+req.url.search+'.'+req.method.toLowerCase()+'.mjs'
   await fsp.mkdir(rdir, {recursive: true})
   const [rbString, rbObj] = formatResBody(resBody)
   const escapedBody = rbObj

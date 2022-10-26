@@ -103,3 +103,17 @@ const impersonateUser = async (page, username) => {
   expect(await page.waitForSelector('[data-test-id="signed-in"]', {timeout: 4e3})).toBeDefined()
 }
 export_({impersonateUser})
+
+const promiseWindowEvent = async (page, eventName) => {
+  let resolveEvent = undefined
+  const eventPromise = new Promise(resolve => { resolveEvent = resolve })
+  await page.exposeFunction('handleEvent', resolveEvent)
+  await page.evaluate(eventName => {
+    window.addEventListener(eventName, async e => { handleEvent(e.type) })
+  }, eventName)
+  // This has to be wrapped so callers can await this function to get the event handler installed
+  // without also awaiting the event itself. The auto-chaining nature of promises in JavaScript
+  // makes cases like this one particularly ugly.
+  return [eventPromise]
+}
+export_({promiseWindowEvent})
