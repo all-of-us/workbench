@@ -106,8 +106,9 @@ public class UserAdminController implements UserAdminApiDelegate {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
-    long userId = userProvider.get().getUserId();
-    accessModuleService.updateAllBypassTimes(userId);
+    final DbUser user = userProvider.get();
+    accessModuleService.updateAllBypassTimes(user.getUserId());
+    userService.updateUserAccessTiers(user, Agent.asUser(user));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
