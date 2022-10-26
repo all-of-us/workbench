@@ -70,6 +70,8 @@ function getSaveButtonDisableMsg(wrapper: AnyWrapper, attributeName: string) {
     .prop('disabled')[attributeName];
 }
 
+const WORKSPACE_NAME_TEXT = 'This is a text with space';
+
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
   let userApi: UserApiStub;
@@ -1134,5 +1136,20 @@ describe('WorkspaceEdit', () => {
       'User Billing',
       'User Provided Billing Account',
     ]);
+  });
+  it('Should trim workspace name', async () => {
+    const wrapper = component();
+    let workspaceNameTextBox = wrapper
+      .find('[data-test-id="workspace-name"]')
+      .first();
+    workspaceNameTextBox.simulate('change', {
+      target: { value: '  ' + WORKSPACE_NAME_TEXT + '    ' },
+    });
+    expect(workspaceNameTextBox.prop('value')).not.toBe(WORKSPACE_NAME_TEXT);
+    workspaceNameTextBox.simulate('blur');
+    workspaceNameTextBox = wrapper
+      .find('[data-test-id="workspace-name"]')
+      .first();
+    expect(workspaceNameTextBox.prop('value')).toBe(WORKSPACE_NAME_TEXT);
   });
 });
