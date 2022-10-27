@@ -135,10 +135,6 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     });
   };
 
-  const getWorkspace = (r: WorkspaceResource) => {
-    return props.workspaces.find((w) => w.namespace === r.workspaceNamespace);
-  };
-
   const getCdrVersionName = (r: WorkspaceResource) => {
     const { cdrVersionTiersResponse } = props;
 
