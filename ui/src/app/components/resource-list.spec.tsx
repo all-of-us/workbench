@@ -9,8 +9,15 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ResourceList } from './resource-list';
 
-const RESOURCE_TYPE_COLUMN_NUMBER = 1;
-const NAME_COLUMN_NUMBER = 2;
+export const RESOURCE_TYPE_COLUMN_NUMBER = 1;
+export const NAME_COLUMN_NUMBER = 2;
+export const MODIFIED_DATE_COLUMN_NUMBER = 3;
+
+export const resourceTable = (wrapper) =>
+  wrapper.find('[data-test-id="resource-list"]').find('tbody');
+export const resourceTableRows = (wrapper) => resourceTable(wrapper).find('tr');
+export const resourceTableColumns = (wrapper) =>
+  resourceTable(wrapper).find('td');
 
 const COHORT_NAME = 'My Cohort';
 const COHORT: Partial<WorkspaceResource> = {
@@ -33,14 +40,13 @@ describe('ResourceList', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
 
-    const Columns = wrapper
-      .find('[data-test-id="resource-list"]')
-      .find('tbody')
-      .find('td');
-
     // no resources are rendered
-    expect(Columns.at(RESOURCE_TYPE_COLUMN_NUMBER).exists()).toBeFalsy();
-    expect(Columns.at(NAME_COLUMN_NUMBER).exists()).toBeFalsy();
+    expect(
+      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).exists()
+    ).toBeFalsy();
+    expect(
+      resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).exists()
+    ).toBeFalsy();
   });
 
   it('should render a cohort resource', async () => {
@@ -55,13 +61,12 @@ describe('ResourceList', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
 
-    const Columns = wrapper
-      .find('[data-test-id="resource-list"]')
-      .find('tbody')
-      .find('td');
-
-    expect(Columns.at(RESOURCE_TYPE_COLUMN_NUMBER).text()).toBe('Cohort');
-    expect(Columns.at(NAME_COLUMN_NUMBER).text()).toBe(COHORT_NAME);
+    expect(
+      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).text()
+    ).toBe('Cohort');
+    expect(resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).text()).toBe(
+      COHORT_NAME
+    );
   });
 
   it("should render when a resource's workspace is not available", async () => {
@@ -73,13 +78,12 @@ describe('ResourceList', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
 
-    const Columns = wrapper
-      .find('[data-test-id="resource-list"]')
-      .find('tbody')
-      .find('td');
-
     // the resource is not rendered, because its workspace is not available
-    expect(Columns.at(RESOURCE_TYPE_COLUMN_NUMBER).exists()).toBeFalsy();
-    expect(Columns.at(NAME_COLUMN_NUMBER).exists()).toBeFalsy();
+    expect(
+      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).exists()
+    ).toBeFalsy();
+    expect(
+      resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).exists()
+    ).toBeFalsy();
   });
 });

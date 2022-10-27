@@ -4,6 +4,11 @@ import { mount } from 'enzyme';
 
 import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
 
+import {
+  MODIFIED_DATE_COLUMN_NUMBER,
+  NAME_COLUMN_NUMBER,
+  RESOURCE_TYPE_COLUMN_NUMBER,
+} from 'app/components/resource-list.spec';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -15,10 +20,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { NotebookList } from './notebook-list';
-
-const RESOURCE_TYPE_COLUMN_NUMBER = 1;
-const NOTEBOOK_NAME_COLUMN_NUMBER = 2;
-const MODIFIED_DATE_COLUMN_NUMBER = 3;
 
 const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/notebooks/preview/mockFile.ipynb`;
 
@@ -48,7 +49,7 @@ describe('NotebookList', () => {
     );
 
     // Third column of notebook table displays the notebook file name
-    expect(notebookTableColumns.at(NOTEBOOK_NAME_COLUMN_NUMBER).text()).toMatch(
+    expect(notebookTableColumns.at(NAME_COLUMN_NUMBER).text()).toMatch(
       NotebooksApiStub.stubNotebookList()[0].name.split('.ipynb')[0]
     );
 
@@ -81,10 +82,7 @@ describe('NotebookList', () => {
     ).toBe(NOTEBOOK_HREF_LOCATION);
 
     expect(
-      notebookTableColumns
-        .at(NOTEBOOK_NAME_COLUMN_NUMBER)
-        .find('a')
-        .prop('href')
+      notebookTableColumns.at(NAME_COLUMN_NUMBER).find('a').prop('href')
     ).toBe(NOTEBOOK_HREF_LOCATION);
   });
 });
