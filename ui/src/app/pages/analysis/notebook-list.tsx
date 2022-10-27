@@ -258,8 +258,8 @@ export const NotebookList = withCurrentWorkspace()(
                   </FlexRow>
                   {!loading && (
                     <ResourcesList
+                      workspaces={[workspace]}
                       workspaceResources={this.getNotebookListAsResources()}
-                      workspaceMap={new Map([[workspace.namespace, workspace]])}
                       onUpdate={() => this.loadNotebooks()}
                     />
                   )}

@@ -99,7 +99,7 @@ interface Props {
   existingNameList: string[];
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
-  workspaceMap: Map<string, Workspace>;
+  workspaces: Workspace[];
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   recentResourceSource?: boolean;
 }
@@ -136,8 +136,7 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   };
 
   const getWorkspace = (r: WorkspaceResource) => {
-    const { workspaceMap } = props;
-    return workspaceMap?.get(r.workspaceNamespace);
+    return props.workspaces.find((w) => w.namespace === r.workspaceNamespace);
   };
 
   const getCdrVersionName = (r: WorkspaceResource) => {
@@ -160,11 +159,13 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   };
 
   useEffect(() => {
-    const { workspaceResources } = props;
+    const { workspaces, workspaceResources } = props;
     if (workspaceResources) {
       setTableData(
         fp.flatMap((r) => {
-          const workspace = getWorkspace(r);
+          const workspace = workspaces.find(
+            (w) => w.namespace === r.workspaceNamespace
+          );
           return (
             // Don't return resources where we no longer have access to the workspace.
             // For example: the owner has unshared the workspace, but a recent-resource entry remains.

@@ -25,7 +25,6 @@ interface Props {
 export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
-  const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
   const [apiLoadError, setApiLoadError] = useState<string>(null);
 
   const loadResources = async () => {
@@ -44,10 +43,6 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   useEffect(() => {
     const { workspaces } = props;
     if (workspaces) {
-      const workspaceTuples = workspaces.map(
-        (r) => [r.workspace.namespace, r.workspace] as [string, Workspace]
-      );
-      setWorkspaceMap(new Map(workspaceTuples));
       loadResources();
     }
   }, [props.workspaces]);
@@ -63,7 +58,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       ),
     ],
     [
-      resources && wsMap && !loading,
+      resources && !loading,
       () => (
         <React.Fragment>
           {resources.length > 0 && (
@@ -75,8 +70,8 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           >
             <ResourcesList
               recentResourceSource
+              workspaces={props.workspaces.map((w) => w.workspace)}
               workspaceResources={resources}
-              workspaceMap={wsMap}
               onUpdate={loadResources}
             />
           </div>
