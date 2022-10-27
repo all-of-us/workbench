@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import {
   CdrVersionTiersResponse,
-  Workspace,
   WorkspaceResourceResponse,
   WorkspaceResponse,
 } from 'generated/fetch';
