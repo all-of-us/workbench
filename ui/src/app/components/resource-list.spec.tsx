@@ -5,6 +5,7 @@ import { mount } from 'enzyme';
 import { WorkspaceResource } from 'generated/fetch';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { stubResource } from 'testing/stubs/resources-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ResourceList } from './resource-list';
@@ -20,9 +21,8 @@ export const resourceTableColumns = (wrapper) =>
   resourceTable(wrapper).find('td');
 
 const COHORT_NAME = 'My Cohort';
-const COHORT: Partial<WorkspaceResource> = {
-  workspaceNamespace: workspaceDataStub.namespace,
-  workspaceFirecloudName: workspaceDataStub.id,
+const COHORT: WorkspaceResource = {
+  ...stubResource,
   cohort: {
     name: COHORT_NAME,
     criteria: 'something',

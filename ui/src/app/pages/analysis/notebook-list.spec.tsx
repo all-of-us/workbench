@@ -8,6 +8,7 @@ import {
   MODIFIED_DATE_COLUMN_NUMBER,
   NAME_COLUMN_NUMBER,
   RESOURCE_TYPE_COLUMN_NUMBER,
+  resourceTableColumns,
 } from 'app/components/resource-list.spec';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
@@ -38,23 +39,21 @@ describe('NotebookList', () => {
       </MemoryRouter>
     );
     await waitOneTickAndUpdate(wrapper);
-    const notebookTableColumns = wrapper
-      .find('[data-test-id="resource-list"]')
-      .find('tbody')
-      .find('td');
 
     // Second Column of notebook table displays the type of resource: Notebook
-    expect(notebookTableColumns.at(RESOURCE_TYPE_COLUMN_NUMBER).text()).toMatch(
-      'Notebook'
-    );
+    expect(
+      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).text()
+    ).toMatch('Notebook');
 
     // Third column of notebook table displays the notebook file name
-    expect(notebookTableColumns.at(NAME_COLUMN_NUMBER).text()).toMatch(
+    expect(resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).text()).toMatch(
       NotebooksApiStub.stubNotebookList()[0].name.split('.ipynb')[0]
     );
 
     // Forth column of notebook table displays last modified time
-    expect(notebookTableColumns.at(MODIFIED_DATE_COLUMN_NUMBER).text()).toMatch(
+    expect(
+      resourceTableColumns(wrapper).at(MODIFIED_DATE_COLUMN_NUMBER).text()
+    ).toMatch(
       displayDateWithoutHours(
         NotebooksApiStub.stubNotebookList()[0].lastModifiedTime
       )
@@ -69,20 +68,19 @@ describe('NotebookList', () => {
       </MemoryRouter>
     );
     await waitOneTickAndUpdate(wrapper);
-    const notebookTableColumns = wrapper
-      .find('[data-test-id="resource-list"]')
-      .find('tbody')
-      .find('td');
 
     expect(
-      notebookTableColumns
+      resourceTableColumns(wrapper)
         .at(RESOURCE_TYPE_COLUMN_NUMBER)
         .find('a')
         .prop('href')
     ).toBe(NOTEBOOK_HREF_LOCATION);
 
     expect(
-      notebookTableColumns.at(NAME_COLUMN_NUMBER).find('a').prop('href')
+      resourceTableColumns(wrapper)
+        .at(NAME_COLUMN_NUMBER)
+        .find('a')
+        .prop('href')
     ).toBe(NOTEBOOK_HREF_LOCATION);
   });
 });
