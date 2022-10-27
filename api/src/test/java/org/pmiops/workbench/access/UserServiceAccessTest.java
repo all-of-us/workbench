@@ -72,8 +72,8 @@ import org.springframework.test.annotation.DirtiesContext;
  * AccessSyncService#updateUserAccessTiers(org.pmiops.workbench.db.model.DbUser,
  * org.pmiops.workbench.actionaudit.Agent)} with different configurations, which ultimately executes
  * the private method {@link
- * AccessSyncService#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List,
- * String)} to make this determination.
+ * AccessSyncService#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)}
+ * to make this determination.
  */
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
