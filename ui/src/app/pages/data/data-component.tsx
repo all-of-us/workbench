@@ -302,6 +302,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
           {
             <ResourcesList
               workspaceResources={filteredList}
+              workspaceMap={new Map([[workspace.namespace, workspace]])}
               onUpdate={() => loadResources()}
             />
           }

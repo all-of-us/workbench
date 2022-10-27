@@ -20,8 +20,7 @@ const RESOURCE_TYPE_COLUMN_NUMBER = 1;
 const NOTEBOOK_NAME_COLUMN_NUMBER = 2;
 const MODIFIED_DATE_COLUMN_NUMBER = 3;
 
-const NOTEBOOK_HREF_LOCATION =
-  '/workspaces/defaultNamespace/1/notebooks/preview/mockFile.ipynb';
+const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/notebooks/preview/mockFile.ipynb`;
 
 describe('NotebookList', () => {
   beforeEach(() => {

@@ -99,7 +99,7 @@ interface Props {
   existingNameList: string[];
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
-  workspaceMap?: Map<string, Workspace>;
+  workspaceMap: Map<string, Workspace>;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   recentResourceSource?: boolean;
 }

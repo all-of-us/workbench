@@ -259,6 +259,7 @@ export const NotebookList = withCurrentWorkspace()(
                   {!loading && (
                     <ResourcesList
                       workspaceResources={this.getNotebookListAsResources()}
+                      workspaceMap={new Map([[workspace.namespace, workspace]])}
                       onUpdate={() => this.loadNotebooks()}
                     />
                   )}
