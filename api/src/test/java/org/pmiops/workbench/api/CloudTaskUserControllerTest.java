@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
-import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -50,7 +49,6 @@ public class CloudTaskUserControllerTest {
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
   @MockBean({
     AccessModuleService.class,
-    AccessSyncService.class,
     CloudResourceManagerService.class,
     UserService.class,
   })
@@ -109,8 +107,6 @@ public class CloudTaskUserControllerTest {
     verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem());
     verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
 
-    // normally we would expect the userService sync methods to add to this count, but userService
-    // is mocked so we only see the direct calls from synchronizeUserAccess(), one per user
     verifyNoMoreInteractions(mockUserService);
   }
 }
