@@ -11,6 +11,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
@@ -48,10 +49,6 @@ import org.pmiops.workbench.model.RuntimeStatus;
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
 
-  String LEONARDO_LABEL_AOU = "all-of-us";
-  String LEONARDO_LABEL_AOU_CONFIG = "all-of-us-config";
-  String LEONARDO_LABEL_CREATED_BY = "created-by";
-  String LEONARDO_LABEL_APP_TYPE = "aou-app-type";
   BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
       ImmutableBiMap.of(
           RuntimeConfigurationType.USEROVERRIDE, "user-override",
@@ -211,7 +208,8 @@ public interface LeonardoMapper {
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
     final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
-    if (runtimeLabels == null || runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG) == null) {
+    if (runtimeLabels == null
+        || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
       // If there's no label, fall back onto the old behavior where every Runtime was created with a
       // default Dataproc config
       runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
@@ -219,7 +217,7 @@ public interface LeonardoMapper {
       runtime.setConfigurationType(
           RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
               .inverse()
-              .get(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG)));
+              .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
     }
   }
 

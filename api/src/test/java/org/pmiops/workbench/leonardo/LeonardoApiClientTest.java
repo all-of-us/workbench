@@ -119,6 +119,7 @@ public class LeonardoApiClientTest {
   private CreateAppRequest createAppRequest;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
+  private PersistentDiskRequest persistentDiskRequest;
   private Map<String, String> appLabels = new HashMap<>();
   private Map<String, String> customEnvironmentVariables = new HashMap<>();
 
@@ -133,8 +134,7 @@ public class LeonardoApiClientTest {
         new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     leonardoKubernetesRuntimeConfig =
         new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
-    PersistentDiskRequest persistentDiskRequest =
-        new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
+    persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
         new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
     testApp =
@@ -170,8 +170,8 @@ public class LeonardoApiClientTest {
             .setCdrVersion(cdrVersion);
     doReturn(testWorkspace).when(workspaceDao).getRequired(WORKSPACE_NS, WORKSPACE_NAME);
 
-    appLabels.put(LeonardoMapper.LEONARDO_LABEL_AOU, "true");
-    appLabels.put(LeonardoMapper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true");
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
 
     customEnvironmentVariables.put("WORKSPACE_CDR", "cdr.bq");
     customEnvironmentVariables.put("WORKSPACE_NAMESPACE", WORKSPACE_NS);
@@ -183,9 +183,44 @@ public class LeonardoApiClientTest {
   }
 
   @Test
-  public void testCreateAppSuccess() throws Exception {
+  public void testCreateAppSuccess_exisingPd() throws Exception {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
-    leonardoApiClient.createApp(createAppRequest, testWorkspace);
+    leonardoApiClient.createApp(
+        createAppRequest.persistentDiskRequest(persistentDiskRequest.name("pd-name")),
+        testWorkspace);
+    verify(userAppsApi)
+        .createApp(
+            eq(GOOGLE_PROJECT_ID),
+            eq(getAppName(AppType.RSTUDIO)),
+            createAppRequestArgumentCaptor.capture());
+
+    Map<String, String> diskLabels = new HashMap<>();
+    diskLabels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
+        LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
+
+    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    appLabels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
+
+    LeonardoCreateAppRequest expectedAppRequest =
+        new LeonardoCreateAppRequest()
+            .appType(LeonardoAppType.CUSTOM)
+            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
+            .descriptorPath(RSTUDIO_DESCRIPTOR_PATH)
+            .labels(appLabels)
+            .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
+            .customEnvironmentVariables(customEnvironmentVariables);
+
+    assertThat(createAppRequest).isEqualTo(expectedAppRequest);
+  }
+
+  @Test
+  public void testCreateAppSuccess_newPd() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    leonardoApiClient.createApp(
+        createAppRequest.persistentDiskRequest(persistentDiskRequest), testWorkspace);
+
     verify(userAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
@@ -193,17 +228,9 @@ public class LeonardoApiClientTest {
             createAppRequestArgumentCaptor.capture());
 
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
-    appLabels.put(LeonardoMapper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString());
-    LeonardoCreateAppRequest expectedAppRequest =
-        new LeonardoCreateAppRequest()
-            .appType(LeonardoAppType.CUSTOM)
-            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .descriptorPath(RSTUDIO_DESCRIPTOR_PATH)
-            .labels(appLabels)
-            .diskConfig(leonardoPersistentDiskRequest)
-            .customEnvironmentVariables(customEnvironmentVariables);
 
-    assertThat(createAppRequest).isEqualTo(expectedAppRequest);
+    assertThat(createAppRequest.getDiskConfig().getName())
+        .startsWith("all-of-us-pd-" + user.getUserId() + "-" + "rstudio");
   }
 
   @Test
