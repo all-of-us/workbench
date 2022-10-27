@@ -24,7 +24,7 @@ import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.access.AccessTierSyncService;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
-  private final AccessTierSyncService accessTierSyncService;
+  private final AccessSyncService accessSyncService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DirectoryService directoryService,
       AccessTierService accessTierService,
       MailService mailService,
-      AccessTierSyncService accessTierSyncService) {
+      AccessSyncService accessSyncService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
-    this.accessTierSyncService = accessTierSyncService;
+    this.accessSyncService = accessSyncService;
   }
 
   /**
@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      dbUser = accessTierSyncService.updateUserAccessTiers(dbUser, agent);
+      dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -573,7 +573,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
               accessModuleService.updateCompletionTime(
                   dbUser, accessModuleName, timestamp.orElse(null)));
 
-      return accessTierSyncService.updateUserAccessTiers(dbUser, agent);
+      return accessSyncService.updateUserAccessTiers(dbUser, agent);
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
@@ -694,7 +694,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           targetUser, DbAccessModuleName.TWO_FACTOR_AUTH, null);
     }
 
-    return accessTierSyncService.updateUserAccessTiers(targetUser, agent);
+    return accessSyncService.updateUserAccessTiers(targetUser, agent);
   }
 
   @Override
@@ -709,7 +709,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           targetUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     }
 
-    return accessTierSyncService.updateUserAccessTiers(targetUser, agent);
+    return accessSyncService.updateUserAccessTiers(targetUser, agent);
   }
 
   @Override
@@ -792,7 +792,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, clockNow());
 
-    return accessTierSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
@@ -802,7 +802,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, clockNow());
 
-    return accessTierSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */

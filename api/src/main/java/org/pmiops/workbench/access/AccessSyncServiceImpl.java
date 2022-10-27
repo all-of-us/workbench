@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AccessTierSyncServiceImpl implements AccessTierSyncService {
-  private static final Logger log = Logger.getLogger(AccessTierSyncServiceImpl.class.getName());
+public class AccessSyncServiceImpl implements AccessSyncService {
+  private static final Logger log = Logger.getLogger(AccessSyncServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -36,7 +36,7 @@ public class AccessTierSyncServiceImpl implements AccessTierSyncService {
   private final UserServiceAuditor userServiceAuditor;
 
   @Autowired
-  public AccessTierSyncServiceImpl(
+  public AccessSyncServiceImpl(
       Provider<WorkbenchConfig> workbenchConfigProvider,
       AccessTierService accessTierService,
       AccessModuleService accessModuleService,

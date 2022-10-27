@@ -69,10 +69,10 @@ import org.springframework.test.annotation.DirtiesContext;
  * Tests to cover access change determinations by executing {@link
  * UserService#updateUserWithRetries(java.util.function.Function,
  * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} or {@link
- * AccessTierSyncService#updateUserAccessTiers(org.pmiops.workbench.db.model.DbUser,
+ * AccessSyncService#updateUserAccessTiers(org.pmiops.workbench.db.model.DbUser,
  * org.pmiops.workbench.actionaudit.Agent)} with different configurations, which ultimately executes
  * the private method {@link
- * AccessTierSyncService#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List,
+ * AccessSyncService#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List,
  * String)} to make this determination.
  */
 @DataJpaTest
@@ -102,7 +102,7 @@ public class UserServiceAccessTest {
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierDao accessTierDao;
-  @Autowired private AccessTierSyncService accessTierSyncService;
+  @Autowired private AccessSyncService accessSyncService;
   @Autowired private InstitutionService institutionService;
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserDao userDao;
@@ -116,7 +116,7 @@ public class UserServiceAccessTest {
     CommonMappers.class,
     AccessModuleServiceImpl.class,
     AccessTierServiceImpl.class,
-    AccessTierSyncServiceImpl.class,
+    AccessSyncServiceImpl.class,
     InstitutionServiceImpl.class,
     UserAccessModuleMapperImpl.class,
   })
@@ -1230,7 +1230,7 @@ public class UserServiceAccessTest {
   }
 
   private DbUser updateUserAccessTiers() {
-    return accessTierSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   private void updateInstitutionTier(InstitutionTierConfig updatedTierConfig) {

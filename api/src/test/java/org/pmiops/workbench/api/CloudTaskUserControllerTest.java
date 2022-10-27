@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
-import org.pmiops.workbench.access.AccessTierSyncService;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -50,7 +50,7 @@ public class CloudTaskUserControllerTest {
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
   @MockBean({
     AccessModuleService.class,
-    AccessTierSyncService.class,
+    AccessSyncService.class,
     CloudResourceManagerService.class,
     UserService.class,
   })
