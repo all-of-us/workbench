@@ -7,6 +7,7 @@ import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
+import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
@@ -14,7 +15,6 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
-import { ResourcesList } from 'app/utils/resource-list';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
@@ -300,7 +300,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
           }}
         >
           {
-            <ResourcesList
+            <ResourceList
               workspaces={[workspace]}
               workspaceResources={filteredList}
               onUpdate={() => loadResources()}

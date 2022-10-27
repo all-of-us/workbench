@@ -23,6 +23,8 @@ import {
 } from 'app/components/resource-card';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
 import {
   getDisplayName,
@@ -30,9 +32,6 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-
-import { findCdrVersion } from './cdr-versions';
-import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 
 const styles = reactStyles({
   column: {
@@ -104,7 +103,7 @@ interface Props {
   recentResourceSource?: boolean;
 }
 
-export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
+export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
   const [tableData, setTableData] = useState<TableData[]>();
 
   const reloadResources = async () => {

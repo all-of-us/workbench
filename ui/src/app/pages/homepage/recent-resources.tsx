@@ -11,10 +11,10 @@ import {
 import { AlertWarning } from 'app/components/alert';
 import { SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
+import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { cond, withCdrVersions } from 'app/utils';
-import { ResourcesList } from 'app/utils/resource-list';
 
 interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
@@ -67,7 +67,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
             data-test-id='recent-resources-table'
             style={{ paddingTop: '1rem' }}
           >
-            <ResourcesList
+            <ResourceList
               recentResourceSource
               workspaces={props.workspaces.map((w) => w.workspace)}
               workspaceResources={resources}
