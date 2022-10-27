@@ -1553,8 +1553,6 @@ paths:
     post:
       tags:
         - userAdmin
-      consumes:
-        - application/json
       description: 'Updates the given user to bypass all access requirements'
       operationId: unsafeSelfBypassAccessRequirements
       responses:
