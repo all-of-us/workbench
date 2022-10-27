@@ -67,27 +67,22 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   public void updateAllBypassTimes(long userId) {
     dbAccessModulesProvider.get().stream()
         .filter(DbAccessModule::getBypassable)
-        .forEach(
-            module ->
-                updateBypassTime(
-                    userId,
-                    // TODO rm double conversion
-                    accessModuleNameMapper.storageAccessModuleToClient(module.getName()),
-                    true));
+        .forEach(module -> updateBypassTime(userId, module.getName(), true));
   }
 
   @Override
   public void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest) {
     updateBypassTime(
-        userId, accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
+        userId,
+        accessModuleNameMapper.clientAccessModuleToStorage(accessBypassRequest.getModuleName()),
+        accessBypassRequest.getIsBypassed());
   }
 
   @Override
-  public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
+  public void updateBypassTime(
+      long userId, DbAccessModuleName accessModuleName, boolean isBypassed) {
     DbAccessModule accessModule =
-        getDbAccessModuleOrThrow(
-            dbAccessModulesProvider.get(),
-            accessModuleNameMapper.clientAccessModuleToStorage(accessModuleName));
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }

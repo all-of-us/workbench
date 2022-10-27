@@ -45,7 +45,6 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierConfig;
@@ -256,7 +255,7 @@ public class UserServiceAccessTest {
 
   private DbUser removeDuccBypass(DbUser user) {
     accessModuleService.updateBypassTime(
-        user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+        user.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
     return userDao.save(user);
   }
 
@@ -282,7 +281,8 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
     testUnregistration(
         user -> {
-          accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
           return userDao.save(user);
         });
   }
@@ -294,7 +294,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+              dbUser.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, false);
           return userDao.save(user);
         });
   }
@@ -306,7 +306,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
+              dbUser.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, false);
           return userDao.save(user);
         });
   }
@@ -317,7 +317,7 @@ public class UserServiceAccessTest {
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
+              dbUser.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpire);
 
@@ -335,7 +335,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+              dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
           return userDao.save(user);
         });
   }
@@ -345,7 +345,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+              dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
           return userDao.save(user);
@@ -359,7 +359,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+              dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
           user.setDuccAgreement(signDucc(user, 3));
@@ -373,7 +373,7 @@ public class UserServiceAccessTest {
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+              dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpire);
 
@@ -461,9 +461,9 @@ public class UserServiceAccessTest {
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
 
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+        dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, true);
+        dbUser.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, true);
 
     // these 2 are not bypassable
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -521,7 +521,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+        dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -542,7 +542,7 @@ public class UserServiceAccessTest {
 
     // this is bypassed
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+        dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
@@ -576,7 +576,7 @@ public class UserServiceAccessTest {
 
     // a bypass which would "expire" in 30 days does NOT trigger a 30-day warning
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+        dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -868,7 +868,7 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
 
     // Now make user eRA not complete, expect user removed from Registered tier;
-    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
@@ -891,7 +891,7 @@ public class UserServiceAccessTest {
     institutionService.updateInstitution(
         institution.getShortName(),
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
@@ -912,7 +912,7 @@ public class UserServiceAccessTest {
     institutionService.updateInstitution(
         institution.getShortName(),
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
-    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
@@ -927,7 +927,7 @@ public class UserServiceAccessTest {
 
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
@@ -948,7 +948,7 @@ public class UserServiceAccessTest {
 
     // Incomplete RAS module, expect user is still Registered;
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
@@ -965,7 +965,7 @@ public class UserServiceAccessTest {
 
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
@@ -1001,7 +1001,7 @@ public class UserServiceAccessTest {
     dbUser = completeRTAndCTRequirements(dbUser);
 
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
+        dbUser.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
@@ -1022,7 +1022,7 @@ public class UserServiceAccessTest {
     ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
 
-    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
@@ -1039,7 +1039,7 @@ public class UserServiceAccessTest {
     ctTierConfig.setEraRequired(false);
     updateInstitutionTier(ctTierConfig);
 
-    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
@@ -1128,7 +1128,7 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
 
-    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
@@ -1147,7 +1147,7 @@ public class UserServiceAccessTest {
     assertControlledTierEnabled(dbUser);
 
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
+        dbUser.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
@@ -1292,12 +1292,14 @@ public class UserServiceAccessTest {
     //        && isPublicationsCompliant
     //        && isProfileCompliant
     //        && institutionEmailValid
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.COMPLIANCE_TRAINING, true);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.ERA_COMMONS, true);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
     accessModuleService.updateBypassTime(
-        user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, true);
+        user.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, true);
+    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.ERA_COMMONS, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
+    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
 
     accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
@@ -1329,9 +1331,9 @@ public class UserServiceAccessTest {
 
   private DbUser completeCTRequirements(DbUser user) {
     addCTConfigToInstitution(institutionService.getByUser(user).get());
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.ERA_COMMONS, true);
+    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.ERA_COMMONS, true);
     accessModuleService.updateBypassTime(
-        user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, true);
+        user.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, true);
     return user;
   }
 
