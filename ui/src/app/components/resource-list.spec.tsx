@@ -2,89 +2,84 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
 
-import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
-
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { displayDateWithoutHours } from 'app/utils/dates';
-import { currentWorkspaceStore } from 'app/utils/navigation';
+import { WorkspaceResource } from 'generated/fetch';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { NotebookList } from './notebook-list';
+import { ResourceList } from './resource-list';
 
 const RESOURCE_TYPE_COLUMN_NUMBER = 1;
-const NOTEBOOK_NAME_COLUMN_NUMBER = 2;
-const MODIFIED_DATE_COLUMN_NUMBER = 3;
+const NAME_COLUMN_NUMBER = 2;
 
-const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/notebooks/preview/mockFile.ipynb`;
+const COHORT_NAME = 'My Cohort';
+const COHORT: Partial<WorkspaceResource> = {
+  workspaceNamespace: workspaceDataStub.namespace,
+  workspaceFirecloudName: workspaceDataStub.id,
+  cohort: {
+    name: COHORT_NAME,
+    criteria: 'something',
+    type: 'something else',
+  },
+};
 
-describe('NotebookList', () => {
-  beforeEach(() => {
-    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(NotebooksApi, new NotebooksApiStub());
-    registerApiClient(ProfileApi, new ProfileApiStub());
-  });
-
-  it('should render notebooks', async () => {
-    currentWorkspaceStore.next(workspaceDataStub);
+describe('ResourceList', () => {
+  it('should render when there are no resources', async () => {
     const wrapper = mount(
       <MemoryRouter>
-        <NotebookList hideSpinner={() => {}} />
+        <ResourceList workspaceResources={[]} />
       </MemoryRouter>
     );
     await waitOneTickAndUpdate(wrapper);
-    const notebookTableColumns = wrapper
+    expect(wrapper.exists()).toBeTruthy();
+
+    const Columns = wrapper
       .find('[data-test-id="resource-list"]')
       .find('tbody')
       .find('td');
 
-    // Second Column of notebook table displays the type of resource: Notebook
-    expect(notebookTableColumns.at(RESOURCE_TYPE_COLUMN_NUMBER).text()).toMatch(
-      'Notebook'
-    );
-
-    // Third column of notebook table displays the notebook file name
-    expect(notebookTableColumns.at(NOTEBOOK_NAME_COLUMN_NUMBER).text()).toMatch(
-      NotebooksApiStub.stubNotebookList()[0].name.split('.ipynb')[0]
-    );
-
-    // Forth column of notebook table displays last modified time
-    expect(notebookTableColumns.at(MODIFIED_DATE_COLUMN_NUMBER).text()).toMatch(
-      displayDateWithoutHours(
-        NotebooksApiStub.stubNotebookList()[0].lastModifiedTime
-      )
-    );
+    // no resources are rendered
+    expect(Columns.at(RESOURCE_TYPE_COLUMN_NUMBER).exists()).toBeFalsy();
+    expect(Columns.at(NAME_COLUMN_NUMBER).exists()).toBeFalsy();
   });
 
-  it('should redirect to notebook playground mode when either resource type or name is clicked', async () => {
-    currentWorkspaceStore.next(workspaceDataStub);
+  it('should render a cohort resource', async () => {
     const wrapper = mount(
       <MemoryRouter>
-        <NotebookList hideSpinner={() => {}} />
+        <ResourceList
+          workspaces={[workspaceDataStub]}
+          workspaceResources={[COHORT]}
+        />
       </MemoryRouter>
     );
     await waitOneTickAndUpdate(wrapper);
-    const notebookTableColumns = wrapper
+    expect(wrapper.exists()).toBeTruthy();
+
+    const Columns = wrapper
       .find('[data-test-id="resource-list"]')
       .find('tbody')
       .find('td');
 
-    expect(
-      notebookTableColumns
-        .at(RESOURCE_TYPE_COLUMN_NUMBER)
-        .find('a')
-        .prop('href')
-    ).toBe(NOTEBOOK_HREF_LOCATION);
+    expect(Columns.at(RESOURCE_TYPE_COLUMN_NUMBER).text()).toBe('Cohort');
+    expect(Columns.at(NAME_COLUMN_NUMBER).text()).toBe(COHORT_NAME);
+  });
 
-    expect(
-      notebookTableColumns
-        .at(NOTEBOOK_NAME_COLUMN_NUMBER)
-        .find('a')
-        .prop('href')
-    ).toBe(NOTEBOOK_HREF_LOCATION);
+  it("should render when a resource's workspace is not available", async () => {
+    const wrapper = mount(
+      <MemoryRouter>
+        <ResourceList workspaces={[]} workspaceResources={[COHORT]} />
+      </MemoryRouter>
+    );
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists()).toBeTruthy();
+
+    const Columns = wrapper
+      .find('[data-test-id="resource-list"]')
+      .find('tbody')
+      .find('td');
+
+    // the resource is not rendered, because its workspace is not available
+    expect(Columns.at(RESOURCE_TYPE_COLUMN_NUMBER).exists()).toBeFalsy();
+    expect(Columns.at(NAME_COLUMN_NUMBER).exists()).toBeFalsy();
   });
 });
