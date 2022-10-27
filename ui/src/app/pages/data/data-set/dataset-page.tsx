@@ -672,7 +672,7 @@ const PREPACKAGED_WITH_WHOLE_GENOME = {
 const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
   [PrepackagedConceptSet.ZIPCODESOCIOECONOMIC]: Domain.ZIPCODESOCIOECONOMIC,
 };
-let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
+let PREPACKAGED_DOMAINS = {};
 
 // For converting domain strings to type Domain
 const reverseDomainEnum = {
@@ -844,13 +844,14 @@ export const DatasetPage = fp.flow(
     const [savingDataset, setSavingDataset] = useState(false);
 
     const updatePrepackagedDomains = () => {
+      PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
       const { hasFitbitData, hasFitbitSleepData, hasWgsData } = getCdrVersion(
         workspace,
         cdrVersionTiersResponse
       );
       if (hasFitbitData) {
         PREPACKAGED_DOMAINS = {
-          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+          ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_FITBIT_DOMAINS,
         };
       }
