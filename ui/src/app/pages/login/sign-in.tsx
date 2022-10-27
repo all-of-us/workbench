@@ -442,6 +442,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private captureCaptchaResponse(token) {
     this.setState({ captchaToken: token, captcha: true });
+    window.dispatchEvent(new Event('captchaSolved'));
   }
 
   private renderNavigation(currentStep: SignInStep) {

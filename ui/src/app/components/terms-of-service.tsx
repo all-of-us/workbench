@@ -62,6 +62,11 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
       hasAckedAgreement: props.afterPrev,
       hasClickedNext: false,
     };
+    // This bypasses the scroll detection. A better implementation may be to provide a method
+    // on HtmlViewer to force the scroll, thus exercising the scroll detection.
+    (window as any).forceHasReadEntireAgreement = () => {
+      this.setState({ hasReadEntireAgreement: true });
+    };
   }
 
   render() {
