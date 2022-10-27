@@ -641,6 +641,8 @@ enum PrepackagedConceptSet {
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
+  FITBITSLEEPDAILYSUMMARY = 'Fitbit Sleep Daily Summary',
+  FITBITSLEEPLEVEL = 'Fitbit Sleep Level',
   WHOLEGENOME = 'Whole Genome Sequencing Data',
   ZIPCODESOCIOECONOMIC = 'Zip Code Socioeconomic Status Data',
 }
@@ -655,6 +657,12 @@ const PREPACKAGED_WITH_FITBIT_DOMAINS = {
   [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
   [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
   [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
+};
+
+const PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS = {
+  [PrepackagedConceptSet.FITBITSLEEPDAILYSUMMARY]:
+    Domain.FITBITSLEEPDAILYSUMMARY,
+  [PrepackagedConceptSet.FITBITSLEEPLEVEL]: Domain.FITBITSLEEPLEVEL,
 };
 
 const PREPACKAGED_WITH_WHOLE_GENOME = {
@@ -687,6 +695,8 @@ const reverseDomainEnum = {
   FITBIT_HEART_RATE_LEVEL: Domain.FITBITHEARTRATELEVEL,
   FITBIT_ACTIVITY: Domain.FITBITACTIVITY,
   FITBIT_INTRADAY_STEPS: Domain.FITBITINTRADAYSTEPS,
+  FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBITSLEEPDAILYSUMMARY,
+  FITBIT_SLEEP_LEVEL: Domain.FITBITSLEEPLEVEL,
   PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICALMEASUREMENTCSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLEGENOMEVARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
@@ -834,10 +844,20 @@ export const DatasetPage = fp.flow(
     const [savingDataset, setSavingDataset] = useState(false);
 
     const updatePrepackagedDomains = () => {
-      if (getCdrVersion(workspace, cdrVersionTiersResponse).hasFitbitData) {
+      const { hasFitbitData, hasFitbitSleepData, hasWgsData } = getCdrVersion(
+        workspace,
+        cdrVersionTiersResponse
+      );
+      if (hasFitbitData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
           ...PREPACKAGED_WITH_FITBIT_DOMAINS,
+        };
+      }
+      if (hasFitbitSleepData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS,
         };
       }
       // Only allow selection of genomics prepackaged concept sets if genomics
@@ -845,7 +865,7 @@ export const DatasetPage = fp.flow(
       // can be taken on genomics variant data from the dataset builder.
       if (
         serverConfigStore.get().config.enableGenomicExtraction &&
-        getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
+        hasWgsData
       ) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
@@ -1090,26 +1110,12 @@ export const DatasetPage = fp.flow(
     }, [dataSetId]);
 
     const getPrePackagedList = () => {
-      let prepackagedList = Object.keys(PrepackagedConceptSet);
-      if (!getCdrVersion(workspace, cdrVersionTiersResponse).hasFitbitData) {
-        prepackagedList = prepackagedList.filter(
-          (prepack) => !fp.startsWith('FITBIT', prepack)
-        );
-      }
-      if (
-        !serverConfigStore.get().config.enableGenomicExtraction ||
-        !getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
-      ) {
-        prepackagedList = prepackagedList.filter(
-          (prepack) => prepack !== 'WHOLEGENOME'
-        );
-      }
-      if (workspace.accessTierShortName !== 'controlled') {
-        prepackagedList = prepackagedList.filter(
-          (prepack) => prepack !== 'ZIPCODESOCIOECONOMIC'
-        );
-      }
-      return prepackagedList;
+      // Use PREPACKAGED_DOMAINS to filter and return only prepackaged sets for this CDR version
+      return Object.keys(PrepackagedConceptSet).filter((prepackaged) =>
+        Object.keys(PREPACKAGED_DOMAINS).includes(
+          PrepackagedConceptSet[prepackaged]
+        )
+      );
     };
 
     const selectPrePackagedConceptSet = (
