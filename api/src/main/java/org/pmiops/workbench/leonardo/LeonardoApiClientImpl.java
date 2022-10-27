@@ -527,8 +527,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     createAppRequest.getPersistentDiskRequest().getLabels(),
                     LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
                     appTypeToLabelValue(createAppRequest.getAppType())));
-    // If diskRequest is not set or missing name from request, that means creating new disk.
-    if (diskRequest != null && Strings.isNullOrEmpty(diskRequest.getName())) {
+    // If no disk name in field name from request, that means creating new disk.
+    if (Strings.isNullOrEmpty(diskRequest.getName())) {
       diskRequest.setName(userProvider.get().generatePDNameForApp(appType));
     }
 
