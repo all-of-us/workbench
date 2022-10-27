@@ -90,6 +90,7 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
+  @Deprecated // unsafeSelfBypassAccessRequirements() handles all modules at once
   public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
       AccessBypassRequest request) {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
