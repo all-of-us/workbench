@@ -162,29 +162,27 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
           const workspace = workspaces.find(
             (w) => w.namespace === r.workspaceNamespace
           );
-          return (
-            // Don't return resources where we no longer have access to the workspace.
-            // For example: the owner has unshared the workspace, but a recent-resource entry remains.
-            workspace
-              ? [
-                  {
-                    resource: r,
-                    workspace,
-                    menu: renderResourceMenu(r),
-                    resourceType: getTypeString(r),
-                    resourceName: getDisplayName(r),
-                    formattedLastModified: displayDateWithoutHours(
-                      r.lastModifiedEpochMillis
-                    ),
-                    lastModifiedDateAsString: displayDate(
-                      r.lastModifiedEpochMillis
-                    ),
-                    cdrVersionName: getCdrVersionName(r),
-                    lastModifiedBy: r.lastModifiedBy,
-                  },
-                ]
-              : []
-          );
+          // Don't return resources where we no longer have access to the workspace.
+          // For example: the owner has unshared the workspace, but a recent-resource entry remains.
+          return workspace
+            ? [
+                {
+                  resource: r,
+                  workspace,
+                  menu: renderResourceMenu(r),
+                  resourceType: getTypeString(r),
+                  resourceName: getDisplayName(r),
+                  formattedLastModified: displayDateWithoutHours(
+                    r.lastModifiedEpochMillis
+                  ),
+                  lastModifiedDateAsString: displayDate(
+                    r.lastModifiedEpochMillis
+                  ),
+                  cdrVersionName: getCdrVersionName(r),
+                  lastModifiedBy: r.lastModifiedBy,
+                },
+              ]
+            : [];
         }, workspaceResources)
       );
     }
