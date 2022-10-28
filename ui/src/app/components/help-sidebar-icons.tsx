@@ -409,7 +409,6 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
     criteria,
     concept,
   } = props;
-  const terminalRoute = `/workspaces/${workspace.namespace}/${workspace.id}/terminals`;
   return switchCase(
     icon.id,
     [
@@ -432,7 +431,9 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
     [
       'terminal',
       () => (
-        <RouteLink path={terminalRoute}>
+        <RouteLink
+          path={`/workspaces/${workspace.namespace}/${workspace.id}/terminals`}
+        >
           <FontAwesomeIcon
             data-test-id={'help-sidebar-icon-' + icon.id}
             icon={icon.faIcon}
