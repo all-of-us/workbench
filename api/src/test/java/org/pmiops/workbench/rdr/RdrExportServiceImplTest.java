@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -316,6 +317,20 @@ public class RdrExportServiceImplTest {
     assertThat(rdrExportDao.findAll()).hasSize(1);
 
     verify(mockRdrApi).exportWorkspaces(ImmutableList.of(rdrWorkspace), NO_BACKFILL);
+  }
+
+  @Test
+  public void exportWorkspace_firecloudCallFail_skipUpdateRdrEntity() throws ApiException {
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+        .thenThrow(WorkbenchException.class);
+
+    // workspace.getWorkspaceId() fails, so skip that export. There should be only one workspace
+    // exported
+    rdrExportService.exportWorkspaces(
+        ImmutableList.of(workspace.getWorkspaceId(), creatorWorkspace.getWorkspaceId()),
+        NO_BACKFILL);
+    assertThat(rdrExportDao.findAll()).hasSize(1);
   }
 
   @Test
