@@ -69,7 +69,7 @@ describe('ResourceList', () => {
     );
   });
 
-  it("should render when a resource's workspace is not available", async () => {
+  it('should not render a resource when its workspace is not available', async () => {
     const wrapper = mount(
       <MemoryRouter>
         <ResourceList workspaces={[]} workspaceResources={[COHORT]} />
