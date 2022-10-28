@@ -33,8 +33,6 @@ require_relative "../../../libproject/environments"
 # We generate one or more manifests of source/destination GCS file paths, which
 # describe how data will be copied.
 #
-# TODO(RW-8266): details on the publishing/copy process, details on manifest provenance
-#
 # See the CDR playbook for more context on the overall publishing process:
 # https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#heading=h.xt7avgt1nsoh
 
@@ -42,15 +40,14 @@ PROD_BROAD_BUCKET = "gs://prod-drc-broad"
 OLD_ARRAYS_PATH_INFIX = "array_old_egt_files"
 
 CURATION_SYNTHETIC_SOURCE_CONFIG = {
-  :wgs_aw4_prefix => "gs://all-of-us-workbench-test-genomics/aw4_wgs/test_aw4.csv"
+  :wgs_aw4_prefix => "gs://all-of-us-workbench-test-genomics/aw4_wgs/test_aw4_2.csv"
 }
 
 CURATION_PROD_SOURCE_CONFIG = {
   # Optional: to speed up iteration with this script, download and run against a local directory instead.
   :wgs_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_wgs_manifest/AoU_DRCB_SEQ_",
-  # The array_old_egt_files should be removed, likely in late 2022. This contains older
-  # AW4 manifests before reprocessing.
-  :microarray_aw4_prefix => "#{PROD_BROAD_BUCKET}/#{OLD_ARRAYS_PATH_INFIX}/AW4_array_manifest/AoU_DRCB_GEN_"
+  # This contains all AW4 manifests.
+  :microarray_aw4_prefix => "#{PROD_BROAD_BUCKET}/AW4_array_manifest/AoU_DRCB_GEN_"
 }
 
 FILE_ENVIRONMENTS = {
@@ -96,11 +93,18 @@ AW4_INPUT_SECTION_SCHEMA = {
     "filenameReplace" => String,
     # The GCS storage class, e.g. STANDARD, NEARLINE. Defaults STANDARD.
     "storageClass" => String,
+    # Specifies whether this CDR release is a base or delta. If this field exists, then the release
+    # is a delta one.
+    # The output directory name will be post-fixed by _delta and the logic to compare with previous
+    # release will be triggered. The value should be the release directory to diff against.
+    # For example, v6_base or v7_delta.
+    "deltaRelease" => String,
   },
 }
 
 # This describes the input manifest YAML file.
 INPUT_SCHEMAS = {
+
   # Data sources backed from the microarray AW4 manifests. The manifests
   # refer to either raw GC files, or curated operational files
   "aw4MicroarraySources" => AW4_INPUT_SECTION_SCHEMA,
@@ -150,6 +154,7 @@ def parse_input_manifest(filename)
   manifest.each do |k, v|
     raise ArgumentError.new("unknown input manifest key '#{k}'") unless INPUT_SCHEMAS.key? k
     section_schema = INPUT_SCHEMAS[k]
+
     v.each do |section_key, section_value|
       missing_keys = section_schema[:required].keys.to_set - section_value.keys.to_set
       extra_keys = section_value.keys.to_set - (section_schema[:required].keys + section_schema[:optional].keys).to_set
@@ -166,6 +171,7 @@ def parse_input_manifest(filename)
         if want_type.nil?
           want_type = section_schema[:optional][inner_k]
         end
+
         unless inner_v.instance_of? want_type
           raise ArgumentError.new("'#{k}.#{inner_k}' is the wrong type, got value '#{inner_v}', wanted type #{want_type}")
         end
@@ -373,9 +379,34 @@ def _build_copy_manifest_row(
   }
 end
 
-def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows, output_manifest_path)
-  # TODO(RW-8269): handle delta directories
-  path_prefix = "pooled/#{input_section["pooledDestPathInfix"]}/#{display_version_id}_base"
+def _read_previous_manifest(project, dest_bucket, deltaReleaseSection, infix)
+  common = Common.new
+  prev_manifest = ""
+  unless deltaReleaseSection.nil?
+    deploy_account = must_get_env_value(project, :publisher_account)
+    manifest_path = "#{dest_bucket}/#{deltaReleaseSection}/#{infix}/manifest.csv"
+    prev_manifest = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", manifest_path])
+    if prev_manifest.empty?
+      raise ArgumentError.new("failed to read previous manifest from #{manifest_path},
+        make sure to provide the correct previous release in the input manifest")
+    end
+  end
+
+  # Convert the prev_manifest to dict of research ID -> CSV::Row
+  prev_manifest_csv = CSV.parse(prev_manifest, headers: true)
+  prev_manifest_hash = {}
+  prev_manifest_csv.each do |manifest_row|
+    rid = manifest_row["person_id"]
+    prev_manifest_hash[rid] = manifest_row
+  end
+
+  return prev_manifest_hash
+end
+
+##
+def build_manifests_for_aw4_section(project, input_section, ingest_bucket, dest_bucket, display_version_id, aw4_rows, output_manifest_path)
+  path_prefix = _get_pooled_path(input_section["pooledDestPathInfix"], display_version_id, input_section["deltaRelease"])
+
   ingest_base_path = File.join(ingest_bucket, path_prefix)
   destination = File.join(dest_bucket, path_prefix)
 
@@ -384,22 +415,34 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
     output_manifest = []
   end
 
+  prev_manifest = _read_previous_manifest(project, dest_bucket, input_section["deltaRelease"], input_section["pooledDestPathInfix"])
+
   copy_manifest = aw4_rows.flat_map do |aw4_entry|
     unless output_manifest.nil?
       out_row = { "person_id" => aw4_entry["research_id"] }
-      input_section["outputManifestSpec"].each do |aw4_col, out_col|
-        row = _build_copy_manifest_row(aw4_entry[aw4_col], ingest_base_path, destination, input_section, aw4_entry["research_id"])
-        destination_uri = File.join(row[:destination_dir], File.basename(row[:ingest_path]))
-        out_row[out_col] = destination_uri
+      # If the research_id already exists in the prev manifest, just put as is in the new output manifest
+      unless prev_manifest.nil? or prev_manifest[aw4_entry["research_id"]].nil?
+        output_manifest.push(prev_manifest[aw4_entry["research_id"]].to_h)
+      else
+        input_section["outputManifestSpec"].each do |aw4_col, out_col|
+          row = _build_copy_manifest_row(aw4_entry[aw4_col], ingest_base_path, destination, input_section, aw4_entry["research_id"])
+          destination_uri = File.join(row[:destination_dir], File.basename(row[:ingest_path]))
+          out_row[out_col] = destination_uri
+        end
+        output_manifest.push(out_row)
       end
-      output_manifest.push(out_row)
     end
 
     source_paths = input_section["aw4Columns"].map { |k| aw4_entry[k] }
     source_paths.map do |source_path|
-      _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, aw4_entry["research_id"])
+      if prev_manifest.nil? or prev_manifest[aw4_entry["research_id"]].nil?
+        _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section, aw4_entry["research_id"])
+      end
     end
   end
+
+  # To remove nils
+  copy_manifest = copy_manifest.compact
 
   unless output_manifest.nil?
     unpooled_prefix = "#{display_version_id}/#{input_section["pooledDestPathInfix"]}"
@@ -413,6 +456,18 @@ def build_manifests_for_aw4_section(input_section, ingest_bucket, dest_bucket, d
   end
 
   return [copy_manifest, output_manifest]
+end
+
+def _get_pooled_path(pathInfix, display_version_id, is_delta_release)
+
+  version_postfix = "base"
+
+  unless is_delta_release.nil?
+    version_postfix = "delta"
+  end
+
+  return "pooled/#{pathInfix}/#{display_version_id}_#{version_postfix}"
+
 end
 
 def build_copy_manifest_for_curation_section(input_section, ingest_bucket, dest_bucket, display_version_id)
@@ -607,7 +662,7 @@ def _maybe_update_preprod_access(project, all_tasks, add)
   if needs_preprod_grant
     preprod_source_projects.each do |p|
       _update_project_iam_object_viewer(preprod_appspot_account, preprod_deploy_account, p, add)
-      common.status "Sleeping for 1m after IAM grant to mitigate consistency issues"
+      Common.new.status "Sleeping for 1m after IAM grant to mitigate consistency issues"
       sleep 60
     end
   end
