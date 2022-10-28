@@ -828,6 +828,51 @@ export const HelpSidebar = fp.flow(
       );
     }
 
+    displayIcon(icon: IconConfig, terminalRoute: string) {
+      return switchCase(
+        icon.id,
+        [
+          'dataDictionary',
+          () => (
+            <a href={supportUrls.dataDictionary} target='_blank'>
+              <FontAwesomeIcon
+                data-test-id={'help-sidebar-icon-' + icon.id}
+                icon={icon.faIcon}
+                style={icon.style}
+              />
+            </a>
+          ),
+        ],
+        ['runtime', () => this.displayRuntimeIcon(icon)],
+        [
+          'terminal',
+          () => (
+            <RouteLink path={terminalRoute}>
+              <FontAwesomeIcon
+                data-test-id={'help-sidebar-icon-' + icon.id}
+                icon={icon.faIcon}
+                style={icon.style}
+              />
+            </RouteLink>
+          ),
+        ],
+        ['genomicExtractions', () => this.displayExtractionIcon(icon)],
+        [
+          DEFAULT,
+          () =>
+            icon.faIcon === null ? (
+              <img
+                data-test-id={'help-sidebar-icon-' + icon.id}
+                src={proIcons[icon.id]}
+                style={icon.style}
+              />
+            ) : (
+              this.displayFontAwesomeIcon(icon)
+            ),
+        ]
+      );
+    }
+
     get sidebarStyle() {
       return {
         ...styles.sidebar,
@@ -1083,52 +1128,9 @@ export const HelpSidebar = fp.flow(
                       }
                     }}
                   >
-                    {switchCase(
-                      icon.id,
-                      [
-                        'dataDictionary',
-                        () => (
-                          <a href={supportUrls.dataDictionary} target='_blank'>
-                            <FontAwesomeIcon
-                              data-test-id={'help-sidebar-icon-' + icon.id}
-                              icon={icon.faIcon}
-                              style={icon.style}
-                            />
-                          </a>
-                        ),
-                      ],
-                      ['runtime', () => this.displayRuntimeIcon(icon)],
-                      [
-                        'terminal',
-                        () => (
-                          <RouteLink
-                            path={`/workspaces/${namespace}/${id}/terminals`}
-                          >
-                            <FontAwesomeIcon
-                              data-test-id={'help-sidebar-icon-' + icon.id}
-                              icon={icon.faIcon}
-                              style={icon.style}
-                            />
-                          </RouteLink>
-                        ),
-                      ],
-                      [
-                        'genomicExtractions',
-                        () => this.displayExtractionIcon(icon),
-                      ],
-                      [
-                        DEFAULT,
-                        () =>
-                          icon.faIcon === null ? (
-                            <img
-                              data-test-id={'help-sidebar-icon-' + icon.id}
-                              src={proIcons[icon.id]}
-                              style={icon.style}
-                            />
-                          ) : (
-                            this.displayFontAwesomeIcon(icon)
-                          ),
-                      ]
+                    {this.displayIcon(
+                      icon,
+                      `/workspaces/${namespace}/${id}/terminals`
                     )}
                   </div>
                 </TooltipTrigger>
