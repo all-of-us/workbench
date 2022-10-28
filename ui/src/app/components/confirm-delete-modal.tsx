@@ -81,7 +81,9 @@ export class ConfirmDeleteModal extends React.Component<
             </div>
           </ModalBody>
           <ModalFooter style={{ paddingTop: '1rem' }}>
-            <Button aria-label='Cancel' type='secondary'
+            <Button
+              aria-label='Cancel'
+              type='secondary'
               onClick={() => this.props.closeFunction()}
             >
               Cancel

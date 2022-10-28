@@ -1043,7 +1043,10 @@ export const HelpSidebar = fp.flow(
                   </React.Fragment>
                 }
               >
-                <div aria-label='Open Actions Menu' data-test-id='workspace-menu-button'>
+                <div
+                  aria-label='Open Actions Menu'
+                  data-test-id='workspace-menu-button'
+                >
                   <TooltipTrigger content={<div>Menu</div>} side='left'>
                     <div
                       style={styles.icon}
