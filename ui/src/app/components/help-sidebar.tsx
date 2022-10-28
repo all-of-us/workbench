@@ -511,18 +511,19 @@ export const HelpSidebar = fp.flow(
       const {
         workspace,
         workspace: { namespace, id },
+        pageKey,
+        criteria,
       } = this.props;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu =
-        !showConceptIcon(this.props.pageKey) &&
-        !showCriteriaIcon(this.props.pageKey, this.props.criteria);
+        !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
 
       return (
         <div id='help-sidebar'>
           <div
             style={{
               ...styles.iconContainer,
-              ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY
+              ...(pageKey === LEONARDO_APP_PAGE_KEY
                 ? styles.notebookOverrides
                 : {}),
             }}
