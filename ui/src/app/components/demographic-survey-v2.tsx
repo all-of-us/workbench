@@ -308,6 +308,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     return (
       <FlexColumn>
         <div
+          id='demographics-survey'
           style={{
             backgroundColor: colorWithWhiteness(colors.accent, 0.75),
             padding: '1rem',

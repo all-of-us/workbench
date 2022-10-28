@@ -834,6 +834,7 @@ export class AccountCreation extends React.Component<
             </Section>
             <FormSection style={{ marginTop: '4rem', paddingBottom: '1rem' }}>
               <Button
+                aria-label='Previous'
                 type='secondary'
                 style={{ marginRight: '1rem' }}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}
@@ -856,6 +857,7 @@ export class AccountCreation extends React.Component<
                 disabled={!errors}
               >
                 <Button
+                  aria-label='Next'
                   disabled={
                     this.state.usernameCheckInProgress ||
                     this.isUsernameValidationError() ||

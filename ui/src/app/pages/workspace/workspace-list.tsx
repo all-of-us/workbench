@@ -106,7 +106,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       return (
         <React.Fragment>
           <FadeBox style={styles.fadeBox}>
-            <div style={{ padding: '0 1rem' }}>
+            <div id='workspaces-list' style={{ padding: '0 1rem' }}>
               <ListPageHeader>Workspaces</ListPageHeader>
               <FlexRow style={{ marginTop: '0.5em' }}>
                 <div style={{ margin: '0', padding: '0.5em 0.75em 0 0' }}>
