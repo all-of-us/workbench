@@ -183,7 +183,11 @@ public class RdrExportServiceImpl implements RdrExportService {
         // data already from a backfill, we'd still want to resend any normal modifications, if any,
         // in order to trigger this review process.
         if (!backfill) {
-          updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+          updateDbRdrExport(
+              RdrEntity.WORKSPACE,
+              rdrWorkspacesList.stream()
+                  .map(r -> Long.valueOf(r.getWorkspaceId()))
+                  .collect(Collectors.toList()));
         }
       }
       log.info(
