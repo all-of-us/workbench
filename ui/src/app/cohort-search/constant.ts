@@ -95,6 +95,13 @@ export const MODIFIERS_MAP = {
       [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
     },
   },
+  [ModifierType.CATI]: {
+    name: 'CATI(Computer Assisted Telephone Interview)',
+    operators: {
+      42530794: 'CATI(Computer Assisted Telephone Interview)',
+      42531021: 'Non-CATI(Non Computer Assisted Telephone Interview)',
+    },
+  },
   [ModifierType.ENCOUNTERS]: {
     name: 'During Visit Type',
     operators: {

@@ -14,9 +14,10 @@ import {
   currentCohortSearchContextStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -42,6 +43,7 @@ describe('ModifierPage', () => {
         enableEraCommons: true,
       },
     });
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   const component = () => {
@@ -63,7 +65,7 @@ describe('ModifierPage', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should display Only Age Event modifier for SURVEY', async () => {
+  it('should display Only Age Event and CATI modifiers for SURVEY', async () => {
     currentCohortSearchContextStore.next({
       domain: Domain.SURVEY,
       item: { modifiers: [] },
