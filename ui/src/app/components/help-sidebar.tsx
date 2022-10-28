@@ -48,10 +48,7 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import {
-  ComputeSecuritySuspendedError,
-  withRuntimeStore,
-} from 'app/utils/runtime-utils';
+import { withRuntimeStore } from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore,
