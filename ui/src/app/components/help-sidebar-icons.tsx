@@ -462,6 +462,10 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
   );
 };
 
+export const showCriteriaIcon = (pageKey: string, criteria: Array<Selection>) =>
+  pageKey === 'cohortBuilder' && !!criteria;
+export const showConceptIcon = (pageKey: string) => pageKey === 'conceptSets';
+
 type IconKey =
   | 'criteria'
   | 'concept'
@@ -473,20 +477,21 @@ type IconKey =
   | 'terminal'
   | 'genomicExtractions';
 
-export const iconConfig = (
-  iconKey: IconKey,
-  pageKey: string,
-  criteria: Array<Selection>,
-  runtimeStore: RuntimeStore,
-  runtimeTooltip: (text: string) => string
-): IconConfig =>
-  ({
+interface IconConfigProps {
+  pageKey: string;
+  criteria: Array<Selection>;
+  runtimeStore: RuntimeStore;
+  runtimeTooltip: (text: string) => string;
+}
+const iconConfig = (iconKey: IconKey, props: IconConfigProps): IconConfig => {
+  const { pageKey, criteria, runtimeStore, runtimeTooltip } = props;
+  return {
     criteria: {
       id: 'criteria',
       disabled: false,
       faIcon: faInbox,
       label: 'Selected Criteria',
-      showIcon: () => pageKey === 'cohortBuilder' && !!criteria,
+      showIcon: () => showCriteriaIcon(pageKey, criteria),
       style: { fontSize: '21px' },
       tooltip: 'Selected Criteria',
       hasContent: true,
@@ -496,7 +501,7 @@ export const iconConfig = (
       disabled: false,
       faIcon: faInbox,
       label: 'Selected Concepts',
-      showIcon: () => pageKey === 'conceptSets',
+      showIcon: () => showConceptIcon(pageKey),
       style: { fontSize: '21px' },
       tooltip: 'Selected Concepts',
       hasContent: true,
@@ -577,16 +582,20 @@ export const iconConfig = (
       tooltip: 'Genomic Extraction History',
       hasContent: true,
     },
-  }[iconKey]);
+  }[iconKey];
+};
 
-const icons = (
-  pageKey: string,
-  criteria: Array<Selection>,
-  runtimeStore: RuntimeStore,
-  runtimeTooltip: (text: string) => string,
-  workspace: WorkspaceData,
-  cdrVersionTiersResponse: CdrVersionTiersResponse
-): IconConfig[] => {
+interface HelpSidebarIconsProps extends IconConfigProps {
+  workspace: WorkspaceData;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+  compoundRuntimeOps: CompoundRuntimeOpStore;
+  genomicExtractionJobs: GenomicExtractionJob[];
+  activeIcon: string;
+  onIconClick: (icon: IconConfig) => void;
+}
+export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
+  const { workspace, cdrVersionTiersResponse, activeIcon, onIconClick } = props;
+
   const defaultIcons: IconKey[] = [
     'criteria',
     'concept',
@@ -595,8 +604,8 @@ const icons = (
     'dataDictionary',
     'annotations',
   ];
-  const keys: IconKey[] = defaultIcons.filter((key: IconKey) =>
-    iconConfig(key, pageKey, criteria, runtimeStore, runtimeTooltip).showIcon()
+  const keys: IconKey[] = defaultIcons.filter((key) =>
+    iconConfig(key, props).showIcon()
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
@@ -610,45 +619,11 @@ const icons = (
     keys.push('genomicExtractions');
   }
 
-  return keys.map((k) =>
-    iconConfig(k, pageKey, criteria, runtimeStore, runtimeTooltip)
-  );
-};
-
-interface HelpSidebarIconsProps {
-  pageKey: string;
-  criteria: Array<Selection>;
-  runtimeStore: RuntimeStore;
-  runtimeTooltip: (text: string) => string;
-  workspace: WorkspaceData;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-  compoundRuntimeOps: CompoundRuntimeOpStore;
-  genomicExtractionJobs: GenomicExtractionJob[];
-  activeIcon: string;
-  onIconClick: (icon: IconConfig) => void;
-}
-export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
-  const {
-    pageKey,
-    criteria,
-    runtimeStore,
-    runtimeTooltip,
-    workspace,
-    cdrVersionTiersResponse,
-    activeIcon,
-    onIconClick,
-  } = props;
+  const icons = keys.map((key) => iconConfig(key, props));
 
   return (
     <>
-      {icons(
-        pageKey,
-        criteria,
-        runtimeStore,
-        runtimeTooltip,
-        workspace,
-        cdrVersionTiersResponse
-      ).map((icon, i) => (
+      {icons.map((icon, i) => (
         <div key={i} style={{ display: 'table' }}>
           <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
             <div

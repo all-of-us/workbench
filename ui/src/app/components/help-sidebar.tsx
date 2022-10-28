@@ -68,8 +68,9 @@ import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 import {
   HelpSidebarIcons,
   IconConfig,
-  iconConfig,
   proIcons,
+  showConceptIcon,
+  showCriteriaIcon,
 } from './help-sidebar-icons';
 import { RuntimeErrorModal } from './runtime-error-modal';
 
@@ -513,20 +514,8 @@ export const HelpSidebar = fp.flow(
       } = this.props;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu =
-        !iconConfig(
-          'concept',
-          this.props.pageKey,
-          this.props.criteria,
-          this.props.runtimeStore,
-          (text) => this.runtimeTooltip(text)
-        ).showIcon() &&
-        !iconConfig(
-          'criteria',
-          this.props.pageKey,
-          this.props.criteria,
-          this.props.runtimeStore,
-          (text) => this.runtimeTooltip(text)
-        ).showIcon();
+        !showConceptIcon(this.props.pageKey) &&
+        !showCriteriaIcon(this.props.pageKey, this.props.criteria);
 
       return (
         <div id='help-sidebar'>
