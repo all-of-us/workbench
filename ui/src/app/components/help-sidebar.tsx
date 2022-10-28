@@ -1,16 +1,7 @@
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as fp from 'lodash/fp';
-import { faEdit } from '@fortawesome/free-regular-svg-icons';
-import {
-  faBook,
-  faEllipsisV,
-  faFolderOpen,
-  faInbox,
-  faInfoCircle,
-} from '@fortawesome/free-solid-svg-icons';
-import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
-import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -52,7 +43,6 @@ import {
   withUserProfile,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getCdrVersion } from 'app/utils/cdr-versions';
 import {
   currentConceptStore,
   NavigationProps,
@@ -68,16 +58,20 @@ import {
   routeDataStore,
   RuntimeStore,
   runtimeStore,
-  serverConfigStore,
   withGenomicExtractionJobs,
   withStore,
 } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 
-import { displayIcon, IconConfig, proIcons } from './help-sidebar-icons';
+import {
+  displayIcon,
+  IconConfig,
+  iconConfig,
+  icons,
+  proIcons,
+} from './help-sidebar-icons';
 import { RuntimeErrorModal } from './runtime-error-modal';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
@@ -266,133 +260,6 @@ export const HelpSidebar = fp.flow(
         this.props.navigate(['workspaces']);
       }
     );
-
-    iconConfig(iconKey): IconConfig {
-      return {
-        criteria: {
-          id: 'criteria',
-          disabled: false,
-          faIcon: faInbox,
-          label: 'Selected Criteria',
-          showIcon: () =>
-            this.props.pageKey === 'cohortBuilder' && !!this.props.criteria,
-          style: { fontSize: '21px' },
-          tooltip: 'Selected Criteria',
-          hasContent: true,
-        },
-        concept: {
-          id: 'concept',
-          disabled: false,
-          faIcon: faInbox,
-          label: 'Selected Concepts',
-          showIcon: () => this.props.pageKey === 'conceptSets',
-          style: { fontSize: '21px' },
-          tooltip: 'Selected Concepts',
-          hasContent: true,
-        },
-        help: {
-          id: 'help',
-          disabled: false,
-          faIcon: faInfoCircle,
-          label: 'Help Icon',
-          showIcon: () => true,
-          style: { fontSize: '21px' },
-          tooltip: 'Help Tips',
-          hasContent: true,
-        },
-        notebooksHelp: {
-          id: 'notebooksHelp',
-          disabled: false,
-          faIcon: faFolderOpen,
-          label: 'Storage Icon',
-          showIcon: () => true,
-          style: { fontSize: '21px' },
-          tooltip: 'Workspace Storage',
-          hasContent: true,
-        },
-        dataDictionary: {
-          id: 'dataDictionary',
-          disabled: false,
-          faIcon: faBook,
-          label: 'Data Dictionary Icon',
-          showIcon: () => true,
-          style: { color: colors.white, fontSize: '20px', marginTop: '5px' },
-          tooltip: 'Data Dictionary',
-          hasContent: false,
-        },
-        annotations: {
-          id: 'annotations',
-          disabled: false,
-          faIcon: faEdit,
-          label: 'Annotations Icon',
-          showIcon: () => this.props.pageKey === 'reviewParticipantDetail',
-          style: { fontSize: '20px', marginLeft: '3px' },
-          tooltip: 'Annotations',
-          hasContent: true,
-        },
-        runtime: {
-          id: 'runtime',
-          disabled: !!this.props.runtimeStore.loadingError,
-          faIcon: null,
-          label: 'Cloud Icon',
-          showIcon: () => true,
-          style: { height: '22px', width: '22px' },
-          tooltip: this.runtimeTooltip('Cloud Analysis Environment'),
-          hasContent: true,
-        },
-        terminal: {
-          id: 'terminal',
-          disabled: !!this.props.runtimeStore.loadingError,
-          faIcon: faTerminal,
-          label: 'Terminal Icon',
-          showIcon: () => true,
-          style: { height: '22px', width: '22px' },
-          tooltip: this.runtimeTooltip('Cloud Analysis Terminal'),
-          hasContent: false,
-        },
-        genomicExtractions: {
-          id: 'genomicExtractions',
-          disabled: false,
-          faIcon: faDna,
-          label: 'Genomic Extraction',
-          showIcon: () => true,
-          // position: absolute is so the status icon won't push the DNA icon to the left.
-          style: {
-            height: '22px',
-            width: '22px',
-            marginTop: '0.25rem',
-            position: 'absolute',
-          },
-          tooltip: 'Genomic Extraction History',
-          hasContent: true,
-        },
-      }[iconKey];
-    }
-
-    icons(): IconConfig[] {
-      const keys = [
-        'criteria',
-        'concept',
-        'help',
-        'notebooksHelp',
-        'dataDictionary',
-        'annotations',
-      ].filter((key) => this.iconConfig(key).showIcon());
-
-      if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
-        keys.push('runtime', 'terminal');
-      }
-
-      if (
-        serverConfigStore.get().config.enableGenomicExtraction &&
-        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse)
-          .hasWgsData
-      ) {
-        keys.push('genomicExtractions');
-      }
-
-      return keys.map((k) => this.iconConfig(k));
-    }
 
     setActiveIcon(activeIcon: string) {
       setSidebarActiveIconStore.next(activeIcon);
@@ -664,8 +531,20 @@ export const HelpSidebar = fp.flow(
       } = this.props;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu =
-        !this.iconConfig('concept').showIcon() &&
-        !this.iconConfig('criteria').showIcon();
+        !iconConfig(
+          'concept',
+          this.props.pageKey,
+          this.props.criteria,
+          this.props.runtimeStore,
+          (text) => this.runtimeTooltip(text)
+        ).showIcon() &&
+        !iconConfig(
+          'criteria',
+          this.props.pageKey,
+          this.props.criteria,
+          this.props.runtimeStore,
+          (text) => this.runtimeTooltip(text)
+        ).showIcon();
 
       return (
         <div id='help-sidebar'>
@@ -739,7 +618,14 @@ export const HelpSidebar = fp.flow(
                 </div>
               </PopupTrigger>
             )}
-            {this.icons().map((icon, i) => (
+            {icons(
+              this.props.pageKey,
+              this.props.criteria,
+              this.props.runtimeStore,
+              (text) => this.runtimeTooltip(text),
+              this.props.workspace,
+              this.props.cdrVersionTiersResponse
+            ).map((icon, i) => (
               <div key={i} style={{ display: 'table' }}>
                 <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
                   <div

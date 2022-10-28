@@ -1,13 +1,23 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faEdit } from '@fortawesome/free-regular-svg-icons';
+import {
+  faBook,
+  faFolderOpen,
+  faInbox,
+  faInfoCircle,
+  IconDefinition,
+} from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
+import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
 import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
+import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
+  CdrVersionTiersResponse,
   Criteria,
   GenomicExtractionJob,
   RuntimeStatus,
@@ -16,9 +26,15 @@ import {
 
 import colors from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
+import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import { CompoundRuntimeOpStore, RuntimeStore } from 'app/utils/stores';
+import {
+  CompoundRuntimeOpStore,
+  RuntimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import runtime from 'assets/icons/thunderstorm-solid.svg';
@@ -67,7 +83,7 @@ export interface IconConfig {
   showIcon: () => boolean;
   style: CSSProperties;
   tooltip: string;
-  hasContent: true;
+  hasContent: boolean;
 }
 
 export const proIcons = {
@@ -209,27 +225,25 @@ const displayFontAwesomeIcon = (
   icon: IconConfig,
   criteria: Array<Selection>,
   concept: Array<Criteria>
-) => {
-  return (
-    <React.Fragment>
-      {icon.id === 'criteria' && criteria && criteria.length > 0 && (
-        <span data-test-id='criteria-count' style={styles.criteriaCount}>
-          {criteria.length}
-        </span>
-      )}
-      {icon.id === 'concept' && concept && concept.length > 0 && (
-        <span data-test-id='concept-count' style={styles.criteriaCount}>
-          {concept.length}
-        </span>
-      )}
-      <FontAwesomeIcon
-        data-test-id={'help-sidebar-icon-' + icon.id}
-        icon={icon.faIcon}
-        style={icon.style}
-      />
-    </React.Fragment>
-  );
-};
+) => (
+  <React.Fragment>
+    {icon.id === 'criteria' && criteria && criteria.length > 0 && (
+      <span data-test-id='criteria-count' style={styles.criteriaCount}>
+        {criteria.length}
+      </span>
+    )}
+    {icon.id === 'concept' && concept && concept.length > 0 && (
+      <span data-test-id='concept-count' style={styles.criteriaCount}>
+        {concept.length}
+      </span>
+    )}
+    <FontAwesomeIcon
+      data-test-id={'help-sidebar-icon-' + icon.id}
+      icon={icon.faIcon}
+      style={icon.style}
+    />
+  </React.Fragment>
+);
 
 const displayExtractionIcon = (
   icon: IconConfig,
@@ -422,5 +436,158 @@ export const displayIcon = (icon: IconConfig, props: TempProps) => {
           displayFontAwesomeIcon(icon, criteria, concept)
         ),
     ]
+  );
+};
+
+type IconKey =
+  | 'criteria'
+  | 'concept'
+  | 'help'
+  | 'notebooksHelp'
+  | 'dataDictionary'
+  | 'annotations'
+  | 'runtime'
+  | 'terminal'
+  | 'genomicExtractions';
+
+export const iconConfig = (
+  iconKey: IconKey,
+  pageKey: string,
+  criteria: Array<Selection>,
+  runtimeStore: RuntimeStore,
+  runtimeTooltip: (string) => string
+): IconConfig =>
+  ({
+    criteria: {
+      id: 'criteria',
+      disabled: false,
+      faIcon: faInbox,
+      label: 'Selected Criteria',
+      showIcon: () => pageKey === 'cohortBuilder' && !!criteria,
+      style: { fontSize: '21px' },
+      tooltip: 'Selected Criteria',
+      hasContent: true,
+    },
+    concept: {
+      id: 'concept',
+      disabled: false,
+      faIcon: faInbox,
+      label: 'Selected Concepts',
+      showIcon: () => pageKey === 'conceptSets',
+      style: { fontSize: '21px' },
+      tooltip: 'Selected Concepts',
+      hasContent: true,
+    },
+    help: {
+      id: 'help',
+      disabled: false,
+      faIcon: faInfoCircle,
+      label: 'Help Icon',
+      showIcon: () => true,
+      style: { fontSize: '21px' },
+      tooltip: 'Help Tips',
+      hasContent: true,
+    },
+    notebooksHelp: {
+      id: 'notebooksHelp',
+      disabled: false,
+      faIcon: faFolderOpen,
+      label: 'Storage Icon',
+      showIcon: () => true,
+      style: { fontSize: '21px' },
+      tooltip: 'Workspace Storage',
+      hasContent: true,
+    },
+    dataDictionary: {
+      id: 'dataDictionary',
+      disabled: false,
+      faIcon: faBook,
+      label: 'Data Dictionary Icon',
+      showIcon: () => true,
+      style: { color: colors.white, fontSize: '20px', marginTop: '5px' },
+      tooltip: 'Data Dictionary',
+      hasContent: false,
+    },
+    annotations: {
+      id: 'annotations',
+      disabled: false,
+      faIcon: faEdit,
+      label: 'Annotations Icon',
+      showIcon: () => pageKey === 'reviewParticipantDetail',
+      style: { fontSize: '20px', marginLeft: '3px' },
+      tooltip: 'Annotations',
+      hasContent: true,
+    },
+    runtime: {
+      id: 'runtime',
+      disabled: !!runtimeStore.loadingError,
+      faIcon: null,
+      label: 'Cloud Icon',
+      showIcon: () => true,
+      style: { height: '22px', width: '22px' },
+      tooltip: runtimeTooltip('Cloud Analysis Environment'),
+      hasContent: true,
+    },
+    terminal: {
+      id: 'terminal',
+      disabled: !!runtimeStore.loadingError,
+      faIcon: faTerminal,
+      label: 'Terminal Icon',
+      showIcon: () => true,
+      style: { height: '22px', width: '22px' },
+      tooltip: runtimeTooltip('Cloud Analysis Terminal'),
+      hasContent: false,
+    },
+    genomicExtractions: {
+      id: 'genomicExtractions',
+      disabled: false,
+      faIcon: faDna,
+      label: 'Genomic Extraction',
+      showIcon: () => true,
+      // position: absolute is so the status icon won't push the DNA icon to the left.
+      style: {
+        height: '22px',
+        width: '22px',
+        marginTop: '0.25rem',
+        position: 'absolute',
+      } as CSSProperties,
+      tooltip: 'Genomic Extraction History',
+      hasContent: true,
+    },
+  }[iconKey]);
+
+export const icons = (
+  pageKey: string,
+  criteria: Array<Selection>,
+  runtimeStore: RuntimeStore,
+  runtimeTooltip: (string) => string,
+  workspace: WorkspaceData,
+  cdrVersionTiersResponse: CdrVersionTiersResponse
+): IconConfig[] => {
+  const defaultIcons: IconKey[] = [
+    'criteria',
+    'concept',
+    'help',
+    'notebooksHelp',
+    'dataDictionary',
+    'annotations',
+  ];
+  const keys: IconKey[] = defaultIcons.filter((key: IconKey) =>
+    iconConfig(key, pageKey, criteria, runtimeStore, runtimeTooltip).showIcon()
+  );
+
+  if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
+    keys.push('runtime', 'terminal');
+  }
+
+  if (
+    serverConfigStore.get().config.enableGenomicExtraction &&
+    getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
+  ) {
+    keys.push('genomicExtractions');
+  }
+
+  return keys.map((k) =>
+    iconConfig(k, pageKey, criteria, runtimeStore, runtimeTooltip)
   );
 };
