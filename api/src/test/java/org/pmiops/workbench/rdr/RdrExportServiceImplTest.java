@@ -321,8 +321,9 @@ public class RdrExportServiceImplTest {
 
   @Test
   public void exportWorkspace_firecloudCallFail_skipUpdateRdrEntity() throws ApiException {
-    when(mockWorkspaceService.getFirecloudUserRoles(workspace.getWorkspaceNamespace(), workspace.getFirecloudName())).thenThrow(
-        WorkbenchException.class);
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+        .thenThrow(WorkbenchException.class);
 
     rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
     assertThat(rdrExportDao.findAll()).hasSize(0);
