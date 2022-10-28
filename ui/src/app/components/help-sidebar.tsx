@@ -366,17 +366,6 @@ export const HelpSidebar = fp.flow(
       );
     }
 
-    private runtimeTooltip(baseTooltip: string): string {
-      const { loadingError } = this.props.runtimeStore;
-      if (loadingError) {
-        if (loadingError instanceof ComputeSecuritySuspendedError) {
-          return `Security suspended: ${baseTooltip}`;
-        }
-        return `${baseTooltip} (unknown error)`;
-      }
-      return baseTooltip;
-    }
-
     sidebarContent(activeIcon): {
       overflow?: string;
       headerPadding?: string;
@@ -592,7 +581,6 @@ export const HelpSidebar = fp.flow(
             )}
             <HelpSidebarIcons
               {...{ ...this.props, activeIcon }}
-              runtimeTooltip={(text) => this.runtimeTooltip(text)}
               onIconClick={(icon) => this.onIconClick(icon)}
             />
           </div>

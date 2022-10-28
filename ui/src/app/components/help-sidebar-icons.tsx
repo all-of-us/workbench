@@ -466,6 +466,17 @@ export const showCriteriaIcon = (pageKey: string, criteria: Array<Selection>) =>
   pageKey === 'cohortBuilder' && !!criteria;
 export const showConceptIcon = (pageKey: string) => pageKey === 'conceptSets';
 
+const runtimeTooltip = (baseTooltip: string, loadingError: Error): string => {
+  if (loadingError) {
+    if (loadingError instanceof ComputeSecuritySuspendedError) {
+      return `Security suspended: ${baseTooltip}`;
+    }
+    return `${baseTooltip} (unknown error)`;
+  }
+
+  return baseTooltip;
+};
+
 type IconKey =
   | 'criteria'
   | 'concept'
@@ -481,10 +492,9 @@ interface IconConfigProps {
   pageKey: string;
   criteria: Array<Selection>;
   runtimeStore: RuntimeStore;
-  runtimeTooltip: (text: string) => string;
 }
 const iconConfig = (iconKey: IconKey, props: IconConfigProps): IconConfig => {
-  const { pageKey, criteria, runtimeStore, runtimeTooltip } = props;
+  const { pageKey, criteria, runtimeStore } = props;
   return {
     criteria: {
       id: 'criteria',
@@ -553,7 +563,10 @@ const iconConfig = (iconKey: IconKey, props: IconConfigProps): IconConfig => {
       label: 'Cloud Icon',
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip('Cloud Analysis Environment'),
+      tooltip: runtimeTooltip(
+        'Cloud Analysis Environment',
+        runtimeStore.loadingError
+      ),
       hasContent: true,
     },
     terminal: {
@@ -563,7 +576,10 @@ const iconConfig = (iconKey: IconKey, props: IconConfigProps): IconConfig => {
       label: 'Terminal Icon',
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip('Cloud Analysis Terminal'),
+      tooltip: runtimeTooltip(
+        'Cloud Analysis Terminal',
+        runtimeStore.loadingError
+      ),
       hasContent: false,
     },
     genomicExtractions: {
