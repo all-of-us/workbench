@@ -9,9 +9,7 @@ import {
   faInbox,
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
 import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -23,7 +21,6 @@ import {
   ResourceType,
   RuntimeError,
   RuntimeStatus,
-  TerraJobStatus,
 } from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
@@ -45,7 +42,6 @@ import { participantStore } from 'app/services/review-state.service';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
-  DEFAULT,
   reactStyles,
   switchCase,
   withCdrVersions,
@@ -80,13 +76,8 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import arrowLeft from 'assets/icons/arrow-left-regular.svg';
-import runtime from 'assets/icons/thunderstorm-solid.svg';
-import times from 'assets/icons/times-light.svg';
-import moment from 'moment';
 
-import { RouteLink } from './app-router';
-import { displayRuntimeIcon, IconConfig, proIcons } from './help-sidebar-icons';
+import { displayIcon, IconConfig, proIcons } from './help-sidebar-icons';
 import { RuntimeErrorModal } from './runtime-error-modal';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
@@ -134,22 +125,6 @@ const styles = reactStyles({
     textAlign: 'center',
     verticalAlign: 'middle',
   },
-  asyncOperationStatusIcon: {
-    width: '.5rem',
-    height: '.5rem',
-    zIndex: 2,
-  },
-  runtimeStatusIconOutline: {
-    border: `1px solid ${colors.white}`,
-    borderRadius: '.25rem',
-  },
-  statusIconContainer: {
-    alignSelf: 'flex-end',
-    margin: '0 .1rem .1rem auto',
-  },
-  rotate: {
-    animation: 'rotation 2s infinite linear',
-  },
   sectionTitle: {
     marginTop: '0.5rem',
     fontWeight: 600,
@@ -169,18 +144,6 @@ const styles = reactStyles({
     color: colors.accent,
     cursor: 'pointer',
     textDecoration: 'none',
-  },
-  criteriaCount: {
-    position: 'absolute',
-    height: '0.8rem',
-    width: '0.8rem',
-    top: '1rem',
-    left: '0.55rem',
-    textAlign: 'center',
-    backgroundColor: colors.danger,
-    borderRadius: '50%',
-    display: 'inline-block',
-    fontSize: '0.4rem',
   },
   dropdownHeader: {
     fontSize: 12,
@@ -538,201 +501,6 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    displayFontAwesomeIcon(icon: IconConfig) {
-      const { concept, criteria } = this.props;
-
-      return (
-        <React.Fragment>
-          {icon.id === 'criteria' && criteria && criteria.length > 0 && (
-            <span data-test-id='criteria-count' style={styles.criteriaCount}>
-              {criteria.length}
-            </span>
-          )}
-          {icon.id === 'concept' && concept && concept.length > 0 && (
-            <span data-test-id='concept-count' style={styles.criteriaCount}>
-              {concept.length}
-            </span>
-          )}
-          <FontAwesomeIcon
-            data-test-id={'help-sidebar-icon-' + icon.id}
-            icon={icon.faIcon}
-            style={icon.style}
-          />
-        </React.Fragment>
-      );
-    }
-
-    withinPastTwentyFourHours(epoch) {
-      const completionTimeMoment = moment(epoch);
-      const twentyFourHoursAgo = moment().subtract(1, 'days');
-      return completionTimeMoment.isAfter(twentyFourHoursAgo);
-    }
-
-    displayExtractionIcon(icon: IconConfig) {
-      const { genomicExtractionJobs } = this.props;
-      const jobsByStatus = fp.groupBy('status', genomicExtractionJobs);
-      let status;
-      // If any jobs are currently active, show the 'sync' icon corresponding to their status.
-      if (jobsByStatus[TerraJobStatus.RUNNING]) {
-        status = TerraJobStatus.RUNNING;
-      } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
-        status = TerraJobStatus.ABORTING;
-      } else if (
-        jobsByStatus[TerraJobStatus.SUCCEEDED] ||
-        jobsByStatus[TerraJobStatus.FAILED] ||
-        jobsByStatus[TerraJobStatus.ABORTED]
-      ) {
-        // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
-        const completedJobs = fp.flatten([
-          jobsByStatus[TerraJobStatus.SUCCEEDED] || [],
-          jobsByStatus[TerraJobStatus.FAILED] || [],
-          jobsByStatus[TerraJobStatus.ABORTED] || [],
-        ]);
-        const mostRecentCompletedJob = fp.flow(
-          fp.filter((job: GenomicExtractionJob) =>
-            this.withinPastTwentyFourHours(job.completionTime)
-          ),
-          // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
-          fp.sortBy((job) => job.completionTime),
-          fp.reverse,
-          fp.head
-        )(completedJobs);
-        if (mostRecentCompletedJob) {
-          status = mostRecentCompletedJob.status;
-        }
-      }
-
-      // We always want to show the DNA icon.
-      // When there are running or recently completed  jobs, we will show a small overlay icon in
-      // the bottom right of the tab showing the job status.
-      return (
-        <FlexRow
-          style={{
-            height: '100%',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-          }}
-        >
-          {this.displayFontAwesomeIcon(icon)}
-          <FlexRow
-            data-test-id='extraction-status-icon-container'
-            style={styles.statusIconContainer}
-          >
-            {switchCase(
-              status,
-              [
-                TerraJobStatus.RUNNING,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faSyncAlt}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      ...styles.rotate,
-                      color: colors.asyncOperationStatus.starting,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.ABORTING,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faSyncAlt}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      ...styles.rotate,
-                      color: colors.asyncOperationStatus.stopping,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.FAILED,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.error,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.SUCCEEDED,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.succeeded,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.ABORTED,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.stopped,
-                    }}
-                  />
-                ),
-              ]
-            )}
-          </FlexRow>
-        </FlexRow>
-      );
-    }
-
-    displayIcon(icon: IconConfig, terminalRoute: string) {
-      return switchCase(
-        icon.id,
-        [
-          'dataDictionary',
-          () => (
-            <a href={supportUrls.dataDictionary} target='_blank'>
-              <FontAwesomeIcon
-                data-test-id={'help-sidebar-icon-' + icon.id}
-                icon={icon.faIcon}
-                style={icon.style}
-              />
-            </a>
-          ),
-        ],
-        ['runtime', () => displayRuntimeIcon(icon, this.props)],
-        [
-          'terminal',
-          () => (
-            <RouteLink path={terminalRoute}>
-              <FontAwesomeIcon
-                data-test-id={'help-sidebar-icon-' + icon.id}
-                icon={icon.faIcon}
-                style={icon.style}
-              />
-            </RouteLink>
-          ),
-        ],
-        ['genomicExtractions', () => this.displayExtractionIcon(icon)],
-        [
-          DEFAULT,
-          () =>
-            icon.faIcon === null ? (
-              <img
-                data-test-id={'help-sidebar-icon-' + icon.id}
-                src={proIcons[icon.id]}
-                style={icon.style}
-              />
-            ) : (
-              this.displayFontAwesomeIcon(icon)
-            ),
-        ]
-      );
-    }
-
     get sidebarStyle() {
       return {
         ...styles.sidebar,
@@ -988,10 +756,7 @@ export const HelpSidebar = fp.flow(
                       }
                     }}
                   >
-                    {this.displayIcon(
-                      icon,
-                      `/workspaces/${namespace}/${id}/terminals`
-                    )}
+                    {displayIcon(icon, this.props)}
                   </div>
                 </TooltipTrigger>
               </div>
