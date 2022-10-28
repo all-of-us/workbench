@@ -325,8 +325,12 @@ public class RdrExportServiceImplTest {
             workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenThrow(WorkbenchException.class);
 
-    rdrExportService.exportWorkspaces(ImmutableList.of(workspace.getWorkspaceId()), NO_BACKFILL);
-    assertThat(rdrExportDao.findAll()).hasSize(0);
+    // workspace.getWorkspaceId() fails, so skip that export. There should be only one workspace
+    // exported
+    rdrExportService.exportWorkspaces(
+        ImmutableList.of(workspace.getWorkspaceId(), creatorWorkspace.getWorkspaceId()),
+        NO_BACKFILL);
+    assertThat(rdrExportDao.findAll()).hasSize(1);
   }
 
   @Test
