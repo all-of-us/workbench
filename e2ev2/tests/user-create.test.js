@@ -4,9 +4,6 @@ const u = require('../src/utils')
 
 const browserTest = tu.browserTest(__filename)
 
-// Puppeteer's Page.click is not reliable. This is worth investigation.
-const jsClick = (page, sel) => page.waitForSelector(sel).then(eh => eh.evaluate(e => e.click()))
-
 const pressKey = async (page, keyName, count = 1) => {
   for (let i = 0; i < count; ++i) {
     await page.keyboard.press(keyName)
@@ -15,34 +12,36 @@ const pressKey = async (page, keyName, count = 1) => {
 
 browserTest('create user', async browser => {
   const page = browser.initialPage
-  const iframeSel = '[aria-label="terms of use and privacy statement"]>iframe'
-  const ackCheckboxSel = '[data-test-id="agreement-check"]'
+  const ackCheckboxSel = 'input[aria-label="Acknowledge Terms"]'
   const isAckCheckboxDisabled =
     () => page.waitForSelector(ackCheckboxSel).then(eh => eh.evaluate(e => e.disabled))
 
   await tu.useApiProxy(page)
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
-  await jsClick(page, '[data-test-id="login"]>div+div>[role="button"]') // Create Account
+  await tu.jsClick(page, '[role="button"][aria-label="Create Account"]')
 
-  await page.waitForSelector(iframeSel) // Agreement Page
+  // Agreement Page
+  await page.waitForSelector('[aria-label="terms of use and privacy statement"]>iframe')
+  await expect(isAckCheckboxDisabled()).resolves.toBe(true)
   await page.evaluate(() => window.forceHasReadEntireAgreement())
   await expect(isAckCheckboxDisabled()).resolves.toBe(false)
-  await jsClick(page, ackCheckboxSel)
-  await page.click('[role="button"]') // Next button
+  await tu.jsClick(page, ackCheckboxSel)
+  await page.click('[role="button"][aria-label="Next"]')
 
-  await page.waitForSelector('.p-dropdown') // Institution Page
-  await page.click('.p-dropdown')
-  await page.waitForSelector('[role="option"][aria-label="Broad Institute"]')
-  await page.click('[role="option"][aria-label="Broad Institute"]')
+  await page.waitForSelector('#account-creation-institution') // Institution Page
+  await page.waitForSelector('[aria-label="Institution"]')
+    .then(eh => eh.evaluate(e => e.parentNode.parentNode.click()))
+  await page.waitForSelector('[role="option"][aria-label="Broad Institute"]').then(eh => eh.click())
   // Email needs to be real or it will bounce and account creation will fail.
   await page.type('#contact-email', 'dmohs@broadinstitute.org')
   // The second dropdown, which is a child of a sibling of the first one.
-  await page.click('.p-dropdown~div>div>.p-dropdown')
+  await page.waitForSelector('[aria-label="Role"]')
+    .then(eh => eh.evaluate(e => e.parentNode.parentNode.click()))
   await page.waitForSelector('[role="option"][aria-label^="Project Personnel"]')
-  await page.click('[role="option"][aria-label^="Project Personnel"]')
-  await jsClick(page, '[role="button"]+[role="button"]')
+    .then(eh => eh.click())
+  await tu.jsClick(page, '[role="button"][aria-label="Next"]')
 
-  await page.waitForSelector('#username') // Personal Information Page
+  await page.waitForSelector('#account-creation') // Personal Information Page
   await page.type('#username', 'test')
   await page.keyboard.press('Tab')
   await page.keyboard.type('Test')
@@ -61,10 +60,9 @@ browserTest('create user', async browser => {
   await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
   await page.keyboard.type('Testing the system.')
-  await pressKey(page, 'Tab', 3)
-  await page.keyboard.press('Enter')
+  await tu.jsClick(page, '[role="button"][aria-label="Next"]')
 
-  await page.waitForSelector('iframe[title="reCAPTCHA"]') // Demographics Survey Page
+  await page.waitForSelector('#demographics-survey') // Demographics Survey Page
   await pressKey(page, 'Tab', 10)
   await page.keyboard.press('Space')
   await pressKey(page, 'Tab', 9)
@@ -83,11 +81,11 @@ browserTest('create user', async browser => {
   await pressKey(page, 'ArrowRight', 2)
   await page.waitForSelector('#g-recaptcha-response')
   await pressKey(page, 'Tab', 2)
-  const [captchaSolved] = await tu.promiseWindowEvent(page, 'captchaSolved')
+  const [captchaSolved] = await tu.promiseWindowEvent(page, 'captcha-solved')
   await Promise.all([captchaSolved, page.keyboard.press('Space')])
-  await page.click('[data-test-id="sign-in-page"]+div [role="button"]+[role="button"]')
+  await page.click('[role="button"][aria-label="Submit"]')
 
-  await page.waitForSelector('h2')
+  await page.waitForSelector('#account-creation-success')
   await expect(page.waitForSelector('h2').then(eh => eh.evaluate(e => e.innerText)))
     .resolves.toBe('Congratulations!')
 }, 20e3)
