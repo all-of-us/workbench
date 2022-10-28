@@ -24,7 +24,7 @@ import {
   TerraJobStatus,
 } from 'generated/fetch';
 
-import colors from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
@@ -43,6 +43,7 @@ import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
 import { FlexRow } from './flex';
+import { TooltipTrigger } from './popups';
 
 const styles = reactStyles({
   asyncOperationStatusIcon: {
@@ -72,6 +73,28 @@ const styles = reactStyles({
     borderRadius: '50%',
     display: 'inline-block',
     fontSize: '0.4rem',
+  },
+  icon: {
+    background: colorWithWhiteness(colors.primary, 0.48),
+    color: colors.white,
+    display: 'table-cell',
+    height: '46px',
+    width: '45px',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
+    cursor: 'pointer',
+    textAlign: 'center',
+    verticalAlign: 'middle',
+  },
+});
+
+const iconStyles = reactStyles({
+  active: {
+    ...styles.icon,
+    background: colorWithWhiteness(colors.primary, 0.55),
+  },
+  disabled: {
+    ...styles.icon,
+    cursor: 'not-allowed',
   },
 });
 
@@ -369,7 +392,7 @@ const displayExtractionIcon = (
   );
 };
 
-interface TempProps {
+interface DisplayIconProps {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
@@ -377,7 +400,7 @@ interface TempProps {
   compoundRuntimeOps: CompoundRuntimeOpStore;
   genomicExtractionJobs: GenomicExtractionJob[];
 }
-export const displayIcon = (icon: IconConfig, props: TempProps) => {
+const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
   const {
     workspace,
     runtimeStore,
@@ -455,7 +478,7 @@ export const iconConfig = (
   pageKey: string,
   criteria: Array<Selection>,
   runtimeStore: RuntimeStore,
-  runtimeTooltip: (string) => string
+  runtimeTooltip: (text: string) => string
 ): IconConfig =>
   ({
     criteria: {
@@ -556,11 +579,11 @@ export const iconConfig = (
     },
   }[iconKey]);
 
-export const icons = (
+const icons = (
   pageKey: string,
   criteria: Array<Selection>,
   runtimeStore: RuntimeStore,
-  runtimeTooltip: (string) => string,
+  runtimeTooltip: (text: string) => string,
   workspace: WorkspaceData,
   cdrVersionTiersResponse: CdrVersionTiersResponse
 ): IconConfig[] => {
@@ -589,5 +612,64 @@ export const icons = (
 
   return keys.map((k) =>
     iconConfig(k, pageKey, criteria, runtimeStore, runtimeTooltip)
+  );
+};
+
+interface HelpSidebarIconsProps {
+  pageKey: string;
+  criteria: Array<Selection>;
+  runtimeStore: RuntimeStore;
+  runtimeTooltip: (text: string) => string;
+  workspace: WorkspaceData;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+  compoundRuntimeOps: CompoundRuntimeOpStore;
+  genomicExtractionJobs: GenomicExtractionJob[];
+  activeIcon: string;
+  onIconClick: (icon: IconConfig) => void;
+}
+export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
+  const {
+    pageKey,
+    criteria,
+    runtimeStore,
+    runtimeTooltip,
+    workspace,
+    cdrVersionTiersResponse,
+    activeIcon,
+    onIconClick,
+  } = props;
+
+  return (
+    <>
+      {icons(
+        pageKey,
+        criteria,
+        runtimeStore,
+        runtimeTooltip,
+        workspace,
+        cdrVersionTiersResponse
+      ).map((icon, i) => (
+        <div key={i} style={{ display: 'table' }}>
+          <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
+            <div
+              style={
+                activeIcon === icon.id
+                  ? iconStyles.active
+                  : icon.disabled
+                  ? iconStyles.disabled
+                  : styles.icon
+              }
+              onClick={() => {
+                if (icon.hasContent && !icon.disabled) {
+                  onIconClick(icon);
+                }
+              }}
+            >
+              {displayIcon(icon, props)}
+            </div>
+          </TooltipTrigger>
+        </div>
+      ))}
+    </>
   );
 };

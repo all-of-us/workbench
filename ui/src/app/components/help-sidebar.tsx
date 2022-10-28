@@ -66,10 +66,9 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 
 import {
-  displayIcon,
+  HelpSidebarIcons,
   IconConfig,
   iconConfig,
-  icons,
   proIcons,
 } from './help-sidebar-icons';
 import { RuntimeErrorModal } from './runtime-error-modal';
@@ -148,23 +147,6 @@ const styles = reactStyles({
     width: 160,
   },
 });
-
-const iconStyles = {
-  active: {
-    ...styles.icon,
-    background: colorWithWhiteness(colors.primary, 0.55),
-  },
-  disabled: {
-    ...styles.icon,
-    cursor: 'not-allowed',
-  },
-  menu: {
-    ...styles.icon,
-    margin: '0.5rem auto 1.5rem',
-    height: 27,
-    width: 27,
-  },
-};
 
 export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
@@ -618,35 +600,11 @@ export const HelpSidebar = fp.flow(
                 </div>
               </PopupTrigger>
             )}
-            {icons(
-              this.props.pageKey,
-              this.props.criteria,
-              this.props.runtimeStore,
-              (text) => this.runtimeTooltip(text),
-              this.props.workspace,
-              this.props.cdrVersionTiersResponse
-            ).map((icon, i) => (
-              <div key={i} style={{ display: 'table' }}>
-                <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
-                  <div
-                    style={
-                      activeIcon === icon.id
-                        ? iconStyles.active
-                        : icon.disabled
-                        ? iconStyles.disabled
-                        : styles.icon
-                    }
-                    onClick={() => {
-                      if (icon.hasContent && !icon.disabled) {
-                        this.onIconClick(icon);
-                      }
-                    }}
-                  >
-                    {displayIcon(icon, this.props)}
-                  </div>
-                </TooltipTrigger>
-              </div>
-            ))}
+            <HelpSidebarIcons
+              {...{ ...this.props, activeIcon }}
+              runtimeTooltip={(text) => this.runtimeTooltip(text)}
+              onIconClick={(icon) => this.onIconClick(icon)}
+            />
           </div>
 
           <TransitionGroup>
