@@ -29,6 +29,8 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyResponse;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyResponse.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -309,6 +311,14 @@ public class TestMockFactory {
   public static List<DbAccessModule> createAccessModules(AccessModuleDao accessModuleDao) {
     accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);
     return accessModuleDao.findAll();
+  }
+
+  public static DbNewUserSatisfactionSurveyResponse createDefaultNewUserSatisfactionSurveyResponse(
+      DbUser user) {
+    return new DbNewUserSatisfactionSurveyResponse()
+        .setUser(user)
+        .setSatisfaction(Satisfaction.SATISFIED)
+        .setAdditionalInfo("");
   }
 
   public static DbCdrVersion createDefaultCdrVersion(

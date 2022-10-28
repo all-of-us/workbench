@@ -65,6 +65,7 @@ public class DbUser {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp computeSecuritySuspendedUntil;
+  private DbNewUserSatisfactionSurveyResponse newUserSatisfactionSurveyResponse;
 
   // user-editable Profile fields
 
@@ -402,6 +403,21 @@ public class DbUser {
 
   public DbUser setComputeSecuritySuspendedUntil(Timestamp computeSecuritySuspendedUntil) {
     this.computeSecuritySuspendedUntil = computeSecuritySuspendedUntil;
+    return this;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbNewUserSatisfactionSurveyResponse getNewUserSatisfactionSurveyResponse() {
+    return newUserSatisfactionSurveyResponse;
+  }
+
+  public DbUser setNewUserSatisfactionSurveyResponse(
+      DbNewUserSatisfactionSurveyResponse newUserSatisfactionSurveyResponse) {
+    this.newUserSatisfactionSurveyResponse = newUserSatisfactionSurveyResponse;
     return this;
   }
 
