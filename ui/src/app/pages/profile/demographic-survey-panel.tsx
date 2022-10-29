@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { Button, ButtonWithLocationState } from 'app/components/buttons';
+import { ButtonWithLocationState } from 'app/components/buttons';
 import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { serverConfigStore } from 'app/utils/stores';
 
 import { styles } from './profile-styles';
 
@@ -13,13 +12,9 @@ interface Props {
   onClick: () => void;
 }
 export const DemographicSurveyPanel = (props: Props) => {
-  const { demographicSurveyCompletionTime, firstSignInTime, onClick } = props;
-  const { enableUpdatedDemographicSurvey } = serverConfigStore.get().config;
+  const { demographicSurveyCompletionTime, firstSignInTime } = props;
 
-  const surveyCompleted =
-    (enableUpdatedDemographicSurvey &&
-      demographicSurveyCompletionTime !== null) ||
-    !enableUpdatedDemographicSurvey;
+  const surveyCompleted = demographicSurveyCompletionTime !== null;
 
   return (
     <div style={styles.panel}>
@@ -38,25 +33,14 @@ export const DemographicSurveyPanel = (props: Props) => {
         ) : (
           <div>Updated Survey Incomplete</div>
         )}
-        {enableUpdatedDemographicSurvey ? (
-          <ButtonWithLocationState
-            path={DEMOGRAPHIC_SURVEY_V2_PATH}
-            type={'link'}
-            style={styles.updateSurveyButton}
-            data-test-id={'demographics-survey-button'}
-          >
-            {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
-          </ButtonWithLocationState>
-        ) : (
-          <Button
-            {...{ onClick }}
-            type={'link'}
-            style={styles.updateSurveyButton}
-            data-test-id={'demographics-survey-button'}
-          >
-            {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
-          </Button>
-        )}
+        <ButtonWithLocationState
+          path={DEMOGRAPHIC_SURVEY_V2_PATH}
+          type={'link'}
+          style={styles.updateSurveyButton}
+          data-test-id={'demographics-survey-button'}
+        >
+          {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
+        </ButtonWithLocationState>
       </div>
     </div>
   );

@@ -43,7 +43,6 @@ import {
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -365,9 +364,6 @@ export const ProfileComponent = fp.flow(
         );
       };
 
-      const enableUpdatedDemographicSurvey =
-        serverConfigStore.get().config.enableUpdatedDemographicSurvey;
-
       /* API returns completion time as a Date object but creates that Date object with a
        * seconds representation instead of a milliseconds representation, so it needs to be adjusted
        * */
@@ -565,9 +561,7 @@ export const ProfileComponent = fp.flow(
                 />
                 <DemographicSurveyPanel
                   demographicSurveyCompletionTime={
-                    enableUpdatedDemographicSurvey
-                      ? demographicSurveyV2CompletionTimeMillis
-                      : profile.demographicSurveyCompletionTime
+                    demographicSurveyV2CompletionTimeMillis
                   }
                   firstSignInTime={profile.firstSignInTime}
                   onClick={() =>

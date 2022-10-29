@@ -7,10 +7,10 @@ import {
   LATEST_TOS_VERSION,
   TermsOfService,
 } from 'app/components/terms-of-service';
+import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
-import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import LoginReactComponent from 'app/pages/login/login';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -105,12 +105,9 @@ describe('SignIn', () => {
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
     wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
 
-    // Account Creation Survey (e.g. demographics) is part of the new-style flow.
-    expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper
-      .find(AccountCreationSurvey)
-      .props()
-      .onComplete(createEmptyProfile());
+    // Demographic Survey is part of the new-style flow.
+    expect(wrapper.exists(DemographicSurvey)).toBeTruthy();
+    wrapper.find(DemographicSurvey).props().onComplete(createEmptyProfile());
 
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
   });
