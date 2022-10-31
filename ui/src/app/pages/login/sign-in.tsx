@@ -27,7 +27,6 @@ import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError, reportError } from 'app/utils/errors';
-import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
 import landingBackgroundImage from 'assets/images/login-group.png';
@@ -484,7 +483,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                 aria-label='Submit'
                 disabled={!!errors || !this.state.captcha || loading}
                 type='primary'
-                data-test-id={'submit-button'}
+                data-test-id='submit-button'
                 onClick={this.onSubmit}
               >
                 Submit
