@@ -11,6 +11,7 @@ import {
   RuntimeConfigurationType,
   RuntimeStatus,
 } from 'generated/fetch';
+
 import { Button, LinkButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
@@ -25,7 +26,6 @@ import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/dis
 import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
 import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
 import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-panel/offer-delete-disk-with-update';
-import { PresetSelector } from 'app/components/runtime-configuration-panel/preset-selector';
 import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
 import { StartStopRuntimeButton } from 'app/components/runtime-configuration-panel/start-stop-runtime-button';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
@@ -203,6 +203,49 @@ const DisabledPanel = () => {
         </TextColumn>
       }
     </WarningMessage>
+  );
+};
+
+// Select a recommended preset configuration.
+export const PresetSelector = ({
+  allowDataproc,
+  setAnalysisConfig,
+  disabled,
+  persistentDisk,
+}) => {
+  return (
+    <Dropdown
+      id='runtime-presets-menu'
+      disabled={disabled}
+      style={{
+        marginTop: '21px',
+        display: 'inline-block',
+        color: colors.primary,
+      }}
+      placeholder='Recommended environments'
+      options={fp.flow(
+        fp.values,
+        fp.filter(
+          ({ runtimeTemplate }) =>
+            allowDataproc || !runtimeTemplate.dataprocConfig
+        ),
+        fp.map(({ displayName, runtimeTemplate }) => ({
+          label: displayName,
+          value: runtimeTemplate,
+        }))
+      )(runtimePresets)}
+      onChange={({ value }) => {
+        setAnalysisConfig(toAnalysisConfig(value, persistentDisk));
+
+        // Return false to skip the normal handling of the value selection. We're
+        // abusing the dropdown here to act as if it were a menu instead.
+        // Therefore, we never want the empty "placeholder" text to change to a
+        // selected value (it should always read "recommended environments"). The presets
+        // are not persistent state, they just snap the rest of the form to a particular configuration.
+        // See RW-5996 for more details.
+        return false;
+      }}
+    />
   );
 };
 
