@@ -23,8 +23,8 @@ import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { PopupTrigger } from 'app/components/popups';
+import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { Spinner } from 'app/components/spinners';
-import { RuntimePanelWrapper } from 'app/pages/analysis/runtime-panel';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
@@ -418,7 +418,9 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () => (
-              <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)} />
+              <RuntimeConfigurationPanel
+                onClose={() => this.setActiveIcon(null)}
+              />
             ),
             showFooter: false,
           };

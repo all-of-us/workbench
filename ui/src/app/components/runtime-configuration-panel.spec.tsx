@@ -22,11 +22,9 @@ import {
 import { Button, LinkButton } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
+import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
+import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
 import { Spinner } from 'app/components/spinners';
-import {
-  ConfirmDelete,
-  RuntimePanelWrapper,
-} from 'app/pages/analysis/runtime-panel';
 import {
   diskApi,
   profileApi,
@@ -75,7 +73,7 @@ interface Props {
   onClose: () => void;
 }
 
-describe('RuntimePanel', () => {
+describe('RuntimeConfigurationPanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
   let diskApiStub: DiskApiStub;
@@ -87,7 +85,7 @@ describe('RuntimePanel', () => {
 
   const component = async (propOverrides?: object) => {
     const allProps = { ...props, ...propOverrides };
-    const c = mountWithRouter(<RuntimePanelWrapper {...allProps} />);
+    const c = mountWithRouter(<RuntimeConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };
