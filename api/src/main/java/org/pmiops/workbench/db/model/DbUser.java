@@ -65,7 +65,7 @@ public class DbUser {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp computeSecuritySuspendedUntil;
-  private DbNewUserSatisfactionSurveyResponse newUserSatisfactionSurveyResponse;
+  private DbNewUserSatisfactionSurvey newUserSatisfactionSurvey;
 
   // user-editable Profile fields
 
@@ -411,13 +411,13 @@ public class DbUser {
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public DbNewUserSatisfactionSurveyResponse getNewUserSatisfactionSurveyResponse() {
-    return newUserSatisfactionSurveyResponse;
+  public DbNewUserSatisfactionSurvey getNewUserSatisfactionSurvey() {
+    return newUserSatisfactionSurvey;
   }
 
-  public DbUser setNewUserSatisfactionSurveyResponse(
-      DbNewUserSatisfactionSurveyResponse newUserSatisfactionSurveyResponse) {
-    this.newUserSatisfactionSurveyResponse = newUserSatisfactionSurveyResponse;
+  public DbUser setNewUserSatisfactionSurvey(
+      DbNewUserSatisfactionSurvey newUserSatisfactionSurvey) {
+    this.newUserSatisfactionSurvey = newUserSatisfactionSurvey;
     return this;
   }
 

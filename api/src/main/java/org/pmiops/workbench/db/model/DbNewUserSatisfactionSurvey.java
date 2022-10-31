@@ -16,9 +16,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "new_user_satisfaction_survey_response")
+@Table(name = "new_user_satisfaction_survey")
 @EntityListeners(AuditingEntityListener.class)
-public class DbNewUserSatisfactionSurveyResponse {
+public class DbNewUserSatisfactionSurvey {
   private long id;
   private DbUser user;
   private Timestamp creationTime;
@@ -27,13 +27,13 @@ public class DbNewUserSatisfactionSurveyResponse {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "new_user_satisfaction_survey_response_id", nullable = false)
+  @Column(name = "new_user_satisfaction_survey_id", nullable = false)
   public long getId() {
     return id;
   }
 
-  public DbNewUserSatisfactionSurveyResponse setId(long new_user_satisfaction_survey_response_id) {
-    this.id = new_user_satisfaction_survey_response_id;
+  public DbNewUserSatisfactionSurvey setId(long new_user_satisfaction_survey_id) {
+    this.id = new_user_satisfaction_survey_id;
     return this;
   }
 
@@ -43,7 +43,7 @@ public class DbNewUserSatisfactionSurveyResponse {
     return user;
   }
 
-  public DbNewUserSatisfactionSurveyResponse setUser(DbUser user) {
+  public DbNewUserSatisfactionSurvey setUser(DbUser user) {
     this.user = user;
     return this;
   }
@@ -54,7 +54,7 @@ public class DbNewUserSatisfactionSurveyResponse {
     return creationTime;
   }
 
-  public DbNewUserSatisfactionSurveyResponse setCreationTime(Timestamp creationTime) {
+  public DbNewUserSatisfactionSurvey setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
     return this;
   }
@@ -65,7 +65,7 @@ public class DbNewUserSatisfactionSurveyResponse {
     return satisfaction;
   }
 
-  public DbNewUserSatisfactionSurveyResponse setSatisfaction(Satisfaction satisfaction) {
+  public DbNewUserSatisfactionSurvey setSatisfaction(Satisfaction satisfaction) {
     this.satisfaction = satisfaction;
     return this;
   }
@@ -75,7 +75,7 @@ public class DbNewUserSatisfactionSurveyResponse {
     return additionalInfo;
   }
 
-  public DbNewUserSatisfactionSurveyResponse setAdditionalInfo(String additionalInfo) {
+  public DbNewUserSatisfactionSurvey setAdditionalInfo(String additionalInfo) {
     this.additionalInfo = additionalInfo;
     return this;
   }
