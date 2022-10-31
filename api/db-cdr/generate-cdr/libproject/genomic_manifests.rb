@@ -96,9 +96,12 @@ AW4_INPUT_SECTION_SCHEMA = {
     # Specifies whether this CDR release is a base or delta. If this field exists, then the release
     # is a delta one.
     # The output directory name will be post-fixed by _delta and the logic to compare with previous
-    # release will be triggered. The value should be the release directory to diff against.
-    # For example, v6_base or v7_delta.
+    # release will be triggered. The value should be the release to diff against.
+    # For example, v6 or v7
     "deltaRelease" => String,
+    # If this field exists, then the manifest will be read from it if it can't be read from the
+    # regular manifest path.
+    "deltaReleaseManifestPath" => String,
   },
 }
 
@@ -379,13 +382,31 @@ def _build_copy_manifest_row(
   }
 end
 
-def _read_previous_manifest(project, dest_bucket, deltaReleaseSection, infix)
+# Logic to read the previous manifest for a delta release.
+# Returns a hash of person_id => CSV row found in previous manifest
+def _read_previous_manifest(project, dest_bucket, deltaReleaseManifestPath, deltaRelease, infix)
   common = Common.new
   prev_manifest = ""
-  unless deltaReleaseSection.nil?
-    deploy_account = must_get_env_value(project, :publisher_account)
-    manifest_path = "#{dest_bucket}/#{deltaReleaseSection}/#{infix}/manifest.csv"
+
+  deploy_account = must_get_env_value(project, :publisher_account)
+
+  # Try to find the manifest given the deltaRelease field.
+  unless deltaRelease.nil?
+    manifest_path = "#{dest_bucket}/#{deltaRelease}/#{infix}/manifest.csv"
     prev_manifest = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", manifest_path])
+  end
+
+  # If deltaReleaseManifestPath is specified, try to use it. If the manifest still cannot be
+  # read then throw an error because config is not correct.
+  unless deltaReleaseManifestPath.nil? or not prev_manifest.empty?
+    if deltaReleaseManifestPath.start_with?("gs://")
+      prev_manifest = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", deltaReleaseManifestPath])
+    else
+      prev_manifest = IO.read(deltaReleaseManifestPath)
+    end
+  end
+
+  unless deltaRelease.nil? and deltaReleaseManifestPath.nil?
     if prev_manifest.empty?
       raise ArgumentError.new("failed to read previous manifest from #{manifest_path},
         make sure to provide the correct previous release in the input manifest")
@@ -415,7 +436,12 @@ def build_manifests_for_aw4_section(project, input_section, ingest_bucket, dest_
     output_manifest = []
   end
 
-  prev_manifest = _read_previous_manifest(project, dest_bucket, input_section["deltaRelease"], input_section["pooledDestPathInfix"])
+  prev_manifest = _read_previous_manifest(
+    project,
+    dest_bucket,
+    input_section["deltaReleaseManifestPath"],
+    input_section["deltaRelease"],
+    input_section["pooledDestPathInfix"])
 
   copy_manifest = aw4_rows.flat_map do |aw4_entry|
     unless output_manifest.nil?
