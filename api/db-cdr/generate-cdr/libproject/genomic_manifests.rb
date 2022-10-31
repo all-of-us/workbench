@@ -670,8 +670,8 @@ def _maybe_update_preprod_access(project, all_tasks, add)
 
   preprod_source_projects = (
     all_tasks
-      .filter { |k, v| k == "preprod_source_project" }
-      .map { |k, v| v }
+      .filter { |k, _v| k == "preprod_source_project" }
+      .map { |_k, v| v }
       .filter { |p| !p.to_s.empty? }
       .to_set
   )
