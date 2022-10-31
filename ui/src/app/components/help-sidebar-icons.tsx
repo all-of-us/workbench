@@ -98,6 +98,17 @@ const iconStyles = reactStyles({
   },
 });
 
+export type SidebarIconId =
+  | 'criteria'
+  | 'concept'
+  | 'help'
+  | 'notebooksHelp'
+  | 'dataDictionary'
+  | 'annotations'
+  | 'runtime'
+  | 'terminal'
+  | 'genomicExtractions';
+
 export interface IconConfig {
   id: SidebarIconId;
   disabled: boolean;
@@ -477,17 +488,6 @@ const runtimeTooltip = (baseTooltip: string, loadingError: Error): string => {
 
   return baseTooltip;
 };
-
-export type SidebarIconId =
-  | 'criteria'
-  | 'concept'
-  | 'help'
-  | 'notebooksHelp'
-  | 'dataDictionary'
-  | 'annotations'
-  | 'runtime'
-  | 'terminal'
-  | 'genomicExtractions';
 
 interface IconConfigProps {
   pageKey: string;
