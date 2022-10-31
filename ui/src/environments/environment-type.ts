@@ -60,6 +60,8 @@ export interface EnvironmentBase {
   enableFooter: boolean;
   // Enable redirect to v2 demographic survey if not submitted by user
   enableDemographicSurveyV2Redirect: boolean;
+  // Enable the tab Apps Analysis that is going to replace the notebooks tab
+  enableAppsAnalysisTab: boolean;
 
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them

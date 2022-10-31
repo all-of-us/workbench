@@ -24,4 +24,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDemographicSurveyV2Redirect: false,
+  enableAppsAnalysisTab: true,
 };

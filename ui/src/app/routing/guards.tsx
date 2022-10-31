@@ -1,5 +1,6 @@
 import { AccessModule, Profile } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Guard } from 'app/components/app-router';
 import { cond } from 'app/utils';
 import {
@@ -85,6 +86,15 @@ export const getAccessModuleGuard = (): Guard => {
 export const adminLockedGuard = (ns: string, wsid: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
+    redirectPath: `/workspaces/${ns}/${wsid}/about`,
+  };
+};
+
+// Temp: Since the new analysis page is not ready yet, use the guard to prevent users to go to
+// new analysis page, if the flag is off
+export const tempAppsAnalysisGuard = (ns: string, wsid: string): Guard => {
+  return {
+    allowed: (): boolean => environment.enableAppsAnalysisTab,
     redirectPath: `/workspaces/${ns}/${wsid}/about`,
   };
 };
