@@ -2,14 +2,13 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import javax.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
+import com.google.common.collect.Iterables;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyResponse;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyResponse.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -23,21 +22,52 @@ public class NewUserSatisfactionSurveyResponseDaoTest {
   private DbUser user;
   private DbNewUserSatisfactionSurveyResponse newUserSatisfactionSurveyResponse;
 
-  @Autowired private EntityManager entityManager;
-
-  @BeforeEach
-  public void setUp() {
+  @Test
+  public void testCRUD() {
     user = userDao.save(new DbUser());
-
     newUserSatisfactionSurveyResponse =
-        TestMockFactory.createDefaultNewUserSatisfactionSurveyResponse(user);
+        new DbNewUserSatisfactionSurveyResponse()
+            .setUser(user)
+            .setSatisfaction(Satisfaction.SATISFIED)
+            .setAdditionalInfo("");
     newUserSatisfactionSurveyResponseDao.save(newUserSatisfactionSurveyResponse);
 
-    entityManager.refresh(user);
+    assertThat(
+            newUserSatisfactionSurveyResponseDao
+                .findById(newUserSatisfactionSurveyResponse.getId())
+                .get())
+        .isEqualTo(newUserSatisfactionSurveyResponse);
+
+    newUserSatisfactionSurveyResponseDao.save(
+        newUserSatisfactionSurveyResponse.setSatisfaction(Satisfaction.NEUTRAL));
+    assertThat(Iterables.size(newUserSatisfactionSurveyResponseDao.findAll())).isEqualTo(1);
+    assertThat(
+            newUserSatisfactionSurveyResponseDao
+                .findById(newUserSatisfactionSurveyResponse.getId())
+                .get()
+                .getSatisfaction())
+        .isEqualTo(Satisfaction.NEUTRAL);
+
+    newUserSatisfactionSurveyResponseDao.delete(newUserSatisfactionSurveyResponse);
+    assertThat(
+            newUserSatisfactionSurveyResponseDao
+                .findById(newUserSatisfactionSurveyResponse.getId())
+                .isPresent())
+        .isFalse();
   }
 
   @Test
   public void testGetByUser() {
+    user = userDao.save(new DbUser());
+
+    newUserSatisfactionSurveyResponse =
+        new DbNewUserSatisfactionSurveyResponse()
+            .setUser(user)
+            .setSatisfaction(Satisfaction.SATISFIED)
+            .setAdditionalInfo("");
+
+    newUserSatisfactionSurveyResponseDao.save(newUserSatisfactionSurveyResponse);
+
     assertThat(newUserSatisfactionSurveyResponseDao.findByUser(user).get())
         .isEqualTo(newUserSatisfactionSurveyResponse);
   }
