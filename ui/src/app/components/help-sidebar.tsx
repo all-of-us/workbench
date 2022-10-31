@@ -68,6 +68,7 @@ import {
   proIcons,
   showConceptIcon,
   showCriteriaIcon,
+  SidebarIconId,
 } from './help-sidebar-icons';
 import { RuntimeErrorModal } from './runtime-error-modal';
 
@@ -183,7 +184,7 @@ enum CurrentModal {
 }
 
 interface State {
-  activeIcon: string;
+  activeIcon: SidebarIconId;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -241,14 +242,16 @@ export const HelpSidebar = fp.flow(
       }
     );
 
-    setActiveIcon(activeIcon: string) {
+    setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
     }
 
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
+      this.setActiveIcon(
+        localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE) as SidebarIconId
+      );
       this.subscriptions.push(
         participantStore.subscribe((participant) =>
           this.setState({ participant })
@@ -363,7 +366,7 @@ export const HelpSidebar = fp.flow(
       );
     }
 
-    sidebarContent(activeIcon): {
+    sidebarContent(activeIcon: SidebarIconId): {
       overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;

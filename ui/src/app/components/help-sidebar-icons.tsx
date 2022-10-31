@@ -99,7 +99,7 @@ const iconStyles = reactStyles({
 });
 
 export interface IconConfig {
-  id: string;
+  id: SidebarIconId;
   disabled: boolean;
   faIcon: IconDefinition;
   label: string;
@@ -478,7 +478,7 @@ const runtimeTooltip = (baseTooltip: string, loadingError: Error): string => {
   return baseTooltip;
 };
 
-type IconKey =
+export type SidebarIconId =
   | 'criteria'
   | 'concept'
   | 'help'
@@ -494,9 +494,14 @@ interface IconConfigProps {
   criteria: Array<Selection>;
   runtimeStore: RuntimeStore;
 }
-const iconConfig = (iconKey: IconKey, props: IconConfigProps): IconConfig => {
+const iconConfig = (
+  iconId: SidebarIconId,
+  props: IconConfigProps
+): IconConfig => {
   const { pageKey, criteria, runtimeStore } = props;
-  return {
+
+  // TODO: not sure why the iconKey needs to be converted to string here
+  const config: { [iconKey: string]: IconConfig } = {
     criteria: {
       id: 'criteria',
       disabled: false,
@@ -599,7 +604,9 @@ const iconConfig = (iconKey: IconKey, props: IconConfigProps): IconConfig => {
       tooltip: 'Genomic Extraction History',
       hasContent: true,
     },
-  }[iconKey];
+  };
+
+  return config[iconId];
 };
 
 interface HelpSidebarIconsProps extends IconConfigProps {
@@ -613,7 +620,7 @@ interface HelpSidebarIconsProps extends IconConfigProps {
 export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   const { workspace, cdrVersionTiersResponse, activeIcon, onIconClick } = props;
 
-  const defaultIcons: IconKey[] = [
+  const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',
     'help',
@@ -621,7 +628,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     'dataDictionary',
     'annotations',
   ];
-  const keys: IconKey[] = defaultIcons.filter((key) =>
+  const keys: SidebarIconId[] = defaultIcons.filter((key) =>
     iconConfig(key, props).showIcon()
   );
 
