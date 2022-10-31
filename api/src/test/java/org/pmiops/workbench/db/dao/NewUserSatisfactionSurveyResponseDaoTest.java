@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Iterables;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
@@ -22,9 +23,13 @@ public class NewUserSatisfactionSurveyResponseDaoTest {
   private DbUser user;
   private DbNewUserSatisfactionSurveyResponse newUserSatisfactionSurveyResponse;
 
+  @BeforeEach
+  public void setUp() {
+    user = userDao.save(new DbUser());
+  }
+
   @Test
   public void testCRUD() {
-    user = userDao.save(new DbUser());
     newUserSatisfactionSurveyResponse =
         new DbNewUserSatisfactionSurveyResponse()
             .setUser(user)
@@ -58,8 +63,6 @@ public class NewUserSatisfactionSurveyResponseDaoTest {
 
   @Test
   public void testGetByUser() {
-    user = userDao.save(new DbUser());
-
     newUserSatisfactionSurveyResponse =
         new DbNewUserSatisfactionSurveyResponse()
             .setUser(user)
@@ -74,7 +77,6 @@ public class NewUserSatisfactionSurveyResponseDaoTest {
 
   @Test
   public void testGetByUserNotPresent() {
-    user = userDao.save(new DbUser());
     assertThat(newUserSatisfactionSurveyResponseDao.findByUser(user).isPresent()).isEqualTo(false);
   }
 }
