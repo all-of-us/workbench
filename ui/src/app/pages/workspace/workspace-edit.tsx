@@ -538,6 +538,7 @@ export const WorkspaceEdit = fp.flow(
       this.setState({ billingAccounts: displayBillingAccounts });
       this.setState({ fetchBillingAccountLoading: false });
       this.setState({ billingAccountFetched: true });
+      window.dispatchEvent(new Event('billing-accounts-loaded'));
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
@@ -913,6 +914,7 @@ export const WorkspaceEdit = fp.flow(
       return (
         <div key={index} style={{ ...styles.categoryRow, paddingTop: '0rem' }}>
           <CheckBox
+            aria-label={item.label}
             style={styles.checkboxStyle}
             key={item.label}
             checked={this.researchOutcomeCheckboxSelected(item.shortName)}
@@ -1628,6 +1630,7 @@ export const WorkspaceEdit = fp.flow(
                     <FlexRow>
                       <FlexColumn>
                         <div
+                          id='billing-dropdown-container'
                           data-test-id='billing-dropdown-div'
                           onClick={() =>
                             this.requestBillingScopeThenFetchBillingAccount()
@@ -2025,6 +2028,7 @@ export const WorkspaceEdit = fp.flow(
                   <FlexColumn>
                     <FlexRow>
                       <RadioButton
+                        aria-label='Request Review'
                         style={{ marginTop: '0.2rem' }}
                         name='reviewRequested'
                         data-test-id='review-request-btn-true'
@@ -2040,6 +2044,7 @@ export const WorkspaceEdit = fp.flow(
                     </FlexRow>
                     <FlexRow>
                       <RadioButton
+                        aria-label='Do Not Request Review'
                         style={{ marginTop: '0.2rem' }}
                         name='reviewRequested'
                         data-test-id='review-request-btn-false'
@@ -2172,6 +2177,7 @@ export const WorkspaceEdit = fp.flow(
                   disabled={!errors}
                 >
                   <Button
+                    aria-label={this.renderButtonText()}
                     type='primary'
                     onClick={() =>
                       this.setState({ showConfirmationModal: true })
@@ -2332,6 +2338,7 @@ export const WorkspaceEdit = fp.flow(
                 </ModalBody>
                 <ModalFooter>
                   <Button
+                    aria-label='Cancel'
                     type='secondary'
                     disabled={errors || loading}
                     style={{ marginRight: '1rem' }}
@@ -2342,6 +2349,7 @@ export const WorkspaceEdit = fp.flow(
                     Keep Editing
                   </Button>
                   <Button
+                    aria-label='Confirm'
                     type='primary'
                     disabled={errors || loading || showCdrVersionModal}
                     onClick={() => this.onSaveClick()}

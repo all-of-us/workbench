@@ -132,6 +132,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
             </div>
             <div>
               <CheckBox
+                aria-label='Acknowledge Terms'
                 data-test-id='agreement-check'
                 checked={hasAckedAgreement}
                 disabled={!hasReadEntireAgreement}
@@ -162,6 +163,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
             }}
           >
             <Button
+              aria-label='Next'
               data-test-id='next-button'
               style={{
                 width: '5rem',

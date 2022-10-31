@@ -10,10 +10,10 @@ export_({usernames})
 
 const urlRoot = () => {
   assert(
-    process.env.UI_HOSTNAME,
-    'UI_HOSTNAME not defined. Try: export UI_HOSTNAME=all-of-us-workbench-test.appspot.com'
+    process.env.UI_URL_ROOT,
+    'UI_URL_ROOT not defined. Try: export UI_URL_ROOT=https://all-of-us-workbench-test.appspot.com'
   )
-  return `https://${process.env.UI_HOSTNAME}`
+  return process.env.UI_URL_ROOT
 }
 
 export_({urlRoot})

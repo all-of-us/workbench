@@ -74,12 +74,12 @@ Again:
 % yarn test tests/sanity.browser.test.js
 <snip>
     Message:
-      UI_HOSTNAME not defined. Try: export UI_HOSTNAME=all-of-us-workbench-test.appspot.com
+      UI_URL_ROOT not defined. Try: export UI_URL_ROOT=https://all-of-us-workbench-test.appspot.com
 ```
 
-`UI_HOSTNAME` holds the code under test.
+`UI_URL_ROOT` holds the code under test.
 ```
-export UI_HOSTNAME=all-of-us-workbench-test.appspot.com
+export UI_URL_ROOT=https://all-of-us-workbench-test.appspot.com
 ```
 
 Should be good to go now:

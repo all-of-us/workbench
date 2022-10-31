@@ -65,6 +65,7 @@ export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
         Share
       </MenuItem>
       <MenuItem
+        aria-label='Delete'
         icon='trash'
         tooltip={
           (isNotOwner && ownerTip('delete')) ||

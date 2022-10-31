@@ -57,6 +57,7 @@ export class AccountCreationSuccess extends React.Component<
     return (
       <React.Fragment>
         <div
+          id='account-creation-success'
           style={{
             padding: '3rem 3rem 0 3rem',
             marginLeft: '-0.5rem',

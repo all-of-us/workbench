@@ -72,6 +72,7 @@ export const LoginReactComponent: React.FunctionComponent<{
         <div style={{ paddingTop: '1.25rem' }}>
           <SmallHeader>Don't have an account?</SmallHeader>
           <Button
+            aria-label='Create Account'
             type='secondary'
             style={styles.createAccountButton}
             onClick={onCreateAccount}

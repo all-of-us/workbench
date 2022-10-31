@@ -5,7 +5,7 @@ import { TermsOfService, TosProps } from 'app/components/terms-of-service';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 const getAgreementCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('input[data-test-id="agreement-check"]');
+  return wrapper.find('input[aria-label="Acknowledge Terms"]');
 };
 const getNextButton = (wrapper: AnyWrapper): AnyWrapper => {
   return wrapper.find('[data-test-id="next-button"]');
