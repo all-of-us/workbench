@@ -11,7 +11,6 @@ import {
   RuntimeConfigurationType,
   RuntimeStatus,
 } from 'generated/fetch';
-
 import { Button, LinkButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
@@ -20,10 +19,7 @@ import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confir
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
 import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
-import { CostInfo } from 'app/components/runtime-configuration-panel/cost-info';
-import { CreatePanel } from 'app/components/runtime-configuration-panel/create-panel';
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
-import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
 import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
@@ -56,7 +52,8 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { applyPresetOverride } from 'app/utils/runtime-presets';
+import { formatUsd } from 'app/utils/numbers';
+import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   AnalysisDiff,
@@ -81,9 +78,135 @@ import {
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
+import { RuntimeCostEstimator } from './runtime-cost-estimator';
+import { RuntimeSummary } from './runtime-summary';
+import { TextColumn } from './text-column';
+import { AoU } from './text-wrappers';
+
 const { useState, useEffect, Fragment } = React;
 
-const Panel = fp.flow(
+const CostInfo = ({
+  runtimeChanged,
+  analysisConfig,
+  currentUser,
+  workspace,
+  creatorFreeCreditsRemaining,
+}) => {
+  const remainingCredits =
+    creatorFreeCreditsRemaining === null ? (
+      <Spinner size={10} />
+    ) : (
+      formatUsd(creatorFreeCreditsRemaining)
+    );
+
+  return (
+    <FlexRow data-test-id='cost-estimator'>
+      <div
+        style={{
+          padding: '.33rem .5rem',
+          ...(runtimeChanged
+            ? {
+                backgroundColor: colorWithWhiteness(colors.warning, 0.9),
+              }
+            : {}),
+        }}
+      >
+        <RuntimeCostEstimator {...{ analysisConfig }} />
+      </div>
+      {isUsingFreeTierBillingAccount(workspace) &&
+        currentUser === workspace.creator && (
+          <div style={styles.costsDrawnFrom}>
+            Costs will draw from your remaining {remainingCredits} of free
+            credits.
+          </div>
+        )}
+      {isUsingFreeTierBillingAccount(workspace) &&
+        currentUser !== workspace.creator && (
+          <div style={styles.costsDrawnFrom}>
+            Costs will draw from workspace creator's remaining{' '}
+            {remainingCredits} of free credits.
+          </div>
+        )}
+      {!isUsingFreeTierBillingAccount(workspace) && (
+        <div style={styles.costsDrawnFrom}>
+          Costs will be charged to billing account{' '}
+          {workspace.billingAccountName}.
+        </div>
+      )}
+    </FlexRow>
+  );
+};
+
+const CreatePanel = ({
+  creatorFreeCreditsRemaining,
+  profile,
+  setPanelContent,
+  workspace,
+  analysisConfig,
+}) => {
+  const displayName =
+    analysisConfig.computeType === ComputeType.Dataproc
+      ? runtimePresets.hailAnalysis.displayName
+      : runtimePresets.generalAnalysis.displayName;
+
+  return (
+    <div data-test-id='runtime-create-panel' style={styles.controlSection}>
+      <FlexRow style={styles.costPredictorWrapper}>
+        <StartStopRuntimeButton
+          workspaceNamespace={workspace.namespace}
+          googleProject={workspace.googleProject}
+        />
+        <CostInfo
+          runtimeChanged={false}
+          analysisConfig={analysisConfig}
+          currentUser={profile.username}
+          workspace={workspace}
+          creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+        />
+      </FlexRow>
+      <FlexRow
+        style={{ justifyContent: 'space-between', alignItems: 'center' }}
+      >
+        <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
+          Recommended Environment for {displayName}
+        </h3>
+        <Button
+          type='secondarySmall'
+          onClick={() => setPanelContent(PanelContent.Customize)}
+          aria-label='Customize'
+        >
+          Customize
+        </Button>
+      </FlexRow>
+      <RuntimeSummary analysisConfig={analysisConfig} />
+    </div>
+  );
+};
+
+const DisabledPanel = () => {
+  return (
+    <WarningMessage
+      data-test-id='runtime-disabled-panel'
+      iconSize={16}
+      iconPosition={'top'}
+    >
+      {
+        <TextColumn>
+          <div style={{ fontWeight: 600 }}>
+            Cloud services are disabled for this workspace.
+          </div>
+          <div style={{ marginTop: '0.5rem' }}>
+            You cannot run or edit notebooks in this workspace because billed
+            services are disabled for the workspace creator's <AoU /> Researcher
+            account.
+          </div>
+        </TextColumn>
+      }
+    </WarningMessage>
+  );
+};
+
+const PanelMain = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
@@ -909,5 +1032,5 @@ export const RuntimeConfigurationPanel = withStore(
   }
 
   // TODO: can we remove this indirection?
-  return <Panel onClose={onClose} />;
+  return <PanelMain onClose={onClose} />;
 });
