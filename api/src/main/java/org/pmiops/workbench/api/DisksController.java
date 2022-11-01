@@ -89,7 +89,6 @@ public class DisksController implements DisksApiDelegate {
   public ResponseEntity<ListDisksResponse> listDisksInWorkspace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    String pdNamePrefix = userProvider.get().getUserPDNamePrefix();
 
     List<LeonardoListPersistentDiskResponse> responseList =
         leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false);
