@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="Peter-Lavigne" id="changelog-208-add-new-user-satisfaction-survey">
+
+    <createTable tableName="new_user_satisfaction_survey">
+      <column name="new_user_satisfaction_survey_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints
+            unique="true"
+            nullable="false"
+            foreignKeyName="fk_new_user_satisfaction_survey_user"
+            references="user(user_id)"
+            deleteCascade="true"
+        />
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="satisfaction" type="ENUM('VERY_UNSATISFIED','UNSATISFIED','NEUTRAL','SATISFIED','VERY_SATISFIED')">
+        <constraints nullable="false"/>
+      </column>
+      <column name="additional_info" type="VARCHAR(500)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <rollback>
+      <dropTable tableName="new_user_satisfaction_survey"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

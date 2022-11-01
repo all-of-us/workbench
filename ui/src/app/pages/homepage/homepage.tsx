@@ -124,6 +124,7 @@ const Workspaces = () => {
             Workspaces
           </SemiBoldHeader>
           <ClrIcon
+            aria-label='Create Workspace'
             shape='plus-circle'
             size={30}
             className={'is-solid'}

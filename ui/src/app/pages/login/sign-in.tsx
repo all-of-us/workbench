@@ -442,7 +442,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private captureCaptchaResponse(token) {
     this.setState({ captchaToken: token, captcha: true });
-    window.dispatchEvent(new Event('captchaSolved'));
+    window.dispatchEvent(new Event('captcha-solved'));
   }
 
   private renderNavigation(currentStep: SignInStep) {
@@ -470,6 +470,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           )}
           <FlexRow>
             <Button
+              aria-label='Previous'
               type='secondary'
               style={{ marginRight: '1rem' }}
               onClick={() => {
@@ -492,6 +493,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
               }
             >
               <Button
+                aria-label='Submit'
                 disabled={!!errors || !this.state.captcha || loading}
                 type='primary'
                 data-test-id={'submit-button'}

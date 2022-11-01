@@ -8789,6 +8789,7 @@ definitions:
     - AGE_AT_CONSENT
     - AGE_AT_CDR
     - SURVEY_VERSION_CONCEPT_ID
+    - PERSONAL_FAMILY_HEALTH_HISTORY
   AgeType:
     type: string
     description: Different age types

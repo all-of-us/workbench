@@ -36,6 +36,7 @@ import {
   maybeInitializeRuntime,
   RUNTIME_ERROR_STATUS_MESSAGE_SHORT,
   RuntimeStatusError,
+  SparkConsolePath,
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
@@ -53,13 +54,6 @@ export enum LeoApplicationType {
   Notebook,
   Terminal,
   SparkConsole,
-}
-
-export enum SparkConsolePath {
-  Yarn = 'yarn',
-  YarnTimeline = 'apphistory',
-  SparkHistory = 'sparkhistory',
-  JobHistory = 'jobhistory',
 }
 
 export enum Progress {

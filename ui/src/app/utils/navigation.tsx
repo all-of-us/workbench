@@ -11,6 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
+import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -46,7 +47,9 @@ export const attributesSelectionStore = new BehaviorSubject<Criteria>(
 export const currentCohortSearchContextStore = new BehaviorSubject<any>(
   undefined
 );
-export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
+export const setSidebarActiveIconStore = new BehaviorSubject<SidebarIconId>(
+  null
+);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
 export const useNavigation = () => {

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -168,6 +169,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   public void exportWorkspaces(List<Long> workspaceIds, boolean backfill) {
     List<RdrWorkspace> rdrWorkspacesList;
     try {
+      // toRdrWorkspace may fail and will return null, skip failures and continue.
       rdrWorkspacesList =
           workspaceIds.stream()
               .map(
@@ -178,17 +180,27 @@ public class RdrExportServiceImpl implements RdrExportService {
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
 
+        List<Long> workspaceIdsToUpload =
+            rdrWorkspacesList.stream()
+                .map(r -> Long.valueOf(r.getWorkspaceId()))
+                .collect(Collectors.toList());
+
         // Skip the RDR export table updates on backfills. A normal export may trigger manual review
         // from the RDR, where-as a backfill does not. Therefore, even if the RDR has the latest
         // data already from a backfill, we'd still want to resend any normal modifications, if any,
         // in order to trigger this review process.
         if (!backfill) {
-          updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+          updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIdsToUpload);
         }
+        log.info(
+            String.format(
+                "Successfully exported workspace count: %d, total count %d",
+                workspaceIdsToUpload.size(), workspaceIds.size()));
+        log.info(
+            String.format(
+                "successfully exported workspace data for workspace IDs: %s",
+                workspaceIdsToUpload));
       }
-      log.info(
-          String.format(
-              "successfully exported workspace data for workspace IDs: %s", workspaceIds));
     } catch (ApiException ex) {
       log.severe(
           String.format(
@@ -210,6 +222,7 @@ public class RdrExportServiceImpl implements RdrExportService {
         : researcher.demographicSurveyV2(null);
   }
 
+  @Nullable
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
     RdrWorkspace rdrWorkspace = rdrMapper.toRdrWorkspace(dbWorkspace);
     setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);

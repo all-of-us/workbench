@@ -392,6 +392,7 @@ export class AccountCreationInstitution extends React.Component<
                   using your institutional credentials.
                 </div>
                 <Dropdown
+                  ariaLabel='Institution'
                   data-test-id='institution-dropdown'
                   style={styles.wideInputSize}
                   options={institutions.map((inst) => ({
@@ -464,6 +465,7 @@ export class AccountCreationInstitution extends React.Component<
                   </FlexRow>
                   <div>
                     <Dropdown
+                      ariaLabel='Role'
                       data-test-id='role-dropdown'
                       style={styles.wideInputSize}
                       placeholder={
@@ -511,6 +513,7 @@ export class AccountCreationInstitution extends React.Component<
             )}
             <FormSection style={{ paddingBottom: '1rem' }}>
               <Button
+                aria-label='Previous'
                 type='secondary'
                 style={{ marginRight: '1rem' }}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}
@@ -533,6 +536,7 @@ export class AccountCreationInstitution extends React.Component<
                 disabled={!errors}
               >
                 <Button
+                  aria-label='Next'
                   data-test-id='submit-button'
                   disabled={loadingInstitutions || errors != null}
                   onClick={() => {

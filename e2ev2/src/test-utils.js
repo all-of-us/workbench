@@ -106,14 +106,29 @@ export_({impersonateUser})
 
 const promiseWindowEvent = async (page, eventName) => {
   let resolveEvent = undefined
+  let timeout = undefined
   const eventPromise = new Promise(resolve => { resolveEvent = resolve })
-  await page.exposeFunction('handleEvent', resolveEvent)
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timeout = setTimeout(
+      () => reject(new Error(`Timed out waiting for event "${eventName}"`)),
+      page.getDefaultTimeout()
+    )
+  })
+
+  await page.exposeFunction('handleEvent', eventType => {
+    clearTimeout(timeout)
+    resolveEvent(eventType)
+  })
   await page.evaluate(eventName => {
     window.addEventListener(eventName, async e => { handleEvent(e.type) })
   }, eventName)
   // This has to be wrapped so callers can await this function to get the event handler installed
   // without also awaiting the event itself. The auto-chaining nature of promises in JavaScript
   // makes cases like this one particularly ugly.
-  return [eventPromise]
+  return [Promise.race([eventPromise, timeoutPromise])]
 }
 export_({promiseWindowEvent})
+
+// Puppeteer's Page.click is not reliable. This is worth investigation.
+const jsClick = (page, sel) => page.waitForSelector(sel).then(eh => eh.evaluate(e => e.click()))
+export_({jsClick})

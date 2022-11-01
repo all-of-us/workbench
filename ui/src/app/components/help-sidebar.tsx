@@ -1,21 +1,7 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as fp from 'lodash/fp';
-import { faEdit } from '@fortawesome/free-regular-svg-icons';
-import {
-  faBook,
-  faEllipsisV,
-  faFolderOpen,
-  faInbox,
-  faInfoCircle,
-  IconDefinition,
-} from '@fortawesome/free-solid-svg-icons';
-import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
-import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
-import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
-import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -26,7 +12,6 @@ import {
   ResourceType,
   RuntimeError,
   RuntimeStatus,
-  TerraJobStatus,
 } from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
@@ -38,8 +23,8 @@ import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { PopupTrigger } from 'app/components/popups';
+import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { Spinner } from 'app/components/spinners';
-import { RuntimePanelWrapper } from 'app/pages/analysis/runtime-panel';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
@@ -48,7 +33,6 @@ import { participantStore } from 'app/services/review-state.service';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
-  DEFAULT,
   reactStyles,
   switchCase,
   withCdrVersions,
@@ -59,45 +43,36 @@ import {
   withUserProfile,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getCdrVersion } from 'app/utils/cdr-versions';
 import {
   currentConceptStore,
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import {
-  ComputeSecuritySuspendedError,
-  withRuntimeStore,
-} from 'app/utils/runtime-utils';
+import { withRuntimeStore } from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore,
   routeDataStore,
   RuntimeStore,
   runtimeStore,
-  serverConfigStore,
   withGenomicExtractionJobs,
   withStore,
 } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import arrowLeft from 'assets/icons/arrow-left-regular.svg';
-import runtime from 'assets/icons/thunderstorm-solid.svg';
-import times from 'assets/icons/times-light.svg';
-import moment from 'moment';
 
-import { RouteLink } from './app-router';
+import {
+  HelpSidebarIcons,
+  IconConfig,
+  proIcons,
+  showConceptIcon,
+  showCriteriaIcon,
+  SidebarIconId,
+} from './help-sidebar-icons';
 import { RuntimeErrorModal } from './runtime-error-modal';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
-
-const proIcons = {
-  arrowLeft: arrowLeft,
-  runtime: runtime,
-  times: times,
-};
 
 const styles = reactStyles({
   sidebarContainer: {
@@ -142,22 +117,6 @@ const styles = reactStyles({
     textAlign: 'center',
     verticalAlign: 'middle',
   },
-  asyncOperationStatusIcon: {
-    width: '.5rem',
-    height: '.5rem',
-    zIndex: 2,
-  },
-  runtimeStatusIconOutline: {
-    border: `1px solid ${colors.white}`,
-    borderRadius: '.25rem',
-  },
-  statusIconContainer: {
-    alignSelf: 'flex-end',
-    margin: '0 .1rem .1rem auto',
-  },
-  rotate: {
-    animation: 'rotation 2s infinite linear',
-  },
   sectionTitle: {
     marginTop: '0.5rem',
     fontWeight: 600,
@@ -178,18 +137,6 @@ const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'none',
   },
-  criteriaCount: {
-    position: 'absolute',
-    height: '0.8rem',
-    width: '0.8rem',
-    top: '1rem',
-    left: '0.55rem',
-    textAlign: 'center',
-    backgroundColor: colors.danger,
-    borderRadius: '50%',
-    display: 'inline-block',
-    fontSize: '0.4rem',
-  },
   dropdownHeader: {
     fontSize: 12,
     lineHeight: '30px',
@@ -200,35 +147,7 @@ const styles = reactStyles({
   },
 });
 
-const iconStyles = {
-  active: {
-    ...styles.icon,
-    background: colorWithWhiteness(colors.primary, 0.55),
-  },
-  disabled: {
-    ...styles.icon,
-    cursor: 'not-allowed',
-  },
-  menu: {
-    ...styles.icon,
-    margin: '0.5rem auto 1.5rem',
-    height: 27,
-    width: 27,
-  },
-};
-
 export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
-
-interface IconConfig {
-  id: string;
-  disabled: boolean;
-  faIcon: IconDefinition;
-  label: string;
-  showIcon: () => boolean;
-  style: CSSProperties;
-  tooltip: string;
-  hasContent: true;
-}
 
 const pageKeyToAnalyticsLabels = {
   about: 'About Page',
@@ -265,7 +184,7 @@ enum CurrentModal {
 }
 
 interface State {
-  activeIcon: string;
+  activeIcon: SidebarIconId;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -323,141 +242,16 @@ export const HelpSidebar = fp.flow(
       }
     );
 
-    iconConfig(iconKey): IconConfig {
-      return {
-        criteria: {
-          id: 'criteria',
-          disabled: false,
-          faIcon: faInbox,
-          label: 'Selected Criteria',
-          showIcon: () =>
-            this.props.pageKey === 'cohortBuilder' && !!this.props.criteria,
-          style: { fontSize: '21px' },
-          tooltip: 'Selected Criteria',
-          hasContent: true,
-        },
-        concept: {
-          id: 'concept',
-          disabled: false,
-          faIcon: faInbox,
-          label: 'Selected Concepts',
-          showIcon: () => this.props.pageKey === 'conceptSets',
-          style: { fontSize: '21px' },
-          tooltip: 'Selected Concepts',
-          hasContent: true,
-        },
-        help: {
-          id: 'help',
-          disabled: false,
-          faIcon: faInfoCircle,
-          label: 'Help Icon',
-          showIcon: () => true,
-          style: { fontSize: '21px' },
-          tooltip: 'Help Tips',
-          hasContent: true,
-        },
-        notebooksHelp: {
-          id: 'notebooksHelp',
-          disabled: false,
-          faIcon: faFolderOpen,
-          label: 'Storage Icon',
-          showIcon: () => true,
-          style: { fontSize: '21px' },
-          tooltip: 'Workspace Storage',
-          hasContent: true,
-        },
-        dataDictionary: {
-          id: 'dataDictionary',
-          disabled: false,
-          faIcon: faBook,
-          label: 'Data Dictionary Icon',
-          showIcon: () => true,
-          style: { color: colors.white, fontSize: '20px', marginTop: '5px' },
-          tooltip: 'Data Dictionary',
-          hasContent: false,
-        },
-        annotations: {
-          id: 'annotations',
-          disabled: false,
-          faIcon: faEdit,
-          label: 'Annotations Icon',
-          showIcon: () => this.props.pageKey === 'reviewParticipantDetail',
-          style: { fontSize: '20px', marginLeft: '3px' },
-          tooltip: 'Annotations',
-          hasContent: true,
-        },
-        runtime: {
-          id: 'runtime',
-          disabled: !!this.props.runtimeStore.loadingError,
-          faIcon: null,
-          label: 'Cloud Icon',
-          showIcon: () => true,
-          style: { height: '22px', width: '22px' },
-          tooltip: this.runtimeTooltip('Cloud Analysis Environment'),
-          hasContent: true,
-        },
-        terminal: {
-          id: 'terminal',
-          disabled: !!this.props.runtimeStore.loadingError,
-          faIcon: faTerminal,
-          label: 'Terminal Icon',
-          showIcon: () => true,
-          style: { height: '22px', width: '22px' },
-          tooltip: this.runtimeTooltip('Cloud Analysis Terminal'),
-          hasContent: false,
-        },
-        genomicExtractions: {
-          id: 'genomicExtractions',
-          disabled: false,
-          faIcon: faDna,
-          label: 'Genomic Extraction',
-          showIcon: () => true,
-          // position: absolute is so the status icon won't push the DNA icon to the left.
-          style: {
-            height: '22px',
-            width: '22px',
-            marginTop: '0.25rem',
-            position: 'absolute',
-          },
-          tooltip: 'Genomic Extraction History',
-          hasContent: true,
-        },
-      }[iconKey];
-    }
-
-    icons(): IconConfig[] {
-      const keys = [
-        'criteria',
-        'concept',
-        'help',
-        'notebooksHelp',
-        'dataDictionary',
-        'annotations',
-      ].filter((key) => this.iconConfig(key).showIcon());
-
-      if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
-        keys.push('runtime', 'terminal');
-      }
-
-      if (
-        serverConfigStore.get().config.enableGenomicExtraction &&
-        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse)
-          .hasWgsData
-      ) {
-        keys.push('genomicExtractions');
-      }
-
-      return keys.map((k) => this.iconConfig(k));
-    }
-
-    setActiveIcon(activeIcon: string) {
+    setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
     }
 
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
+      this.setActiveIcon(
+        localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE) as SidebarIconId
+      );
       this.subscriptions.push(
         participantStore.subscribe((participant) =>
           this.setState({ participant })
@@ -557,277 +351,6 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    displayFontAwesomeIcon(icon: IconConfig) {
-      const { concept, criteria } = this.props;
-
-      return (
-        <React.Fragment>
-          {icon.id === 'criteria' && criteria && criteria.length > 0 && (
-            <span data-test-id='criteria-count' style={styles.criteriaCount}>
-              {criteria.length}
-            </span>
-          )}
-          {icon.id === 'concept' && concept && concept.length > 0 && (
-            <span data-test-id='concept-count' style={styles.criteriaCount}>
-              {concept.length}
-            </span>
-          )}
-          <FontAwesomeIcon
-            data-test-id={'help-sidebar-icon-' + icon.id}
-            icon={icon.faIcon}
-            style={icon.style}
-          />
-        </React.Fragment>
-      );
-    }
-
-    displayRuntimeIcon(icon: IconConfig) {
-      const { runtimeStore: store, compoundRuntimeOps, workspace } = this.props;
-      let status = store?.runtime?.status;
-      if (
-        (!status || status === RuntimeStatus.Deleted) &&
-        workspace.namespace in compoundRuntimeOps
-      ) {
-        // If a compound operation is still pending, and we're transitioning
-        // through the "Deleted" phase of the runtime, we want to keep showing
-        // an activity spinner. Avoids an awkward UX during a delete/create cycle.
-        // There also be some lag during the runtime creation flow between when
-        // the compound operation starts, and the runtime is set in the store; for
-        // this reason use Creating rather than Deleting here.
-        status = RuntimeStatus.Creating;
-      }
-
-      // We always want to show the thunderstorm icon.
-      // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
-      // overlay icon in the bottom right of the tab showing the runtime status.
-      return (
-        <FlexRow
-          style={{
-            height: '100%',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-          }}
-        >
-          <img
-            data-test-id={'help-sidebar-icon-' + icon.id}
-            src={proIcons[icon.id]}
-            style={{ ...icon.style, position: 'absolute' }}
-          />
-          <FlexRow
-            data-test-id='runtime-status-icon-container'
-            style={styles.statusIconContainer}
-          >
-            {(() => {
-              const errIcon = (
-                <FontAwesomeIcon
-                  icon={faCircle}
-                  style={{
-                    ...styles.asyncOperationStatusIcon,
-                    ...styles.runtimeStatusIconOutline,
-                    color: colors.asyncOperationStatus.error,
-                  }}
-                />
-              );
-
-              if (store.loadingError) {
-                if (
-                  store.loadingError instanceof ComputeSecuritySuspendedError
-                ) {
-                  return (
-                    <FontAwesomeIcon
-                      icon={faLock}
-                      style={{
-                        ...styles.asyncOperationStatusIcon,
-                        color: colors.asyncOperationStatus.stopped,
-                      }}
-                    />
-                  );
-                }
-                return errIcon;
-              }
-              switch (status) {
-                case RuntimeStatus.Creating:
-                case RuntimeStatus.Starting:
-                case RuntimeStatus.Updating:
-                  return (
-                    <FontAwesomeIcon
-                      icon={faSyncAlt}
-                      style={{
-                        ...styles.asyncOperationStatusIcon,
-                        ...styles.rotate,
-                        color: colors.asyncOperationStatus.starting,
-                      }}
-                    />
-                  );
-                case RuntimeStatus.Stopped:
-                  return (
-                    <FontAwesomeIcon
-                      icon={faCircle}
-                      style={{
-                        ...styles.asyncOperationStatusIcon,
-                        ...styles.runtimeStatusIconOutline,
-                        color: colors.asyncOperationStatus.stopped,
-                      }}
-                    />
-                  );
-                case RuntimeStatus.Running:
-                  return (
-                    <FontAwesomeIcon
-                      icon={faCircle}
-                      style={{
-                        ...styles.asyncOperationStatusIcon,
-                        ...styles.runtimeStatusIconOutline,
-                        color: colors.asyncOperationStatus.running,
-                      }}
-                    />
-                  );
-                case RuntimeStatus.Stopping:
-                case RuntimeStatus.Deleting:
-                  return (
-                    <FontAwesomeIcon
-                      icon={faSyncAlt}
-                      style={{
-                        ...styles.asyncOperationStatusIcon,
-                        ...styles.rotate,
-                        color: colors.asyncOperationStatus.stopping,
-                      }}
-                    />
-                  );
-                case RuntimeStatus.Error:
-                  return errIcon;
-              }
-            })()}
-          </FlexRow>
-        </FlexRow>
-      );
-    }
-
-    withinPastTwentyFourHours(epoch) {
-      const completionTimeMoment = moment(epoch);
-      const twentyFourHoursAgo = moment().subtract(1, 'days');
-      return completionTimeMoment.isAfter(twentyFourHoursAgo);
-    }
-
-    displayExtractionIcon(icon: IconConfig) {
-      const { genomicExtractionJobs } = this.props;
-      const jobsByStatus = fp.groupBy('status', genomicExtractionJobs);
-      let status;
-      // If any jobs are currently active, show the 'sync' icon corresponding to their status.
-      if (jobsByStatus[TerraJobStatus.RUNNING]) {
-        status = TerraJobStatus.RUNNING;
-      } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
-        status = TerraJobStatus.ABORTING;
-      } else if (
-        jobsByStatus[TerraJobStatus.SUCCEEDED] ||
-        jobsByStatus[TerraJobStatus.FAILED] ||
-        jobsByStatus[TerraJobStatus.ABORTED]
-      ) {
-        // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
-        const completedJobs = fp.flatten([
-          jobsByStatus[TerraJobStatus.SUCCEEDED] || [],
-          jobsByStatus[TerraJobStatus.FAILED] || [],
-          jobsByStatus[TerraJobStatus.ABORTED] || [],
-        ]);
-        const mostRecentCompletedJob = fp.flow(
-          fp.filter((job: GenomicExtractionJob) =>
-            this.withinPastTwentyFourHours(job.completionTime)
-          ),
-          // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
-          fp.sortBy((job) => job.completionTime),
-          fp.reverse,
-          fp.head
-        )(completedJobs);
-        if (mostRecentCompletedJob) {
-          status = mostRecentCompletedJob.status;
-        }
-      }
-
-      // We always want to show the DNA icon.
-      // When there are running or recently completed  jobs, we will show a small overlay icon in
-      // the bottom right of the tab showing the job status.
-      return (
-        <FlexRow
-          style={{
-            height: '100%',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-          }}
-        >
-          {this.displayFontAwesomeIcon(icon)}
-          <FlexRow
-            data-test-id='extraction-status-icon-container'
-            style={styles.statusIconContainer}
-          >
-            {switchCase(
-              status,
-              [
-                TerraJobStatus.RUNNING,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faSyncAlt}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      ...styles.rotate,
-                      color: colors.asyncOperationStatus.starting,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.ABORTING,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faSyncAlt}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      ...styles.rotate,
-                      color: colors.asyncOperationStatus.stopping,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.FAILED,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.error,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.SUCCEEDED,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.succeeded,
-                    }}
-                  />
-                ),
-              ],
-              [
-                TerraJobStatus.ABORTED,
-                () => (
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    style={{
-                      ...styles.asyncOperationStatusIcon,
-                      color: colors.asyncOperationStatus.stopped,
-                    }}
-                  />
-                ),
-              ]
-            )}
-          </FlexRow>
-        </FlexRow>
-      );
-    }
-
     get sidebarStyle() {
       return {
         ...styles.sidebar,
@@ -843,18 +366,7 @@ export const HelpSidebar = fp.flow(
       );
     }
 
-    private runtimeTooltip(baseTooltip: string): string {
-      const { loadingError } = this.props.runtimeStore;
-      if (loadingError) {
-        if (loadingError instanceof ComputeSecuritySuspendedError) {
-          return `Security suspended: ${baseTooltip}`;
-        }
-        return `${baseTooltip} (unknown error)`;
-      }
-      return baseTooltip;
-    }
-
-    sidebarContent(activeIcon): {
+    sidebarContent(activeIcon: SidebarIconId): {
       overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
@@ -906,7 +418,9 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () => (
-              <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)} />
+              <RuntimeConfigurationPanel
+                onClose={() => this.setActiveIcon(null)}
+              />
             ),
             showFooter: false,
           };
@@ -988,18 +502,19 @@ export const HelpSidebar = fp.flow(
       const {
         workspace,
         workspace: { namespace, id },
+        pageKey,
+        criteria,
       } = this.props;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu =
-        !this.iconConfig('concept').showIcon() &&
-        !this.iconConfig('criteria').showIcon();
+        !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
 
       return (
         <div id='help-sidebar'>
           <div
             style={{
               ...styles.iconContainer,
-              ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY
+              ...(pageKey === LEONARDO_APP_PAGE_KEY
                 ? styles.notebookOverrides
                 : {}),
             }}
@@ -1043,7 +558,10 @@ export const HelpSidebar = fp.flow(
                   </React.Fragment>
                 }
               >
-                <div data-test-id='workspace-menu-button'>
+                <div
+                  aria-label='Open Actions Menu'
+                  data-test-id='workspace-menu-button'
+                >
                   <TooltipTrigger content={<div>Menu</div>} side='left'>
                     <div
                       style={styles.icon}
@@ -1063,74 +581,10 @@ export const HelpSidebar = fp.flow(
                 </div>
               </PopupTrigger>
             )}
-            {this.icons().map((icon, i) => (
-              <div key={i} style={{ display: 'table' }}>
-                <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
-                  <div
-                    style={
-                      activeIcon === icon.id
-                        ? iconStyles.active
-                        : icon.disabled
-                        ? iconStyles.disabled
-                        : styles.icon
-                    }
-                    onClick={() => {
-                      if (icon.hasContent && !icon.disabled) {
-                        this.onIconClick(icon);
-                      }
-                    }}
-                  >
-                    {switchCase(
-                      icon.id,
-                      [
-                        'dataDictionary',
-                        () => (
-                          <a href={supportUrls.dataDictionary} target='_blank'>
-                            <FontAwesomeIcon
-                              data-test-id={'help-sidebar-icon-' + icon.id}
-                              icon={icon.faIcon}
-                              style={icon.style}
-                            />
-                          </a>
-                        ),
-                      ],
-                      ['runtime', () => this.displayRuntimeIcon(icon)],
-                      [
-                        'terminal',
-                        () => (
-                          <RouteLink
-                            path={`/workspaces/${namespace}/${id}/terminals`}
-                          >
-                            <FontAwesomeIcon
-                              data-test-id={'help-sidebar-icon-' + icon.id}
-                              icon={icon.faIcon}
-                              style={icon.style}
-                            />
-                          </RouteLink>
-                        ),
-                      ],
-                      [
-                        'genomicExtractions',
-                        () => this.displayExtractionIcon(icon),
-                      ],
-                      [
-                        DEFAULT,
-                        () =>
-                          icon.faIcon === null ? (
-                            <img
-                              data-test-id={'help-sidebar-icon-' + icon.id}
-                              src={proIcons[icon.id]}
-                              style={icon.style}
-                            />
-                          ) : (
-                            this.displayFontAwesomeIcon(icon)
-                          ),
-                      ]
-                    )}
-                  </div>
-                </TooltipTrigger>
-              </div>
-            ))}
+            <HelpSidebarIcons
+              {...{ ...this.props, activeIcon }}
+              onIconClick={(icon) => this.onIconClick(icon)}
+            />
           </div>
 
           <TransitionGroup>

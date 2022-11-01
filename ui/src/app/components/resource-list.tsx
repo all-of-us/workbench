@@ -23,6 +23,8 @@ import {
 } from 'app/components/resource-card';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
 import {
   getDisplayName,
@@ -30,9 +32,6 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-
-import { findCdrVersion } from './cdr-versions';
-import { ROWS_PER_PAGE_RESOURCE_TABLE } from './constants';
 
 const styles = reactStyles({
   column: {
@@ -90,21 +89,21 @@ interface TableData {
   formattedLastModified: string;
   lastModifiedDateAsString: string;
   lastModifiedBy: string;
-  workspaceName: string;
   cdrVersionName: string;
   resource: WorkspaceResource;
+  workspace: Workspace;
 }
 
 interface Props {
   existingNameList: string[];
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
-  workspaceMap?: Map<string, Workspace>;
+  workspaces: Workspace[];
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   recentResourceSource?: boolean;
 }
 
-export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
+export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
   const [tableData, setTableData] = useState<TableData[]>();
 
   const reloadResources = async () => {
@@ -135,11 +134,6 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
     });
   };
 
-  const getWorkspace = (r: WorkspaceResource) => {
-    const { workspaceMap } = props;
-    return workspaceMap?.get(r.workspaceNamespace);
-  };
-
   const getCdrVersionName = (r: WorkspaceResource) => {
     const { cdrVersionTiersResponse } = props;
 
@@ -160,34 +154,44 @@ export const ResourcesList = fp.flow(withCdrVersions())((props: Props) => {
   };
 
   useEffect(() => {
-    const { workspaceResources } = props;
+    const { workspaces, workspaceResources } = props;
     if (workspaceResources) {
       setTableData(
-        workspaceResources.map((r) => {
-          return {
-            resource: r,
-            menu: renderResourceMenu(r),
-            resourceType: getTypeString(r),
-            resourceName: getDisplayName(r),
-            formattedLastModified: displayDateWithoutHours(
-              r.lastModifiedEpochMillis
-            ),
-            lastModifiedDateAsString: displayDate(r.lastModifiedEpochMillis),
-            cdrVersionName: getCdrVersionName(r),
-            workspaceName: getWorkspace(r)?.name,
-            lastModifiedBy: r.lastModifiedBy,
-          };
-        })
+        fp.flatMap((r) => {
+          const workspace = workspaces.find(
+            (w) => w.namespace === r.workspaceNamespace
+          );
+          // Don't return resources where we no longer have access to the workspace.
+          // For example: the owner has unshared the workspace, but a recent-resource entry remains.
+          return workspace
+            ? [
+                {
+                  resource: r,
+                  workspace,
+                  menu: renderResourceMenu(r),
+                  resourceType: getTypeString(r),
+                  resourceName: getDisplayName(r),
+                  formattedLastModified: displayDateWithoutHours(
+                    r.lastModifiedEpochMillis
+                  ),
+                  lastModifiedDateAsString: displayDate(
+                    r.lastModifiedEpochMillis
+                  ),
+                  cdrVersionName: getCdrVersionName(r),
+                  lastModifiedBy: r.lastModifiedBy,
+                },
+              ]
+            : [];
+        }, workspaceResources)
       );
     }
   }, [props.workspaceResources]);
 
   const displayWorkspace = (rowData) => {
-    const { resource } = rowData;
+    const { workspace, resource } = rowData;
     return (
       <WorkspaceNavigation
-        workspace={getWorkspace(resource)}
-        resource={resource}
+        {...{ workspace, resource }}
         style={styles.navigation}
       />
     );

@@ -2,7 +2,7 @@ const fsp = require('fs').promises
 const config = require('../src/config')
 const impersonate = require('../src/impersonate')
 const tu = require('../src/test-utils')
-const utils = require('../src/utils')
+const u = require('../src/utils')
 
 const browserTest = tu.browserTest(__filename)
 
@@ -13,16 +13,16 @@ browserTest('create a workspace', async browser => {
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
-  const createWorkspaceLink = await page.waitForSelector('clr-icon[shape="plus-circle"]')
-  await utils.delayP(100) // just long-enough to allow a re-render
-  await createWorkspaceLink.click()
+
+  const createWorkspaceLink = await page.waitForSelector('[aria-label="Create Workspace"]')
+  // Workspace creation isn't really available until billing accounts have been fetched.
+  const [baEventPromise] = await tu.promiseWindowEvent(page, 'billing-accounts-loaded')
+  await Promise.all([baEventPromise, createWorkspaceLink.click()])
+
   await expect(page.waitForSelector('title').then(eh => eh.evaluate(n => n.innerText)))
     .resolves.toContain('Create Workspace |')
-  // Workspace creation isn't really available until billing accounts have been fetched.
-  await page.waitForSelector('[data-test-id="billing-dropdown-div"]')
-  const createButton = await page.waitForFunction(
-    () => [...document.querySelectorAll('[role="button"]')]
-      .filter(n => n.innerText.toLowerCase() === 'create workspace')[0])
+  await page.waitForSelector('#billing-dropdown-container')
+  const createButton = await page.waitForSelector('[role="button"][aria-label="Create Workspace"]')
   await expect(createButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
   const wsName = `test-ws-share-202207311932`
   await page.type('[placeholder="Workspace Name"]', wsName)
@@ -33,40 +33,36 @@ browserTest('create a workspace', async browser => {
   await expect(page.waitForSelector('[data-test-id="otherDisseminateResearch-text"]')
     .then(eh => eh.evaluate(e => e.disabled)))
     .resolves.toBe(true)
-  // Why doesn't this work?
-  // await page.click('input[data-test-id="OTHER-checkbox"]')
-  await page.waitForSelector('input[data-test-id="OTHER-checkbox"]')
-    .then(eh => eh.evaluate(e => e.click()))
+  await tu.jsClick(page, 'input[data-test-id="OTHER-checkbox"]')
   await expect(page.waitForSelector('[data-test-id="otherDisseminateResearch-text"]')
     .then(eh => eh.evaluate(e => e.disabled)))
     .resolves.toBe(false)
   await page.type('textarea[data-test-id="otherDisseminateResearch-text"]', 'Team test reports.')
-  await page.evaluate(() =>
-    Array.from(document.querySelectorAll('input[type="checkbox"]'))[17].click()) // no
+  await tu.jsClick(page,
+    'input[aria-label="None of these statements apply to this research project"]')
   await page.click('input[type="radio"][data-test-id="specific-population-no"]')
-  await page.click('div > div + div > input[type="radio"][name="reviewRequested"]')
+  await page.click('input[aria-label="Do Not Request Review"]')
   await expect(createButton.evaluate(n => n.style.cursor)).resolves.toBe('pointer')
   await createButton.click()
-  await page.click('[role="dialog"] [role="button"] + [role="button"]')
+  await page.click('[role="button"][aria-label="Confirm"]')
+
   // Allow 30 seconds for workspace creation.
+  await page.waitForSelector('#workspace-top-nav-bar', {timeout: workspaceCreationTimeoutMs})
   const workspacePageTitleLink =
-    await page.waitForSelector('a[href="/workspaces"] + span + div > a',
-    {timeout: workspaceCreationTimeoutMs})
+    await page.waitForSelector('a[href="/workspaces"] + span + div > a')
   await expect(workspacePageTitleLink.evaluate(e => e.innerText)).resolves.toBe(wsName)
-  await page.click('[data-test-id="workspace-menu-button"]')
+  await page.click('[aria-label="Open Actions Menu"]')
   // side menu pops up
-  await page.click('div#popup-root clr-icon[shape="trash"]')
+  await page.click('[aria-label="Delete"]')
   // modal confirmation pops up
   const confirmButton =
-    await page.waitForSelector('[role="dialog"] [role="button"] + [role="button"]')
+    await page.waitForSelector('[role="button"][aria-label="Confirm Delete"]')
   await expect(confirmButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
   await page.type('[role="dialog"] input[placeholder="type DELETE to confirm"]', 'delete')
   await expect(confirmButton.evaluate(n => n.style.cursor)).resolves.toBe('pointer')
   await confirmButton.click()
+
   // automatic navigation to Workspaces page
-  await expect(page.waitForSelector(
-    '[data-test-id="signed-in"] > div:nth-child(2) h3', {timeout: workspaceDeletionTimeoutMs}
-    ).then(eh => eh.evaluate(e => e.innerText)))
-    .resolves.toBe('Workspaces')
+  await page.waitForSelector('#workspaces-list')
 }, workspaceCreationTimeoutMs + workspaceDeletionTimeoutMs + 10e3)
 

@@ -10,6 +10,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { resourceTableRows } from 'app/components/resource-list.spec';
 import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
@@ -49,13 +50,6 @@ describe('DataPage', () => {
         <DataComponent hideSpinner={() => {}} showSpinner={() => {}} />
       </MemoryRouter>
     );
-  };
-
-  const resourceTableRows = (wrapper) => {
-    return wrapper
-      .find('[data-test-id="resource-list"]')
-      .find('tbody')
-      .find('tr');
   };
 
   it('should render', async () => {
