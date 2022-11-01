@@ -79,8 +79,8 @@ const buildColumn = (props: ColumnProps) => {
       headerStyle={{ ...styles.colStyle, width: headerWidth }}
       sortable={!!sortField}
       excludeGlobalFilter={!filterable}
-      filterField={filterable && sortField}
-      filterMatchMode={filterable && 'contains'}
+      filterField={filterable ? sortField : undefined}
+      filterMatchMode={filterable ? 'contains' : undefined}
     />
   );
 };
