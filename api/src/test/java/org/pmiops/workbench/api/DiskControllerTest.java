@@ -210,7 +210,13 @@ public class DiskControllerTest {
             deletingPDName, LeonardoDiskStatus.DELETING, "2021-08-06T16:57:29.827954Z");
 
     Disk readyPD =
-        new Disk().size(300).diskType(DiskType.STANDARD).name(readyPDName).status(DiskStatus.READY);
+        new Disk()
+            .size(300)
+            .diskType(DiskType.STANDARD)
+            .name(readyPDName)
+            .status(DiskStatus.READY)
+            .isGceRuntime(true)
+            .createdDate("2021-08-06T17:57:29.827954Z");
 
     when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
@@ -233,7 +239,9 @@ public class DiskControllerTest {
             .size(300)
             .diskType(DiskType.STANDARD)
             .name(deletingPDName)
-            .status(DiskStatus.DELETING);
+            .status(DiskStatus.DELETING)
+            .isGceRuntime(true)
+            .createdDate("2021-08-06T19:57:29.827954Z");
 
     when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
