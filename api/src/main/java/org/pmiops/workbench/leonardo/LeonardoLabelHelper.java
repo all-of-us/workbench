@@ -21,6 +21,10 @@ public class LeonardoLabelHelper {
     return appType.toString().toLowerCase();
   }
 
+  public static AppType labelValueToAppType(String labelValue) {
+    return AppType.fromValue(labelValue.toUpperCase());
+  }
+
   /** Insert of update disk labels. */
   @SuppressWarnings("unchecked")
   public static Map<String, String> upsertLeonardoLabel(

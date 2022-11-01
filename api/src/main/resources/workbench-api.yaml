@@ -957,8 +957,8 @@ paths:
 
   "/v1/workspaces/{workspaceNamespace}/disks":
     get:
-      summary: Lists persistent disks in the user's workspace.
-      operationId: listAppsInWorkspace
+      summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
+      operationId: listDisksInWorkspace
       tags:
         - disks
       parameters:
@@ -974,12 +974,35 @@ paths:
             "$ref": "#/definitions/ErrorResponse"
 
   "/v1/workspaces/{workspaceNamespace}/disks/{diskName}":
+    get:
+      summary: Get the user's workspace persistent disk by name.
+      description: Returns the current user's latest created persistent disk, if any, which has been created
+        for the given workspace.
+      operationId: getDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+      responses:
+        200:
+          description: The persistent disk for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Disk"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     delete:
       summary: Delete a persistent disk.
       description: Delete the current user's latest created persistent disk
       operationId: deleteDisk
       tags:
-        - disk
+        - disks
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: path
@@ -1001,7 +1024,7 @@ paths:
       description: In order to update the configuration of a persistent disk, it must first be ready
       operationId: updateDisk
       tags:
-        - disk
+        - disks
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: path
@@ -4757,10 +4780,19 @@ definitions:
         description: Block size of persistent disk in bytes
       appType:
         $ref: "#/definitions/AppType"
-      isRuntimeDisk:
+      isGceRuntime:
         type: boolean
         default: false
-        description: True if disk is used by Runtime or being used by runtime
+        description: True if disk is used by Runtime or being used by GCE runtime
+      creator:
+        type: string
+        description: The email for the user that created this runtime
+      createdDate:
+        type: string
+        description: timestamp for the date this runtime was created in ISO 8601 format
+      dateAccessed:
+        type: string
+        description: timestamp for the date this runtime was last accessed in ISO 8601 format. This is null if it has not been deleted yet.
 
   WorkspaceListResponse:
     type: object
@@ -6611,7 +6643,7 @@ definitions:
     items:
       "$ref": "#/definitions/App"
 
-  ListDiskResponse:
+  ListDisksResponse:
     type: array
     items:
       "$ref": "#/definitions/Disk"
