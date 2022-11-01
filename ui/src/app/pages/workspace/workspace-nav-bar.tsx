@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 
 import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -143,7 +142,6 @@ const CdrVersion = (props: {
 const tabs = [
   { name: 'Data', link: 'data' },
   { name: 'Analysis', link: 'notebooks' },
-  //  Add this option once we are ready to show the new analysis tab for Apps
   // { name: 'Analysis (New)', link: 'apps' },
   { name: 'About', link: 'about' },
 ];
@@ -173,7 +171,7 @@ export const WorkspaceNavBar = fp.flow(
   const { ns, wsid } = useParams<MatchParams>();
 
   useEffect(() => {
-    if (environment.enableAppsAnalysisTab) {
+    if (serverConfigStore.get().config.enableGkeApp && tabs.length === 3) {
       tabs.push({ name: 'Analysis (New)', link: 'apps' });
     }
   }, []);
