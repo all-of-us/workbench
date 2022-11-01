@@ -1224,3 +1224,23 @@ export const withRuntimeStore = () => (WrappedComponent) => {
     return <WrappedComponent {...props} runtimeStore={value} />;
   };
 };
+
+export enum SparkConsolePath {
+  Yarn = 'yarn',
+  YarnTimeline = 'apphistory',
+  SparkHistory = 'sparkhistory',
+  JobHistory = 'jobhistory',
+}
+
+export enum PanelContent {
+  Create = 'Create',
+  Customize = 'Customize',
+  DeleteRuntime = 'DeleteRuntime',
+  DeleteUnattachedPd = 'DeleteUnattachedPd',
+  DeleteUnattachedPdAndCreate = 'DeleteUnattachedPdAndCreate',
+  DeleteUnattachedPdAndUpdate = 'DeleteUnattachedPdAndUpdate',
+  Disabled = 'Disabled',
+  ConfirmUpdate = 'ConfirmUpdate',
+  ConfirmUpdateWithDiskDelete = 'ConfirmUpdateWithDiskDelete',
+  SparkConsole = 'SparkConsole',
+}
