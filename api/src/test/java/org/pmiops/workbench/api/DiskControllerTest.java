@@ -44,6 +44,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -218,7 +219,8 @@ public class DiskControllerTest {
             .isGceRuntime(true)
             .createdDate("2021-08-06T17:57:29.827954Z");
 
-    when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
+    when(userDisksApi.listDisksByProject(
+            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody()).isEqualTo(readyPD);
   }
@@ -243,14 +245,16 @@ public class DiskControllerTest {
             .isGceRuntime(true)
             .createdDate("2021-08-06T19:57:29.827954Z");
 
-    when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
+    when(userDisksApi.listDisksByProject(
+            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody()).isEqualTo(deletingPD);
   }
 
   @Test
   public void testGetDisk_noDisks() throws ApiException {
-    when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
+    when(userDisksApi.listDisksByProject(
+            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
         .thenReturn(Collections.emptyList());
     assertThrows(NotFoundException.class, () -> diskController.getDisk(WORKSPACE_NS));
   }
@@ -265,7 +269,8 @@ public class DiskControllerTest {
             .status(null)
             .auditInfo(new LeonardoAuditInfo().createdDate("2021-08-06T16:57:29.827954Z"))
             .googleProject(GOOGLE_PROJECT_ID);
-    when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
+    when(userDisksApi.listDisksByProject(
+            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
         .thenReturn(ImmutableList.of(response));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody().getStatus())
         .isEqualTo(DiskStatus.UNKNOWN);

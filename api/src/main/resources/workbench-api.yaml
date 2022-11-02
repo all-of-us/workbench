@@ -976,8 +976,6 @@ paths:
   "/v1/workspaces/{workspaceNamespace}/disks/{diskName}":
     get:
       summary: Get the user's workspace persistent disk by name.
-      description: Returns the current user's latest created persistent disk, if any, which has been created
-        for the given workspace.
       operationId: getDisk
       tags:
         - disks

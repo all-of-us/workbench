@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.time.Clock;
@@ -209,7 +211,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     // Fetch disks as the service, which gets all disks for all workspaces.
     final List<LeonardoListPersistentDiskResponse> disks;
     try {
-      disks = disksApiProvider.get().listDisks(null /* labels */, false /* includeDeleted */);
+      disks =
+          disksApiProvider
+              .get()
+              .listDisks(/* labels */ null, /* includeDeleted */ false, LEONARDO_DISK_LABEL_KEYS);
     } catch (ApiException e) {
       throw new ServerErrorException("listDisks failed", e);
     }

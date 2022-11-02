@@ -146,11 +146,14 @@ public class DisksControllerTest {
             newerRstudioDisk.getAuditInfo().getCreatedDate(),
             AppType.RSTUDIO);
 
-    // GCE Disk: newer one is inactive, returns the older one.
+    // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
+    // active ones.
+    LeonardoListPersistentDiskResponse olderGceDisk =
+        newListPdResponse("gce1", LeonardoDiskStatus.READY, NOW.minusMillis(200).toString(), null);
     LeonardoListPersistentDiskResponse oldGceDisk =
-        newListPdResponse("gce1", LeonardoDiskStatus.READY, NOW.minusMillis(100).toString(), null);
+        newListPdResponse("gce2", LeonardoDiskStatus.READY, NOW.minusMillis(100).toString(), null);
     LeonardoListPersistentDiskResponse newerInactiveGceDisk =
-        newListPdResponse("gce2", LeonardoDiskStatus.DELETING, NOW.toString(), null);
+        newListPdResponse("gce3", LeonardoDiskStatus.DELETING, NOW.toString(), null);
     Disk expectedGceDisk =
         newDisk(
             oldGceDisk.getName(),

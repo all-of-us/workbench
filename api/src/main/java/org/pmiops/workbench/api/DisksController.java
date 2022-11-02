@@ -12,8 +12,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
@@ -54,7 +52,7 @@ public class DisksController implements DisksApiDelegate {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
     Disk disk =
-        leonardoMapper.toApGetDiskResponse(
+        leonardoMapper.toApiGetDiskResponse(
             leonardoNotebooksClient.getPersistentDisk(googleProject, diskName));
 
     if (DiskStatus.FAILED.equals(disk.getStatus())) {
@@ -110,27 +108,27 @@ public class DisksController implements DisksApiDelegate {
     // Iterate original list first to check if disks are valid. Print log if disks maybe in
     // incorrect state to help future debugging.
     // Disk maybe in incorrect state if having additional active state disks.
-    List<Disk> activateDisks =
+    List<Disk> activeDisks =
         disksToValidate.stream()
             .filter(d -> ACTIVE_DISK_STATUS.contains(d.getStatus()))
             .collect(Collectors.toList());
-    if (activateDisks.size() > (AppType.values().length + 1)) {
+    if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =
-          activateDisks.stream().map(Disk::getName).collect(Collectors.joining(","));
+          activeDisks.stream().map(Disk::getName).collect(Collectors.joining(","));
       log.warning(String.format("Maybe incorrect disks: %s", diskNameList));
     }
 
     List<Disk> recentDisks = new ArrayList<>();
     // Find the runtime disk with maximum creation time.
     Optional<Disk> runtimeDisk =
-        activateDisks.stream()
+        activeDisks.stream()
             .filter(Disk::getIsGceRuntime)
             .max(Comparator.comparing((r) -> Instant.parse(r.getCreatedDate())));
     runtimeDisk.ifPresent(recentDisks::add);
 
     // For each app type, find the disk with maximum creation time.
     Map<AppType, Disk> appDisks =
-        activateDisks.stream()
+        activeDisks.stream()
             .filter(d -> d.getAppType() != null)
             .collect(
                 Collectors.toMap(

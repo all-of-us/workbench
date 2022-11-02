@@ -502,7 +502,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       String googleProject, boolean includeDeleted) {
     DisksApi disksApi = diskApiProvider.get();
     return leonardoRetryHandler.run(
-        (context) -> disksApi.listDisksByProject(googleProject, null, includeDeleted));
+        (context) ->
+            disksApi.listDisksByProject(
+                googleProject, null, includeDeleted, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS));
   }
 
   @Override
@@ -575,7 +577,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     googleProjectId,
                     /* labels= */ null,
                     /* includeDeleted= */ false,
-                    /* includeLabels= */ null));
+                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }

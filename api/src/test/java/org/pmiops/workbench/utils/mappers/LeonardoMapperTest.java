@@ -205,12 +205,12 @@ public class LeonardoMapperTest {
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
             .status(DiskStatus.READY);
-    assertThat(mapper.toApGetDiskResponse(getPersistentDiskResponse)).isEqualTo(disk);
+    assertThat(mapper.toApiGetDiskResponse(getPersistentDiskResponse)).isEqualTo(disk);
 
     // RSTUDIO
     Map<String, String> rstudioLabel = new HashMap<>();
     rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
-    assertThat(mapper.toApGetDiskResponse(getPersistentDiskResponse.labels(rstudioLabel)))
+    assertThat(mapper.toApiGetDiskResponse(getPersistentDiskResponse.labels(rstudioLabel)))
         .isEqualTo(disk.appType(AppType.RSTUDIO).isGceRuntime(false));
   }
 }
