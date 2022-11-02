@@ -361,7 +361,7 @@ echo "ds_sleep_level - inserting data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_level\`
     (person_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min)
-SELECT person_id, sleep_date, ins_main_sleep, level, start_datetime, duration_in_min
+SELECT person_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min
 FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
 FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`)
 where rank = 1"
