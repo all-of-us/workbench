@@ -79,7 +79,7 @@ export const RuntimeStatusIcon = fp.flow(
             />
           );
 
-          if (store.loadingError) {
+          if (store?.loadingError) {
             if (store.loadingError instanceof ComputeSecuritySuspendedError) {
               return (
                 <FontAwesomeIcon
