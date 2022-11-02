@@ -12,14 +12,9 @@ import { ListPageHeader } from 'app/components/headers';
 import colors from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 export const AppsList = withCurrentWorkspace()((props) => {
   const { workspace } = props;
-
-  const canWrite = () => {
-    return WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
-  };
 
   useEffect(() => {
     props.hideSpinner();
@@ -41,9 +36,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
             onClick={() => {
               AnalyticsTracker.Notebooks.OpenCreateModal();
             }}
-            disabled={
-              workspace.billingStatus === BillingStatus.INACTIVE || !canWrite()
-            }
+            disabled={workspace.billingStatus === BillingStatus.INACTIVE}
           >
             <div style={{ paddingRight: '0.5rem' }}>Start</div>
             <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
