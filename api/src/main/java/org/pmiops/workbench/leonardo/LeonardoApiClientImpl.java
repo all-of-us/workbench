@@ -550,7 +550,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         (context) -> {
           appsApi.createApp(
               dbWorkspace.getGoogleProject(),
-              userProvider.get().getAppName(appType),
+              userProvider.get().generateAppName(appType),
               leonardoCreateAppRequest);
           return null;
         });
