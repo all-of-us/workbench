@@ -58,7 +58,9 @@
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_48",
       "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "accessTier": "registered"
     },
     {
@@ -89,7 +91,9 @@
       "numParticipants": 234525,
       "cdrDbName": "synth_c_2019q4_43",
       "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "storageBasePath": "5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
