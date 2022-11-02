@@ -1,0 +1,62 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "sleep_date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_main_sleep",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_in_bed",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_asleep",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_after_wakeup",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_awake",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_restless",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_deep",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_light",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_rem",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_wake",
+    "type": "INTEGER"
+  }
+]
