@@ -94,7 +94,7 @@ export const adminLockedGuard = (ns: string, wsid: string): Guard => {
 export const tempAppsAnalysisGuard = (ns: string, wsid: string): Guard => {
   return {
     allowed: (): boolean => serverConfigStore.get().config.enableGkeApp,
-    redirectPath: `/workspaces/${ns}/${wsid}/about`,
+    redirectPath: `/workspaces/${ns}/${wsid}/data`,
   };
 };
 

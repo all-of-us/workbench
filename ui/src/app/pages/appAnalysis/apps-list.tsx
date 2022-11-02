@@ -9,11 +9,9 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
-import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 export const AppsList = withCurrentWorkspace()((props) => {
@@ -21,14 +19,6 @@ export const AppsList = withCurrentWorkspace()((props) => {
 
   const canWrite = () => {
     return WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
-  };
-
-  const disabledCreateButtonText = () => {
-    if (workspace.billingStatus === BillingStatus.INACTIVE) {
-      return ACTION_DISABLED_INVALID_BILLING;
-    } else if (!canWrite()) {
-      return 'Write permission required to create notebooks';
-    }
   };
 
   useEffect(() => {
@@ -39,29 +29,25 @@ export const AppsList = withCurrentWorkspace()((props) => {
     <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
       <FlexColumn>
         <FlexRow>
-          {/* disable if user does not have write permission*/}
           <ListPageHeader style={{ paddingRight: '1.5rem' }}>
             Your Analysis
           </ListPageHeader>
-          <TooltipTrigger content={disabledCreateButtonText()}>
-            <Button
-              style={{
-                paddingLeft: '0.5rem',
-                height: '2rem',
-                backgroundColor: colors.secondary,
-              }}
-              onClick={() => {
-                AnalyticsTracker.Notebooks.OpenCreateModal();
-              }}
-              disabled={
-                workspace.billingStatus === BillingStatus.INACTIVE ||
-                !canWrite()
-              }
-            >
-              <div style={{ paddingRight: '0.5rem' }}>Start</div>
-              <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
-            </Button>
-          </TooltipTrigger>
+          <Button
+            style={{
+              paddingLeft: '0.5rem',
+              height: '2rem',
+              backgroundColor: colors.secondary,
+            }}
+            onClick={() => {
+              AnalyticsTracker.Notebooks.OpenCreateModal();
+            }}
+            disabled={
+              workspace.billingStatus === BillingStatus.INACTIVE || !canWrite()
+            }
+          >
+            <div style={{ paddingRight: '0.5rem' }}>Start</div>
+            <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
+          </Button>
         </FlexRow>
       </FlexColumn>
     </FadeBox>
