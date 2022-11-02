@@ -76,6 +76,10 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
     ) f on (p.person_id = f.person_id)"
 else
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -148,6 +152,10 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
     ) f on (p.person_id = f.person_id)
 LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (CAST(p.person_id as STRING) = w.sample_name)
 LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$ARRAY_TABLE\` a on (CAST(p.person_id as STRING) = a.sample_name)"
