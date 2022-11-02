@@ -15,16 +15,6 @@ import {
 } from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
-import { Clickable, StyledExternalLink } from 'app/components/buttons';
-import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
-import { HelpTips } from 'app/components/help-tips';
-import { withErrorModal } from 'app/components/modals';
-import { TooltipTrigger } from 'app/components/popups';
-import { PopupTrigger } from 'app/components/popups';
-import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
-import { Spinner } from 'app/components/spinners';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
@@ -50,27 +40,34 @@ import {
 } from 'app/utils/navigation';
 import { withRuntimeStore } from 'app/utils/runtime-utils';
 import {
-  CompoundRuntimeOpStore,
-  compoundRuntimeOpStore,
   routeDataStore,
   RuntimeStore,
   runtimeStore,
   withGenomicExtractionJobs,
-  withStore,
 } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+import times from 'assets/icons/times-light.svg';
 
+import { Clickable, StyledExternalLink } from './buttons';
+import { ConfirmDeleteModal } from './confirm-delete-modal';
+import { FlexColumn, FlexRow } from './flex';
+import { GenomicsExtractionTable } from './genomics-extraction-table';
 import {
   HelpSidebarIcons,
   IconConfig,
-  proIcons,
   showConceptIcon,
   showCriteriaIcon,
   SidebarIconId,
 } from './help-sidebar-icons';
+import { HelpTips } from './help-tips';
+import { withErrorModal } from './modals';
+import { TooltipTrigger } from './popups';
+import { PopupTrigger } from './popups';
+import { RuntimeConfigurationPanel } from './runtime-configuration-panel';
 import { RuntimeErrorModal } from './runtime-error-modal';
+import { Spinner } from './spinners';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -118,7 +115,7 @@ const styles = reactStyles({
     verticalAlign: 'middle',
   },
   sectionTitle: {
-    marginTop: '0.5rem',
+    marginTop: 0,
     fontWeight: 600,
     color: colors.primary,
   },
@@ -170,7 +167,6 @@ interface Props extends NavigationProps {
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
   runtimeStore: RuntimeStore;
-  compoundRuntimeOps: CompoundRuntimeOpStore;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtractionJobs: GenomicExtractionJob[];
   cohortContext: any;
@@ -201,7 +197,6 @@ export const HelpSidebar = fp.flow(
   withGenomicExtractionJobs,
   withCurrentWorkspace(),
   withRuntimeStore(),
-  withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withUserProfile(),
   withCdrVersions(),
   withNavigation
@@ -383,7 +378,6 @@ export const HelpSidebar = fp.flow(
               <h3
                 style={{
                   ...styles.sectionTitle,
-                  marginTop: 0,
                   lineHeight: 1.75,
                 }}
               >
@@ -407,7 +401,6 @@ export const HelpSidebar = fp.flow(
                 <h3
                   style={{
                     ...styles.sectionTitle,
-                    marginTop: 0,
                     lineHeight: 1.75,
                   }}
                 >
@@ -428,9 +421,7 @@ export const HelpSidebar = fp.flow(
           return {
             headerPadding: '0.5rem',
             renderHeader: () => (
-              <h3 style={{ ...styles.sectionTitle, marginTop: 0 }}>
-                Workspace storage
-              </h3>
+              <h3 style={styles.sectionTitle}>Workspace storage</h3>
             ),
             renderBody: () => (
               <HelpTips allowSearch={false} pageKey='notebook' />
@@ -458,9 +449,7 @@ export const HelpSidebar = fp.flow(
           return {
             headerPadding: '0.75rem',
             renderHeader: () => (
-              <h3 style={{ ...styles.sectionTitle, marginTop: 0 }}>
-                Selected Concepts
-              </h3>
+              <h3 style={styles.sectionTitle}>Selected Concepts</h3>
             ),
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
@@ -486,9 +475,7 @@ export const HelpSidebar = fp.flow(
             overflow: 'visible',
             headerPadding: '0.75rem',
             renderHeader: () => (
-              <h3 style={{ ...styles.sectionTitle, marginTop: 0 }}>
-                Genomic Extractions
-              </h3>
+              <h3 style={styles.sectionTitle}>Genomic Extractions</h3>
             ),
             bodyWidthRem: '30',
             renderBody: () => <GenomicsExtractionTable />,
@@ -627,7 +614,7 @@ export const HelpSidebar = fp.flow(
                               onClick={() => this.setActiveIcon(null)}
                             >
                               <img
-                                src={proIcons.times}
+                                src={times}
                                 style={{ height: '27px', width: '17px' }}
                                 alt='Close'
                               />
@@ -649,7 +636,7 @@ export const HelpSidebar = fp.flow(
 
                       {sidebarContent.showFooter && (
                         <div style={{ ...styles.footer }}>
-                          <h3 style={{ ...styles.sectionTitle, marginTop: 0 }}>
+                          <h3 style={styles.sectionTitle}>
                             Not finding what you're looking for?
                           </h3>
                           <p style={styles.contentItem}>
