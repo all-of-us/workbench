@@ -58,7 +58,7 @@ export async function redirectToRegisteredTraining() {
   const {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
-  const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on'`;
+  const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`;
   window.open(url, '_blank');
 }
 
@@ -68,7 +68,7 @@ export async function redirectToControlledTraining() {
   const {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
-  const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on'`;
+  const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`;
   window.open(url, '_blank');
 }
 
