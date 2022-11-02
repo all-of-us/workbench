@@ -37,7 +37,6 @@ public class DisksController implements DisksApiDelegate {
 
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoMapper leonardoMapper;
-  private final Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
 
   @Autowired
