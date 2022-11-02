@@ -390,7 +390,7 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: true,
           };
-        case 'runtimeConfig':
+        case 'apps':
           return {
             headerPadding: '0.75rem',
             renderHeader: () => (
