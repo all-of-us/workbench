@@ -42,11 +42,9 @@ public class DisksController implements DisksApiDelegate {
   @Autowired
   public DisksController(
       LeonardoApiClient leonardoNotebooksClient,
-      Provider<DbUser> userProvider,
       LeonardoMapper leonardoMapper,
       WorkspaceService workspaceService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
-    this.userProvider = userProvider;
     this.leonardoMapper = leonardoMapper;
     this.workspaceService = workspaceService;
   }
