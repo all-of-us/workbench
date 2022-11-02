@@ -142,6 +142,7 @@ const CdrVersion = (props: {
 const tabs = [
   { name: 'Data', link: 'data' },
   { name: 'Analysis', link: 'notebooks' },
+  // { name: 'Analysis (New)', link: 'apps' },
   { name: 'About', link: 'about' },
 ];
 
@@ -168,6 +169,12 @@ export const WorkspaceNavBar = fp.flow(
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
   const [navigate] = useNavigation();
   const { ns, wsid } = useParams<MatchParams>();
+
+  useEffect(() => {
+    if (serverConfigStore.get().config.enableGkeApp && tabs.length === 3) {
+      tabs.push({ name: 'Analysis (New)', link: 'apps' });
+    }
+  }, []);
 
   const navTab = (currentTab, disabled) => {
     const { name, link } = currentTab;

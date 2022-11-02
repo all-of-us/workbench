@@ -18,7 +18,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { authStore, profileStore } from 'app/utils/stores';
+import { authStore, profileStore, serverConfigStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
 
@@ -86,6 +86,15 @@ export const adminLockedGuard = (ns: string, wsid: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
     redirectPath: `/workspaces/${ns}/${wsid}/about`,
+  };
+};
+
+// Temp: Since the new analysis page is not ready yet, use the guard to prevent users to go to
+// new analysis page, if the flag is off
+export const tempAppsAnalysisGuard = (ns: string, wsid: string): Guard => {
+  return {
+    allowed: (): boolean => serverConfigStore.get().config.enableGkeApp,
+    redirectPath: `/workspaces/${ns}/${wsid}/data`,
   };
 };
 

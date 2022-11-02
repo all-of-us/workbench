@@ -11,6 +11,7 @@ import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import { LeonardoAppLauncher } from 'app/pages/analysis/leonardo-app-launcher';
 import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { NotebookList } from 'app/pages/analysis/notebook-list';
+import { AppsList } from 'app/pages/appAnalysis/apps-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortReviewPage } from 'app/pages/data/cohort-review/cohort-review-page';
 import { DetailPage } from 'app/pages/data/cohort-review/detail-page';
@@ -25,7 +26,7 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { adminLockedGuard } from 'app/routing/guards';
+import { adminLockedGuard, tempAppsAnalysisGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
@@ -85,6 +86,7 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
+const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppsList);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
@@ -126,6 +128,20 @@ export const WorkspaceRoutes = () => {
             pageKey: 'edit',
           }}
           workspaceEditMode={WorkspaceEditMode.Edit}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/apps`}
+        guards={[adminLockedGuard(ns, wsid), tempAppsAnalysisGuard(ns, wsid)]}
+      >
+        <AppsListPage
+          routeData={{
+            title: 'View Apps',
+            pageKey: 'apps',
+            workspaceNavBarTab: 'apps',
+            breadcrumb: BreadcrumbType.Workspace,
+          }}
         />
       </AppRoute>
       <AppRoute
