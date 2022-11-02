@@ -358,10 +358,10 @@ VALUES
   ($MAX_ID + 7, 'MINUTE_AFTER_WAKEUP', 'sleep_daily_summary.minute_after_wakeup', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
   ($MAX_ID + 8, 'MINUTE_AWAKE', 'sleep_daily_summary.minute_awake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
   ($MAX_ID + 9, 'MINUTE_RESTLESS', 'sleep_daily_summary.minute_restless', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
-  ($MAX_ID + 8, 'MINUTE_DEEP', 'sleep_daily_summary.minute_deep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
-  ($MAX_ID + 8, 'MINUTE_LIGHT', 'sleep_daily_summary.minute_light', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
-  ($MAX_ID + 8, 'MINUTE_REM', 'sleep_daily_summary.minute_rem', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
-  ($MAX_ID + 8, 'MINUTE_WAKE', 'sleep_daily_summary.minute_wake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary')"
+  ($MAX_ID + 10, 'MINUTE_DEEP', 'sleep_daily_summary.minute_deep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 11, 'MINUTE_LIGHT', 'sleep_daily_summary.minute_light', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 12, 'MINUTE_REM', 'sleep_daily_summary.minute_rem', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 13, 'MINUTE_WAKE', 'sleep_daily_summary.minute_wake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary')"
 
 echo "ds_linking - inserting fitbit sleep_level data"
 MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
