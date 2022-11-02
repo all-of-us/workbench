@@ -177,6 +177,7 @@ public class DisksControllerTest {
             ImmutableList.of(
                 oldRstudioDisk,
                 newerRstudioDisk,
+                olderGceDisk,
                 oldGceDisk,
                 newerInactiveGceDisk,
                 oldInactiveCromwellDisk,
