@@ -295,7 +295,7 @@ describe('HelpSidebar', () => {
     });
     const wrapper = await component();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtime' }).length
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(1);
   });
 

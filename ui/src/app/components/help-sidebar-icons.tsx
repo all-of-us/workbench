@@ -94,7 +94,7 @@ export type SidebarIconId =
   | 'notebooksHelp'
   | 'dataDictionary'
   | 'annotations'
-  | 'runtime'
+  | 'apps'
   | 'terminal'
   | 'genomicExtractions';
 
@@ -310,7 +310,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         </a>
       ),
     ],
-    ['runtime', () => displayRuntimeIcon(icon, workspace.namespace)],
+    ['apps', () => displayRuntimeIcon(icon, workspace.namespace)],
     [
       'terminal',
       () => (
@@ -336,7 +336,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         icon.faIcon === null ? (
           <img
             data-test-id={'help-sidebar-icon-' + icon.id}
-            src={icon.id === 'runtime' && thunderstorm}
+            src={icon.id === 'apps' && thunderstorm}
             style={icon.style}
           />
         ) : (
@@ -432,8 +432,8 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: 'Annotations',
       hasContent: true,
     },
-    runtime: {
-      id: 'runtime',
+    apps: {
+      id: 'apps',
       disabled: !!loadingError,
       faIcon: null,
       label: 'Cloud Icon',
@@ -506,7 +506,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('runtime', 'terminal');
+    keys.push('apps', 'terminal');
   }
 
   if (

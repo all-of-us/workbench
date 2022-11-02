@@ -95,7 +95,7 @@ export const RuntimeInitializerModal = ({
           data-test-id='runtime-initializer-configure'
           type='secondary'
           onClick={() => {
-            setSidebarActiveIconStore.next('runtime');
+            setSidebarActiveIconStore.next('apps');
             cancel();
           }}
         >
