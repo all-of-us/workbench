@@ -23,6 +23,7 @@ import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
@@ -155,6 +156,8 @@ const SearchGroupList = fp.flow(
 
     getMenuOptions() {
       const {
+        cdrVersionTiersResponse,
+        workspace,
         workspace: { cdrVersionId, id, namespace },
       } = this.props;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
@@ -170,7 +173,24 @@ const SearchGroupList = fp.flow(
                   id,
                   option.id
                 );
-                option.children = children.items.map(mapMenuItem);
+                const filterSurveyConductData =
+                  option.domain === Domain.SURVEY.toString() &&
+                  getCdrVersion(workspace, cdrVersionTiersResponse)
+                    .hasSurveyConductData;
+                // Survey items to hide if hasSurveyConductData cdr flag is enabled
+                const surveyConductMenuItems = [
+                  'Personal Medical History',
+                  'Family History',
+                  'Personal and Family Health History',
+                ];
+                // TODO Remove filter after fix for survey conduct data in new dataset is complete
+                option.children = children.items
+                  .filter(
+                    ({ name }) =>
+                      !filterSurveyConductData ||
+                      !surveyConductMenuItems.includes(name)
+                  )
+                  .map(mapMenuItem);
               }
               return option;
             })
