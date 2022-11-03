@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
+  CdrVersionTiersResponse,
   Concept,
   Domain,
   DomainCard as ConceptDomainCard,
@@ -22,10 +23,12 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
   validateInputForMySQL,
+  withCdrVersions,
   withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
 } from 'app/utils';
+import { getCdrVersion } from 'app/utils/cdr-versions';
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
@@ -236,6 +239,7 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
@@ -262,6 +266,7 @@ interface State {
 }
 
 export const ConceptHomepage = fp.flow(
+  withCdrVersions(),
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
   withCurrentWorkspace(),
@@ -295,7 +300,9 @@ export const ConceptHomepage = fp.flow(
 
     async loadDomainsAndSurveys() {
       const {
+        cdrVersionTiersResponse,
         cohortContext,
+        workspace,
         workspace: { id, namespace },
       } = this.props;
       this.setState({
@@ -314,9 +321,21 @@ export const ConceptHomepage = fp.flow(
         });
       const getSurveyInfo = cohortBuilderApi()
         .findSurveyModules(namespace, id)
-        .then((surveysInfo) =>
-          this.setState({ conceptSurveysList: surveysInfo.items })
-        )
+        .then((surveysInfo) => {
+          const { hasSurveyConductData } = getCdrVersion(
+            workspace,
+            cdrVersionTiersResponse
+          );
+          // Surveys to hide if hasSurveyConductData cdr flag is enabled
+          const surveyConductConceptIds = [1740639, 43529712, 43528698];
+          // TODO Remove condition and filter after fix for survey conduct data in new dataset is complete
+          const surveysList = hasSurveyConductData
+            ? surveysInfo.items.filter(
+                ({ conceptId }) => !surveyConductConceptIds.includes(conceptId)
+              )
+            : surveysInfo.items;
+          this.setState({ conceptSurveysList: surveysList });
+        })
         .catch((e) => {
           this.setState({ surveyInfoError: true });
           console.error(e);

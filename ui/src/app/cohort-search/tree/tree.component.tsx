@@ -284,7 +284,7 @@ export const CriteriaTree = fp.flow(
         }
         const filterSurveyConductData =
           domain === Domain.SURVEY &&
-          !getCdrVersion(workspace, cdrVersionTiersResponse)
+          getCdrVersion(workspace, cdrVersionTiersResponse)
             .hasSurveyConductData;
         // Surveys to hide if hasSurveyConductData cdr flag is enabled
         const surveyConductConceptIds = [1740639, 43529712, 43528698];
