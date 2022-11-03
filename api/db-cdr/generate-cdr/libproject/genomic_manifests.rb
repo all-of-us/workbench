@@ -401,7 +401,7 @@ def _read_previous_manifest(project, dest_bucket, deltaReleaseManifestPath, delt
   end
 
   # Try to find the manifest given the deltaRelease field.
-  unless deltaRelease.nil? or not prev_manifest.empty?
+  if not deltaRelease.nil? and prev_manifest.empty?
     manifest_path = "#{dest_bucket}/#{deltaRelease}/#{infix}/manifest.csv"
     prev_manifest = common.capture_stdout(["gsutil", "-i", deploy_account, "cat", manifest_path])
   end
