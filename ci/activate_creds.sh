@@ -2,7 +2,7 @@
 
 # Creates credentials file $1 from two environment variables (see
 # below) which combine to decrypt the keys for a service account.
-# Does gcloud auth using the result.
+# Does gcloud auth and docker auth using the result.
 if [ ! "${GCLOUD_CREDENTIALS}" ]
 then
   echo "No GCLOUD_CREDENTIALS env var defined, aborting creds activation."
@@ -14,4 +14,4 @@ echo $GCLOUD_CREDENTIALS | \
      > $1
 
 gcloud auth activate-service-account --key-file $1
-
+gcloud auth configure-docker us-central1-docker.pkg.dev
