@@ -534,6 +534,8 @@ jobs:
           name: Run tests
           working_directory: e2ev2
           command: |
+            set +e
+            set -v
             ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
