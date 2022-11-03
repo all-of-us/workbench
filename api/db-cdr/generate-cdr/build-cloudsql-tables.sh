@@ -144,7 +144,7 @@ fi
 
 #  Getting count for Cope Minute Survey
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
-where concept_id = 765936"
+where concept_id = 1741006"
 minuteCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 if [[ "$minuteCount" > 0 ]]; then
   # Insert row for Cope Minute Survey
@@ -152,21 +152,20 @@ if [[ "$minuteCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (765936,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,9)"
+  (1741006,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,9)"
 fi
 
-echo "Updating survey names on survey_module"
+echo "Updating survey names on survey_module from cb_criteria table"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\` sm
-SET sm.name = c.concept_name
+SET sm.name = cbc.name
 FROM (
-  SELECT concept_name, concept_id
-  FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-  WHERE domain_id = 'Observation'
-  AND vocabulary_id = 'PPI'
-  AND concept_class_id = 'Module'
-) c
-WHERE sm.concept_id = c.concept_id"
+  SELECT name, concept_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+  WHERE domain_id = 'SURVEY'
+  AND parent_id = 0
+) cbc
+WHERE sm.concept_id = cbc.concept_id"
 
 # Populate cb_person table
 echo "Inserting cb_person"
