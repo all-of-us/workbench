@@ -17,9 +17,9 @@ const parseUrl = (protocol, req) => {
 }
 
 
-export const createReqHandler = handleReq => {
+export const createReqHandler = (logPath, handleReq) => {
   let requestIndex = 0
-  const {log} = createLogger()
+  const {log} = createLogger(logPath)
   return async (req, res) => {
     req.startTimeMs = Date.now()
     req.index = requestIndex++
@@ -89,10 +89,10 @@ export const create = () => {
   return server
 }
 
-export const startServer = async port => {
+export const startServer = async (port, logPath) => {
   const server = create()
   server.listen(port)
-  server.on('request', createReqHandler(async (req, res) => {
+  server.on('request', createReqHandler(logPath, async (req, res) => {
     return handleReq(req, res)
   }))
 }

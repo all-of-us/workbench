@@ -500,39 +500,20 @@ jobs:
           name: Build
           working_directory: ui
           command: |
-            # Redirection here suppresses this warning:
-            #   *** WARNING : deprecated key derivation used.
-            #   Using -iter or -pbkdf2 would be better.
-            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
-              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
-              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
-            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
-            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+            ../.circleci/activate-service-account.sh
+            source ../.circleci/PR_SITE_NUM.sh
+            export PR_SITE_NUM
 
-            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
-            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
-
-            gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
-            yarn install
-            yarn codegen
-            REACT_APP_ENVIRONMENT=test yarn run build --aot --no-watch --no-progress
+            ./src/circle-build.sh
       - run:
           name: Deploy
           working_directory: ui
           command: |
-            # Redirection here suppresses this warning:
-            #   *** WARNING : deprecated key derivation used.
-            #   Using -iter or -pbkdf2 would be better.
-            SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
-              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
-              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
-            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
-            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
+            ../.circleci/activate-service-account.sh
+            source ../.circleci/PR_SITE_NUM.sh
+            export PR_SITE_NUM
 
-            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
-            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
-
-            ../e2ev2/src/circle-deploy-ui.sh
+            ./src/circle-deploy.sh
   e2etests-run:
     machine:
       image: ubuntu-2204:2022.04.1
@@ -549,21 +530,15 @@ jobs:
           name: Run tests
           working_directory: e2ev2
           command: |
-            # Redirection here suppresses this warning:
-            #   *** WARNING : deprecated key derivation used.
-            #   Using -iter or -pbkdf2 would be better.
-            export SA_KEY_JSON="$(echo "$GCLOUD_CREDENTIALS" \
-              | openssl enc -d -md sha256 -aes-256-cbc -base64 -A \
-              -k "$GCLOUD_CREDENTIALS_KEY" 2>/dev/null)"
-            SA_EMAIL="$(echo "$SA_KEY_JSON" | jq -r .client_email)"
-            echo "$SA_KEY_JSON" | gcloud auth activate-service-account "$SA_EMAIL" --key-file=-
-
-            export PR_NUM="$(echo "$CIRCLE_PULL_REQUEST" | perl -ne "/(\d+)\$/; print \$1")"
-            export PR_SITE_NUM="$(expr $PR_NUM % $PR_SITE_COUNT)"
+            ../.circleci/activate-service-account.sh
+            source ../.circleci/PR_SITE_NUM.sh
+            export PR_SITE_NUM
 
             ./src/circle-run-tests.sh
       - store_artifacts:
           path: e2ev2/screenshots
+      - store_artifacts:
+          path: e2ev2/api-proxy.log.txt
 
   ui-deploy-to-test:
     executor: workbench-executor
