@@ -544,7 +544,7 @@ jobs:
       - store_artifacts:
           path: e2ev2/screenshots
       - store_artifacts:
-          path: e2ev2/api-proxy.log.txt
+          path: api-proxy/api-proxy.log.txt
 
   ui-deploy-to-test:
     executor: workbench-executor
