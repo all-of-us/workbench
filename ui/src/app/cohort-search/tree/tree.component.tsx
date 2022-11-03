@@ -218,10 +218,12 @@ export const CriteriaTree = fp.flow(
     async loadRootNodes() {
       try {
         const {
+          cdrVersionTiersResponse,
           domain,
           node: { id, isStandard, parentId, subtype, type },
           selectedSurvey,
           source,
+          workspace,
         } = this.props;
         this.setState({ loading: true });
         const {
@@ -268,7 +270,7 @@ export const CriteriaTree = fp.flow(
             ? cohortBuilderApi().findVersionedSurveys(namespace, workspaceId)
             : Promise.resolve(null),
         ];
-        const [rootNodes, criteriaLookup, versionedSurveyLookup] =
+        const [criteriaResponse, criteriaLookup, versionedSurveyLookup] =
           await Promise.all(promises);
         if (criteriaLookup) {
           updateCriteriaSelectionStore(criteriaLookup.items, domain);
@@ -280,10 +282,22 @@ export const CriteriaTree = fp.flow(
             ),
           });
         }
+        const filterSurveyConductData =
+          domain === Domain.SURVEY &&
+          !getCdrVersion(workspace, cdrVersionTiersResponse)
+            .hasSurveyConductData;
+        // Surveys to hide if hasSurveyConductData cdr flag is enabled
+        const surveyConductConceptIds = [1740639, 43529712, 43528698];
+        // TODO Remove condition and filter after fix for survey conduct data in new dataset is complete
+        const rootNodes = filterSurveyConductData
+          ? criteriaResponse.items.filter(
+              ({ conceptId }) => !surveyConductConceptIds.includes(conceptId)
+            )
+          : criteriaResponse.items;
         if (domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT) {
           let children = [];
           const rootParentId = domain === Domain.VISIT ? -1 : 0;
-          rootNodes.items.forEach((child) => {
+          rootNodes.forEach((child) => {
             // Property 'children' does not exist on type 'Criteria'
             // TODO RW-5572 confirm proper behavior and fix
             // eslint-disable-next-line @typescript-eslint/dot-notation
@@ -298,7 +312,7 @@ export const CriteriaTree = fp.flow(
         } else if (domain === Domain.SURVEY && selectedSurvey) {
           if (source === 'cohort' && selectedSurvey !== 'All Surveys') {
             this.setState({
-              children: rootNodes.items.filter(
+              children: rootNodes.filter(
                 (child) => child.name === selectedSurvey
               ),
             });
@@ -306,28 +320,28 @@ export const CriteriaTree = fp.flow(
             // Temp: This should be handle in API
             this.updatePpiSurveys(
               rootNodes,
-              rootNodes.items.filter((child) => child.name === selectedSurvey)
+              rootNodes.filter((child) => child.name === selectedSurvey)
             );
           }
         } else if (domain === Domain.SURVEY && source === 'conceptSetDetails') {
           this.updatePpiSurveys(
             rootNodes,
-            rootNodes.items.filter((child) => child.id === parentId)
+            rootNodes.filter((child) => child.id === parentId)
           );
         } else {
           this.setState({
             children:
               domain === Domain.MEASUREMENT
                 ? // For Measurements, only show the subtype of the node selected in list search and don't display the code
-                  rootNodes.items
+                  rootNodes
                     .filter((node) => node.subtype === subtype)
                     .map((node) => ({ ...node, code: null }))
-                : rootNodes.items,
+                : rootNodes,
           });
           if (domain === Domain.SURVEY) {
             const rootSurveys = ppiSurveys.getValue();
             if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = rootNodes.items;
+              rootSurveys[cdrVersionId] = rootNodes;
               ppiSurveys.next(rootSurveys);
             }
           }
@@ -369,10 +383,10 @@ export const CriteriaTree = fp.flow(
             this.setState({ children: surveyResponse.items })
           );
       } else {
-        this.setState({ children: resp.items });
+        this.setState({ children: resp });
         const rootSurveys = ppiSurveys.getValue();
         if (!rootSurveys[cdrVersionId]) {
-          rootSurveys[cdrVersionId] = resp.items;
+          rootSurveys[cdrVersionId] = resp;
           ppiSurveys.next(rootSurveys);
         }
       }
