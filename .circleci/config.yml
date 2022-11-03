@@ -511,6 +511,8 @@ jobs:
           name: Deploy
           working_directory: ui
           command: |
+            set +e
+            set -v
             ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
