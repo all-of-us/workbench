@@ -16,7 +16,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench-image:
     type: string
-    default: "allofustest/workbench:buildimage-0.0.24"
+    default: "us-central1-docker.pkg.dev/all-of-us-workbench-test/allofustest/workbenchbuildimage-X.Y.Z"
   db-image:
     type: string
     default: "cimg/mysql:5.7"
@@ -170,7 +170,9 @@ commands:
                   echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
                   source $BASH_ENV
                 working_directory: ~/workbench
-
+     - run:
+         name: Authenticate with Google Artifact Registry
+         command: gcloud auth configure-docker us-central1-docker.pkg.dev
   halt-test-check:
     description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
     parameters:
