@@ -48,6 +48,8 @@ public enum BigQueryDataSetTableInfo {
   FITBIT_HEART_RATE_LEVEL(Domain.FITBIT_HEART_RATE_LEVEL, "ds_heart_rate_minute_level", null, null),
   FITBIT_ACTIVITY(Domain.FITBIT_ACTIVITY, "ds_activity_summary", null, null),
   FITBIT_INTRADAY_STEPS(Domain.FITBIT_INTRADAY_STEPS, "ds_steps_intraday", null, null),
+  FITBIT_SLEEP_DAILY_SUMMARY(Domain.FITBIT_SLEEP_DAILY_SUMMARY, "ds_sleep_daily_summary", null, null),
+  FITBIT_SLEEP_LEVEL(Domain.FITBIT_SLEEP_LEVEL, "ds_sleep_level", null, null),
   ZIP_CODE_SOCIOECONOMIC(Domain.ZIP_CODE_SOCIOECONOMIC, "ds_zip_code_socioeconomic", null, null);
 
   private final Domain domain;
@@ -79,16 +81,5 @@ public enum BigQueryDataSetTableInfo {
       }
     }
     return null;
-  }
-
-  private static class Constants {
-    private static final String CONDITION = "'CONDITION'";
-    private static final String CONDITION_RANK = "'%[condition_rank1]%'";
-    private static final String PROCEDURE = "'PROCEDURE'";
-    private static final String PROCEDURE_RANK = "'%[procedure_rank1]%'";
-    private static final String DRUG = "'DRUG'";
-    private static final String DRUG_RANK = "'%[drug_rank1]%'";
-    private static final String MEASUREMENT = "'MEASUREMENT'";
-    private static final String MEASUREMENT_RANK = "'%[measurement_rank1]%'";
   }
 }
