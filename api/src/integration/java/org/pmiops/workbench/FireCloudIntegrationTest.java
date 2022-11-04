@@ -100,7 +100,7 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
     // This test no longer fails, but let's keep it active with the opposite behavior.
     // When enforcement resumes, this will fail again, and we will be reminded to switch it back.
 
-    final boolean isToSEnforcedInTerraDev = false;
+    final boolean isToSEnforcedInTerraDev = true;
     if (isToSEnforcedInTerraDev) {
       assertThrows(ApiException.class, profileApi::me);
     } else {
