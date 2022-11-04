@@ -9,6 +9,7 @@ import {
   SurveyModule,
 } from 'generated/fetch';
 
+import { notSynthAndHasSurveyConductData } from 'app/cohort-search/search-group-list/search-group-list.component';
 import { AlertClose, AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
 import { DomainCardBase } from 'app/components/card';
@@ -322,14 +323,10 @@ export const ConceptHomepage = fp.flow(
       const getSurveyInfo = cohortBuilderApi()
         .findSurveyModules(namespace, id)
         .then((surveysInfo) => {
-          const { hasSurveyConductData } = getCdrVersion(
-            workspace,
-            cdrVersionTiersResponse
-          );
           // Surveys to hide if hasSurveyConductData cdr flag is enabled
           const surveyConductConceptIds = [1740639, 43529712, 43528698];
           // TODO Remove condition and filter after fix for survey conduct data in new dataset is complete
-          const surveysList = hasSurveyConductData
+          const surveysList = notSynthAndHasSurveyConductData(workspace)
             ? surveysInfo.items.filter(
                 ({ conceptId }) => !surveyConductConceptIds.includes(conceptId)
               )

@@ -6,6 +6,7 @@ import {
   CohortDefinition,
   CriteriaMenu,
   Domain,
+  Workspace,
 } from 'generated/fetch';
 
 import { CohortCriteriaMenu } from 'app/cohort-search/cohort-criteria-menu';
@@ -25,6 +26,7 @@ import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { cdrVersionStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -103,6 +105,14 @@ function mapMenuItem(item: CriteriaMenu) {
   };
 }
 
+export const notSynthAndHasSurveyConductData = (workspace: Workspace) => {
+  const { hasSurveyConductData, name } = getCdrVersion(
+    workspace,
+    cdrVersionStore.get() as CdrVersionTiersResponse
+  );
+  return !name.includes('Synthetic') && hasSurveyConductData;
+};
+
 interface Props {
   groups: Array<any>;
   setSearchContext: (context: any) => void;
@@ -156,7 +166,6 @@ const SearchGroupList = fp.flow(
 
     getMenuOptions() {
       const {
-        cdrVersionTiersResponse,
         workspace,
         workspace: { cdrVersionId, id, namespace },
       } = this.props;
@@ -175,8 +184,7 @@ const SearchGroupList = fp.flow(
                 );
                 const filterSurveyConductData =
                   option.domain === Domain.SURVEY.toString() &&
-                  getCdrVersion(workspace, cdrVersionTiersResponse)
-                    .hasSurveyConductData;
+                  notSynthAndHasSurveyConductData(workspace);
                 // Survey items to hide if hasSurveyConductData cdr flag is enabled
                 const surveyConductMenuItems = [
                   'Personal Medical History',

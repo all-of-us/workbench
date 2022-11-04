@@ -10,6 +10,7 @@ import {
 } from 'generated/fetch';
 
 import { SearchBar } from 'app/cohort-search/search-bar/search-bar.component';
+import { notSynthAndHasSurveyConductData } from 'app/cohort-search/search-group-list/search-group-list.component';
 import { ppiSurveys } from 'app/cohort-search/search-state.service';
 import { TreeNode } from 'app/cohort-search/tree-node/tree-node.component';
 import { ClrIcon } from 'app/components/icons';
@@ -218,7 +219,6 @@ export const CriteriaTree = fp.flow(
     async loadRootNodes() {
       try {
         const {
-          cdrVersionTiersResponse,
           domain,
           node: { id, isStandard, parentId, subtype, type },
           selectedSurvey,
@@ -284,8 +284,7 @@ export const CriteriaTree = fp.flow(
         }
         const filterSurveyConductData =
           domain === Domain.SURVEY &&
-          getCdrVersion(workspace, cdrVersionTiersResponse)
-            .hasSurveyConductData;
+          notSynthAndHasSurveyConductData(workspace);
         // Surveys to hide if hasSurveyConductData cdr flag is enabled
         const surveyConductConceptIds = [1740639, 43529712, 43528698];
         // TODO Remove condition and filter after fix for survey conduct data in new dataset is complete
