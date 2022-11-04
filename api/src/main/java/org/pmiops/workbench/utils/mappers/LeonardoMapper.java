@@ -1,5 +1,8 @@
 package org.pmiops.workbench.utils.mappers;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.labelValueToAppType;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
@@ -19,6 +22,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
@@ -111,7 +115,41 @@ public interface LeonardoMapper {
 
   DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
 
-  Disk toApiDisk(LeonardoListPersistentDiskResponse disk);
+  @Mapping(target = "creator", source = "auditInfo.creator")
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "isGceRuntime", ignore = true)
+  Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
+
+  @Mapping(target = "creator", source = "auditInfo.creator")
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "isGceRuntime", ignore = true)
+  Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
+
+  @SuppressWarnings("unchecked")
+  @AfterMapping
+  default void getDiskAfterMapper(
+      @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
+    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoGetDiskResponse.getLabels());
+  }
+
+  @SuppressWarnings("unchecked")
+  @AfterMapping
+  default void listDisksAfterMapper(
+      @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
+    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoListDisksResponse.getLabels());
+  }
+
+  default void mapDiskLabelsToDiskAppType(Disk disk, Map<String, String> diskLabels) {
+    if (diskLabels != null && diskLabels.containsKey(LEONARDO_LABEL_APP_TYPE)) {
+      disk.appType(labelValueToAppType(diskLabels.get(LEONARDO_LABEL_APP_TYPE)));
+    } else {
+      disk.isGceRuntime(true);
+    }
+  }
 
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);

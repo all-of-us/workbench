@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,15 +13,20 @@ import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesError;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -156,5 +162,55 @@ public class LeonardoMapperTest {
             .googleProject(GOOGLE_PROJECT)
             .cloudContext(new LeonardoCloudContext().cloudResource(GOOGLE_PROJECT));
     assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app);
+  }
+
+  @Test
+  public void testToApiDiskFromListDiskResponse() {
+    LeonardoListPersistentDiskResponse listPersistentDiskResponse =
+        new LeonardoListPersistentDiskResponse()
+            .diskType(LeonardoDiskType.SSD)
+            .auditInfo(leonardoAuditInfo)
+            .status(LeonardoDiskStatus.READY);
+
+    Disk disk =
+        new Disk()
+            .diskType(DiskType.SSD)
+            .isGceRuntime(true)
+            .creator(leonardoAuditInfo.getCreator())
+            .dateAccessed(leonardoAuditInfo.getDateAccessed())
+            .createdDate(leonardoAuditInfo.getCreatedDate())
+            .status(DiskStatus.READY);
+    assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse)).isEqualTo(disk);
+
+    // RSTUDIO
+    Map<String, String> rstudioLabel = new HashMap<>();
+    rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
+    assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse.labels(rstudioLabel)))
+        .isEqualTo(disk.appType(AppType.RSTUDIO).isGceRuntime(false));
+  }
+
+  @Test
+  public void testToApiDiskFromGetDiskResponse() {
+    LeonardoGetPersistentDiskResponse getPersistentDiskResponse =
+        new LeonardoGetPersistentDiskResponse()
+            .diskType(LeonardoDiskType.SSD)
+            .auditInfo(leonardoAuditInfo)
+            .status(LeonardoDiskStatus.READY);
+
+    Disk disk =
+        new Disk()
+            .diskType(DiskType.SSD)
+            .isGceRuntime(true)
+            .creator(leonardoAuditInfo.getCreator())
+            .dateAccessed(leonardoAuditInfo.getDateAccessed())
+            .createdDate(leonardoAuditInfo.getCreatedDate())
+            .status(DiskStatus.READY);
+    assertThat(mapper.toApiGetDiskResponse(getPersistentDiskResponse)).isEqualTo(disk);
+
+    // RSTUDIO
+    Map<String, String> rstudioLabel = new HashMap<>();
+    rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
+    assertThat(mapper.toApiGetDiskResponse(getPersistentDiskResponse.labels(rstudioLabel)))
+        .isEqualTo(disk.appType(AppType.RSTUDIO).isGceRuntime(false));
   }
 }

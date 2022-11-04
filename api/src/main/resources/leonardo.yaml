@@ -471,6 +471,15 @@ paths:
           schema:
             type: boolean
             default: false
+        - in: query
+          name: includeLabels
+          description: >
+            Optional label keys of the labels returned in response. Example:
+            Querying by key1,key2,key3
+            returns all labels key1/val1 key2/val2 and key3 and val3 for each persistent disk in response
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of persistent disks
@@ -526,6 +535,15 @@ paths:
           schema:
             type: boolean
             default: false
+        - in: query
+          name: includeLabels
+          description: >
+            Optional label keys of the labels returned in response. Example:
+            Querying by key1,key2,key3
+            returns all labels key1/val1 key2/val2 and key3 and val3 for each app in response
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of persistent disks
@@ -2314,6 +2332,9 @@ components:
         blockSize:
           type: integer
           description: Block size of persistent disk in bytes
+        labels:
+          type: object
+          description: The labels of each persistent disk in the response whose key is in includeLabels in the request. Of type Map[String,String]
 
     GetPersistentDiskResponse:
       description: ""

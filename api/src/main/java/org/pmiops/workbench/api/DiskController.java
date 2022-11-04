@@ -77,7 +77,7 @@ public class DiskController implements DiskApiDelegate {
               pdNamePrefix, workspaceNamespace));
     }
 
-    return ResponseEntity.ok(leonardoMapper.toApiDisk(response));
+    return ResponseEntity.ok(leonardoMapper.toApiListDisksResponse(response));
   }
 
   @Override

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -191,7 +192,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   private void stubDisks(List<LeonardoListPersistentDiskResponse> disks) throws Exception {
-    when(mockDisksApi.listDisks(any(), any())).thenReturn(disks);
+    when(mockDisksApi.listDisks(any(), any(), anyString())).thenReturn(disks);
   }
 
   private void stubWorkspaceOwners(DbWorkspace w, List<DbUser> users) {

@@ -955,6 +955,96 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
+  "/v1/workspaces/{workspaceNamespace}/disks":
+    get:
+      summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
+      operationId: listDisksInWorkspace
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The persistent disk for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ListDisksResponse"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/workspaces/{workspaceNamespace}/disks/{diskName}":
+    get:
+      summary: Get the user's workspace persistent disk by name.
+      operationId: getDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+      responses:
+        200:
+          description: The persistent disk for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Disk"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a persistent disk.
+      description: Delete the current user's latest created persistent disk
+      operationId: deleteDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    patch:
+      summary: Updates the configuration of a persistent disk
+      description: In order to update the configuration of a persistent disk, it must first be ready
+      operationId: updateDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+        - in: query
+          name: diskSize
+          type: integer
+          description: Update disk disk Size
+          required: true
+      responses:
+        "200":
+          description: Persistent disk update request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        "404":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   "/v1/disks/{workspaceNamespace}":
     get:
       summary: Get the user's workspace persistent disk.
@@ -1023,6 +1113,7 @@ paths:
           description: Bad Request
           schema:
             $ref: "#/definitions/ErrorResponse"
+
   "/v1/workspaces":
     get:
       tags:
@@ -4685,6 +4776,22 @@ definitions:
       blockSize:
         type: integer
         description: Block size of persistent disk in bytes
+      appType:
+        $ref: "#/definitions/AppType"
+      isGceRuntime:
+        type: boolean
+        default: false
+        description: True if disk is used by Runtime or being used by GCE runtime
+      creator:
+        type: string
+        description: The email for the user that created this runtime
+      createdDate:
+        type: string
+        description: timestamp for the date this runtime was created in ISO 8601 format
+      dateAccessed:
+        type: string
+        description: timestamp for the date this runtime was last accessed in ISO 8601 format. This is null if it has not been deleted yet.
+
   WorkspaceListResponse:
     type: object
     required:
@@ -6533,6 +6640,12 @@ definitions:
     type: array
     items:
       "$ref": "#/definitions/App"
+
+  ListDisksResponse:
+    type: array
+    items:
+      "$ref": "#/definitions/Disk"
+
   UsernameTakenResponse:
     type: object
     required:
