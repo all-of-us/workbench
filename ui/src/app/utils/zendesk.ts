@@ -76,7 +76,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     },
     [ZendeskEnv.Preprod]: {
       ...commonUrls,
-      billing: section('360012893532'),
+      billing: section('360060301171'),
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
@@ -91,7 +91,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
-      billing: section('360009142932'),
+      billing: section('360044792211'),
       createBillingAccount: article('360044792211'),
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
