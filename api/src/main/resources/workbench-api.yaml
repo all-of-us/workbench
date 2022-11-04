@@ -4151,6 +4151,22 @@ paths:
           description: A collection of data filter options
           schema:
             "$ref": "#/definitions/DataFiltersResponse"
+  "/v1/surveys/newUserSatisfactionSurvey":
+    post:
+      tags:
+        - surveys
+      description: Stores user responses for the new user satisfaction survey.
+      operationId: createNewUserSatisfactionSurvey
+      parameters:
+        - in: body
+          name: NewUserSatisfactionSurvey
+          description: Survey response data
+          required: true
+          schema:
+            "$ref": "#/definitions/CreateNewUserSatisfactionSurvey"
+      responses:
+        200:
+          description: 'The survey responses were successfully stored.'
 definitions:
   ArchivalStatus:
     type: string
@@ -10215,3 +10231,19 @@ definitions:
       - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
       - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
       - PREFER_NOT_TO_ANSWER
+
+  CreateNewUserSatisfactionSurvey:
+    type: object
+    properties:
+      satisfaction:
+        type: string
+        description: How satisfied the user is with the researcher workbench
+        enum:
+          - VERY_UNSATISFIED
+          - UNSATISFIED
+          - NEUTRAL
+          - SATISFIED
+          - VERY_SATISFIED
+      additionalInfo:
+        type: string
+        description: Additional information regarding their satisfaction score
