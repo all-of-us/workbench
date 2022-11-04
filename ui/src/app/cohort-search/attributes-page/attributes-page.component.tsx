@@ -470,10 +470,14 @@ export const AttributesPage = fp.flow(
           loading: false,
         });
       } else {
-        options.unshift({
-          label: optionUtil.ANY.display,
-          value: AttrName[AttrName.ANY],
-        });
+        if (
+          !options.find((option) => option.value === AttrName.ANY.toString())
+        ) {
+          options.unshift({
+            label: optionUtil.ANY.display,
+            value: AttrName[AttrName.ANY],
+          });
+        }
         this.setState(
           { formValid: true, isCOPEOrMinuteSurvey: false, options },
           () => this.getAttributes()
