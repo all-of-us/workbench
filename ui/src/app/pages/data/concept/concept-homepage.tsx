@@ -29,7 +29,6 @@ import {
   withCurrentConcept,
   withCurrentWorkspace,
 } from 'app/utils';
-import { getCdrVersion } from 'app/utils/cdr-versions';
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
@@ -301,7 +300,6 @@ export const ConceptHomepage = fp.flow(
 
     async loadDomainsAndSurveys() {
       const {
-        cdrVersionTiersResponse,
         cohortContext,
         workspace,
         workspace: { id, namespace },
