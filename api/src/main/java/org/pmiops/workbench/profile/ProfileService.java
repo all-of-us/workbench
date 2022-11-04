@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
 import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,6 +73,7 @@ public class ProfileService {
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
+  private final NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
 
   @Autowired
   public ProfileService(
@@ -91,7 +93,8 @@ public class ProfileService {
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      NewUserSatisfactionSurveyService newUserSatisfactionSurveyService) {
     this.accessModuleService = accessModuleService;
     this.accessTierService = accessTierService;
     this.addressMapper = addressMapper;
@@ -109,6 +112,7 @@ public class ProfileService {
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
+    this.newUserSatisfactionSurveyService = newUserSatisfactionSurveyService;
   }
 
   // TODO: avoid all these separate queries by appropriate ORM mappings
@@ -144,7 +148,8 @@ public class ProfileService {
         freeTierDollarQuota,
         accessTierShortNames,
         userTierEligibilities,
-        accessModules);
+        accessModules,
+        newUserSatisfactionSurveyService);
   }
 
   public void validateAffiliation(Profile profile) {

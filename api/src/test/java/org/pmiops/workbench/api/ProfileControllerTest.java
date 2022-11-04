@@ -108,6 +108,7 @@ import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.ras.RasLinkService;
 import org.pmiops.workbench.shibboleth.ShibbolethService;
+import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -209,7 +210,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     FakeJpaDateTimeConfiguration.class,
     WorkspaceFreeTierUsageService.class,
   })
-  @MockBean({BigQueryService.class})
+  @MockBean({
+    BigQueryService.class,
+    NewUserSatisfactionSurveyService.class,
+  })
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

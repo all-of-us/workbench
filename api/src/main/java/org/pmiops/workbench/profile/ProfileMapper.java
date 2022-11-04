@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -17,6 +20,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
 import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -39,6 +43,7 @@ public interface ProfileMapper {
   @Mapping(source = "dbUser.duccAgreement.userInitials", target = "duccSignedInitials")
   @Mapping(source = "dbUser.duccAgreement.completionTime", target = "duccCompletionTimeEpochMillis")
   @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
+  @Mapping(target = "newUserSatisfactionSurveyEligibility", ignore = true)
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
@@ -47,7 +52,8 @@ public interface ProfileMapper {
       Double freeTierDollarQuota,
       List<String> accessTierShortNames,
       List<UserTierEligibility> tierEligibilities,
-      ProfileAccessModules accessModules);
+      ProfileAccessModules accessModules,
+      @Context NewUserSatisfactionSurveyService newUserSatisfactionSurveyService);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
@@ -60,5 +66,15 @@ public interface ProfileMapper {
       return Arrays.stream(commaSeparatedAccessTierShortNames.split(","))
           .collect(Collectors.toList());
     }
+  }
+
+  @AfterMapping
+  default void populateNewUserSatisfactionSurveyEligibility(
+      DbUser dbUser,
+      @MappingTarget Profile profile,
+      @Context NewUserSatisfactionSurveyService newUserSatisfactionSurveyService) {
+
+    profile.setNewUserSatisfactionSurveyEligibility(
+        newUserSatisfactionSurveyService.eligibleToTakeSurvey(dbUser));
   }
 }

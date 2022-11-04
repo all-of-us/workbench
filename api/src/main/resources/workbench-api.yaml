@@ -6095,6 +6095,8 @@ definitions:
               "$ref": "#/definitions/AccessModuleStatus"
       demographicSurveyV2:
         $ref: '#/definitions/DemographicSurveyV2'
+      newUserSatisfactionSurveyEligibility:
+        type: boolean
 
   AccessModuleStatus:
     type: object
