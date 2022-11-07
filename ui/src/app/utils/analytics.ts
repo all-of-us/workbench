@@ -314,7 +314,7 @@ export const AnalyticsTracker = {
         'Support - Policy'
       ),
     SupportVideo: () =>
-      triggerEvent(AnalyticsCategory.FOOTER, 'FAQ', 'Support - FAQ'),
+      triggerEvent(AnalyticsCategory.FOOTER, 'Videos', 'Support - Videos'),
     ContactUs: (suffix) =>
       triggerEvent(
         AnalyticsCategory.FOOTER,
