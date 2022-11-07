@@ -43,7 +43,7 @@ public class DbUser {
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
   private static final String APP_NAME_PREFIX = "all-of-us-";
-  @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
+  @VisibleForTesting static final int LEONARDO_UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
 
@@ -466,24 +466,19 @@ public class DbUser {
         Hashing.sha256()
             .hashUnencodedChars(UUID.randomUUID().toString())
             .toString()
-            .substring(0, PD_UUID_SUFFIX_SIZE);
-    return getUserPDNamePrefix() + "-" + randomString;
+            .substring(0, LEONARDO_UUID_SUFFIX_SIZE);
+    return getUserPDNamePrefix() + "-" + generateLeonardoRandomString();
   }
 
   /** Returns a name for the persistent disk used in APP to be created for this user. */
   @Transient
   public String generatePDNameForApp(AppType appType) {
-    String randomString =
-        Hashing.sha256()
-            .hashUnencodedChars(UUID.randomUUID().toString())
-            .toString()
-            .substring(0, PD_UUID_SUFFIX_SIZE);
-    return getUserPDNamePrefix() + '-' + appType.toString().toLowerCase() + "-" + randomString;
+    return getUserPDNamePrefix() + '-' + appType.toString().toLowerCase() + "-" + generateLeonardoRandomString();
   }
 
   @Transient
-  public String getAppName(AppType appType) {
-    return APP_NAME_PREFIX + getUserId() + '-' + appType.toString().toLowerCase();
+  public String generateAppName(AppType appType) {
+    return APP_NAME_PREFIX + getUserId() + '-' + appType.toString().toLowerCase() + "-" + generateLeonardoRandomString();
   }
 
   @Override
@@ -522,5 +517,13 @@ public class DbUser {
         .append(familyName)
         .append(address)
         .toHashCode();
+  }
+
+  private static String generateLeonardoRandomString() {
+    return
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, LEONARDO_UUID_SUFFIX_SIZE);
   }
 }
