@@ -1136,7 +1136,6 @@ export const DatasetPage = fp.flow(
         selectedDomainsWithConceptSetIds
       );
       if (selected) {
-        console.log(prepackaged);
         updatedPrepackaged.add(prepackaged);
         updatedDomainsWithConceptSetIds.add({
           conceptSetId: null,
@@ -1169,8 +1168,6 @@ export const DatasetPage = fp.flow(
           )
         );
       }
-      console.log(updatedDomainsWithConceptSetIds);
-      console.log(updatedPrepackaged);
       setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
       setSelectedPrepackagedConceptSets(updatedPrepackaged);
       setDataSetTouched(true);
