@@ -58,7 +58,6 @@ class NewUserSatisfactionSurveyServiceTest {
   @Test
   public void testEligibleToTakeSurvey_eligible() {
     final Instant threeWeeksAgo = PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS);
-    final int threeWeeks = 3 * 7;
     DbUserAccessTier userAccessTier =
         new DbUserAccessTier().setFirstEnabled(Timestamp.from(threeWeeksAgo));
     when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
