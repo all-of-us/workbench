@@ -57,8 +57,9 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "accessTier": "registered"
     },
     {
@@ -89,7 +90,9 @@
       "numParticipants": 234525,
       "cdrDbName": "cdr",
       "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "storageBasePath": "5",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
