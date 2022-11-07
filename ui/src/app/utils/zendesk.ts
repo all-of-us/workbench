@@ -61,14 +61,14 @@ export const supportUrls: ZendeskUrls = ((env) => {
   const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {
       ...commonUrls,
-      billing: section('360008099991'),
+      billing: section('360039539411'),
       createBillingAccount: article('360039539411'),
       dataDictionary: article('360033200232'),
       egressFaq: article('4407354684052'),
       faq: category('360002157532'),
       genomicExtraction: article('4558187754772'),
       gettingStarted: category('360002157352'),
-      gpus: article('4421259211668'),
+      gpus: article('4558692960660'),
       persistentDisk: article('5140493753620'),
       researchPurpose: article('360042673211'),
       tableOfContents: category('360002625291'),
@@ -76,7 +76,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     },
     [ZendeskEnv.Preprod]: {
       ...commonUrls,
-      billing: section('360012893532'),
+      billing: section('360060301171'),
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
@@ -91,7 +91,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
-      billing: section('360009142932'),
+      billing: section('360044792211'),
       createBillingAccount: article('360044792211'),
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
