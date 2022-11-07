@@ -663,6 +663,14 @@ const prepackedReverseEnum = {
   ZIP_CODE_SOCIOECONOMIC: 'ZIPCODESOCIOECONOMIC',
 };
 
+const prepackagedReverseEnum = () => {
+  const reverseEnum = {};
+  Object.keys(PrePackagedConceptSetEnum).forEach((pre) => {
+    reverseEnum[PrePackagedConceptSetEnum[pre]] = pre;
+  });
+  return reverseEnum;
+};
+
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrepackagedConceptSet.PERSON]: Domain.PERSON,
   [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY,
@@ -745,7 +753,7 @@ const apiEnumToPrePackageConceptSets = (
       case PrePackagedConceptSetEnum.NONE:
         break;
       default:
-        re.add(PrepackagedConceptSet[prepackedReverseEnum[pre]]);
+        re.add(PrepackagedConceptSet[prepackagedReverseEnum()[pre]]);
         break;
     }
   });
