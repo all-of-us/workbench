@@ -746,6 +746,14 @@ const apiEnumToPrePackageConceptSets = (
         re.add(PrepackagedConceptSet.FITBITACTIVITY);
         break;
       }
+      case PrePackagedConceptSetEnum.FITBITSLEEPDAILYSUMMARY: {
+        re.add(PrepackagedConceptSet.FITBITSLEEPDAILYSUMMARY);
+        break;
+      }
+      case PrePackagedConceptSetEnum.FITBITSLEEPLEVEL: {
+        re.add(PrepackagedConceptSet.FITBITSLEEPLEVEL);
+        break;
+      }
       case PrePackagedConceptSetEnum.WHOLEGENOME: {
         re.add(PrepackagedConceptSet.WHOLEGENOME);
         break;
@@ -1128,6 +1136,7 @@ export const DatasetPage = fp.flow(
         selectedDomainsWithConceptSetIds
       );
       if (selected) {
+        console.log(prepackaged);
         updatedPrepackaged.add(prepackaged);
         updatedDomainsWithConceptSetIds.add({
           conceptSetId: null,
@@ -1160,6 +1169,8 @@ export const DatasetPage = fp.flow(
           )
         );
       }
+      console.log(updatedDomainsWithConceptSetIds);
+      console.log(updatedPrepackaged);
       setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
       setSelectedPrepackagedConceptSets(updatedPrepackaged);
       setDataSetTouched(true);
@@ -1370,6 +1381,16 @@ export const DatasetPage = fp.flow(
             case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
               selectedPrePackagedConceptSDetEnum.push(
                 PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL
+              );
+              break;
+            case PrepackagedConceptSet.FITBITSLEEPDAILYSUMMARY:
+              selectedPrePackagedConceptSDetEnum.push(
+                PrePackagedConceptSetEnum.FITBITSLEEPDAILYSUMMARY
+              );
+              break;
+            case PrepackagedConceptSet.FITBITSLEEPLEVEL:
+              selectedPrePackagedConceptSDetEnum.push(
+                PrePackagedConceptSetEnum.FITBITSLEEPLEVEL
               );
               break;
             case PrepackagedConceptSet.WHOLEGENOME:
