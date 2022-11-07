@@ -647,28 +647,14 @@ enum PrepackagedConceptSet {
   ZIPCODESOCIOECONOMIC = 'Zip Code Socioeconomic Status Data',
 }
 
-const prepackedReverseEnum = {
-  NONE: 'NONE',
-  PERSON: 'PERSON',
-  SURVEY: 'SURVEY',
-  FITBIT: 'FITBIT',
-  FITBIT_HEART_RATE_SUMMARY: 'FITBITHEARTRATESUMMARY',
-  FITBIT_HEART_RATE_LEVEL: 'FITBITHEARTRATELEVEL',
-  FITBIT_ACTIVITY: 'FITBITACTIVITY',
-  FITBIT_INTRADAY_STEPS: 'FITBITINTRADAYSTEPS',
-  FITBIT_SLEEP_DAILY_SUMMARY: 'FITBITSLEEPDAILYSUMMARY',
-  FITBIT_SLEEP_LEVEL: 'FITBITSLEEPLEVEL',
-  WHOLE_GENOME: 'WHOLEGENOME',
-  BOTH: 'BOTH',
-  ZIP_CODE_SOCIOECONOMIC: 'ZIPCODESOCIOECONOMIC',
-};
-
 const prepackagedReverseEnum = () => {
-  const reverseEnum = {};
-  Object.keys(PrePackagedConceptSetEnum).forEach((pre) => {
-    reverseEnum[PrePackagedConceptSetEnum[pre]] = pre;
-  });
-  return reverseEnum;
+  return Object.keys(PrePackagedConceptSetEnum).reduce(
+    (reverseEnum, enumKey) => {
+      reverseEnum[PrePackagedConceptSetEnum[enumKey]] = enumKey;
+      return reverseEnum;
+    },
+    {}
+  );
 };
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
