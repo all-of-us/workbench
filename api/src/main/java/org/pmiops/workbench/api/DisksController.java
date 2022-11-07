@@ -134,7 +134,8 @@ public class DisksController implements DisksApiDelegate {
                 Collectors.toMap(
                     Disk::getAppType,
                     Function.identity(),
-                    BinaryOperator.maxBy(Comparator.comparing(Disk::getCreatedDate))));
+                    BinaryOperator.maxBy(
+                        Comparator.comparing((r) -> Instant.parse(r.getCreatedDate())))));
     recentDisks.addAll(appDisks.values());
     return recentDisks;
   }
