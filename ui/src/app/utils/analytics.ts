@@ -310,7 +310,7 @@ export const AnalyticsTracker = {
     SupportPolicy: () =>
       triggerEvent(
         AnalyticsCategory.FOOTER,
-        'Documentation',
+        'Policy',
         'Support - Policy'
       ),
     SupportVideo: () =>
