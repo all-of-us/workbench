@@ -647,6 +647,22 @@ enum PrepackagedConceptSet {
   ZIPCODESOCIOECONOMIC = 'Zip Code Socioeconomic Status Data',
 }
 
+const prepackedReverseEnum = {
+  NONE: 'NONE',
+  PERSON: 'PERSON',
+  SURVEY: 'SURVEY',
+  FITBIT: 'FITBIT',
+  FITBIT_HEART_RATE_SUMMARY: 'FITBITHEARTRATESUMMARY',
+  FITBIT_HEART_RATE_LEVEL: 'FITBITHEARTRATELEVEL',
+  FITBIT_ACTIVITY: 'FITBITACTIVITY',
+  FITBIT_INTRADAY_STEPS: 'FITBITINTRADAYSTEPS',
+  FITBIT_SLEEP_DAILY_SUMMARY: 'FITBITSLEEPDAILYSUMMARY',
+  FITBIT_SLEEP_LEVEL: 'FITBITSLEEPLEVEL',
+  WHOLE_GENOME: 'WHOLEGENOME',
+  BOTH: 'BOTH',
+  ZIP_CODE_SOCIOECONOMIC: 'ZIPCODESOCIOECONOMIC',
+};
+
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrepackagedConceptSet.PERSON]: Domain.PERSON,
   [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY,
@@ -722,48 +738,14 @@ const apiEnumToPrePackageConceptSets = (
         re.add(PrepackagedConceptSet.SURVEYS);
         break;
       }
-      case PrePackagedConceptSetEnum.PERSON: {
-        re.add(PrepackagedConceptSet.PERSON);
-        break;
-      }
       case PrePackagedConceptSetEnum.SURVEY: {
         re.add(PrepackagedConceptSet.SURVEYS);
         break;
       }
-      case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
-        re.add(PrepackagedConceptSet.FITBITHEARTRATESUMMARY);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
-        re.add(PrepackagedConceptSet.FITBITHEARTRATELEVEL);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS: {
-        re.add(PrepackagedConceptSet.FITBITINTRADAYSTEPS);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITACTIVITY: {
-        re.add(PrepackagedConceptSet.FITBITACTIVITY);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITSLEEPDAILYSUMMARY: {
-        re.add(PrepackagedConceptSet.FITBITSLEEPDAILYSUMMARY);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITSLEEPLEVEL: {
-        re.add(PrepackagedConceptSet.FITBITSLEEPLEVEL);
-        break;
-      }
-      case PrePackagedConceptSetEnum.WHOLEGENOME: {
-        re.add(PrepackagedConceptSet.WHOLEGENOME);
-        break;
-      }
-      case PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC: {
-        re.add(PrepackagedConceptSet.ZIPCODESOCIOECONOMIC);
-        break;
-      }
       case PrePackagedConceptSetEnum.NONE:
+        break;
       default:
+        re.add(PrepackagedConceptSet[prepackedReverseEnum[pre]]);
         break;
     }
   });
