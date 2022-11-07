@@ -301,19 +301,19 @@ export const AnalyticsTracker = {
         'Getting started',
         'Support - Getting started'
       ),
-    SupportDocs: () =>
+    SupportWorkingWithData: () =>
       triggerEvent(
         AnalyticsCategory.FOOTER,
         'Documentation',
-        'Support - Documentation'
+        'Support - Working with Data'
       ),
-    CommunityForum: () =>
+    SupportPolicy: () =>
       triggerEvent(
         AnalyticsCategory.FOOTER,
-        'Community forum',
-        'Support - Community forum'
+        'Documentation',
+        'Support - Policy'
       ),
-    SupportFAQ: () =>
+    SupportVideo: () =>
       triggerEvent(AnalyticsCategory.FOOTER, 'FAQ', 'Support - FAQ'),
     ContactUs: (suffix) =>
       triggerEvent(

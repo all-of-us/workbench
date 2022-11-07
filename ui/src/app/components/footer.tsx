@@ -208,24 +208,24 @@ const WorkbenchFooter = withUserProfile()(
                     Getting Started
                   </NewTabFooterAnchorTag>
                   <NewTabFooterAnchorTag
-                    href={supportUrls.tableOfContents}
-                    analyticsFn={tracker.SupportDocs}
+                    href={supportUrls.workingWithData}
+                    analyticsFn={tracker.SupportWorkingWithData}
                   >
-                    Documentation
+                    Working with Data
                   </NewTabFooterAnchorTag>
                   <NewTabFooterAnchorTag
-                    href={supportUrls.communityForum}
-                    analyticsFn={tracker.CommunityForum}
+                    href={supportUrls.policy}
+                    analyticsFn={tracker.SupportPolicy}
                   >
-                    Community Forum
+                    Policy
                   </NewTabFooterAnchorTag>
                 </FlexColumn>
                 <FlexColumn style={{ width: '50%' }}>
                   <NewTabFooterAnchorTag
-                    href={supportUrls.faq}
-                    analyticsFn={tracker.SupportFAQ}
+                    href={supportUrls.videos}
+                    analyticsFn={tracker.SupportVideo}
                   >
-                    FAQs
+                    Videos
                   </NewTabFooterAnchorTag>
                   <LinkButton
                     style={styles.footerAnchor}

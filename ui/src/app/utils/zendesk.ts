@@ -3,18 +3,18 @@ import { ZendeskEnv } from 'environments/environment-type';
 
 interface ZendeskUrls {
   billing: string;
-  communityForum: string;
+  policy: string;
   createBillingAccount: string;
   egressFaq: string;
   dataDictionary: string;
-  faq: string;
+  videos: string;
   genomicExtraction: string;
   gettingStarted: string;
   gpus: string;
   helpCenter: string;
   persistentDisk: string;
   researchPurpose: string;
-  tableOfContents: string;
+  workingWithData: string;
   workspaceBucket: string;
 }
 
@@ -53,26 +53,24 @@ export const supportUrls: ZendeskUrls = ((env) => {
   const category = (id) => `${baseUrl}/categories/${id}`;
   const section = (id) => `${baseUrl}/sections/${id}`;
   const commonUrls = {
-    // This link in particular needs the "en-us" infix. The other urls will
-    // redirect according to detected locale, which is preferred.
-    communityForum: `${baseUrl}/en-us/community/topics`,
     helpCenter: baseUrl,
   };
   const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {
       ...commonUrls,
-      billing: section('360008099991'),
+      billing: section('360039539411'),
       createBillingAccount: article('360039539411'),
       dataDictionary: article('360033200232'),
       egressFaq: article('4407354684052'),
-      faq: category('360002157532'),
+      videos: category('5942794068756'),
       genomicExtraction: article('4558187754772'),
       gettingStarted: category('360002157352'),
       gpus: article('4421259211668'),
       persistentDisk: article('5140493753620'),
       researchPurpose: article('360042673211'),
-      tableOfContents: category('360002625291'),
+      workingWithData: category('5942702296468'),
       workspaceBucket: article('360040043072'),
+      policy: article('5942677039892'),
     },
     [ZendeskEnv.Preprod]: {
       ...commonUrls,
@@ -80,14 +78,15 @@ export const supportUrls: ZendeskUrls = ((env) => {
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
-      faq: category('360005877792'),
+      videos: category('360005877792'),
       genomicExtraction: article('4403537387412'),
       gpus: article('4428626363668'),
       gettingStarted: category('360005884571'),
       persistentDisk: article('404'),
       researchPurpose: article('360058861612'),
-      tableOfContents: category('360005884591'),
+      workingWithData: category('360005884591'),
       workspaceBucket: article('360044796611'),
+      policy: article('360040043072'),
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
@@ -95,14 +94,15 @@ export const supportUrls: ZendeskUrls = ((env) => {
       createBillingAccount: article('360044792211'),
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
-      faq: category('360003453651'),
+      videos: category('360003453651'),
       genomicExtraction: article('404'),
       gettingStarted: category('360003430652'),
       gpus: article('4421259211668'),
       persistentDisk: article('404'),
       researchPurpose: article('360044334652'),
-      tableOfContents: category('360003430672'),
+      workingWithData: category('360003430672'),
       workspaceBucket: article('360044796611'),
+      policy: article('360040043072'),
     },
   };
   return urls[env];
