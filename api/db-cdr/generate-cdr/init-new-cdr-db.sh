@@ -73,7 +73,7 @@ fi
 
 # Use liquibase to generate the schema and data
 echo "Running liquibase "
-(cd "$(dirname "${BASH_SOURCE}")/.." && ../gradlew update -PrunList=${RUN_LIST} ${CONTEXT})
+(cd "$(dirname "${BASH_SOURCE}")/.." && ../gradlew update --no-daemon -PrunList=${RUN_LIST} ${CONTEXT})
 
 if [ "${RUN_LIST}" == "data" ]
 then
