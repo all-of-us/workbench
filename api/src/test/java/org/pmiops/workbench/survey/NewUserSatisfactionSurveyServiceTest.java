@@ -55,6 +55,7 @@ class NewUserSatisfactionSurveyServiceTest {
     user = new DbUser();
   }
 
+  // The user has RT access and the enabled date is within the eligibility window
   @Test
   public void testEligibleToTakeSurvey_eligible() {
     final Instant threeWeeksAgo = PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS);
