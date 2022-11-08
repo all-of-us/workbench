@@ -127,7 +127,8 @@ VALUES
 (43529712,'','Survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
 (43528895,'','Survey includes information about a participants access to and use of health care.',0,0,5),
 (43528698,'','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
-(1333342,'','Survey includes information about the impact of COVID-19 on participant mental and physical health.',0,0,7)"
+(1333342,'','Survey includes information about the impact of COVID-19 on participant mental and physical health.',0,0,7),
+(1740639,'','Survey includes information about medical history of family members, including medical conditions and approximate age of diagnosis.',0,0,8)"
 
 #  Getting count for SDOH Survey
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
