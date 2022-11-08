@@ -42,7 +42,7 @@ public class SurveysController implements SurveysApiDelegate {
     DbNewUserSatisfactionSurvey newUserSatisfactionSurvey =
         newUserSatisfactionSurveyMapper.toDbNewUserSatisfactionSurvey(
             createNewUserSatisfactionSurvey, user);
-    newUserSatisfactionSurveyDao.save(newUserSatisfactionSurvey);
+    newUserSatisfactionSurvey = newUserSatisfactionSurveyDao.save(newUserSatisfactionSurvey);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }
