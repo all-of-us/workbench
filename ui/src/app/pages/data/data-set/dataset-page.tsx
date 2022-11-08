@@ -643,7 +643,7 @@ const prepackagedConceptSetToString = {
   FITBIT_SLEEP_DAILY_SUMMARY: 'Fitbit Sleep Daily Summary',
   FITBIT_SLEEP_LEVEL: 'Fitbit Sleep Level',
   WHOLE_GENOME: 'Whole Genome Sequencing Data',
-  ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
+  // ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
 };
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -1695,7 +1695,7 @@ export const DatasetPage = fp.flow(
                     const p = PrePackagedConceptSetEnum[prepackaged];
                     return (
                       <ImmutableListItem
-                        name={prepackagedConceptSetToString[p]}
+                        name={prepackagedConceptSetToString[p] || p}
                         data-test-id='prePackage-concept-set-item'
                         key={prepackaged}
                         checked={selectedPrepackagedConceptSets.includes(p)}
