@@ -140,6 +140,9 @@ public class ProfileService {
     final ProfileAccessModules accessModules =
         new ProfileAccessModules().modules(accessModuleService.getAccessModuleStatus(userLite));
 
+    final boolean newUserSatisfactionSurveyEligibility =
+        newUserSatisfactionSurveyService.eligibleToTakeSurvey(user);
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
@@ -149,7 +152,7 @@ public class ProfileService {
         accessTierShortNames,
         userTierEligibilities,
         accessModules,
-        newUserSatisfactionSurveyService);
+        newUserSatisfactionSurveyEligibility);
   }
 
   public void validateAffiliation(Profile profile) {
