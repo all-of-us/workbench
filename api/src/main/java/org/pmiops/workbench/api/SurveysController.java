@@ -35,12 +35,12 @@ public class SurveysController implements SurveysApiDelegate {
   @Override
   public ResponseEntity<Void> createNewUserSatisfactionSurvey(
       CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey) {
-    DbUser user = this.userProvider.get();
+    DbUser user = userProvider.get();
     if (!newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)) {
       throw new BadRequestException("User is ineligible to take this survey.");
     }
     DbNewUserSatisfactionSurvey newUserSatisfactionSurvey =
-        this.newUserSatisfactionSurveyMapper.toDbNewUserSatisfactionSurvey(
+        newUserSatisfactionSurveyMapper.toDbNewUserSatisfactionSurvey(
             createNewUserSatisfactionSurvey, user);
     newUserSatisfactionSurveyDao.save(newUserSatisfactionSurvey);
     return new ResponseEntity<>(HttpStatus.OK);

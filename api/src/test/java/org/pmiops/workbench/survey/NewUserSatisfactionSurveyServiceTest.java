@@ -49,7 +49,7 @@ class NewUserSatisfactionSurveyServiceTest {
 
   @BeforeEach
   public void setup() {
-    this.registeredAccessTier = TestMockFactory.createRegisteredTierForTests(mockAccessTierDao);
+    registeredAccessTier = TestMockFactory.createRegisteredTierForTests(mockAccessTierDao);
     when(mockAccessTierService.getRegisteredTierOrThrow()).thenReturn(registeredAccessTier);
     PROVIDED_CLOCK.setInstant(START_INSTANT);
     user = new DbUser();

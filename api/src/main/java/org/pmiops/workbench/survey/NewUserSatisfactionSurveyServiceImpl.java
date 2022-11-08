@@ -33,10 +33,10 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
       return false;
     }
 
-    DbAccessTier registeredAccessTier = this.accessTierService.getRegisteredTierOrThrow();
+    DbAccessTier registeredAccessTier = accessTierService.getRegisteredTierOrThrow();
 
     Optional<DbUserAccessTier> userRegisteredAccessTier =
-        this.userAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier);
+        userAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier);
 
     if (!userRegisteredAccessTier.isPresent()) {
       return false;
