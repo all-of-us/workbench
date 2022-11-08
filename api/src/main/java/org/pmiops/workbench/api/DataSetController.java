@@ -26,7 +26,6 @@ import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -418,9 +417,8 @@ public class DataSetController implements DataSetApiDelegate {
                 });
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    if (BigQueryTableInfo.getTableName(Domain.fromValue(domain)) == null) {
-      throw new BadRequestException("Invalid Domain");
-    }
+    Optional.ofNullable(Domain.fromValue(domain))
+        .orElseThrow(() -> new BadRequestException("Invalid Domain"));
 
     return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(value, domain));
   }
