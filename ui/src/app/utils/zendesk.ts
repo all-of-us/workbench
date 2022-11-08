@@ -78,7 +78,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
-      videos: category('360005877792'),
+      videos: category('360006379271'),
       genomicExtraction: article('4403537387412'),
       gpus: article('4428626363668'),
       gettingStarted: category('360005884571'),
@@ -86,7 +86,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       researchPurpose: article('360058861612'),
       workingWithData: category('360005884591'),
       workspaceBucket: article('360044796611'),
-      policy: article('360040043072'),
+      policy: article('10680515788436'),
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
