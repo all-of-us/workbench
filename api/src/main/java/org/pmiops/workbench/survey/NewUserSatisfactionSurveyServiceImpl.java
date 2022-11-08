@@ -42,6 +42,7 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
               final Instant twoWeeksAgo = clock.instant().minus(2 * 7, ChronoUnit.DAYS);
               final boolean enabledMoreThanTwoWeeksAgo = enabledTime.isBefore(twoWeeksAgo);
 
+              // users become ineligible to take the survey two months after eligibility begins
               final Instant twoMonthsTwoWeeksAgo = twoWeeksAgo.minus(61, ChronoUnit.DAYS);
               final boolean eligibleForLessThanTwoMonths =
                   enabledTime.isAfter(twoMonthsTwoWeeksAgo);
