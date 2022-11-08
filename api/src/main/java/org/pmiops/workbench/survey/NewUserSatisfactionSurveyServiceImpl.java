@@ -37,17 +37,14 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
         .getByUserAndAccessTier(user, registeredAccessTier)
         .map(
             userRegisteredAccessTier -> {
-              Instant enabledTime = userRegisteredAccessTier.getFirstEnabled().toInstant();
+              final Instant enabledTime = userRegisteredAccessTier.getFirstEnabled().toInstant();
 
-              final Instant twoWeeksAgo = clock.instant().minus(2 * 7, ChronoUnit.DAYS);
-              final boolean enabledMoreThanTwoWeeksAgo = enabledTime.isBefore(twoWeeksAgo);
+              final Instant windowStart = enabledTime.plus(2 * 7, ChronoUnit.DAYS);
+              final Instant windowEnd = windowStart.plus(61, ChronoUnit.DAYS);
 
-              // users become ineligible to take the survey two months after eligibility begins
-              final Instant twoMonthsTwoWeeksAgo = twoWeeksAgo.minus(61, ChronoUnit.DAYS);
-              final boolean eligibleForLessThanTwoMonths =
-                  enabledTime.isAfter(twoMonthsTwoWeeksAgo);
+              final Instant now = clock.instant();
 
-              return enabledMoreThanTwoWeeksAgo && eligibleForLessThanTwoMonths;
+              return now.isAfter(windowStart) && now.isBefore(windowEnd);
             })
         .orElse(false);
   }
