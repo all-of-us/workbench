@@ -65,17 +65,20 @@ class NewUserSatisfactionSurveyServiceTest {
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isTrue();
   }
 
+  // A user who has taken the survey already is ineligible
   @Test
   public void testEligibleToTakeSurvey_takenSurveyIneligible() {
     user.setNewUserSatisfactionSurvey(new DbNewUserSatisfactionSurvey());
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
 
+  // A user without RT access is ineligible
   @Test
   public void testEligibleToTakeSurvey_incompleteRTAccessStepsIneligible() {
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
 
+  // A user with RT access for less than two weeks is ineligible
   @Test
   public void testEligibleToTakeSurvey_usersWithinTwoWeeksIneligible() {
     final Instant twoWeeksMinusOneDayAgo =
@@ -87,6 +90,7 @@ class NewUserSatisfactionSurveyServiceTest {
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
 
+  // A user is ineligible after two months of eligibility
   @Test
   public void testEligibleToTakeSurvey_ineligibleAfterTwoMonths() {
     final Instant twoMonthsTwoWeeksOneDayAgo =
