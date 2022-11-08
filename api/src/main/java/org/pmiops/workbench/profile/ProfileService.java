@@ -65,6 +65,7 @@ public class ProfileService {
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
   private final Javers javers;
+  private final NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
   private final Provider<DbUser> userProvider;
@@ -73,7 +74,6 @@ public class ProfileService {
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
-  private final NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
 
   @Autowired
   public ProfileService(
