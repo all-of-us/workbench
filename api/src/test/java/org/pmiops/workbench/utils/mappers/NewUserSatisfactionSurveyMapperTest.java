@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
-import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey.SatisfactionEnum;
@@ -31,17 +30,10 @@ public class NewUserSatisfactionSurveyMapperTest {
     DbNewUserSatisfactionSurvey mappedDbNewUserSatisfactionSurvey =
         mapper.toDbNewUserSatisfactionSurvey(createNewUserSatisfactionSurvey, user);
 
-    DbNewUserSatisfactionSurvey dbNewUserSatisfactionSurvey =
-        new DbNewUserSatisfactionSurvey()
-            .setSatisfaction(Satisfaction.SATISFIED)
-            .setAdditionalInfo(additionalInfo)
-            .setUser(user);
-
-    assertThat(mappedDbNewUserSatisfactionSurvey.getSatisfaction())
-        .isEqualTo(dbNewUserSatisfactionSurvey.getSatisfaction());
+    assertThat(mappedDbNewUserSatisfactionSurvey.getSatisfaction().toString())
+        .isEqualTo(createNewUserSatisfactionSurvey.getSatisfaction().toString());
     assertThat(mappedDbNewUserSatisfactionSurvey.getAdditionalInfo())
-        .isEqualTo(dbNewUserSatisfactionSurvey.getAdditionalInfo());
-    assertThat(mappedDbNewUserSatisfactionSurvey.getUser())
-        .isEqualTo(dbNewUserSatisfactionSurvey.getUser());
+        .isEqualTo(createNewUserSatisfactionSurvey.getAdditionalInfo());
+    assertThat(mappedDbNewUserSatisfactionSurvey.getUser()).isEqualTo(user);
   }
 }
