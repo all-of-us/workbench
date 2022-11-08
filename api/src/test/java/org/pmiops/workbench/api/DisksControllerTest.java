@@ -133,17 +133,26 @@ public class DisksControllerTest {
 
   @Test
   public void testListPD() throws ApiException {
-    // RStudio Disk: 2 are active, returns the newer one.
+    // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
         newListPdResponse(
-            "rstudio1", LeonardoDiskStatus.READY, NOW.minusMillis(100).toString(), AppType.RSTUDIO);
-    LeonardoListPersistentDiskResponse newerRstudioDisk =
+            "rstudio1",
+            LeonardoDiskStatus.READY,
+            NOW.minusSeconds(100).toString(),
+            AppType.RSTUDIO);
+    LeonardoListPersistentDiskResponse newestRstudioDisk =
         newListPdResponse("rstudio2", LeonardoDiskStatus.READY, NOW.toString(), AppType.RSTUDIO);
+    LeonardoListPersistentDiskResponse olderRstudioDisk =
+        newListPdResponse(
+            "rstudio3",
+            LeonardoDiskStatus.READY,
+            NOW.minusSeconds(200).toString(),
+            AppType.RSTUDIO);
     Disk expectedRStudioDisk =
         newDisk(
-            newerRstudioDisk.getName(),
+            newestRstudioDisk.getName(),
             DiskStatus.READY,
-            newerRstudioDisk.getAuditInfo().getCreatedDate(),
+            newestRstudioDisk.getAuditInfo().getCreatedDate(),
             AppType.RSTUDIO);
 
     // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
@@ -176,7 +185,8 @@ public class DisksControllerTest {
         .thenReturn(
             ImmutableList.of(
                 oldRstudioDisk,
-                newerRstudioDisk,
+                newestRstudioDisk,
+                olderRstudioDisk,
                 olderGceDisk,
                 oldGceDisk,
                 newerInactiveGceDisk,

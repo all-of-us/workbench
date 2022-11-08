@@ -633,44 +633,44 @@ const BoxHeader = ({
 // For now, this client-side enum tracks the desired state: a set of selectable
 // prepackaged concept sets.
 
-// Enum values are the display values.
-enum PrepackagedConceptSet {
-  PERSON = 'Demographics',
-  SURVEYS = 'All Surveys',
-  FITBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
-  FITBITACTIVITY = 'Fitbit Activity Summary',
-  FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
-  FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
-  FITBITSLEEPDAILYSUMMARY = 'Fitbit Sleep Daily Summary',
-  FITBITSLEEPLEVEL = 'Fitbit Sleep Level',
-  WHOLEGENOME = 'Whole Genome Sequencing Data',
-  ZIPCODESOCIOECONOMIC = 'Zip Code Socioeconomic Status Data',
-}
+const prepackagedConceptSetToString = {
+  PERSON: 'Demographics',
+  SURVEY: 'All Surveys',
+  FITBIT_HEART_RATE_SUMMARY: 'Fitbit Heart Rate Summary',
+  FITBIT_ACTIVITY: 'Fitbit Activity Summary',
+  FITBIT_HEART_RATE_LEVEL: 'Fitbit Heart Rate Level',
+  FITBIT_INTRADAY_STEPS: 'Fitbit Intra Day Steps',
+  FITBIT_SLEEP_DAILY_SUMMARY: 'Fitbit Sleep Daily Summary',
+  FITBIT_SLEEP_LEVEL: 'Fitbit Sleep Level',
+  WHOLE_GENOME: 'Whole Genome Sequencing Data',
+  ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
+};
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
-  [PrepackagedConceptSet.PERSON]: Domain.PERSON,
-  [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
+  [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
-  [PrepackagedConceptSet.FITBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
-  [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
-  [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
-  [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
+  [PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY]:
+    Domain.FITBITHEARTRATESUMMARY,
+  [PrePackagedConceptSetEnum.FITBITACTIVITY]: Domain.FITBITACTIVITY,
+  [PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
+  [PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
 };
 
 const PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS = {
-  [PrepackagedConceptSet.FITBITSLEEPDAILYSUMMARY]:
+  [PrePackagedConceptSetEnum.FITBITSLEEPDAILYSUMMARY]:
     Domain.FITBITSLEEPDAILYSUMMARY,
-  [PrepackagedConceptSet.FITBITSLEEPLEVEL]: Domain.FITBITSLEEPLEVEL,
+  [PrePackagedConceptSetEnum.FITBITSLEEPLEVEL]: Domain.FITBITSLEEPLEVEL,
 };
 
 const PREPACKAGED_WITH_WHOLE_GENOME = {
-  [PrepackagedConceptSet.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT,
+  [PrePackagedConceptSetEnum.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT,
 };
 
 const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
-  [PrepackagedConceptSet.ZIPCODESOCIOECONOMIC]: Domain.ZIPCODESOCIOECONOMIC,
+  [PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC]: Domain.ZIPCODESOCIOECONOMIC,
 };
 let PREPACKAGED_DOMAINS = {};
 
@@ -710,57 +710,6 @@ function domainValuePairsToLowercase(domainValuePairs: DomainValuePair[]) {
     value: value.toLowerCase(),
   }));
 }
-
-const apiEnumToPrePackageConceptSets = (
-  v: Array<PrePackagedConceptSetEnum>
-): Set<PrepackagedConceptSet> => {
-  const re: Set<PrepackagedConceptSet> = new Set<PrepackagedConceptSet>();
-  v.forEach((pre) => {
-    switch (pre) {
-      case PrePackagedConceptSetEnum.BOTH: {
-        re.add(PrepackagedConceptSet.PERSON);
-        re.add(PrepackagedConceptSet.SURVEYS);
-        break;
-      }
-      case PrePackagedConceptSetEnum.PERSON: {
-        re.add(PrepackagedConceptSet.PERSON);
-        break;
-      }
-      case PrePackagedConceptSetEnum.SURVEY: {
-        re.add(PrepackagedConceptSet.SURVEYS);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
-        re.add(PrepackagedConceptSet.FITBITHEARTRATESUMMARY);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
-        re.add(PrepackagedConceptSet.FITBITHEARTRATELEVEL);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS: {
-        re.add(PrepackagedConceptSet.FITBITINTRADAYSTEPS);
-        break;
-      }
-      case PrePackagedConceptSetEnum.FITBITACTIVITY: {
-        re.add(PrepackagedConceptSet.FITBITACTIVITY);
-        break;
-      }
-      case PrePackagedConceptSetEnum.WHOLEGENOME: {
-        re.add(PrepackagedConceptSet.WHOLEGENOME);
-        break;
-      }
-      case PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC: {
-        re.add(PrepackagedConceptSet.ZIPCODESOCIOECONOMIC);
-        break;
-      }
-      case PrePackagedConceptSetEnum.NONE:
-      default:
-        break;
-    }
-  });
-  return re;
-};
 
 interface DomainWithConceptSetId {
   domain: Domain;
@@ -837,7 +786,7 @@ export const DatasetPage = fp.flow(
       Domain.CONDITION
     );
     const [selectedPrepackagedConceptSets, setSelectedPrepackagedConceptSets] =
-      useState(new Set());
+      useState([]);
     const [selectedDomainValuePairs, setSelectedDomainValuePairs] = useState(
       []
     );
@@ -891,7 +840,7 @@ export const DatasetPage = fp.flow(
 
     const getIdsAndDomainsFromConceptSets = (
       conceptSets: ConceptSet[],
-      prepackagedConceptSets: Set<PrepackagedConceptSet>
+      prepackagedConceptSets: PrePackagedConceptSetEnum[]
     ): DomainWithConceptSetId[] => {
       return conceptSets
         .map((cs) => ({
@@ -902,7 +851,7 @@ export const DatasetPage = fp.flow(
               : cs.domain,
         }))
         .concat(
-          Array.from(prepackagedConceptSets).map((p) => ({
+          prepackagedConceptSets.map((p) => ({
             conceptSetId: null,
             domain: PREPACKAGED_DOMAINS[p],
           }))
@@ -912,7 +861,7 @@ export const DatasetPage = fp.flow(
     const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
       return getIdsAndDomainsFromConceptSets(
         d.conceptSets,
-        apiEnumToPrePackageConceptSets(d.prePackagedConceptSet)
+        d.prePackagedConceptSet
       );
     };
 
@@ -1029,7 +978,9 @@ export const DatasetPage = fp.flow(
             );
           }
           const updateIndex = domainsWithConceptSetIds.findIndex(
-            (dc) => dc.conceptSetId === domainWithConceptSetId.conceptSetId
+            (dc) =>
+              dc.conceptSetId !== null &&
+              dc.conceptSetId === domainWithConceptSetId.conceptSetId
           );
           if (updateIndex > -1) {
             domainsWithConceptSetIds[updateIndex].domain = domain;
@@ -1068,9 +1019,7 @@ export const DatasetPage = fp.flow(
         setSelectedDomainValuePairs(
           domainValuePairsToLowercase(dataset.domainValuePairs)
         );
-        setSelectedPrepackagedConceptSets(
-          apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
-        );
+        setSelectedPrepackagedConceptSets(dataset.prePackagedConceptSet);
         setDomainValueSetIsLoading(
           new Set(dataset.conceptSets.map(({ domain }) => domain))
         );
@@ -1112,15 +1061,15 @@ export const DatasetPage = fp.flow(
 
     const getPrePackagedList = () => {
       // Use PREPACKAGED_DOMAINS to filter and return only prepackaged sets for this CDR version
-      return Object.keys(PrepackagedConceptSet).filter((prepackaged) =>
+      return Object.keys(PrePackagedConceptSetEnum).filter((prepackaged) =>
         Object.keys(PREPACKAGED_DOMAINS).includes(
-          PrepackagedConceptSet[prepackaged]
+          PrePackagedConceptSetEnum[prepackaged]
         )
       );
     };
 
     const selectPrePackagedConceptSet = (
-      prepackaged: PrepackagedConceptSet,
+      prepackaged: PrePackagedConceptSetEnum,
       selected: boolean
     ) => {
       const updatedPrepackaged = new Set(selectedPrepackagedConceptSets);
@@ -1161,7 +1110,7 @@ export const DatasetPage = fp.flow(
         );
       }
       setSelectedDomainsWithConceptSetIds(updatedDomainsWithConceptSetIds);
-      setSelectedPrepackagedConceptSets(updatedPrepackaged);
+      setSelectedPrepackagedConceptSets(Array.from(updatedPrepackaged));
       setDataSetTouched(true);
       if (selected) {
         setDomainValueSetIsLoading(
@@ -1313,7 +1262,7 @@ export const DatasetPage = fp.flow(
       return (
         !selectedConceptSetIds ||
         (selectedConceptSetIds.length === 0 &&
-          selectedPrepackagedConceptSets.size === 0) ||
+          selectedPrepackagedConceptSets.length === 0) ||
         ((!selectedCohortIds || selectedCohortIds.length === 0) &&
           !includesAllParticipants) ||
         !selectedDomainValuePairs ||
@@ -1334,58 +1283,6 @@ export const DatasetPage = fp.flow(
         fp.unzip,
         fp.map(fp.fromPairs)
       )(data);
-    };
-
-    const getPrePackagedConceptSetApiEnum = () => {
-      const selectedPrePackagedConceptSDetEnum =
-        new Array<PrePackagedConceptSetEnum>();
-      selectedPrepackagedConceptSets.forEach(
-        (selectedPrepackagedConceptSet) => {
-          switch (selectedPrepackagedConceptSet) {
-            case PrepackagedConceptSet.PERSON:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.PERSON
-              );
-              break;
-            case PrepackagedConceptSet.SURVEYS:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.SURVEY
-              );
-              break;
-            case PrepackagedConceptSet.FITBITACTIVITY:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.FITBITACTIVITY
-              );
-              break;
-            case PrepackagedConceptSet.FITBITINTRADAYSTEPS:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS
-              );
-              break;
-            case PrepackagedConceptSet.FITBITHEARTRATESUMMARY:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY
-              );
-              break;
-            case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL
-              );
-              break;
-            case PrepackagedConceptSet.WHOLEGENOME:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.WHOLEGENOME
-              );
-              break;
-            case PrepackagedConceptSet.ZIPCODESOCIOECONOMIC:
-              selectedPrePackagedConceptSDetEnum.push(
-                PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC
-              );
-              break;
-          }
-        }
-      );
-      return selectedPrePackagedConceptSDetEnum;
     };
 
     // TODO: Move to using a response based error handling method, rather than a error based one
@@ -1465,7 +1362,7 @@ export const DatasetPage = fp.flow(
         conceptSetIds: selectedConceptSetIds,
         includesAllParticipants: includesAllParticipants,
         cohortIds: selectedCohortIds,
-        prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
+        prePackagedConceptSet: selectedPrepackagedConceptSets,
         values: selectedDomainValuePairs
           .filter((values) => values.domain === domain)
           .map((domainValue) => domainValue.value),
@@ -1524,7 +1421,7 @@ export const DatasetPage = fp.flow(
           conceptSetIds: selectedConceptSetIds,
           cohortIds: selectedCohortIds,
           domainValuePairs: selectedDomainValuePairs,
-          prePackagedConceptSet: getPrePackagedConceptSetApiEnum(),
+          prePackagedConceptSet: selectedPrepackagedConceptSets,
         },
       };
     };
@@ -1794,25 +1691,23 @@ export const DatasetPage = fp.flow(
                   data-test-id='prePackage-concept-set'
                 >
                   <Subheader>Prepackaged Concept Sets</Subheader>
-                  {getPrePackagedList().map(
-                    (prepackaged: PrepackagedConceptSet) => {
-                      const p = PrepackagedConceptSet[prepackaged];
-                      return (
-                        <ImmutableListItem
-                          name={p}
-                          data-test-id='prePackage-concept-set-item'
-                          key={prepackaged}
-                          checked={selectedPrepackagedConceptSets.has(p)}
-                          onChange={() =>
-                            selectPrePackagedConceptSet(
-                              p,
-                              !selectedPrepackagedConceptSets.has(p)
-                            )
-                          }
-                        />
-                      );
-                    }
-                  )}
+                  {getPrePackagedList().map((prepackaged) => {
+                    const p = PrePackagedConceptSetEnum[prepackaged];
+                    return (
+                      <ImmutableListItem
+                        name={prepackagedConceptSetToString[p] || p}
+                        data-test-id='prePackage-concept-set-item'
+                        key={prepackaged}
+                        checked={selectedPrepackagedConceptSets.includes(p)}
+                        onChange={() =>
+                          selectPrePackagedConceptSet(
+                            p,
+                            !selectedPrepackagedConceptSets.includes(p)
+                          )
+                        }
+                      />
+                    );
+                  })}
                   <Subheader>Workspace Concept Sets</Subheader>
                   {!loadingResources &&
                     conceptSetList.map((conceptSet) => (
