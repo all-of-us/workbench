@@ -1,6 +1,4 @@
-runtime: python27
-api_version: 1
-threadsafe: true
+runtime: nodejs16
 default_expiration: "2m"
 
 handlers:
@@ -76,8 +74,3 @@ handlers:
         https://leonardo.dsde-dev.broadinstitute.org
         https://notebooks.firecloud.org;
       report-uri /content-security-index-report"
-
-# If a file (relative path under ui/) matches this regex, do not upload it.
-# Skip everything not starting with "build".
-skip_files:
-- ^(?!build).*$

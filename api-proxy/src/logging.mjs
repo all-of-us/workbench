@@ -1,6 +1,9 @@
+import * as fs from 'fs'
 import * as nu from 'util'
 
-const create = (logStream = process.stderr) => {
+const create = logPath => {
+  const logStream = logPath ? fs.createWriteStream(logPath) : process.stderr
+  console.log('logging to: '+(logPath || 'stderr'))
   let lastStamp = -Infinity
 
   const truncate = ms => Math.floor(ms / 60e3) * 60e3
