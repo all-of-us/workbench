@@ -308,11 +308,7 @@ export const AnalyticsTracker = {
         'Support - Working with Data'
       ),
     SupportPolicy: () =>
-      triggerEvent(
-        AnalyticsCategory.FOOTER,
-        'Policy',
-        'Support - Policy'
-      ),
+      triggerEvent(AnalyticsCategory.FOOTER, 'Policy', 'Support - Policy'),
     SupportVideo: () =>
       triggerEvent(AnalyticsCategory.FOOTER, 'Videos', 'Support - Videos'),
     ContactUs: (suffix) =>
