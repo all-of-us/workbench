@@ -454,6 +454,6 @@ FROM
               ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
           WHERE domain_id = 'SURVEY'
           AND type = 'PPI'
-          AND subtype = 'ANSWER'
+          AND subtype = 'ANSWER')
     ) y
 WHERE x.concept_id = y.concept_id"
