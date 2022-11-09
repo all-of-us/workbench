@@ -69,7 +69,15 @@ class NewUserSatisfactionSurveyServiceTest {
   // A user who has taken the survey already is ineligible
   @Test
   public void testEligibleToTakeSurvey_takenSurveyIneligible() {
+    final Instant instantWithinEligibilityWindow =
+        PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS);
+    DbUserAccessTier userAccessTier =
+        new DbUserAccessTier().setFirstEnabled(Timestamp.from(instantWithinEligibilityWindow));
+    when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
+        .thenReturn(Optional.of(userAccessTier));
+
     user.setNewUserSatisfactionSurvey(new DbNewUserSatisfactionSurvey());
+
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
 
