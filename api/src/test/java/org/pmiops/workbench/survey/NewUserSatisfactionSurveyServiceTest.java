@@ -84,6 +84,8 @@ class NewUserSatisfactionSurveyServiceTest {
   // A user without RT access is ineligible
   @Test
   public void testEligibleToTakeSurvey_incompleteRTAccessStepsIneligible() {
+    when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
+        .thenReturn(Optional.empty());
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
 
