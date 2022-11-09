@@ -435,3 +435,25 @@ FROM
     ) y
 WHERE x.concept_id = y.ancestor_concept_id"
 
+# Set the participant count for the PFHH survey
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
+SET x.participant_count = y.est_count
+FROM
+    (
+        SELECT 1740639 as concept_id, count(distinct person_id) as est_count
+        FROM \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.cb_search_all_events\` se
+        WHERE se.value_source_concept_id in (
+          SELECT DISTINCT CAST(c.value AS INT64) as value
+          FROM \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.cb_criteria\` c
+          JOIN (
+                SELECT CAST(id AS STRING) AS id
+                FROM \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.cb_criteria\`
+                WHERE concept_id IN (1740639)
+                AND domain_id = 'SURVEY'
+              ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+          WHERE domain_id = 'SURVEY'
+          AND type = 'PPI'
+          AND subtype = 'ANSWER'
+    ) y
+WHERE x.concept_id = y.concept_id"
