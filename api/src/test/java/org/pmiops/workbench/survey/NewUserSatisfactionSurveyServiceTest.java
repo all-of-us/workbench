@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,9 @@ class NewUserSatisfactionSurveyServiceTest {
   public void testEligibleToTakeSurvey_eligible() {
     final Instant threeWeeksAgo = PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS);
     DbUserAccessTier userAccessTier =
-        new DbUserAccessTier().setFirstEnabled(Timestamp.from(threeWeeksAgo));
+        new DbUserAccessTier()
+            .setFirstEnabled(Timestamp.from(threeWeeksAgo))
+            .setTierAccessStatus(TierAccessStatus.ENABLED);
     when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
         .thenReturn(Optional.of(userAccessTier));
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isTrue();
@@ -72,7 +75,9 @@ class NewUserSatisfactionSurveyServiceTest {
     final Instant instantWithinEligibilityWindow =
         PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS);
     DbUserAccessTier userAccessTier =
-        new DbUserAccessTier().setFirstEnabled(Timestamp.from(instantWithinEligibilityWindow));
+        new DbUserAccessTier()
+            .setFirstEnabled(Timestamp.from(instantWithinEligibilityWindow))
+            .setTierAccessStatus(TierAccessStatus.ENABLED);
     when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
         .thenReturn(Optional.of(userAccessTier));
 
@@ -89,13 +94,29 @@ class NewUserSatisfactionSurveyServiceTest {
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
 
+  // A user whose RT access is disabled is ineligible
+  @Test
+  public void testEligibleToTakeSurvey_disabledRTAccessIneligible() {
+    final Instant instantWithinEligibilityWindow =
+        PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS);
+    DbUserAccessTier userAccessTier =
+        new DbUserAccessTier()
+            .setFirstEnabled(Timestamp.from(instantWithinEligibilityWindow))
+            .setTierAccessStatus(TierAccessStatus.DISABLED);
+    when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
+        .thenReturn(Optional.of(userAccessTier));
+    assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
+  }
+
   // A user with RT access for less than two weeks is ineligible
   @Test
   public void testEligibleToTakeSurvey_usersWithinTwoWeeksIneligible() {
     final Instant twoWeeksMinusOneDayAgo =
         PROVIDED_CLOCK.instant().minus((2 * 7) - 1, ChronoUnit.DAYS);
     DbUserAccessTier userAccessTier =
-        new DbUserAccessTier().setFirstEnabled(Timestamp.from(twoWeeksMinusOneDayAgo));
+        new DbUserAccessTier()
+            .setFirstEnabled(Timestamp.from(twoWeeksMinusOneDayAgo))
+            .setTierAccessStatus(TierAccessStatus.ENABLED);
     when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
         .thenReturn(Optional.of(userAccessTier));
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
@@ -107,7 +128,9 @@ class NewUserSatisfactionSurveyServiceTest {
     final Instant twoMonthsTwoWeeksOneDayAgo =
         PROVIDED_CLOCK.instant().minus(61 + (2 * 7) + 1, ChronoUnit.DAYS);
     DbUserAccessTier userAccessTier =
-        new DbUserAccessTier().setFirstEnabled(Timestamp.from(twoMonthsTwoWeeksOneDayAgo));
+        new DbUserAccessTier()
+            .setFirstEnabled(Timestamp.from(twoMonthsTwoWeeksOneDayAgo))
+            .setTierAccessStatus(TierAccessStatus.ENABLED);
     when(mockUserAccessTierDao.getByUserAndAccessTier(user, registeredAccessTier))
         .thenReturn(Optional.of(userAccessTier));
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();

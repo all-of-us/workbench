@@ -7,6 +7,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.TierAccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,10 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
         .getByUserAndAccessTier(user, registeredAccessTier)
         .map(
             userRegisteredAccessTier -> {
+              if (userRegisteredAccessTier.getTierAccessStatusEnum() != TierAccessStatus.ENABLED) {
+                return false;
+              }
+
               final Instant enabledTime = userRegisteredAccessTier.getFirstEnabled().toInstant();
 
               final Instant windowStart = enabledTime.plus(2 * 7, ChronoUnit.DAYS);
