@@ -47,7 +47,8 @@ public interface ProfileMapper {
       Double freeTierDollarQuota,
       List<String> accessTierShortNames,
       List<UserTierEligibility> tierEligibilities,
-      ProfileAccessModules accessModules);
+      ProfileAccessModules accessModules,
+      boolean newUserSatisfactionSurveyEligibility);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 

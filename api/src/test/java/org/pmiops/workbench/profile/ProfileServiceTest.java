@@ -55,6 +55,7 @@ import org.pmiops.workbench.model.SexAtBirthV2;
 import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.YesNoPreferNot;
+import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -137,6 +138,7 @@ public class ProfileServiceTest {
     FreeTierBillingService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
+    NewUserSatisfactionSurveyService.class,
   })
   static class Configuration {
 

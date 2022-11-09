@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
 import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,6 +65,7 @@ public class ProfileService {
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
   private final Javers javers;
+  private final NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
   private final Provider<DbUser> userProvider;
@@ -91,7 +93,8 @@ public class ProfileService {
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      NewUserSatisfactionSurveyService newUserSatisfactionSurveyService) {
     this.accessModuleService = accessModuleService;
     this.accessTierService = accessTierService;
     this.addressMapper = addressMapper;
@@ -109,6 +112,7 @@ public class ProfileService {
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
+    this.newUserSatisfactionSurveyService = newUserSatisfactionSurveyService;
   }
 
   // TODO: avoid all these separate queries by appropriate ORM mappings
@@ -136,6 +140,9 @@ public class ProfileService {
     final ProfileAccessModules accessModules =
         new ProfileAccessModules().modules(accessModuleService.getAccessModuleStatus(userLite));
 
+    final boolean newUserSatisfactionSurveyEligibility =
+        newUserSatisfactionSurveyService.eligibleToTakeSurvey(user);
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
@@ -144,7 +151,8 @@ public class ProfileService {
         freeTierDollarQuota,
         accessTierShortNames,
         userTierEligibilities,
-        accessModules);
+        accessModules,
+        newUserSatisfactionSurveyEligibility);
   }
 
   public void validateAffiliation(Profile profile) {

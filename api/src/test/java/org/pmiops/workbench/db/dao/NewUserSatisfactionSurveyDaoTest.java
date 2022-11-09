@@ -54,23 +54,4 @@ public class NewUserSatisfactionSurveyDaoTest {
     assertThat(newUserSatisfactionSurveyDao.findById(newUserSatisfactionSurvey.getId()).isPresent())
         .isFalse();
   }
-
-  @Test
-  public void testGetByUser() {
-    newUserSatisfactionSurvey =
-        new DbNewUserSatisfactionSurvey()
-            .setUser(user)
-            .setSatisfaction(Satisfaction.SATISFIED)
-            .setAdditionalInfo("");
-
-    newUserSatisfactionSurveyDao.save(newUserSatisfactionSurvey);
-
-    assertThat(newUserSatisfactionSurveyDao.findByUser(user).get())
-        .isEqualTo(newUserSatisfactionSurvey);
-  }
-
-  @Test
-  public void testGetByUserNotPresent() {
-    assertThat(newUserSatisfactionSurveyDao.findByUser(user).isPresent()).isEqualTo(false);
-  }
 }
