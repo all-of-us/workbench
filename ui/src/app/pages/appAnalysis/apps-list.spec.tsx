@@ -11,20 +11,20 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 describe('Apps list', () => {
-
-  const startButton = (wrapper) =>  {return wrapper.find('[data-test-id="start-button"]').first()};
+  const startButton = (wrapper) => {
+    return wrapper.find('[data-test-id="start-button"]').first();
+  };
 
   const applicationListDropDown = (wrapper) => {
-    return wrapper.find('[data-test-id="application-list-dropdown"]')
-        .first();
-  }
+    return wrapper.find('[data-test-id="application-list-dropdown"]').first();
+  };
 
   const setCurrentWorkspaceAccessLevel = (accessLevel) => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       accessLevel: accessLevel,
     });
-  }
+  };
 
   const component = () => {
     return mount(

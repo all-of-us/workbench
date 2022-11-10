@@ -23,6 +23,16 @@ import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
+  fadeBox: {
+    margin: 'auto',
+    marginTop: '1rem',
+    width: '95.7%',
+  },
+  startButton: {
+    paddingLeft: '0.5rem',
+    height: '2rem',
+    backgroundColor: colors.secondary,
+  },
   appsLabel: {
     color: colors.primary,
     fontWeight: 600,
@@ -42,15 +52,12 @@ export const AppsList = withCurrentWorkspace()((props) => {
     setShowAppModal(false);
     setShowJupyterModal(true);
   };
-  const setApplication = (selectedValue) => {
-    setSelectedApp(selectedValue.value);
-  };
 
   const canWrite = (): boolean => {
     return WorkspacePermissionsUtil.canWrite(props.workspace.accessLevel);
   };
 
-  const showApplication = () => {
+  const showApplicationModal = () => {
     switch (selectedApp) {
       case JUPYTER_APP: {
         displayJupyterModal();
@@ -59,7 +66,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
     }
   };
 
-  const cancel = () => {
+  const onClose = () => {
     setShowJupyterModal(false);
     setShowAppModal(false);
   };
@@ -70,7 +77,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
 
   return (
     <>
-      <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
+      <FadeBox style={styles.fadeBox}>
         <FlexColumn>
           <FlexRow>
             <ListPageHeader style={{ paddingRight: '1.5rem' }}>
@@ -78,11 +85,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
             </ListPageHeader>
             <Button
               data-test-id='start-button'
-              style={{
-                paddingLeft: '0.5rem',
-                height: '2rem',
-                backgroundColor: colors.secondary,
-              }}
+              style={styles.startButton}
               onClick={() => {
                 AnalyticsTracker.Notebooks.OpenCreateModal();
                 setShowAppModal(true);
@@ -108,7 +111,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               value={selectedApp}
               options={APP_LIST}
               placeholder={'Choose One'}
-              onChange={(value) => setApplication(value)}
+              onChange={(e) => setSelectedApp(e.value)}
               style={{ width: '9rem' }}
             />
           </ModalBody>
@@ -117,14 +120,14 @@ export const AppsList = withCurrentWorkspace()((props) => {
               style={{ marginRight: '2rem' }}
               type={'secondary'}
               label={'Close'}
-              onClick={() => cancel()}
+              onClick={() => onClose()}
             >
               Close
             </Button>
             <Button
               type={'primary'}
               label={'Next'}
-              onClick={() => showApplication()}
+              onClick={() => showApplicationModal()}
             >
               Next
             </Button>
