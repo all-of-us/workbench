@@ -186,9 +186,9 @@ def deploy(cmd_name, args)
     "Circle test output URL to attach to the release tracker; only " +
     "relevant for runs where a release ticket is created (staging)"
   )
-  op.add_validator ->(opts) { raise ArgumentError if opts.project.nil?}
-  op.add_validator ->(opts) { raise ArgumentError if opts.account.nil?}
-  op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --account") if opts.account.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
 
   op.parse.validate
 
