@@ -21,6 +21,7 @@
  */
 
 import {
+  AppsApi,
   AuthDomainApi,
   BaseAPI, // internal
   CdrVersionsApi,
@@ -123,6 +124,7 @@ export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 export const diskApi = bindCtor(DiskApi);
+export const appsApi = bindCtor(AppsApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {
