@@ -10236,14 +10236,17 @@ definitions:
     type: object
     properties:
       satisfaction:
-        type: string
-        description: How satisfied the user is with the researcher workbench
-        enum:
-          - VERY_UNSATISFIED
-          - UNSATISFIED
-          - NEUTRAL
-          - SATISFIED
-          - VERY_SATISFIED
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
       additionalInfo:
         type: string
         description: Additional information regarding their satisfaction score
+
+  NewUserSatisfactionSurveySatisfaction:
+    type: string
+    description: How satisfied the user is with the researcher workbench.
+    enum:
+      - VERY_UNSATISFIED
+      - UNSATISFIED
+      - NEUTRAL
+      - SATISFIED
+      - VERY_SATISFIED
