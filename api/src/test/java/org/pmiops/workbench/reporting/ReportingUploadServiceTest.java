@@ -15,6 +15,7 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedT
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingNewUserSatisfactionSurvey;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -43,10 +44,12 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
+import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -299,6 +302,35 @@ public class ReportingUploadServiceTest {
         .isEqualTo(reportingCohorts.get(0).getCohortId());
     assertThat(cohortColumnValues.get(CohortColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(reportingCohorts.get(0).getCreatorId());
+  }
+
+  @Test
+  public void testUploadBatchNewUserSatisfactionSurveys() {
+    ReportingNewUserSatisfactionSurvey reportingNewUserSatisfactionSurvey =
+        createReportingNewUserSatisfactionSurvey();
+    List<ReportingNewUserSatisfactionSurvey> reportingNewUserSatisfactionSurveys =
+        ImmutableList.of(
+            reportingNewUserSatisfactionSurvey, new ReportingNewUserSatisfactionSurvey());
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatchNewUserSatisfactionSurveys(
+        reportingNewUserSatisfactionSurveys, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingNewUserSatisfactionSurveys.size());
+    final Map<String, Object> newUserSatisfactionSurveyColumnValues =
+        request.getRows().get(0).getContent();
+
+    assertThat(
+            newUserSatisfactionSurveyColumnValues.get(
+                NewUserSatisfactionSurveyColumnValueExtractor.ID.getParameterName()))
+        .isEqualTo(reportingNewUserSatisfactionSurvey.getId());
   }
 
   @Test

@@ -13,15 +13,19 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
@@ -106,6 +110,16 @@ public class ReportingTestUtils {
   public static final String DATASET__NAME = "foo_6";
   public static final Short DATASET__PRE_PACKAGED_CONCEPT_SET = 7;
   public static final Long DATASET__WORKSPACE_ID = 8L;
+
+  public static final Long NEW_USER_SATISFACTION_SURVEY__ID = 1L;
+  public static final Long NEW_USER_SATISFACTION_SURVEY__USER_ID = 2L;
+  public static final Timestamp NEW_USER_SATISFACTION_SURVEY__CREATED =
+      Timestamp.from(Instant.parse("2001-01-01T00:00:00.00Z"));
+  public static final Timestamp NEW_USER_SATISFACTION_SURVEY__MODIFIED =
+      Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
+  public static final NewUserSatisfactionSurveySatisfaction
+      NEW_USER_SATISFACTION_SURVEY__SATISFACTION = NewUserSatisfactionSurveySatisfaction.NEUTRAL;
+  public static final String NEW_USER_SATISFACTION_SURVEY__ADDITIONAL_INFO = "It's ok.";
 
   public static ReportingWorkspace createDtoWorkspace() {
     return new ReportingWorkspace()
@@ -298,6 +312,23 @@ public class ReportingTestUtils {
     return dataset;
   }
 
+  public static ReportingNewUserSatisfactionSurvey createReportingNewUserSatisfactionSurvey() {
+    return new ReportingNewUserSatisfactionSurvey()
+        .id(NEW_USER_SATISFACTION_SURVEY__ID)
+        .userId(NEW_USER_SATISFACTION_SURVEY__USER_ID)
+        .created(offsetDateTimeUtc(NEW_USER_SATISFACTION_SURVEY__CREATED))
+        .modified(offsetDateTimeUtc(NEW_USER_SATISFACTION_SURVEY__MODIFIED))
+        .satisfaction(NEW_USER_SATISFACTION_SURVEY__SATISFACTION)
+        .additionalInfo(NEW_USER_SATISFACTION_SURVEY__ADDITIONAL_INFO);
+  }
+
+  public static DbNewUserSatisfactionSurvey createDbNewUserSatisfactionSurvey(DbUser user) {
+    return new DbNewUserSatisfactionSurvey()
+        .setUser(user)
+        .setSatisfaction(Satisfaction.SATISFIED)
+        .setAdditionalInfo("Love it!");
+  }
+
   public static ReportingSnapshot createEmptySnapshot() {
     return new ReportingSnapshot()
         .cohorts(new ArrayList<>())
@@ -306,6 +337,7 @@ public class ReportingTestUtils {
         .datasetDomainIdValues(new ArrayList<>())
         .datasetCohorts(new ArrayList<>())
         .institutions(new ArrayList<>())
-        .workspaceFreeTierUsage(new ArrayList<>());
+        .workspaceFreeTierUsage(new ArrayList<>())
+        .newUserSatisfactionSurveys(new ArrayList<>());
   }
 }

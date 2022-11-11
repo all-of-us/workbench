@@ -26,6 +26,7 @@ import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
@@ -111,6 +112,18 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
           CohortColumnValueExtractor.TABLE_NAME,
           (long) sourceCount,
           getActualRowCount(CohortColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
+          sb)) {
+        detailsLogLevel = Level.WARNING;
+        verified = false;
+      }
+    }
+    if (batchTables.contains(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)) {
+      int sourceCount = reportingQueryService.getNewUserSatisfactionSurveysCount();
+      if (!verifyCount(
+          NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
+          (long) sourceCount,
+          getActualRowCount(
+              NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
           sb)) {
         detailsLogLevel = Level.WARNING;
         verified = false;

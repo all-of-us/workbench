@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.reporting.ReportingServiceImpl.BATCH_UPLOADED_TABLES;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbCohort;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbNewUserSatisfactionSurvey;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbWorkspace;
 
 import com.google.cloud.bigquery.Field;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryServiceImpl;
@@ -73,6 +75,7 @@ public class ReportingVerificationServiceTest {
   @Autowired private EntityManager entityManager;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
   @Autowired private UserDao userDao;
   @Autowired private CohortDao cohortDao;
   @MockBean private BigQueryService mockBigQueryService;
@@ -107,7 +110,7 @@ public class ReportingVerificationServiceTest {
 
   @Test
   public void testVerifyBatch_verified() throws Exception {
-    createCohortWorkspacesAndUsers(ACTUAL_COUNT);
+    createTableEntries(ACTUAL_COUNT);
     assertThat(
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
@@ -119,11 +122,14 @@ public class ReportingVerificationServiceTest {
     assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
     String expectedCohortLogPart = "cohort\t2\t2\t0 (0.000%)";
     assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
+    String expectedNewUserSatisfactionSurveyLogPart =
+        "new_user_satisfaction_survey\t2\t2\t0 (0.000%)";
+    assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
   }
 
   @Test
   public void testVerifyBatch_fail() throws Exception {
-    createCohortWorkspacesAndUsers(ACTUAL_COUNT * 2);
+    createTableEntries(ACTUAL_COUNT * 2);
     assertThat(
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
@@ -135,10 +141,12 @@ public class ReportingVerificationServiceTest {
     assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
     String expectedCohortLogPart = "cohort\t4\t2\t-2 (-50.000%)";
     assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
+    String expectedNewUserSatisfactionSurveyLogPart = "cohort\t4\t2\t-2 (-50.000%)";
+    assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
   }
 
-  /** This creates equal amount of users and workspaces. */
-  private void createCohortWorkspacesAndUsers(long count) {
+  /** This creates equal amount of table entries for all batch-uploaded tables. */
+  private void createTableEntries(long count) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("foo");
     cdrVersionDao.save(cdrVersion);
@@ -148,6 +156,7 @@ public class ReportingVerificationServiceTest {
       userDao.save(user);
       DbWorkspace dbworkspace = workspaceDao.save(createDbWorkspace(user, cdrVersion));
       cohortDao.save(createDbCohort(user, dbworkspace));
+      newUserSatisfactionSurveyDao.save(createDbNewUserSatisfactionSurvey(user));
     }
     entityManager.flush();
   }
