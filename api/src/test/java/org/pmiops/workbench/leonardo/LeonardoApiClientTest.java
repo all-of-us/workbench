@@ -3,6 +3,7 @@ package org.pmiops.workbench.leonardo;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -191,7 +192,7 @@ public class LeonardoApiClientTest {
     verify(userAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
-            eq(getAppName(AppType.RSTUDIO)),
+            startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
     Map<String, String> diskLabels = new HashMap<>();
@@ -224,7 +225,7 @@ public class LeonardoApiClientTest {
     verify(userAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
-            eq(getAppName(AppType.RSTUDIO)),
+            startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();

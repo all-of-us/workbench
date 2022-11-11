@@ -43,7 +43,8 @@ public class DbUser {
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
   private static final String APP_NAME_PREFIX = "all-of-us-";
-  @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
+  // The UUID for user managed resources. Currently, it is used by PD and APP.
+  @VisibleForTesting static final int UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
 
@@ -462,28 +463,34 @@ public class DbUser {
   /** Returns a name for the Persistent Disk to be created for this user. */
   @Transient
   public String generatePDName() {
-    String randomString =
-        Hashing.sha256()
-            .hashUnencodedChars(UUID.randomUUID().toString())
-            .toString()
-            .substring(0, PD_UUID_SUFFIX_SIZE);
-    return getUserPDNamePrefix() + "-" + randomString;
+    return getUserPDNamePrefix() + "-" + randomStringForUserResource();
   }
 
   /** Returns a name for the persistent disk used in APP to be created for this user. */
   @Transient
   public String generatePDNameForApp(AppType appType) {
-    String randomString =
-        Hashing.sha256()
-            .hashUnencodedChars(UUID.randomUUID().toString())
-            .toString()
-            .substring(0, PD_UUID_SUFFIX_SIZE);
-    return getUserPDNamePrefix() + '-' + appType.toString().toLowerCase() + "-" + randomString;
+    return getUserPDNamePrefix()
+        + '-'
+        + appType.toString().toLowerCase()
+        + "-"
+        + randomStringForUserResource();
   }
 
   @Transient
-  public String getAppName(AppType appType) {
-    return APP_NAME_PREFIX + getUserId() + '-' + appType.toString().toLowerCase();
+  public String generateAppName(AppType appType) {
+    return APP_NAME_PREFIX
+        + getUserId()
+        + '-'
+        + appType.toString().toLowerCase()
+        + "-"
+        + randomStringForUserResource();
+  }
+
+  private static String randomStringForUserResource() {
+    return Hashing.sha256()
+        .hashUnencodedChars(UUID.randomUUID().toString())
+        .toString()
+        .substring(0, UUID_SUFFIX_SIZE);
   }
 
   @Override
