@@ -18,6 +18,7 @@ import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
+  DEMOGRAPHIC_SURVEY_COMMENTS,
   DISABILITY_CONCENTRATING,
   DISABILITY_DRESSING,
   DISABILITY_ERRANDS,
@@ -75,6 +76,7 @@ export const questionsIndex = {
   [YEAR_OF_BIRTH]: 12,
   [EDUCATION]: 13,
   [DISADVANTAGED]: 14,
+  [DEMOGRAPHIC_SURVEY_COMMENTS]: 15,
 };
 
 const maxYear = new Date().getFullYear();
@@ -1078,9 +1080,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <div
               style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
             >
-              15. Is there any aspect of your identity that we have not covered
-              in the preceding questions that we may want to consider including
-              in future surveys?
+              {getQuestionLabel(
+                DEMOGRAPHIC_SURVEY_COMMENTS,
+                'Is there any aspect of your identity that we have not covered' +
+                  ' in the preceding questions that we may want to consider including' +
+                  ' in future surveys?'
+              )}
             </div>
             <TextAreaWithLengthValidationMessage
               id='survey-comments'

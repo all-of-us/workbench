@@ -20,6 +20,7 @@ export const DISABILITY_OTHER = 'disabilityOtherText';
 export const YEAR_OF_BIRTH = 'yearOfBirth';
 export const EDUCATION = 'education';
 export const DISADVANTAGED = 'disadvantaged';
+export const DEMOGRAPHIC_SURVEY_COMMENTS = 'surveyComments';
 
 // Resource table
 export const ROWS_PER_PAGE_RESOURCE_TABLE = 10;
