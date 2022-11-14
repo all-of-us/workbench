@@ -85,6 +85,4 @@ export const STATE_CODE_MAPPING = {
 };
 
 // ANALYSIS (NEW): APPS LIST
-export const JUPYTER_APP = 'JUPYTER';
-
-export const APP_LIST = [JUPYTER_APP];
+export const APP_LIST = ['JUPYTER'];

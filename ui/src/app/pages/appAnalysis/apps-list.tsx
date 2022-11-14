@@ -18,7 +18,6 @@ import {
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { AnalyticsTracker } from 'app/utils/analytics';
 import { APP_LIST } from 'app/utils/constants';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -71,7 +70,6 @@ export const AppsList = withCurrentWorkspace()((props) => {
               data-test-id='start-button'
               style={styles.startButton}
               onClick={() => {
-                AnalyticsTracker.Notebooks.OpenCreateModal();
                 setShowSelectAppModal(true);
               }}
               disabled={
