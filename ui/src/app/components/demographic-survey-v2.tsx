@@ -22,6 +22,7 @@ import {
   DISABILITY_DRESSING,
   DISABILITY_ERRANDS,
   DISABILITY_HEARING,
+  DISABILITY_OTHER,
   DISABILITY_SEEING,
   DISABILITY_WALKING,
   DISADVANTAGED,
@@ -37,7 +38,6 @@ import {
   CheckBox,
   NumberInput,
   TextAreaWithLengthValidationMessage,
-  TextInput,
 } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { AoU } from './text-wrappers';
@@ -55,6 +55,7 @@ export const possiblePreferNotToAnswerErrors = [
   DISABILITY_WALKING,
   DISABILITY_DRESSING,
   DISABILITY_ERRANDS,
+  DISABILITY_OTHER,
   EDUCATION,
   DISADVANTAGED,
 ];
@@ -70,6 +71,7 @@ export const questionsIndex = {
   [DISABILITY_WALKING]: 8,
   [DISABILITY_DRESSING]: 9,
   [DISABILITY_ERRANDS]: 10,
+  [DISABILITY_OTHER]: 11,
   [YEAR_OF_BIRTH]: 12,
   [EDUCATION]: 13,
   [DISADVANTAGED]: 14,
@@ -177,6 +179,12 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
       presence: {
         allowEmpty: false,
         message: "^ Difficulty doing errands can't be blank",
+      },
+    },
+    disabilityOtherText: {
+      length: {
+        maximum: 1000,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
       },
     },
     ...yearOfBirth,
@@ -978,15 +986,20 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <div
               style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
             >
-              11. Do you have a physical, cognitive, and/or emotional condition
-              that substantially limits one or more life activities not
-              specified through the above questions, and want to share more?
-              Please describe.
+              {getQuestionLabel(
+                DISABILITY_OTHER,
+                'Do you have a physical, cognitive, and/or emotional condition ' +
+                  'that substantially limits one or more life activities not ' +
+                  'specified through the above questions, and want to share more? ' +
+                  'Please describe.'
+              )}
             </div>
-            <TextInput
+            <TextAreaWithLengthValidationMessage
+              id='disability-other-text'
               onChange={(value) => onUpdate('disabilityOtherText', value)}
-              value={survey.disabilityOtherText || ''}
-              style={{ width: '50%' }}
+              initialText={survey.disabilityOtherText || ''}
+              textBoxStyleOverrides={{ width: '100%' }}
+              maxCharacters={1000}
             />
           </FlexColumn>
           <div style={styles.question}>

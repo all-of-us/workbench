@@ -16,6 +16,7 @@ export const DISABILITY_CONCENTRATING = 'disabilityConcentrating';
 export const DISABILITY_WALKING = 'disabilityWalking';
 export const DISABILITY_DRESSING = 'disabilityDressing';
 export const DISABILITY_ERRANDS = 'disabilityErrands';
+export const DISABILITY_OTHER = 'disabilityOtherText';
 export const YEAR_OF_BIRTH = 'yearOfBirth';
 export const EDUCATION = 'education';
 export const DISADVANTAGED = 'disadvantaged';
