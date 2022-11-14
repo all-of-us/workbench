@@ -19,7 +19,7 @@ import {
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
+import { APP_LIST } from 'app/utils/constants';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
@@ -45,30 +45,14 @@ const styles = reactStyles({
 export const AppsList = withCurrentWorkspace()((props) => {
   const { workspace } = props;
   const [selectedApp, setSelectedApp] = useState('');
-  const [showAppModal, setShowAppModal] = useState(false);
-  const [showJupyterModal, setShowJupyterModal] = useState(false);
-
-  const displayJupyterModal = () => {
-    setShowAppModal(false);
-    setShowJupyterModal(true);
-  };
+  const [showSelectAppModal, setShowSelectAppModal] = useState(false);
 
   const canWrite = (): boolean => {
     return WorkspacePermissionsUtil.canWrite(props.workspace.accessLevel);
   };
 
-  const showApplicationModal = () => {
-    switch (selectedApp) {
-      case JUPYTER_APP: {
-        displayJupyterModal();
-        break;
-      }
-    }
-  };
-
   const onClose = () => {
-    setShowJupyterModal(false);
-    setShowAppModal(false);
+    setShowSelectAppModal(false);
   };
 
   useEffect(() => {
@@ -88,7 +72,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               style={styles.startButton}
               onClick={() => {
                 AnalyticsTracker.Notebooks.OpenCreateModal();
-                setShowAppModal(true);
+                setShowSelectAppModal(true);
               }}
               disabled={
                 workspace.billingStatus === BillingStatus.INACTIVE ||
@@ -101,11 +85,11 @@ export const AppsList = withCurrentWorkspace()((props) => {
           </FlexRow>
         </FlexColumn>
       </FadeBox>
-      {showAppModal && (
+      {showSelectAppModal && (
         <Modal data-test-id='select-application-modal'>
-          <ModalTitle>Analysis Data</ModalTitle>
+          <ModalTitle>Analyze Data</ModalTitle>
           <ModalBody>
-            <div style={styles.appsLabel}>Select an Application</div>
+            <div style={styles.appsLabel}>Select an application</div>
             <Dropdown
               data-test-id={'application-list-dropdown'}
               value={selectedApp}
@@ -124,22 +108,11 @@ export const AppsList = withCurrentWorkspace()((props) => {
             >
               Close
             </Button>
-            <Button
-              type={'primary'}
-              label={'Next'}
-              onClick={() => showApplicationModal()}
-            >
+            <Button type={'primary'} label={'Next'} onClick={() => {}}>
               Next
             </Button>
           </ModalFooter>
         </Modal>
-      )}
-      {showJupyterModal && (
-        <div>Modal will come here </div>
-        // <JupyterModal
-        //   onBack={() => closeApplication()}
-        //   onCancel={() => cancel()}
-        // />
       )}
     </>
   );

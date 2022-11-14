@@ -1,5 +1,3 @@
-import { AppType } from 'generated/fetch';
-
 export const DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE = '8/21/2022';
 
 export const DEMOGRAPHIC_SURVEY_V2_PATH = '/demographic-survey';
@@ -89,7 +87,4 @@ export const STATE_CODE_MAPPING = {
 // ANALYSIS (NEW): APPS LIST
 export const JUPYTER_APP = 'JUPYTER';
 
-export const APP_LIST = [
-  ...Object.keys(AppType).map((app) => app.toString()),
-  JUPYTER_APP,
-];
+export const APP_LIST = [JUPYTER_APP];
