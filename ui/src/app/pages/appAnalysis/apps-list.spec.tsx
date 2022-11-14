@@ -65,14 +65,6 @@ describe('Apps list', () => {
     expect(startButton(wrapper).prop('disabled')).toBeFalsy();
   });
 
-  it('Clicking Start button should open select application modal', () => {
-    const wrapper = component();
-    startButton(wrapper).simulate('click');
-    expect(
-      wrapper.find('[data-test-id="select-application-modal"]')
-    ).toBeTruthy();
-  });
-
   it('Clicking Start button should open select application modal that has list of applications', () => {
     const wrapper = component();
     startButton(wrapper).simulate('click');
