@@ -52,6 +52,7 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { formatUsd } from 'app/utils/numbers';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import {
@@ -60,6 +61,8 @@ import {
   diffsToUpdateMessaging,
   fromAnalysisConfig,
   getAnalysisConfigDiffs,
+  isActionable,
+  isVisible,
   maybeWithExistingDisk,
   PanelContent,
   RuntimeStatusRequest,
@@ -259,6 +262,7 @@ const PanelMain = fp.flow(
     workspace,
     profileState,
     onClose = () => {},
+    forceInitialPanelContent,
   }) => {
     const { namespace, id, cdrVersionId, googleProject } = workspace;
 
@@ -307,8 +311,9 @@ const PanelMain = fp.flow(
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const initialPanelContent = fp.cond([
+      [([f, _, _2, _3]) => !!f, ([f, _, _2, _3]) => f],
       [
-        ([b, _, _2]) => b === BillingStatus.INACTIVE,
+        ([_, b, _2, _3]) => b === BillingStatus.INACTIVE,
         () => PanelContent.Disabled,
       ],
       // If there's a pendingRuntime, this means there's already a create/update
@@ -316,12 +321,12 @@ const PanelMain = fp.flow(
       // Show the customize panel in this event.
       [() => !!pendingRuntime, () => PanelContent.Customize],
       [
-        ([, r, s]) =>
+        ([_, _2, r, s]) =>
           r === null || r === undefined || s === RuntimeStatus.Unknown,
         () => PanelContent.Create,
       ],
       [
-        ([, r, _]) =>
+        ([_, _2, r, _3]) =>
           r.status === RuntimeStatus.Deleted &&
           [
             RuntimeConfigurationType.GeneralAnalysis,
@@ -330,7 +335,12 @@ const PanelMain = fp.flow(
         () => PanelContent.Create,
       ],
       [() => true, () => PanelContent.Customize],
-    ])([workspace.billingStatus, currentRuntime, status]);
+    ])([
+      forceInitialPanelContent,
+      workspace.billingStatus,
+      currentRuntime,
+      status,
+    ]);
     const [panelContent, setPanelContent] =
       useState<PanelContent>(initialPanelContent);
 
@@ -354,15 +364,8 @@ const PanelMain = fp.flow(
       }
     }, [analysisConfig.computeType]);
 
-    const runtimeExists =
-      (status &&
-        ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) ||
-      !!pendingRuntime;
-    const disableControls =
-      runtimeExists &&
-      ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
-        status as RuntimeStatus
-      );
+    const runtimeExists = (status && isVisible(status)) || !!pendingRuntime;
+    const disableControls = runtimeExists && !isActionable(status);
 
     const dataprocExists =
       runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
@@ -632,6 +635,8 @@ const PanelMain = fp.flow(
       );
     };
 
+    const closeSidebar = () => setSidebarActiveIconStore.next(null);
+
     return (
       <div id='runtime-panel'>
         {cond(
@@ -678,6 +683,7 @@ const PanelMain = fp.flow(
                   <ConfirmDeleteRuntimeWithPD
                     onConfirm={async (runtimeStatusReq) => {
                       await setRuntimeStatus(runtimeStatusReq);
+                      closeSidebar();
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -692,6 +698,7 @@ const PanelMain = fp.flow(
                       await setRuntimeStatus(
                         RuntimeStatusRequest.DeleteRuntime
                       );
+                      closeSidebar();
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -706,6 +713,7 @@ const PanelMain = fp.flow(
               <ConfirmDeleteUnattachedPD
                 onConfirm={async () => {
                   await diskApi().deleteDisk(namespace, persistentDisk.name);
+                  closeSidebar();
                   onClose();
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -1069,11 +1077,11 @@ const PanelMain = fp.flow(
 export const RuntimeConfigurationPanel = withStore(
   runtimeStore,
   'runtime'
-)(({ runtime, onClose = () => {} }) => {
+)(({ runtime, onClose = () => {}, forceInitialPanelContent }) => {
   if (!runtime.runtimeLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '5rem' }} />;
   }
 
   // TODO: can we remove this indirection?
-  return <PanelMain onClose={onClose} />;
+  return <PanelMain {...{ onClose, forceInitialPanelContent }} />;
 });
