@@ -39,7 +39,7 @@ import {
 } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { diskTypeLabels } from 'app/utils/runtime-utils';
+import { diskTypeLabels, isActionable } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -501,9 +501,12 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
   });
 
-  it('should disable controls when runtime has non-updateable status', async () => {
+  it('should disable controls when runtime has a non-actionable status', async () => {
     runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
     runtimeStoreStub.runtime = runtimeApiStub.runtime;
+
+    // sanity check
+    expect(isActionable(runtimeApiStub.runtime.status)).toBeFalsy();
 
     const wrapper = await component();
 
