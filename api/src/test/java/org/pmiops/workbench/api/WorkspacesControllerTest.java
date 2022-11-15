@@ -179,7 +179,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -373,7 +373,7 @@ public class WorkspacesControllerTest {
     LeonardoRuntimeAuditor.class,
     MailService.class,
     MonitoringService.class,
-    NotebooksService.class,
+    FileArtifactsService.class,
     TaskQueueService.class,
     UserRecentResourceService.class,
     UserService.class,

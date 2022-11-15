@@ -57,6 +57,8 @@ import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -76,8 +78,6 @@ import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -120,7 +120,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapperImpl dataSetMapper;
   @Autowired private FireCloudService fireCloudService;
-  @Autowired private NotebooksService notebooksService;
+  @Autowired private FileArtifactsService fileArtifactsService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -177,7 +177,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     ConceptSetService.class,
     FireCloudServiceImpl.class,
     FreeTierBillingService.class,
-    NotebooksServiceImpl.class,
+    FileArtifactsServiceImpl.class,
     Provider.class,
     UserMapper.class,
     WorkspaceMapperImpl.class,
@@ -252,7 +252,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 cdrVersionService,
                 dataSetServiceImpl,
                 fireCloudService,
-                notebooksService,
+                fileArtifactsService,
                 userProvider,
                 genomicExtractionService,
                 workspaceAuthService,

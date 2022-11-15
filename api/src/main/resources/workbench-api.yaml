@@ -1485,14 +1485,14 @@ paths:
             executed (as a starting point for exploring manually in BigQuery).
           schema:
             "$ref": "#/definitions/WorkspaceAuditLogQueryResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/file-artifact-list":
     get:
-      summary: Get details of Python files from google Bucket directory notebook
+      summary: Get details of files from google Bucket directory
       description: 'Returns list of name and path of python files from google bucket,
-        directory notebook.'
-      operationId: getNoteBookList
+        directory files.'
+      operationId: getFileList
       tags:
-      - notebooks
+      - fileArtifacts
       parameters:
       - in: path
         name: workspaceNamespace
@@ -1766,17 +1766,17 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/CloudStorageTraffic"
-  "/v1/admin/workspaces/{workspaceNamespace}/notebooks/{notebookName}/readonly":
+  "/v1/admin/workspaces/{workspaceNamespace}/fileArtifacts/{fileName}/readonly":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
     post:
       tags:
         - workspaceAdmin
-      description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
-      operationId: adminReadOnlyNotebook
+      description: Get the HTML for a read only view of the file. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminReadOnlyFileArtifacts
       parameters:
       - in: path
-        name: notebookName
+        name: fileName
         required: true
         type: string
       - in: body
@@ -1786,9 +1786,9 @@ paths:
           "$ref": "#/definitions/AccessReason"
       responses:
         200:
-          description: HTML Read Only version of the notebook
+          description: HTML Read Only version of the file
           schema:
-            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+            "$ref": "#/definitions/ReadOnlyFileArtifactResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/files":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2070,40 +2070,40 @@ paths:
         204:
           description: No content.
 
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/{fileName}/readonly":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - notebooks
-      description: Get the HTML for a read only view of the notebook
-      operationId: readOnlyNotebook
+      - fileArtifacts
+      description: Get the HTML for a read only view of the file
+      operationId: readOnlyFileArtifacts
       parameters:
       - in: path
-        name: notebookName
+        name: fileName
         required: true
         type: string
       responses:
         200:
-          description: HTML Read Only version of the notebook
+          description: HTML Read Only version of the file
           schema:
-            "$ref": "#/definitions/ReadOnlyNotebookResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename":
+            "$ref": "#/definitions/ReadOnlyFileArtifactResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/rename":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - notebooks
+      - fileArtifacts
       consumes:
       - application/json
       description: Renames specified notebook
-      operationId: renameNotebook
+      operationId: renameFileArtifacts
       parameters:
       - in: body
-        name: NotebookRename
-        description: new name for notebook
+        name: FileArtifactsRename
+        description: new name for file artifacts
         required: true
         schema:
           type: object
@@ -2117,18 +2117,18 @@ paths:
           description: Successful rename
           schema:
             "$ref": "#/definitions/FileDetail"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/duplicate":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/{fileName}/duplicate":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - notebooks
-      description: Duplicates specified notebook
-      operationId: cloneNotebook
+      - fileArtifacts
+      description: Duplicates specified file
+      operationId: cloneFileArtifacts
       parameters:
       - in: path
-        name: notebookName
+        name: fileName
         required: true
         type: string
       responses:
@@ -2136,22 +2136,22 @@ paths:
           description: Successful duplicate
           schema:
             "$ref": "#/definitions/FileDetail"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/copy":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/{fileName}/copy":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     - in: path
-      name: notebookName
+      name: fileName
       required: true
       type: string
     post:
       tags:
-      - notebooks
-      description: Copy specified notebook in path to specified workspace in body
+      - fileArtifacts
+      description: Copy specified file in path to specified workspace in body
       operationId: copyNotebook
       parameters:
       - in: body
-        name: copyNotebookRequest
+        name: copyFileArtifactRequest
         required: true
         schema:
           "$ref": "#/definitions/CopyRequest"
@@ -2160,18 +2160,18 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/FileDetail"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/kernel":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/{fileName}/kernel":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-        - notebooks
+        - fileArtifacts
       description: Get Kernel Type of notebook
-      operationId: getNotebookKernel
+      operationId: getFileArtifactKernel
       parameters:
         - in: path
-          name: notebookName
+          name: fileName
           required: true
           type: string
       responses:
@@ -2179,18 +2179,18 @@ paths:
           description: Kernel Type
           schema:
             "$ref": "#/definitions/KernelTypeResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/{fileName}/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     delete:
       tags:
-      - notebooks
-      description: Deletes specified notebook
-      operationId: deleteNotebook
+      - fileArtifacts
+      description: Deletes specified file
+      operationId: deleteFileArtifacts
       parameters:
       - in: path
-        name: notebookName
+        name: fileName
         required: true
         type: string
       responses:
@@ -2198,30 +2198,30 @@ paths:
           description: Successful delete
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/fileArtifacts/{fileName}/lockingMetadata":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-      - notebooks
-      summary: Get the locking metadata for a notebook
+      - fileArtifacts
+      summary: Get the locking metadata for a file artifacts
       description: |
         Get the locking metadata for a notebook, if available.  If the notebook is not locked
         (e.g. at first creation) this may be empty.  Additionally, the caller of this endpoint
-        may not have the appropriate permissions to determine who is locking this notebook.
+        may not have the appropriate permissions to determine who is locking this file artifacts.
         When this is the case, the lastLockedBy field is set to UNKNOWN.
       operationId: getNotebookLockingMetadata
       parameters:
       - in: path
-        name: notebookName
+        name: fileName
         required: true
         type: string
       responses:
         200:
-          description: The locking metadata fields for the notebook
+          description: The locking metadata fields for the file artifacts
           schema:
-            "$ref": "#/definitions/NotebookLockingMetadataResponse"
+            "$ref": "#/definitions/FileArtifactLockingMetadataResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2895,9 +2895,9 @@ paths:
             "$ref": "#/definitions/DataSetExportRequest"
       responses:
         200:
-          description: HTML Read Only version of the the notebook cells to be exported
+          description: HTML Read Only version of the the file cells to be exported
           schema:
-            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+            "$ref": "#/definitions/ReadOnlyFileArtifactResponse"
         400:
           description: Invalid data set export request
           schema:
@@ -5835,7 +5835,7 @@ definitions:
       value:
         description: The user facing display name for the value.
         type: string
-  ReadOnlyNotebookResponse:
+  ReadOnlyFileArtifactResponse:
     type: object
     properties:
       html:
@@ -6838,7 +6838,7 @@ definitions:
     type: array
     items:
       "$ref": "#/definitions/RecentWorkspace"
-  NotebookLockingMetadataResponse:
+  FileArtifactLockingMetadataResponse:
     type: object
     properties:
       lastLockedBy:

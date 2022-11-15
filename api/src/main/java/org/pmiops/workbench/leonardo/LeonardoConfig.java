@@ -13,8 +13,8 @@ import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.notebooks.api.JupyterApi;
-import org.pmiops.workbench.notebooks.api.ProxyApi;
+import org.pmiops.workbench.fileArtifacts.api.JupyterApi;
+import org.pmiops.workbench.fileArtifacts.api.ProxyApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -46,11 +46,11 @@ public class LeonardoConfig {
 
   @Bean(name = USER_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.notebooks.ApiClient notebooksApiClient(
+  public org.pmiops.workbench.fileArtifacts.ApiClient notebooksApiClient(
       UserAuthentication userAuthentication,
       LeonardoApiClientFactory factory,
       HttpServletRequest req) {
-    org.pmiops.workbench.notebooks.ApiClient apiClient = factory.newNotebooksClient();
+    org.pmiops.workbench.fileArtifacts.ApiClient apiClient = factory.newNotebooksClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
 
     // We pass-through the "Referer" header to outgoing Proxy API requests. Leonardo verifies this
@@ -90,9 +90,9 @@ public class LeonardoConfig {
 
   @Bean(name = SERVICE_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.notebooks.ApiClient workbenchServiceAccountClient(
+  public org.pmiops.workbench.fileArtifacts.ApiClient workbenchServiceAccountClient(
       LeonardoApiClientFactory factory) {
-    org.pmiops.workbench.notebooks.ApiClient apiClient = factory.newNotebooksClient();
+    org.pmiops.workbench.fileArtifacts.ApiClient apiClient = factory.newNotebooksClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
@@ -131,7 +131,7 @@ public class LeonardoConfig {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ProxyApi proxyApi(
-      @Qualifier(USER_NOTEBOOKS_CLIENT) org.pmiops.workbench.notebooks.ApiClient apiClient) {
+      @Qualifier(USER_NOTEBOOKS_CLIENT) org.pmiops.workbench.fileArtifacts.ApiClient apiClient) {
     ProxyApi api = new ProxyApi();
     api.setApiClient(apiClient);
     return api;
@@ -140,7 +140,7 @@ public class LeonardoConfig {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public JupyterApi jupyterApi(
-      @Qualifier(USER_NOTEBOOKS_CLIENT) org.pmiops.workbench.notebooks.ApiClient apiClient) {
+      @Qualifier(USER_NOTEBOOKS_CLIENT) org.pmiops.workbench.fileArtifacts.ApiClient apiClient) {
     JupyterApi api = new JupyterApi();
     api.setApiClient(apiClient);
     return api;

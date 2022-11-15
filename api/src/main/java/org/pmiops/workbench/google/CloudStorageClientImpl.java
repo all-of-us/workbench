@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.notebooks.NotebookLockingUtils;
+import org.pmiops.workbench.fileArtifacts.FileArtifactLockingUtils;
 
 public class CloudStorageClientImpl implements CloudStorageClient {
 
@@ -165,7 +165,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     if (null != fileMetadata) {
       String hash = fileMetadata.getOrDefault("lastLockedBy", null);
       if (hash != null) {
-        String userName = NotebookLockingUtils.findHashedUser(bucketName, workspaceUsers, hash);
+        String userName = FileArtifactLockingUtils.findHashedUser(bucketName, workspaceUsers, hash);
         fileDetail.setLastModifiedBy(userName);
       }
     }

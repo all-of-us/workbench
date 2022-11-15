@@ -130,7 +130,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -213,7 +213,7 @@ public class DataSetControllerTest {
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
-  @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private FileArtifactsService mockFileArtifactsService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
@@ -675,10 +675,10 @@ public class DataSetControllerTest {
     dataSetController
         .exportToNotebook(workspace.getNamespace(), workspace.getName(), request)
         .getBody();
-    verify(mockNotebooksService, never()).getNotebookContents(any(), any());
+    verify(mockFileArtifactsService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
-    verify(mockNotebooksService, times(1))
+    verify(mockFileArtifactsService, times(1))
         .saveNotebook(
             eq(WORKSPACE_BUCKET_NAME), eq(request.getNotebookName()), any(JSONObject.class));
   }
@@ -876,7 +876,7 @@ public class DataSetControllerTest {
 
     String notebookName = "Hello World";
 
-    when(mockNotebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
+    when(mockFileArtifactsService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
         .thenReturn(
             new JSONObject()
                 .put("cells", new JSONArray())
@@ -884,7 +884,7 @@ public class DataSetControllerTest {
                 .put("nbformat", 4)
                 .put("nbformat_minor", 2));
 
-    when(mockNotebooksService.getNotebookKernel(any())).thenReturn(KernelTypeEnum.PYTHON);
+    when(mockFileArtifactsService.getNotebookKernel(any())).thenReturn(KernelTypeEnum.PYTHON);
 
     DataSetExportRequest request =
         new DataSetExportRequest()
@@ -895,10 +895,10 @@ public class DataSetControllerTest {
     dataSetController
         .exportToNotebook(workspace.getNamespace(), workspace.getName(), request)
         .getBody();
-    verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
+    verify(mockFileArtifactsService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
-    verify(mockNotebooksService, times(1))
+    verify(mockFileArtifactsService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
   }
 
@@ -980,7 +980,7 @@ public class DataSetControllerTest {
             .kernelType(KernelTypeEnum.R);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
-    verify(mockNotebooksService)
+    verify(mockFileArtifactsService)
         .saveNotebook(anyString(), anyString(), notebookContentsCaptor.capture());
 
     JSONObject notebookContents = notebookContentsCaptor.getValue();

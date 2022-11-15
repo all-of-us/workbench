@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.fileArtifacts;
 
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 
-public class NotebookLockingUtils {
+public class FileArtifactLockingUtils {
   @VisibleForTesting
   public static String notebookLockingEmailHash(String bucket, String email) {
     String toHash = String.format("%s:%s", bucket, email);

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.fileArtifacts;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -38,15 +38,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotebooksServiceImpl implements NotebooksService {
+public class FileArtifactsServiceImpl implements FileArtifactsService {
 
   private static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
-  // Experimentally determined that generating the preview HTML for a >11MB notebook results in
+      Pattern.compile(FILE_ARTIFACTS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
+  private static final Pattern RMD_PATTERN =
+      Pattern.compile(FILE_ARTIFACTS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(rmd))$");
+  // Experimentally determined that generating the preview HTML for a >11MB fileArtifact results in
   // OOMs on a default F1 240MB GAE task. OOMs may still occur during concurrent requests. If this
   // issue persists, we can move preview processing onto the client (calling Calhoun), or fully
-  // client-side (using a client-side notebook renderer).
-  private static final long MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // 5MB
+  // client-side (using a client-side fileArtifact renderer).
+  private static final long MAX_FILE_READ_SIZE_BYTES = 5 * 1000 * 1000; // 5MB
   private static final PolicyFactory PREVIEW_SANITIZER =
       Sanitizers.FORMATTING
           .and(Sanitizers.BLOCKS)
@@ -87,7 +89,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
-  public NotebooksServiceImpl(
+  public FileArtifactsServiceImpl(
       Clock clock,
       CloudStorageClient cloudStorageClient,
       FireCloudService fireCloudService,
@@ -108,47 +110,47 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
-  public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
+  public List<FileDetail> getFileArtifacts(String workspaceNamespace, String workspaceName) {
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
-    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceName);
+    return getFileArtifactsAsService(bucketName, workspaceNamespace, workspaceName);
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
-  public List<FileDetail> getNotebooksAsService(
+  public List<FileDetail> getFileArtifactsAsService(
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
-    return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+    return cloudStorageClient.getBlobPageForPrefix(bucketName, FILE_ARTIFACTS_WORKSPACE_DIRECTORY)
         .stream()
-        .filter(this::isNotebookBlob)
+        .filter(this::isFileArtifactBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
   }
 
   @Override
-  public boolean isNotebookBlob(Blob blob) {
+  public boolean isFileArtifactBlob(Blob blob) {
     return NOTEBOOK_PATTERN.matcher(blob.getName()).matches();
   }
 
   @Override
-  public FileDetail copyNotebook(
+  public FileDetail copyFileArtifact(
       String fromWorkspaceNamespace,
       String fromWorkspaceFirecloudName,
-      String fromNotebookName,
+      String fromFileArtifactName,
       String toWorkspaceNamespace,
       String toWorkspaceFirecloudName,
-      String newNotebookName) {
+      String newFileArtifactName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
-    newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
+    newFileArtifactName = FileArtifactsService.withFileArtifactExtension(newFileArtifactName);
 
     final DbWorkspace fromWorkspace =
         workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);
@@ -165,87 +167,87 @@ public class NotebooksServiceImpl implements NotebooksService {
       throw new BadRequestException(msg);
     }
 
-    GoogleCloudLocators fromNotebookLocators =
-        getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookName);
-    GoogleCloudLocators newNotebookLocators =
-        getNotebookLocators(toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookName);
+    GoogleCloudLocators fromFileArtifactLocators =
+        getFileArtifactLocators(fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromFileArtifactName);
+    GoogleCloudLocators newFileArtifactLocators =
+        getFileArtifactLocators(toWorkspaceNamespace, toWorkspaceFirecloudName, newFileArtifactName);
 
     if (!cloudStorageClient
-        .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
+        .getExistingBlobIdsIn(Collections.singletonList(newFileArtifactLocators.blobId))
         .isEmpty()) {
       throw new BlobAlreadyExistsException();
     }
-    cloudStorageClient.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
+    cloudStorageClient.copyBlob(fromFileArtifactLocators.blobId, newFileArtifactLocators.blobId);
 
     FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(newNotebookName);
-    fileDetail.setPath(newNotebookLocators.fullPath);
+    fileDetail.setName(newFileArtifactName);
+    fileDetail.setPath(newFileArtifactLocators.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
-    userRecentResourceService.updateNotebookEntry(
-        toWorkspace.getWorkspaceId(), userProvider.get().getUserId(), newNotebookLocators.fullPath);
+    userRecentResourceService.updateFileArtifactEntry(
+        toWorkspace.getWorkspaceId(), userProvider.get().getUserId(), newFileArtifactLocators.fullPath);
 
     return fileDetail;
   }
 
   @Override
-  public FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String fromNotebookName) {
-    String newName = "Duplicate of " + fromNotebookName;
-    final FileDetail copiedNotebookFileDetail =
-        copyNotebook(
+  public FileDetail cloneFileArtifact(
+      String workspaceNamespace, String workspaceName, String fromFileArtifactName) {
+    String newName = "Duplicate of " + fromFileArtifactName;
+    final FileDetail copiedFileArtifactFileDetail =
+        copyFileArtifact(
             workspaceNamespace,
             workspaceName,
-            fromNotebookName,
+            fromFileArtifactName,
             workspaceNamespace,
             workspaceName,
             newName);
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_CLONE);
-    return copiedNotebookFileDetail;
+    return copiedFileArtifactFileDetail;
   }
 
   @Override
-  public void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName) {
+  public void deleteFileArtifact(String workspaceNamespace, String workspaceName, String fileArtifactName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceName, WorkspaceAccessLevel.WRITER);
 
-    GoogleCloudLocators notebookLocators =
-        getNotebookLocators(workspaceNamespace, workspaceName, notebookName);
-    cloudStorageClient.deleteBlob(notebookLocators.blobId);
-    userRecentResourceService.deleteNotebookEntry(
+    GoogleCloudLocators fileArtifactLocators =
+        getFileArtifactLocators(workspaceNamespace, workspaceName, fileArtifactName);
+    cloudStorageClient.deleteBlob(fileArtifactLocators.blobId);
+    userRecentResourceService.deleteFileArtifactEntry(
         workspaceDao.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
-        notebookLocators.fullPath);
+        fileArtifactLocators.fullPath);
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Override
-  public FileDetail renameNotebook(
+  public FileDetail renameFileArtifact(
       String workspaceNamespace, String workspaceName, String originalName, String newName) {
     FileDetail fileDetail =
-        copyNotebook(
+        copyFileArtifact(
             workspaceNamespace,
             workspaceName,
             originalName,
             workspaceNamespace,
             workspaceName,
-            NotebooksService.withNotebookExtension(newName));
-    deleteNotebook(workspaceNamespace, workspaceName, originalName);
+            FileArtifactsService.withFileArtifactExtension(newName));
+    deleteFileArtifact(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
   }
 
   @Override
-  public JSONObject getNotebookContents(String bucketName, String notebookName) {
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
+  public JSONObject getFileArtifactContents(String bucketName, String fileArtifactName) {
+    Blob blob = getBlobWithSizeConstraint(bucketName, fileArtifactName);
     return cloudStorageClient.readBlobAsJson(blob);
   }
 
   @Override
-  public KernelTypeEnum getNotebookKernel(JSONObject notebookFile) {
+  public KernelTypeEnum getFileArtifactKernel(JSONObject fileArtifactFile) {
     try {
       String language =
-          Optional.of(notebookFile.getJSONObject("metadata"))
+          Optional.of(fileArtifactFile.getJSONObject("metadata"))
               .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
               .map(kernelSpec -> kernelSpec.getString("language"))
               .orElse("Python");
@@ -262,82 +264,82 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
-  public KernelTypeEnum getNotebookKernel(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+  public KernelTypeEnum getFileArtifactKernel(
+      String workspaceNamespace, String workspaceName, String fileArtifactName) {
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return getNotebookKernel(cloudStorageClient.readBlobAsJson(blob));
+    Blob blob = getBlobWithSizeConstraint(bucketName, fileArtifactName);
+    return getFileArtifactKernel(cloudStorageClient.readBlobAsJson(blob));
   }
 
-  private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
+  private Blob getBlobWithSizeConstraint(String bucketName, String fileArtifactName) {
     Blob blob =
         cloudStorageClient.getBlob(
-            bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
-    if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
+            bucketName, "fileArtifacts/".concat(FileArtifactsService.withFileArtifactExtension(fileArtifactName)));
+    if (blob.getSize() >= MAX_FILE_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
-              "target notebook is too large to process @ %.2fMB", ((double) blob.getSize()) / 1e6));
+              "target fileArtifact is too large to process @ %.2fMB", ((double) blob.getSize()) / 1e6));
     }
     return blob;
   }
 
   @Override
-  public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
+  public void saveFileArtifact(String bucketName, String fileArtifactName, JSONObject fileArtifactContents) {
     cloudStorageClient.writeFile(
         bucketName,
-        "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
-        notebookContents.toString().getBytes(StandardCharsets.UTF_8));
+        "fileArtifacts/" + FileArtifactsService.withFileArtifactExtension(fileArtifactName),
+        fileArtifactContents.toString().getBytes(StandardCharsets.UTF_8));
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Override
-  public String convertNotebookToHtml(byte[] notebook) {
+  public String convertFileArtifactToHtml(byte[] fileArtifact) {
     // We need to send a byte array so the ApiClient attaches the body as is instead
     // of serializing it through Gson which it will do for Strings.
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
-    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(notebook));
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticFileArtifactsConvert(fileArtifact));
   }
 
   @Override
   public String getReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceName, String fileArtifactName) {
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return convertNotebookToHtml(blob.getContent());
+    Blob blob = getBlobWithSizeConstraint(bucketName, fileArtifactName);
+    return convertFileArtifactToHtml(blob.getContent());
   }
 
   @Override
   public String adminGetReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceName, String fileArtifactName) {
     String bucketName =
         fireCloudService
             .getWorkspaceAsService(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return convertNotebookToHtml(blob.getContent());
+    Blob blob = getBlobWithSizeConstraint(bucketName, fileArtifactName);
+    return convertFileArtifactToHtml(blob.getContent());
   }
 
-  private GoogleCloudLocators getNotebookLocators(
-      String workspaceNamespace, String firecloudName, String notebookName) {
+  private GoogleCloudLocators getFileArtifactLocators(
+      String workspaceNamespace, String firecloudName, String fileArtifactName) {
     String bucket =
         fireCloudService
             .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
-    String blobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String blobPath = FILE_ARTIFACTS_WORKSPACE_DIRECTORY + "/" + fileArtifactName;
     String pathStart = "gs://" + bucket + "/";
     String fullPath = pathStart + blobPath;
     BlobId blobId = BlobId.of(bucket, blobPath);

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.fileArtifacts;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
@@ -12,14 +12,14 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotebooksRetryHandler extends RetryHandler<ApiException> {
+public class FileArtifactsRetryHandler extends RetryHandler<ApiException> {
 
-  private static final Logger logger = Logger.getLogger(NotebooksRetryHandler.class.getName());
+  private static final Logger logger = Logger.getLogger(FileArtifactsRetryHandler.class.getName());
 
-  private static class NotebookRetryPolicy extends ResponseCodeRetryPolicy {
+  private static class FileArtifactRetryPolicy extends ResponseCodeRetryPolicy {
 
-    public NotebookRetryPolicy() {
-      super("Notebooks API");
+    public FileArtifactRetryPolicy() {
+      super("FileArtifacts API");
     }
 
     @Override
@@ -39,7 +39,7 @@ public class NotebooksRetryHandler extends RetryHandler<ApiException> {
         logger.log(
             getLogLevel(responseCode),
             String.format(
-                "Exception calling Notebooks API with response: %s",
+                "Exception calling FileArtifacts API with response: %s",
                 ((ApiException) t).getResponseBody()),
             t);
       } else {
@@ -49,12 +49,12 @@ public class NotebooksRetryHandler extends RetryHandler<ApiException> {
   }
 
   @Autowired
-  public NotebooksRetryHandler(BackOffPolicy backoffPolicy) {
-    super(backoffPolicy, new NotebookRetryPolicy());
+  public FileArtifactsRetryHandler(BackOffPolicy backoffPolicy) {
+    super(backoffPolicy, new FileArtifactRetryPolicy());
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return ExceptionUtils.convertNotebookException(exception);
+    return ExceptionUtils.convertFileArtifactException(exception);
   }
 }

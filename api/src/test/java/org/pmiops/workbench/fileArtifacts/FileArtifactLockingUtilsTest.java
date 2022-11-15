@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.fileArtifacts;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class NotebookLockingUtilsTest {
+public class FileArtifactLockingUtilsTest {
   private static Stream<Arguments> notebookLockingCases() {
     return Stream.of(
         Arguments.of(
@@ -32,6 +32,6 @@ public class NotebookLockingUtilsTest {
   @ParameterizedTest
   @MethodSource("notebookLockingCases")
   public void testNotebookLockingEmailHash(String bucket, String email, String hash) {
-    assertThat(NotebookLockingUtils.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
+    assertThat(FileArtifactLockingUtils.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
   }
 }

@@ -56,8 +56,8 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.notebooks.api.ProxyApi;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsRetryHandler;
+import org.pmiops.workbench.fileArtifacts.api.ProxyApi;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -121,7 +121,7 @@ public class DiskControllerTest {
     LeonardoApiClientImpl.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
-    NotebooksRetryHandler.class,
+    FileArtifactsRetryHandler.class,
     PublicInstitutionDetailsMapperImpl.class,
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,

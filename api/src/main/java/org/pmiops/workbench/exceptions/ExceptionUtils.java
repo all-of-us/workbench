@@ -50,8 +50,8 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static WorkbenchException convertNotebookException(
-      org.pmiops.workbench.notebooks.ApiException e) {
+  public static WorkbenchException convertFileArtifactException(
+      org.pmiops.workbench.fileArtifacts.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

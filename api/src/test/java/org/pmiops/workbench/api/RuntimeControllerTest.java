@@ -102,10 +102,10 @@ import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.notebooks.api.ProxyApi;
-import org.pmiops.workbench.notebooks.model.LocalizationEntry;
-import org.pmiops.workbench.notebooks.model.Localize;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsRetryHandler;
+import org.pmiops.workbench.fileArtifacts.api.ProxyApi;
+import org.pmiops.workbench.fileArtifacts.model.LocalizationEntry;
+import org.pmiops.workbench.fileArtifacts.model.Localize;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -177,7 +177,7 @@ public class RuntimeControllerTest {
     UserServiceTestConfiguration.class,
     LeonardoMapperImpl.class,
     LeonardoApiClientImpl.class,
-    NotebooksRetryHandler.class,
+    FileArtifactsRetryHandler.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
     AccessTierServiceImpl.class,
@@ -1299,7 +1299,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testLocalize() throws org.pmiops.workbench.notebooks.ApiException {
+  public void testLocalize() throws org.pmiops.workbench.fileArtifacts.ApiException {
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
@@ -1350,7 +1350,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testLocalize_playgroundMode() throws org.pmiops.workbench.notebooks.ApiException {
+  public void testLocalize_playgroundMode() throws org.pmiops.workbench.fileArtifacts.ApiException {
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
@@ -1384,7 +1384,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testLocalize_differentNamespace() throws org.pmiops.workbench.notebooks.ApiException {
+  public void testLocalize_differentNamespace() throws org.pmiops.workbench.fileArtifacts.ApiException {
     DbWorkspace otherWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace("other-proj")
@@ -1438,7 +1438,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testLocalize_noNotebooks() throws org.pmiops.workbench.notebooks.ApiException {
+  public void testLocalize_noNotebooks() throws org.pmiops.workbench.fileArtifacts.ApiException {
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);

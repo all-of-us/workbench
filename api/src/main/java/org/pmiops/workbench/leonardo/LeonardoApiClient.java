@@ -11,7 +11,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.notebooks.model.StorageLink;
+import org.pmiops.workbench.fileArtifacts.model.StorageLink;
 
 /**
  * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface

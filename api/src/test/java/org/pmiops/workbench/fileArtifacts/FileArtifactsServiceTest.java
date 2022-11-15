@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.fileArtifacts;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -60,12 +60,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class NotebooksServiceTest {
+public class FileArtifactsServiceTest {
   private static final String BUCKET_NAME = "BUCKET_NAME";
-  private static final String NOTEBOOK_NAME = "my first notebook";
+  private static final String NOTEBOOK_NAME = "my first fileArtifact";
   private static final String NAMESPACE_NAME = "namespace_name";
   private static final String WORKSPACE_NAME = "workspace_name";
-  private static final String PREVIOUS_NOTEBOOK = "previous notebook";
+  private static final String PREVIOUS_NOTEBOOK = "previous fileArtifact";
 
   private static DbUser dbUser;
   private static DbWorkspace dbWorkspace;
@@ -86,10 +86,10 @@ public class NotebooksServiceTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private UserDao userDao;
 
-  @Autowired private NotebooksService notebooksService;
+  @Autowired private FileArtifactsService fileArtifactsService;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class})
+  @Import({FakeClockConfiguration.class, FileArtifactsServiceImpl.class})
   static class Configuration {
 
     @Bean
@@ -104,11 +104,11 @@ public class NotebooksServiceTest {
     }
   }
 
-  class MockNotebook {
+  class MockFileArtifact {
     Blob blob;
     FileDetail fileDetail;
 
-    MockNotebook(String path, String bucketName) {
+    MockFileArtifact(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
       Set<String> workspaceUsersSet = new HashSet();
@@ -159,7 +159,7 @@ public class NotebooksServiceTest {
                         .bucketName(bucketName)));
   }
 
-  private void stubNotebookToJson() {
+  private void stubFileArtifactToJson() {
     when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -181,24 +181,24 @@ public class NotebooksServiceTest {
 
     String htmlDocument = "<body><div>test</div></body>";
 
-    when(mockFireCloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
+    when(mockFireCloudService.staticFileArtifactsConvert(any())).thenReturn(htmlDocument);
 
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
     when(mockBlob.getSize()).thenReturn(1l);
     when(mockBlob.getContent()).thenReturn(new byte[10]);
     String actualResult =
-        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName");
+        fileArtifactsService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "fileArtifactName");
     assertThat(actualResult).isEqualTo(htmlDocument);
   }
 
   @Test
-  public void testCloneNotebook() {
+  public void testCloneFileArtifact() {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
 
-    // Does not verify the response of clone because it is essentially the same as copyNotebook,
+    // Does not verify the response of clone because it is essentially the same as copyFileArtifact,
     // and that is tested below.
-    notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    fileArtifactsService.cloneFileArtifact(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
 
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.READER);
@@ -209,14 +209,14 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testCopyNotebook() {
+  public void testCopyFileArtifact() {
     String fromWorkspaceNamespace = "fromWorkspaceNamespace";
     String fromWorkspaceFirecloudName = "fromWorkspaceFirecloudName";
-    String fromNotebookName = "fromNotebookName";
+    String fromFileArtifactName = "fromFileArtifactName";
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName";
+    String newFileArtifactName = "newFileArtifactName";
     String toBucket = "TO_BUCKET";
     HashSet<BlobId> existingBlobIds = new HashSet<>();
 
@@ -237,13 +237,13 @@ public class NotebooksServiceTest {
     when(mockCloudStorageClient.getExistingBlobIdsIn(any())).thenReturn(existingBlobIds);
 
     FileDetail actualFileDetail =
-        notebooksService.copyNotebook(
+        fileArtifactsService.copyFileArtifact(
             fromWorkspaceNamespace,
             fromWorkspaceFirecloudName,
-            fromNotebookName,
+            fromFileArtifactName,
             toWorkspaceNamespace,
             toWorkspaceFirecloudName,
-            newNotebookName);
+            newFileArtifactName);
 
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(
@@ -256,23 +256,23 @@ public class NotebooksServiceTest {
 
     FileDetail expectedFileDetail =
         new FileDetail()
-            .name(newNotebookName + ".ipynb")
-            .path("gs://" + toBucket + "/notebooks/" + newNotebookName + ".ipynb");
+            .name(newFileArtifactName + ".ipynb")
+            .path("gs://" + toBucket + "/fileArtifacts/" + newFileArtifactName + ".ipynb");
     assertThat(actualFileDetail.getName()).isEqualTo(expectedFileDetail.getName());
     assertThat(actualFileDetail.getPath()).isEqualTo(expectedFileDetail.getPath());
     assertThat(actualFileDetail.getSizeInBytes()).isEqualTo(expectedFileDetail.getSizeInBytes());
   }
 
   @Test
-  public void testCopyNotebook_fromDifferentTiers() {
+  public void testCopyFileArtifact_fromDifferentTiers() {
     DbWorkspace fromWorkSpace = new DbWorkspace();
     DbWorkspace toWorkSpace = new DbWorkspace();
     String fromWorkspaceNamespace = "fromWorkspaceNamespace";
     String fromWorkspaceFirecloudName = "fromWorkspaceFirecloudName";
-    String fromNotebookName = "fromNotebookName";
+    String fromFileArtifactName = "fromFileArtifactName";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName";
+    String newFileArtifactName = "newFileArtifactName";
 
     fromAccessTier.setDisplayName("A Tier");
     toAccessTier.setDisplayName("B Tier");
@@ -293,26 +293,26 @@ public class NotebooksServiceTest {
         assertThrows(
             BadRequestException.class,
             () ->
-                notebooksService.copyNotebook(
+                fileArtifactsService.copyFileArtifact(
                     fromWorkspaceNamespace,
                     fromWorkspaceFirecloudName,
-                    fromNotebookName,
+                    fromFileArtifactName,
                     toWorkspaceNamespace,
                     toWorkspaceFirecloudName,
-                    newNotebookName));
+                    newFileArtifactName));
     assertThat(exception.getMessage())
         .isEqualTo("Cannot copy between access tiers (attempted copy from A Tier to B Tier)");
   }
 
   @Test
-  public void testCopyNotebook_alreadyExists() {
+  public void testCopyFileArtifact_alreadyExists() {
     String fromWorkspaceNamespace = "fromWorkspaceNamespace";
     String fromWorkspaceFirecloudName = "fromWorkspaceFirecloudName";
-    String fromNotebookName = "fromNotebookName";
+    String fromFileArtifactName = "fromFileArtifactName";
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName";
+    String newFileArtifactName = "newFileArtifactName";
     String toBucket = "TO_BUCKET";
     HashSet<BlobId> existingBlobIds = new HashSet<>();
 
@@ -337,140 +337,140 @@ public class NotebooksServiceTest {
     assertThrows(
         BlobAlreadyExistsException.class,
         () ->
-            notebooksService.copyNotebook(
+            fileArtifactsService.copyFileArtifact(
                 fromWorkspaceNamespace,
                 fromWorkspaceFirecloudName,
-                fromNotebookName,
+                fromFileArtifactName,
                 toWorkspaceNamespace,
                 toWorkspaceFirecloudName,
-                newNotebookName));
+                newFileArtifactName));
   }
 
   @Test
-  public void testDeleteNotebook() {
+  public void testDeleteFileArtifact() {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
 
-    notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
+    fileArtifactsService.deleteFileArtifact(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Test
-  public void testGetNotebookContents() {
+  public void testGetFileArtifactContents() {
     JSONObject expectedResult = new JSONObject();
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
     when(mockBlob.getSize()).thenReturn(1l);
     when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(expectedResult);
 
-    JSONObject actualResult = notebooksService.getNotebookContents(BUCKET_NAME, "notebookName");
+    JSONObject actualResult = fileArtifactsService.getFileArtifactContents(BUCKET_NAME, "fileArtifactName");
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
-  public void testGetNotebookContents_tooBig() {
+  public void testGetFileArtifactContents_tooBig() {
     JSONObject expectedResult = new JSONObject();
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    // The current max notebook read size in bytes is 5e6 or 5mb.
+    // The current max fileArtifact read size in bytes is 5e6 or 5mb.
     when(mockBlob.getSize()).thenReturn((long) 5e6);
     when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(expectedResult);
 
     Exception exception =
         assertThrows(
             FailedPreconditionException.class,
-            () -> notebooksService.getNotebookContents(BUCKET_NAME, "notebookName"));
+            () -> fileArtifactsService.getFileArtifactContents(BUCKET_NAME, "fileArtifactName"));
     assertThat(exception.getMessage())
-        .isEqualTo("target notebook is too large to process @ 5.00MB");
+        .isEqualTo("target fileArtifact is too large to process @ 5.00MB");
   }
 
   @Test
-  public void testGetNotebookKernel_exception() {
-    JSONObject notebookFile = new JSONObject();
-    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+  public void testGetFileArtifactKernel_exception() {
+    JSONObject fileArtifactFile = new JSONObject();
+    KernelTypeEnum kernelType = fileArtifactsService.getFileArtifactKernel(fileArtifactFile);
     assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
   }
 
   @Test
-  public void testGetNotebookKernel_fromBucket() {
-    JSONObject notebookFile = new JSONObject();
+  public void testGetFileArtifactKernel_fromBucket() {
+    JSONObject fileArtifactFile = new JSONObject();
 
     stubGetWorkspace(
         dbWorkspace.getWorkspaceNamespace(),
         dbWorkspace.getFirecloudName(),
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
-    when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(notebookFile);
+    when(mockCloudStorageClient.readBlobAsJson(any())).thenReturn(fileArtifactFile);
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
     when(mockBlob.getSize()).thenReturn(1l);
 
     KernelTypeEnum kernelType =
-        notebooksService.getNotebookKernel(
+        fileArtifactsService.getFileArtifactKernel(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), NOTEBOOK_NAME);
     assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
   }
 
   @Test
-  public void testGetNotebookKernel_python() {
-    JSONObject notebookFile = new JSONObject();
+  public void testGetFileArtifactKernel_python() {
+    JSONObject fileArtifactFile = new JSONObject();
     JSONObject kernelSpec = new JSONObject();
     JSONObject language = new JSONObject();
 
     language.put("language", "Python");
     kernelSpec.put("kernelspec", language);
-    notebookFile.put("metadata", kernelSpec);
+    fileArtifactFile.put("metadata", kernelSpec);
 
-    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    KernelTypeEnum kernelType = fileArtifactsService.getFileArtifactKernel(fileArtifactFile);
     assertThat(kernelType).isEqualTo(KernelTypeEnum.PYTHON);
   }
 
   @Test
-  public void testGetNotebookKernel_r() {
-    JSONObject notebookFile = new JSONObject();
+  public void testGetFileArtifactKernel_r() {
+    JSONObject fileArtifactFile = new JSONObject();
     JSONObject kernelSpec = new JSONObject();
     JSONObject language = new JSONObject();
 
     language.put("language", "R");
     kernelSpec.put("kernelspec", language);
-    notebookFile.put("metadata", kernelSpec);
+    fileArtifactFile.put("metadata", kernelSpec);
 
-    KernelTypeEnum kernelType = notebooksService.getNotebookKernel(notebookFile);
+    KernelTypeEnum kernelType = fileArtifactsService.getFileArtifactKernel(fileArtifactFile);
     assertThat(kernelType).isEqualTo(KernelTypeEnum.R);
   }
 
   @Test
-  public void testGetNotebooks() {
-    MockNotebook notebook1 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), BUCKET_NAME);
-    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text", BUCKET_NAME);
-    MockNotebook notebook3 =
-        new MockNotebook(
-            NotebooksService.withNotebookExtension("notebooks/two words"), BUCKET_NAME);
+  public void testGetFileArtifacts() {
+    MockFileArtifact fileArtifact1 =
+        new MockFileArtifact(FileArtifactsService.withFileArtifactExtension("fileArtifacts/mockFile"), BUCKET_NAME);
+    MockFileArtifact fileArtifact2 = new MockFileArtifact("fileArtifacts/mockFile.text", BUCKET_NAME);
+    MockFileArtifact fileArtifact3 =
+        new MockFileArtifact(
+            FileArtifactsService.withFileArtifactExtension("fileArtifacts/two words"), BUCKET_NAME);
 
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
+    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "fileArtifacts"))
+        .thenReturn(ImmutableList.of(fileArtifact1.blob, fileArtifact2.blob, fileArtifact3.blob));
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
 
     List<FileDetail> gotNames =
-        notebooksService.getNotebooks(NAMESPACE_NAME, WORKSPACE_NAME).stream()
+        fileArtifactsService.getFileArtifacts(NAMESPACE_NAME, WORKSPACE_NAME).stream()
             .collect(Collectors.toList());
 
-    // Note that notebook 2 is not included because it is not actually a notebook file but a text
+    // Note that fileArtifact 2 is not included because it is not actually a fileArtifact file but a text
     // file.
-    assertThat(gotNames).isEqualTo(ImmutableList.of(notebook1.fileDetail, notebook3.fileDetail));
+    assertThat(gotNames).isEqualTo(ImmutableList.of(fileArtifact1.fileDetail, fileArtifact3.fileDetail));
   }
 
   @Test
-  public void testGetNotebooks_notFound() {
+  public void testGetFileArtifacts_notFound() {
     when(mockFireCloudService.getWorkspace("mockProject", "mockWorkspace"))
         .thenThrow(new org.pmiops.workbench.exceptions.NotFoundException());
     assertThrows(
         org.pmiops.workbench.exceptions.NotFoundException.class,
-        () -> notebooksService.getNotebooks("mockProject", "mockWorkspace"));
+        () -> fileArtifactsService.getFileArtifacts("mockProject", "mockWorkspace"));
   }
 
   @Test
-  public void testGetNotebooks_omitsExtraDirectories() {
+  public void testGetFileArtifacts_omitsExtraDirectories() {
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     FileDetail fileDetail1 = mock(FileDetail.class);
@@ -483,9 +483,9 @@ public class NotebooksServiceTest {
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
     when(mockBlob1.getName())
-        .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
-    when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+        .thenReturn(FileArtifactsService.withFileArtifactExtension("fileArtifacts/extra/nope"));
+    when(mockBlob2.getName()).thenReturn(FileArtifactsService.withFileArtifactExtension("fileArtifacts/foo"));
+    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "fileArtifacts"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);
@@ -495,64 +495,64 @@ public class NotebooksServiceTest {
     when(fileDetail2.getName()).thenReturn("foo.ipynb");
 
     List<FileDetail> body =
-        notebooksService.getNotebooks(
+        fileArtifactsService.getFileArtifacts(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
 
-    assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
+    assertThat(gotNames).isEqualTo(ImmutableList.of(FileArtifactsService.withFileArtifactExtension("foo")));
   }
 
   @Test
   public void testGetReadOnlyHtml_allowsDataImage() {
-    stubNotebookToJson();
+    stubFileArtifactToJson();
     String dataUri = "data:image/png;base64,MTIz";
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticFileArtifactsConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(fileArtifactsService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).contains(dataUri);
   }
 
   @Test
   public void testGetReadOnlyHtml_basicContent() {
-    stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    stubFileArtifactToJson();
+    when(mockFireCloudService.staticFileArtifactsConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(fileArtifactsService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).contains("div");
     assertThat(html).contains("asdf");
   }
 
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
-    stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    stubFileArtifactToJson();
+    when(mockFireCloudService.staticFileArtifactsConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(fileArtifactsService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).doesNotContain("eviltrackingpixel.com");
   }
 
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
-    stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    stubFileArtifactToJson();
+    when(mockFireCloudService.staticFileArtifactsConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(fileArtifactsService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).doesNotContain("script");
     assertThat(html).doesNotContain("alert");
   }
 
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
-    stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    stubFileArtifactToJson();
+    when(mockFireCloudService.staticFileArtifactsConvert(any()))
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(fileArtifactsService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).contains("style");
     assertThat(html).contains("color");
     // This behavior is not desired, but this test is in place to enshrine current expected
@@ -565,25 +565,25 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_tooBig() {
     when(mockBlob.getSize()).thenReturn(50L * 1000 * 1000); // 50MB
-    stubNotebookToJson();
+    stubFileArtifactToJson();
 
     try {
-      notebooksService.getReadOnlyHtml("", "", "").getBytes();
+      fileArtifactsService.getReadOnlyHtml("", "", "").getBytes();
       fail("expected 412 exception");
     } catch (FailedPreconditionException e) {
       // expected
     }
-    verify(mockFireCloudService, never()).staticNotebooksConvert(any());
+    verify(mockFireCloudService, never()).staticFileArtifactsConvert(any());
   }
 
   @Test
-  public void testIsNotebookBlob_negative() {
-    when(mockBlob.getName()).thenReturn("notebooks/test.txt");
-    assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  public void testIsFileArtifactBlob_negative() {
+    when(mockBlob.getName()).thenReturn("fileArtifacts/test.txt");
+    assertThat(fileArtifactsService.isFileArtifactBlob(mockBlob)).isEqualTo(false);
   }
 
   @Test
-  public void testRenameNotebook() {
+  public void testRenameFileArtifact() {
 
     when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
         .thenReturn(WorkspaceAccessLevel.OWNER);
@@ -593,24 +593,24 @@ public class NotebooksServiceTest {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
 
     FileDetail actualResult =
-        notebooksService.renameNotebook(
+        fileArtifactsService.renameFileArtifact(
             NAMESPACE_NAME,
             WORKSPACE_NAME,
-            NotebooksService.withNotebookExtension("oldName"),
-            NotebooksService.withNotebookExtension("newName"));
+            FileArtifactsService.withFileArtifactExtension("oldName"),
+            FileArtifactsService.withFileArtifactExtension("newName"));
 
     verify(mockCloudStorageClient).deleteBlob(any());
-    verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
+    verify(mockUserRecentResourceService).deleteFileArtifactEntry(anyLong(), anyLong(), anyString());
     verify(mockWorkspaceAuthService, times(2))
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
-        .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");
+        .isEqualTo("gs://" + BUCKET_NAME + "/fileArtifacts/newName.ipynb");
   }
 
   @Test
-  public void testRenameNotebook_withOutExtension() {
+  public void testRenameFileArtifact_withOutExtension() {
 
     when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
         .thenReturn(WorkspaceAccessLevel.OWNER);
@@ -620,17 +620,17 @@ public class NotebooksServiceTest {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
 
     FileDetail actualResult =
-        notebooksService.renameNotebook(NAMESPACE_NAME, WORKSPACE_NAME, "oldName", "newName");
+        fileArtifactsService.renameFileArtifact(NAMESPACE_NAME, WORKSPACE_NAME, "oldName", "newName");
 
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
-        .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");
+        .isEqualTo("gs://" + BUCKET_NAME + "/fileArtifacts/newName.ipynb");
   }
 
   @Test
-  public void testSaveNotebook_firesMetric() {
-    notebooksService.saveNotebook(
-        BUCKET_NAME, NOTEBOOK_NAME, new JSONObject().put("who", "I'm a notebook!"));
+  public void testSaveFileArtifact_firesMetric() {
+    fileArtifactsService.saveFileArtifact(
+        BUCKET_NAME, NOTEBOOK_NAME, new JSONObject().put("who", "I'm a fileArtifact!"));
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 }
