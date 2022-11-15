@@ -372,6 +372,7 @@ export const HelpSidebar = fp.flow(
     } {
       const { pageKey, workspace, cohortContext } = this.props;
       const { runTimeConfPanelInitialState } = this.state;
+
       switch (activeIcon) {
         case 'help':
           return {
