@@ -877,6 +877,8 @@ const useRuntime = (currentWorkspaceNamespace) => {
             runtime: leoRuntime,
             runtimeLoaded: true,
           };
+          // checking for (deep) value equality substantially reduces the number of runtimeStore updates over the
+          // default (reference) equality check, because runtime is often a new object
           if (!fp.isEqual(currentStore, newStore)) {
             runtimeStore.set(newStore);
           }
