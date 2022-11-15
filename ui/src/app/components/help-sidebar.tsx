@@ -371,9 +371,9 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const { pageKey, cohortContext } = this.props;
-      const { runTimeConfPanelInitialState } = this.state;
       const { pageKey, workspace, cohortContext } = this.props;
+      const { runTimeConfPanelInitialState } = this.state;
+
       switch (activeIcon) {
         case 'help':
           return {
@@ -420,7 +420,8 @@ export const HelpSidebar = fp.flow(
             renderBody: () =>
               !!runTimeConfPanelInitialState ? (
                 <RuntimeConfigurationPanel
-                  forceInitialPanelContent={runTimeConfPanelInitialState}
+                  onClose={() => this.setActiveIcon(null)}
+                  initialPanelContent={runTimeConfPanelInitialState}
                 />
               ) : (
                 <AppsPanel
@@ -592,7 +593,6 @@ export const HelpSidebar = fp.flow(
             )}
             <HelpSidebarIcons
               {...{ ...this.props, activeIcon }}
-              runtimeStore={runtimeStore.get()}
               onIconClick={(icon) => this.onIconClick(icon)}
             />
           </div>
