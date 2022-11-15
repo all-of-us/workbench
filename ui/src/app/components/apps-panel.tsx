@@ -16,6 +16,7 @@ import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
+import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
 import colors from 'app/styles/colors';
 import { cond, reactStyles, switchCase } from 'app/utils';
 import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
@@ -259,15 +260,29 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
   );
 };
 
-const RuntimeOpenButton = (props: { disabled: boolean }) => {
-  const { disabled } = props;
+const RuntimeOpenButton = (props: { workspace: Workspace }) => {
+  const { workspace } = props;
+  const [showModal, setShowModal] = useState(false);
+
   return (
-    <Clickable {...{ disabled }} style={{ padding: '0.5em' }}>
-      <FlexColumn style={disabled ? styles.disabledButton : styles.button}>
-        <FontAwesomeIcon icon={faRocket} style={styles.buttonIcon} />
-        <div style={styles.buttonText}>Open</div>
-      </FlexColumn>
-    </Clickable>
+    <>
+      {showModal && (
+        <NewNotebookModal
+          {...{ workspace }}
+          existingNameList={[]} // TODO
+          onClose={() => setShowModal(false)}
+        />
+      )}
+      <Clickable
+        style={{ padding: '0.5em' }}
+        onClick={() => setShowModal(true)}
+      >
+        <FlexColumn style={styles.button}>
+          <FontAwesomeIcon icon={faRocket} style={styles.buttonIcon} />
+          <div style={styles.buttonText}>Open New</div>
+        </FlexColumn>
+      </Clickable>
+    </>
   );
 };
 
@@ -308,7 +323,7 @@ const ExpandedApp = (props: {
         <FlexRow>
           <RuntimeSettingsButton {...{ onClickRuntimeConf }} />
           <RuntimeStateButton {...{ workspace }} />
-          <RuntimeOpenButton disabled={true} />
+          <RuntimeOpenButton {...{ workspace }} />
         </FlexRow>
       </FlexColumn>
     )
