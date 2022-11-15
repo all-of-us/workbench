@@ -83,3 +83,6 @@ export const STATE_CODE_MAPPING = {
   'WEST VIRGINIA': 'WV',
   WYOMING: 'WY',
 };
+
+// ANALYSIS (NEW): APPS LIST
+export const APP_LIST = ['JUPYTER'];
