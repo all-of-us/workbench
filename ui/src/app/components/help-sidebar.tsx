@@ -38,7 +38,6 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { PanelContent } from 'app/utils/runtime-utils';
 import {
   routeDataStore,
   runtimeStore,
@@ -186,7 +185,6 @@ interface State {
   tooltipId: number;
   currentModal: CurrentModal;
   runtimeErrors: Array<RuntimeError>;
-  runTimeConfPanelInitialState: PanelContent | null;
 }
 
 export const HelpSidebar = fp.flow(
@@ -211,7 +209,6 @@ export const HelpSidebar = fp.flow(
         tooltipId: undefined,
         currentModal: CurrentModal.None,
         runtimeErrors: null,
-        runTimeConfPanelInitialState: null,
       };
     }
 
@@ -238,7 +235,6 @@ export const HelpSidebar = fp.flow(
 
     setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
-      this.setState({ runTimeConfPanelInitialState: null });
     }
 
     async componentDidMount() {
