@@ -408,7 +408,6 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () => (
-              runtimeStore
               <RuntimeConfigurationPanel
                 onClose={() => this.setActiveIcon(null)}
               />

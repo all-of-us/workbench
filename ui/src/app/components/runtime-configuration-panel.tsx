@@ -1065,7 +1065,7 @@ const PanelMain = fp.flow(
 
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
-  forceInitialPanelContent,
+  forceInitialPanelContent = null,
 }) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
