@@ -26,12 +26,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import {
-  RuntimeStore,
-  runtimeStore,
-  serverConfigStore,
-  useStore,
-} from 'app/utils/stores';
+import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -367,15 +362,13 @@ const runtimeTooltip = (baseTooltip: string, loadingError: Error): string => {
 };
 
 interface IconConfigProps {
+  iconId: SidebarIconId;
   pageKey: string;
   criteria: Array<Selection>;
+  loadingError: Error;
 }
-const iconConfig = (
-  iconId: SidebarIconId,
-  loadingError: Error,
-  props: IconConfigProps
-): IconConfig => {
-  const { pageKey, criteria } = props;
+const iconConfig = (props: IconConfigProps): IconConfig => {
+  const { iconId, pageKey, criteria, loadingError } = props;
 
   // TODO: not sure why the iconKey needs to be converted to string here
   const config: { [iconKey: string]: IconConfig } = {
@@ -480,15 +473,24 @@ const iconConfig = (
   return config[iconId];
 };
 
-interface HelpSidebarIconsProps extends IconConfigProps {
+interface HelpSidebarIconsProps {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtractionJobs: GenomicExtractionJob[];
   activeIcon: string;
   onIconClick: (icon: IconConfig) => void;
+  pageKey: string;
+  criteria: Array<Selection>;
 }
 export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
-  const { workspace, cdrVersionTiersResponse, activeIcon, onIconClick } = props;
+  const {
+    workspace,
+    cdrVersionTiersResponse,
+    activeIcon,
+    onIconClick,
+    pageKey,
+    criteria,
+  } = props;
   const { loadingError } = useStore(runtimeStore);
 
   const defaultIcons: SidebarIconId[] = [
@@ -499,8 +501,8 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     'dataDictionary',
     'annotations',
   ];
-  const keys: SidebarIconId[] = defaultIcons.filter((key) =>
-    iconConfig(key, loadingError, props).showIcon()
+  const keys: SidebarIconId[] = defaultIcons.filter((iconId) =>
+    iconConfig({ iconId, pageKey, criteria, loadingError }).showIcon()
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
@@ -514,7 +516,9 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     keys.push('genomicExtractions');
   }
 
-  const icons = keys.map((key) => iconConfig(key, loadingError, props));
+  const icons = keys.map((iconId) =>
+    iconConfig({ iconId, pageKey, criteria, loadingError })
+  );
 
   return (
     <>

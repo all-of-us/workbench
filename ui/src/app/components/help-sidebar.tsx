@@ -370,8 +370,7 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const { runTimeConfPanelInitialState } = this.state;
-      const { pageKey, workspace, cohortContext } = this.props;
+      const { pageKey, cohortContext } = this.props;
       switch (activeIcon) {
         case 'help':
           return {
