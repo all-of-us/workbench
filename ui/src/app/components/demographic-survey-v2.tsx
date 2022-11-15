@@ -90,6 +90,7 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
+const OTHER_DISABILITY_MAX_LENGTH = 200;
 const MAX_CHARACTERS_VALIDATION_MESSAGE =
   'can have no more than %{count} characters.';
 const NONE_FULLY_DESCRIBE = 'None of these fully describe me';
@@ -101,15 +102,13 @@ const NONE_FULLY_DESCRIBE_VALIDATION = {
   },
 };
 const NONE_FULLY_DESCRIBE_PLACEHOLDER = 'Please specify (optional)';
-
+const SURVEY_COMMENTS_MAX_LENGTH = 1000;
 const TWO_SPIRIT_DISABLED_TEXT =
   'unique to people of American Indian and Alaska Native ' +
   'ancestry. If this applies to you, please update your selection in the ' +
   '"Racial and Ethnic" section.';
-
 const TWO_SPIRIT_IDENTITY_DISABLED_TEXT =
   'Two Spirit is an identity ' + TWO_SPIRIT_DISABLED_TEXT;
-
 const TWO_SPIRIT_SEXUAL_ORIENTATION_DISABLED_TEXT =
   'Two Spirit is an orientation ' + TWO_SPIRIT_DISABLED_TEXT;
 
@@ -184,7 +183,7 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     },
     disabilityOtherText: {
       length: {
-        maximum: 1000,
+        maximum: OTHER_DISABILITY_MAX_LENGTH,
         tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
       },
     },
@@ -193,7 +192,7 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
     disadvantaged: { presence: { allowEmpty: false } },
     surveyComments: {
       length: {
-        maximum: 1000,
+        maximum: SURVEY_COMMENTS_MAX_LENGTH,
         tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
       },
     },
@@ -1000,7 +999,8 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               onChange={(value) => onUpdate('disabilityOtherText', value)}
               initialText={survey.disabilityOtherText || ''}
               textBoxStyleOverrides={{ width: '100%' }}
-              maxCharacters={1000}
+              heightOverride={{ height: '5rem' }}
+              maxCharacters={OTHER_DISABILITY_MAX_LENGTH}
             />
           </FlexColumn>
           <div style={styles.question}>
@@ -1091,7 +1091,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               onChange={(value) => onUpdate('surveyComments', value)}
               initialText={survey.surveyComments || ''}
               textBoxStyleOverrides={{ width: '100%' }}
-              maxCharacters={1000}
+              maxCharacters={SURVEY_COMMENTS_MAX_LENGTH}
             />
           </FlexColumn>
         </FlexColumn>
