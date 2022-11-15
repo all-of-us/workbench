@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.SocketTimeoutException;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.notebooks.ApiException;
+import org.pmiops.workbench.fileArtifacts.ApiException;
 
 public class ExceptionUtilsTest {
 
@@ -12,6 +12,6 @@ public class ExceptionUtilsTest {
   public void convertNotebookException() throws Exception {
     ApiException cause = new ApiException(new SocketTimeoutException());
     assertThrows(
-        GatewayTimeoutException.class, () -> ExceptionUtils.convertNotebookException(cause));
+        GatewayTimeoutException.class, () -> ExceptionUtils.convertFileArtifactException(cause));
   }
 }

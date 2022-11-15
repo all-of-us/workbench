@@ -36,7 +36,7 @@ import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -86,7 +86,7 @@ public class WorkspaceAdminControllerTest {
   })
   @MockBean({
     CloudStorageClient.class,
-    NotebooksService.class,
+    FileArtifactsService.class,
     ConceptSetService.class,
     CohortService.class,
   })

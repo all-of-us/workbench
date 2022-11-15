@@ -40,7 +40,7 @@ import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsRetryHandler;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -67,7 +67,7 @@ public class LeonardoApiClientTest {
     LeonardoRetryHandler.class,
     LeonardoApiClientImpl.class,
     NoBackOffPolicy.class,
-    NotebooksRetryHandler.class,
+    FileArtifactsRetryHandler.class,
   })
   static class Configuration {
 

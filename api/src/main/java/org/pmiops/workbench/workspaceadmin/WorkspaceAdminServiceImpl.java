@@ -37,6 +37,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -62,7 +63,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -89,7 +89,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
-  private final NotebooksService notebooksService;
+  private final FileArtifactsService fileArtifactsService;
   private final Provider<DbUser> userProvider;
   private final UserMapper userMapper;
   private final UserService userService;
@@ -113,7 +113,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
-      NotebooksService notebooksService,
+      FileArtifactsService fileArtifactsService,
       Provider<DbUser> userProvider,
       UserMapper userMapper,
       UserService userService,
@@ -134,7 +134,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.mailService = mailService;
-    this.notebooksService = notebooksService;
+    this.fileArtifactsService = fileArtifactsService;
     this.userProvider = userProvider;
     this.userMapper = userMapper;
     this.userService = userService;
@@ -172,7 +172,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     // NOTE: all of these may be undercounts, because we're only looking at the first Page of
     // Storage List results
     int notebookFilesCount =
-        notebooksService
+        fileArtifactsService
             .getNotebooksAsService(bucketName, workspaceNamespace, workspaceName)
             .size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
@@ -323,7 +323,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
     adminAuditor.fireViewNotebookAction(
         workspaceNamespace, workspaceName, notebookName, accessReason);
-    return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
+    return fileArtifactsService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
@@ -406,9 +406,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageClient
-            .getBlobPageForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+            .getBlobPageForPrefix(bucketName, FileArtifactsService.FILE_ARTIFACTS_WORKSPACE_DIRECTORY)
             .stream()
-            .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
+            .filter(((Predicate<Blob>) fileArtifactsService::isNotebookBlob).negate())
             .count();
   }
 

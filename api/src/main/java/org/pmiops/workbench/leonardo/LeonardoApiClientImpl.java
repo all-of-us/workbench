@@ -56,11 +56,11 @@ import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.notebooks.api.ProxyApi;
-import org.pmiops.workbench.notebooks.model.LocalizationEntry;
-import org.pmiops.workbench.notebooks.model.Localize;
-import org.pmiops.workbench.notebooks.model.StorageLink;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsRetryHandler;
+import org.pmiops.workbench.fileArtifacts.api.ProxyApi;
+import org.pmiops.workbench.fileArtifacts.model.LocalizationEntry;
+import org.pmiops.workbench.fileArtifacts.model.Localize;
+import org.pmiops.workbench.fileArtifacts.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -106,7 +106,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<DisksApi> diskApiProvider;
   private final Provider<AppsApi> appsApiProvider;
   private final FireCloudService fireCloudService;
-  private final NotebooksRetryHandler notebooksRetryHandler;
+  private final FileArtifactsRetryHandler fileArtifactsRetryHandler;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
   private final WorkspaceDao workspaceDao;
@@ -124,7 +124,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
       Provider<AppsApi> appsApiProvider,
       FireCloudService fireCloudService,
-      NotebooksRetryHandler notebooksRetryHandler,
+      FileArtifactsRetryHandler fileArtifactsRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
       WorkspaceDao workspaceDao) {
@@ -138,7 +138,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.diskApiProvider = diskApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.fireCloudService = fireCloudService;
-    this.notebooksRetryHandler = notebooksRetryHandler;
+    this.fileArtifactsRetryHandler = fileArtifactsRetryHandler;
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
     this.workspaceDao = workspaceDao;
@@ -447,7 +447,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                                 .localDestinationPath(e.getKey()))
                     .collect(Collectors.toList()));
     ProxyApi proxyApi = proxyApiProvider.get();
-    notebooksRetryHandler.run(
+    fileArtifactsRetryHandler.run(
         (context) -> {
           proxyApi.welderLocalize(googleProject, runtimeName, welderReq);
           return null;
@@ -458,7 +458,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public StorageLink createStorageLink(
       String googleProject, String runtime, StorageLink storageLink) {
     ProxyApi proxyApi = proxyApiProvider.get();
-    return notebooksRetryHandler.run(
+    return fileArtifactsRetryHandler.run(
         (context) -> proxyApi.welderCreateStorageLink(googleProject, runtime, storageLink));
   }
 

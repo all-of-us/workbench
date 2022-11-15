@@ -48,6 +48,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -71,7 +72,6 @@ import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
@@ -114,7 +114,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private FileArtifactsService mockFileArtifactsService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -255,11 +255,11 @@ public class WorkspaceAdminServiceTest {
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
                 .storageBucketPath("gs://bucket"));
-    verify(mockNotebooksService, atLeastOnce())
-        .getNotebooksAsService(any(), anyString(), anyString());
+    verify(mockFileArtifactsService, atLeastOnce())
+        .getFileArtifactsAsService(any(), anyString(), anyString());
 
     // Regression check: the admin service should never call the end-user variants of these methods.
-    verify(mockNotebooksService, never()).getNotebooks(any(), any());
+    verify(mockFileArtifactsService, never()).getFileArtifacts(any(), any());
     verify(mockFirecloudService, never()).getWorkspace(any(), any());
   }
 

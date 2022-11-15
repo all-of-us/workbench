@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
@@ -58,7 +59,6 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -81,7 +81,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
-  private final NotebooksService notebooksService;
+  private final FileArtifactsService fileArtifactsService;
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -91,7 +91,7 @@ public class DataSetController implements DataSetApiDelegate {
       CdrVersionService cdrVersionService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
-      NotebooksService notebooksService,
+      FileArtifactsService fileArtifactsService,
       Provider<DbUser> userProvider,
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService,
@@ -99,7 +99,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
-    this.notebooksService = notebooksService;
+    this.fileArtifactsService = fileArtifactsService;
     this.userProvider = userProvider;
     this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
@@ -261,7 +261,7 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
             .html(
-                notebooksService.convertNotebookToHtml(
+                fileArtifactsService.convertNotebookToHtml(
                     notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
   }
 
@@ -283,8 +283,8 @@ public class DataSetController implements DataSetApiDelegate {
 
     if (!dataSetExportRequest.getNewNotebook()) {
       notebookFile =
-          notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
-      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
+          fileArtifactsService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
+      dataSetExportRequest.setKernelType(fileArtifactsService.getNotebookKernel(notebookFile));
     } else {
       notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
@@ -294,7 +294,7 @@ public class DataSetController implements DataSetApiDelegate {
         .forEach(
             cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
-    notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
+    fileArtifactsService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }

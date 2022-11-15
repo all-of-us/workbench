@@ -66,10 +66,10 @@ public class LeonardoApiClientFactory {
    * Creates a Leonardo notebooks API client, unauthenticated. Most clients should use an
    * authenticated, request scoped bean instead of calling this directly.
    */
-  public org.pmiops.workbench.notebooks.ApiClient newNotebooksClient() {
+  public org.pmiops.workbench.fileArtifacts.ApiClient newNotebooksClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final org.pmiops.workbench.notebooks.ApiClient apiClient =
-        new org.pmiops.workbench.notebooks.ApiClient()
+    final org.pmiops.workbench.fileArtifacts.ApiClient apiClient =
+        new org.pmiops.workbench.fileArtifacts.ApiClient()
             .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(

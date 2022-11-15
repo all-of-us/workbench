@@ -224,7 +224,7 @@ public class ExportWorkspaceData {
   private CohortDao cohortDao;
   private ConceptSetDao conceptSetDao;
   private DataSetDao dataSetDao;
-  private NotebooksService notebooksService;
+  private NotebooksService fileArtifactsService;
   private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private UserDao userDao;
   private WorkspacesApi workspacesApi;
@@ -238,7 +238,7 @@ public class ExportWorkspaceData {
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
-      NotebooksService notebooksService,
+      NotebooksService fileArtifactsService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       UserDao userDao,
       WorkspacesApi workspacesApi,
@@ -247,7 +247,7 @@ public class ExportWorkspaceData {
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
-    this.notebooksService = notebooksService;
+    this.fileArtifactsService = fileArtifactsService;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.userDao = userDao;
     this.workspacesApi = workspacesApi;

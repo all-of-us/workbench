@@ -44,7 +44,7 @@ import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.model.StorageLink;
+import org.pmiops.workbench.fileArtifacts.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;

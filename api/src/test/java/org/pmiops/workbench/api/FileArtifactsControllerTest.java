@@ -29,6 +29,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -38,13 +39,12 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.KernelTypeResponse;
-import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
-import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
+import org.pmiops.workbench.model.FileArtifactLockingMetadataResponse;
+import org.pmiops.workbench.model.FileArtifactRename;
+import org.pmiops.workbench.model.ReadOnlyFileArtifactResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.notebooks.NotebookLockingUtils;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactLockingUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -58,7 +58,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class NotebooksControllerTest {
+public class FileArtifactsControllerTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
@@ -72,7 +72,7 @@ public class NotebooksControllerTest {
     AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
     LogsBasedMetricServiceFakeImpl.class,
-    NotebooksController.class,
+    FileArtifactsController.class,
   })
   @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
   static class Configuration {
@@ -83,11 +83,11 @@ public class NotebooksControllerTest {
     }
   }
 
-  class MockNotebook {
+  class MockFileArtifact {
     Blob blob;
     FileDetail fileDetail;
 
-    MockNotebook(String path, String bucketName) {
+    MockFileArtifact(String path, String bucketName) {
       blob = mock(Blob.class);
       fileDetail = new FileDetail();
 
@@ -105,13 +105,13 @@ public class NotebooksControllerTest {
 
   private FirecloudWorkspaceACL fcWorkspaceAcl;
 
-  @MockBean private NotebooksService mockNotebookService;
+  @MockBean private FileArtifactsService mockFileArtifactService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;
 
-  @Autowired private NotebooksController notebooksController;
+  @Autowired private FileArtifactsController fileArtifactsController;
 
   @BeforeEach
   public void setUp() {
@@ -120,45 +120,45 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testCloneNotebook() {
-    String toNotebookName = "Duplicate of starter.ipynb";
-    String toPath = "/path/to/" + toNotebookName;
+  public void testCloneFileArtifact() {
+    String toFileArtifactName = "Duplicate of starter.ipynb";
+    String toPath = "/path/to/" + toFileArtifactName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
-    FileDetail expectedFileDetail = createFileDetail(toNotebookName, toPath, toLastModifiedTime);
+    FileDetail expectedFileDetail = createFileDetail(toFileArtifactName, toPath, toLastModifiedTime);
 
-    when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
+    when(mockFileArtifactService.cloneFileArtifact(anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
-        notebooksController
-            .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME)
+        fileArtifactsController
+            .cloneFileArtifact(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME)
             .getBody();
 
-    verify(mockNotebookService)
-        .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
+    verify(mockFileArtifactService)
+        .cloneFileArtifact(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
 
   @Test
-  public void testCloneNotebook_alreadyExists() {
-    when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
+  public void testCloneFileArtifact_alreadyExists() {
+    when(mockFileArtifactService.cloneFileArtifact(anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
 
     Throwable exception =
         assertThrows(
             BadRequestException.class,
             () ->
-                notebooksController.cloneNotebook(
+                fileArtifactsController.cloneFileArtifact(
                     FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME));
 
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
-    verify(mockNotebookService)
-        .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
+    verify(mockFileArtifactService)
+        .cloneFileArtifact(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
   }
 
   @Test
-  public void testCopyNotebook() {
+  public void testCopyFileArtifact() {
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
@@ -169,18 +169,18 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
     copyRequest.setToWorkspaceName(toWorkspaceName);
 
-    when(mockNotebookService.copyNotebook(
+    when(mockFileArtifactService.copyFileArtifact(
             anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
-        notebooksController
-            .copyNotebook(
+        fileArtifactsController
+            .copyFileArtifact(
                 FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME, copyRequest)
             .getBody();
 
-    verify(mockNotebookService)
-        .copyNotebook(
+    verify(mockFileArtifactService)
+        .copyFileArtifact(
             FROM_WORKSPACE_NAMESPACE,
             FROM_WORKSPACE_NAME,
             FROM_NOTEBOOK_NAME,
@@ -192,7 +192,7 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testCopyNotebook_alreadyExists() {
+  public void testCopyFileArtifact_alreadyExists() {
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     CopyRequest copyRequest = new CopyRequest();
@@ -200,7 +200,7 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceName(toWorkspaceName);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
 
-    when(mockNotebookService.copyNotebook(
+    when(mockFileArtifactService.copyFileArtifact(
             anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
 
@@ -208,14 +208,14 @@ public class NotebooksControllerTest {
         assertThrows(
             ConflictException.class,
             () ->
-                notebooksController.copyNotebook(
+                fileArtifactsController.copyFileArtifact(
                     FROM_WORKSPACE_NAMESPACE,
                     FROM_WORKSPACE_NAME,
                     FROM_NOTEBOOK_NAME,
                     copyRequest));
 
-    verify(mockNotebookService)
-        .copyNotebook(
+    verify(mockFileArtifactService)
+        .copyFileArtifact(
             FROM_WORKSPACE_NAMESPACE,
             FROM_WORKSPACE_NAME,
             FROM_NOTEBOOK_NAME,
@@ -226,62 +226,62 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testDeleteNotebook() {
+  public void testDeleteFileArtifact() {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
-    String notebookName = "notebook.ipynb";
+    String fileArtifactName = "fileArtifact.ipynb";
 
-    notebooksController.deleteNotebook(workspaceNamespace, workspaceName, notebookName);
-    verify(mockNotebookService).deleteNotebook(workspaceNamespace, workspaceName, notebookName);
+    fileArtifactsController.deleteFileArtifact(workspaceNamespace, workspaceName, fileArtifactName);
+    verify(mockFileArtifactService).deleteFileArtifact(workspaceNamespace, workspaceName, fileArtifactName);
   }
 
   @Test
-  public void testGetNotebookList() {
+  public void testGetFileArtifactList() {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
-    MockNotebook notebook1 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), "bucket");
-    MockNotebook notebook2 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"), "bucket");
+    MockFileArtifact fileArtifact1 =
+        new MockFileArtifact(FileArtifactsService.withFileArtifactExtension("fileArtifacts/mockFile"), "bucket");
+    MockFileArtifact fileArtifact2 =
+        new MockFileArtifact(FileArtifactsService.withFileArtifactExtension("fileArtifacts/two words"), "bucket");
 
-    when(mockNotebookService.getNotebooks(anyString(), anyString()))
-        .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
+    when(mockFileArtifactService.getFileArtifacts(anyString(), anyString()))
+        .thenReturn(ImmutableList.of(fileArtifact1.fileDetail, fileArtifact2.fileDetail));
 
-    List<FileDetail> actualNotebooks =
-        notebooksController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
+    List<FileDetail> actualFileArtifacts =
+        fileArtifactsController.getNoteBookList(workspaceNamespace, workspaceName).getBody().stream()
             .collect(Collectors.toList());
-    verify(mockNotebookService).getNotebooks(workspaceNamespace, workspaceName);
-    assertThat(actualNotebooks)
-        .isEqualTo(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
+    verify(mockFileArtifactService).getFileArtifacts(workspaceNamespace, workspaceName);
+    assertThat(actualFileArtifacts)
+        .isEqualTo(ImmutableList.of(fileArtifact1.fileDetail, fileArtifact2.fileDetail));
   }
 
   @Test
-  public void testGetNotebookKernel() {
+  public void testGetFileArtifactKernel() {
     KernelTypeEnum kernelTypeEnum = KernelTypeEnum.PYTHON;
     KernelTypeResponse expectedResponse = new KernelTypeResponse().kernelType(kernelTypeEnum);
 
     when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
         .thenReturn(WorkspaceAccessLevel.OWNER);
-    when(mockNotebookService.getNotebookKernel(anyString(), anyString(), anyString()))
+    when(mockFileArtifactService.getFileArtifactKernel(anyString(), anyString(), anyString()))
         .thenReturn(kernelTypeEnum);
 
     KernelTypeResponse actualResponse =
-        notebooksController
-            .getNotebookKernel(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME)
+        fileArtifactsController
+            .getFileArtifactKernel(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME)
             .getBody();
 
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(
             FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, WorkspaceAccessLevel.READER);
 
-    verify(mockNotebookService)
-        .getNotebookKernel(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
+    verify(mockFileArtifactService)
+        .getFileArtifactKernel(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
   }
 
   @Test
-  public void testGetNotebookLockingMetadata() {
+  public void testGetFileArtifactLockingMetadata() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
@@ -290,31 +290,31 @@ public class NotebooksControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                NotebookLockingUtils.notebookLockingEmailHash(
+                FileArtifactLockingUtils.fileArtifactLockingEmailHash(
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
+    final FileArtifactLockingMetadataResponse expectedResponse =
+        new FileArtifactLockingMetadataResponse()
             .lockExpirationTime(lockExpirationTime)
             .lastLockedBy(lastLockedUser);
 
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+    assertFileArtifactLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
 
   @Test
-  public void testGetNotebookLockingMetadata_emptyMetadata() {
+  public void testGetFileArtifactLockingMetadata_emptyMetadata() {
     final Map<String, String> gcsMetadata = new HashMap<>();
 
     // This file has no metadata so the response is empty
 
-    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+    final FileArtifactLockingMetadataResponse expectedResponse = new FileArtifactLockingMetadataResponse();
+    assertFileArtifactLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
 
   @Test
-  public void testGetNotebookLockingMetadata_knownUser() {
+  public void testGetFileArtifactLockingMetadata_knownUser() {
     final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
 
     FirecloudWorkspaceACL workspaceACL =
@@ -341,33 +341,33 @@ public class NotebooksControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                NotebookLockingUtils.notebookLockingEmailHash(
+                FileArtifactLockingUtils.fileArtifactLockingEmailHash(
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
     // I'm the owner so I can see readers on my workspace
 
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
+    final FileArtifactLockingMetadataResponse expectedResponse =
+        new FileArtifactLockingMetadataResponse()
             .lockExpirationTime(lockExpirationTime)
             .lastLockedBy(readerOnMyWorkspace);
 
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, workspaceACL);
+    assertFileArtifactLockingMetadata(gcsMetadata, expectedResponse, workspaceACL);
   }
 
   @Test
-  public void testGetNotebookLockingMetadata_nullMetadata() {
+  public void testGetFileArtifactLockingMetadata_nullMetadata() {
     final Map<String, String> gcsMetadata = null;
 
     // This file has no metadata so the response is empty
 
-    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+    final FileArtifactLockingMetadataResponse expectedResponse = new FileArtifactLockingMetadataResponse();
+    assertFileArtifactLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
 
   @Test
-  public void testGetNotebookLockingMetadata_plaintextUser() {
+  public void testGetFileArtifactLockingMetadata_plaintextUser() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
@@ -382,16 +382,16 @@ public class NotebooksControllerTest {
     // in case of accidentally storing the user email in plaintext
     // it can't be retrieved by this endpoint
 
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
+    final FileArtifactLockingMetadataResponse expectedResponse =
+        new FileArtifactLockingMetadataResponse()
             .lockExpirationTime(lockExpirationTime)
             .lastLockedBy("UNKNOWN");
 
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+    assertFileArtifactLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
 
   @Test
-  public void testGetNotebookLockingMetadata_unknownUser() {
+  public void testGetFileArtifactLockingMetadata_unknownUser() {
     final String lastLockedUser = "a-stranger@fake-research-aou.org";
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
@@ -400,104 +400,104 @@ public class NotebooksControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                NotebookLockingUtils.notebookLockingEmailHash(
+                FileArtifactLockingUtils.fileArtifactLockingEmailHash(
                     TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
     // This user is not listed in the DbWorkspace ACL so I don't know them
 
-    final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
+    final FileArtifactLockingMetadataResponse expectedResponse =
+        new FileArtifactLockingMetadataResponse()
             .lockExpirationTime(lockExpirationTime)
             .lastLockedBy("UNKNOWN");
 
-    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+    assertFileArtifactLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
 
   @Test
-  public void testReadOnlyNotebook() {
+  public void testReadOnlyFileArtifact() {
 
     String html = "<html><body><div>Hi!</div></body></html>";
-    ReadOnlyNotebookResponse expectedResponse = new ReadOnlyNotebookResponse().html(html);
+    ReadOnlyFileArtifactResponse expectedResponse = new ReadOnlyFileArtifactResponse().html(html);
 
-    when(mockNotebookService.getReadOnlyHtml(anyString(), anyString(), anyString()))
+    when(mockFileArtifactService.getReadOnlyHtml(anyString(), anyString(), anyString()))
         .thenReturn(html);
 
-    ReadOnlyNotebookResponse actualResponse =
-        notebooksController
-            .readOnlyNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME)
+    ReadOnlyFileArtifactResponse actualResponse =
+        fileArtifactsController
+            .readOnlyFileArtifact(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME)
             .getBody();
 
-    verify(mockNotebookService)
+    verify(mockFileArtifactService)
         .getReadOnlyHtml(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
   }
 
   @Test
-  public void testRenameNotebook() {
+  public void testRenameFileArtifact() {
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
 
     long toLastModifiedTime = Instant.now().toEpochMilli();
-    NotebookRename notebookRename = new NotebookRename();
+    FileArtifactRename fileArtifactRename = new FileArtifactRename();
     FileDetail expectedFileDetail = createFileDetail(TO_NOTEBOOK_NAME, toPath, toLastModifiedTime);
 
-    notebookRename.setName(FROM_NOTEBOOK_NAME);
-    notebookRename.setNewName(TO_NOTEBOOK_NAME);
+    fileArtifactRename.setName(FROM_NOTEBOOK_NAME);
+    fileArtifactRename.setNewName(TO_NOTEBOOK_NAME);
 
-    when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
+    when(mockFileArtifactService.renameFileArtifact(anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
-        notebooksController
-            .renameNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, notebookRename)
+        fileArtifactsController
+            .renameFileArtifact(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fileArtifactRename)
             .getBody();
 
-    verify(mockNotebookService)
-        .renameNotebook(
+    verify(mockFileArtifactService)
+        .renameFileArtifact(
             FROM_WORKSPACE_NAMESPACE,
             FROM_WORKSPACE_NAME,
-            notebookRename.getName(),
-            notebookRename.getNewName());
+            fileArtifactRename.getName(),
+            fileArtifactRename.getNewName());
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
 
   @Test
-  public void testRenameNotebook_alreadyExists() {
-    NotebookRename notebookRename = new NotebookRename();
+  public void testRenameFileArtifact_alreadyExists() {
+    FileArtifactRename fileArtifactRename = new FileArtifactRename();
 
-    notebookRename.setName(FROM_NOTEBOOK_NAME);
-    notebookRename.setNewName(TO_NOTEBOOK_NAME);
+    fileArtifactRename.setName(FROM_NOTEBOOK_NAME);
+    fileArtifactRename.setNewName(TO_NOTEBOOK_NAME);
 
-    when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
+    when(mockFileArtifactService.renameFileArtifact(anyString(), anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
 
     Throwable exception =
         assertThrows(
             BadRequestException.class,
             () ->
-                notebooksController.renameNotebook(
-                    FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, notebookRename));
+                fileArtifactsController.renameFileArtifact(
+                    FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fileArtifactRename));
 
-    verify(mockNotebookService)
-        .renameNotebook(
+    verify(mockFileArtifactService)
+        .renameFileArtifact(
             FROM_WORKSPACE_NAMESPACE,
             FROM_WORKSPACE_NAME,
-            notebookRename.getName(),
-            notebookRename.getNewName());
+            fileArtifactRename.getName(),
+            fileArtifactRename.getNewName());
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
 
-  private void assertNotebookLockingMetadata(
+  private void assertFileArtifactLockingMetadata(
       Map<String, String> gcsMetadata,
-      NotebookLockingMetadataResponse expectedResponse,
+      FileArtifactLockingMetadataResponse expectedResponse,
       FirecloudWorkspaceACL acl) {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
-    final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
+    final String testFileArtifact = FileArtifactsService.withFileArtifactExtension("test-fileArtifact");
 
     FirecloudWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
@@ -509,14 +509,14 @@ public class NotebooksControllerTest {
     when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
         .thenReturn(acl.getAcl());
 
-    final String testNotebookPath = "notebooks/" + testNotebook;
+    final String testFileArtifactPath = "fileArtifacts/" + testFileArtifact;
     doReturn(gcsMetadata)
         .when(mockCloudStorageClient)
-        .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
+        .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testFileArtifactPath);
 
     assertThat(
-            notebooksController
-                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+            fileArtifactsController
+                .getFileArtifactLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testFileArtifact)
                 .getBody())
         .isEqualTo(expectedResponse);
   }

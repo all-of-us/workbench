@@ -54,6 +54,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -76,7 +77,6 @@ import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -251,7 +251,7 @@ public class ConceptSetsControllerTest {
     FreeTierBillingService.class,
     IamService.class,
     MailService.class,
-    NotebooksService.class,
+    FileArtifactsService.class,
     TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,

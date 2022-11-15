@@ -81,6 +81,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -117,7 +118,6 @@ import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -267,7 +267,7 @@ public class CohortReviewControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
-    NotebooksServiceImpl.class,
+    FileArtifactsServiceImpl.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,

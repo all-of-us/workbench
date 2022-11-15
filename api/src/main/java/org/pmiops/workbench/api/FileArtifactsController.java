@@ -16,24 +16,24 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeResponse;
-import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
-import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
+import org.pmiops.workbench.model.FileArtifactLockingMetadataResponse;
+import org.pmiops.workbench.model.FileArtifactsRename;
+import org.pmiops.workbench.model.ReadOnlyFileArtifactResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebookLockingUtils;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.fileArtifacts.FileArtifactLockingUtils;
+import org.pmiops.workbench.fileArtifacts.FileArtifactsService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class NotebooksController implements NotebooksApiDelegate {
-  private static final Logger log = Logger.getLogger(NotebooksController.class.getName());
+public class FileArtifactsController implements FileArtifactsApiDelegate {
+  private static final Logger log = Logger.getLogger(FileArtifactsController.class.getName());
 
   @Autowired private Clock clock;
   @Autowired private CloudStorageClient cloudStorageClient;
-  @Autowired private NotebooksService notebooksService;
+  @Autowired private FileArtifactsService fileArtifactsService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private Provider<DbUser> userProvider;
@@ -41,41 +41,41 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(notebooksService.getNotebooks(workspaceNamespace, workspaceId));
+    return ResponseEntity.ok(fileArtifactsService.getFileArtifacts(workspaceNamespace, workspaceId));
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteNotebook(
-      String workspace, String workspaceName, String notebookName) {
-    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+  public ResponseEntity<EmptyResponse> deleteFileArtifact(
+      String workspace, String workspaceName, String fileArtifactName) {
+    fileArtifactsService.deleteFileArtifact(workspace, workspaceName, fileArtifactName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
-  public ResponseEntity<FileDetail> copyNotebook(
+  public ResponseEntity<FileDetail> copyFileArtifact(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromFileArtifactName,
       CopyRequest copyRequest) {
     return ResponseEntity.ok(
-        copyNotebookImpl(fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest));
+        copyFileArtifactImpl(fromWorkspaceNamespace, fromWorkspaceId, fromFileArtifactName, copyRequest));
   }
 
-  private FileDetail copyNotebookImpl(
+  private FileDetail copyFileArtifactImpl(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromFileArtifactName,
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
       fileDetail =
-          notebooksService.copyNotebook(
+          fileArtifactsService.copyFileArtifact(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withNotebookExtension(fromNotebookName),
+              FileArtifactsService.withFileArtifactExtension(fromFileArtifactName),
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
+              FileArtifactsService.withFileArtifactExtension(copyRequest.getNewName()));
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
@@ -83,11 +83,11 @@ public class NotebooksController implements NotebooksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<FileDetail> cloneNotebook(
-      String workspace, String workspaceName, String notebookName) {
+  public ResponseEntity<FileDetail> cloneFileArtifact(
+      String workspace, String workspaceName, String fileArtifactName) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
+      fileDetail = fileArtifactsService.cloneFileArtifact(workspace, workspaceName, fileArtifactName);
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -96,22 +96,22 @@ public class NotebooksController implements NotebooksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName) {
-    ReadOnlyNotebookResponse response =
-        new ReadOnlyNotebookResponse()
+  public ResponseEntity<ReadOnlyFileArtifactResponse> readOnlyFileArtifact(
+      String workspaceNamespace, String workspaceName, String fileArtifactName) {
+    ReadOnlyFileArtifactResponse response =
+        new ReadOnlyFileArtifactResponse()
             .html(
-                notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName));
+                fileArtifactsService.getReadOnlyHtml(workspaceNamespace, workspaceName, fileArtifactName));
     return ResponseEntity.ok(response);
   }
 
   @Override
-  public ResponseEntity<FileDetail> renameNotebook(
-      String workspace, String workspaceName, NotebookRename rename) {
+  public ResponseEntity<FileDetail> renameFileArtifact(
+      String workspace, String workspaceName, FileArtifactsRename rename) {
     FileDetail fileDetail;
     try {
       fileDetail =
-          notebooksService.renameNotebook(
+          fileArtifactsService.renameFileArtifact(
               workspace, workspaceName, rename.getName(), rename.getNewName());
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
@@ -121,20 +121,20 @@ public class NotebooksController implements NotebooksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<KernelTypeResponse> getNotebookKernel(
-      String workspace, String workspaceName, String notebookName) {
+  public ResponseEntity<KernelTypeResponse> getFileArtifactKernel(
+      String workspace, String workspaceName, String fileArtifactName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspace, workspaceName, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
-                notebooksService.getNotebookKernel(workspace, workspaceName, notebookName)));
+                fileArtifactsService.getFileArtifactKernel(workspace, workspaceName, fileArtifactName)));
   }
 
   @Override
-  public ResponseEntity<NotebookLockingMetadataResponse> getNotebookLockingMetadata(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+  public ResponseEntity<FileArtifactLockingMetadataResponse> getFileArtifactLockingMetadata(
+      String workspaceNamespace, String workspaceName, String fileArtifactName) {
 
     // Retrieving the workspace is done first, which acts as an access check.
     String bucketName =
@@ -144,12 +144,12 @@ public class NotebooksController implements NotebooksApiDelegate {
             .getBucketName();
 
     // response may be empty - fill in what we can
-    NotebookLockingMetadataResponse response = new NotebookLockingMetadataResponse();
+    FileArtifactLockingMetadataResponse response = new FileArtifactLockingMetadataResponse();
 
-    // throws NotFoundException if the notebook is not in GCS
+    // throws NotFoundException if the fileArtifact is not in GCS
     // returns null if found but no user-metadata
     Map<String, String> metadata =
-        cloudStorageClient.getMetadata(bucketName, "notebooks/" + notebookName);
+        cloudStorageClient.getMetadata(bucketName, "fileArtifacts/" + fileArtifactName);
 
     if (metadata != null) {
       String lockExpirationTime = metadata.get("lockExpiresAt");
@@ -161,7 +161,7 @@ public class NotebooksController implements NotebooksApiDelegate {
       String lastLockedByHash = metadata.get("lastLockedBy");
       if (lastLockedByHash != null) {
 
-        // the caller should not necessarily know the identities of all notebook users
+        // the caller should not necessarily know the identities of all fileArtifact users
         // so we check against the set of users of this workspace which are known to the caller
 
         // NOTE: currently, users of workspace X of any access level can see all other
@@ -174,23 +174,23 @@ public class NotebooksController implements NotebooksApiDelegate {
                 .keySet();
 
         response.lastLockedBy(
-            NotebookLockingUtils.findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
+            FileArtifactLockingUtils.findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
       }
     }
 
     // If a lock is held by another user, log this to establish a rough estimate of how often
-    // locked notebooks are encountered. Note that this only covers locks encountered from the
+    // locked fileArtifacts are encountered. Note that this only covers locks encountered from the
     // Workbench - any Jupyter UI-based lock detection does not touch this code path.
     String currentUsername = userProvider.get().getUsername();
     if (response.getLockExpirationTime() == null
         || response.getLastLockedBy() == null
         || response.getLockExpirationTime() < clock.millis()
         || response.getLastLockedBy().equals(currentUsername)) {
-      log.info(String.format("user '%s' observed notebook available for editing", currentUsername));
+      log.info(String.format("user '%s' observed fileArtifact available for editing", currentUsername));
     } else {
       log.info(
           String.format(
-              "user '%s' observed notebook locked by '%s'",
+              "user '%s' observed fileArtifact locked by '%s'",
               currentUsername, response.getLastLockedBy()));
     }
 
