@@ -325,8 +325,6 @@ export const AppsPanel = (props: {
     config: { enableGkeApp },
   } = useStore(serverConfigStore);
 
-  // TODO not sure if this behavior is right
-
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);
   const addToExpandedApps = (appType: UIAppType) =>
@@ -344,22 +342,30 @@ export const AppsPanel = (props: {
     { appType: UIAppType.RSTUDIO, expand: false },
   ];
 
-  const shouldExpand = (appType: UIAppType): boolean =>
+  const showExpanded = (appType: UIAppType): boolean =>
     userExpandedApps.includes(appType) ||
     appStates.find((s) => s.appType === appType)?.expand;
 
-  const showActive = appStates.some(
-    (s) => appsToDisplay.includes(s.appType) && shouldExpand(s.appType)
-  );
-  const showAvailable = appStates.some(
-    (s) => appsToDisplay.includes(s.appType) && !shouldExpand(s.appType)
-  );
+  const showInActiveSection = (appType: UIAppType): boolean =>
+    appsToDisplay.includes(appType) &&
+    showExpanded(appType) &&
+    !userExpandedApps.includes(appType);
+  const showActiveSection = appStates
+    .map((s) => s.appType)
+    .some(showInActiveSection);
+
+  const showInAvailableSection = (appType: UIAppType): boolean =>
+    appsToDisplay.includes(appType) &&
+    (userExpandedApps.includes(appType) || !showExpanded(appType));
+  const showAvailableSection = appStates
+    .map((s) => s.appType)
+    .some(showInAvailableSection);
 
   const ActiveApps = () => (
     <div>
       <h3 style={styles.header}>Active applications</h3>
       {appsToDisplay.map((appType) => {
-        return shouldExpand(appType) ? (
+        return showInActiveSection(appType) ? (
           <ExpandedApp {...{ ...props, appType }} key={appType} />
         ) : null;
       })}
@@ -370,13 +376,17 @@ export const AppsPanel = (props: {
     <FlexColumn>
       <h3 style={styles.header}>Launch other applications</h3>
       {appsToDisplay.map((appType) => {
-        return shouldExpand(appType) ? null : (
-          <AvailableApp
-            {...{ appType }}
-            key={appType}
-            onClick={() => addToExpandedApps(appType)}
-          />
-        );
+        return showInAvailableSection(appType) ? (
+          showExpanded(appType) ? (
+            <ExpandedApp {...{ ...props, appType }} key={appType} />
+          ) : (
+            <AvailableApp
+              {...{ appType }}
+              key={appType}
+              onClick={() => addToExpandedApps(appType)}
+            />
+          )
+        ) : null;
       })}
     </FlexColumn>
   );
@@ -385,8 +395,8 @@ export const AppsPanel = (props: {
     <DisabledPanel />
   ) : (
     <div>
-      {runtime?.status && showActive && <ActiveApps />}
-      {runtime?.status && showAvailable && <AvailableApps />}
+      {runtime?.status && showActiveSection && <ActiveApps />}
+      {runtime?.status && showAvailableSection && <AvailableApps />}
     </div>
   );
 };

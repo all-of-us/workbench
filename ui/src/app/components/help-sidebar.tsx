@@ -15,6 +15,25 @@ import {
 } from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
+import { AppsPanel } from 'app/components/apps-panel';
+import { Clickable, StyledExternalLink } from 'app/components/buttons';
+import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
+import {
+  HelpSidebarIcons,
+  IconConfig,
+  showConceptIcon,
+  showCriteriaIcon,
+  SidebarIconId,
+} from 'app/components/help-sidebar-icons';
+import { HelpTips } from 'app/components/help-tips';
+import { withErrorModal } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
+import { PopupTrigger } from 'app/components/popups';
+import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
+import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
+import { Spinner } from 'app/components/spinners';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
@@ -48,26 +67,6 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 import times from 'assets/icons/times-light.svg';
-
-import { AppsPanel } from './apps-panel';
-import { Clickable, StyledExternalLink } from './buttons';
-import { ConfirmDeleteModal } from './confirm-delete-modal';
-import { FlexColumn, FlexRow } from './flex';
-import { GenomicsExtractionTable } from './genomics-extraction-table';
-import {
-  HelpSidebarIcons,
-  IconConfig,
-  showConceptIcon,
-  showCriteriaIcon,
-  SidebarIconId,
-} from './help-sidebar-icons';
-import { HelpTips } from './help-tips';
-import { withErrorModal } from './modals';
-import { TooltipTrigger } from './popups';
-import { PopupTrigger } from './popups';
-import { RuntimeConfigurationPanel } from './runtime-configuration-panel';
-import { RuntimeErrorModal } from './runtime-error-modal';
-import { Spinner } from './spinners';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 

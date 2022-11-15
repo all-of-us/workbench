@@ -9,13 +9,15 @@ import { workspaceDataStub, workspaceStubs } from 'testing/stubs/workspaces';
 
 import { AppsPanel } from './apps-panel';
 
+const stubFunction = () => ({});
+
 describe('AppsPanel', () => {
   const component = async () => {
     return mount(
       <AppsPanel
         workspace={workspaceStubs[0]}
-        onClickRuntimeConf={() => ({})}
-        onClickDeleteRuntime={() => ({})}
+        onClickRuntimeConf={stubFunction}
+        onClickDeleteRuntime={stubFunction}
       />
     );
   };
