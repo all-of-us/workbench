@@ -26,7 +26,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import { RuntimeStore, serverConfigStore } from 'app/utils/stores';
+import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -109,11 +109,7 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-const displayRuntimeIcon = (
-  icon: IconConfig,
-  workspaceNamespace: string,
-  store: RuntimeStore
-) => {
+const displayRuntimeIcon = (icon: IconConfig, workspaceNamespace: string) => {
   // We always want to show the thunderstorm icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
@@ -130,7 +126,10 @@ const displayRuntimeIcon = (
         src={thunderstorm}
         style={{ ...icon.style, position: 'absolute' }}
       />
-      <RuntimeStatusIcon {...{ store, workspaceNamespace }} />
+      <RuntimeStatusIcon
+        {...{ workspaceNamespace }}
+        style={styles.statusIconContainer}
+      />
     </FlexRow>
   );
 };
@@ -293,12 +292,10 @@ interface DisplayIconProps {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
-  runtimeStore: RuntimeStore;
   genomicExtractionJobs: GenomicExtractionJob[];
 }
 const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
-  const { workspace, runtimeStore, genomicExtractionJobs, criteria, concept } =
-    props;
+  const { workspace, genomicExtractionJobs, criteria, concept } = props;
   return switchCase(
     icon.id,
     [
@@ -313,10 +310,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         </a>
       ),
     ],
-    [
-      'runtime',
-      () => displayRuntimeIcon(icon, workspace.namespace, runtimeStore),
-    ],
+    ['runtime', () => displayRuntimeIcon(icon, workspace.namespace)],
     [
       'terminal',
       () => (
@@ -368,15 +362,13 @@ const runtimeTooltip = (baseTooltip: string, loadingError: Error): string => {
 };
 
 interface IconConfigProps {
+  iconId: SidebarIconId;
   pageKey: string;
   criteria: Array<Selection>;
-  runtimeStore: RuntimeStore;
+  loadingError: Error;
 }
-const iconConfig = (
-  iconId: SidebarIconId,
-  props: IconConfigProps
-): IconConfig => {
-  const { pageKey, criteria, runtimeStore } = props;
+const iconConfig = (props: IconConfigProps): IconConfig => {
+  const { iconId, pageKey, criteria, loadingError } = props;
 
   // TODO: not sure why the iconKey needs to be converted to string here
   const config: { [iconKey: string]: IconConfig } = {
@@ -442,28 +434,22 @@ const iconConfig = (
     },
     runtime: {
       id: 'runtime',
-      disabled: !!runtimeStore.loadingError,
+      disabled: !!loadingError,
       faIcon: null,
       label: 'Cloud Icon',
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip(
-        'Cloud Analysis Environment',
-        runtimeStore.loadingError
-      ),
+      tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
       hasContent: true,
     },
     terminal: {
       id: 'terminal',
-      disabled: !!runtimeStore.loadingError,
+      disabled: !!loadingError,
       faIcon: faTerminal,
       label: 'Terminal Icon',
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip(
-        'Cloud Analysis Terminal',
-        runtimeStore.loadingError
-      ),
+      tooltip: runtimeTooltip('Cloud Analysis Terminal', loadingError),
       hasContent: false,
     },
     genomicExtractions: {
@@ -487,15 +473,25 @@ const iconConfig = (
   return config[iconId];
 };
 
-interface HelpSidebarIconsProps extends IconConfigProps {
+interface HelpSidebarIconsProps {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtractionJobs: GenomicExtractionJob[];
   activeIcon: string;
   onIconClick: (icon: IconConfig) => void;
+  pageKey: string;
+  criteria: Array<Selection>;
 }
 export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
-  const { workspace, cdrVersionTiersResponse, activeIcon, onIconClick } = props;
+  const {
+    workspace,
+    cdrVersionTiersResponse,
+    activeIcon,
+    onIconClick,
+    pageKey,
+    criteria,
+  } = props;
+  const { loadingError } = useStore(runtimeStore);
 
   const defaultIcons: SidebarIconId[] = [
     'criteria',
@@ -505,8 +501,8 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     'dataDictionary',
     'annotations',
   ];
-  const keys: SidebarIconId[] = defaultIcons.filter((key) =>
-    iconConfig(key, props).showIcon()
+  const keys: SidebarIconId[] = defaultIcons.filter((iconId) =>
+    iconConfig({ iconId, pageKey, criteria, loadingError }).showIcon()
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
@@ -520,7 +516,9 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     keys.push('genomicExtractions');
   }
 
-  const icons = keys.map((key) => iconConfig(key, props));
+  const icons = keys.map((iconId) =>
+    iconConfig({ iconId, pageKey, criteria, loadingError })
+  );
 
   return (
     <>

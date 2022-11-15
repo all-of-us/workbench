@@ -60,6 +60,8 @@ import {
   diffsToUpdateMessaging,
   fromAnalysisConfig,
   getAnalysisConfigDiffs,
+  isActionable,
+  isVisible,
   maybeWithExistingDisk,
   PanelContent,
   RuntimeStatusRequest,
@@ -74,7 +76,6 @@ import {
   runtimeStore,
   serverConfigStore,
   useStore,
-  withStore,
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
@@ -259,6 +260,7 @@ const PanelMain = fp.flow(
     workspace,
     profileState,
     onClose = () => {},
+    initialPanelContent,
   }) => {
     const { namespace, id, cdrVersionId, googleProject } = workspace;
 
@@ -306,33 +308,37 @@ const PanelMain = fp.flow(
 
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
-    const initialPanelContent = fp.cond([
-      [
-        ([b, _, _2]) => b === BillingStatus.INACTIVE,
-        () => PanelContent.Disabled,
-      ],
-      // If there's a pendingRuntime, this means there's already a create/update
-      // in progress, even if the runtime store doesn't actively reflect this yet.
-      // Show the customize panel in this event.
-      [() => !!pendingRuntime, () => PanelContent.Customize],
-      [
-        ([, r, s]) =>
-          r === null || r === undefined || s === RuntimeStatus.Unknown,
-        () => PanelContent.Create,
-      ],
-      [
-        ([, r, _]) =>
-          r.status === RuntimeStatus.Deleted &&
-          [
-            RuntimeConfigurationType.GeneralAnalysis,
-            RuntimeConfigurationType.HailGenomicAnalysis,
-          ].includes(r.configurationType),
-        () => PanelContent.Create,
-      ],
-      [() => true, () => PanelContent.Customize],
-    ])([workspace.billingStatus, currentRuntime, status]);
-    const [panelContent, setPanelContent] =
-      useState<PanelContent>(initialPanelContent);
+    const initializePanelContent = (): PanelContent =>
+      cond(
+        [!!initialPanelContent, () => initialPanelContent],
+        [
+          workspace.billingStatus === BillingStatus.INACTIVE,
+          () => PanelContent.Disabled,
+        ],
+        // If there's a pendingRuntime, this means there's already a create/update
+        // in progress, even if the runtime store doesn't actively reflect this yet.
+        // Show the customize panel in this event.
+        [!!pendingRuntime, () => PanelContent.Customize],
+        [
+          currentRuntime === null ||
+            currentRuntime === undefined ||
+            status === RuntimeStatus.Unknown,
+          () => PanelContent.Create,
+        ],
+        [
+          currentRuntime?.status === RuntimeStatus.Deleted &&
+            [
+              RuntimeConfigurationType.GeneralAnalysis,
+              RuntimeConfigurationType.HailGenomicAnalysis,
+            ].includes(currentRuntime?.configurationType),
+          () => PanelContent.Create,
+        ],
+        () => PanelContent.Customize
+      );
+
+    const [panelContent, setPanelContent] = useState<PanelContent>(
+      initializePanelContent()
+    );
 
     const validMainMachineTypes =
       analysisConfig.computeType === ComputeType.Standard
@@ -354,15 +360,8 @@ const PanelMain = fp.flow(
       }
     }, [analysisConfig.computeType]);
 
-    const runtimeExists =
-      (status &&
-        ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) ||
-      !!pendingRuntime;
-    const disableControls =
-      runtimeExists &&
-      ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
-        status as RuntimeStatus
-      );
+    const runtimeExists = (status && isVisible(status)) || !!pendingRuntime;
+    const disableControls = runtimeExists && !isActionable(status);
 
     const dataprocExists =
       runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
@@ -1066,14 +1065,15 @@ const PanelMain = fp.flow(
   }
 );
 
-export const RuntimeConfigurationPanel = withStore(
-  runtimeStore,
-  'runtime'
-)(({ runtime, onClose = () => {} }) => {
-  if (!runtime.runtimeLoaded) {
+export const RuntimeConfigurationPanel = ({
+  onClose = () => {},
+  initialPanelContent = null,
+}) => {
+  const { runtimeLoaded } = useStore(runtimeStore);
+  if (!runtimeLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '5rem' }} />;
   }
 
   // TODO: can we remove this indirection?
-  return <PanelMain onClose={onClose} />;
-});
+  return <PanelMain {...{ onClose, initialPanelContent }} />;
+};

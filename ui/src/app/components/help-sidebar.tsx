@@ -38,10 +38,8 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { withRuntimeStore } from 'app/utils/runtime-utils';
 import {
   routeDataStore,
-  RuntimeStore,
   runtimeStore,
   withGenomicExtractionJobs,
 } from 'app/utils/stores';
@@ -166,7 +164,6 @@ interface Props extends NavigationProps {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
-  runtimeStore: RuntimeStore;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtractionJobs: GenomicExtractionJob[];
   cohortContext: any;
@@ -196,7 +193,6 @@ export const HelpSidebar = fp.flow(
   withCurrentConcept(),
   withGenomicExtractionJobs,
   withCurrentWorkspace(),
-  withRuntimeStore(),
   withUserProfile(),
   withCdrVersions(),
   withNavigation
@@ -370,6 +366,7 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
+      const { pageKey, cohortContext } = this.props;
       switch (activeIcon) {
         case 'help':
           return {
@@ -386,9 +383,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <HelpTips
+                {...{ pageKey }}
                 allowSearch={true}
                 onSearch={() => this.analyticsEvent('Search')}
-                pageKey={this.props.pageKey}
               />
             ),
             showFooter: true,
@@ -462,7 +459,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
             renderBody: () =>
-              !!this.props.cohortContext && (
+              !!cohortContext && (
                 <SelectionList
                   back={() => this.setActiveIcon(null)}
                   selections={[]}
