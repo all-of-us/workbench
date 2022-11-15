@@ -52,7 +52,6 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { formatUsd } from 'app/utils/numbers';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import {
@@ -631,8 +630,6 @@ const PanelMain = fp.flow(
       );
     };
 
-    const closeSidebar = () => setSidebarActiveIconStore.next(null);
-
     return (
       <div id='runtime-panel'>
         {cond(
@@ -679,7 +676,6 @@ const PanelMain = fp.flow(
                   <ConfirmDeleteRuntimeWithPD
                     onConfirm={async (runtimeStatusReq) => {
                       await setRuntimeStatus(runtimeStatusReq);
-                      closeSidebar();
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -694,7 +690,6 @@ const PanelMain = fp.flow(
                       await setRuntimeStatus(
                         RuntimeStatusRequest.DeleteRuntime
                       );
-                      closeSidebar();
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -709,7 +704,6 @@ const PanelMain = fp.flow(
               <ConfirmDeleteUnattachedPD
                 onConfirm={async () => {
                   await diskApi().deleteDisk(namespace, persistentDisk.name);
-                  closeSidebar();
                   onClose();
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
