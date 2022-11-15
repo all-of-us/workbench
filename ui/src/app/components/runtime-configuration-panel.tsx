@@ -260,7 +260,7 @@ const PanelMain = fp.flow(
     workspace,
     profileState,
     onClose = () => {},
-    forceInitialPanelContent,
+    initialPanelContent,
   }) => {
     const { namespace, id, cdrVersionId, googleProject } = workspace;
 
@@ -308,35 +308,37 @@ const PanelMain = fp.flow(
 
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
-    const initialPanelContent = cond(
-      [!!forceInitialPanelContent, () => forceInitialPanelContent],
-      [
-        workspace.billingStatus === BillingStatus.INACTIVE,
-        () => PanelContent.Disabled,
-      ],
-      // If there's a pendingRuntime, this means there's already a create/update
-      // in progress, even if the runtime store doesn't actively reflect this yet.
-      // Show the customize panel in this event.
-      [!!pendingRuntime, () => PanelContent.Customize],
-      [
-        currentRuntime === null ||
-          currentRuntime === undefined ||
-          status === RuntimeStatus.Unknown,
-        () => PanelContent.Create,
-      ],
-      [
-        currentRuntime?.status === RuntimeStatus.Deleted &&
-          [
-            RuntimeConfigurationType.GeneralAnalysis,
-            RuntimeConfigurationType.HailGenomicAnalysis,
-          ].includes(currentRuntime?.configurationType),
-        () => PanelContent.Create,
-      ],
-      () => PanelContent.Customize
-    );
+    const initializePanelContent = (): PanelContent =>
+      cond(
+        [!!initialPanelContent, () => initialPanelContent],
+        [
+          workspace.billingStatus === BillingStatus.INACTIVE,
+          () => PanelContent.Disabled,
+        ],
+        // If there's a pendingRuntime, this means there's already a create/update
+        // in progress, even if the runtime store doesn't actively reflect this yet.
+        // Show the customize panel in this event.
+        [!!pendingRuntime, () => PanelContent.Customize],
+        [
+          currentRuntime === null ||
+            currentRuntime === undefined ||
+            status === RuntimeStatus.Unknown,
+          () => PanelContent.Create,
+        ],
+        [
+          currentRuntime?.status === RuntimeStatus.Deleted &&
+            [
+              RuntimeConfigurationType.GeneralAnalysis,
+              RuntimeConfigurationType.HailGenomicAnalysis,
+            ].includes(currentRuntime?.configurationType),
+          () => PanelContent.Create,
+        ],
+        () => PanelContent.Customize
+      );
 
-    const [panelContent, setPanelContent] =
-      useState<PanelContent>(initialPanelContent);
+    const [panelContent, setPanelContent] = useState<PanelContent>(
+      initializePanelContent()
+    );
 
     const validMainMachineTypes =
       analysisConfig.computeType === ComputeType.Standard
@@ -1065,7 +1067,7 @@ const PanelMain = fp.flow(
 
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
-  forceInitialPanelContent = null,
+  initialPanelContent = null,
 }) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
@@ -1073,5 +1075,5 @@ export const RuntimeConfigurationPanel = ({
   }
 
   // TODO: can we remove this indirection?
-  return <PanelMain {...{ onClose, forceInitialPanelContent }} />;
+  return <PanelMain {...{ onClose, initialPanelContent }} />;
 };
