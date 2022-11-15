@@ -53,27 +53,31 @@ export const AppsList = withCurrentWorkspace()((props) => {
     return WorkspacePermissionsUtil.canWrite(props.workspace.accessLevel);
   };
 
-  const onClose = () => {
+  const closeAllApplicationModal = () => {
     setShowJupyterModal(false);
+  };
+
+  const onClose = () => {
     setSelectedApp('');
+    closeAllApplicationModal();
     setShowSelectAppModal(false);
   };
 
-  const onBack = () => {
-    setShowJupyterModal(false);
+  const backToSelectAppModal = () => {
+    closeAllApplicationModal();
     setShowSelectAppModal(true);
   };
 
-  const jupyterModal = () => {
+  const onJupyterAppSelect = () => {
     AnalyticsTracker.Notebooks.OpenCreateModal();
-    setShowJupyterModal(true);
     setShowSelectAppModal(false);
+    setShowJupyterModal(true);
   };
 
   const onNext = () => {
     switch (selectedApp) {
       case JUPYTER_APP:
-        jupyterModal();
+        onJupyterAppSelect();
         break;
     }
   };
@@ -131,6 +135,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               Close
             </Button>
             <Button
+              data-test-id={'next-btn'}
               type={'primary'}
               label={'Next'}
               onClick={() => onNext()}
@@ -142,7 +147,11 @@ export const AppsList = withCurrentWorkspace()((props) => {
         </Modal>
       )}
       {showJupyterModal && (
-        <JupyterModal onClose={() => onClose()} onBack={() => onBack()} />
+        <JupyterModal
+          data-test-id='jupyter-modal'
+          onClose={() => onClose()}
+          onBack={() => backToSelectAppModal()}
+        />
       )}
     </>
   );
