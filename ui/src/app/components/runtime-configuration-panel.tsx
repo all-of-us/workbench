@@ -311,12 +311,9 @@ const PanelMain = fp.flow(
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const initialPanelContent = fp.cond([
+      [([, , forcePanel]) => !!forcePanel, ([, , forcePanel]) => forcePanel],
       [
-        ([forcePanel, _, _2]) => !!forcePanel,
-        ([forcePanel, _, _2]) => forcePanel,
-      ],
-      [
-        ([_, billingStatus, _2]) => billingStatus === BillingStatus.INACTIVE,
+        ([billingStatus, _, _2]) => billingStatus === BillingStatus.INACTIVE,
         () => PanelContent.Disabled,
       ],
       // If there's a pendingRuntime, this means there's already a create/update
@@ -324,14 +321,14 @@ const PanelMain = fp.flow(
       // Show the customize panel in this event.
       [() => !!pendingRuntime, () => PanelContent.Customize],
       [
-        ([_, _2, runtime]) =>
+        ([, runtime, _]) =>
           runtime === null ||
           runtime === undefined ||
           status === RuntimeStatus.Unknown,
         () => PanelContent.Create,
       ],
       [
-        ([_, _2, runtime]) =>
+        ([, runtime, _]) =>
           runtime.status === RuntimeStatus.Deleted &&
           [
             RuntimeConfigurationType.GeneralAnalysis,
@@ -340,7 +337,7 @@ const PanelMain = fp.flow(
         () => PanelContent.Create,
       ],
       [() => true, () => PanelContent.Customize],
-    ])([forceInitialPanelContent, workspace.billingStatus, currentRuntime]);
+    ])([workspace.billingStatus, currentRuntime, forceInitialPanelContent]);
     const [panelContent, setPanelContent] =
       useState<PanelContent>(initialPanelContent);
 
