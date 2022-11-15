@@ -16,9 +16,11 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { JupyterModal } from 'app/pages/appAnalysis/jupyter-modal';
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { APP_LIST } from 'app/utils/constants';
+import { AnalyticsTracker } from 'app/utils/analytics';
+import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
@@ -45,13 +47,35 @@ export const AppsList = withCurrentWorkspace()((props) => {
   const { workspace } = props;
   const [selectedApp, setSelectedApp] = useState('');
   const [showSelectAppModal, setShowSelectAppModal] = useState(false);
+  const [showJupyterModal, setShowJupyterModal] = useState(false);
 
   const canWrite = (): boolean => {
     return WorkspacePermissionsUtil.canWrite(props.workspace.accessLevel);
   };
 
   const onClose = () => {
+    setShowJupyterModal(false);
+    setSelectedApp('');
     setShowSelectAppModal(false);
+  };
+
+  const onBack = () => {
+    setShowJupyterModal(false);
+    setShowSelectAppModal(true);
+  };
+
+  const jupyterModal = () => {
+    AnalyticsTracker.Notebooks.OpenCreateModal();
+    setShowJupyterModal(true);
+    setShowSelectAppModal(false);
+  };
+
+  const onNext = () => {
+    switch (selectedApp) {
+      case JUPYTER_APP:
+        jupyterModal();
+        break;
+    }
   };
 
   useEffect(() => {
@@ -109,14 +133,16 @@ export const AppsList = withCurrentWorkspace()((props) => {
             <Button
               type={'primary'}
               label={'Next'}
-              onClick={() => {}}
-              style={{ cursor: 'not-allowed' }}
-              disabled
+              onClick={() => onNext()}
+              disabled={selectedApp === ''}
             >
               Next
             </Button>
           </ModalFooter>
         </Modal>
+      )}
+      {showJupyterModal && (
+        <JupyterModal onClose={() => onClose()} onBack={() => onBack()} />
       )}
     </>
   );

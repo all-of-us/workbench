@@ -25,6 +25,8 @@ interface Props {
   onClose: Function;
   workspace: Workspace;
   existingNameList: string[];
+  showBackButton?: boolean;
+  onBack?: Function;
 }
 
 export const NewNotebookModal = (props: Props) => {
@@ -91,6 +93,11 @@ export const NewNotebookModal = (props: Props) => {
         </label>
       </ModalBody>
       <ModalFooter>
+        {props.showBackButton && (
+          <Button type='secondary' onClick={props.onBack}>
+            BACK
+          </Button>
+        )}
         <Button type='secondary' onClick={onClose}>
           Cancel
         </Button>
