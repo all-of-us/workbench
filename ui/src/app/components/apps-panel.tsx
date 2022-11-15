@@ -10,8 +10,12 @@ import {
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { RuntimeStatus, Workspace } from 'generated/fetch';
+import { BillingStatus, RuntimeStatus, Workspace } from 'generated/fetch';
 
+import { Clickable } from 'app/components/buttons';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
+import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
 import colors from 'app/styles/colors';
 import { cond, reactStyles, switchCase } from 'app/utils';
 import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
@@ -31,10 +35,6 @@ import {
 } from 'app/utils/stores';
 import jupyterLogo from 'assets/images/jupyter.png';
 import rStudioLogo from 'assets/images/RStudio.png';
-
-import { Clickable } from './buttons';
-import { FlexColumn, FlexRow } from './flex';
-import { RuntimeStatusIcon } from './runtime-status-icon';
 
 const styles = reactStyles({
   expandedAppContainer: {
@@ -381,7 +381,9 @@ export const AppsPanel = (props: {
     </FlexColumn>
   );
 
-  return (
+  return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
+    <DisabledPanel />
+  ) : (
     <div>
       {runtime?.status && showActive && <ActiveApps />}
       {runtime?.status && showAvailable && <AvailableApps />}
