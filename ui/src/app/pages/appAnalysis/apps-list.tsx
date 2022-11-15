@@ -106,7 +106,13 @@ export const AppsList = withCurrentWorkspace()((props) => {
             >
               Close
             </Button>
-            <Button type={'primary'} label={'Next'} onClick={() => {}}>
+            <Button
+              type={'primary'}
+              label={'Next'}
+              onClick={() => {}}
+              style={{ cursor: 'not-allowed' }}
+              disabled
+            >
               Next
             </Button>
           </ModalFooter>
