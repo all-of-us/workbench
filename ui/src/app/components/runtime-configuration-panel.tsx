@@ -76,7 +76,6 @@ import {
   runtimeStore,
   serverConfigStore,
   useStore,
-  withStore,
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
@@ -1064,14 +1063,15 @@ const PanelMain = fp.flow(
   }
 );
 
-export const RuntimeConfigurationPanel = withStore(
-  runtimeStore,
-  'runtime'
-)(({ runtime, onClose = () => {}, forceInitialPanelContent }) => {
-  if (!runtime.runtimeLoaded) {
+export const RuntimeConfigurationPanel = ({
+  onClose = () => {},
+  forceInitialPanelContent,
+}) => {
+  const { runtimeLoaded } = useStore(runtimeStore);
+  if (!runtimeLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '5rem' }} />;
   }
 
   // TODO: can we remove this indirection?
   return <PanelMain {...{ onClose, forceInitialPanelContent }} />;
-});
+};
