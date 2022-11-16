@@ -277,18 +277,18 @@ describe('HelpSidebar', () => {
     ).toBe(2);
   });
 
-  it('should not display runtime control icon for read-only workspaces', async () => {
+  it('should not display apps control icon for read-only workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
     });
     const wrapper = await component();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtime' }).length
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(0);
   });
 
-  it('should display runtime control icon for writable workspaces', async () => {
+  it('should display apps control icon for writable workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
