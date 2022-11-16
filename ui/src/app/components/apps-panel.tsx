@@ -4,7 +4,7 @@ import {
   faGear,
   faPause,
   faPlay,
-  faRocket,
+  faPlusCircle,
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
@@ -279,8 +279,8 @@ const RuntimeOpenButton = (props: { workspace: Workspace }) => {
         onClick={() => setShowModal(true)}
       >
         <FlexColumn style={styles.button}>
-          <FontAwesomeIcon icon={faRocket} style={styles.buttonIcon} />
-          <div style={styles.buttonText}>Open New</div>
+          <FontAwesomeIcon icon={faPlusCircle} style={styles.buttonIcon} />
+          <div style={styles.buttonText}>Create New</div>
         </FlexColumn>
       </Clickable>
     </>
