@@ -59,8 +59,8 @@ WHERE concept_id in
     )"
 
 # for each loop, add all items (children/parents) related to the items that were previously added
-# currently, there are only 5 levels, but we run it 6 times to be safe
-for i in {1..6};
+# currently, there are only 7 levels, but we run it 8 times to be safe
+for i in {1..8};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - temp table adding level $i"
     bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
