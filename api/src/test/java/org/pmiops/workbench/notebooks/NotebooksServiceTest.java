@@ -38,6 +38,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -63,7 +64,7 @@ import org.springframework.context.annotation.Scope;
 @DataJpaTest
 public class NotebooksServiceTest {
   private static final String BUCKET_NAME = "BUCKET_NAME";
-  private static final String NOTEBOOK_NAME = "my first notebook";
+  private static final String NOTEBOOK_NAME = "my first notebook.ipynb";
   private static final String NAMESPACE_NAME = "namespace_name";
   private static final String WORKSPACE_NAME = "workspace_name";
   private static final String PREVIOUS_NOTEBOOK = "previous notebook";
@@ -188,7 +189,7 @@ public class NotebooksServiceTest {
     when(mockBlob.getSize()).thenReturn(1l);
     when(mockBlob.getContent()).thenReturn(new byte[10]);
     String actualResult =
-        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName");
+        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.ipynb");
     assertThat(actualResult).isEqualTo(htmlDocument);
   }
 
@@ -489,7 +490,7 @@ public class NotebooksServiceTest {
     when(mockBlob2.getName()).thenReturn("notebooks/f2.rmd");
     when(mockBlob3.getName()).thenReturn("notebooks/f3.random");
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
+        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);
     when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME, workspaceUsersSet))
@@ -498,7 +499,7 @@ public class NotebooksServiceTest {
         .thenReturn(fileDetail3);
     when(fileDetail1.getName()).thenReturn("f1.ipynb");
     when(fileDetail2.getName()).thenReturn("f2.rmd");
-    when(fileDetail2.getName()).thenReturn("f3.random");
+    when(fileDetail3.getName()).thenReturn("f3.random");
 
     List<FileDetail> body =
         notebooksService.getNotebooks(
@@ -676,7 +677,7 @@ public class NotebooksServiceTest {
   @Test
   public void testGetNotebookKernel_notSupported() {
     Assertions.assertThrows(
-        BadRequestException.class,
+        NotImplementedException.class,
         () ->
             notebooksService.saveNotebook(
                 BUCKET_NAME, "test.rmd", new JSONObject().put("who", "I'm a notebook!")));
