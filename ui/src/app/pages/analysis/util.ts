@@ -1,7 +1,7 @@
 const notebookExtension = '.ipynb';
 
 export function dropNotebookFileSuffix(filename: string) {
-  if (filename.endsWith(notebookExtension)) {
+  if (filename?.endsWith(notebookExtension)) {
     filename = filename.substring(0, filename.length - 6);
   }
 
@@ -9,7 +9,7 @@ export function dropNotebookFileSuffix(filename: string) {
 }
 
 export function appendNotebookFileSuffix(filename: string) {
-  if (!filename.endsWith(notebookExtension)) {
+  if (filename && !filename.endsWith(notebookExtension)) {
     filename = filename + notebookExtension;
   }
 
