@@ -111,7 +111,7 @@ WHERE a.type = 'CPT4'
 ORDER BY 1"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
-# currently, there are only 8 levels, but we run it 9 times to be safe
+# currently, there are only 7 levels, but we run it 8 times to be safe
 # if this number is changed, you will need to change the number of JOINS in the query below for prep_cpt_ancestor
 for i in {1..8};
 do
