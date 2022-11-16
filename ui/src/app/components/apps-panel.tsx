@@ -17,6 +17,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
 import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
+import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
+import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles, switchCase } from 'app/utils';
 import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
@@ -246,14 +248,24 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
 
 const RuntimeOpenButton = (props: { workspace: Workspace }) => {
   const { workspace } = props;
+
   const [showModal, setShowModal] = useState(false);
+  const [notebookNameList, setNotebookNameList] = useState<string[]>([]);
+
+  useEffect(() => {
+    notebooksApi()
+      .getNoteBookList(workspace.namespace, workspace.id)
+      .then((nbl) =>
+        setNotebookNameList(nbl.map((fd) => dropNotebookFileSuffix(fd.name)))
+      );
+  }, []);
 
   return (
     <>
       {showModal && (
         <NewNotebookModal
           {...{ workspace }}
-          existingNameList={[]} // TODO
+          existingNameList={notebookNameList}
           onClose={() => setShowModal(false)}
         />
       )}
