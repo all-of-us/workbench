@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 /** Notebook files operation utils */
 public class NotebookUtils {
-  private NotebookUtils{}
+  private NotebookUtils() {}
 
   public static String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
   public static String NOTEBOOK_EXTENSION = ".ipynb";

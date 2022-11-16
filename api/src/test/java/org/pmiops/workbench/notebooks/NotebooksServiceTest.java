@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -470,6 +471,44 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testGetNotebooks_mixedFileTypes() {
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    Blob mockBlob3 = mock(Blob.class);
+    FileDetail fileDetail1 = mock(FileDetail.class);
+    FileDetail fileDetail2 = mock(FileDetail.class);
+    FileDetail fileDetail3 = mock(FileDetail.class);
+    Set<String> workspaceUsersSet = new HashSet<String>();
+
+    stubGetWorkspace(
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        BUCKET_NAME,
+        WorkspaceAccessLevel.OWNER);
+    when(mockBlob1.getName()).thenReturn("notebooks/f1.ipynb");
+    when(mockBlob2.getName()).thenReturn("notebooks/f2.rmd");
+    when(mockBlob3.getName()).thenReturn("notebooks/f3.random");
+    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
+        .thenReturn(fileDetail1);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME, workspaceUsersSet))
+        .thenReturn(fileDetail2);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob3, BUCKET_NAME, workspaceUsersSet))
+        .thenReturn(fileDetail3);
+    when(fileDetail1.getName()).thenReturn("f1.ipynb");
+    when(fileDetail2.getName()).thenReturn("f2.rmd");
+    when(fileDetail2.getName()).thenReturn("f3.random");
+
+    List<FileDetail> body =
+        notebooksService.getNotebooks(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
+
+    assertThat(gotNames).isEqualTo(ImmutableList.of("f1.ipynb", "f2.rmd"));
+  }
+
+  @Test
   public void testGetNotebooks_omitsExtraDirectories() {
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
@@ -632,5 +671,14 @@ public class NotebooksServiceTest {
     notebooksService.saveNotebook(
         BUCKET_NAME, NOTEBOOK_NAME, new JSONObject().put("who", "I'm a notebook!"));
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_SAVE);
+  }
+
+  @Test
+  public void testGetNotebookKernel_notSupported() {
+    Assertions.assertThrows(
+        BadRequestException.class,
+        () ->
+            notebooksService.saveNotebook(
+                BUCKET_NAME, "test.rmd", new JSONObject().put("who", "I'm a notebook!")));
   }
 }

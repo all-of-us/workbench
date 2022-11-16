@@ -121,8 +121,8 @@ public class NotebooksServiceImpl implements NotebooksService {
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
-    return cloudStorageClient.getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
-        .stream()
+    return cloudStorageClient
+        .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
         .filter(this::isNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
@@ -130,7 +130,8 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public boolean isNotebookBlob(Blob blob) {
-    return NotebookUtils.isJupyterNotebook(blob.getName()) || NotebookUtils.isRMarkDownNotebook(blob.getName());
+    return NotebookUtils.isJupyterNotebook(blob.getName())
+        || NotebookUtils.isRMarkDownNotebook(blob.getName());
   }
 
   @Override
@@ -286,8 +287,9 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
-    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
-      throw new NotImplementedException(String.format("%s type of file is not implemented yet", notebookName));
+    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new NotImplementedException(
+          String.format("%s type of file is not implemented yet", notebookName));
     }
     cloudStorageClient.writeFile(
         bucketName,
@@ -321,8 +323,9 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String adminGetReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
-    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
-      throw new NotImplementedException(String.format("%s type of file is not implemented yet", notebookName));
+    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new NotImplementedException(
+          String.format("%s type of file is not implemented yet", notebookName));
     }
 
     String bucketName =

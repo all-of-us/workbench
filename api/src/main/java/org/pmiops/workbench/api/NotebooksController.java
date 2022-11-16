@@ -100,8 +100,9 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
       String workspaceNamespace, String workspaceName, String notebookName) {
-    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
-      throw new NotImplementedException(String.format("%s type of file is not implemented yet", notebookName));
+    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new NotImplementedException(
+          String.format("%s type of file is not implemented yet", notebookName));
     }
 
     ReadOnlyNotebookResponse response =
@@ -129,8 +130,9 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
       String workspace, String workspaceName, String notebookName) {
-    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
-      throw new BadRequestException(String.format("%s is not a Jupyter notebook file", notebookName));
+    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new BadRequestException(
+          String.format("%s is not a Jupyter notebook file", notebookName));
     }
 
     workspaceAuthService.enforceWorkspaceAccessLevel(

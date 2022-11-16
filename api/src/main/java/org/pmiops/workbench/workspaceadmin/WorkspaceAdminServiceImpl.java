@@ -407,8 +407,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageClient
-            .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
-            .stream()
+            .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
             .count();
   }

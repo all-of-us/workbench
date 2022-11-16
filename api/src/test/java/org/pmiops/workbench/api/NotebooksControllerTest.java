@@ -281,6 +281,15 @@ public class NotebooksControllerTest {
   }
 
   @Test
+  public void testGetNotebookKernel_notSupported() {
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            notebooksController.getNotebookKernel(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "file.rmd"));
+  }
+
+  @Test
   public void testGetNotebookLockingMetadata() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
