@@ -111,7 +111,7 @@ WHERE p.domain_id = 'PROCEDURE'
         )"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
-# currently, there are only 16 levels, but we run it 17 times to be safe, If this count changes, change the query below
+# currently, there are only 17 levels, but we run it 18 times to be safe, If this count changes, change the query below
 # NOTE: if loop number changes, change number of joins in next two queries
 for i in {1..17};
 do
