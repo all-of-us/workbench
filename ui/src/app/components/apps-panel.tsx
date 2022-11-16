@@ -135,7 +135,7 @@ const RuntimeCost = () => {
   const { runtime } = useStore(runtimeStore);
   const { persistentDisk } = useStore(diskStore);
 
-  if (!runtime) {
+  if (!isVisible(runtime?.status)) {
     return null;
   }
 
@@ -144,6 +144,7 @@ const RuntimeCost = () => {
   const storageCost = formatUsd(machineStorageCost(analysisConfig));
 
   // display running cost or stopped (storage) cost
+  // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]
   const text: string = switchCase(
     runtime.status,
     // TODO: is it appropriate to assume full running cost in all these cases?
@@ -154,9 +155,7 @@ const RuntimeCost = () => {
     [RuntimeStatus.Stopping, () => `Pausing ${runningCost} / hr`],
     [RuntimeStatus.Starting, () => `Resuming ${runningCost} / hr`],
     [RuntimeStatus.Stopped, () => `Paused ${storageCost} / hr`],
-    [RuntimeStatus.Unknown, () => runtime.status],
-    [RuntimeStatus.Error, () => runtime.status],
-    [RuntimeStatus.Deleted, () => 'Not Running']
+    [RuntimeStatus.Unknown, () => runtime.status]
   );
 
   return (

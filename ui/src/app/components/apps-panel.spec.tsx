@@ -57,8 +57,9 @@ describe('AppsPanel', () => {
     [RuntimeStatus.Starting, true, true],
     [RuntimeStatus.Creating, true, true],
     [RuntimeStatus.Deleting, true, true],
-    [RuntimeStatus.Deleted, false, true],
-    [RuntimeStatus.Error, false, true],
+    [RuntimeStatus.Updating, true, true],
+    [RuntimeStatus.Deleted, false, true], // not visible [isVisible() = false]
+    [RuntimeStatus.Error, false, true], // not visible [isVisible() = false]
     [null, false, false],
   ])(
     'should render / not render ActiveApps and AvailableApps when the runtime status is %s',
@@ -78,6 +79,40 @@ describe('AppsPanel', () => {
       expect(
         findNodesContainingText(wrapper, 'Launch other applications').exists()
       ).toBe(availableExpected);
+    }
+  );
+
+  it('should show a Running status for a Running runtime', async () => {
+    const wrapper = await component();
+    expect(wrapper.exists()).toBeTruthy();
+
+    const runtimeCost = wrapper.find('[data-test-id="runtime-cost"]');
+    expect(runtimeCost.exists()).toBeTruthy();
+
+    expect(runtimeCost.text()).toContain('Running');
+  });
+
+  // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]
+  test.each([
+    [RuntimeStatus.Creating, RuntimeStatus.Creating],
+    [RuntimeStatus.Running, RuntimeStatus.Running],
+    [RuntimeStatus.Updating, RuntimeStatus.Updating],
+    [RuntimeStatus.Deleting, RuntimeStatus.Deleting],
+    ['Paused', RuntimeStatus.Stopped],
+    ['Pausing', RuntimeStatus.Stopping],
+    ['Resuming', RuntimeStatus.Starting],
+  ])(
+    'should show the status text %s when the runtime status is %s',
+    async (statusText, status) => {
+      runtimeStub.runtime.status = status;
+
+      const wrapper = await component();
+      expect(wrapper.exists()).toBeTruthy();
+
+      const runtimeCost = wrapper.find('[data-test-id="runtime-cost"]');
+      expect(runtimeCost.exists()).toBeTruthy();
+
+      expect(runtimeCost.text()).toContain(statusText);
     }
   );
 });
