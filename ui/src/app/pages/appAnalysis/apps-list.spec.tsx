@@ -89,7 +89,7 @@ describe('Apps list', () => {
     );
   });
 
-  it('should jupyter modal when Jupyter application is selected and next button is clicked', async () => {
+  it('should open jupyter modal when Jupyter application is selected and next button is clicked', async () => {
     const wrapper = component();
     startButton(wrapper).simulate('click');
 

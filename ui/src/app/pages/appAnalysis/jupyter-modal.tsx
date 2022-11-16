@@ -27,7 +27,6 @@ export const JupyterModal = withCurrentWorkspace()((props) => {
       workspace={workspace}
       existingNameList={notebookNameList}
       onBack={() => onBack()}
-      showBackButton
     />
   );
 });

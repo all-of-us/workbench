@@ -25,7 +25,6 @@ interface Props {
   onClose: Function;
   workspace: Workspace;
   existingNameList: string[];
-  showBackButton?: boolean;
   onBack?: Function;
 }
 
@@ -35,7 +34,7 @@ export const NewNotebookModal = (props: Props) => {
   const [nameTouched, setNameTouched] = useState(false);
   const [navigate] = useNavigation();
 
-  const { workspace, onClose, existingNameList } = props;
+  const { onBack, onClose, existingNameList, workspace } = props;
   const errors = validate(
     { name, kernel },
     {
@@ -93,8 +92,8 @@ export const NewNotebookModal = (props: Props) => {
         </label>
       </ModalBody>
       <ModalFooter>
-        {props.showBackButton && (
-          <Button type='secondary' onClick={props.onBack}>
+        {onBack && (
+          <Button type='secondary' onClick={onBack}>
             BACK
           </Button>
         )}
