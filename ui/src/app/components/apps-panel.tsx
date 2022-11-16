@@ -215,33 +215,28 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
       ]
     );
 
-  const [icon, buttonText] = cond(
+  const [icon, buttonText, enabled] = cond(
     [
       pausing || status === RuntimeStatus.Stopping,
-      () => [faSyncAlt, 'Pausing'],
+      () => [faSyncAlt, 'Pausing', false],
     ],
     [
       resuming || status === RuntimeStatus.Starting,
-      () => [faSyncAlt, 'Resuming'],
+      () => [faSyncAlt, 'Resuming', false],
     ],
-    [status === RuntimeStatus.Stopped, () => [faPlay, 'Resume']],
-    [status === RuntimeStatus.Running, () => [faPause, 'Pause']],
-    // choose a default to show for other states - will be disabled, regardless
-    () => [faPause, 'Pause']
+    [status === RuntimeStatus.Stopped, () => [faPlay, 'Resume', true]],
+    [status === RuntimeStatus.Running, () => [faPause, 'Pause', true]],
+    // choose a (disabled) default to show for other states
+    () => [faPause, 'Pause', false]
   );
-
-  const disabled =
-    pausing ||
-    resuming ||
-    (status !== RuntimeStatus.Running && status !== RuntimeStatus.Stopped);
 
   return (
     <Clickable
-      {...{ disabled }}
+      disabled={!enabled}
       style={{ padding: '0.5em' }}
       onClick={toggleRuntimeStatus}
     >
-      <FlexColumn style={disabled ? styles.disabledButton : styles.button}>
+      <FlexColumn style={enabled ? styles.button : styles.disabledButton}>
         <FontAwesomeIcon {...{ icon }} style={styles.buttonIcon} />
         <div style={styles.buttonText}>{buttonText}</div>
       </FlexColumn>
