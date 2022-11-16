@@ -40,7 +40,8 @@ import rStudioLogo from 'assets/images/RStudio.png';
 const styles = reactStyles({
   expandedAppContainer: {
     background: colors.white,
-    margin: '1em',
+    marginLeft: '1em',
+    marginBottom: '1em',
     padding: '1em',
     width: 'fit-content',
   },
