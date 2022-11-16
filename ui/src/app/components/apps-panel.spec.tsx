@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { mount } from 'enzyme';
 
-import { RuntimeApi, RuntimeStatus } from 'generated/fetch';
+import { NotebooksApi, RuntimeApi, RuntimeStatus } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -10,6 +10,7 @@ import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { findNodesContainingText } from 'testing/react-test-helpers';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub, workspaceStubs } from 'testing/stubs/workspaces';
 
@@ -36,6 +37,7 @@ describe('AppsPanel', () => {
     });
     runtimeStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeStub);
+    registerApiClient(NotebooksApi, new NotebooksApiStub());
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
       runtime: runtimeStub.runtime,
