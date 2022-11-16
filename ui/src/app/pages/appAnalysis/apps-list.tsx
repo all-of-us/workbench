@@ -64,7 +64,6 @@ export const AppsList = withCurrentWorkspace()((props) => {
   };
 
   const backToSelectAppModal = () => {
-    closeAllApplicationModal();
     setShowSelectAppModal(true);
   };
 
@@ -146,7 +145,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
           </ModalFooter>
         </Modal>
       )}
-      {showJupyterModal && (
+      {showJupyterModal && !showSelectAppModal && (
         <JupyterModal
           data-test-id='jupyter-modal'
           onClose={() => onClose()}
