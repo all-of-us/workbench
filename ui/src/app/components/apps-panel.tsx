@@ -144,37 +144,26 @@ const RuntimeCost = () => {
   const storageCost = formatUsd(machineStorageCost(analysisConfig));
 
   // display running cost or stopped (storage) cost
-  switch (runtime.status) {
+  const text: string = switchCase(
+    runtime.status,
     // TODO: is it appropriate to assume full running cost in all these cases?
-    case RuntimeStatus.Creating:
-    case RuntimeStatus.Running:
-    case RuntimeStatus.Updating:
-    case RuntimeStatus.Deleting:
-      return (
-        <div style={{ alignSelf: 'center' }}>
-          {runtime.status} {runningCost} / hr
-        </div>
-      );
-    case RuntimeStatus.Stopping:
-      return (
-        <div style={{ alignSelf: 'center' }}>Pausing {runningCost} / hr</div>
-      );
-    case RuntimeStatus.Starting:
-      return (
-        <div style={{ alignSelf: 'center' }}>Resuming {runningCost} / hr</div>
-      );
-    case RuntimeStatus.Stopped:
-      return (
-        <div style={{ alignSelf: 'center' }}>Paused {storageCost} / hr</div>
-      );
-    case RuntimeStatus.Unknown:
-      return <div style={{ alignSelf: 'center' }}>Unknown</div>;
-    case RuntimeStatus.Error:
-      return <div style={{ alignSelf: 'center' }}>Error</div>;
-    case RuntimeStatus.Deleted:
-    default:
-      return <div style={{ alignSelf: 'center' }}>Not Running</div>;
-  }
+    [RuntimeStatus.Creating, () => `${runtime.status} ${runningCost} / hr`],
+    [RuntimeStatus.Running, () => `${runtime.status} ${runningCost} / hr`],
+    [RuntimeStatus.Updating, () => `${runtime.status} ${runningCost} / hr`],
+    [RuntimeStatus.Deleting, () => `${runtime.status} ${runningCost} / hr`],
+    [RuntimeStatus.Stopping, () => `Pausing ${runningCost} / hr`],
+    [RuntimeStatus.Starting, () => `Resuming ${runningCost} / hr`],
+    [RuntimeStatus.Stopped, () => `Paused ${storageCost} / hr`],
+    [RuntimeStatus.Unknown, () => runtime.status],
+    [RuntimeStatus.Error, () => runtime.status],
+    [RuntimeStatus.Deleted, () => 'Not Running']
+  );
+
+  return (
+    <div data-test-id='runtime-cost' style={{ alignSelf: 'center' }}>
+      {text}
+    </div>
+  );
 };
 
 const RuntimeSettingsButton = (props: { onClickRuntimeConf: Function }) => (
