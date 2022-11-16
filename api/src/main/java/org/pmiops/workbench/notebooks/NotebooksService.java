@@ -1,5 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
+import static org.pmiops.workbench.notebooks.NotebookUtils.NOTEBOOK_EXTENSION;
+
 import com.google.cloud.storage.Blob;
 import java.util.List;
 import org.json.JSONObject;
@@ -7,9 +9,6 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 
 public interface NotebooksService {
-
-  String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  String NOTEBOOK_EXTENSION = ".ipynb";
 
   static String withNotebookExtension(String notebookName) {
     return notebookName.endsWith(NOTEBOOK_EXTENSION)

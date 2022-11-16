@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +100,10 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
       String workspaceNamespace, String workspaceName, String notebookName) {
+    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new NotImplementedException(String.format("%s type of file is not implemented yet", notebookName));
+    }
+
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
             .html(
@@ -123,6 +129,10 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
       String workspace, String workspaceName, String notebookName) {
+    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new BadRequestException(String.format("%s is not a Jupyter notebook file", notebookName));
+    }
+
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspace, workspaceName, WorkspaceAccessLevel.READER);
 

@@ -62,6 +62,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -406,7 +407,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageClient
-            .getBlobPageForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+            .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
             .stream()
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
             .count();

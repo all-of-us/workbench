@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -39,9 +40,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
-
-  private static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
   // Experimentally determined that generating the preview HTML for a >11MB notebook results in
   // OOMs on a default F1 240MB GAE task. OOMs may still occur during concurrent requests. If this
   // issue persists, we can move preview processing onto the client (calling Calhoun), or fully
@@ -123,7 +121,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
-    return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+    return cloudStorageClient.getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
@@ -132,7 +130,7 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public boolean isNotebookBlob(Blob blob) {
-    return NOTEBOOK_PATTERN.matcher(blob.getName()).matches();
+    return NotebookUtils.isJupyterNotebook(blob.getName()) || NotebookUtils.isRMarkDownNotebook(blob.getName());
   }
 
   @Override
@@ -288,6 +286,9 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
+    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new NotImplementedException(String.format("%s type of file is not implemented yet", notebookName));
+    }
     cloudStorageClient.writeFile(
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
@@ -320,6 +321,10 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String adminGetReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
+    if(!NotebookUtils.isJupyterNotebook(notebookName)) {
+      throw new NotImplementedException(String.format("%s type of file is not implemented yet", notebookName));
+    }
+
     String bucketName =
         fireCloudService
             .getWorkspaceAsService(workspaceNamespace, workspaceName)
@@ -337,7 +342,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
-    String blobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String blobPath = NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
     String pathStart = "gs://" + bucket + "/";
     String fullPath = pathStart + blobPath;
     BlobId blobId = BlobId.of(bucket, blobPath);
