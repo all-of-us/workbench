@@ -58,7 +58,7 @@ WHERE concept_id in
             and b.standard_concept = 'S'
     )"
 
-# currently, there are only 6 levels, but we run it 7 times to be safe
+# currently, there are only 5 levels, but we run it 6 times to be safe
 for i in {1..6};
 do
     echo "MEASUREMENT - SNOMED - STANDARD - temp table level $i"
