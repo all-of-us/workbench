@@ -201,16 +201,16 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
       status,
       [
         RuntimeStatus.Running,
-        async () => {
+        () => {
           setPausing(true);
-          await setRuntimeStatus(RuntimeStatusRequest.Stop);
+          setRuntimeStatus(RuntimeStatusRequest.Stop);
         },
       ],
       [
         RuntimeStatus.Stopped,
-        async () => {
+        () => {
           setResuming(true);
-          await setRuntimeStatus(RuntimeStatusRequest.Start);
+          setRuntimeStatus(RuntimeStatusRequest.Start);
         },
       ]
     );
@@ -226,7 +226,7 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
     ],
     [status === RuntimeStatus.Stopped, () => [faPlay, 'Resume']],
     [status === RuntimeStatus.Running, () => [faPause, 'Pause']],
-    // choose this button's most common function as the (disabled) default text to show for other states
+    // choose a default to show for other states - will be disabled, regardless
     () => [faPause, 'Pause']
   );
 
