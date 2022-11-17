@@ -70,14 +70,15 @@ public class NotebooksController implements NotebooksApiDelegate {
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
+      // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              fromNotebookName,
+              NotebooksService.withNotebookExtension(fromNotebookName),
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              copyRequest.getNewName());
+              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
