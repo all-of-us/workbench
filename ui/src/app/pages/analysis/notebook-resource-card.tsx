@@ -26,7 +26,6 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';

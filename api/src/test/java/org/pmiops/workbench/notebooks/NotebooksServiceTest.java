@@ -214,7 +214,7 @@ public class NotebooksServiceTest {
   public void testCopyNotebook() {
     String fromWorkspaceNamespace = "fromWorkspaceNamespace";
     String fromWorkspaceFirecloudName = "fromWorkspaceFirecloudName";
-    String fromNotebookName = "fromNotebookName";
+    String fromNotebookName = "fromNotebookName.ipynb";
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
@@ -647,24 +647,6 @@ public class NotebooksServiceTest {
     verify(mockWorkspaceAuthService, times(2))
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
-    assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
-    assertThat(actualResult.getPath())
-        .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");
-  }
-
-  @Test
-  public void testRenameNotebook_withOutExtension() {
-
-    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(anyString(), anyString(), any()))
-        .thenReturn(WorkspaceAccessLevel.OWNER);
-
-    when(workspaceDao.getRequired(anyString(), anyString())).thenReturn(dbWorkspace);
-
-    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
-
-    FileDetail actualResult =
-        notebooksService.renameNotebook(NAMESPACE_NAME, WORKSPACE_NAME, "oldName", "newName");
-
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
         .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");
