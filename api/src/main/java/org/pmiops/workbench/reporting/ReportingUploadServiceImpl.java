@@ -25,6 +25,7 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtr
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
@@ -64,6 +66,9 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
       workspaceFreeTierUsageRequestBuilder = WorkspaceFreeTierUsageColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDataset> datasetRequestBuilder =
       DatasetColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingNewUserSatisfactionSurvey>
+      newUserSatisfactionSurveyRequestBuilder =
+          NewUserSatisfactionSurveyColumnValueExtractor::values;
 
   /**
    * The verified–snapshot BigQuery name. It has no row other than the default snapshot_timestamp,
@@ -132,6 +137,17 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     uploadBatchTable(
         cohortRequestBuilder.build(
             getTableId(CohortColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
+  }
+
+  /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
+  @Override
+  public void uploadBatchNewUserSatisfactionSurveys(
+      List<ReportingNewUserSatisfactionSurvey> batch, long captureTimestamp) {
+    uploadBatchTable(
+        newUserSatisfactionSurveyRequestBuilder.build(
+            getTableId(NewUserSatisfactionSurveyColumnValueExtractor.class),
+            batch,
+            getFixedValues(captureTimestamp)));
   }
 
   /** Batch uploads a reporting table. */
@@ -247,6 +263,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             reportingSnapshot.getWorkspaceFreeTierUsage(),
             fixedValues,
             batchSize));
+
     return resultBuilder.build().stream()
         .filter(r -> r.getRows().size() > 0)
         .collect(ImmutableList.toImmutableList());

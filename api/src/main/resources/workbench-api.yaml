@@ -9302,6 +9302,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingInstitution"
+      newUserSatisfactionSurveys:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingNewUserSatisfactionSurvey"
       workspaceFreeTierUsage:
         type: array
         items:
@@ -9815,6 +9819,30 @@ definitions:
       registeredTierRequirement:
         description: Institution tegisted tier requirement.
         "$ref": "#/definitions/InstitutionMembershipRequirement"
+  ReportingNewUserSatisfactionSurvey:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: ID of the survey response.
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      created:
+        type: string
+        format: date-time
+        description: Time the survey response was created.
+      modified:
+        type: string
+        format: date-time
+        description: Time the survey response was last modified.
+      satisfaction:
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
+      additionalInfo:
+        type: string
+        description: Additional information regarding the satisfaction score.
 
   ReportingDataset:
     x-aou-note: |-
@@ -10237,14 +10265,17 @@ definitions:
     type: object
     properties:
       satisfaction:
-        type: string
-        description: How satisfied the user is with the researcher workbench
-        enum:
-          - VERY_UNSATISFIED
-          - UNSATISFIED
-          - NEUTRAL
-          - SATISFIED
-          - VERY_SATISFIED
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
       additionalInfo:
         type: string
         description: Additional information regarding their satisfaction score
+
+  NewUserSatisfactionSurveySatisfaction:
+    type: string
+    description: How satisfied the user is with the researcher workbench.
+    enum:
+      - VERY_UNSATISFIED
+      - UNSATISFIED
+      - NEUTRAL
+      - SATISFIED
+      - VERY_SATISFIED

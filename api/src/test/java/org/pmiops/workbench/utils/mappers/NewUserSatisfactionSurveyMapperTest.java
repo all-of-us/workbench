@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey.SatisfactionEnum;
+import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyMapper;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,8 @@ public class NewUserSatisfactionSurveyMapperTest {
 
     CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey =
         new CreateNewUserSatisfactionSurvey();
-    createNewUserSatisfactionSurvey.setSatisfaction(SatisfactionEnum.SATISFIED);
+    createNewUserSatisfactionSurvey.setSatisfaction(
+        NewUserSatisfactionSurveySatisfaction.SATISFIED);
     createNewUserSatisfactionSurvey.setAdditionalInfo(additionalInfo);
     DbNewUserSatisfactionSurvey mappedDbNewUserSatisfactionSurvey =
         mapper.toDbNewUserSatisfactionSurvey(createNewUserSatisfactionSurvey, user);
