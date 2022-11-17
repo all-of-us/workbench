@@ -4225,9 +4225,9 @@ definitions:
     - FITBIT_SLEEP_LEVEL
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
+    - LR_WHOLE_GENOME_VARIANT
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
-    - LR_WHOLE_GENOME_VARIANT
   Surveys:
     type: string
     description: a survey for concepts
