@@ -443,11 +443,12 @@ public class NotebooksServiceTest {
   @Test
   public void testGetNotebooks() {
     MockNotebook notebook1 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), BUCKET_NAME);
+        new MockNotebook(
+            NotebooksService.withJupyterNotebookExtension("notebooks/mockFile"), BUCKET_NAME);
     MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text", BUCKET_NAME);
     MockNotebook notebook3 =
         new MockNotebook(
-            NotebooksService.withNotebookExtension("notebooks/two words"), BUCKET_NAME);
+            NotebooksService.withJupyterNotebookExtension("notebooks/two words"), BUCKET_NAME);
 
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
@@ -523,8 +524,9 @@ public class NotebooksServiceTest {
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
     when(mockBlob1.getName())
-        .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
-    when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
+        .thenReturn(NotebooksService.withJupyterNotebookExtension("notebooks/extra/nope"));
+    when(mockBlob2.getName())
+        .thenReturn(NotebooksService.withJupyterNotebookExtension("notebooks/foo"));
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
@@ -539,7 +541,8 @@ public class NotebooksServiceTest {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
 
-    assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
+    assertThat(gotNames)
+        .isEqualTo(ImmutableList.of(NotebooksService.withJupyterNotebookExtension("foo")));
   }
 
   @Test
@@ -636,8 +639,8 @@ public class NotebooksServiceTest {
         notebooksService.renameNotebook(
             NAMESPACE_NAME,
             WORKSPACE_NAME,
-            NotebooksService.withNotebookExtension("oldName"),
-            NotebooksService.withNotebookExtension("newName"));
+            NotebooksService.withJupyterNotebookExtension("oldName"),
+            NotebooksService.withJupyterNotebookExtension("newName"));
 
     verify(mockCloudStorageClient).deleteBlob(any());
     verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());

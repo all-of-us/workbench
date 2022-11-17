@@ -276,7 +276,8 @@ public class NotebooksServiceImpl implements NotebooksService {
   private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
     Blob blob =
         cloudStorageClient.getBlob(
-            bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
+            bucketName,
+            "notebooks/".concat(NotebooksService.withJupyterNotebookExtension(notebookName)));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
@@ -293,7 +294,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
     cloudStorageClient.writeFile(
         bucketName,
-        "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
+        "notebooks/" + NotebooksService.withJupyterNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }

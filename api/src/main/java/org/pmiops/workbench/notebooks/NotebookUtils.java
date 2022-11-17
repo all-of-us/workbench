@@ -8,6 +8,7 @@ public class NotebookUtils {
 
   public static String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
   public static String JUPYTER_NOTEBOOK_EXTENSION = ".ipynb";
+  public static String R_MARKDOWN_NOTEBOOK_EXTENSION = ".rmd";
 
   // Pattern matches directory and the file type, e.g. notebooks/file.ipynb
   public static final Pattern JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN =
@@ -26,5 +27,9 @@ public class NotebookUtils {
 
   public static boolean isJupyterNotebook(String name) {
     return name.endsWith(JUPYTER_NOTEBOOK_EXTENSION);
+  }
+
+  public static boolean isRMarkdownNotebook(String name) {
+    return name.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 }

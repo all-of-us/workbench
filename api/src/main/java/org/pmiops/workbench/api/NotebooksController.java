@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.notebooks.NotebookUtils.isRMarkdownNotebook;
+
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
@@ -70,15 +72,22 @@ public class NotebooksController implements NotebooksApiDelegate {
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
+      // Checks the new name extension to match the original from file type, add extension if
+      // needed.
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
+      String newName =
+          isRMarkdownNotebook(fromNotebookName)
+              ? NotebooksService.withRMarkdownExtension(copyRequest.getNewName())
+              : NotebooksService.withJupyterNotebookExtension(copyRequest.getNewName());
+
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withNotebookExtension(fromNotebookName),
+              NotebooksService.withJupyterNotebookExtension(fromNotebookName),
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
+              newName);
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
