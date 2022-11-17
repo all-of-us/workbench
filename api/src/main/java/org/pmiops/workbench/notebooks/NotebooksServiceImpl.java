@@ -148,7 +148,6 @@ public class NotebooksServiceImpl implements NotebooksService {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
-    newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
 
     final DbWorkspace fromWorkspace =
         workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);
@@ -229,7 +228,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             originalName,
             workspaceNamespace,
             workspaceName,
-            NotebooksService.withNotebookExtension(newName));
+            newName);
     deleteNotebook(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
@@ -290,7 +289,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
     if (!NotebookUtils.isJupyterNotebook(notebookName)) {
       throw new NotImplementedException(
-          String.format("%s type of file is not implemented yet", notebookName));
+          String.format("%s is a type of file that is not yet supported", notebookName));
     }
     cloudStorageClient.writeFile(
         bucketName,
@@ -326,7 +325,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       String workspaceNamespace, String workspaceName, String notebookName) {
     if (!NotebookUtils.isJupyterNotebook(notebookName)) {
       throw new NotImplementedException(
-          String.format("%s type of file is not implemented yet", notebookName));
+          String.format("%s is a type of file that is not yet supported", notebookName));
     }
 
     String bucketName =

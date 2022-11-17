@@ -74,10 +74,10 @@ public class NotebooksController implements NotebooksApiDelegate {
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withNotebookExtension(fromNotebookName),
+              fromNotebookName,
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
+              copyRequest.getNewName());
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }

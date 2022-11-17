@@ -176,7 +176,7 @@ export const NotebookResourceCard = fp.flow(
       return notebooksApi().copyNotebook(
         this.props.resource.workspaceNamespace,
         this.props.resource.workspaceFirecloudName,
-        dropNotebookFileSuffix(this.props.resource.notebook.name),
+        this.props.resource.notebook.name,
         copyRequest
       );
     }
