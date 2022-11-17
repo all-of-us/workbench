@@ -84,7 +84,7 @@
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.6",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^26.5.3",
