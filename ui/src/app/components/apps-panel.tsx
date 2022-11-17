@@ -79,7 +79,14 @@ const styles = reactStyles({
     cursor: 'not-allowed',
   },
   buttonText: {
-    color: '#4D72AA', // TODO fix
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+    letterSpacing: 0,
+    lineHeight: '15px',
+  },
+  disabledButtonText: {
+    color: colors.secondary,
     fontFamily: 'Montserrat',
     fontWeight: 'bold',
     letterSpacing: 0,
@@ -240,7 +247,9 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
     >
       <FlexColumn style={enabled ? styles.button : styles.disabledButton}>
         <FontAwesomeIcon {...{ icon }} style={styles.buttonIcon} />
-        <div style={styles.buttonText}>{buttonText}</div>
+        <div style={enabled ? styles.buttonText : styles.disabledButtonText}>
+          {buttonText}
+        </div>
       </FlexColumn>
     </Clickable>
   );
