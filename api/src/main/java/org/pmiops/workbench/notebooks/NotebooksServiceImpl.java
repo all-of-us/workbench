@@ -130,8 +130,9 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public boolean isNotebookBlob(Blob blob) {
-    return NotebookUtils.isJupyterNotebook(blob.getName())
-        || NotebookUtils.isRMarkDownNotebook(blob.getName());
+    // Blobs have notebooks/ directory
+    return NotebookUtils.isJupyterNotebookWithDirectory(blob.getName())
+        || NotebookUtils.isRMarkDownNotebookWithDirectory(blob.getName());
   }
 
   @Override

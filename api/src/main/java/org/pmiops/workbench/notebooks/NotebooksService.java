@@ -1,6 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
-import static org.pmiops.workbench.notebooks.NotebookUtils.NOTEBOOK_EXTENSION;
+import static org.pmiops.workbench.notebooks.NotebookUtils.JUPYTER_NOTEBOOK_EXTENSION;
 
 import com.google.cloud.storage.Blob;
 import java.util.List;
@@ -11,9 +11,9 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 public interface NotebooksService {
 
   static String withNotebookExtension(String notebookName) {
-    return notebookName.endsWith(NOTEBOOK_EXTENSION)
+    return notebookName.endsWith(JUPYTER_NOTEBOOK_EXTENSION)
         ? notebookName
-        : notebookName.concat(NOTEBOOK_EXTENSION);
+        : notebookName.concat(JUPYTER_NOTEBOOK_EXTENSION);
   }
 
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
