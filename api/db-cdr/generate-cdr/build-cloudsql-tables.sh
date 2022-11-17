@@ -124,11 +124,9 @@ VALUES
 (1585855,'','Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
 (1585710,'','Survey provides information about how participants report levels of individual health.',0,0,2),
 (1586134,'','Survey includes participant demographic information.',0,0,1),
-(43529712,'','Survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
 (43528895,'','Survey includes information about a participants access to and use of health care.',0,0,5),
-(43528698,'','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
-(1333342,'','Survey includes information about the impact of COVID-19 on participant mental and physical health.',0,0,7),
-(1740639,'','Survey includes information about medical history of family members, including medical conditions and approximate age of diagnosis.',0,0,8)"
+(1333342,'','Survey includes information about the impact of COVID-19 on participant mental and physical health.',0,0,6),
+(1740639,'','Survey includes information about medical history of family members, including medical conditions and approximate age of diagnosis.',0,0,4)"
 
 #  Getting count for SDOH Survey
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
@@ -140,7 +138,7 @@ if [[ "$sdohCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (40192389,'','Survey includes information to help better understand the connection between social environmental factors and overall health.',0,0,8)"
+  (40192389,'','Survey includes information to help better understand the connection between social environmental factors and overall health.',0,0,7)"
 fi
 
 #  Getting count for Cope Minute Survey
@@ -153,7 +151,7 @@ if [[ "$minuteCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (1741006,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,9)"
+  (1741006,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,8)"
 fi
 
 echo "Updating survey names on survey_module from cb_criteria table"
