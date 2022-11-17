@@ -26,6 +26,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
+import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';
@@ -112,10 +113,6 @@ export const NotebookResourceCard = fp.flow(
       ];
     }
 
-    fullNotebookName(name) {
-      return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
-    }
-
     renameNotebook(newName) {
       const { resource } = this.props;
       return notebooksApi()
@@ -124,7 +121,7 @@ export const NotebookResourceCard = fp.flow(
           resource.workspaceFirecloudName,
           {
             name: resource.notebook.name,
-            newName: this.fullNotebookName(newName),
+            newName: appendNotebookFileSuffix(newName),
           }
         )
         .then(() => this.props.onUpdate())
@@ -210,7 +207,7 @@ export const NotebookResourceCard = fp.flow(
               onCancel={() => this.setState({ showRenameModal: false })}
               hideDescription={true}
               oldName={getDisplayName(resource)}
-              nameFormat={(name) => this.fullNotebookName(name)}
+              nameFormat={(name) => appendNotebookFileSuffix(name)}
               existingNames={this.props.existingNameList}
             />
           )}

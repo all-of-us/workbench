@@ -28,6 +28,8 @@ import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
+import { dropNotebookFileSuffix } from './util';
+
 const styles = {
   heading: {
     color: colors.primary,
@@ -158,7 +160,7 @@ export const NotebookList = withCurrentWorkspace()(
         );
         this.setState({ notebookList });
         const notebookNameList = notebookList.map((fd) =>
-          fd.name.slice(0, -'.ipynb'.length)
+          dropNotebookFileSuffix(fd.name)
         );
         this.setState({ notebookNameList });
       } catch (error) {

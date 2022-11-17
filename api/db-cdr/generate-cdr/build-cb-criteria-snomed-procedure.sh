@@ -111,9 +111,9 @@ WHERE p.domain_id = 'PROCEDURE'
         )"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
-# currently, there are only 15 levels, but we run it 16 times to be safe, If this count changes, change the query below
+# currently, there are only 16 levels, but we run it 17 times to be safe, If this count changes, change the query below
 # NOTE: if loop number changes, change number of joins in next two queries
-for i in {1..16};
+for i in {1..17};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - adding level $i"
     bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
@@ -173,7 +173,7 @@ do
             )"
 done
 
-# Join Count: 16 - If loop count above is changed, the number of JOINS below must be updated
+# Join Count: 17 - If loop count above is changed, the number of JOINS below must be updated
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - add items into staging table for use in next query"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
@@ -197,6 +197,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
         , concept_id_13
         , concept_id_14
         , concept_id_15
+        , concept_id_16
     )
 SELECT DISTINCT a.concept_id as ancestor_concept_id
     , a.domain_id
@@ -217,6 +218,7 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
     , o.concept_id as c13
     , p.concept_id as c14
     , q.concept_id as c15
+    , q.concept_id as c16
 FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
          WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1 and parent_id != 0 and is_group = 1
                and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
@@ -234,9 +236,10 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) n on m.id = n.parent_id
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) o on n.id = o.parent_id
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) p on o.id = p.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) q on p.id = q.parent_id"
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) q on p.id = q.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) r on q.id = r.parent_id"
 
-# Join Count: 16 - If loop count above is changed, the number of JOINS below must be updated
+# Join Count: 17 - If loop count above is changed, the number of JOINS below must be updated
 # the last UNION statement is to add the item to itself
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - add items into ancestor table"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
@@ -246,6 +249,13 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
         , descendant_concept_id
         , is_standard
     )
+SELECT DISTINCT ancestor_concept_id, concept_id_16 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
+WHERE concept_id_16 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_15 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_15 is not null
