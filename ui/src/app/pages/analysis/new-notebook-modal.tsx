@@ -29,13 +29,14 @@ import { appendNotebookFileSuffix } from './util';
 
 interface Props {
   onClose: Function;
+  onSave?: Function;
   workspace: Workspace;
   existingNameList?: string[];
   onBack?: Function;
 }
 
 export const NewNotebookModal = (props: Props) => {
-  const { onBack, onClose, workspace } = props;
+  const { onBack, onClose, onSave, workspace } = props;
 
   const [name, setName] = useState('');
   const [kernel, setKernel] = useState(Kernels.Python3);
@@ -66,7 +67,9 @@ export const NewNotebookModal = (props: Props) => {
   );
 
   const create = () => {
-      onClose();
+      if (onSave) {
+          onSave();
+      }
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
       notebookName: appendNotebookFileSuffix(name),
     });
