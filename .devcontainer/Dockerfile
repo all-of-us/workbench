@@ -75,6 +75,13 @@ RUN \
   apt-get install -y ruby ruby-dev ruby-bundler && \
   rm -rf /var/lib/apt/lists/*
 
+#Install Docker
+RUN apt-get update && \
+    apt-get -qy full-upgrade && \
+    apt-get install -qy curl && \
+    apt-get install -qy curl && \
+    curl -sSL https://get.docker.com/ | sh
+
 # Clean up
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get autoremove -y \
