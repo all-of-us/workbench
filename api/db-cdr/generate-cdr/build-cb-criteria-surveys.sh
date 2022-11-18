@@ -356,7 +356,7 @@ do
             , x.est_count = y.cnt
        FROM
        (
-        SELECT $line as concept_id, count(distinct person_id)
+        SELECT $line as concept_id, count(distinct person_id) as cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
         WHERE se.value_source_concept_id in (
           SELECT distinct CAST(value AS INT64)
@@ -386,7 +386,7 @@ bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
      , x.est_count = y.cnt
  FROM
      (
-         SELECT 1740639 as concept_id, count(distinct person_id)
+         SELECT 1740639 as concept_id, count(distinct person_id) as cnt
          FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
          WHERE se.value_source_concept_id in (
            SELECT DISTINCT CAST(c.value AS INT64) as value
