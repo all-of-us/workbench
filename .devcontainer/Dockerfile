@@ -69,6 +69,12 @@ RUN mkdir -p /usr/local/gcloud \
 # Adding the package path to local
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
+# Install Ruby.
+RUN \
+  apt-get update && \
+  apt-get install -y ruby ruby-dev ruby-bundler && \
+  rm -rf /var/lib/apt/lists/*
+
 # Clean up
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get autoremove -y \
