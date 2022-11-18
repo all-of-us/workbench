@@ -345,6 +345,7 @@ AND type = 'PPI'
 AND subtype = 'QUESTION'"
 questionConceptIds=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv "$query")
 
+echo "PPI SURVEYS - update question counts for PFHH survey only"
 while IFS= read -r line
 do
   if [[ "$line" != "concept_id" ]]; then
@@ -378,7 +379,7 @@ do
   fi
 done <<< "$questionConceptIds"
 
-echo "Getting PFHH survey counts"
+echo "PPI SURVEYS - update survey count for PFHH survey only"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
  SET x.rollup_count = y.cnt
