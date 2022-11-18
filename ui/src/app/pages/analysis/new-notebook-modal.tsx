@@ -25,6 +25,7 @@ import { appendNotebookFileSuffix } from './util';
 
 interface Props {
   onClose: Function;
+  onSave?: Function;
   workspace: Workspace;
   existingNameList: string[];
 }
@@ -35,7 +36,7 @@ export const NewNotebookModal = (props: Props) => {
   const [nameTouched, setNameTouched] = useState(false);
   const [navigate] = useNavigation();
 
-  const { workspace, onClose, existingNameList } = props;
+  const { workspace, onClose, onSave, existingNameList } = props;
   const errors = validate(
     { name, kernel },
     {
@@ -45,7 +46,9 @@ export const NewNotebookModal = (props: Props) => {
   );
 
   const save = () => {
-    onClose();
+    if (onSave) {
+      onSave();
+    }
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
       notebookName: appendNotebookFileSuffix(name),
     });
