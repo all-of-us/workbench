@@ -218,7 +218,7 @@ public class NotebooksServiceTest {
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName.ipynb";
+    String newNotebookName = "newNotebookName";
     String toBucket = "TO_BUCKET";
     HashSet<BlobId> existingBlobIds = new HashSet<>();
 
@@ -259,7 +259,7 @@ public class NotebooksServiceTest {
     FileDetail expectedFileDetail =
         new FileDetail()
             .name(newNotebookName + ".ipynb")
-            .path("gs://" + toBucket + "/notebooks/" + newNotebookName + ".ipynb");
+            .path("gs://" + toBucket + "/notebooks/" + newNotebookName);
     assertThat(actualFileDetail.getName()).isEqualTo(expectedFileDetail.getName());
     assertThat(actualFileDetail.getPath()).isEqualTo(expectedFileDetail.getPath());
     assertThat(actualFileDetail.getSizeInBytes()).isEqualTo(expectedFileDetail.getSizeInBytes());
