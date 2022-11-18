@@ -75,16 +75,6 @@ RUN \
   apt-get install -y ruby ruby-dev ruby-bundler && \
   rm -rf /var/lib/apt/lists/*
 
-#Install Docker
-RUN apt-get update && \
-    apt-get -qy full-upgrade && \
-    apt-get install -qy curl && \
-    apt-get install -qy curl && \
-    curl -sSL https://get.docker.com/ | sh
-
-#Start Docker Service
-RUN dockerd &
-
 #Install Docker Compose
 RUN curl -L --fail \
     https://github.com/docker/compose/releases/download/1.21.2/run.sh \
