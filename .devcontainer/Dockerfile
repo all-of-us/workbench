@@ -76,7 +76,7 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 # Install MySQL
-RUN apk add --update mysql mysql-client && rm -f /var/cache/apk/*
+#RUN apk add --update mysql mysql-client && rm -f /var/cache/apk/*
 
 #Install Docker Compose
 RUN curl -L --fail \
