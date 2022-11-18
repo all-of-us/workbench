@@ -94,7 +94,7 @@ export type SidebarIconId =
   | 'notebooksHelp'
   | 'dataDictionary'
   | 'annotations'
-  | 'runtime'
+  | 'runtimeConfig'
   | 'terminal'
   | 'genomicExtractions';
 
@@ -109,7 +109,10 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-const displayRuntimeIcon = (icon: IconConfig, workspaceNamespace: string) => {
+const displayRuntimeStatusIcon = (
+  icon: IconConfig,
+  workspaceNamespace: string
+) => {
   // We always want to show the thunderstorm icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
@@ -310,7 +313,10 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         </a>
       ),
     ],
-    ['runtime', () => displayRuntimeIcon(icon, workspace.namespace)],
+    [
+      'runtimeConfig',
+      () => displayRuntimeStatusIcon(icon, workspace.namespace),
+    ],
     [
       'terminal',
       () => (
@@ -336,7 +342,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         icon.faIcon === null ? (
           <img
             data-test-id={'help-sidebar-icon-' + icon.id}
-            src={icon.id === 'runtime' && thunderstorm}
+            src={icon.id === 'runtimeConfig' && thunderstorm}
             style={icon.style}
           />
         ) : (
@@ -432,8 +438,8 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: 'Annotations',
       hasContent: true,
     },
-    runtime: {
-      id: 'runtime',
+    runtimeConfig: {
+      id: 'runtimeConfig',
       disabled: !!loadingError,
       faIcon: null,
       label: 'Cloud Icon',
@@ -506,7 +512,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('runtime', 'terminal');
+    keys.push('runtimeConfig', 'terminal');
   }
 
   if (
