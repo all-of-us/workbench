@@ -190,14 +190,9 @@ export const CriteriaTree = fp.flow(
       const { concept, domain, selectedIds, source } = this.props;
       if (source === 'conceptSetDetails') {
         if (prevProps.concept !== concept) {
-          const { cdrVersionId } = currentWorkspaceStore.getValue();
           this.setState({ children: concept, loading: false });
           if (domain === Domain.SURVEY) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = concept;
-              ppiSurveys.next(rootSurveys);
-            }
+            this.setPPISurveys(concept);
           }
         }
       }
@@ -226,11 +221,7 @@ export const CriteriaTree = fp.flow(
           workspace,
         } = this.props;
         this.setState({ loading: true });
-        const {
-          cdrVersionId,
-          id: workspaceId,
-          namespace,
-        } = currentWorkspaceStore.getValue();
+        const { id: workspaceId, namespace } = currentWorkspaceStore.getValue();
         const criteriaType =
           domain === Domain.DRUG ? CriteriaType.ATC.toString() : type;
         const promises = [
@@ -315,6 +306,7 @@ export const CriteriaTree = fp.flow(
                 (child) => child.name === selectedSurvey
               ),
             });
+            this.setPPISurveys(rootNodes);
           } else {
             // Temp: This should be handle in API
             this.updatePpiSurveys(
@@ -338,11 +330,7 @@ export const CriteriaTree = fp.flow(
                 : rootNodes,
           });
           if (domain === Domain.SURVEY) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = rootNodes;
-              ppiSurveys.next(rootSurveys);
-            }
+            this.setPPISurveys(rootNodes);
           }
         }
       } catch (error) {
@@ -350,6 +338,15 @@ export const CriteriaTree = fp.flow(
         this.setState({ error: true });
       } finally {
         this.setState({ loading: false });
+      }
+    }
+
+    setPPISurveys(rootSurveyList: Criteria[]) {
+      const { cdrVersionId } = currentWorkspaceStore.getValue();
+      const rootSurveys = ppiSurveys.getValue();
+      if (!rootSurveys[cdrVersionId]) {
+        rootSurveys[cdrVersionId] = rootSurveyList;
+        ppiSurveys.next(rootSurveys);
       }
     }
 
@@ -367,7 +364,7 @@ export const CriteriaTree = fp.flow(
       const {
         node: { domainId, isStandard, type },
       } = this.props;
-      const { cdrVersionId, id, namespace } = currentWorkspaceStore.getValue();
+      const { id, namespace } = currentWorkspaceStore.getValue();
       if (selectedSurveyChild && selectedSurveyChild.length > 0) {
         cohortBuilderApi()
           .findCriteriaBy(
@@ -383,11 +380,7 @@ export const CriteriaTree = fp.flow(
           );
       } else {
         this.setState({ children: resp });
-        const rootSurveys = ppiSurveys.getValue();
-        if (!rootSurveys[cdrVersionId]) {
-          rootSurveys[cdrVersionId] = resp;
-          ppiSurveys.next(rootSurveys);
-        }
+        this.setPPISurveys(resp);
       }
     }
 
