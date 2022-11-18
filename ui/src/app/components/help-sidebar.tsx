@@ -390,7 +390,7 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: true,
           };
-        case 'runtime':
+        case 'runtimeConfig':
           return {
             headerPadding: '0.75rem',
             renderHeader: () => (
@@ -698,7 +698,7 @@ export const HelpSidebar = fp.flow(
                   closeFunction={() =>
                     this.setState({ currentModal: CurrentModal.None })
                   }
-                  openRuntimePanel={() => this.setActiveIcon('runtime')}
+                  openRuntimePanel={() => this.setActiveIcon('runtimeConfig')}
                   errors={runtimeErrors}
                 />
               ),
