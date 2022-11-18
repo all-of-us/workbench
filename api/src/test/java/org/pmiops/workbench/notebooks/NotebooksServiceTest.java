@@ -258,7 +258,7 @@ public class NotebooksServiceTest {
 
     FileDetail expectedFileDetail =
         new FileDetail()
-            .name(newNotebookName + ".ipynb")
+            .name(newNotebookName)
             .path("gs://" + toBucket + "/notebooks/" + newNotebookName);
     assertThat(actualFileDetail.getName()).isEqualTo(expectedFileDetail.getName());
     assertThat(actualFileDetail.getPath()).isEqualTo(expectedFileDetail.getPath());
