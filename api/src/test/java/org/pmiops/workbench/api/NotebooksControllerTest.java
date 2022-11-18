@@ -192,6 +192,41 @@ public class NotebooksControllerTest {
   }
 
   @Test
+  public void testCopyNotebook_rmd_withNoExtensionName() {
+    String toWorkspaceNamespace = "fromProject";
+    String toWorkspaceName = "fromWorkspace_001";
+    String newName = "toName";
+    String toPath = "/path/to/" + newName;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    CopyRequest copyRequest = new CopyRequest();
+    FileDetail expectedFileDetail = createFileDetail(newName + ".rmd", toPath, toLastModifiedTime);
+    copyRequest.setNewName(newName);
+    copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
+    copyRequest.setToWorkspaceName(toWorkspaceName);
+
+    when(mockNotebookService.copyNotebook(
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .copyNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "test.rmd", copyRequest)
+            .getBody();
+
+    // Note the fromNotebooName will change after stop setting extension for notebookName.
+    verify(mockNotebookService)
+        .copyNotebook(
+            FROM_WORKSPACE_NAMESPACE,
+            FROM_WORKSPACE_NAME,
+            "test.rmd.ipynb",
+            toWorkspaceNamespace,
+            toWorkspaceName,
+            newName + ".rmd");
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
   public void testCopyNotebook_alreadyExists() {
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
@@ -240,9 +275,11 @@ public class NotebooksControllerTest {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
     MockNotebook notebook1 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/mockFile"), "bucket");
+        new MockNotebook(
+            NotebooksService.withJupyterNotebookExtension("notebooks/mockFile"), "bucket");
     MockNotebook notebook2 =
-        new MockNotebook(NotebooksService.withNotebookExtension("notebooks/two words"), "bucket");
+        new MockNotebook(
+            NotebooksService.withJupyterNotebookExtension("notebooks/two words"), "bucket");
 
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
         .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
@@ -278,6 +315,15 @@ public class NotebooksControllerTest {
         .getNotebookKernel(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
+  }
+
+  @Test
+  public void testGetNotebookKernel_notSupported() {
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            notebooksController.getNotebookKernel(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "file.rmd"));
   }
 
   @Test
@@ -497,7 +543,7 @@ public class NotebooksControllerTest {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
-    final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
+    final String testNotebook = NotebooksService.withJupyterNotebookExtension("test-notebook");
 
     FirecloudWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
