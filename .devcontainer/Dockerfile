@@ -72,7 +72,7 @@ ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 # Install Ruby.
 RUN \
   apt-get update && \
-  apt-get install -y ruby ruby-dev ruby-bundler gettext && \
+  apt-get install -y ruby ruby-dev ruby-bundler gettext mysql-server && \
   rm -rf /var/lib/apt/lists/*
 
 #Install Docker Compose
@@ -80,6 +80,8 @@ RUN curl -L --fail \
     https://github.com/docker/compose/releases/download/1.21.2/run.sh \
     -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose
+
+RUN systemctl start mysql.service
 
 # Clean up
 RUN export DEBIAN_FRONTEND=noninteractive \
