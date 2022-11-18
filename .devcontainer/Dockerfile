@@ -72,7 +72,7 @@ ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 # Install Ruby.
 RUN \
   apt-get update && \
-  apt-get install -y ruby ruby-dev ruby-bundler && \
+  apt-get install -y ruby ruby-dev ruby-bundler gettext && \
   rm -rf /var/lib/apt/lists/*
 
 #Install Docker Compose
