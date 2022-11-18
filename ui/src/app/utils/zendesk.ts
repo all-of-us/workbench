@@ -70,7 +70,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       researchPurpose: article('360042673211'),
       workingWithData: category('5942702296468'),
       workspaceBucket: article('360040043072'),
-      policy: article('5942677039892'),
+      policy: category('5942677039892'),
     },
     [ZendeskEnv.Preprod]: {
       ...commonUrls,
