@@ -23,7 +23,7 @@
 	"forwardPorts": [8080],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	 "postCreateCommand": "sudo (cd /workspaces/workbench && git submodule update -f --init --recursive && rm -f /.dockerenv)",
+	 "postCreateCommand": "(cd /workspaces/workbench && git submodule update -f --init --recursive && sudo rm -f /.dockerenv)",
 
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
