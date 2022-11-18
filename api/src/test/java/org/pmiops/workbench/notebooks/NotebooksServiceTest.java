@@ -218,7 +218,7 @@ public class NotebooksServiceTest {
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName";
+    String newNotebookName = "newNotebookName.ipynb";
     String toBucket = "TO_BUCKET";
     HashSet<BlobId> existingBlobIds = new HashSet<>();
 
