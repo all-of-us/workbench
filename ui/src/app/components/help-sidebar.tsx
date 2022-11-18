@@ -631,6 +631,7 @@ export const HelpSidebar = fp.flow(
                           >
                             {sidebarContent.renderHeader()}
                             <CloseButton
+                              style={{ marginLeft: 'auto' }}
                               onClose={() => this.setActiveIcon(null)}
                             />
                           </FlexRow>

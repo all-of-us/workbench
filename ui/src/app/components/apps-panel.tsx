@@ -112,6 +112,7 @@ const styles = reactStyles({
     marginBottom: '1em',
     justifyContent: 'center',
   },
+  closeButton: { marginLeft: 'auto', alignSelf: 'center' },
 });
 
 // Eventually we will need to align this with the API's AppType
@@ -400,7 +401,7 @@ export const AppsPanel = (props: {
       <FlexRow>
         <h3 style={styles.header}>Active applications</h3>
         {showActiveSection && (
-          <CloseButton {...{ onClose }} style={{ alignSelf: 'center' }} />
+          <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
       {appsToDisplay.map((appType) => {
@@ -416,7 +417,7 @@ export const AppsPanel = (props: {
       <FlexRow>
         <h3 style={styles.header}>Launch other applications</h3>
         {!showActiveSection && (
-          <CloseButton {...{ onClose }} style={{ alignSelf: 'center' }} />
+          <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
       {appsToDisplay.map((appType) => {
