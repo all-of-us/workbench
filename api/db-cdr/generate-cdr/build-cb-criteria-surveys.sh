@@ -343,7 +343,7 @@ JOIN (
 WHERE domain_id = 'SURVEY'
 AND type = 'PPI'
 AND subtype = 'QUESTION'"
-questionConceptIds=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv "$query")
+questionConceptIds=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv -n 1000 "$query")
 
 echo "PPI SURVEYS - update question counts for PFHH survey only"
 while IFS= read -r line
