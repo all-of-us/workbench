@@ -329,7 +329,7 @@ FROM
 WHERE x.domain_id = 'SURVEY'
 AND x.type = 'PPI'
 AND x.subtype = 'ANSWER'
-AND x.value = y.value_source_concept_id"
+AND CAST(x.value AS INT64) = y.value_source_concept_id"
 
 echo "Getting PFHH survey question concept ids"
 query="SELECT distinct concept_id
