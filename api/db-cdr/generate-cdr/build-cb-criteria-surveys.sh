@@ -4,6 +4,7 @@ set -e
 SQL_FOR='PPI SURVEYS'
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
+MAX_ROWS=1000
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 ID_PREFIX=$3
@@ -343,7 +344,7 @@ JOIN (
 WHERE domain_id = 'SURVEY'
 AND type = 'PPI'
 AND subtype = 'QUESTION'"
-questionConceptIds=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv "$query")
+questionConceptIds=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv -n "$MAX_ROWS" "$query")
 
 echo "PPI SURVEYS - update question counts for PFHH survey only"
 while IFS= read -r line
