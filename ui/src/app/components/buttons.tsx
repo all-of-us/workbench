@@ -688,7 +688,7 @@ interface CloseButtonProps {
 export const CloseButton = (props: CloseButtonProps) => {
   const { onClose, style } = props;
   return (
-    <Clickable {...{style}} onClick={onClose}>
+    <Clickable {...{ style }} onClick={onClose}>
       <img src={times} style={{ height: '27px', width: '17px' }} alt='Close' />
     </Clickable>
   );
