@@ -22,6 +22,7 @@ const component = async () => {
   return mount(
     <AppsPanel
       workspace={workspaceStubs[0]}
+      onClose={stubFunction}
       onClickRuntimeConf={stubFunction}
       onClickDeleteRuntime={stubFunction}
     />

@@ -1,17 +1,18 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { RouteLink } from 'app/components/app-router';
 import { styles as cardStyles } from 'app/components/card';
 import { ClrIcon, SnowmanIcon } from 'app/components/icons';
 import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils/index';
-
-import { RouteLink } from './app-router';
+import { reactStyles } from 'app/utils';
+import times from 'assets/icons/times-light.svg';
 
 export interface LinkLocationState {
   pathname: string;
@@ -679,3 +680,16 @@ export class SlidingFabReact extends React.Component<
     );
   }
 }
+
+interface CloseButtonProps {
+  onClose: Function;
+  style?: CSSProperties;
+}
+export const CloseButton = (props: CloseButtonProps) => {
+  const { onClose, style } = props;
+  return (
+    <Clickable style={{ marginLeft: 'auto', ...style }} onClick={onClose}>
+      <img src={times} style={{ height: '27px', width: '17px' }} alt='Close' />
+    </Clickable>
+  );
+};

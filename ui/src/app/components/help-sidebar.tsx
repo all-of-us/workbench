@@ -16,7 +16,7 @@ import {
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
-import { Clickable, StyledExternalLink } from 'app/components/buttons';
+import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -66,7 +66,6 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import times from 'assets/icons/times-light.svg';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -425,6 +424,7 @@ export const HelpSidebar = fp.flow(
               ) : (
                 <AppsPanel
                   {...{ workspace }}
+                  onClose={() => this.setActiveIcon(null)}
                   onClickRuntimeConf={() =>
                     this.setState({
                       runTimeConfPanelInitialState: PanelContent.Customize,
@@ -630,17 +630,9 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-
-                            <Clickable
-                              style={{ marginLeft: 'auto' }}
-                              onClick={() => this.setActiveIcon(null)}
-                            >
-                              <img
-                                src={times}
-                                style={{ height: '27px', width: '17px' }}
-                                alt='Close'
-                              />
-                            </Clickable>
+                            <CloseButton
+                              onClose={() => this.setActiveIcon(null)}
+                            />
                           </FlexRow>
                         )}
 

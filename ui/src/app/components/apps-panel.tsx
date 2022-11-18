@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { BillingStatus, RuntimeStatus, Workspace } from 'generated/fetch';
 
-import { Clickable } from 'app/components/buttons';
+import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
@@ -255,8 +255,11 @@ const RuntimeStateButton = (props: { workspace: Workspace }) => {
   );
 };
 
-const RuntimeOpenButton = (props: { workspace: Workspace }) => {
-  const { workspace } = props;
+const RuntimeOpenButton = (props: {
+  workspace: Workspace;
+  onClose: Function;
+}) => {
+  const { workspace, onClose } = props;
 
   const [showModal, setShowModal] = useState(false);
   const [notebookNameList, setNotebookNameList] = useState<string[]>([]);
@@ -275,7 +278,10 @@ const RuntimeOpenButton = (props: { workspace: Workspace }) => {
         <NewNotebookModal
           {...{ workspace }}
           existingNameList={notebookNameList}
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            onClose();
+          }}
         />
       )}
       <Clickable
@@ -294,12 +300,18 @@ const RuntimeOpenButton = (props: { workspace: Workspace }) => {
 const ExpandedApp = (props: {
   appType: UIAppType;
   workspace: Workspace;
+  onClose: Function;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
   const { runtime } = useStore(runtimeStore);
-  const { appType, workspace, onClickRuntimeConf, onClickDeleteRuntime } =
-    props;
+  const {
+    appType,
+    workspace,
+    onClose,
+    onClickRuntimeConf,
+    onClickDeleteRuntime,
+  } = props;
   return (
     // first iteration: hard-code Jupyter only
     appType === UIAppType.JUPYTER && (
@@ -328,7 +340,7 @@ const ExpandedApp = (props: {
         <FlexRow>
           <RuntimeSettingsButton {...{ onClickRuntimeConf }} />
           <RuntimeStateButton {...{ workspace }} />
-          <RuntimeOpenButton {...{ workspace }} />
+          <RuntimeOpenButton {...{ workspace, onClose }} />
         </FlexRow>
       </FlexColumn>
     )
@@ -337,9 +349,11 @@ const ExpandedApp = (props: {
 
 export const AppsPanel = (props: {
   workspace: Workspace;
+  onClose: Function;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
+  const { onClose } = props;
   const { runtime } = useStore(runtimeStore);
   const {
     config: { enableGkeApp },
@@ -382,19 +396,29 @@ export const AppsPanel = (props: {
     .some(showInAvailableSection);
 
   const ActiveApps = () => (
-    <div>
-      <h3 style={styles.header}>Active applications</h3>
+    <FlexColumn>
+      <FlexRow>
+        <h3 style={styles.header}>Active applications</h3>
+        {showActiveSection && (
+          <CloseButton {...{ onClose }} style={{ alignSelf: 'center' }} />
+        )}
+      </FlexRow>
       {appsToDisplay.map((appType) => {
         return showInActiveSection(appType) ? (
           <ExpandedApp {...{ ...props, appType }} key={appType} />
         ) : null;
       })}
-    </div>
+    </FlexColumn>
   );
 
   const AvailableApps = () => (
     <FlexColumn>
-      <h3 style={styles.header}>Launch other applications</h3>
+      <FlexRow>
+        <h3 style={styles.header}>Launch other applications</h3>
+        {!showActiveSection && (
+          <CloseButton {...{ onClose }} style={{ alignSelf: 'center' }} />
+        )}
+      </FlexRow>
       {appsToDisplay.map((appType) => {
         return showInAvailableSection(appType) ? (
           showExpanded(appType) ? (
