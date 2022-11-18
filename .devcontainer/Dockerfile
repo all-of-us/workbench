@@ -56,7 +56,6 @@ ENV MAVEN_CONFIG /root/.m2
 #     && mv "gradle-${GRADLE_VERSION}" "${GRADLE_HOME}/" \
 #     && ln -s "${GRADLE_HOME}/bin/gradle" /usr/bin/gradle
 #-------------------------------------------------------------------------------------------------------------
-RUN (cd /workspaces/workbench; git submodule update -f --init --recursive)
 
 #Install GSUtil
 # Downloading gcloud package
