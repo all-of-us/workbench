@@ -86,7 +86,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       researchPurpose: article('360058861612'),
       workingWithData: category('360005884591'),
       workspaceBucket: article('360044796611'),
-      policy: article('10680515788436'),
+      policy: category('10680515788436'),
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
@@ -102,7 +102,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       researchPurpose: article('360044334652'),
       workingWithData: category('360003430672'),
       workspaceBucket: article('360044796611'),
-      policy: article('360040043072'),
+      policy: category('360040043072'),
     },
   };
   return urls[env];
