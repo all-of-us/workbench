@@ -10,7 +10,10 @@ import {
 } from 'generated/fetch';
 
 import { PREDEFINED_ATTRIBUTES } from 'app/cohort-search/constant';
-import { ppiQuestions } from 'app/cohort-search/search-state.service';
+import {
+  ppiQuestions,
+  ppiSurveys,
+} from 'app/cohort-search/search-state.service';
 import { domainToTitle } from 'app/cohort-search/utils';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -30,6 +33,7 @@ import {
 export const COPE_SURVEY_GROUP_NAME =
   'COVID-19 Participant Experience (COPE) Survey';
 export const MINUTE_SURVEY_GROUP_NAME = 'COVID-19 Vaccine Survey';
+const PFHH_SURVEY_CONCEPT_ID = 1740639;
 const styles = reactStyles({
   code: {
     color: colors.dark,
@@ -312,6 +316,16 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       .includes(this.props.node.subtype);
   }
 
+  get isPFHHSurvey() {
+    return (
+      ppiSurveys
+        .getValue()
+        [currentWorkspaceStore.getValue().cdrVersionId]?.find(
+          (survey) => survey.conceptId === PFHH_SURVEY_CONCEPT_ID
+        )?.id === +this.props.node.path.split('.')[0]
+    );
+  }
+
   get showCount() {
     const {
       node: { code, count, group, selectable, subtype, type },
@@ -352,16 +366,25 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           operator: Operator.IN,
           operands: [value],
         });
-      } else if (domainId === Domain.SURVEY.toString() && !group) {
-        const question = ppiQuestions.getValue()[parentId];
-        if (question) {
-          name = `${question.name} - ${name}`;
+      } else if (domainId === Domain.SURVEY.toString()) {
+        if (this.isPFHHSurvey) {
+          attributes.push({
+            name: AttrName.PERSONALFAMILYHEALTHHISTORY,
+            operator: Operator.IN,
+            operands: [PFHH_SURVEY_CONCEPT_ID.toString()],
+          });
         }
-        attributes.push({
-          name: AttrName.CAT,
-          operator: Operator.IN,
-          operands: [value],
-        });
+        if (!group) {
+          const question = ppiQuestions.getValue()[parentId];
+          if (question) {
+            name = `${question.name} - ${name}`;
+          }
+          attributes.push({
+            name: AttrName.CAT,
+            operator: Operator.IN,
+            operands: [value],
+          });
+        }
       }
       const param = {
         ...(node as Object),
