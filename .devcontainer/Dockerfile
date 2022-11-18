@@ -69,9 +69,13 @@ RUN mkdir -p /usr/local/gcloud \
 # Adding the package path to local
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
+
+
 # Install Ruby.
 RUN \
   apt-get update && \
+  wget -c https://repo.mysql.com//mysql-apt-config_0.8.13-1_all.deb && \
+  dpkg -i mysql-apt-config_0.8.13-1_all.deb && \
   apt-get install -y ruby ruby-dev ruby-bundler gettext mysql-server && \
   rm -rf /var/lib/apt/lists/*
 
@@ -80,8 +84,6 @@ RUN curl -L --fail \
     https://github.com/docker/compose/releases/download/1.21.2/run.sh \
     -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose
-
-RUN systemctl start mysql.service
 
 # Clean up
 RUN export DEBIAN_FRONTEND=noninteractive \
