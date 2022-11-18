@@ -25,7 +25,7 @@ import { appendNotebookFileSuffix } from './util';
 
 interface Props {
   onClose: Function;
-  onSave?: Function;
+  onCreate?: Function;
   workspace: Workspace;
   existingNameList: string[];
 }
@@ -36,7 +36,7 @@ export const NewNotebookModal = (props: Props) => {
   const [nameTouched, setNameTouched] = useState(false);
   const [navigate] = useNavigation();
 
-  const { workspace, onClose, onSave, existingNameList } = props;
+  const { workspace, onClose, onCreate, existingNameList } = props;
   const errors = validate(
     { name, kernel },
     {
@@ -45,10 +45,7 @@ export const NewNotebookModal = (props: Props) => {
     }
   );
 
-  const save = () => {
-    if (onSave) {
-      onSave();
-    }
+  const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
       notebookName: appendNotebookFileSuffix(name),
     });
@@ -62,6 +59,10 @@ export const NewNotebookModal = (props: Props) => {
       ],
       { queryParams: { kernelType: kernel, creating: true } }
     );
+
+    if (onCreate) {
+      onCreate();
+    }
   };
 
   return (
@@ -106,7 +107,7 @@ export const NewNotebookModal = (props: Props) => {
             disabled={!!errors}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
-              save();
+              create();
             }}
           >
             Create Notebook
