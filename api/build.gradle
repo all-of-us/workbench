@@ -375,7 +375,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
     compile "com.github.java-json-tools:json-patch:1.13"
     compile "com.github.rholder:guava-retrying:2.0.0"
-    compile 'org.javers:javers-core:6.6.5'
+    compile 'org.javers:javers-core:6.8.0'
     compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
     compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
     compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
