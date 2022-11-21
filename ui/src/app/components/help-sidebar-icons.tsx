@@ -346,7 +346,6 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         icon.faIcon === null ? (
           <img
             data-test-id={'help-sidebar-icon-' + icon.id}
-            src={icon.id === 'runtimeConfig' && thunderstorm}
             style={icon.style}
           />
         ) : (

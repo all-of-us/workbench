@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
@@ -12,7 +11,6 @@ import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import times from 'assets/icons/times-light.svg';
 
 export interface LinkLocationState {
   pathname: string;

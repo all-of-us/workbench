@@ -277,7 +277,7 @@ describe('HelpSidebar', () => {
     ).toBe(2);
   });
 
-  it('should not display runtime control icon for read-only workspaces', async () => {
+  it('should not display runtime config icon for read-only workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
@@ -288,7 +288,7 @@ describe('HelpSidebar', () => {
     ).toBe(0);
   });
 
-  it('should display runtime control icon for writable workspaces', async () => {
+  it('should display runtime config icon for writable workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
