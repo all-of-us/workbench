@@ -17,6 +17,11 @@ query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\
 where has_whole_genome_variant = 1"
 wgvCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
+echo "Getting long read wgs count"
+query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
+where has_lr_whole_genome_variant = 1"
+longReadWGSCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 echo "Getting array_data count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
 where has_array_data = 1"
@@ -51,7 +56,17 @@ then
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
   VALUES
-  (5,0,'Program Data','WHOLE_GENOME_VARIANT','','Whole Genome Sequence',0,5)"
+  (5,0,'Program Data','WHOLE_GENOME_VARIANT','','Short Read WGS',0,5)"
+fi
+
+if [[ $longReadWGSCount > 0 ]];
+then
+  echo "Insert long read wgs into cb_criteria_menu"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
+      (id,parent_id,category,domain_id,type,name,is_group,sort_order)
+  VALUES
+  (6,0,'Program Data','LR_WHOLE_GENOME_VARIANT','','Long Read WGS',0,6)"
 fi
 
 if [[ $arrayCount > 0 ]];
@@ -61,7 +76,7 @@ then
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
   VALUES
-  (6,0,'Program Data','ARRAY_DATA','','Global Diversity Array',0,6)"
+  (7,0,'Program Data','ARRAY_DATA','','Global Diversity Array',0,6)"
 fi
 
 echo "Insert cb_criteria_menu"
@@ -69,20 +84,20 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
     (id,parent_id,category,domain_id,type,name,is_group,sort_order)
 VALUES
-(7,0,'Domains','CONDITION','','Conditions',0,7),
-(8,0,'Domains','PROCEDURE','','Procedures',0,8),
-(9,0,'Domains','DRUG','','Drugs',0,9),
-(10,0,'Domains','MEASUREMENT','','Labs and Measurements',0,10),
-(11,0,'Domains','VISIT','VISIT','Visits',0,11),
-(12,0,'Domains','OBSERVATION','','Observations',0,12),
-(13,0,'Domains','DEVICE','','Devices',0,13),
-(14,1,'Program Data','PERSON','AGE','Age',0,1),
-(15,1,'Program Data','PERSON','DECEASED','Deceased',0,2),
-(16,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
-(17,1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
-(18,1,'Program Data','PERSON','RACE','Race',0,5),
-(19,1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6),
-(20,2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
+(8,0,'Domains','CONDITION','','Conditions',0,7),
+(9,0,'Domains','PROCEDURE','','Procedures',0,8),
+(10,0,'Domains','DRUG','','Drugs',0,9),
+(11,0,'Domains','MEASUREMENT','','Labs and Measurements',0,10),
+(12,0,'Domains','VISIT','VISIT','Visits',0,11),
+(13,0,'Domains','OBSERVATION','','Observations',0,12),
+(14,0,'Domains','DEVICE','','Devices',0,13),
+(15,1,'Program Data','PERSON','AGE','Age',0,1),
+(16,1,'Program Data','PERSON','DECEASED','Deceased',0,2),
+(17,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
+(18,1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
+(19,1,'Program Data','PERSON','RACE','Race',0,5),
+(20,1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6),
+(21,2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
 
 echo "Adding surveys"
 query="select name from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
