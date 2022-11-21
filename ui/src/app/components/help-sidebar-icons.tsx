@@ -95,6 +95,7 @@ export type SidebarIconId =
   | 'dataDictionary'
   | 'annotations'
   | 'runtimeConfig'
+  | 'apps'
   | 'terminal'
   | 'genomicExtractions';
 
@@ -111,7 +112,8 @@ export interface IconConfig {
 
 const displayRuntimeStatusIcon = (
   icon: IconConfig,
-  workspaceNamespace: string
+  workspaceNamespace: string,
+  featureFlaggedStyling: boolean = false
 ) => {
   // We always want to show the thunderstorm icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
@@ -122,6 +124,7 @@ const displayRuntimeStatusIcon = (
         height: '100%',
         alignItems: 'center',
         justifyContent: 'space-around',
+        background: featureFlaggedStyling && colors.danger,
       }}
     >
       <img
@@ -317,6 +320,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
       'runtimeConfig',
       () => displayRuntimeStatusIcon(icon, workspace.namespace),
     ],
+    ['apps', () => displayRuntimeStatusIcon(icon, workspace.namespace, true)],
     [
       'terminal',
       () => (
@@ -448,6 +452,19 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
       hasContent: true,
     },
+    apps: {
+      id: 'apps',
+      disabled: !!loadingError,
+      faIcon: null,
+      label: 'Cloud Icon',
+      showIcon: () => true,
+      style: { height: '22px', width: '22px', background: colors.danger },
+      tooltip: runtimeTooltip(
+        '[Feature-Flagged Preview] Applications',
+        loadingError
+      ),
+      hasContent: true, // TODO?
+    },
     terminal: {
       id: 'terminal',
       disabled: !!loadingError,
@@ -498,7 +515,8 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     criteria,
   } = props;
   const { loadingError } = useStore(runtimeStore);
-
+  const { enableGkeApp, enableGenomicExtraction } =
+    serverConfigStore.get().config;
   const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',
@@ -511,12 +529,19 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     iconConfig({ iconId, pageKey, criteria, loadingError }).showIcon()
   );
 
+  if (
+    enableGkeApp &&
+    WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
+  ) {
+    keys.push('apps');
+  }
+
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
     keys.push('runtimeConfig', 'terminal');
   }
 
   if (
-    serverConfigStore.get().config.enableGenomicExtraction &&
+    enableGenomicExtraction &&
     getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
   ) {
     keys.push('genomicExtractions');

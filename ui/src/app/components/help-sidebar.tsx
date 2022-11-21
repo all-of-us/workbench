@@ -65,6 +65,8 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 
+import { AppsPanel } from './apps-panel';
+
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const styles = reactStyles({
@@ -410,6 +412,14 @@ export const HelpSidebar = fp.flow(
                 onClose={() => this.setActiveIcon(null)}
               />
             ),
+            showFooter: false,
+          };
+        case 'apps':
+          return {
+            headerPadding: '0.75rem',
+            bodyWidthRem: '19',
+            bodyPadding: '0 1.25rem',
+            renderBody: () => <AppsPanel />,
             showFooter: false,
           };
         case 'notebooksHelp':

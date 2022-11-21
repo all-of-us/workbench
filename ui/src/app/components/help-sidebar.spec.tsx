@@ -299,6 +299,51 @@ describe('HelpSidebar', () => {
     ).toBe(1);
   });
 
+  it('should not display apps icon for read-only workspaces', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.READER,
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(0);
+  });
+
+  it('should display apps icon for writable workspaces when enableGkeApp is true', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableGkeApp: true,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(1);
+  });
+
+  it('should not display apps icon for writable workspaces when enableGkeApp is false', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableGkeApp: false,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(0);
+  });
+
   it('should display dynamic runtime status icon', async () => {
     setRuntimeStatus(RuntimeStatus.Running);
     const wrapper = await component();
