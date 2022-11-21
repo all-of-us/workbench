@@ -416,9 +416,7 @@ export const HelpSidebar = fp.flow(
           };
         case 'apps':
           return {
-            headerPadding: '0.75rem',
             bodyWidthRem: '19',
-            bodyPadding: '0 1.25rem',
             renderBody: () => <AppsPanel />,
             showFooter: false,
           };
