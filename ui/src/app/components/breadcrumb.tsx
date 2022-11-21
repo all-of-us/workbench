@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link as RouterLink, matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
@@ -11,7 +11,6 @@ import {
 
 import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
-import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
   withCurrentCohortReview,
@@ -26,30 +25,8 @@ import {
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import { BreadcrumbData, BreadcrumbLinks } from './breadcrumb-links';
 import { BreadcrumbType } from './breadcrumb-type';
-
-const styles = {
-  firstLink: {
-    color: colors.accent,
-    textDecoration: 'none',
-  },
-  lastLink: {
-    color: colors.primary,
-    fontWeight: 600,
-    fontSize: '1rem',
-    textDecoration: 'none',
-  },
-};
-
-class BreadcrumbData {
-  label: string;
-  url: string;
-
-  constructor(label: string, url: string) {
-    this.label = label;
-    this.url = url;
-  }
-}
 
 // Generates a trail of breadcrumbs based on currently loaded data.
 export const getTrail = (
@@ -239,10 +216,6 @@ export const getTrail = (
   }
 };
 
-const BreadcrumbLink = ({ href, ...props }) => {
-  return <RouterLink to={href} {...props} />;
-};
-
 interface Props {
   workspace: WorkspaceData;
   cohort: Cohort;
@@ -352,45 +325,14 @@ export const Breadcrumb = fp.flow(
 
     render() {
       return (
-        <React.Fragment>
+        <>
           {this.state.showInvalidBillingBanner && (
             <InvalidBillingBanner
               onClose={() => this.setState({ showInvalidBillingBanner: false })}
             />
           )}
-
-          <div
-            style={{
-              marginLeft: '3.25rem',
-              display: 'inline-block',
-            }}
-          >
-            {this.first().map(({ label, url }, i) => {
-              return (
-                <React.Fragment key={i}>
-                  <BreadcrumbLink href={url} style={styles.firstLink}>
-                    {label}
-                  </BreadcrumbLink>
-                  <span
-                    style={{
-                      color: colors.primary,
-                    }}
-                  >
-                    {' '}
-                    &gt;{' '}
-                  </span>
-                </React.Fragment>
-              );
-            })}
-            {this.last() && (
-              <div>
-                <BreadcrumbLink href={this.last().url} style={styles.lastLink}>
-                  {this.last().label}
-                </BreadcrumbLink>
-              </div>
-            )}
-          </div>
-        </React.Fragment>
+          <BreadcrumbLinks trail={this.trail()} />
+        </>
       );
     }
   }
