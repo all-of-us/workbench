@@ -1,3 +1,5 @@
+// For DT-32 demonstration plots
+// originak file form dolbeew/highcharts-demo -- src/app/components/highcharts-demo.tsx
 import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
