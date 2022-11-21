@@ -16,7 +16,7 @@ import {
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
-import { StyledExternalLink } from 'app/components/buttons';
+import { Clickable, StyledExternalLink } from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -32,7 +32,6 @@ import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { PopupTrigger } from 'app/components/popups';
 import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
-import { CloseButton } from 'app/components/runtime-configuration-panel/close-button';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
@@ -66,6 +65,7 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+import times from 'assets/icons/times-light.svg';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -611,10 +611,16 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            <CloseButton
+                            <Clickable
                               style={{ marginLeft: 'auto' }}
-                              onClose={() => this.setActiveIcon(null)}
-                            />
+                              onClick={() => this.setActiveIcon(null)}
+                            >
+                              <img
+                                src={times}
+                                style={{ height: '27px', width: '17px' }}
+                                alt='Close'
+                              />
+                            </Clickable>
                           </FlexRow>
                         )}
 
