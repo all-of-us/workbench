@@ -332,53 +332,43 @@ AND x.type = 'PPI'
 AND x.subtype = 'ANSWER'
 AND CAST(x.value AS INT64) = y.value_source_concept_id"
 
-echo "Getting PFHH survey question concept ids"
-query="SELECT distinct concept_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
-JOIN (
-      SELECT CAST(id AS STRING) AS id
-      FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-      WHERE concept_id IN (1740639)
-      AND domain_id = 'SURVEY'
-    ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
-WHERE domain_id = 'SURVEY'
-AND type = 'PPI'
-AND subtype = 'QUESTION'"
-questionConceptIds=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv -n "$MAX_ROWS" "$query")
-
-echo "PPI SURVEYS - update question counts for PFHH survey only"
-while IFS= read -r line
-do
-  if [[ "$line" != "concept_id" ]]; then
-    bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-      "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-       SET x.rollup_count = y.cnt
-            , x.item_count = y.cnt
-            , x.est_count = y.cnt
-       FROM
-       (
-        SELECT $line as concept_id, count(distinct person_id) as cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
-        WHERE se.value_source_concept_id in (
-          SELECT distinct CAST(value AS INT64)
-          FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
-          JOIN (
-              SELECT CAST(id AS STRING) AS id
-              FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-              WHERE concept_id IN ($line)
-              AND domain_id = 'SURVEY'
-              ) a ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)
-          WHERE domain_id = 'SURVEY'
-          AND type = 'PPI'
-          AND subtype = 'ANSWER'
-        )
-       ) y
-       WHERE x.domain_id = 'SURVEY'
-       and x.type = 'PPI'
-       and x.is_group = 1
-       and x.concept_id = y.concept_id"
-  fi
-done <<< "$questionConceptIds"
+echo "PPI SURVEYS - generate question counts for PFHH survey only"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` z
+SET z.rollup_count = y.cnt,
+    z.item_count = y.cnt,
+    z.est_count = y.cnt
+FROM (
+      SELECT question_concept_id, COUNT(DISTINCT person_id) AS cnt
+      FROM (
+            WITH question_concept_ids AS (
+              SELECT DISTINCT concept_id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+              JOIN (
+                    SELECT CAST(id AS STRING) AS id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                    WHERE concept_id IN (1740639)
+                    AND domain_id = 'SURVEY'
+                  ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+              WHERE domain_id = 'SURVEY'
+              AND type = 'PPI'
+              AND subtype = 'QUESTION'
+            )
+            SELECT qci.concept_id AS question_concept_id, CAST(value AS INT64) AS answer_concept_id
+            FROM question_concept_ids qci
+            JOIN \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cc ON qci.concept_id = cc.concept_id
+            WHERE cc.value IS NOT NULL
+            AND cc.code NOT LIKE '%PMI_%'
+            GROUP BY qci.concept_id, CAST(value AS INT64)
+           ) x
+      JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` ON value_source_concept_id = x.answer_concept_id
+      WHERE domain = 'Observation'
+      GROUP BY question_concept_id
+     ) y
+WHERE z.domain_id = 'SURVEY'
+AND z.type = 'PPI'
+AND z.is_group = 1
+AND z.concept_id = y.question_concept_id"
 
 echo "PPI SURVEYS - update survey count for PFHH survey only"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
