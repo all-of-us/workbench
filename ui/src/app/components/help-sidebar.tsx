@@ -15,7 +15,8 @@ import {
 } from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
-import { CloseButton, StyledExternalLink } from 'app/components/buttons';
+import { AppsPanel } from 'app/components/apps-panel';
+import { StyledExternalLink } from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -31,6 +32,7 @@ import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { PopupTrigger } from 'app/components/popups';
 import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
+import { CloseButton } from 'app/components/runtime-configuration-panel/close-button';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
@@ -64,8 +66,6 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-
-import { AppsPanel } from './apps-panel';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
