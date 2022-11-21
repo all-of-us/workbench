@@ -70,7 +70,6 @@ then
 fi
 
 echo "Insert cb_criteria_menu"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 insertCriteriaMenu "
 ($((++ID)),0,'Domains','CONDITION','','Conditions',0,$ID),
 ($((++ID)),0,'Domains','PROCEDURE','','Procedures',0,$ID),
