@@ -182,12 +182,12 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
     }
   }
 
-  function onNotebookSelect(value) {
-    setCreatingNewNotebook(value === '');
-    setNotebookNameWithoutSuffix(value);
+  function onNotebookSelect(nameWithoutSuffix) {
+    setCreatingNewNotebook(nameWithoutSuffix === '');
+    setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
 
-    if (value === '') {
+    if (nameWithoutSuffix === '') {
       setCreatingNewNotebook(true);
     } else {
       setCreatingNewNotebook(false);
@@ -196,7 +196,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
         .getNotebookKernel(
           workspace.namespace,
           workspace.id,
-          appendNotebookFileSuffix(value)
+          appendNotebookFileSuffix(nameWithoutSuffix)
         )
         .then((resp) => setKernelType(resp.kernelType))
         .catch(() =>
