@@ -146,7 +146,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
         </Modal>
       )}
       {showJupyterModal && !showSelectAppModal && (
-        <NewNotebookModal
+        <NewNotebookModal data-test-id={'jupyter-modal'}
           onClose={() => onClose()}
           workspace={props.workspace}
           existingNameList={null}
