@@ -11,10 +11,6 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
-import {
-  appendNotebookFileSuffix,
-  dropNotebookFileSuffix,
-} from '../../analysis/util';
 import { Select } from 'app/components/inputs';
 import { Tooltip } from 'app/components/popups';
 import {
