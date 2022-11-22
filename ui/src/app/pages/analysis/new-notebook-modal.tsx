@@ -25,7 +25,6 @@ import { appendNotebookFileSuffix } from './util';
 
 interface Props {
   onClose: Function;
-  onCreate?: Function;
   workspace: Workspace;
   existingNameList: string[];
 }
@@ -36,7 +35,7 @@ export const NewNotebookModal = (props: Props) => {
   const [nameTouched, setNameTouched] = useState(false);
   const [navigate] = useNavigation();
 
-  const { workspace, onClose, onCreate, existingNameList } = props;
+  const { workspace, onClose, existingNameList } = props;
   const errors = validate(
     { name, kernel },
     {
@@ -59,10 +58,6 @@ export const NewNotebookModal = (props: Props) => {
       ],
       { queryParams: { kernelType: kernel, creating: true } }
     );
-
-    if (onCreate) {
-      onCreate();
-    }
   };
 
   return (
