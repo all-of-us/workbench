@@ -16,7 +16,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import { JupyterModal } from 'app/pages/appAnalysis/jupyter-modal';
+import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -146,9 +146,10 @@ export const AppsList = withCurrentWorkspace()((props) => {
         </Modal>
       )}
       {showJupyterModal && !showSelectAppModal && (
-        <JupyterModal
-          data-test-id='jupyter-modal'
+        <NewNotebookModal
           onClose={() => onClose()}
+          workspace={props.workspace}
+          existingNameList={null}
           onBack={() => backToSelectAppModal()}
         />
       )}
