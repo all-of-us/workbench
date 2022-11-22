@@ -1,3 +1,5 @@
+import { FileDetail } from 'generated/fetch';
+
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 
 const notebookExtension = '.ipynb';
@@ -18,8 +20,12 @@ export function appendNotebookFileSuffix(filename: string) {
   return filename;
 }
 
-export const getExistingNotebookNames = async (workspace) => {
+export const getExistingNotebooks = (workspace): Promise<FileDetail[]> => {
   const { namespace, id } = workspace;
-  const notebook = await notebooksApi().getNoteBookList(namespace, id);
-  return notebook.map((fd) => dropNotebookFileSuffix(fd.name));
+  return notebooksApi().getNoteBookList(namespace, id);
 };
+
+export const getExistingNotebookNames = async (workspace): Promise<string[]> =>
+  (await getExistingNotebooks(workspace)).map((fd) =>
+    dropNotebookFileSuffix(fd.name)
+  );

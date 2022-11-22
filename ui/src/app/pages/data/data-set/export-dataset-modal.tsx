@@ -25,7 +25,10 @@ import {
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
-import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
+import {
+  appendNotebookFileSuffix,
+  getExistingNotebookNames,
+} from 'app/pages/analysis/util';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
@@ -222,13 +225,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
   }
 
   useEffect(() => {
-    notebooksApi()
-      .getNoteBookList(workspace.namespace, workspace.id)
-      .then((notebooks) =>
-        setExistingNotebooks(
-          notebooks.map((fileDetail) => fileDetail.name.slice(0, -6))
-        )
-      )
+    getExistingNotebookNames(workspace)
+      .then(setExistingNotebooks)
       .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
   }, [workspace]);
 

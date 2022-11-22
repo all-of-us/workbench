@@ -32,13 +32,23 @@ interface Props {
 }
 
 export const NewNotebookModal = (props: Props) => {
+  const { onBack, onClose, workspace } = props;
+
   const [name, setName] = useState('');
   const [kernel, setKernel] = useState(Kernels.Python3);
   const [nameTouched, setNameTouched] = useState(false);
   const [existingNotebookNameList, setExistingNotebookNameList] = useState([]);
   const [navigate] = useNavigation();
 
-  const { onBack, onClose, workspace } = props;
+  useEffect(() => {
+    const { existingNameList } = props;
+    if (!!existingNameList) {
+      setExistingNotebookNameList(existingNameList);
+    } else {
+      getExistingNotebookNames(workspace).then(setExistingNotebookNameList);
+    }
+  }, [props.existingNameList]);
+
   const errors = validate(
     { name, kernel },
     {
@@ -49,17 +59,6 @@ export const NewNotebookModal = (props: Props) => {
       ),
     }
   );
-
-  useEffect(() => {
-    const { existingNameList } = props;
-    if (!!existingNameList) {
-      setExistingNotebookNameList(existingNameList);
-    } else {
-      getExistingNotebookNames(workspace).then((notebookList) => {
-        setExistingNotebookNameList(notebookList);
-      });
-    }
-  }, [props.existingNameList]);
 
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
