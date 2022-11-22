@@ -15,6 +15,7 @@ import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__RAS_LOGIN_GOV_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_COMPLETION_TIME;
+import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
+import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -51,15 +53,19 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.TierAccessStatus;
@@ -100,6 +106,7 @@ public class ReportingQueryServiceTest {
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
 
   @Autowired private EntityManager entityManager;
 
@@ -307,7 +314,7 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
-  public void testIteratorStream() {
+  public void testWorkspaceIteratorStream() {
     final int numWorkspaces = 5;
     createWorkspaces(numWorkspaces);
 
@@ -439,6 +446,33 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
+  public void testQueryNewUserSatisfactionSurvey() {
+    final DbUser user = userDao.save(userFixture.createEntity());
+    final String additionalInfo = "It's ok.";
+    DbNewUserSatisfactionSurvey dbNewUserSatisfactionSurvey =
+        newUserSatisfactionSurveyDao.save(
+            new DbNewUserSatisfactionSurvey()
+                .setUser(user)
+                .setSatisfaction(Satisfaction.NEUTRAL)
+                .setAdditionalInfo(additionalInfo));
+
+    final List<ReportingNewUserSatisfactionSurvey> newUserSatisfactionSurveys =
+        reportingQueryService.getNewUserSatisfactionSurveys(1, 0);
+
+    assertThat(newUserSatisfactionSurveys.size()).isEqualTo(1);
+    final ReportingNewUserSatisfactionSurvey newUserSatisfactionSurvey =
+        newUserSatisfactionSurveys.get(0);
+    assertThat(newUserSatisfactionSurvey.getUserId()).isEqualTo(user.getUserId());
+    assertThat(newUserSatisfactionSurvey.getCreated())
+        .isEqualTo(offsetDateTimeUtc(dbNewUserSatisfactionSurvey.getCreationTime()));
+    assertThat(newUserSatisfactionSurvey.getModified())
+        .isEqualTo(offsetDateTimeUtc(dbNewUserSatisfactionSurvey.getCreationTime()));
+    assertThat(newUserSatisfactionSurvey.getSatisfaction())
+        .isEqualTo(NewUserSatisfactionSurveySatisfaction.NEUTRAL);
+    assertThat(newUserSatisfactionSurvey.getAdditionalInfo()).isEqualTo(additionalInfo);
+  }
+
+  @Test
   public void testUserCount() {
     createUsers(3);
     assertThat(reportingQueryService.getUserCount()).isEqualTo(3);
@@ -479,6 +513,57 @@ public class ReportingQueryServiceTest {
   public void testCohortsCount() {
     createCohorts(3);
     assertThat(reportingQueryService.getCohortsCount()).isEqualTo(3);
+  }
+
+  @Test
+  public void testNewUserSatisfactionSurveysIterator() {
+    createNewUserSatisfactionSurveys(5);
+
+    final Iterator<List<ReportingNewUserSatisfactionSurvey>> iterator =
+        reportingQueryService.getNewUserSatisfactionSurveyBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    final List<ReportingNewUserSatisfactionSurvey> batch1 = iterator.next();
+    assertThat(batch1).hasSize(BATCH_SIZE);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingNewUserSatisfactionSurvey> batch2 = iterator.next();
+    assertThat(batch2).hasSize(BATCH_SIZE);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingNewUserSatisfactionSurvey> batch3 = iterator.next();
+    assertThat(batch3).hasSize(1);
+
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testNewUserSatisfactionSurveysStream() {
+    final int numNewUserSatisfactionSurveys = 5;
+    createNewUserSatisfactionSurveys(numNewUserSatisfactionSurveys);
+
+    final int totalRows =
+        reportingQueryService.getNewUserSatisfactionSurveysStream().mapToInt(List::size).sum();
+    assertThat(totalRows).isEqualTo(numNewUserSatisfactionSurveys);
+
+    final long totalBatches = reportingQueryService.getNewUserSatisfactionSurveysStream().count();
+    assertThat(totalBatches)
+        .isEqualTo((long) Math.ceil(1.0 * numNewUserSatisfactionSurveys / BATCH_SIZE));
+
+    // verify that we get all of them and they're distinct in terms of their PKs
+    final Set<Long> ids =
+        reportingQueryService
+            .getNewUserSatisfactionSurveysStream()
+            .flatMap(List::stream)
+            .map(ReportingNewUserSatisfactionSurvey::getId)
+            .collect(ImmutableSet.toImmutableSet());
+    assertThat(ids).hasSize(numNewUserSatisfactionSurveys);
+  }
+
+  @Test
+  public void testNewUserSatisfactionSurveysCount() {
+    createNewUserSatisfactionSurveys(5);
+    assertThat(reportingQueryService.getNewUserSatisfactionSurveysCount()).isEqualTo(5);
   }
 
   private void createWorkspaces(int count) {
@@ -527,6 +612,18 @@ public class ReportingQueryServiceTest {
 
     for (int i = 0; i < count; ++i) {
       createCohort(user, dbWorkspace);
+    }
+    entityManager.flush();
+  }
+
+  private void createNewUserSatisfactionSurveys(int count) {
+    for (int i = 0; i < count; ++i) {
+      final DbUser user = userDao.save(userFixture.createEntity());
+      newUserSatisfactionSurveyDao.save(
+          new DbNewUserSatisfactionSurvey()
+              .setUser(user)
+              .setSatisfaction(Satisfaction.NEUTRAL)
+              .setAdditionalInfo("It's ok."));
     }
     entityManager.flush();
   }

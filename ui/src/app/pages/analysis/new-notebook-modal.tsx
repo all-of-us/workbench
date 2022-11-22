@@ -22,6 +22,8 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 
+import { appendNotebookFileSuffix } from './util';
+
 interface Props {
   onClose: Function;
   workspace: Workspace;
@@ -59,9 +61,10 @@ export const NewNotebookModal = (props: Props) => {
     }
   }, [props.existingNameList]);
 
-  const save = () => {
+
+  const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
-      notebookName: `${name}.ipynb`,
+      notebookName: appendNotebookFileSuffix(name),
     });
     navigate(
       [
@@ -122,7 +125,7 @@ export const NewNotebookModal = (props: Props) => {
             disabled={!!errors}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
-              save();
+              create();
             }}
           >
             Create Notebook

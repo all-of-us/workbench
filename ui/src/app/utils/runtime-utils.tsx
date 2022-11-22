@@ -870,14 +870,18 @@ const useRuntime = (currentWorkspaceNamespace) => {
             return;
           }
         }
-        if (
-          currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace
-        ) {
-          runtimeStore.set({
-            workspaceNamespace: currentWorkspaceNamespace,
+        const currentStore = runtimeStore.get();
+        if (currentWorkspaceNamespace === currentStore.workspaceNamespace) {
+          const newStore = {
+            ...currentStore,
             runtime: leoRuntime,
             runtimeLoaded: true,
-          });
+          };
+          // checking for (deep) value equality substantially reduces the number of runtimeStore updates over the
+          // default (reference) equality check, because runtime is often a new object
+          if (!fp.isEqual(currentStore, newStore)) {
+            runtimeStore.set(newStore);
+          }
         }
       }
     );
@@ -1244,3 +1248,11 @@ export enum PanelContent {
   ConfirmUpdateWithDiskDelete = 'ConfirmUpdateWithDiskDelete',
   SparkConsole = 'SparkConsole',
 }
+
+// should we show the runtime in the UI?
+export const isVisible = (status: RuntimeStatus) =>
+  status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status);
+
+// is the runtime in a state where the user can take action?
+export const isActionable = (status: RuntimeStatus) =>
+  [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status);

@@ -15,6 +15,25 @@ import {
 } from 'generated/fetch';
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
+import { AppsPanel } from 'app/components/apps-panel';
+import { Clickable, StyledExternalLink } from 'app/components/buttons';
+import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
+import {
+  HelpSidebarIcons,
+  IconConfig,
+  showConceptIcon,
+  showCriteriaIcon,
+  SidebarIconId,
+} from 'app/components/help-sidebar-icons';
+import { HelpTips } from 'app/components/help-tips';
+import { withErrorModal } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
+import { PopupTrigger } from 'app/components/popups';
+import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
+import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
+import { Spinner } from 'app/components/spinners';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
@@ -38,10 +57,8 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { withRuntimeStore } from 'app/utils/runtime-utils';
 import {
   routeDataStore,
-  RuntimeStore,
   runtimeStore,
   withGenomicExtractionJobs,
 } from 'app/utils/stores';
@@ -49,25 +66,6 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 import times from 'assets/icons/times-light.svg';
-
-import { Clickable, StyledExternalLink } from './buttons';
-import { ConfirmDeleteModal } from './confirm-delete-modal';
-import { FlexColumn, FlexRow } from './flex';
-import { GenomicsExtractionTable } from './genomics-extraction-table';
-import {
-  HelpSidebarIcons,
-  IconConfig,
-  showConceptIcon,
-  showCriteriaIcon,
-  SidebarIconId,
-} from './help-sidebar-icons';
-import { HelpTips } from './help-tips';
-import { withErrorModal } from './modals';
-import { TooltipTrigger } from './popups';
-import { PopupTrigger } from './popups';
-import { RuntimeConfigurationPanel } from './runtime-configuration-panel';
-import { RuntimeErrorModal } from './runtime-error-modal';
-import { Spinner } from './spinners';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -166,7 +164,6 @@ interface Props extends NavigationProps {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
-  runtimeStore: RuntimeStore;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtractionJobs: GenomicExtractionJob[];
   cohortContext: any;
@@ -196,7 +193,6 @@ export const HelpSidebar = fp.flow(
   withCurrentConcept(),
   withGenomicExtractionJobs,
   withCurrentWorkspace(),
-  withRuntimeStore(),
   withUserProfile(),
   withCdrVersions(),
   withNavigation
@@ -370,6 +366,7 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
+      const { pageKey, cohortContext } = this.props;
       switch (activeIcon) {
         case 'help':
           return {
@@ -386,14 +383,14 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <HelpTips
+                {...{ pageKey }}
                 allowSearch={true}
                 onSearch={() => this.analyticsEvent('Search')}
-                pageKey={this.props.pageKey}
               />
             ),
             showFooter: true,
           };
-        case 'runtime':
+        case 'runtimeConfig':
           return {
             headerPadding: '0.75rem',
             renderHeader: () => (
@@ -415,6 +412,12 @@ export const HelpSidebar = fp.flow(
                 onClose={() => this.setActiveIcon(null)}
               />
             ),
+            showFooter: false,
+          };
+        case 'apps':
+          return {
+            bodyWidthRem: '19',
+            renderBody: () => <AppsPanel />,
             showFooter: false,
           };
         case 'notebooksHelp':
@@ -462,7 +465,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
             renderBody: () =>
-              !!this.props.cohortContext && (
+              !!cohortContext && (
                 <SelectionList
                   back={() => this.setActiveIcon(null)}
                   selections={[]}
@@ -608,7 +611,6 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-
                             <Clickable
                               style={{ marginLeft: 'auto' }}
                               onClick={() => this.setActiveIcon(null)}
@@ -701,7 +703,7 @@ export const HelpSidebar = fp.flow(
                   closeFunction={() =>
                     this.setState({ currentModal: CurrentModal.None })
                   }
-                  openRuntimePanel={() => this.setActiveIcon('runtime')}
+                  openRuntimePanel={() => this.setActiveIcon('runtimeConfig')}
                   errors={runtimeErrors}
                 />
               ),

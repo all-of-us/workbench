@@ -49,6 +49,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "This property is not used",
+      "namespace": "aou-rw-6d5ab903",
+      "id": "aourecoverlongcovidv6",
+      "category": "DEMO_PROJECTS"
+    },
+    {
       "name": "Demo - Medication Sequencing",
       "namespace": "aou-rw-e8aeecf1",
       "id": "demomedicationsequencing",

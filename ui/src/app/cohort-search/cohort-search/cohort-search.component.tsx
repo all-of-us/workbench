@@ -449,10 +449,7 @@ export const CohortSearch = fp.flow(
                 }
               >
                 {domain === Domain.PERSON ? (
-                  <div
-                    data-test-id='demographics'
-                    style={{ flex: 1, overflow: 'auto' }}
-                  >
+                  <div data-test-id='demographics'>
                     <Demographics
                       criteriaType={type}
                       select={this.addSelection}
