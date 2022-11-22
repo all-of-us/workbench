@@ -101,7 +101,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       kernelType,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
-      notebookName,
+      notebookName: appendNotebookFileSuffix(notebookName),
       newNotebook: creatingNewNotebook,
     };
   }
@@ -185,7 +185,11 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       setCreatingNewNotebook(false);
       setIsLoadingNotebook(true);
       notebooksApi()
-        .getNotebookKernel(workspace.namespace, workspace.id, value)
+        .getNotebookKernel(
+          workspace.namespace,
+          workspace.id,
+          appendNotebookFileSuffix(value)
+        )
         .then((resp) => setKernelType(resp.kernelType))
         .catch(() =>
           setErrorMsg(

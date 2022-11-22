@@ -6,6 +6,7 @@ import { useQuery } from 'app/components/app-router';
 import { StyledRouterLink } from 'app/components/buttons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -104,9 +105,13 @@ const AdminNotebookViewComponent = (props: Props) => {
     }
 
     workspaceAdminApi()
-      .adminReadOnlyNotebook(workspaceNamespace, notebookName, {
-        reason: accessReason,
-      })
+      .adminReadOnlyNotebook(
+        workspaceNamespace,
+        appendNotebookFileSuffix(notebookName),
+        {
+          reason: accessReason,
+        }
+      )
       .then((response) => setHtml(response.html))
       .catch((e) => {
         if (e.status === 404) {
