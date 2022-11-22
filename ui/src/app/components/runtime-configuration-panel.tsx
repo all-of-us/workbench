@@ -21,6 +21,7 @@ import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-
 import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
 import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
+import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
 import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
@@ -29,6 +30,8 @@ import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-
 import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
 import { StartStopRuntimeButton } from 'app/components/runtime-configuration-panel/start-stop-runtime-button';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
+import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
+import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
 import { diskApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -78,11 +81,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-
-import { RuntimeCostEstimator } from './runtime-cost-estimator';
-import { RuntimeSummary } from './runtime-summary';
-import { TextColumn } from './text-column';
-import { AoU } from './text-wrappers';
 
 const { useState, useEffect, Fragment } = React;
 
@@ -181,29 +179,6 @@ const CreatePanel = ({
       </FlexRow>
       <RuntimeSummary analysisConfig={analysisConfig} />
     </div>
-  );
-};
-
-const DisabledPanel = () => {
-  return (
-    <WarningMessage
-      data-test-id='runtime-disabled-panel'
-      iconSize={16}
-      iconPosition={'top'}
-    >
-      {
-        <TextColumn>
-          <div style={{ fontWeight: 600 }}>
-            Cloud services are disabled for this workspace.
-          </div>
-          <div style={{ marginTop: '0.5rem' }}>
-            You cannot run or edit notebooks in this workspace because billed
-            services are disabled for the workspace creator's <AoU /> Researcher
-            account.
-          </div>
-        </TextColumn>
-      }
-    </WarningMessage>
   );
 };
 
