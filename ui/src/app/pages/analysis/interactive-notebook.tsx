@@ -44,7 +44,6 @@ import {
   NotebookFrameError,
   SecuritySuspendedMessage,
 } from './notebook-frame-error';
-import { appendNotebookFileSuffix } from './util';
 
 const styles = reactStyles({
   navBar: {
@@ -178,7 +177,7 @@ export const InteractiveNotebook = fp.flow(
         const { html } = await notebooksApi().readOnlyNotebook(
           ns,
           wsid,
-          appendNotebookFileSuffix(nbName)
+          nbName
         );
         this.setState({ html: html });
       } catch (e) {
