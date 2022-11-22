@@ -44,7 +44,7 @@ export const NewNotebookModal = (props: Props) => {
     }
   );
 
-  const save = () => {
+  const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
       notebookName: appendNotebookFileSuffix(name),
     });
@@ -102,7 +102,7 @@ export const NewNotebookModal = (props: Props) => {
             disabled={!!errors}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
-              save();
+              create();
             }}
           >
             Create Notebook
