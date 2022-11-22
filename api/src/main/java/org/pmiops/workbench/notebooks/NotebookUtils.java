@@ -32,4 +32,10 @@ public class NotebookUtils {
   public static boolean isRMarkdownNotebook(String name) {
     return name.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
+
+  public static String notebookNameWithExtension(String notebookName) {
+    return isRMarkdownNotebook(notebookName)
+        ? NotebooksService.withRMarkdownExtension(notebookName)
+        : NotebooksService.withJupyterNotebookExtension(notebookName);
+  }
 }

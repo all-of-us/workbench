@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.notebooks.NotebookUtils.isRMarkdownNotebook;
+import static org.pmiops.workbench.notebooks.NotebookUtils.notebookNameWithExtension;
 
 import java.time.Clock;
 import java.util.List;
@@ -149,15 +150,11 @@ public class NotebooksController implements NotebooksApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspace, workspaceName, WorkspaceAccessLevel.READER);
 
-    String updatedNotebookName =
-        isRMarkdownNotebook(notebookName)
-            ? NotebooksService.withRMarkdownExtension(notebookName)
-            : NotebooksService.withJupyterNotebookExtension(notebookName);
-
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
-                notebooksService.getNotebookKernel(workspace, workspaceName, updatedNotebookName)));
+                notebooksService.getNotebookKernel(
+                    workspace, workspaceName, notebookNameWithExtension(notebookName))));
   }
 
   @Override
