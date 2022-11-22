@@ -56,11 +56,13 @@ public interface NotebooksService {
   KernelTypeEnum getNotebookKernel(
       String workspaceNamespace, String workspaceName, String notebookName);
 
-  void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
+  void saveNotebook(
+      String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents);
 
   public String convertNotebookToHtml(byte[] notebook);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 
-  String adminGetReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+  String adminGetReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension);
 }

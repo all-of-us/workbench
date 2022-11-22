@@ -287,14 +287,16 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
-  public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
-    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+  public void saveNotebook(
+      String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
       throw new NotImplementedException(
-          String.format("%s is a type of file that is not yet supported", notebookName));
+          String.format(
+              "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
     }
     cloudStorageClient.writeFile(
         bucketName,
-        "notebooks/" + NotebooksService.withJupyterNotebookExtension(notebookName),
+        "notebooks/" + NotebooksService.withJupyterNotebookExtension(notebookNameWithFileExtension),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
@@ -323,10 +325,11 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public String adminGetReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookName) {
-    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
       throw new NotImplementedException(
-          String.format("%s is a type of file that is not yet supported", notebookName));
+          String.format(
+              "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
     }
 
     String bucketName =
@@ -335,7 +338,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
+    Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
     return convertNotebookToHtml(blob.getContent());
   }
 

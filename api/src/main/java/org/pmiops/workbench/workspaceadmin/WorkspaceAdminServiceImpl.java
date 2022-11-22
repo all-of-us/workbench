@@ -315,7 +315,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public String getReadOnlyNotebook(
-      String workspaceNamespace, String notebookName, AccessReason accessReason) {
+      String workspaceNamespace, String notebookNameWithFileExtension, AccessReason accessReason) {
     if (StringUtils.isBlank(accessReason.getReason())) {
       throw new BadRequestException("Notebook viewing access reason is required");
     }
@@ -323,8 +323,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final String workspaceName =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
     adminAuditor.fireViewNotebookAction(
-        workspaceNamespace, workspaceName, notebookName, accessReason);
-    return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
+        workspaceNamespace, workspaceName, notebookNameWithFileExtension, accessReason);
+    return notebooksService.adminGetReadOnlyHtml(
+        workspaceNamespace, workspaceName, notebookNameWithFileExtension);
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
