@@ -29,9 +29,9 @@ const local: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   EGRESS_TEST_USER: process.env.EGRESS_TEST_USER || 'puppeteer-egress-1@fake-research-aou.org',
-  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
-  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier v4',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
   RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
@@ -47,9 +47,9 @@ const test: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   EGRESS_TEST_USER: process.env.EGRESS_TEST_USER || 'puppeteer-egress-1@fake-research-aou.org',
-  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
-  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier v4',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
   RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true
@@ -67,7 +67,7 @@ const staging: IEnvConfig = {
   EGRESS_TEST_USER: process.env.EGRESS_TEST_USER || 'puppeteer-egress-1@staging.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier v4',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
   RAS_TEST_USER: process.env.RAS_TEST_USER,
   ENABLED_PERSISTENT_DISK: true

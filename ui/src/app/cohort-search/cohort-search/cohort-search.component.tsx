@@ -199,6 +199,8 @@ export const CohortSearch = fp.flow(
         this.selectFitbit();
       } else if (domain === Domain.WHOLEGENOMEVARIANT) {
         this.selectGenome();
+      } else if (domain === Domain.LRWHOLEGENOMEVARIANT) {
+        this.selectLongReadGenome();
       } else if (domain === Domain.ARRAYDATA) {
         this.selectArrayData();
       }
@@ -382,6 +384,25 @@ export const CohortSearch = fp.flow(
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         'Select Whole Genome Sequence'
+      );
+      saveCriteria([param]);
+    }
+
+    selectLongReadGenome() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name: 'Long Read Whole Genome Sequence',
+        group: false,
+        domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Long Read Whole Genome Sequence'
       );
       saveCriteria([param]);
     }
