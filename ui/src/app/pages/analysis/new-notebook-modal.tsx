@@ -14,13 +14,16 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { nameValidationFormat } from 'app/components/rename-modal';
-import { getExistingNotebookNames } from 'app/pages/analysis/util';
+import {
+  dropNotebookFileSuffix,
+  getExistingNotebookNames,
+} from 'app/pages/analysis/util';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
+import { nameValidationFormat } from 'app/utils/resources';
 
 import { appendNotebookFileSuffix } from './util';
 
@@ -50,7 +53,9 @@ export const NewNotebookModal = (props: Props) => {
   }, [props.existingNameList]);
 
   const errors = validate(
-    { name, kernel },
+    // we expect the notebook name to lack the .ipynb suffix
+    // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
+    { name: dropNotebookFileSuffix(name), kernel },
     {
       kernel: { presence: { allowEmpty: false } },
       name: nameValidationFormat(

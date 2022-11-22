@@ -10,6 +10,7 @@ import {
   DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
+  ResourceType,
 } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
@@ -27,6 +28,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import {
   appendNotebookFileSuffix,
+  dropNotebookFileSuffix,
   getExistingNotebookNames,
 } from 'app/pages/analysis/util';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
@@ -34,6 +36,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
+import { nameValidationFormat } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -241,15 +244,14 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
 
   const errors = {
     ...validate(
-      { notebookName: notebookNameWithoutSuffix },
+      // we expect the notebook name to lack the .ipynb suffix
+      // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
+      { notebookName: dropNotebookFileSuffix(notebookNameWithoutSuffix) },
       {
-        notebookName: {
-          presence: { allowEmpty: false },
-          exclusion: {
-            within: creatingNewNotebook ? existingNotebooks : [],
-            message: 'already exists',
-          },
-        },
+        notebookName: nameValidationFormat(
+          existingNotebooks,
+          ResourceType.NOTEBOOK
+        ),
       }
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE

@@ -15,7 +15,7 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
-import { toDisplay } from 'app/utils/resources';
+import { nameValidationFormat, toDisplay } from 'app/utils/resources';
 
 const styles = reactStyles({
   fieldHeader: {
@@ -25,44 +25,6 @@ const styles = reactStyles({
     display: 'block',
   },
 });
-
-/* Name validation for resources.
- *
- * Notebooks have characters that are disallowed. Specifically, Jupyter only disallows :/\
- * but Terra disallows a larger list of characters.  Those characters are listed in
- * `const notebookNameValidator` in this file:
- * https://github.com/DataBiosphere/terra-ui/blob/dev/src/components/notebook-utils.js#L42
- *
- * Other AoU resource types do not have the same name restriction and only block slashes.
- */
-export const nameValidationFormat = (
-  existingNames,
-  resourceType: ResourceType
-) =>
-  resourceType === ResourceType.NOTEBOOK
-    ? {
-        presence: { allowEmpty: false },
-        format: {
-          pattern: /^[^@#$%*+=?,[\]:;/\\]*$/,
-          message:
-            "can't contain these characters: @ # $ % * + = ? , [ ] : ; / \\ ",
-        },
-        exclusion: {
-          within: existingNames,
-          message: 'already exists',
-        },
-      }
-    : {
-        presence: { allowEmpty: false },
-        format: {
-          pattern: /^[^\/]*$/,
-          message: "can't contain a slash",
-        },
-        exclusion: {
-          within: existingNames,
-          message: 'already exists',
-        },
-      };
 
 interface Props {
   hideDescription?: boolean;
