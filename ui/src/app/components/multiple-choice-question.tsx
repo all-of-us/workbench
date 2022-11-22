@@ -22,6 +22,7 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '18px',
     lineHeight: '1.25rem',
+    marginBottom: '0.5rem',
   },
 });
 
