@@ -1,3 +1,4 @@
+const http = require('http');
 const assert = require('assert').strict
 const fs = require('fs')
 const fsp = fs.promises
@@ -73,13 +74,26 @@ export_({browserTest})
 
 const useApiProxy = async page => {
   assert(process.env.API_PROXY_URL, 'API_PROXY_URL not defined')
-  await page.setJavaScriptEnabled(false)
-  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
-  await page.evaluate(
-    url => { localStorage.allOfUsApiUrlOverride = url},
-    process.env.API_PROXY_URL
-  )
-  await page.setJavaScriptEnabled(true)
+  //http.get(process.env.API_PROXY_URL + '/v1/config', response => {console.log("First")})
+  await new Promise((resolve, reject) => {
+      http.get('http://127.0.0.1:8080/v1/config',
+          response => {
+          assert(response.statusCode === 200);
+          resolve()
+        }
+      ).on('error', (err) => {
+        reject(err)
+      })
+    }).then(async () => {
+      await page.setJavaScriptEnabled(false)
+      await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+      await page.evaluate(
+        url => { localStorage.allOfUsApiUrlOverride = url},
+        process.env.API_PROXY_URL
+      )
+      await page.setJavaScriptEnabled(true)
+  });
+
 }
 export_({useApiProxy})
 
