@@ -25,7 +25,9 @@ export const getExistingNotebooks = (workspace): Promise<FileDetail[]> => {
   return notebooksApi().getNoteBookList(namespace, id);
 };
 
-export const getExistingNotebookNames = async (workspace): Promise<string[]> =>
-  (await getExistingNotebooks(workspace)).map((fd) =>
-    dropNotebookFileSuffix(fd.name)
-  );
+export const getExistingNotebookNames = async (
+  workspace
+): Promise<string[]> => {
+  const notebooks = await getExistingNotebooks(workspace);
+  return notebooks.map((fd) => dropNotebookFileSuffix(fd.name));
+};
