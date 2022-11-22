@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.notebooks.NotebookUtils.isRMarkdownNotebook;
+
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
@@ -294,7 +296,12 @@ public class DataSetController implements DataSetApiDelegate {
         .forEach(
             cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
-    notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
+    String newName =
+        isRMarkdownNotebook(dataSetExportRequest.getNotebookName())
+            ? NotebooksService.withRMarkdownExtension(dataSetExportRequest.getNotebookName())
+            : NotebooksService.withJupyterNotebookExtension(dataSetExportRequest.getNotebookName());
+
+    notebooksService.saveNotebook(bucketName, newName, notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
