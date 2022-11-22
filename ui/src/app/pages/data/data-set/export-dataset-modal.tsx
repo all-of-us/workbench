@@ -68,7 +68,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
   );
   const [isExporting, setIsExporting] = useState(false);
   const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
-  const [notebookName, setNotebookName] = useState('');
+  const [notebookNameWithoutSuffix, setNotebookNameWithoutSuffix] =
+    useState('');
   const [codePreview, setCodePreview] = useState(null);
   const [loadingNotebook, setIsLoadingNotebook] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -104,7 +105,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       kernelType,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
-      notebookName: appendNotebookFileSuffix(notebookName),
+      notebookName: appendNotebookFileSuffix(notebookNameWithoutSuffix),
       newNotebook: creatingNewNotebook,
     };
   }
@@ -123,7 +124,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       // Open notebook in a new tab and return back to the Data tab
       const notebookUrl =
         `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
-        appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
+        encodeURIComponentStrict(
+          appendNotebookFileSuffix(notebookNameWithoutSuffix)
+        );
       navigateByUrl(notebookUrl);
     } catch (e) {
       console.error(e);
@@ -179,7 +182,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
 
   function onNotebookSelect(value) {
     setCreatingNewNotebook(value === '');
-    setNotebookName(value);
+    setNotebookNameWithoutSuffix(value);
     setErrorMsg(null);
 
     if (value === '') {
@@ -238,7 +241,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
 
   const errors = {
     ...validate(
-      { notebookName },
+      { notebookName: notebookNameWithoutSuffix },
       {
         notebookName: {
           presence: { allowEmpty: false },
@@ -284,7 +287,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
           <ModalBody>
             <div style={{ marginTop: '1rem' }}>
               <Select
-                value={creatingNewNotebook ? '' : notebookName}
+                value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
                 onChange={(v) => onNotebookSelect(v)}
@@ -297,8 +300,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
                   Notebook Name
                 </SmallHeader>
                 <TextInput
-                  onChange={(v) => setNotebookName(v)}
-                  value={notebookName}
+                  onChange={(v) => setNotebookNameWithoutSuffix(v)}
+                  value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
                 />
               </React.Fragment>
