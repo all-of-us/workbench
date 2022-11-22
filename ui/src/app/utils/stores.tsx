@@ -4,6 +4,7 @@ import { useParams } from 'react-router';
 import {
   CdrVersionTier,
   ConfigResponse,
+  CreateNewUserSatisfactionSurvey,
   Disk,
   Profile,
   Runtime,
@@ -111,6 +112,18 @@ export const profileStore = atom<ProfileStore>({
       profile: p,
     }),
 });
+
+export interface CreateNewUserSatisfactionSurveyStore {
+  newUserSatisfactionSurveyData: CreateNewUserSatisfactionSurvey;
+}
+
+export const createNewUserSatisfactionSurveyStore =
+  atom<CreateNewUserSatisfactionSurveyStore>({
+    newUserSatisfactionSurveyData: {
+      satisfaction: undefined,
+      additionalInfo: '',
+    },
+  });
 
 export interface NotificationStore {
   title: string;
