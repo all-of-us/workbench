@@ -124,7 +124,6 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
         workspace.id,
         createExportDatasetRequest()
       );
-      // Open notebook in a new tab and return back to the Data tab
       const notebookUrl =
         `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
         encodeURIComponentStrict(
