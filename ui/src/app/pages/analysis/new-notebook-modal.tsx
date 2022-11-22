@@ -61,7 +61,6 @@ export const NewNotebookModal = (props: Props) => {
     }
   }, [props.existingNameList]);
 
-
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
       notebookName: appendNotebookFileSuffix(name),
