@@ -874,7 +874,7 @@ public class DataSetControllerTest {
 
     mockLinkingTableQuery();
 
-    String notebookName = "Hello World";
+    String notebookName = "Hello World.ipynb";
 
     when(mockNotebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
         .thenReturn(
@@ -1374,7 +1374,7 @@ public class DataSetControllerTest {
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery();
-    String notebookName = "Hello World";
+    String notebookName = "Hello World.ipynb";
 
     return new DataSetExportRequest()
         .dataSetRequest(dataSet)

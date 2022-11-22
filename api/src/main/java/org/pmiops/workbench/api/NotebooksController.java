@@ -149,10 +149,15 @@ public class NotebooksController implements NotebooksApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspace, workspaceName, WorkspaceAccessLevel.READER);
 
+    String updatedNotebookName =
+        isRMarkdownNotebook(notebookName)
+            ? NotebooksService.withRMarkdownExtension(notebookName)
+            : NotebooksService.withJupyterNotebookExtension(notebookName);
+
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
-                notebooksService.getNotebookKernel(workspace, workspaceName, notebookName)));
+                notebooksService.getNotebookKernel(workspace, workspaceName, updatedNotebookName)));
   }
 
   @Override
