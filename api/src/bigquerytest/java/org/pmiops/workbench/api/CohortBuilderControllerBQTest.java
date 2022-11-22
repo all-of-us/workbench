@@ -666,6 +666,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .ancestorData(false);
   }
 
+  private static SearchParameter longReadWholeGenomeVariant() {
+    return new SearchParameter()
+        .domain(Domain.LR_WHOLE_GENOME_VARIANT.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
   private static SearchParameter survey() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -1469,6 +1477,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createCohortDefinition(
             Domain.WHOLE_GENOME_VARIANT.toString(),
             ImmutableList.of(wholeGenomeVariant()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsLongReadWholeGenomeVariant() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.LR_WHOLE_GENOME_VARIANT.toString(),
+            ImmutableList.of(longReadWholeGenomeVariant()),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
