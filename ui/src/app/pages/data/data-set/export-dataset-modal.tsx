@@ -248,7 +248,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       { notebookName: dropNotebookFileSuffix(notebookNameWithoutSuffix) },
       {
         notebookName: nameValidationFormat(
-          existingNotebooks,
+          creatingNewNotebook ? existingNotebooks : [],
           ResourceType.NOTEBOOK
         ),
       }
