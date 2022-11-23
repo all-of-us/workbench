@@ -8,6 +8,7 @@ import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/tes
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
+import Tab from 'app/element/tab';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -65,8 +66,15 @@ describe('WRITER clone workspace and notebook tests', () => {
     await dataPage.cloneWorkspace();
 
     // Currently displayed workspace is the workspace clone.
+    // Open Analysis tab to verify notebook also cloned successfully.
+
+    const tab = new Tab(page, Tabs.Analysis);
+    await tab.click().catch((err) => {
+      console.error(err);
+    });
+
     const workspaceCloneAnalysisPage = new WorkspaceAnalysisPage(page);
-    await openTab(page, Tabs.Analysis, workspaceCloneAnalysisPage);
+    await workspaceCloneAnalysisPage.waitForLoad({ timeout: 10 * 60 * 1000 });
 
     // Create Notebook button is enabled.
     expect(await workspaceCloneAnalysisPage.createNewNotebookLink().isCursorNotAllowed()).toBe(false);
