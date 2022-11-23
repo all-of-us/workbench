@@ -191,16 +191,16 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String fromNotebookNameWithExtension) {
-    String newName = "Duplicate of " + fromNotebookNameWithExtension;
+      String workspaceNamespace, String workspaceName, String notebookNameWithExtension) {
+    String newNameWithExtension = "Duplicate of " + notebookNameWithExtension;
     final FileDetail copiedNotebookFileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            fromNotebookNameWithExtension,
+            notebookNameWithExtension,
             workspaceNamespace,
             workspaceName,
-            newName);
+            newNameWithExtension);
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }

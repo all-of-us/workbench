@@ -23,17 +23,21 @@ public interface NotebooksService {
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceName,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
       String toWorkspaceName,
-      String newNotebookName);
+      String newNotebookNameWithExtension);
 
-  FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String notebookName);
+  FileDetail cloneNotebook(
+      String workspaceNamespace, String workspaceName, String notebookNameWithExtension);
 
   void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
   FileDetail renameNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName, String newName);
+      String workspaceNamespace,
+      String workspaceName,
+      String originalNameWithExtension,
+      String newNameWithExtension);
 
   JSONObject getNotebookContents(String bucketName, String notebookName);
 
