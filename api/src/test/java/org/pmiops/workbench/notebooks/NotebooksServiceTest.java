@@ -194,6 +194,14 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testAdminGetReadOnlyHtml_requiresFileSuffix() {
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName"));
+  }
+
+  @Test
   public void testCloneNotebook() {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
@@ -218,7 +226,7 @@ public class NotebooksServiceTest {
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName";
+    String newNotebookName = "newNotebookName.ipynb";
     String toBucket = "TO_BUCKET";
     HashSet<BlobId> existingBlobIds = new HashSet<>();
 
@@ -665,7 +673,16 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testGetNotebookKernel_notSupported() {
+  public void testSaveNotebook_notSupportedWithoutSuffix() {
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksService.saveNotebook(
+                BUCKET_NAME, "test", new JSONObject().put("who", "I'm a notebook!")));
+  }
+
+  @Test
+  public void testSaveNotebook_rmdNotSupported() {
     Assertions.assertThrows(
         NotImplementedException.class,
         () ->
