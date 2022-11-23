@@ -49,6 +49,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -103,25 +104,6 @@ public class NotebooksServiceTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser getDbUser() {
       return dbUser;
-    }
-  }
-
-  class MockNotebook {
-    Blob blob;
-    FileDetail fileDetail;
-
-    MockNotebook(String path, String bucketName) {
-      blob = mock(Blob.class);
-      fileDetail = new FileDetail();
-      Set<String> workspaceUsersSet = new HashSet();
-
-      String[] parts = path.split("/");
-      String fileName = parts[parts.length - 1];
-      fileDetail.setName(fileName);
-
-      when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsersSet))
-          .thenReturn(fileDetail);
     }
   }
 
@@ -451,15 +433,13 @@ public class NotebooksServiceTest {
   @Test
   public void testGetNotebooks() {
     MockNotebook notebook1 =
-        new MockNotebook(
-            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("mockFile")),
-            BUCKET_NAME);
+        MockNotebook.mockWithPathAndJupyterExtension(
+            "mockFile", BUCKET_NAME, mockCloudStorageClient);
     MockNotebook notebook2 =
-        new MockNotebook(NotebookUtils.withNotebookPath("mockFile.text"), BUCKET_NAME);
+        MockNotebook.mockWithPath("mockFile.text", BUCKET_NAME, mockCloudStorageClient);
     MockNotebook notebook3 =
-        new MockNotebook(
-            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("two words")),
-            BUCKET_NAME);
+        MockNotebook.mockWithPathAndJupyterExtension(
+            "two words", BUCKET_NAME, mockCloudStorageClient);
 
     when(mockCloudStorageClient.getBlobPageForPrefix(
             BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))

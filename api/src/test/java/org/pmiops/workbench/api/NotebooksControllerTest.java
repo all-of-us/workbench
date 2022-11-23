@@ -5,11 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -18,7 +16,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +44,7 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -82,24 +80,6 @@ public class NotebooksControllerTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
-    }
-  }
-
-  class MockNotebook {
-    Blob blob;
-    FileDetail fileDetail;
-
-    MockNotebook(String path, String bucketName) {
-      blob = mock(Blob.class);
-      fileDetail = new FileDetail();
-
-      String[] parts = path.split("/");
-      String fileName = parts[parts.length - 1];
-      fileDetail.setName(fileName);
-
-      when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, mock(Set.class)))
-          .thenReturn(fileDetail);
     }
   }
 
@@ -277,13 +257,9 @@ public class NotebooksControllerTest {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
     MockNotebook notebook1 =
-        new MockNotebook(
-            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("mockFile")),
-            "bucket");
+        MockNotebook.mockWithPathAndJupyterExtension("mockFile", "bucket", mockCloudStorageClient);
     MockNotebook notebook2 =
-        new MockNotebook(
-            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("two words")),
-            "bucket");
+        MockNotebook.mockWithPathAndJupyterExtension("two words", "bucket", mockCloudStorageClient);
 
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
         .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
