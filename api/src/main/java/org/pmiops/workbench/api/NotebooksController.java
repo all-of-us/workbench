@@ -174,7 +174,7 @@ public class NotebooksController implements NotebooksApiDelegate {
     // throws NotFoundException if the notebook is not in GCS
     // returns null if found but no user-metadata
     Map<String, String> metadata =
-        cloudStorageClient.getMetadata(bucketName, "notebooks/" + notebookName);
+        cloudStorageClient.getMetadata(bucketName, NotebookUtils.withNotebookPath(notebookName));
 
     if (metadata != null) {
       String lockExpirationTime = metadata.get("lockExpiresAt");

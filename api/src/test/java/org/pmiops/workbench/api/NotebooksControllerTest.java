@@ -29,6 +29,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -44,6 +45,7 @@ import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -276,10 +278,14 @@ public class NotebooksControllerTest {
     String workspaceName = "workspace";
     MockNotebook notebook1 =
         new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/mockFile"), "bucket");
+            NotebookUtils.withNotebookPath(
+                NotebooksService.withJupyterNotebookExtension("mockFile")),
+            "bucket");
     MockNotebook notebook2 =
         new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/two words"), "bucket");
+            NotebookUtils.withNotebookPath(
+                NotebooksService.withJupyterNotebookExtension("two words")),
+            "bucket");
 
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
         .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
@@ -318,7 +324,16 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testGetNotebookKernel_notSupported() {
+  public void testGetNotebookKernel_notSupportedWithoutSuffix() {
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            notebooksController.getNotebookKernel(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "file"));
+  }
+
+  @Test
+  public void testGetNotebookKernel_rmdNotSupported() {
     assertThrows(
         BadRequestException.class,
         () ->
@@ -482,6 +497,15 @@ public class NotebooksControllerTest {
   }
 
   @Test
+  public void testReadOnlyNotebook_requiresSuffix() {
+    assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksController.readOnlyNotebook(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "notebook without suffix"));
+  }
+
+  @Test
   public void testRenameNotebook() {
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
 
@@ -555,7 +579,7 @@ public class NotebooksControllerTest {
     when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
         .thenReturn(acl.getAcl());
 
-    final String testNotebookPath = "notebooks/" + testNotebook;
+    final String testNotebookPath = NotebookUtils.withNotebookPath(testNotebook);
     doReturn(gcsMetadata)
         .when(mockCloudStorageClient)
         .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);

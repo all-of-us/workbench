@@ -277,7 +277,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     Blob blob =
         cloudStorageClient.getBlob(
             bucketName,
-            "notebooks/".concat(NotebooksService.withJupyterNotebookExtension(notebookName)));
+            NotebookUtils.withNotebookPath(
+                NotebooksService.withJupyterNotebookExtension(notebookName)));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
@@ -296,7 +297,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
     cloudStorageClient.writeFile(
         bucketName,
-        "notebooks/" + NotebooksService.withJupyterNotebookExtension(notebookNameWithFileExtension),
+        NotebookUtils.withNotebookPath(
+            NotebooksService.withJupyterNotebookExtension(notebookNameWithFileExtension)),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
@@ -349,7 +351,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
-    String blobPath = NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String blobPath = NotebookUtils.withNotebookPath(notebookName);
     String pathStart = "gs://" + bucket + "/";
     String fullPath = pathStart + blobPath;
     BlobId blobId = BlobId.of(bucket, blobPath);

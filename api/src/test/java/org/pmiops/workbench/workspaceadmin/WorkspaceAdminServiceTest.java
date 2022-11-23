@@ -71,6 +71,7 @@ import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -308,10 +309,11 @@ public class WorkspaceAdminServiceTest {
   public void testlistFiles() {
     final List<Blob> blobs =
         ImmutableList.of(
-            mockBlob("bucket", "notebooks/test.ipynb", 1000L),
-            mockBlob("bucket", "notebooks/test2.ipynb", 2000L),
-            mockBlob("bucket", "notebooks/scratch.txt", 123L),
-            mockBlob("bucket", "notebooks/hidden/sneaky.ipynb", 1000L * 1000L));
+            mockBlob("bucket", NotebookUtils.withNotebookPath("notebooks/test.ipynb"), 1000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("test2.ipynb"), 2000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("scratch.txt"), 123L),
+            mockBlob(
+                "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
     when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
 
     final List<FileDetail> expectedFiles =

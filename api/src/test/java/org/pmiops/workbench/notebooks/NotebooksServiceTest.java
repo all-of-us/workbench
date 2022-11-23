@@ -444,11 +444,16 @@ public class NotebooksServiceTest {
   public void testGetNotebooks() {
     MockNotebook notebook1 =
         new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/mockFile"), BUCKET_NAME);
-    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text", BUCKET_NAME);
+            NotebookUtils.withNotebookPath(
+                NotebooksService.withJupyterNotebookExtension("mockFile")),
+            BUCKET_NAME);
+    MockNotebook notebook2 =
+        new MockNotebook(NotebookUtils.withNotebookPath("mockFile.text"), BUCKET_NAME);
     MockNotebook notebook3 =
         new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/two words"), BUCKET_NAME);
+            NotebookUtils.withNotebookPath(
+                NotebooksService.withJupyterNotebookExtension("two words")),
+            BUCKET_NAME);
 
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
@@ -487,9 +492,9 @@ public class NotebooksServiceTest {
         dbWorkspace.getFirecloudName(),
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
-    when(mockBlob1.getName()).thenReturn("notebooks/f1.ipynb");
-    when(mockBlob2.getName()).thenReturn("notebooks/f2.rmd");
-    when(mockBlob3.getName()).thenReturn("notebooks/f3.random");
+    when(mockBlob1.getName()).thenReturn(NotebookUtils.withNotebookPath("f1.ipynb"));
+    when(mockBlob2.getName()).thenReturn(NotebookUtils.withNotebookPath("f2.rmd"));
+    when(mockBlob3.getName()).thenReturn(NotebookUtils.withNotebookPath("f3.random"));
     when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
@@ -621,7 +626,7 @@ public class NotebooksServiceTest {
 
   @Test
   public void testIsNotebookBlob_negative() {
-    when(mockBlob.getName()).thenReturn("notebooks/test.txt");
+    when(mockBlob.getName()).thenReturn(NotebookUtils.withNotebookPath("test.txt"));
     assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
   }
 

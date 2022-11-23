@@ -32,4 +32,8 @@ public class NotebookUtils {
   public static boolean isRMarkdownNotebook(String nameWithFileExtension) {
     return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
+
+  public static String withNotebookPath(String notebookName) {
+    return NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+  }
 }
