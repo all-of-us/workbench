@@ -59,36 +59,36 @@ public class NotebooksController implements NotebooksApiDelegate {
   public ResponseEntity<FileDetail> copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     return ResponseEntity.ok(
-        copyNotebookImpl(fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest));
+        copyNotebookImpl(
+            fromWorkspaceNamespace, fromWorkspaceId, fromNotebookNameWithExtension, copyRequest));
   }
 
   private FileDetail copyNotebookImpl(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
       // Checks the new name extension to match the original from file type, add extension if
       // needed.
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
-      String newName =
-          isRMarkdownNotebook(fromNotebookName)
+      String newNameWithExtension =
+          isRMarkdownNotebook(fromNotebookNameWithExtension)
               ? NotebookUtils.withRMarkdownExtension(copyRequest.getNewName())
               : NotebookUtils.withJupyterNotebookExtension(copyRequest.getNewName());
 
-      // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebookUtils.withJupyterNotebookExtension(fromNotebookName),
+              fromNotebookNameWithExtension,
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              newName);
+              newNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
