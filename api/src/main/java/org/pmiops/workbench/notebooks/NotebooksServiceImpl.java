@@ -139,10 +139,10 @@ public class NotebooksServiceImpl implements NotebooksService {
   public FileDetail copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceFirecloudName,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
       String toWorkspaceFirecloudName,
-      String newNotebookName) {
+      String newNotebookNameWithExtension) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
@@ -165,9 +165,11 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
 
     GoogleCloudLocators fromNotebookLocators =
-        getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookName);
+        getNotebookLocators(
+            fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookNameWithExtension);
     GoogleCloudLocators newNotebookLocators =
-        getNotebookLocators(toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookName);
+        getNotebookLocators(
+            toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookNameWithExtension);
 
     if (!cloudStorageClient
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
@@ -177,7 +179,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     cloudStorageClient.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
 
     FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(newNotebookName);
+    fileDetail.setName(newNotebookNameWithExtension);
     fileDetail.setPath(newNotebookLocators.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
@@ -189,13 +191,13 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String fromNotebookName) {
-    String newName = "Duplicate of " + fromNotebookName;
+      String workspaceNamespace, String workspaceName, String fromNotebookNameWithExtension) {
+    String newName = "Duplicate of " + fromNotebookNameWithExtension;
     final FileDetail copiedNotebookFileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            fromNotebookName,
+            fromNotebookNameWithExtension,
             workspaceNamespace,
             workspaceName,
             newName);
@@ -220,16 +222,19 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail renameNotebook(
-      String workspaceNamespace, String workspaceName, String originalName, String newName) {
+      String workspaceNamespace,
+      String workspaceName,
+      String originalNameWithExtension,
+      String newNameWithExtension) {
     FileDetail fileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            originalName,
+            originalNameWithExtension,
             workspaceNamespace,
             workspaceName,
-            newName);
-    deleteNotebook(workspaceNamespace, workspaceName, originalName);
+            newNameWithExtension);
+    deleteNotebook(workspaceNamespace, workspaceName, originalNameWithExtension);
 
     return fileDetail;
   }

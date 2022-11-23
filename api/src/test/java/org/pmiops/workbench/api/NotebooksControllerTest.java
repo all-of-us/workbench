@@ -123,6 +123,28 @@ public class NotebooksControllerTest {
   }
 
   @Test
+  public void testCloneNotebook_rmd() {
+    String fromNotebookName = "starter.rmd";
+    String toNotebookName = "Duplicate of starter.rmd";
+    String toPath = "/path/to/" + toNotebookName;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    FileDetail expectedFileDetail = createFileDetail(toNotebookName, toPath, toLastModifiedTime);
+
+    when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fromNotebookName)
+            .getBody();
+
+    verify(mockNotebookService)
+        .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fromNotebookName);
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
   public void testCloneNotebook_alreadyExists() {
     when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
@@ -174,14 +196,17 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testCopyNotebook_rmd_withNoExtensionName() {
+  public void testCopyNotebook_rmd() {
+    String fromNotebookName = "test.rmd";
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String newName = "toName";
+    String newNameWithExtension = newName + ".rmd";
     String toPath = "/path/to/" + newName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
-    FileDetail expectedFileDetail = createFileDetail(newName + ".rmd", toPath, toLastModifiedTime);
+    FileDetail expectedFileDetail =
+        createFileDetail(newNameWithExtension, toPath, toLastModifiedTime);
     copyRequest.setNewName(newName);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
     copyRequest.setToWorkspaceName(toWorkspaceName);
@@ -192,18 +217,18 @@ public class NotebooksControllerTest {
 
     FileDetail actualFileDetail =
         notebooksController
-            .copyNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "test.rmd", copyRequest)
+            .copyNotebook(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fromNotebookName, copyRequest)
             .getBody();
 
-    // Note the fromNotebooName will change after stop setting extension for notebookName.
     verify(mockNotebookService)
         .copyNotebook(
             FROM_WORKSPACE_NAMESPACE,
             FROM_WORKSPACE_NAME,
-            "test.rmd.ipynb",
+            fromNotebookName,
             toWorkspaceNamespace,
             toWorkspaceName,
-            newName + ".rmd");
+            newNameWithExtension);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
@@ -489,6 +514,37 @@ public class NotebooksControllerTest {
 
     notebookRename.setName(FROM_NOTEBOOK_NAME);
     notebookRename.setNewName(TO_NOTEBOOK_NAME);
+
+    when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .renameNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, notebookRename)
+            .getBody();
+
+    verify(mockNotebookService)
+        .renameNotebook(
+            FROM_WORKSPACE_NAMESPACE,
+            FROM_WORKSPACE_NAME,
+            notebookRename.getName(),
+            notebookRename.getNewName());
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
+  public void testRenameNotebook_rmd() {
+    String fromNotebookName = "original.rmd";
+    String toNotebookName = "new.rmd";
+    String toPath = "/path/to/" + toNotebookName;
+
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    NotebookRename notebookRename = new NotebookRename();
+    FileDetail expectedFileDetail = createFileDetail(toNotebookName, toPath, toLastModifiedTime);
+
+    notebookRename.setName(fromNotebookName);
+    notebookRename.setNewName(toNotebookName);
 
     when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);

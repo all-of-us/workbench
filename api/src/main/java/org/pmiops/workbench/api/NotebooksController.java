@@ -97,10 +97,11 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
-      String workspace, String workspaceName, String notebookName) {
+      String workspace, String workspaceName, String notebookNameWithExtension) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
+      fileDetail =
+          notebooksService.cloneNotebook(workspace, workspaceName, notebookNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
