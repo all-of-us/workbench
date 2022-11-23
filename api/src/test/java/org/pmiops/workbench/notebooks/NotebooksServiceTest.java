@@ -461,7 +461,8 @@ public class NotebooksServiceTest {
             NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("two words")),
             BUCKET_NAME);
 
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+            BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
         .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
 
@@ -501,7 +502,8 @@ public class NotebooksServiceTest {
     when(mockBlob1.getName()).thenReturn(NotebookUtils.withNotebookPath("f1.ipynb"));
     when(mockBlob2.getName()).thenReturn(NotebookUtils.withNotebookPath("f2.rmd"));
     when(mockBlob3.getName()).thenReturn(NotebookUtils.withNotebookPath("f3.random"));
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+            BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);
@@ -535,10 +537,14 @@ public class NotebooksServiceTest {
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
     when(mockBlob1.getName())
-        .thenReturn(NotebookUtils.withJupyterNotebookExtension("notebooks/extra/nope"));
+        .thenReturn(
+            NotebookUtils.withNotebookPath(
+                NotebookUtils.withJupyterNotebookExtension("extra/nope")));
     when(mockBlob2.getName())
-        .thenReturn(NotebookUtils.withJupyterNotebookExtension("notebooks/foo"));
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+        .thenReturn(
+            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("foo")));
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+            BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);

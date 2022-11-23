@@ -309,7 +309,7 @@ public class WorkspaceAdminServiceTest {
   public void testlistFiles() {
     final List<Blob> blobs =
         ImmutableList.of(
-            mockBlob("bucket", NotebookUtils.withNotebookPath("notebooks/test.ipynb"), 1000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
             mockBlob("bucket", NotebookUtils.withNotebookPath("test2.ipynb"), 2000L),
             mockBlob("bucket", NotebookUtils.withNotebookPath("scratch.txt"), 123L),
             mockBlob(
