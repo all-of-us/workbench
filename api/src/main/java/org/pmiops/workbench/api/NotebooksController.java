@@ -77,15 +77,15 @@ public class NotebooksController implements NotebooksApiDelegate {
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       String newName =
           isRMarkdownNotebook(fromNotebookName)
-              ? NotebooksService.withRMarkdownExtension(copyRequest.getNewName())
-              : NotebooksService.withJupyterNotebookExtension(copyRequest.getNewName());
+              ? NotebookUtils.withRMarkdownExtension(copyRequest.getNewName())
+              : NotebookUtils.withJupyterNotebookExtension(copyRequest.getNewName());
 
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withJupyterNotebookExtension(fromNotebookName),
+              NotebookUtils.withJupyterNotebookExtension(fromNotebookName),
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
               newName);

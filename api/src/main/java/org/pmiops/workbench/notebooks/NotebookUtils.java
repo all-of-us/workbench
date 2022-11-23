@@ -33,6 +33,18 @@ public class NotebookUtils {
     return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 
+  public static String withJupyterNotebookExtension(String notebookName) {
+    return notebookName.endsWith(JUPYTER_NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(JUPYTER_NOTEBOOK_EXTENSION);
+  }
+
+  public static String withRMarkdownExtension(String notebookName) {
+    return notebookName.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(R_MARKDOWN_NOTEBOOK_EXTENSION);
+  }
+
   public static String withNotebookPath(String notebookName) {
     return NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
   }

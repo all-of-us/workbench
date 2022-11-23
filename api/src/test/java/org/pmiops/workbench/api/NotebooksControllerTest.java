@@ -278,13 +278,11 @@ public class NotebooksControllerTest {
     String workspaceName = "workspace";
     MockNotebook notebook1 =
         new MockNotebook(
-            NotebookUtils.withNotebookPath(
-                NotebooksService.withJupyterNotebookExtension("mockFile")),
+            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("mockFile")),
             "bucket");
     MockNotebook notebook2 =
         new MockNotebook(
-            NotebookUtils.withNotebookPath(
-                NotebooksService.withJupyterNotebookExtension("two words")),
+            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("two words")),
             "bucket");
 
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
@@ -567,7 +565,7 @@ public class NotebooksControllerTest {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
-    final String testNotebook = NotebooksService.withJupyterNotebookExtension("test-notebook");
+    final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
     FirecloudWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
