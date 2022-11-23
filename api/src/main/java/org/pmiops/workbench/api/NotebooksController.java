@@ -110,16 +110,17 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName) {
-    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
       throw new NotImplementedException(
-          String.format("%s type of file is not implemented yet", notebookName));
+          String.format("%s type of file is not implemented yet", notebookNameWithFileExtension));
     }
 
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
             .html(
-                notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName));
+                notebooksService.getReadOnlyHtml(
+                    workspaceNamespace, workspaceName, notebookNameWithFileExtension));
     return ResponseEntity.ok(response);
   }
 
@@ -140,10 +141,10 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
-      String workspace, String workspaceName, String notebookName) {
-    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
+      String workspace, String workspaceName, String notebookNameWithFileExtension) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
       throw new BadRequestException(
-          String.format("%s is not a Jupyter notebook file", notebookName));
+          String.format("%s is not a Jupyter notebook file", notebookNameWithFileExtension));
     }
 
     workspaceAuthService.enforceWorkspaceAccessLevel(
@@ -152,7 +153,8 @@ public class NotebooksController implements NotebooksApiDelegate {
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
-                notebooksService.getNotebookKernel(workspace, workspaceName, notebookName)));
+                notebooksService.getNotebookKernel(
+                    workspace, workspaceName, notebookNameWithFileExtension)));
   }
 
   @Override
