@@ -157,7 +157,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
       value,
     } = option;
     return (
-      <FlexColumn style={subOptions && { width: '100%' }}>
+      <FlexColumn key={value} style={subOptions && { width: '100%' }}>
         <FlexRow style={{ alignItems: 'center' }}>
           <Option
             {...{ disabled, disabledText, label, multiple, value }}
