@@ -11,6 +11,7 @@ import {
 } from 'app/components/inputs';
 import { Modal } from 'app/components/modals';
 import { MultipleChoiceQuestion } from 'app/components/multiple-choice-question';
+import { surveyStyles } from 'app/components/surveys';
 import { surveysApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -77,12 +78,7 @@ export const NewUserSatisfactionSurveyModal = ({
         />
         <label
           htmlFor='new-user-satisfaction-survey-additional-info'
-          style={{
-            fontWeight: 'bold',
-            color: colors.primary,
-            fontSize: '18px',
-            lineHeight: '1.25rem',
-          }}
+          style={surveyStyles.question}
         >
           Please explain your selection. What were you expecting? What went
           well? What didn't go well?

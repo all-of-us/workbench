@@ -4,6 +4,7 @@ import { CSSProperties } from 'react';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CheckBox, RadioButton } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
+import { surveyStyles } from 'app/components/surveys';
 import colors from 'app/styles/colors';
 import { reactStyles, useId } from 'app/utils';
 
@@ -16,12 +17,6 @@ const styles = reactStyles({
   expansionButton: {
     fontSize: 12,
     textDecoration: 'underline',
-  },
-  question: {
-    fontWeight: 'bold',
-    color: colors.primary,
-    fontSize: '18px',
-    lineHeight: '1.25rem',
   },
 });
 
@@ -238,7 +233,9 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
 
   return (
     <div style={{ ...styles.container, ...style }}>
-      <div style={{ ...styles.question, ...questionStyle }}>{question}</div>
+      <div style={{ ...surveyStyles.question, ...questionStyle }}>
+        {question}
+      </div>
       {multiple && (
         <div style={{ color: colors.primary }}>Select all that apply.</div>
       )}
