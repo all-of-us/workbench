@@ -48,10 +48,10 @@ export interface NewUserSatisfactionSurveyModalProps {
   onSubmitSuccess: () => void;
 }
 
-export function NewUserSatisfactionSurveyModal({
+export const NewUserSatisfactionSurveyModal = ({
   onCancel,
   onSubmitSuccess,
-}: NewUserSatisfactionSurveyModalProps) {
+}: NewUserSatisfactionSurveyModalProps) => {
   const { newUserSatisfactionSurveyData } = useStore(
     createNewUserSatisfactionSurveyStore
   );
@@ -141,4 +141,4 @@ export function NewUserSatisfactionSurveyModal({
       </FlexColumn>
     </Modal>
   );
-}
+};

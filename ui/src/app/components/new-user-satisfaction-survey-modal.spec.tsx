@@ -22,9 +22,12 @@ import {
 } from './new-user-satisfaction-survey-modal';
 
 describe(NewUserSatisfactionSurveyModal.name, () => {
-  function setNewUserSatisfactionSurveyData<
+  const setNewUserSatisfactionSurveyData = <
     T extends keyof CreateNewUserSatisfactionSurvey
-  >(attribute: T, value: CreateNewUserSatisfactionSurvey[T]) {
+  >(
+    attribute: T,
+    value: CreateNewUserSatisfactionSurvey[T]
+  ) => {
     createNewUserSatisfactionSurveyStore.set({
       newUserSatisfactionSurveyData: {
         ...createNewUserSatisfactionSurveyStore.get()
@@ -32,36 +35,36 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
         [attribute]: value,
       },
     });
-  }
+  };
 
-  function setValidNewUserSatisfactionSurveyData() {
+  const setValidNewUserSatisfactionSurveyData = () => {
     setNewUserSatisfactionSurveyData(
       'satisfaction',
       NewUserSatisfactionSurveySatisfaction.VERYSATISFIED
     );
     setNewUserSatisfactionSurveyData('additionalInfo', '');
-  }
+  };
 
   beforeEach(() => {
     registerApiClient(SurveysApi, new SurveysApiStub());
     setValidNewUserSatisfactionSurveyData();
   });
 
-  function createShallowWrapper({
+  const createShallowWrapper = ({
     onCancel = () => {},
     onSubmitSuccess = () => {},
-  } = {}) {
+  } = {}) => {
     return shallow(
       <NewUserSatisfactionSurveyModal
         onCancel={onCancel}
         onSubmitSuccess={onSubmitSuccess}
       />
     );
-  }
+  };
 
-  function findSubmitButton(wrapper: ShallowWrapper) {
+  const findSubmitButton = (wrapper: ShallowWrapper) => {
     return wrapper.find({ children: 'Submit' });
-  }
+  };
 
   it('should disable the submit button until a satisfaction value is selected', () => {
     setNewUserSatisfactionSurveyData('satisfaction', undefined);
