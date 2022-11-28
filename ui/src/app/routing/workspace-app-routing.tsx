@@ -14,6 +14,7 @@ import { NotebookList } from 'app/pages/analysis/notebook-list';
 import { AppsList } from 'app/pages/appAnalysis/apps-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortReviewPage } from 'app/pages/data/cohort-review/cohort-review-page';
+import { DemoChart } from 'app/components/highcharts-demo';
 import { DetailPage } from 'app/pages/data/cohort-review/detail-page';
 import { QueryReport } from 'app/pages/data/cohort-review/query-report.component';
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
@@ -38,6 +39,10 @@ const CohortReviewPagePage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(CohortReviewPage);
+const PlotDemoChartPage = fp.flow(
+    withRouteData,
+    withRoutingSpinner
+)(DemoChart);
 const ConceptHomepagePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -297,6 +302,21 @@ export const WorkspaceRoutes = () => {
           }}
         />
       </AppRoute>
+      <AppRoute
+          exact
+          path={`${path}/data/cohorts/:cid/plots-demo`}
+          guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <PlotDemoChartPage
+            routeData={{
+              title: 'Plot Demo Actions',
+              breadcrumb: BreadcrumbType.Cohort,
+              workspaceNavBarTab: 'data',
+              pageKey: 'cohortBuilder',
+            }}
+        />
+      </AppRoute>
+
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews/cohort-description`}
