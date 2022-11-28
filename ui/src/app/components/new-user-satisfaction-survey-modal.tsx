@@ -73,6 +73,7 @@ export const NewUserSatisfactionSurveyModal = ({
               },
             });
           }}
+          questionStyle={{ marginBottom: '0.5rem' }}
         />
         <label
           htmlFor='new-user-satisfaction-survey-additional-info'

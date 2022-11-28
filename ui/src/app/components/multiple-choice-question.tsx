@@ -22,7 +22,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '18px',
     lineHeight: '1.25rem',
-    marginBottom: '0.5rem',
   },
 });
 
@@ -86,6 +85,7 @@ interface MultipleChoiceQuestionProps {
   selected: any | any[];
   onChange: (any) => void;
   style?: CSSProperties;
+  questionStyle?: CSSProperties;
   multiple?: boolean;
   horizontalOptions?: boolean;
   enableExpansionControls?: boolean;
@@ -106,6 +106,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
     question,
     selected,
     style,
+    questionStyle,
   } = props;
 
   const handleQuestionChange = (
@@ -237,7 +238,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
 
   return (
     <div style={{ ...styles.container, ...style }}>
-      <div style={{ ...styles.question }}>{question}</div>
+      <div style={{ ...styles.question, ...questionStyle }}>{question}</div>
       {multiple && (
         <div style={{ color: colors.primary }}>Select all that apply.</div>
       )}
