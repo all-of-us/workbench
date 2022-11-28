@@ -52,11 +52,11 @@ export enum MenuOption {
   SexAssignedAtBirth = 'Sex Assigned at Birth',
   SexAtBirth = 'Sex at Birth',
   Share = 'Share',
+  ShortReadWGS = 'Short Read WGS',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
   SuppressCriteriaFromTotalCount = 'Suppress criteria from total count',
   Surveys = 'Surveys',
-  Visits = 'Visits',
-  ShortReadWGS = 'Short Read WGS'
+  Visits = 'Visits'
 }
 
 // Button or link text labels.
