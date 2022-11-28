@@ -48,7 +48,7 @@ describe('Genomics Extraction Test', () => {
     // Group 1: Include Whole Genome Variant.
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeWholeGenomeVariant();
+    await group1.includeShortReadWGS();
 
     const group1Count = await group1.getGroupCount();
     let totalCount = await cohortBuildPage.getTotalCount();

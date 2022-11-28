@@ -498,8 +498,8 @@ export default class CohortParticipantsGroup {
   }
 
   // Empty
-  async includeWholeGenomeVariant(): Promise<number> {
-    await this.addCriteria([MenuOption.WholeGenomeVariant]);
+  async includeShortReadWGS(): Promise<number> {
+    await this.addCriteria([MenuOption.ShortReadWGS]);
     return this.getGroupCount();
   }
 
