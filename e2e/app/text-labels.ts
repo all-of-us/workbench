@@ -40,6 +40,7 @@ export enum MenuOption {
   Fitbit = 'Fitbit',
   GenderIdentity = 'Gender Identity',
   LabsAndMeasurements = 'Labs and Measurements',
+  LongReadWGS = 'Long Read WGS',
   PhysicalMeasurements = 'Physical Measurements',
   Procedures = 'Procedures',
   Race = 'Race',
@@ -51,11 +52,11 @@ export enum MenuOption {
   SexAssignedAtBirth = 'Sex Assigned at Birth',
   SexAtBirth = 'Sex at Birth',
   Share = 'Share',
+  ShortReadWGS = 'Short Read WGS',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
   SuppressCriteriaFromTotalCount = 'Suppress criteria from total count',
   Surveys = 'Surveys',
-  Visits = 'Visits',
-  WholeGenomeVariant = 'Whole Genome Sequence'
+  Visits = 'Visits'
 }
 
 // Button or link text labels.
