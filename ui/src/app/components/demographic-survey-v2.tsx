@@ -18,10 +18,12 @@ import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
+  DEMOGRAPHIC_SURVEY_COMMENTS,
   DISABILITY_CONCENTRATING,
   DISABILITY_DRESSING,
   DISABILITY_ERRANDS,
   DISABILITY_HEARING,
+  DISABILITY_OTHER,
   DISABILITY_SEEING,
   DISABILITY_WALKING,
   DISADVANTAGED,
@@ -37,7 +39,6 @@ import {
   CheckBox,
   NumberInput,
   TextAreaWithLengthValidationMessage,
-  TextInput,
 } from './inputs';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { AoU } from './text-wrappers';
@@ -70,9 +71,11 @@ export const questionsIndex = {
   [DISABILITY_WALKING]: 8,
   [DISABILITY_DRESSING]: 9,
   [DISABILITY_ERRANDS]: 10,
+  [DISABILITY_OTHER]: 11,
   [YEAR_OF_BIRTH]: 12,
   [EDUCATION]: 13,
   [DISADVANTAGED]: 14,
+  [DEMOGRAPHIC_SURVEY_COMMENTS]: 15,
 };
 
 const maxYear = new Date().getFullYear();
@@ -87,6 +90,7 @@ const styles = reactStyles({
   answer: { margin: '0.0rem 0.25rem', color: colors.primary },
 });
 
+const OTHER_DISABILITY_MAX_LENGTH = 200;
 const MAX_CHARACTERS_VALIDATION_MESSAGE =
   'can have no more than %{count} characters.';
 const NONE_FULLY_DESCRIBE = 'None of these fully describe me';
@@ -98,15 +102,13 @@ const NONE_FULLY_DESCRIBE_VALIDATION = {
   },
 };
 const NONE_FULLY_DESCRIBE_PLACEHOLDER = 'Please specify (optional)';
-
+const SURVEY_COMMENTS_MAX_LENGTH = 1000;
 const TWO_SPIRIT_DISABLED_TEXT =
   'unique to people of American Indian and Alaska Native ' +
   'ancestry. If this applies to you, please update your selection in the ' +
   '"Racial and Ethnic" section.';
-
 const TWO_SPIRIT_IDENTITY_DISABLED_TEXT =
   'Two Spirit is an identity ' + TWO_SPIRIT_DISABLED_TEXT;
-
 const TWO_SPIRIT_SEXUAL_ORIENTATION_DISABLED_TEXT =
   'Two Spirit is an orientation ' + TWO_SPIRIT_DISABLED_TEXT;
 
@@ -179,12 +181,18 @@ const validateDemographicSurvey = (demographicSurvey: DemographicSurveyV2) => {
         message: "^ Difficulty doing errands can't be blank",
       },
     },
+    disabilityOtherText: {
+      length: {
+        maximum: OTHER_DISABILITY_MAX_LENGTH,
+        tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
+      },
+    },
     ...yearOfBirth,
     education: { presence: { allowEmpty: false } },
     disadvantaged: { presence: { allowEmpty: false } },
     surveyComments: {
       length: {
-        maximum: 1000,
+        maximum: SURVEY_COMMENTS_MAX_LENGTH,
         tooLong: MAX_CHARACTERS_VALIDATION_MESSAGE,
       },
     },
@@ -978,15 +986,21 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <div
               style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
             >
-              11. Do you have a physical, cognitive, and/or emotional condition
-              that substantially limits one or more life activities not
-              specified through the above questions, and want to share more?
-              Please describe.
+              {getQuestionLabel(
+                DISABILITY_OTHER,
+                'Do you have a physical, cognitive, and/or emotional condition ' +
+                  'that substantially limits one or more life activities not ' +
+                  'specified through the above questions, and want to share more? ' +
+                  'Please describe.'
+              )}
             </div>
-            <TextInput
+            <TextAreaWithLengthValidationMessage
+              id='disability-other-text'
               onChange={(value) => onUpdate('disabilityOtherText', value)}
-              value={survey.disabilityOtherText || ''}
-              style={{ width: '50%' }}
+              initialText={survey.disabilityOtherText || ''}
+              textBoxStyleOverrides={{ width: '100%' }}
+              heightOverride={{ height: '5rem' }}
+              maxCharacters={OTHER_DISABILITY_MAX_LENGTH}
             />
           </FlexColumn>
           <div style={styles.question}>
@@ -1065,16 +1079,19 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             <div
               style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
             >
-              15. Is there any aspect of your identity that we have not covered
-              in the preceding questions that we may want to consider including
-              in future surveys?
+              {getQuestionLabel(
+                DEMOGRAPHIC_SURVEY_COMMENTS,
+                'Is there any aspect of your identity that we have not covered' +
+                  ' in the preceding questions that we may want to consider including' +
+                  ' in future surveys?'
+              )}
             </div>
             <TextAreaWithLengthValidationMessage
               id='survey-comments'
               onChange={(value) => onUpdate('surveyComments', value)}
               initialText={survey.surveyComments || ''}
               textBoxStyleOverrides={{ width: '100%' }}
-              maxCharacters={1000}
+              maxCharacters={SURVEY_COMMENTS_MAX_LENGTH}
             />
           </FlexColumn>
         </FlexColumn>

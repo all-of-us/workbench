@@ -1525,7 +1525,9 @@ paths:
       - userAdmin
       consumes:
       - application/json
-      description: 'Updates the given user to bypass the request access requirement'
+      description: >
+        DEPRECATED.  Use unsafeSelfBypassAccessRequirements to bypass all modules at once.
+        Updates the given user to bypass the request access requirement.
       parameters:
       - in: body
         name: request
@@ -1545,6 +1547,21 @@ paths:
             "$ref": "#/definitions/ErrorResponse"
         400:
           description: No module exists with name submitted
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/unsafe-self-bypass-access-requirements":
+    post:
+      tags:
+        - userAdmin
+      description: 'Updates the given user to bypass all access requirements'
+      operationId: unsafeSelfBypassAccessRequirements
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        403:
+          description: Self bypass is disallowed in this environment
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
@@ -4225,6 +4242,7 @@ definitions:
     - FITBIT_SLEEP_LEVEL
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
+    - LR_WHOLE_GENOME_VARIANT
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
   Surveys:
@@ -9301,6 +9319,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingInstitution"
+      newUserSatisfactionSurveys:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingNewUserSatisfactionSurvey"
       workspaceFreeTierUsage:
         type: array
         items:
@@ -9814,6 +9836,30 @@ definitions:
       registeredTierRequirement:
         description: Institution tegisted tier requirement.
         "$ref": "#/definitions/InstitutionMembershipRequirement"
+  ReportingNewUserSatisfactionSurvey:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: ID of the survey response.
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      created:
+        type: string
+        format: date-time
+        description: Time the survey response was created.
+      modified:
+        type: string
+        format: date-time
+        description: Time the survey response was last modified.
+      satisfaction:
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
+      additionalInfo:
+        type: string
+        description: Additional information regarding the satisfaction score.
 
   ReportingDataset:
     x-aou-note: |-
@@ -10236,14 +10282,17 @@ definitions:
     type: object
     properties:
       satisfaction:
-        type: string
-        description: How satisfied the user is with the researcher workbench
-        enum:
-          - VERY_UNSATISFIED
-          - UNSATISFIED
-          - NEUTRAL
-          - SATISFIED
-          - VERY_SATISFIED
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
       additionalInfo:
         type: string
         description: Additional information regarding their satisfaction score
+
+  NewUserSatisfactionSurveySatisfaction:
+    type: string
+    description: How satisfied the user is with the researcher workbench.
+    enum:
+      - VERY_UNSATISFIED
+      - UNSATISFIED
+      - NEUTRAL
+      - SATISFIED
+      - VERY_SATISFIED

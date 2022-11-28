@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { validate } from 'validate.js';
 
@@ -15,16 +15,19 @@ import {
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { nameValidationFormat } from 'app/components/rename-modal';
+import { getExistingNotebookNames } from 'app/pages/analysis/util';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 
+import { appendNotebookFileSuffix } from './util';
+
 interface Props {
   onClose: Function;
   workspace: Workspace;
-  existingNameList: string[];
+  existingNameList?: string[];
   onBack?: Function;
 }
 
@@ -32,20 +35,35 @@ export const NewNotebookModal = (props: Props) => {
   const [name, setName] = useState('');
   const [kernel, setKernel] = useState(Kernels.Python3);
   const [nameTouched, setNameTouched] = useState(false);
+  const [existingNotebookNameList, setExistingNotebookNameList] = useState([]);
   const [navigate] = useNavigation();
 
-  const { onBack, onClose, existingNameList, workspace } = props;
+  const { onBack, onClose, workspace } = props;
   const errors = validate(
     { name, kernel },
     {
       kernel: { presence: { allowEmpty: false } },
-      name: nameValidationFormat(existingNameList, ResourceType.NOTEBOOK),
+      name: nameValidationFormat(
+        existingNotebookNameList,
+        ResourceType.NOTEBOOK
+      ),
     }
   );
 
-  const save = () => {
+  useEffect(() => {
+    const { existingNameList } = props;
+    if (!!existingNameList) {
+      setExistingNotebookNameList(existingNameList);
+    } else {
+      getExistingNotebookNames(workspace).then((notebookList) => {
+        setExistingNotebookNameList(notebookList);
+      });
+    }
+  }, [props.existingNameList]);
+
+  const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
-      notebookName: `${name}.ipynb`,
+      notebookName: appendNotebookFileSuffix(name),
     });
     navigate(
       [
@@ -106,7 +124,7 @@ export const NewNotebookModal = (props: Props) => {
             disabled={!!errors}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
-              save();
+              create();
             }}
           >
             Create Notebook

@@ -17,7 +17,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
 import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { userIsDisabled } from 'app/routing/guards';
-import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
 import { encodeURIComponentStrict } from 'app/utils/navigation';
@@ -451,18 +451,6 @@ export const getAccessModuleStatusByName = (
     profile.accessModules.modules,
     moduleName
   );
-};
-
-export const bypassAll = async (
-  accessModules: AccessModule[],
-  isBypassed: boolean
-) => {
-  for (const module of accessModules) {
-    await userAdminApi().unsafeSelfBypassAccessRequirement({
-      moduleName: module,
-      isBypassed: isBypassed,
-    });
-  }
 };
 
 export const GetStartedButton = ({ style = { marginLeft: '0.5rem' } }) => (

@@ -277,26 +277,71 @@ describe('HelpSidebar', () => {
     ).toBe(2);
   });
 
-  it('should not display runtime control icon for read-only workspaces', async () => {
+  it('should not display runtime config icon for read-only workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
     });
     const wrapper = await component();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtime' }).length
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
     ).toBe(0);
   });
 
-  it('should display runtime control icon for writable workspaces', async () => {
+  it('should display runtime config icon for writable workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
     const wrapper = await component();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtime' }).length
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
     ).toBe(1);
+  });
+
+  it('should not display apps icon for read-only workspaces', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.READER,
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(0);
+  });
+
+  it('should display apps icon for writable workspaces when enableGkeApp is true', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableGkeApp: true,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(1);
+  });
+
+  it('should not display apps icon for writable workspaces when enableGkeApp is false', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableGkeApp: false,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(0);
   });
 
   it('should display dynamic runtime status icon', async () => {

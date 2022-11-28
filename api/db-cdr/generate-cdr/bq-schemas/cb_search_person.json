@@ -73,5 +73,10 @@
     "mode": "NULLABLE",
     "name": "has_array_data",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_lr_whole_genome_variant",
+    "type": "INTEGER"
   }
 ]

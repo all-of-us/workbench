@@ -85,24 +85,24 @@ export const RuntimeInitializerModal = ({
       </ModalBody>
       <ModalFooter style={{ justifyContent: 'space-between' }}>
         <Button
-          data-test-id='runtime-intializer-cancel'
+          data-test-id='runtime-initializer-cancel'
           type='secondary'
           onClick={() => cancel()}
         >
           Cancel
         </Button>
         <Button
-          data-test-id='runtime-intializer-configure'
+          data-test-id='runtime-initializer-configure'
           type='secondary'
           onClick={() => {
-            setSidebarActiveIconStore.next('runtime');
+            setSidebarActiveIconStore.next('runtimeConfig');
             cancel();
           }}
         >
           Configure
         </Button>
         <Button
-          data-test-id='runtime-intializer-create'
+          data-test-id='runtime-initializer-create'
           onClick={() => {
             createAndContinue();
           }}

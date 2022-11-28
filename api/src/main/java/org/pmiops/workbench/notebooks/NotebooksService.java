@@ -1,5 +1,8 @@
 package org.pmiops.workbench.notebooks;
 
+import static org.pmiops.workbench.notebooks.NotebookUtils.JUPYTER_NOTEBOOK_EXTENSION;
+import static org.pmiops.workbench.notebooks.NotebookUtils.R_MARKDOWN_NOTEBOOK_EXTENSION;
+
 import com.google.cloud.storage.Blob;
 import java.util.List;
 import org.json.JSONObject;
@@ -7,14 +10,16 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 
 public interface NotebooksService {
-
-  String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  String NOTEBOOK_EXTENSION = ".ipynb";
-
-  static String withNotebookExtension(String notebookName) {
-    return notebookName.endsWith(NOTEBOOK_EXTENSION)
+  static String withJupyterNotebookExtension(String notebookName) {
+    return notebookName.endsWith(JUPYTER_NOTEBOOK_EXTENSION)
         ? notebookName
-        : notebookName.concat(NOTEBOOK_EXTENSION);
+        : notebookName.concat(JUPYTER_NOTEBOOK_EXTENSION);
+  }
+
+  static String withRMarkdownExtension(String notebookName) {
+    return notebookName.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
@@ -51,11 +56,13 @@ public interface NotebooksService {
   KernelTypeEnum getNotebookKernel(
       String workspaceNamespace, String workspaceName, String notebookName);
 
-  void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
+  void saveNotebook(
+      String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents);
 
   public String convertNotebookToHtml(byte[] notebook);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 
-  String adminGetReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+  String adminGetReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension);
 }

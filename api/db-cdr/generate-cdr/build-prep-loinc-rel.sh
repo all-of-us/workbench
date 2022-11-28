@@ -53,8 +53,8 @@ WHERE concept_id in
     )"
 
 # for each loop, add all items (children/parents) related to the items that were previously added
-# currently, there are only 4 levels, but we run it 5 times to be safe
-for i in {1..5};
+# currently, there are only 6 levels, but we run it 7 times to be safe
+for i in {1..7};
 do
     echo "MEASUREMENT - Labs - STANDARD LOINC - load temp table adding level $i"
     bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
