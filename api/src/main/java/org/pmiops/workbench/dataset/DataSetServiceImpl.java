@@ -41,6 +41,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -366,6 +367,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     if (supportsConceptSets(domain)) {
       List<DbConceptSetConceptId> dbConceptSetConceptIds;
+      List<Long> dbCriteriaAnswerIds = new ArrayList<>();
       switch (domain) {
         case SURVEY:
         case PHYSICAL_MEASUREMENT_CSS:
@@ -373,6 +375,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               isPrepackagedAllSurveys(request)
                   ? findPrepackagedSurveyQuestionConceptIds()
                   : findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+          if (isSurveyDomainOnly(request)) {
+            List<Long> questionConceptIds = dbConceptSetConceptIds.stream()
+                    .map(DbConceptSetConceptId::getConceptId)
+                    .collect(Collectors.toList());
+            //find any quesitons that belong to PFHH survey. The PFHH survey should
+            //only use answer ids when looking up participants.
+            List<Long> pfhhSurveyQuestionIds =
+                    findPFHHSurveyQuestionIds(questionConceptIds);
+            if (!pfhhSurveyQuestionIds.isEmpty()) {
+              dbCriteriaAnswerIds = findDbCriteriaAnswerIds(pfhhSurveyQuestionIds);
+            }
+          }
           break;
         default:
           // Get all source concepts and check to see if they cross this domain. Please see:
@@ -1606,6 +1620,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
+  @NotNull
+  private List<Long> findPFHHSurveyQuestionIds(List<Long> conceptIds) {
+    service
+    return ImmutableList.of();
+  }
+  @NotNull
+  private List<Long> findDbCriteriaAnswerIds(List<Long> conceptIds) {
+    return ImmutableList.of();
+  }
+
   private List<DbConceptSetConceptId> findMultipleDomainConceptIds(
       Domain domain, List<Long> conceptSetIds) {
     List<DbConceptSetConceptId> dbConceptSetConceptIds =
@@ -1661,5 +1685,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private boolean isPrepackagedAllSurveys(DataSetPreviewRequest request) {
     final Domain domain = request.getDomain();
     return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY);
+  }
+
+  private boolean isSurveyDomainOnly(DataSetPreviewRequest request) {
+    final Domain domain = request.getDomain();
+    return domain.equals(Domain.SURVEY) && !request.getPrePackagedConceptSet().contains(SURVEY);
   }
 }
