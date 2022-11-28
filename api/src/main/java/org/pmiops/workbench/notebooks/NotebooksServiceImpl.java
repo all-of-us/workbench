@@ -139,10 +139,10 @@ public class NotebooksServiceImpl implements NotebooksService {
   public FileDetail copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceFirecloudName,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
       String toWorkspaceFirecloudName,
-      String newNotebookName) {
+      String newNotebookNameWithExtension) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
@@ -165,9 +165,11 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
 
     GoogleCloudLocators fromNotebookLocators =
-        getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookName);
+        getNotebookLocators(
+            fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookNameWithExtension);
     GoogleCloudLocators newNotebookLocators =
-        getNotebookLocators(toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookName);
+        getNotebookLocators(
+            toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookNameWithExtension);
 
     if (!cloudStorageClient
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
@@ -177,7 +179,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     cloudStorageClient.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
 
     FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(newNotebookName);
+    fileDetail.setName(newNotebookNameWithExtension);
     fileDetail.setPath(newNotebookLocators.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
@@ -189,16 +191,16 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String fromNotebookName) {
-    String newName = "Duplicate of " + fromNotebookName;
+      String workspaceNamespace, String workspaceName, String notebookNameWithExtension) {
+    String newNameWithExtension = "Duplicate of " + notebookNameWithExtension;
     final FileDetail copiedNotebookFileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            fromNotebookName,
+            notebookNameWithExtension,
             workspaceNamespace,
             workspaceName,
-            newName);
+            newNameWithExtension);
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }
@@ -220,16 +222,19 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail renameNotebook(
-      String workspaceNamespace, String workspaceName, String originalName, String newName) {
+      String workspaceNamespace,
+      String workspaceName,
+      String originalNameWithExtension,
+      String newNameWithExtension) {
     FileDetail fileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            originalName,
+            originalNameWithExtension,
             workspaceNamespace,
             workspaceName,
-            newName);
-    deleteNotebook(workspaceNamespace, workspaceName, originalName);
+            newNameWithExtension);
+    deleteNotebook(workspaceNamespace, workspaceName, originalNameWithExtension);
 
     return fileDetail;
   }
@@ -277,7 +282,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     Blob blob =
         cloudStorageClient.getBlob(
             bucketName,
-            "notebooks/".concat(NotebooksService.withJupyterNotebookExtension(notebookName)));
+            NotebookUtils.withNotebookPath(
+                NotebookUtils.withJupyterNotebookExtension(notebookName)));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
@@ -296,7 +302,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
     cloudStorageClient.writeFile(
         bucketName,
-        "notebooks/" + NotebooksService.withJupyterNotebookExtension(notebookNameWithFileExtension),
+        NotebookUtils.withNotebookPath(
+            NotebookUtils.withJupyterNotebookExtension(notebookNameWithFileExtension)),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
@@ -349,7 +356,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
-    String blobPath = NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String blobPath = NotebookUtils.withNotebookPath(notebookName);
     String pathStart = "gs://" + bucket + "/";
     String fullPath = pathStart + blobPath;
     BlobId blobId = BlobId.of(bucket, blobPath);
