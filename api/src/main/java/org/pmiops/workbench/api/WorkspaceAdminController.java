@@ -67,9 +67,10 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<ReadOnlyNotebookResponse> adminReadOnlyNotebook(
-      String workspaceNamespace, String notebookName, AccessReason accessReason) {
+      String workspaceNamespace, String notebookNameWithFileExtension, AccessReason accessReason) {
     final String notebookHtml =
-        workspaceAdminService.getReadOnlyNotebook(workspaceNamespace, notebookName, accessReason);
+        workspaceAdminService.getReadOnlyNotebook(
+            workspaceNamespace, notebookNameWithFileExtension, accessReason);
     return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
   }
 

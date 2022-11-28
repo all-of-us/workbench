@@ -59,36 +59,36 @@ public class NotebooksController implements NotebooksApiDelegate {
   public ResponseEntity<FileDetail> copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     return ResponseEntity.ok(
-        copyNotebookImpl(fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest));
+        copyNotebookImpl(
+            fromWorkspaceNamespace, fromWorkspaceId, fromNotebookNameWithExtension, copyRequest));
   }
 
   private FileDetail copyNotebookImpl(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
       // Checks the new name extension to match the original from file type, add extension if
       // needed.
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
-      String newName =
-          isRMarkdownNotebook(fromNotebookName)
-              ? NotebooksService.withRMarkdownExtension(copyRequest.getNewName())
-              : NotebooksService.withJupyterNotebookExtension(copyRequest.getNewName());
+      String newNameWithExtension =
+          isRMarkdownNotebook(fromNotebookNameWithExtension)
+              ? NotebookUtils.withRMarkdownExtension(copyRequest.getNewName())
+              : NotebookUtils.withJupyterNotebookExtension(copyRequest.getNewName());
 
-      // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withJupyterNotebookExtension(fromNotebookName),
+              fromNotebookNameWithExtension,
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              newName);
+              newNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
@@ -97,10 +97,11 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
-      String workspace, String workspaceName, String notebookName) {
+      String workspace, String workspaceName, String notebookNameWithExtension) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
+      fileDetail =
+          notebooksService.cloneNotebook(workspace, workspaceName, notebookNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -174,7 +175,7 @@ public class NotebooksController implements NotebooksApiDelegate {
     // throws NotFoundException if the notebook is not in GCS
     // returns null if found but no user-metadata
     Map<String, String> metadata =
-        cloudStorageClient.getMetadata(bucketName, "notebooks/" + notebookName);
+        cloudStorageClient.getMetadata(bucketName, NotebookUtils.withNotebookPath(notebookName));
 
     if (metadata != null) {
       String lockExpirationTime = metadata.get("lockExpiresAt");
