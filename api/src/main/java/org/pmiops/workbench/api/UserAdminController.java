@@ -14,7 +14,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
