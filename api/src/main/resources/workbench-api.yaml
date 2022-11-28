@@ -1525,7 +1525,9 @@ paths:
       - userAdmin
       consumes:
       - application/json
-      description: 'Updates the given user to bypass the request access requirement'
+      description: >
+        DEPRECATED.  Use unsafeSelfBypassAccessRequirements to bypass all modules at once.
+        Updates the given user to bypass the request access requirement.
       parameters:
       - in: body
         name: request
@@ -1545,6 +1547,21 @@ paths:
             "$ref": "#/definitions/ErrorResponse"
         400:
           description: No module exists with name submitted
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/unsafe-self-bypass-access-requirements":
+    post:
+      tags:
+        - userAdmin
+      description: 'Updates the given user to bypass all access requirements'
+      operationId: unsafeSelfBypassAccessRequirements
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        403:
+          description: Self bypass is disallowed in this environment
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
