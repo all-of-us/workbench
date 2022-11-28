@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import validate from 'validate.js';
 
 import { NewUserSatisfactionSurveySatisfaction } from 'generated/fetch';
 
@@ -11,9 +12,9 @@ import {
 } from 'app/components/inputs';
 import { Modal } from 'app/components/modals';
 import { MultipleChoiceQuestion } from 'app/components/multiple-choice-question';
+import { TooltipTrigger } from 'app/components/popups';
 import { surveyStyles } from 'app/components/surveys';
 import { surveysApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import {
   createNewUserSatisfactionSurveyStore,
   useStore,
@@ -49,6 +50,20 @@ export interface NewUserSatisfactionSurveyModalProps {
   onSubmitSuccess: () => void;
 }
 
+const validationCheck = {
+  satisfaction: {
+    presence: {
+      allowEmpty: false,
+      message: "^Satisfaction rating can't be blank",
+    },
+  },
+  additionalInfo: {
+    length: {
+      maximum: ADDITIONAL_INFO_MAX_CHARACTERS,
+    },
+  },
+};
+
 export const NewUserSatisfactionSurveyModal = ({
   onCancel,
   onSubmitSuccess,
@@ -58,6 +73,11 @@ export const NewUserSatisfactionSurveyModal = ({
   );
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [error, setError] = useState(false);
+
+  const validationErrors = validate(
+    newUserSatisfactionSurveyData,
+    validationCheck
+  );
 
   return (
     <Modal width={850} onRequestClose={onCancel}>
@@ -110,30 +130,44 @@ export const NewUserSatisfactionSurveyModal = ({
           <Button type='secondary' onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            type='primary'
-            disabled={
-              newUserSatisfactionSurveyData.satisfaction === undefined ||
-              newUserSatisfactionSurveyData.additionalInfo.length > 500 ||
-              submittingRequest
+          <TooltipTrigger
+            content={
+              validationErrors && (
+                <ul>
+                  {
+                    <>
+                      {Object.entries(validationErrors).map(
+                        ([attribute, errorMessages]) => (
+                          <li key={attribute}>{errorMessages[0]}</li>
+                        )
+                      )}
+                    </>
+                  }
+                </ul>
+              )
             }
-            onClick={async () => {
-              setSubmittingRequest(true);
-              try {
-                await surveysApi().createNewUserSatisfactionSurvey(
-                  newUserSatisfactionSurveyData
-                );
-                setError(false);
-                onSubmitSuccess();
-              } catch {
-                setError(true);
-              } finally {
-                setSubmittingRequest(false);
-              }
-            }}
           >
-            Submit
-          </Button>
+            <Button
+              type='primary'
+              disabled={!!validationErrors || submittingRequest}
+              onClick={async () => {
+                setSubmittingRequest(true);
+                try {
+                  await surveysApi().createNewUserSatisfactionSurvey(
+                    newUserSatisfactionSurveyData
+                  );
+                  setError(false);
+                  onSubmitSuccess();
+                } catch {
+                  setError(true);
+                } finally {
+                  setSubmittingRequest(false);
+                }
+              }}
+            >
+              Submit
+            </Button>
+          </TooltipTrigger>
         </FlexRow>
       </FlexColumn>
     </Modal>
