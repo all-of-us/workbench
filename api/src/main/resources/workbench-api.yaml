@@ -1519,36 +1519,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/unsafe-self-bypass-access-requirement":
-    post:
-      tags:
-      - userAdmin
-      consumes:
-      - application/json
-      description: >
-        DEPRECATED.  Use unsafeSelfBypassAccessRequirements to bypass all modules at once.
-        Updates the given user to bypass the request access requirement.
-      parameters:
-      - in: body
-        name: request
-        schema:
-          "$ref": "#/definitions/AccessBypassRequest"
-        description: 'Whether the requirement should be bypassed or not. Defaults
-          to true, so an empty body  will cause the requirement to be bypassed.'
-      operationId: unsafeSelfBypassAccessRequirement
-      responses:
-        200:
-          description: success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-        403:
-          description: Self bypass is disallowed in this environment
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        400:
-          description: No module exists with name submitted
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/unsafe-self-bypass-access-requirements":
     post:
       tags:
