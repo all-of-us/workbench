@@ -83,15 +83,15 @@ const useApiProxy = async page => {
     ).on('error', (cause) => {
       reject(new Error('Proxy request failed. \n' + cause + '\nIs your API Proxy running?'))
     })
-  }).then(async () => {
-    await page.setJavaScriptEnabled(false)
-    await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
-    await page.evaluate(
-      url => { localStorage.allOfUsApiUrlOverride = url},
-      process.env.API_PROXY_URL
-    )
-    await page.setJavaScriptEnabled(true)
-  });
+  })
+  await page.setJavaScriptEnabled(false)
+  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+  await page.evaluate(
+    url => { localStorage.allOfUsApiUrlOverride = url},
+    process.env.API_PROXY_URL
+  )
+  await page.setJavaScriptEnabled(true)
+
 
 }
 export_({useApiProxy})
