@@ -31,6 +31,26 @@ module.exports = {
     
     config.optimization.minimizer = removeCssMinimizer(config.optimization.minimizer);
 
+    // Remove noisy warning about compiled included code. Stolen from:
+    // https://medium.com/tomincode/hiding-critical-dependency-warnings-from-webpack-c76ccdb1f6c1
+    /*
+    config.plugins.push(
+      new webpack.ContextReplacementPlugin(
+        /[/]ui[/]src[/]terraui[/]/,
+        (data) => {
+          const msg = 'require function is used in a way in which dependencies cannot be '
+            +'statically extracted'
+          const noiseIndex = data.dependencies.findIndex(d => d.critical === msg)
+          if (noiseIndex !== -1) {
+            // Must modify the object rather than return a modified copy or result is ignored.
+            delete data.dependencies[noiseIndex].critical
+          }
+          return data;
+        },
+      ),
+    )
+    */
+
     return config;
   },
   jest: function(config) {
