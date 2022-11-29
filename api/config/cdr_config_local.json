@@ -109,19 +109,15 @@
     },
     {
       "cdrVersionId": 7,
-      "isDefault": true,
-      "name": "Synthetic Dataset v4",
-      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "isDefault": false,
+      "name": "Outdated CT CDR",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "test_R2019q4r3",
-      "creationTime": "2019-09-30 00:00:00Z",
-      "releaseNumber": 7,
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "hasFitbitData": true,
-      "hasFitbitSleepData": true,
-      "hasCopeSurveyData": true,
-      "hasSurveyConductData": true,
-      "accessTier": "registered"
+      "accessTier": "controlled"
     },
     {
       "cdrVersionId": 8,
@@ -144,6 +140,22 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled"
+    },
+    {
+      "cdrVersionId": 9,
+      "isDefault": true,
+      "name": "Synthetic Dataset v4",
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "test_R2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 7,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "accessTier": "registered"
     }
   ]
 }
