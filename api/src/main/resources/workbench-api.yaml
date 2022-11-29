@@ -4192,6 +4192,27 @@ paths:
           description: A collection of data filter options
           schema:
             "$ref": "#/definitions/DataFiltersResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/charts":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - chartBuilder
+      description: Create chart data for participants.
+      operationId: getChartData
+      parameters:
+        - in: query
+          name: cohortId
+          type: integer
+          format: int64
+          required: false
+          description: cohort id optional
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/ChartDataListResponse"
   "/v1/surveys/newUserSatisfactionSurvey":
     post:
       tags:
@@ -8949,6 +8970,43 @@ definitions:
     properties:
       ethnicity:
         description: ethnicity of subject
+        type: string
+      count:
+        description: number of subjects
+        type: integer
+        format: int64
+  ChartDataListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/ChartData"
+  ChartData:
+    type: object
+    required:
+      - gender
+      - sexAtBirth
+      - race
+      - ageBin
+      - count
+    properties:
+      gender:
+        description: gender of subject
+        type: string
+      sexAtBirth:
+        description: sex at birth of subject
+        type: string
+      race:
+        description: race of subject
+        type: string
+      ethnicity:
+        description: ethnicity of subject
+        type: string
+      ageBin:
+        description: lower and higher (inclusive) age range of subject
         type: string
       count:
         description: number of subjects

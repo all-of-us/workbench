@@ -24,6 +24,7 @@ import {
   AuthDomainApi,
   BaseAPI, // internal
   CdrVersionsApi,
+  ChartBuilderApi,
   CohortAnnotationDefinitionApi,
   CohortBuilderApi,
   CohortReviewApi,
@@ -100,6 +101,7 @@ function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
+export const chartBuilderApi = bindCtor(ChartBuilderApi);
 export const cohortAnnotationDefinitionApi = bindCtor(
   CohortAnnotationDefinitionApi
 );

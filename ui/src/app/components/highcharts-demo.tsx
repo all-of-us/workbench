@@ -18,6 +18,7 @@ import {
 
 import { getChartObj } from 'app/cohort-search/utils';
 import {
+  chartBuilderApi,
   cohortBuilderApi,
   cohortsApi,
 } from 'app/services/swagger-fetch-clients';
@@ -159,10 +160,11 @@ export const DemoChart = fp.flow(withRouter)(
         AgeType[AgeType.AGE],
         cohortDefinition
       );
-      console.log(JSON.stringify(demoChartData.items));
       this.setState({ demoChartData: demoChartData.items });
       this.getChartOptions();
       hideSpinner();
+      const c = await chartBuilderApi().getChartData(ns, wsid,1);
+      console.log(JSON.stringify(c));
     }
 
     async getCohort() {
