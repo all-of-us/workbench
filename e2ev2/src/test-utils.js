@@ -80,8 +80,8 @@ const useApiProxy = async page => {
         assert(response.statusCode === 200);
         resolve()
       }
-    ).on('error', (err) => {
-      reject(err)
+    ).on('error', (cause) => {
+      reject(new Error('Proxy request failed. \n' + cause + '\nIs your API Proxy running?'))
     })
   }).then(async () => {
     await page.setJavaScriptEnabled(false)
