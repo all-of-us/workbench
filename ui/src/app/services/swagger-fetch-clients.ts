@@ -42,6 +42,7 @@ import {
   RuntimeApi,
   StatusAlertApi,
   StatusApi,
+  SurveysApi,
   UserAdminApi,
   UserApi,
   UserMetricsApi,
@@ -125,6 +126,7 @@ export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 export const diskApi = bindCtor(DiskApi);
+export const surveysApi = bindCtor(SurveysApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {
