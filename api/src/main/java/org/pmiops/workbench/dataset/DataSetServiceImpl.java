@@ -41,9 +41,9 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
-import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.QueryParameterUtil;
@@ -231,6 +231,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private final BigQueryService bigQueryService;
+
+  private final CohortBuilderService cohortBuilderService;
   private final CohortService cohortService;
   private final ConceptSetService conceptSetService;
   private final CohortQueryBuilder cohortQueryBuilder;
@@ -249,6 +251,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   public DataSetServiceImpl(
       BigQueryService bigQueryService,
+      CohortBuilderService cohortBuilderService,
       CohortService cohortService,
       ConceptSetService conceptSetService,
       CohortQueryBuilder cohortQueryBuilder,
@@ -263,6 +266,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Clock clock,
       Provider<DbUser> userProvider) {
     this.bigQueryService = bigQueryService;
+    this.cohortBuilderService = cohortBuilderService;
     this.cohortService = cohortService;
     this.conceptSetService = conceptSetService;
     this.cohortQueryBuilder = cohortQueryBuilder;
@@ -375,17 +379,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               isPrepackagedAllSurveys(request)
                   ? findPrepackagedSurveyQuestionConceptIds()
                   : findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
-          if (isSurveyDomainOnly(request)) {
-            List<Long> questionConceptIds = dbConceptSetConceptIds.stream()
-                    .map(DbConceptSetConceptId::getConceptId)
+          List<Long> questionConceptIds =
+              dbConceptSetConceptIds.stream()
+                  .map(DbConceptSetConceptId::getConceptId)
+                  .collect(Collectors.toList());
+          // find any questions that belong to PFHH survey. The PFHH survey should
+          // only use answer ids when looking up participants.
+          List<Long> pfhhSurveyQuestionIds = findPFHHSurveyQuestionIds(questionConceptIds);
+          if (!pfhhSurveyQuestionIds.isEmpty()) {
+            // need to filter out PFHH survey questions for other survey questions
+            dbConceptSetConceptIds =
+                dbConceptSetConceptIds.stream()
+                    .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
                     .collect(Collectors.toList());
-            //find any quesitons that belong to PFHH survey. The PFHH survey should
-            //only use answer ids when looking up participants.
-            List<Long> pfhhSurveyQuestionIds =
-                    findPFHHSurveyQuestionIds(questionConceptIds);
-            if (!pfhhSurveyQuestionIds.isEmpty()) {
-              dbCriteriaAnswerIds = findDbCriteriaAnswerIds(pfhhSurveyQuestionIds);
-            }
+            // find all answers for the questions
+            dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
           }
           break;
         default:
@@ -419,6 +427,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           queryBuilder.append(" OR ");
         }
         queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, false));
+      }
+      if (Domain.SURVEY.equals(request.getDomain()) && !dbCriteriaAnswerIds.isEmpty()) {
+        mergedQueryParameterValues.put(
+            "answerConceptIds",
+            QueryParameterValue.array(dbCriteriaAnswerIds.toArray(new Long[0]), Long.class));
+        if (queryBuilder.toString().contains("question_concept_id IN unnest(@sourceConceptIds)")) {
+          queryBuilder.append(" OR ");
+        }
+        queryBuilder.append("answer_concept_id IN unnest(@answerConceptIds)");
       }
       queryBuilder.append(")");
     }
@@ -731,56 +748,80 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         conceptSets.stream()
             .filter(cs -> cs.getDomainEnum().equals(domain))
             .collect(Collectors.toList());
-    if (preDefinedSurveyConceptSet(dbConceptSets)) {
-      return Optional.of(
-          "("
-              + BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
-                  .replace("unnest", "")
-                  .replace("@sourceConceptIds", SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
-              + ")");
-    } else {
-      final List<Long> dbConceptSetIds =
-          conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
-      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-          domain.equals(Domain.SURVEY)
-              ? findDomainConceptIds(domain, dbConceptSetIds)
-              : findMultipleDomainConceptIds(domain, dbConceptSetIds);
-      if (dbConceptSetConceptIds.isEmpty()) {
-        return Optional.empty();
-      } else {
-        StringBuilder queryBuilder = new StringBuilder();
-        Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+    final List<Long> dbConceptSetIds =
+        conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
+    List<DbConceptSetConceptId> dbConceptSetConceptIds;
+    List<Long> dbCriteriaAnswerIds = new ArrayList<>();
+    if (domain.equals(Domain.SURVEY)) {
+      dbConceptSetConceptIds =
+          prePackagedSurveyConceptSet(dbConceptSets)
+              ? findPrepackagedSurveyQuestionConceptIds()
+              : findDomainConceptIds(domain, dbConceptSetIds);
+      List<Long> questionConceptIds =
+          dbConceptSetConceptIds.stream()
+              .map(DbConceptSetConceptId::getConceptId)
+              .collect(Collectors.toList());
+      // find any questions that belong to PFHH survey. The PFHH survey should
+      // only use answer ids when looking up participants.
+      List<Long> pfhhSurveyQuestionIds = findPFHHSurveyQuestionIds(questionConceptIds);
+      if (!pfhhSurveyQuestionIds.isEmpty()) {
+        // need to filter out PFHH survey questions for other survey questions
+        dbConceptSetConceptIds =
             dbConceptSetConceptIds.stream()
-                .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
-        String standardConceptIds =
-            partitionSourceAndStandard.get(true).stream()
-                .map(c -> c.getConceptId().toString())
-                .collect(Collectors.joining(", "));
-        String sourceConceptIds =
-            partitionSourceAndStandard.get(false).stream()
-                .map(c -> c.getConceptId().toString())
-                .collect(Collectors.joining(", "));
-        if (!standardConceptIds.isEmpty()) {
-          queryBuilder.append(
-              BigQueryDataSetTableInfo.getConceptIdIn(domain, true)
-                  .replaceAll("unnest", "")
-                  .replaceAll("(@standardConceptIds)", standardConceptIds));
-        }
-        if (!sourceConceptIds.isEmpty()) {
-          if (!standardConceptIds.isEmpty()) {
-            queryBuilder.append(" OR ");
-          }
-          queryBuilder.append(
-              BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
-                  .replaceAll("unnest", "")
-                  .replaceAll("(@sourceConceptIds)", sourceConceptIds));
-        }
-        return Optional.of("(" + queryBuilder + ")");
+                .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
+                .collect(Collectors.toList());
+        // find all answers for the questions
+        dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
       }
+    } else {
+      dbConceptSetConceptIds = findMultipleDomainConceptIds(domain, dbConceptSetIds);
+    }
+
+    if (dbConceptSetConceptIds.isEmpty() && dbCriteriaAnswerIds.isEmpty()) {
+      return Optional.empty();
+    } else {
+      StringBuilder queryBuilder = new StringBuilder();
+      Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+          dbConceptSetConceptIds.stream()
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+      String standardConceptIds =
+          partitionSourceAndStandard.get(true).stream()
+              .map(c -> c.getConceptId().toString())
+              .collect(Collectors.joining(", "));
+      String sourceConceptIds =
+          partitionSourceAndStandard.get(false).stream()
+              .map(c -> c.getConceptId().toString())
+              .collect(Collectors.joining(", "));
+      if (!standardConceptIds.isEmpty()) {
+        queryBuilder.append(
+            BigQueryDataSetTableInfo.getConceptIdIn(domain, true)
+                .replaceAll("unnest", "")
+                .replaceAll("(@standardConceptIds)", standardConceptIds));
+      }
+      if (!sourceConceptIds.isEmpty()) {
+        if (!standardConceptIds.isEmpty()) {
+          queryBuilder.append(" OR ");
+        }
+        queryBuilder.append(
+            BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
+                .replaceAll("unnest", "")
+                .replaceAll("(@sourceConceptIds)", sourceConceptIds));
+      }
+      if (Domain.SURVEY.equals(domain) && !dbCriteriaAnswerIds.isEmpty()) {
+        String answerConceptIds =
+            dbCriteriaAnswerIds.stream().map(Object::toString).collect(Collectors.joining(","));
+        if (queryBuilder.toString().contains("question_concept_id IN (")) {
+          queryBuilder.append(" OR ");
+        }
+        queryBuilder.append(
+            "answer_concept_id IN (@answerConceptIds)"
+                .replaceAll("@answerConceptIds", answerConceptIds));
+      }
+      return Optional.of("(" + queryBuilder + ")");
     }
   }
 
-  private boolean preDefinedSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
+  private boolean prePackagedSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
     return dbConceptSets.stream()
         .anyMatch(c -> c.getConceptSetId() == 0 && Domain.SURVEY.equals(c.getDomainEnum()));
   }
@@ -796,7 +837,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   public boolean conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
       List<DbConceptSet> conceptSetsSelected) {
-    if (preDefinedSurveyConceptSet(conceptSetsSelected)) {
+    if (prePackagedSurveyConceptSet(conceptSetsSelected)) {
       return true;
     }
     if (conceptSetsSelected.isEmpty()) {
@@ -1622,12 +1663,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @NotNull
   private List<Long> findPFHHSurveyQuestionIds(List<Long> conceptIds) {
-    service
-    return ImmutableList.of();
+    return cohortBuilderService.findPFHHSurveyQuestionIds(conceptIds);
   }
+
   @NotNull
-  private List<Long> findDbCriteriaAnswerIds(List<Long> conceptIds) {
-    return ImmutableList.of();
+  private List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds) {
+    return cohortBuilderService.findPFHHSurveyAnswerIds(conceptIds);
   }
 
   private List<DbConceptSetConceptId> findMultipleDomainConceptIds(

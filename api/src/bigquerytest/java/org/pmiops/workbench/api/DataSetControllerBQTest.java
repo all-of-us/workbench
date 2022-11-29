@@ -30,9 +30,12 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
@@ -65,6 +68,8 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.model.CriteriaSubType;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -107,12 +112,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
+
+  @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
+
+  @Autowired private CohortBuilderService cohortBuilderService;
   @Autowired private CohortDao cohortDao;
   @Autowired private CohortService cohortService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
-  @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private ConceptSetService conceptSetService;
   @Autowired private DSLinkingDao dsLinkingDao;
@@ -146,6 +154,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbConditionConceptSetForValues2;
   private DbConceptSet dbProcedureConceptSet;
   private DbConceptSet dbMeasurementConceptSet;
+
+  private DbConceptSet dbPFHHConceptSet;
   private DbWorkspace dbWorkspace;
   private DbDSLinking conditionLinking1;
   private DbDSLinking conditionLinking2;
@@ -232,6 +242,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
+            cohortBuilderService,
             cohortService,
             conceptSetService,
             cohortQueryBuilder,
@@ -292,6 +303,64 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbMeasurementConceptSet =
         conceptSetDao.save(
             createConceptSet(Domain.MEASUREMENT, dbWorkspace.getWorkspaceId(), 3L, Boolean.TRUE));
+    dbPFHHConceptSet =
+        conceptSetDao.save(
+            createConceptSet(
+                Domain.SURVEY, dbWorkspace.getWorkspaceId(), 43530446L, Boolean.FALSE));
+    // adding pfhh survey module
+    DbCriteria pfhhSurveyModule =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(true)
+                .addConceptId("1740639")
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("Personal and Family Health History")
+                .build());
+    // adding pfhh survey module path
+    pfhhSurveyModule.setPath(String.valueOf(pfhhSurveyModule.getId()));
+    cbCriteriaDao.save(pfhhSurveyModule);
+    // adding pfhh survey question
+    DbCriteria pfhhSurveyQuestion =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
+                .addGroup(true)
+                .addConceptId("43530446")
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("Question")
+                .build());
+    // setting the correct path on pfhh question
+    pfhhSurveyQuestion.setPath(pfhhSurveyModule.getId() + "." + pfhhSurveyQuestion.getId());
+    pfhhSurveyQuestion = cbCriteriaDao.save(pfhhSurveyQuestion);
+    // adding a pfhh survey answer
+    DbCriteria pfhhSurveyAnswer =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.ANSWER.toString())
+                .addGroup(false)
+                .addConceptId("43530446")
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("Answer")
+                .addValue("1385558")
+                .build());
+    // setting the correct path on pfhh answer
+    pfhhSurveyAnswer.setPath(
+        pfhhSurveyModule.getId()
+            + "."
+            + pfhhSurveyQuestion.getId()
+            + "."
+            + pfhhSurveyAnswer.getId());
+    cbCriteriaDao.save(pfhhSurveyAnswer);
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -614,6 +683,25 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void testGenerateCodePFHHSurveyConceptSet() {
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbPFHHConceptSet),
+                            ImmutableList.of(dbCohort3),
+                            ImmutableList.of(Domain.SURVEY),
+                            false,
+                            ImmutableList.of())),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+
+    assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
+  }
+
+  @Test
   public void getValuesFromDomainCondition() {
     List<DomainWithDomainValues> domainWithDomainValues =
         Objects.requireNonNull(
@@ -865,6 +953,32 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .isEqualTo(
             new DataSetPreviewResponse()
                 .domain(Domain.MEASUREMENT)
+                .addValuesItem(
+                    new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
+  }
+
+  @Test
+  public void previewDataSetByDomainPFHHSurveyConceptSet() {
+    DataSetPreviewRequest pfhhDataSetRequest =
+        new DataSetPreviewRequest()
+            .domain(Domain.SURVEY)
+            .addConceptSetIdsItem(dbPFHHConceptSet.getConceptSetId())
+            .addValuesItem("person_id")
+            .addCohortIdsItem(dbCohort3.getCohortId());
+    pfhhDataSetRequest.setPrePackagedConceptSet(ImmutableList.of());
+    DataSetPreviewResponse dataSetPreviewResponse =
+        Objects.requireNonNull(
+            controller
+                .previewDataSetByDomain(
+                    dbWorkspace.getWorkspaceNamespace(),
+                    dbWorkspace.getFirecloudName(),
+                    pfhhDataSetRequest)
+                .getBody());
+
+    assertThat(dataSetPreviewResponse)
+        .isEqualTo(
+            new DataSetPreviewResponse()
+                .domain(Domain.SURVEY)
                 .addValuesItem(
                     new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
   }

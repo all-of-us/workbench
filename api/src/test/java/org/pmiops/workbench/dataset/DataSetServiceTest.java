@@ -738,7 +738,7 @@ public class DataSetServiceTest {
 
   @Test
   public void test_getExtractionDirectory_datasetDoesNotExist() {
-    assertThat(dataSetServiceImpl.getExtractionDirectory(123l).isPresent()).isFalse();
+    assertThat(dataSetServiceImpl.getExtractionDirectory(123L).isPresent()).isFalse();
   }
 
   @Test
