@@ -1,11 +1,10 @@
 package org.pmiops.workbench.cohorts;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -15,20 +14,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CohortService {
-
-  private final BigQueryService bigQueryService;
-  private final CohortQueryBuilder cohortQueryBuilder;
   private final CohortDao cohortDao;
   private final CohortMapper cohortMapper;
 
   @Autowired
-  public CohortService(
-      BigQueryService bigQueryService,
-      CohortQueryBuilder cohortQueryBuilder,
-      CohortDao cohortDao,
-      CohortMapper cohortMapper) {
-    this.bigQueryService = bigQueryService;
-    this.cohortQueryBuilder = cohortQueryBuilder;
+  public CohortService(CohortDao cohortDao, CohortMapper cohortMapper) {
     this.cohortDao = cohortDao;
     this.cohortMapper = cohortMapper;
   }
@@ -37,6 +27,10 @@ public class CohortService {
     return StreamSupport.stream(cohortDao.findAllById(cohortIds).spliterator(), false)
         .map(cohortMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  public List<DbCohort> findAllByCohortIdIn(Collection<Long> cohortIds) {
+    return cohortDao.findAllByCohortIdIn(cohortIds);
   }
 
   public Optional<DbCohort> findByCohortId(Long cohortId) {

@@ -45,9 +45,12 @@ import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -126,14 +129,21 @@ public class DataSetServiceTest {
   private DbDataset dbDataset;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, DataSetMapperImpl.class, DataSetServiceImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    DataSetMapperImpl.class,
+    DataSetServiceImpl.class,
+    ConceptSetMapperImpl.class,
+    CohortService.class,
+    CohortMapperImpl.class,
+    ConceptSetService.class
+  })
   @MockBean({
     BigQueryService.class,
     DbUser.class,
     CommonMappers.class,
-    CohortService.class,
+    CohortBuilderService.class,
     ConceptBigQueryService.class,
-    ConceptSetService.class,
     CohortQueryBuilder.class,
     UserRecentResourceService.class
   })
@@ -524,9 +534,14 @@ public class DataSetServiceTest {
 
   @Test
   public void testGetDataSets_cohort() {
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+
     DbDataset dbDataset = new DbDataset();
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
 
     List<DataSet> datasets =
@@ -540,9 +555,14 @@ public class DataSetServiceTest {
     assertThrows(
         NotFoundException.class,
         () -> {
+          DbConceptSet dbConceptSet = new DbConceptSet();
+          dbConceptSet.setConceptSetId(3L);
+          dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+
           DbDataset dbDataset = new DbDataset();
           dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
           dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+          dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
           dataSetServiceImpl.saveDataSet(dbDataset);
           dataSetServiceImpl.getDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
         });
@@ -550,11 +570,17 @@ public class DataSetServiceTest {
 
   @Test
   public void testGetDataSets_cohort_onlyvalidDataSet() {
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+    dbConceptSet = conceptSetDao.save(dbConceptSet);
+
     DbDataset dbDataset = new DbDataset();
     dbDataset.setName("Data Set dirty 67");
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dbDataset.setInvalid(false);
+    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
 
     DbDataset dbDataset_invalid = new DbDataset();
@@ -562,6 +588,7 @@ public class DataSetServiceTest {
     dbDataset_invalid.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset_invalid.setWorkspaceId(cohort.getWorkspaceId());
     dbDataset_invalid.setInvalid(true);
+    dbDataset_invalid.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dataSetServiceImpl.saveDataSet(dbDataset_invalid);
 
     List<DataSet> datasets =
@@ -581,6 +608,7 @@ public class DataSetServiceTest {
     DbDataset dbDataset = new DbDataset();
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dbDataset.setWorkspaceId(workspace.getWorkspaceId());
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
 
     List<DataSet> datasets =
@@ -599,12 +627,14 @@ public class DataSetServiceTest {
     DbDataset dbDataset = new DbDataset();
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dbDataset.setWorkspaceId(workspace.getWorkspaceId());
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setInvalid(false);
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
 
     DbDataset dbDataset_invalid = new DbDataset();
     dbDataset_invalid.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dbDataset_invalid.setWorkspaceId(workspace.getWorkspaceId());
+    dbDataset_invalid.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset_invalid.setInvalid(true);
     dataSetServiceImpl.saveDataSet(dbDataset_invalid);
 
@@ -628,6 +658,7 @@ public class DataSetServiceTest {
           DbDataset dbDataset = new DbDataset();
           dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
           dbDataset.setWorkspaceId(WORKSPACE_ID);
+          dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
           dataSetServiceImpl.saveDataSet(dbDataset);
           dataSetServiceImpl.getDataSets(
               101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
@@ -859,12 +890,17 @@ public class DataSetServiceTest {
   }
 
   private DbDataset createDbDataSetEntry() {
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+
     DbDataset dbDataset = new DbDataset();
     dbDataset.setName("Data Set dirty 67");
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dbDataset.setCreatorId(cohort.getCreator().getUserId());
     dbDataset.setInvalid(false);
+    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     return dbDataset;
   }
 }

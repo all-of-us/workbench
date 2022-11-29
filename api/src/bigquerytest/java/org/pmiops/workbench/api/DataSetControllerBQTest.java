@@ -33,8 +33,11 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
@@ -62,8 +65,6 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -159,6 +160,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Import({
     BigQueryTestService.class,
     CdrVersionService.class,
+    CohortBuilderMapperImpl.class,
+    CohortBuilderServiceImpl.class,
+    CohortMapperImpl.class,
+    ConceptSetMapperImpl.class,
     CohortService.class,
     ConceptSetService.class,
     CohortQueryBuilder.class,
@@ -171,10 +176,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @MockBean({
     BillingProjectAuditor.class,
     CohortCloningService.class,
-    CohortService.class,
     CommonMappers.class,
-    ConceptSetMapperImpl.class,
-    ConceptSetService.class,
     FireCloudServiceImpl.class,
     FreeTierBillingService.class,
     NotebooksServiceImpl.class,
@@ -230,10 +232,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
-            cohortDao,
             cohortService,
-            conceptBigQueryService,
-            conceptSetDao,
             conceptSetService,
             cohortQueryBuilder,
             dataSetDao,
@@ -293,14 +292,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbMeasurementConceptSet =
         conceptSetDao.save(
             createConceptSet(Domain.MEASUREMENT, dbWorkspace.getWorkspaceId(), 3L, Boolean.TRUE));
-    when(conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
-        .thenReturn(
-            ImmutableList.of(
-                new ConceptSet().id(dbConditionConceptSet.getConceptSetId()),
-                new ConceptSet().id(dbConditionConceptSetForValues.getConceptSetId()),
-                new ConceptSet().id(dbConditionConceptSetForValues2.getConceptSetId()),
-                new ConceptSet().id(dbProcedureConceptSet.getConceptSetId()),
-                new ConceptSet().id(dbMeasurementConceptSet.getConceptSetId())));
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -316,13 +307,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort3.setWorkspaceId(dbWorkspace.getWorkspaceId());
     dbCohort3.setCriteria(new Gson().toJson(CohortDefinitions.conditionPreviewCodes()));
     dbCohort3 = cohortDao.save(dbCohort3);
-
-    when(cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
-        .thenReturn(
-            ImmutableList.of(
-                new Cohort().id(dbCohort1.getCohortId()),
-                new Cohort().id(dbCohort2.getCohortId()),
-                new Cohort().id(dbCohort3.getCohortId())));
 
     conditionLinking1 =
         DbDSLinking.builder()
