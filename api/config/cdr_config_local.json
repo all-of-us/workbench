@@ -31,7 +31,7 @@
       "creationTime": "2018-06-06 00:00:00Z",
       "releaseNumber": 1,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2020q1_3",
+      "cdrDbName": "cdr",
       "accessTier": "registered"
     },
     {
@@ -42,7 +42,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_44",
+      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -55,7 +55,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_44",
+      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -70,7 +70,7 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2019q4_14",
+      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -85,7 +85,7 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_c_2019q4_40",
+      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "storageBasePath": "5",
@@ -104,7 +104,7 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2019q4_19",
+      "cdrDbName": "cdr",
       "accessTier": "registered"
     },
     {
@@ -116,7 +116,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 7,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_52",
+      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
@@ -134,7 +134,7 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 8,
       "numParticipants": 234525,
-      "cdrDbName": "synth_c_2019q4_47",
+      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
