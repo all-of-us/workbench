@@ -8,7 +8,6 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,9 +24,6 @@ public class ConceptBigQueryService {
   private final BigQueryService bigQueryService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
-  public static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
-      "SELECT DISTINCT(question_concept_id) as concept_id \n"
-          + "FROM `${projectId}.${dataSetId}.ds_survey`\n";
 
   @Autowired
   public ConceptBigQueryService(BigQueryService bigQueryService) {
@@ -97,22 +93,5 @@ public class ConceptBigQueryService {
     } else {
       sqlBuilder.append(" unnest(@" + conceptIdsParam + ")");
     }
-  }
-
-  public List<Long> getSurveyQuestionConceptIds() {
-    QueryJobConfiguration qjc =
-        QueryJobConfiguration.newBuilder(SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
-            .setUseLegacySql(false)
-            .build();
-    TableResult result =
-        bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc), 360000L);
-    List<Long> conceptIdList = new ArrayList<>();
-    result
-        .getValues()
-        .forEach(
-            surveyValue -> {
-              conceptIdList.add(Long.parseLong(surveyValue.get(0).getValue().toString()));
-            });
-    return conceptIdList;
   }
 }
