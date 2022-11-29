@@ -3,6 +3,7 @@ package org.pmiops.workbench.conceptset;
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -168,10 +169,18 @@ public class ConceptSetService {
         conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
 
+  public Optional<DbConceptSet> findById(Long id){
+    return conceptSetDao.findById(id);
+  }
+
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
     return StreamSupport.stream(conceptSetDao.findAllById(conceptSetIds).spliterator(), false)
         .map(conceptSetMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  public List<DbConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds) {
+    return conceptSetDao.findAllByConceptSetIdIn(conceptSetIds);
   }
 
   /**
