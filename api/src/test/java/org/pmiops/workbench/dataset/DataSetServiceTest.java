@@ -129,12 +129,20 @@ public class DataSetServiceTest {
   private DbDataset dbDataset;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, DataSetMapperImpl.class, DataSetServiceImpl.class, ConceptSetMapperImpl.class, CohortService.class, CohortMapperImpl.class, ConceptSetService.class})
+  @Import({
+    FakeClockConfiguration.class,
+    DataSetMapperImpl.class,
+    DataSetServiceImpl.class,
+    ConceptSetMapperImpl.class,
+    CohortService.class,
+    CohortMapperImpl.class,
+    ConceptSetService.class
+  })
   @MockBean({
     BigQueryService.class,
     DbUser.class,
     CommonMappers.class,
-          CohortBuilderService.class,
+    CohortBuilderService.class,
     ConceptBigQueryService.class,
     CohortQueryBuilder.class,
     UserRecentResourceService.class

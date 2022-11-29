@@ -149,8 +149,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
   private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
-          "SELECT DISTINCT(question_concept_id) as concept_id \n"
-                  + "FROM `${projectId}.${dataSetId}.ds_survey`\n";
+      "SELECT DISTINCT(question_concept_id) as concept_id \n"
+          + "FROM `${projectId}.${dataSetId}.ds_survey`\n";
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -434,10 +434,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     queryBuilder.append(LIMIT_20);
     QueryJobConfiguration previewBigQueryJobConfig =
         buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
-    return
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
-            APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    return bigQueryService.executeQuery(
+        bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
+        APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
   }
 
   @Override
@@ -723,9 +722,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           "("
               + BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
                   .replace("unnest", "")
-                  .replace(
-                      "@sourceConceptIds",
-                      SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
+                  .replace("@sourceConceptIds", SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
               + ")");
     } else {
       final List<Long> dbConceptSetIds =
@@ -1527,8 +1524,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   /**
    * If the domain is Condition/Procedure and the concept set contains a source concept then it may
-   * have multiple domains. Please see:
-   * <a href="https://precisionmedicineinitiative.atlassian.net/browse/RW-7657">RW-7657</a>
+   * have multiple domains. Please see: <a
+   * href="https://precisionmedicineinitiative.atlassian.net/browse/RW-7657">RW-7657</a>
    */
   @NotNull
   private List<String> findAllDomains(Long conceptSetId, Domain domain) {
@@ -1546,8 +1543,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
 
       Long[] sourceConceptIds =
-              source.stream()
-                      .map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new);
+          source.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new);
 
       // add query param for source concepts
       Map<String, QueryParameterValue> queryParams = new HashMap<>();
@@ -1584,18 +1580,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @NotNull
   private List<DbConceptSetConceptId> findPrepackagedSurveyQuestionConceptIds() {
     QueryJobConfiguration qjc =
-            QueryJobConfiguration.newBuilder(SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
-                    .setUseLegacySql(false)
-                    .build();
+        QueryJobConfiguration.newBuilder(SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
+            .setUseLegacySql(false)
+            .build();
     TableResult result =
-            bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc), 360000L);
+        bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc), 360000L);
     List<Long> conceptIdList = new ArrayList<>();
     result
-            .getValues()
-            .forEach(
-                    surveyValue -> {
-                      conceptIdList.add(Long.parseLong(surveyValue.get(0).getValue().toString()));
-                    });
+        .getValues()
+        .forEach(
+            surveyValue -> {
+              conceptIdList.add(Long.parseLong(surveyValue.get(0).getValue().toString()));
+            });
     return conceptIdList.stream()
         .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(false).build())
         .collect(Collectors.toList());
@@ -1617,7 +1613,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .filter(c -> c.getStandard() == Boolean.TRUE)
             .collect(Collectors.toList());
     List<DbConceptSetConceptId> dbPossibleSourceConceptIds =
-            conceptSetService.findAllByConceptSetIdIn(conceptSetIds).stream()
+        conceptSetService.findAllByConceptSetIdIn(conceptSetIds).stream()
             .flatMap(
                 cs ->
                     cs.getConceptSetConceptIds().stream()
@@ -1625,8 +1621,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .collect(Collectors.toList());
 
     Long[] sourceConceptIds =
-            dbPossibleSourceConceptIds.stream()
-                    .map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new);
+        dbPossibleSourceConceptIds.stream()
+            .map(DbConceptSetConceptId::getConceptId)
+            .toArray(Long[]::new);
 
     // add query param for source concepts
     Map<String, QueryParameterValue> queryParams = new HashMap<>();

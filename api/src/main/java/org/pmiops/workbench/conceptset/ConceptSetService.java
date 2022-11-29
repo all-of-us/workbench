@@ -169,7 +169,7 @@ public class ConceptSetService {
         conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
 
-  public Optional<DbConceptSet> findById(Long id){
+  public Optional<DbConceptSet> findById(Long id) {
     return conceptSetDao.findById(id);
   }
 

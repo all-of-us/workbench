@@ -18,9 +18,7 @@ public class CohortService {
   private final CohortMapper cohortMapper;
 
   @Autowired
-  public CohortService(
-      CohortDao cohortDao,
-      CohortMapper cohortMapper) {
+  public CohortService(CohortDao cohortDao, CohortMapper cohortMapper) {
     this.cohortDao = cohortDao;
     this.cohortMapper = cohortMapper;
   }

@@ -323,7 +323,7 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
-          CohortService.class,
+    CohortService.class,
     CohortsController.class,
     CommonMappers.class,
     ConceptSetMapperImpl.class,
