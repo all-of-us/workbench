@@ -91,4 +91,21 @@ public interface CohortBuilderMapper {
         .map(this::fieldValueListToEthnicityInfo)
         .collect(ImmutableList.toImmutableList());
   }
+
+  default ChartData fieldValueListToChartData(FieldValueList row) {
+    ChartData data = new ChartData();
+    FieldValues.getString(row, "gender").ifPresent(data::setGender);
+    FieldValues.getString(row, "sexAtBirth").ifPresent(data::setSexAtBirth);
+    FieldValues.getString(row, "race").ifPresent(data::setRace);
+    FieldValues.getString(row, "ethnicity").ifPresent(data::setEthnicity);
+    FieldValues.getString(row, "ageBin").ifPresent(data::setAgeBin);
+    FieldValues.getLong(row, "count").ifPresent(data::setCount);
+    return data;
+  }
+
+  default ImmutableList<ChartData> tableResultToChartData(TableResult tableResult) {
+    return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToChartData)
+        .collect(ImmutableList.toImmutableList());
+  }
 }

@@ -90,6 +90,40 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "and rnk <= @%s\n"
           + "order by rank asc, standardName, startDate\n";
 
+  private static final String AGE_BIN_SIZE_PARAM = "ageBin";
+
+  private static final String NEW_CHART_DATA_SQL =
+      "select gender,\n"
+          + "       sex_at_birth as sexAtBirth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       age_bin as ageBin,\n"
+          + "       count(distinct pid) as count,\n"
+          + "       safe_divide(count(distinct pid), sum(count(distinct pid)) over ()) as fract\n"
+          + "FROM\n"
+          + "(\n"
+          + "select gender,\n"
+          + "       sex_at_birth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       age_at_cdr,\n"
+          + "       concat(cast(floor(age_at_cdr/@"
+          + AGE_BIN_SIZE_PARAM
+          + ") * @"
+          + AGE_BIN_SIZE_PARAM
+          + " as int64),'-',\n"
+          + "       cast(((floor(age_at_cdr/@"
+          + AGE_BIN_SIZE_PARAM
+          + ")+1) * @"
+          + AGE_BIN_SIZE_PARAM
+          + ") - 1 as int64)) as age_bin,\n"
+          + "       person_id as pid\n"
+          + "       from `${projectId}.${dataSetId}.cb_search_person`\n"
+          + ") a\n"
+          + "group by 1,2,3,4,5\n"
+          + "order by 1,2,3,4,5\n"
+          + "; ";
+
   /**
    * Provides counts with demographic info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -163,6 +197,7 @@ public class ChartQueryBuilder extends QueryBuilder {
         .setUseLegacySql(false)
         .build();
   }
+
   /**
    * Provides counts with domain info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -212,6 +247,17 @@ public class ChartQueryBuilder extends QueryBuilder {
     queryBuilder.append(endSqlTemplate);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  public QueryJobConfiguration buildNewChartDataQuery() {
+    int ageBin = 5;
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    params.put(AGE_BIN_SIZE_PARAM, QueryParameterValue.int64(ageBin));
+
+    return QueryJobConfiguration.newBuilder(NEW_CHART_DATA_SQL)
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();
