@@ -231,7 +231,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private final BigQueryService bigQueryService;
-
   private final CohortBuilderService cohortBuilderService;
   private final CohortService cohortService;
   private final ConceptSetService conceptSetService;
