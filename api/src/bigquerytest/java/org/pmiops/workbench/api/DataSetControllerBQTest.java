@@ -112,7 +112,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
-
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
