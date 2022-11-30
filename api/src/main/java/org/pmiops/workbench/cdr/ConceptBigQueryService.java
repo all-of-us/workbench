@@ -9,6 +9,7 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,7 @@ public class ConceptBigQueryService {
     List<Long> dbCriteriaAnswerIds = new ArrayList<>();
     StringBuilder innerSql = new StringBuilder();
     ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
+    Set<DbConceptSetConceptId> dbNonPFHHSurveyQuestions = new HashSet<>();
     if (domain.equals(Domain.SURVEY)) {
       List<Long> questionConceptIds =
           dbConceptSetConceptIds.stream()
@@ -51,11 +53,10 @@ public class ConceptBigQueryService {
           cohortBuilderService.findPFHHSurveyQuestionIds(questionConceptIds);
       if (!pfhhSurveyQuestionIds.isEmpty()) {
         // need to filter out PFHH survey questions for other survey questions
-        Set<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
+        dbNonPFHHSurveyQuestions =
             dbConceptSetConceptIds.stream()
                 .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
                 .collect(Collectors.toSet());
-        dbConceptSetConceptIds = dbNonPFHHSurveyQuestions;
         // find all answers for the questions
         dbCriteriaAnswerIds = cohortBuilderService.findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
       }
@@ -63,12 +64,12 @@ public class ConceptBigQueryService {
       innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
       innerSql.append("WHERE is_standard = 0 AND ");
       StringBuilder sqlFragment = new StringBuilder();
-      if (!dbConceptSetConceptIds.isEmpty()) {
+      if (!dbNonPFHHSurveyQuestions.isEmpty()) {
         String questionIdsParam = "questionConceptIds";
         paramMap.put(
             questionIdsParam,
             QueryParameterValue.array(
-                dbConceptSetConceptIds.stream()
+                dbNonPFHHSurveyQuestions.stream()
                     .map(DbConceptSetConceptId::getConceptId)
                     .toArray(Long[]::new),
                 Long.class));
