@@ -13,8 +13,8 @@ browserTest('page loads', async browser => {
 browserTest('view cookie policy page', async browser => {
   const page = browser.initialPage
   await tu.useApiProxy(page)
-    .then(async () => await page.goto(config.urlRoot()+'/login', {waitUntil: 'networkidle0'}))
     .then(async () => {
+      await page.goto(config.urlRoot()+'/login', {waitUntil: 'networkidle0'})
       const cpLink = await page.waitForSelector('a[href="/cookie-policy"]')
       expect(cpLink).toBeDefined()
       // click and wait need to happen simultaneously to avoid a race
