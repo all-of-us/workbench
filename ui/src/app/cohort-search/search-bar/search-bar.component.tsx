@@ -243,7 +243,7 @@ export class SearchBar extends React.Component<Props, State> {
   });
 
   componentDidMount() {
-    document.addEventListener('click', (e) => {
+    document.getElementById('root').addEventListener('click', (e) => {
       if (!!this.dropdown && !this.dropdown.contains(e.target as Node)) {
         this.setState({ options: null });
       }
