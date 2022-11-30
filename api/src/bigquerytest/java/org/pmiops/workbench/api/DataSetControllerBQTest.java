@@ -152,7 +152,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbConditionConceptSetForValues2;
   private DbConceptSet dbProcedureConceptSet;
   private DbConceptSet dbMeasurementConceptSet;
-
   private DbConceptSet dbPFHHConceptSet;
   private DbWorkspace dbWorkspace;
   private DbDSLinking conditionLinking1;
