@@ -59,7 +59,7 @@ Again:
 Point the tests at a running API Proxy. For example:
 ```
 cd ../api-proxy
-PROXY_PORT=8080 PROXY_MODE=replay-only node startproxy.mjs
+PROXY_MODE=replay-only node startproxy.mjs 8080
 ```
 
 `replay-only` means that requests missing handlers will produce a 500 error rather than forwarding the request to the API servier. `record-only` does the opposite. The default is to use handlers when they are available and forward requests that do not have a handler defined.
