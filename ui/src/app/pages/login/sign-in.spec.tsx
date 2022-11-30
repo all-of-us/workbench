@@ -2,7 +2,10 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
 
+import { ProfileApi } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
+import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import {
   LATEST_TOS_VERSION,
   TermsOfService,
@@ -10,11 +13,12 @@ import {
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
-import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import LoginReactComponent from 'app/pages/login/login';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
 import { createEmptyProfile, SignIn, SignInImpl, SignInProps } from './sign-in';
 
@@ -31,11 +35,13 @@ describe('SignIn', () => {
   const shallowComponent = () => shallow(<SignInImpl {...props} />);
 
   beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
     window.scrollTo = () => {};
     props = {
       windowSize: { width: 1700, height: 0 },
       hideSpinner: () => {},
       showSpinner: () => {},
+      showProfileErrorModal: () => {},
     };
     serverConfigStore.set({
       config: defaultServerConfig,
@@ -86,32 +92,43 @@ describe('SignIn', () => {
     // details.
     const wrapper = shallowComponent();
 
-    // To start, the landing page / login component should be shown.
+    // the sign-up flow steps are enumerated by `SignInStep`:
+    // LANDING, TERMS_OF_SERVICE, INSTITUTIONAL_AFFILIATION, ACCOUNT_DETAILS, DEMOGRAPHIC_SURVEY, SUCCESS_PAGE,
+
+    // To start, the LANDING page / login component should be shown.
     expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
     // Simulate the "create account" button being clicked by firing the callback method.
     wrapper.find(LoginReactComponent).props().onCreateAccount();
     await wrapper.update();
 
-    // Terms of Service is part of the new-style flow.
+    // TERMS_OF_SERVICE
     expect(wrapper.exists(TermsOfService)).toBeTruthy();
     wrapper.find(TermsOfService).props().onComplete(LATEST_TOS_VERSION);
 
+    // INSTITUTIONAL_AFFILIATION
     expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
     wrapper
       .find(AccountCreationInstitution)
       .props()
       .onComplete(createEmptyProfile());
 
+    // ACCOUNT_DETAILS
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
     wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
 
-    // Account Creation Survey (e.g. demographics) is part of the new-style flow.
-    expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper
-      .find(AccountCreationSurvey)
-      .props()
-      .onComplete(createEmptyProfile());
+    // DEMOGRAPHIC_SURVEY
+    expect(wrapper.exists(DemographicSurvey)).toBeTruthy();
 
+    // final step, so hit the submit button
+    const { onClick } = wrapper
+      .find('[data-test-id="submit-button"]')
+      .find(Button)
+      .first()
+      .props();
+
+    await onClick();
+
+    // SUCCESS_PAGE
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
   });
 });

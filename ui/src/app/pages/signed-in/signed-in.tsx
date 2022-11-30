@@ -121,8 +121,6 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
-  const { enableUpdatedDemographicSurvey } = serverConfigStore.get().config;
-
   const { enableDemographicSurveyV2Redirect } = environment;
 
   // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
@@ -160,8 +158,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {enableUpdatedDemographicSurvey &&
-              enableDemographicSurveyV2Redirect &&
+              {enableDemographicSurveyV2Redirect &&
               pastSurveyDueDate &&
               !profileState.profile.demographicSurveyV2 &&
               !hasDismissedDemographicSurvey ? (

@@ -45,7 +45,6 @@ import {
 } from 'app/utils/access-utils';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
 import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
-import { serverConfigStore } from 'app/utils/stores';
 
 import { authorityGuard, getAccessModuleGuard } from './guards';
 
@@ -359,15 +358,13 @@ export const SignedInRoutes = () => {
       >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
-      {serverConfigStore.get().config.enableUpdatedDemographicSurvey && (
-        <AppRoute path={DEMOGRAPHIC_SURVEY_V2_PATH} exact>
-          <DemographicSurveyPage
-            routeData={{
-              title: 'Demographic Survey',
-            }}
-          />
-        </AppRoute>
-      )}
+      <AppRoute path={DEMOGRAPHIC_SURVEY_V2_PATH} exact>
+        <DemographicSurveyPage
+          routeData={{
+            title: 'Demographic Survey',
+          }}
+        />
+      </AppRoute>
       <AppRoute exact path='*'>
         <Redirect to={'/not-found'} />
       </AppRoute>
