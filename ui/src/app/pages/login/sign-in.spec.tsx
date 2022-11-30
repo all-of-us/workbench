@@ -2,12 +2,15 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
 
+import { ProfileApi } from '../../../generated/fetch';
+import { ProfileApiStub } from '../../../testing/stubs/profile-api-stub';
+import { registerApiClient } from '../../services/swagger-fetch-clients';
 import { Button } from 'app/components/buttons';
+import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import {
   LATEST_TOS_VERSION,
   TermsOfService,
 } from 'app/components/terms-of-service';
-import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
@@ -31,11 +34,13 @@ describe('SignIn', () => {
   const shallowComponent = () => shallow(<SignInImpl {...props} />);
 
   beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
     window.scrollTo = () => {};
     props = {
       windowSize: { width: 1700, height: 0 },
       hideSpinner: () => {},
       showSpinner: () => {},
+      showProfileErrorModal: () => {},
     };
     serverConfigStore.set({
       config: defaultServerConfig,
@@ -110,19 +115,17 @@ describe('SignIn', () => {
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
     wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
 
-    // await wrapper.update();
-
     // DEMOGRAPHIC_SURVEY
-
-    // fails here.  why?
     expect(wrapper.exists(DemographicSurvey)).toBeTruthy();
 
-    wrapper
+    // final step, so hit the submit button
+    const { onClick } = wrapper
       .find('[data-test-id="submit-button"]')
       .find(Button)
       .first()
-      .props()
-      .onClick();
+      .props();
+
+    await onClick();
 
     // SUCCESS_PAGE
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
