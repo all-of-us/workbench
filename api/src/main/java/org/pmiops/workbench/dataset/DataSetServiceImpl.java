@@ -1727,9 +1727,4 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final Domain domain = request.getDomain();
     return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY);
   }
-
-  private boolean isSurveyDomainOnly(DataSetPreviewRequest request) {
-    final Domain domain = request.getDomain();
-    return domain.equals(Domain.SURVEY) && !request.getPrePackagedConceptSet().contains(SURVEY);
-  }
 }
