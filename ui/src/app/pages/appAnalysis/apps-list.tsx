@@ -94,6 +94,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               Your Analysis
             </ListPageHeader>
             <Button
+              aria-label='start'
               data-test-id='start-button'
               style={styles.startButton}
               onClick={() => {
@@ -111,12 +112,18 @@ export const AppsList = withCurrentWorkspace()((props) => {
         </FlexColumn>
       </FadeBox>
       {showSelectAppModal && (
-        <Modal data-test-id='select-application-modal'>
+        <Modal
+          data-test-id='select-application-modal'
+          aria={{
+            label: 'Select Applications Modal',
+          }}
+        >
           <ModalTitle>Analyze Data</ModalTitle>
           <ModalBody>
             <div style={styles.appsLabel}>Select an application</div>
             <Dropdown
               data-test-id={'application-list-dropdown'}
+              ariaLabel={'Application List Dropdown'}
               value={selectedApp}
               options={APP_LIST}
               placeholder={'Choose One'}
@@ -128,7 +135,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
             <Button
               style={{ marginRight: '2rem' }}
               type={'secondary'}
-              label={'Close'}
+              aria-label='close'
               onClick={() => onClose()}
             >
               Close
@@ -136,7 +143,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
             <Button
               data-test-id={'next-btn'}
               type={'primary'}
-              label={'Next'}
+              aria-label='next'
               onClick={() => onNext()}
               disabled={selectedApp === ''}
             >
