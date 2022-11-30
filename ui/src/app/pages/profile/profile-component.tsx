@@ -13,7 +13,6 @@ import {
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { DemographicSurvey } from 'app/components/demographic-survey';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ExclamationTriangle } from 'app/components/icons';
 import {
@@ -77,7 +76,6 @@ interface ProfilePageProps
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
-  showDemographicSurveyModal: boolean;
   updating: boolean;
 }
 export const ProfileComponent = fp.flow(
@@ -93,7 +91,6 @@ export const ProfileComponent = fp.flow(
       this.state = {
         currentProfile: this.initializeProfile(),
         institutions: [],
-        showDemographicSurveyModal: false,
         updating: false,
       };
     }
@@ -243,8 +240,7 @@ export const ProfileComponent = fp.flow(
       const {
         profileState: { profile },
       } = this.props;
-      const { currentProfile, updating, showDemographicSurveyModal } =
-        this.state;
+      const { currentProfile, updating } = this.state;
       const {
         givenName,
         familyName,
@@ -563,9 +559,6 @@ export const ProfileComponent = fp.flow(
                   demographicSurveyCompletionTime={
                     demographicSurveyV2CompletionTimeMillis
                   }
-                  onClick={() =>
-                    this.setState({ showDemographicSurveyModal: true })
-                  }
                 />
                 {canRenderSignedDucc(profile.duccSignedVersion) && (
                   <SignedDuccPanel
@@ -604,23 +597,6 @@ export const ProfileComponent = fp.flow(
                 </TooltipTrigger>
               </div>
             </div>
-            {showDemographicSurveyModal && (
-              <Modal width={850}>
-                <DemographicSurvey
-                  profile={currentProfile}
-                  onCancelClick={() => {
-                    this.setState({ showDemographicSurveyModal: false });
-                  }}
-                  saveProfile={(profileWithDemoSurvey) => {
-                    this.saveProfile(profileWithDemoSurvey);
-                    this.setState({ showDemographicSurveyModal: false });
-                  }}
-                  enableCaptcha={false}
-                  enablePrevious={false}
-                  showStepCount={false}
-                />
-              </Modal>
-            )}
           </div>
         </FadeBox>
       );

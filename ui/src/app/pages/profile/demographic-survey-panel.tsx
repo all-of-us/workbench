@@ -8,7 +8,6 @@ import { styles } from './profile-styles';
 
 interface Props {
   demographicSurveyCompletionTime: number;
-  onClick: () => void;
 }
 export const DemographicSurveyPanel = (props: Props) => {
   const { demographicSurveyCompletionTime } = props;
@@ -30,9 +29,9 @@ export const DemographicSurveyPanel = (props: Props) => {
         )}
         <ButtonWithLocationState
           path={DEMOGRAPHIC_SURVEY_V2_PATH}
-          type={'link'}
+          type='link'
           style={styles.updateSurveyButton}
-          data-test-id={'demographics-survey-button'}
+          data-test-id='demographics-survey-button'
         >
           {demographicSurveyCompletionTime
             ? 'Update Survey'
