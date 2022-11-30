@@ -191,6 +191,7 @@ export const WorkspaceNavBar = fp.flow(
       <React.Fragment key={name}>
         <Clickable
           data-test-id={name}
+          aria-label={name}
           aria-selected={selected}
           disabled={disabled}
           style={{
