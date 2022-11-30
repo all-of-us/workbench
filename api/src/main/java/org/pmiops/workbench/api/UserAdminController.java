@@ -14,7 +14,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
@@ -87,19 +86,6 @@ public class UserAdminController implements UserAdminApiDelegate {
   public ResponseEntity<Profile> getUserByUsername(String username) {
     DbUser user = userService.getByUsernameOrThrow(username);
     return ResponseEntity.ok(profileService.getProfile(user));
-  }
-
-  @Override
-  @Deprecated // unsafeSelfBypassAccessRequirements() handles all modules at once
-  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
-      AccessBypassRequest request) {
-    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
-      throw new ForbiddenException("Self bypass is disallowed in this environment.");
-    }
-    final DbUser user = userProvider.get();
-    accessModuleService.updateBypassTime(user.getUserId(), request);
-    userService.updateUserAccessTiers(user, Agent.asUser(user));
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
