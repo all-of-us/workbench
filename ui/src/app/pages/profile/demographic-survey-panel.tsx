@@ -8,26 +8,21 @@ import { styles } from './profile-styles';
 
 interface Props {
   demographicSurveyCompletionTime: number;
-  firstSignInTime: number;
   onClick: () => void;
 }
 export const DemographicSurveyPanel = (props: Props) => {
-  const { demographicSurveyCompletionTime, firstSignInTime } = props;
-
-  const surveyCompleted = demographicSurveyCompletionTime !== null;
+  const { demographicSurveyCompletionTime } = props;
 
   return (
     <div style={styles.panel}>
       <div style={styles.title}>Demographics Survey</div>
       <hr style={{ ...styles.verticalLine }} />
       <div style={styles.panelBody}>
-        {surveyCompleted ? (
+        {demographicSurveyCompletionTime ? (
           <>
             <div>Survey Completed</div>
             <div>
-              {displayDateWithoutHours(
-                demographicSurveyCompletionTime ?? firstSignInTime
-              )}
+              {displayDateWithoutHours(demographicSurveyCompletionTime)}
             </div>
           </>
         ) : (
@@ -39,7 +34,9 @@ export const DemographicSurveyPanel = (props: Props) => {
           style={styles.updateSurveyButton}
           data-test-id={'demographics-survey-button'}
         >
-          {surveyCompleted ? 'Update Survey' : 'Complete Survey'}
+          {demographicSurveyCompletionTime
+            ? 'Update Survey'
+            : 'Complete Survey'}
         </ButtonWithLocationState>
       </div>
     </div>

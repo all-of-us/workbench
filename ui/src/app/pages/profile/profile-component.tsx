@@ -563,7 +563,6 @@ export const ProfileComponent = fp.flow(
                   demographicSurveyCompletionTime={
                     demographicSurveyV2CompletionTimeMillis
                   }
-                  firstSignInTime={profile.firstSignInTime}
                   onClick={() =>
                     this.setState({ showDemographicSurveyModal: true })
                   }
