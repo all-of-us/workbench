@@ -8,11 +8,13 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,43 +24,97 @@ import org.springframework.stereotype.Service;
 public class ConceptBigQueryService {
 
   private final BigQueryService bigQueryService;
+  private final CohortBuilderService cohortBuilderService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
 
   @Autowired
-  public ConceptBigQueryService(BigQueryService bigQueryService) {
+  public ConceptBigQueryService(
+      BigQueryService bigQueryService, CohortBuilderService cohortBuilderService) {
     this.bigQueryService = bigQueryService;
+    this.cohortBuilderService = cohortBuilderService;
   }
 
   public int getParticipantCountForConcepts(
       Domain domain, Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
-    Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
-        dbConceptSetConceptIds.stream()
-            .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
-    List<Long> standardList =
-        partitionSourceAndStandard.get(true).stream()
-            .map(DbConceptSetConceptId::getConceptId)
-            .collect(Collectors.toList());
-    List<Long> sourceList =
-        partitionSourceAndStandard.get(false).stream()
-            .map(DbConceptSetConceptId::getConceptId)
-            .collect(Collectors.toList());
+    List<Long> dbCriteriaAnswerIds = new ArrayList<>();
     StringBuilder innerSql = new StringBuilder();
     ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
-    if (!standardList.isEmpty()) {
-      innerSql.append("SELECT person_id\n");
-      innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
-      generateParentChildLookupSql(
-          innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
-      innerSql.append("\n");
-      if (!sourceList.isEmpty()) {
-        innerSql.append(" UNION ALL\n");
+    if (domain.equals(Domain.SURVEY)) {
+      List<Long> questionConceptIds =
+          dbConceptSetConceptIds.stream()
+              .map(DbConceptSetConceptId::getConceptId)
+              .collect(Collectors.toList());
+      // find any questions that belong to PFHH survey. The PFHH survey should
+      // only use answer ids when looking up participants.
+      List<Long> pfhhSurveyQuestionIds =
+          cohortBuilderService.findPFHHSurveyQuestionIds(questionConceptIds);
+      if (!pfhhSurveyQuestionIds.isEmpty()) {
+        // need to filter out PFHH survey questions for other survey questions
+        dbConceptSetConceptIds =
+            dbConceptSetConceptIds.stream()
+                .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
+                .collect(Collectors.toSet());
+        // find all answers for the questions
+        dbCriteriaAnswerIds = cohortBuilderService.findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
       }
-    }
-    if (!sourceList.isEmpty()) {
       innerSql.append("SELECT person_id\n");
       innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
-      generateParentChildLookupSql(innerSql, domain, "sourceConceptIds", 0, sourceList, paramMap);
+      innerSql.append("WHERE is_standard = 0 AND ");
+      StringBuilder sqlFragment = new StringBuilder();
+      if (!dbConceptSetConceptIds.isEmpty()) {
+        String questionIdsParam = "questionConceptIds";
+        paramMap.put(
+            questionIdsParam,
+            QueryParameterValue.array(
+                dbConceptSetConceptIds.stream()
+                    .map(DbConceptSetConceptId::getConceptId)
+                    .toArray(Long[]::new),
+                Long.class));
+        sqlFragment.append("concept_id IN UNNEST(@").append(questionIdsParam).append(")");
+      }
+      if (!dbCriteriaAnswerIds.isEmpty()) {
+        if (sqlFragment.toString().contains("concept_id IN UNNEST")) {
+          sqlFragment.append(" OR ");
+        }
+        String answerIdsParam = "answerConceptIds";
+        paramMap.put(
+            answerIdsParam,
+            QueryParameterValue.array(dbCriteriaAnswerIds.toArray(new Long[0]), Long.class));
+        sqlFragment
+            .append("value_source_concept_id IN UNNEST(@")
+            .append(answerIdsParam)
+            .append(")");
+      }
+      innerSql.append("(").append(sqlFragment).append(")");
+    } else {
+      Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+          dbConceptSetConceptIds.stream()
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+      List<Long> standardList =
+          partitionSourceAndStandard.get(true).stream()
+              .map(DbConceptSetConceptId::getConceptId)
+              .collect(Collectors.toList());
+      List<Long> sourceList =
+          partitionSourceAndStandard.get(false).stream()
+              .map(DbConceptSetConceptId::getConceptId)
+              .collect(Collectors.toList());
+
+      if (!standardList.isEmpty()) {
+        innerSql.append("SELECT person_id\n");
+        innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
+        generateParentChildLookupSql(
+            innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
+        innerSql.append("\n");
+        if (!sourceList.isEmpty()) {
+          innerSql.append(" UNION DISTINCT\n");
+        }
+      }
+      if (!sourceList.isEmpty()) {
+        innerSql.append("SELECT person_id\n");
+        innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
+        generateParentChildLookupSql(innerSql, domain, "sourceConceptIds", 0, sourceList, paramMap);
+      }
     }
     String finalSql = "SELECT COUNT(DISTINCT person_id) person_count FROM (\n" + innerSql + ")";
     QueryJobConfiguration jobConfiguration =
@@ -91,7 +147,7 @@ public class ConceptBigQueryService {
               "@" + conceptIdsParam,
               "@" + standardParam));
     } else {
-      sqlBuilder.append(" unnest(@" + conceptIdsParam + ")");
+      sqlBuilder.append("UNNEST(@").append(conceptIdsParam).append(")");
     }
   }
 }
