@@ -498,7 +498,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
 
   @Test
@@ -561,7 +561,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 3, Domain.CONDITION);
+    assertAndExecutePythonQuery(code, 3, Domain.CONDITION, 1L);
   }
 
   @Test
@@ -580,7 +580,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
 
   @Test
@@ -599,7 +599,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
 
   @Test
@@ -618,7 +618,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.PERSON))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.PERSON);
+    assertAndExecutePythonQuery(code, 1, Domain.PERSON, 1L);
   }
 
   @Test
@@ -637,7 +637,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 2, Domain.SURVEY);
+    assertAndExecutePythonQuery(code, 1, Domain.SURVEY, 2L);
   }
 
   @Test
@@ -658,7 +658,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.FITBIT_HEART_RATE_LEVEL);
+    assertAndExecutePythonQuery(code, 1, Domain.FITBIT_HEART_RATE_LEVEL, 1L);
   }
 
   @Test
@@ -679,7 +679,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                                 PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
 
   @Test
@@ -698,7 +698,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of())),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
+    assertAndExecutePythonQuery(code, 1, Domain.SURVEY, 1L);
   }
 
   @Test
@@ -983,7 +983,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
   }
 
-  private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
+  private void assertAndExecutePythonQuery(String code, int index, Domain domain, Long count) {
     String expected =
         String.format(
             "import pandas\n"
@@ -1003,7 +1003,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
       TableResult result =
           bigQueryService.executeQuery(
               QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
+      assertThat(result.getTotalRows()).isEqualTo(count);
     } catch (Exception e) {
       Assertions.fail(
           "Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
