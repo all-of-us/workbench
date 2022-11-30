@@ -2,9 +2,8 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
 
-import { ProfileApi } from '../../../generated/fetch';
-import { ProfileApiStub } from '../../../testing/stubs/profile-api-stub';
-import { registerApiClient } from '../../services/swagger-fetch-clients';
+import { ProfileApi } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
 import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import {
@@ -15,9 +14,11 @@ import { AccountCreation } from 'app/pages/login/account-creation/account-creati
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
 import LoginReactComponent from 'app/pages/login/login';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
 import { createEmptyProfile, SignIn, SignInImpl, SignInProps } from './sign-in';
 
