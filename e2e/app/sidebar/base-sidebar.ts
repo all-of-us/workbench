@@ -32,7 +32,7 @@ export default abstract class BaseSidebar extends Container {
     let xpath;
     switch (sidebarLink) {
       case SideBarLink.ComputeConfiguration:
-        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-runtime"]`;
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-runtimeConfig"]`;
         break;
       case SideBarLink.DataDictionary:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-dataDictionary"]`;

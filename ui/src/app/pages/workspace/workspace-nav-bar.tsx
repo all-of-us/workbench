@@ -8,7 +8,7 @@ import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
-import colors from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import {
   getCdrVersion,
@@ -176,6 +176,12 @@ export const WorkspaceNavBar = fp.flow(
     }
   }, []);
 
+  const appsTabStyle = (selected) => {
+    return selected
+      ? { backgroundColor: colorWithWhiteness(colors.danger, 0.3) }
+      : { backgroundColor: colors.danger };
+  };
+
   const navTab = (currentTab, disabled) => {
     const { name, link } = currentTab;
     const selected = tabPath === link;
@@ -191,6 +197,7 @@ export const WorkspaceNavBar = fp.flow(
             ...styles.tab,
             ...(selected ? styles.active : {}),
             ...(disabled ? styles.disabled : {}),
+            ...(link === 'apps' ? appsTabStyle(selected) : {}),
           }}
           onClick={() => navigate(['workspaces', ns, wsid, link])}
         >

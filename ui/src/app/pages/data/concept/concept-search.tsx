@@ -30,7 +30,6 @@ import {
 } from 'app/components/inputs';
 import { Modal, ModalFooter, ModalTitle } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { nameValidationFormat } from 'app/components/rename-modal';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EditComponentReact } from 'app/icons/edit';
@@ -54,6 +53,7 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { nameValidationFormat } from 'app/utils/resources';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';

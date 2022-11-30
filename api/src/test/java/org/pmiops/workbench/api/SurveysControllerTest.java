@@ -15,7 +15,7 @@ import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
-import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey.SatisfactionEnum;
+import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyMapperImpl;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class SurveysControllerTest {
     final String additionalInfo = "Love it!";
     final CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey =
         new CreateNewUserSatisfactionSurvey()
-            .satisfaction(SatisfactionEnum.VERY_SATISFIED)
+            .satisfaction(NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED)
             .additionalInfo(additionalInfo);
     when(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).thenReturn(true);
 
@@ -80,7 +80,7 @@ public class SurveysControllerTest {
   public void testCreateNewUserSatisfactionSurvey_failsIfUserIneligible() {
     final CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey =
         new CreateNewUserSatisfactionSurvey()
-            .satisfaction(SatisfactionEnum.VERY_SATISFIED)
+            .satisfaction(NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED)
             .additionalInfo("Love it!");
     when(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).thenReturn(false);
 

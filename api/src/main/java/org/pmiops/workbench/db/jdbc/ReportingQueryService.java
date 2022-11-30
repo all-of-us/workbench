@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
@@ -55,6 +56,14 @@ public interface ReportingQueryService {
   }
 
   int getCohortsCount();
+
+  List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveys(long limit, long offset);
+
+  default Stream<List<ReportingNewUserSatisfactionSurvey>> getNewUserSatisfactionSurveysStream() {
+    return getStream(this::getNewUserSatisfactionSurveys);
+  }
+
+  int getNewUserSatisfactionSurveysCount();
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
     final long offset = getQueryBatchSize() * batchIndex;
@@ -117,6 +126,11 @@ public interface ReportingQueryService {
 
   default Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
     return getBatchIterator(this::getCohorts);
+  }
+
+  default Iterator<List<ReportingNewUserSatisfactionSurvey>>
+      getNewUserSatisfactionSurveyBatchIterator() {
+    return getBatchIterator(this::getNewUserSatisfactionSurveys);
   }
 
   /** Use the maximum batch to get in single batch */

@@ -13,6 +13,10 @@ import {
 
 import { Select } from 'app/components/inputs';
 import { Tooltip } from 'app/components/popups';
+import {
+  appendNotebookFileSuffix,
+  dropNotebookFileSuffix,
+} from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
   dataSetApi,
@@ -74,7 +78,8 @@ describe('ExportDatasetModal', () => {
   it('should export to a new notebook', async () => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const expectedNotebookName = 'Notebook Name';
+    const notebookName = 'Notebook Name';
+    const expectedNotebookName = appendNotebookFileSuffix(notebookName);
     const expectedDatasetRequest: DataSetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
@@ -84,7 +89,36 @@ describe('ExportDatasetModal', () => {
     wrapper
       .find('[data-test-id="notebook-name-input"]')
       .first()
-      .simulate('change', { target: { value: expectedNotebookName } });
+      .simulate('change', { target: { value: notebookName } });
+    findExportButton(wrapper).simulate('click');
+    expect(exportSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        newNotebook: true,
+        notebookName: expectedNotebookName,
+        kernelType: KernelTypeEnum.Python,
+        generateGenomicsAnalysisCode: false,
+      })
+    );
+  });
+
+  it('should export to a new notebook if the user types in the file suffix', async () => {
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const notebookName = 'MyNotebook.ipynb';
+    const expectedNotebookName = notebookName;
+    const expectedDatasetRequest: DataSetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
+    };
+
+    wrapper
+      .find('[data-test-id="notebook-name-input"]')
+      .first()
+      .simulate('change', { target: { value: notebookName } });
     findExportButton(wrapper).simulate('click');
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -115,10 +149,11 @@ describe('ExportDatasetModal', () => {
     expect(wrapper.find(Tooltip).text()).toBe("Notebook name can't be blank");
   });
 
-  it('should disable export if a conflicting name is provided', async () => {
+  it('should disable export if a conflicting name is provided, without the suffix', async () => {
+    const existingNotebookName = 'existing notebook.ipynb';
     notebooksApiStub.notebookList = [
       {
-        name: 'existing notebook.ipynb',
+        name: existingNotebookName,
       },
     ];
     const wrapper = mount(component(testProps));
@@ -127,7 +162,34 @@ describe('ExportDatasetModal', () => {
     wrapper
       .find('[data-test-id="notebook-name-input"]')
       .first()
-      .simulate('change', { target: { value: 'existing notebook' } });
+      .simulate('change', {
+        target: { value: dropNotebookFileSuffix(existingNotebookName) },
+      });
+    await waitOneTickAndUpdate(wrapper);
+    findExportButton(wrapper).simulate('click');
+    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+
+    findExportButton(wrapper).simulate('mouseenter');
+    expect(wrapper.find(Tooltip).text()).toBe('Notebook name already exists');
+    expect(exportSpy).not.toHaveBeenCalled();
+  });
+
+  it('should disable export if a conflicting name is provided, including the suffix', async () => {
+    const existingNotebookName = 'existing notebook.ipynb';
+    notebooksApiStub.notebookList = [
+      {
+        name: existingNotebookName,
+      },
+    ];
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    wrapper
+      .find('[data-test-id="notebook-name-input"]')
+      .first()
+      .simulate('change', {
+        target: { value: appendNotebookFileSuffix(existingNotebookName) },
+      });
     await waitOneTickAndUpdate(wrapper);
     findExportButton(wrapper).simulate('click');
     expect(findExportButton(wrapper).props().disabled).toBeTruthy();
@@ -138,25 +200,27 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should export to an existing notebook with the correct kernel type', async () => {
-    const expectedNotebookName = 'existing notebook';
-    dataset.name = expectedNotebookName;
+    const notebookName = 'existing notebook';
+    const datasetName = 'dataset';
+    const expectedNotebookName = appendNotebookFileSuffix(notebookName);
+    dataset.name = datasetName;
     notebooksApiStub.notebookList = [
       {
-        name: `${expectedNotebookName}.ipynb`,
+        name: expectedNotebookName,
       },
     ];
     notebooksApiStub.notebookKernel = KernelTypeEnum.R;
 
     const expectedDatasetRequest = {
       dataSetId: dataset.id,
-      name: expectedNotebookName,
+      name: datasetName,
       domainValuePairs: dataset.domainValuePairs,
     };
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     const wrapper = mount(component(testProps));
     act(() => {
-      wrapper.find(Select).props().onChange(expectedNotebookName);
+      wrapper.find(Select).props().onChange(notebookName);
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -267,7 +331,8 @@ describe('ExportDatasetModal', () => {
     ];
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const expectedNotebookName = 'Notebook Name';
+    const notebookName = 'Notebook Name';
+    const expectedNotebookName = appendNotebookFileSuffix(notebookName);
     const expectedDatasetRequest: DataSetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
@@ -277,7 +342,7 @@ describe('ExportDatasetModal', () => {
     wrapper
       .find('[data-test-id="notebook-name-input"]')
       .first()
-      .simulate('change', { target: { value: expectedNotebookName } });
+      .simulate('change', { target: { value: notebookName } });
     findExportButton(wrapper).simulate('click');
     expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
       dataSetRequest: expectedDatasetRequest,

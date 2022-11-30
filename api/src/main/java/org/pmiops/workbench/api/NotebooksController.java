@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.notebooks.NotebookUtils.isRMarkdownNotebook;
+
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
@@ -21,6 +24,7 @@ import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,27 +59,36 @@ public class NotebooksController implements NotebooksApiDelegate {
   public ResponseEntity<FileDetail> copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     return ResponseEntity.ok(
-        copyNotebookImpl(fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest));
+        copyNotebookImpl(
+            fromWorkspaceNamespace, fromWorkspaceId, fromNotebookNameWithExtension, copyRequest));
   }
 
   private FileDetail copyNotebookImpl(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
+      // Checks the new name extension to match the original from file type, add extension if
+      // needed.
+      // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
+      String newNameWithExtension =
+          isRMarkdownNotebook(fromNotebookNameWithExtension)
+              ? NotebookUtils.withRMarkdownExtension(copyRequest.getNewName())
+              : NotebookUtils.withJupyterNotebookExtension(copyRequest.getNewName());
+
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withNotebookExtension(fromNotebookName),
+              fromNotebookNameWithExtension,
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
+              newNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
@@ -84,10 +97,11 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
-      String workspace, String workspaceName, String notebookName) {
+      String workspace, String workspaceName, String notebookNameWithExtension) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
+      fileDetail =
+          notebooksService.cloneNotebook(workspace, workspaceName, notebookNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -97,11 +111,17 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+      throw new NotImplementedException(
+          String.format("%s type of file is not implemented yet", notebookNameWithFileExtension));
+    }
+
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
             .html(
-                notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName));
+                notebooksService.getReadOnlyHtml(
+                    workspaceNamespace, workspaceName, notebookNameWithFileExtension));
     return ResponseEntity.ok(response);
   }
 
@@ -122,14 +142,20 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
-      String workspace, String workspaceName, String notebookName) {
+      String workspace, String workspaceName, String notebookNameWithFileExtension) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+      throw new BadRequestException(
+          String.format("%s is not a Jupyter notebook file", notebookNameWithFileExtension));
+    }
+
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspace, workspaceName, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
-                notebooksService.getNotebookKernel(workspace, workspaceName, notebookName)));
+                notebooksService.getNotebookKernel(
+                    workspace, workspaceName, notebookNameWithFileExtension)));
   }
 
   @Override
@@ -149,7 +175,7 @@ public class NotebooksController implements NotebooksApiDelegate {
     // throws NotFoundException if the notebook is not in GCS
     // returns null if found but no user-metadata
     Map<String, String> metadata =
-        cloudStorageClient.getMetadata(bucketName, "notebooks/" + notebookName);
+        cloudStorageClient.getMetadata(bucketName, NotebookUtils.withNotebookPath(notebookName));
 
     if (metadata != null) {
       String lockExpirationTime = metadata.get("lockExpiresAt");

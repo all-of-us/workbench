@@ -44,6 +44,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.RetryException;
@@ -351,8 +352,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             .namespace(toWorkspaceNamespace)
             .name(toFirecloudName)
             // We copy only the notebooks/ subdirectory as a heuristic to avoid unintentionally
-            // propagating copies of large data files elswhere in the bucket.
-            .copyFilesWithPrefix("notebooks/")
+            // propagating copies of large data files elsewhere in the bucket.
+            .copyFilesWithPrefix(NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY + "/")
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)))
             .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation);

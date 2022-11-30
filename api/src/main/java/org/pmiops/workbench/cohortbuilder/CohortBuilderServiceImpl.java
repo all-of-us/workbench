@@ -568,6 +568,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<Long> findPFHHSurveyQuestionIds(List<Long> conceptIds) {
+    return cbCriteriaDao.findPFHHSurveyQuestionIds(conceptIds);
+  }
+
+  @Override
+  public List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds) {
+    return cbCriteriaDao.findPFHHSurveyAnswerIds(conceptIds);
+  }
+
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
       CriteriaSearchRequest request, PageRequest pageRequest) {
     Page<DbCriteria> dbCriteriaPage;

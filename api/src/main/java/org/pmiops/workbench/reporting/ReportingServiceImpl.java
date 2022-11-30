@@ -9,6 +9,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,8 @@ public class ReportingServiceImpl implements ReportingService {
       ImmutableSet.of(
           CohortColumnValueExtractor.TABLE_NAME,
           WorkspaceColumnValueExtractor.TABLE_NAME,
-          UserColumnValueExtractor.TABLE_NAME);
+          UserColumnValueExtractor.TABLE_NAME,
+          NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,
@@ -71,6 +73,10 @@ public class ReportingServiceImpl implements ReportingService {
     reportingQueryService
         .getCohortsStream()
         .forEach(b -> reportingUploadService.uploadBatchCohort(b, captureTimestamp));
+    reportingQueryService
+        .getNewUserSatisfactionSurveysStream()
+        .forEach(
+            b -> reportingUploadService.uploadBatchNewUserSatisfactionSurveys(b, captureTimestamp));
 
     // Third: Verify the count.
     boolean batchUploadSuccess =

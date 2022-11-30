@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -39,9 +40,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
-
-  private static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
   // Experimentally determined that generating the preview HTML for a >11MB notebook results in
   // OOMs on a default F1 240MB GAE task. OOMs may still occur during concurrent requests. If this
   // issue persists, we can move preview processing onto the client (calling Calhoun), or fully
@@ -123,8 +121,8 @@ public class NotebooksServiceImpl implements NotebooksService {
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
-    return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
-        .stream()
+    return cloudStorageClient
+        .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
         .filter(this::isNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
@@ -132,23 +130,24 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public boolean isNotebookBlob(Blob blob) {
-    return NOTEBOOK_PATTERN.matcher(blob.getName()).matches();
+    // Blobs have notebooks/ directory
+    return NotebookUtils.isJupyterNotebookWithDirectory(blob.getName())
+        || NotebookUtils.isRMarkDownNotebookWithDirectory(blob.getName());
   }
 
   @Override
   public FileDetail copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceFirecloudName,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
       String toWorkspaceFirecloudName,
-      String newNotebookName) {
+      String newNotebookNameWithExtension) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
-    newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
 
     final DbWorkspace fromWorkspace =
         workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);
@@ -166,9 +165,11 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
 
     GoogleCloudLocators fromNotebookLocators =
-        getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookName);
+        getNotebookLocators(
+            fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookNameWithExtension);
     GoogleCloudLocators newNotebookLocators =
-        getNotebookLocators(toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookName);
+        getNotebookLocators(
+            toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookNameWithExtension);
 
     if (!cloudStorageClient
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
@@ -178,7 +179,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     cloudStorageClient.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
 
     FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(newNotebookName);
+    fileDetail.setName(newNotebookNameWithExtension);
     fileDetail.setPath(newNotebookLocators.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
@@ -190,16 +191,16 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String fromNotebookName) {
-    String newName = "Duplicate of " + fromNotebookName;
+      String workspaceNamespace, String workspaceName, String notebookNameWithExtension) {
+    String newNameWithExtension = "Duplicate of " + notebookNameWithExtension;
     final FileDetail copiedNotebookFileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            fromNotebookName,
+            notebookNameWithExtension,
             workspaceNamespace,
             workspaceName,
-            newName);
+            newNameWithExtension);
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }
@@ -221,16 +222,19 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail renameNotebook(
-      String workspaceNamespace, String workspaceName, String originalName, String newName) {
+      String workspaceNamespace,
+      String workspaceName,
+      String originalNameWithExtension,
+      String newNameWithExtension) {
     FileDetail fileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
-            originalName,
+            originalNameWithExtension,
             workspaceNamespace,
             workspaceName,
-            NotebooksService.withNotebookExtension(newName));
-    deleteNotebook(workspaceNamespace, workspaceName, originalName);
+            newNameWithExtension);
+    deleteNotebook(workspaceNamespace, workspaceName, originalNameWithExtension);
 
     return fileDetail;
   }
@@ -277,7 +281,9 @@ public class NotebooksServiceImpl implements NotebooksService {
   private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
     Blob blob =
         cloudStorageClient.getBlob(
-            bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
+            bucketName,
+            NotebookUtils.withNotebookPath(
+                NotebookUtils.withJupyterNotebookExtension(notebookName)));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
@@ -287,10 +293,17 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
-  public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
+  public void saveNotebook(
+      String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+      throw new NotImplementedException(
+          String.format(
+              "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
+    }
     cloudStorageClient.writeFile(
         bucketName,
-        "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
+        NotebookUtils.withNotebookPath(
+            NotebookUtils.withJupyterNotebookExtension(notebookNameWithFileExtension)),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
@@ -319,14 +332,20 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public String adminGetReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
+    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+      throw new NotImplementedException(
+          String.format(
+              "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
+    }
+
     String bucketName =
         fireCloudService
             .getWorkspaceAsService(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
+    Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
     return convertNotebookToHtml(blob.getContent());
   }
 
@@ -337,7 +356,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
-    String blobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String blobPath = NotebookUtils.withNotebookPath(notebookName);
     String pathStart = "gs://" + bucket + "/";
     String fullPath = pathStart + blobPath;
     BlobId blobId = BlobId.of(bucket, blobPath);

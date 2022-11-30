@@ -90,6 +90,7 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
+  @Deprecated // unsafeSelfBypassAccessRequirements() handles all modules at once
   public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
       AccessBypassRequest request) {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
@@ -97,6 +98,17 @@ public class UserAdminController implements UserAdminApiDelegate {
     }
     final DbUser user = userProvider.get();
     accessModuleService.updateBypassTime(user.getUserId(), request);
+    userService.updateUserAccessTiers(user, Agent.asUser(user));
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirements() {
+    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
+      throw new ForbiddenException("Self bypass is disallowed in this environment.");
+    }
+    final DbUser user = userProvider.get();
+    accessModuleService.updateAllBypassTimes(user.getUserId());
     userService.updateUserAccessTiers(user, Agent.asUser(user));
     return ResponseEntity.ok(new EmptyResponse());
   }

@@ -4,14 +4,13 @@ import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { RouteLink } from 'app/components/app-router';
 import { styles as cardStyles } from 'app/components/card';
 import { ClrIcon, SnowmanIcon } from 'app/components/icons';
 import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils/index';
-
-import { RouteLink } from './app-router';
+import { reactStyles } from 'app/utils';
 
 export interface LinkLocationState {
   pathname: string;

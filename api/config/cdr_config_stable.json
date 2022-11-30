@@ -77,9 +77,11 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_44",
+      "cdrDbName": "synth_r_2019q4_52",
       "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "accessTier": "registered"
     },
     {
@@ -91,9 +93,11 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_44",
+      "cdrDbName": "synth_r_2019q4_52",
       "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "accessTier": "registered"
     },
     {
@@ -107,9 +111,11 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 234525,
-      "cdrDbName": "synth_c_2019q4_40",
+      "cdrDbName": "synth_c_2019q4_47",
       "hasFitbitData": true,
+      "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
       "storageBasePath": "v5",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",

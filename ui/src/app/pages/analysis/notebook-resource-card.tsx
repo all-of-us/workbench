@@ -26,10 +26,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import {
-  appendNotebookFileSuffix,
-  dropNotebookFileSuffix,
-} from 'app/pages/analysis/util';
+import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';
@@ -175,7 +172,7 @@ export const NotebookResourceCard = fp.flow(
       return notebooksApi().copyNotebook(
         this.props.resource.workspaceNamespace,
         this.props.resource.workspaceFirecloudName,
-        dropNotebookFileSuffix(this.props.resource.notebook.name),
+        this.props.resource.notebook.name,
         copyRequest
       );
     }
