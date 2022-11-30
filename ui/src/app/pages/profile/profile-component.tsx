@@ -21,7 +21,7 @@ import {
   ValidationError,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { Modal, withErrorModal, withSuccessModal } from 'app/components/modals';
+import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import {
