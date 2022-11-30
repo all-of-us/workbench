@@ -1,3 +1,4 @@
+const http = require('http');
 const assert = require('assert').strict
 const fs = require('fs')
 const fsp = fs.promises
@@ -73,6 +74,16 @@ export_({browserTest})
 
 const useApiProxy = async page => {
   assert(process.env.API_PROXY_URL, 'API_PROXY_URL not defined')
+  await new Promise((resolve, reject) => {
+    http.get(process.env.API_PROXY_URL + '/v1/config',
+      response => {
+        assert(response.statusCode === 200);
+        resolve()
+      }
+    ).on('error', (cause) => {
+      reject(new Error('Proxy request failed. \n' + cause + '\nIs your API Proxy running?'))
+    })
+  })
   await page.setJavaScriptEnabled(false)
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
   await page.evaluate(
@@ -80,6 +91,8 @@ const useApiProxy = async page => {
     process.env.API_PROXY_URL
   )
   await page.setJavaScriptEnabled(true)
+
+
 }
 export_({useApiProxy})
 
