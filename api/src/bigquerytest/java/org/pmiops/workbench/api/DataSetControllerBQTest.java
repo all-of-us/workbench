@@ -637,7 +637,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
+    assertAndExecutePythonQuery(code, 2, Domain.SURVEY);
   }
 
   @Test
