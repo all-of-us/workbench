@@ -40,6 +40,7 @@ browserTest('create an application', async browser => {
   await nextButton.click()
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
+  await page.waitForSelector('div[aria-label="New Notebook Modal"]')
 
 }, 10e3)
 
