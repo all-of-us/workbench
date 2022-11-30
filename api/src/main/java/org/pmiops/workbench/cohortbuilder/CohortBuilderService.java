@@ -74,4 +74,8 @@ public interface CohortBuilderService {
       Long questionConceptId, Long answerConceptId);
 
   List<Criteria> findVersionedSurveys();
+
+  List<Long> findPFHHSurveyQuestionIds(List<Long> conceptIds);
+
+  List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds);
 }

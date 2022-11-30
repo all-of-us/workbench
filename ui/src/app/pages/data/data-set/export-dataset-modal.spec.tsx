@@ -104,6 +104,35 @@ describe('ExportDatasetModal', () => {
     );
   });
 
+  it('should export to a new notebook if the user types in the file suffix', async () => {
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const notebookName = 'MyNotebook.ipynb';
+    const expectedNotebookName = notebookName;
+    const expectedDatasetRequest: DataSetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
+    };
+
+    wrapper
+      .find('[data-test-id="notebook-name-input"]')
+      .first()
+      .simulate('change', { target: { value: notebookName } });
+    findExportButton(wrapper).simulate('click');
+    expect(exportSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        newNotebook: true,
+        notebookName: expectedNotebookName,
+        kernelType: KernelTypeEnum.Python,
+        generateGenomicsAnalysisCode: false,
+      })
+    );
+  });
+
   it('should disable export if no name is provided', async () => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -120,7 +149,7 @@ describe('ExportDatasetModal', () => {
     expect(wrapper.find(Tooltip).text()).toBe("Notebook name can't be blank");
   });
 
-  it('should disable export if a conflicting name is provided', async () => {
+  it('should disable export if a conflicting name is provided, without the suffix', async () => {
     const existingNotebookName = 'existing notebook.ipynb';
     notebooksApiStub.notebookList = [
       {
@@ -135,6 +164,31 @@ describe('ExportDatasetModal', () => {
       .first()
       .simulate('change', {
         target: { value: dropNotebookFileSuffix(existingNotebookName) },
+      });
+    await waitOneTickAndUpdate(wrapper);
+    findExportButton(wrapper).simulate('click');
+    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+
+    findExportButton(wrapper).simulate('mouseenter');
+    expect(wrapper.find(Tooltip).text()).toBe('Notebook name already exists');
+    expect(exportSpy).not.toHaveBeenCalled();
+  });
+
+  it('should disable export if a conflicting name is provided, including the suffix', async () => {
+    const existingNotebookName = 'existing notebook.ipynb';
+    notebooksApiStub.notebookList = [
+      {
+        name: existingNotebookName,
+      },
+    ];
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    wrapper
+      .find('[data-test-id="notebook-name-input"]')
+      .first()
+      .simulate('change', {
+        target: { value: appendNotebookFileSuffix(existingNotebookName) },
       });
     await waitOneTickAndUpdate(wrapper);
     findExportButton(wrapper).simulate('click');
