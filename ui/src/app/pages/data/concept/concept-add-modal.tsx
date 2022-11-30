@@ -23,12 +23,12 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { nameValidationFormat } from 'app/components/rename-modal';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
 import { conceptSetUpdating } from 'app/utils/navigation';
+import { nameValidationFormat } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
