@@ -9,7 +9,7 @@ import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabl
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { isVisible } from 'app/utils/runtime-utils';
-import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
@@ -54,26 +54,20 @@ export const AppsPanel = (props: {
 }) => {
   const { onClose } = props;
   const { runtime } = useStore(runtimeStore);
-  const {
-    config: { enableGkeApp },
-  } = useStore(serverConfigStore);
+
+  // in display order
+  const appsToDisplay = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
+
+  const appStates = [
+    { appType: UIAppType.JUPYTER, expand: isVisible(runtime?.status) },
+    // RStudio is not implemented yet, so we don't expand it
+    { appType: UIAppType.RSTUDIO, expand: false },
+  ];
 
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);
   const addToExpandedApps = (appType: UIAppType) =>
     setUserExpandedApps([...userExpandedApps, appType]);
-
-  // environments will see only Jupyter until we are ready to launch apps (enableGkeApp = true)
-  // in display order
-  const appsToDisplay = enableGkeApp
-    ? [UIAppType.JUPYTER, UIAppType.RSTUDIO]
-    : [UIAppType.JUPYTER];
-
-  const appStates = [
-    { appType: UIAppType.JUPYTER, expand: isVisible(runtime?.status) },
-    // RStudio is not implemented yet
-    { appType: UIAppType.RSTUDIO, expand: false },
-  ];
 
   const showExpanded = (appType: UIAppType): boolean =>
     userExpandedApps.includes(appType) ||
