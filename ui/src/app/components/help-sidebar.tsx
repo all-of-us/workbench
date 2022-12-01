@@ -370,9 +370,8 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const { pageKey, cohortContext } = this.props;
-      const { runTimeConfPanelInitialState } = this.state;
       const { pageKey, workspace, cohortContext } = this.props;
+      const { runTimeConfPanelInitialState } = this.state;
       switch (activeIcon) {
         case 'help':
           return {
@@ -396,52 +395,48 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: true,
           };
-        case 'apps':
+        case 'runtimeConfig':
           return {
             headerPadding: '0.75rem',
-            renderHeader:
-              // when null, use AppsPanel which renders its own header
-              !!runTimeConfPanelInitialState &&
-              (() => (
-                <div>
-                  <h3
-                    style={{
-                      ...styles.sectionTitle,
-                      lineHeight: 1.75,
-                    }}
-                  >
-                    Cloud analysis environment
-                  </h3>
-                </div>
-              )),
-            bodyWidthRem: !!runTimeConfPanelInitialState ? '30' : '19',
+            renderHeader: () => (
+              <div>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  Cloud analysis environment
+                </h3>
+              </div>
+            ),
+            bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
-            renderBody: () =>
-              !!runTimeConfPanelInitialState ? (
-                <RuntimeConfigurationPanel
-                  forceInitialPanelContent={runTimeConfPanelInitialState}
-                />
-              ) : (
-                <AppsPanel
-                  {...{ workspace }}
-                  onClickRuntimeConf={() =>
-                    this.setState({
-                      runTimeConfPanelInitialState: PanelContent.Customize,
-                    })
-                  }
-                  onClickDeleteRuntime={() =>
-                    this.setState({
-                      runTimeConfPanelInitialState: PanelContent.DeleteRuntime,
-                    })
-                  }
-                />
-              ),
+            renderBody: () => (
+              <RuntimeConfigurationPanel
+                initialPanelContent={runTimeConfPanelInitialState}
+              />
+            ),
             showFooter: false,
           };
         case 'apps':
           return {
             bodyWidthRem: '19',
-            renderBody: () => <AppsPanel />,
+            renderBody: () => (
+              <AppsPanel
+                {...{ workspace }}
+                onClickRuntimeConf={() =>
+                  this.setState({
+                    runTimeConfPanelInitialState: PanelContent.Customize,
+                  })
+                }
+                onClickDeleteRuntime={() =>
+                  this.setState({
+                    runTimeConfPanelInitialState: PanelContent.DeleteRuntime,
+                  })
+                }
+              />
+            ),
             showFooter: false,
           };
         case 'notebooksHelp':
@@ -597,7 +592,6 @@ export const HelpSidebar = fp.flow(
             )}
             <HelpSidebarIcons
               {...{ ...this.props, activeIcon }}
-              runtimeStore={runtimeStore.get()}
               onIconClick={(icon) => this.onIconClick(icon)}
             />
           </div>
