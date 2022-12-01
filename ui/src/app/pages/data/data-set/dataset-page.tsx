@@ -889,7 +889,11 @@ export const DatasetPage = fp.flow(
       updatedSelectedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
-        if (domain !== domainWithConceptSetId.domain) {
+        if (
+          ![domain, Domain.PHYSICALMEASUREMENTCSS].includes(
+            domainWithConceptSetId.domain
+          )
+        ) {
           updatedCrossDomainConceptSetList.add(
             domainWithConceptSetId.conceptSetId
           );
@@ -972,7 +976,11 @@ export const DatasetPage = fp.flow(
         const domainWithConceptSetId = domainsWithConceptSetIds[index];
         values.items.forEach((domainWithDomainValues) => {
           const domain = reverseDomainEnum[domainWithDomainValues.domain];
-          if (domain !== domainWithConceptSetId.domain) {
+          if (
+            ![domain, Domain.PHYSICALMEASUREMENTCSS].includes(
+              domainWithConceptSetId.domain
+            )
+          ) {
             newCrossDomainConceptSetList.add(
               domainWithConceptSetId.conceptSetId
             );
