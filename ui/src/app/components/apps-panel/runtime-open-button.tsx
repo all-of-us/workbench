@@ -39,11 +39,6 @@ export const RuntimeOpenButton = (props: {
           onClose={() => {
             setShowModal(false);
           }}
-          onCreate={() => {
-            setShowModal(false);
-            // close the AppsPanel on notebook creation
-            onClose();
-          }}
         />
       )}
       <Clickable
