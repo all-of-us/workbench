@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { times } from 'lodash';
 import * as fp from 'lodash/fp';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,11 +16,7 @@ import {
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
-import {
-  Clickable,
-  CloseButton,
-  StyledExternalLink,
-} from 'app/components/buttons';
+import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -637,16 +632,10 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            <Clickable
+                            <CloseButton
                               style={{ marginLeft: 'auto' }}
-                              onClick={() => this.setActiveIcon(null)}
-                            >
-                              <img
-                                src={times}
-                                style={{ height: '27px', width: '17px' }}
-                                alt='Close'
-                              />
-                            </Clickable>
+                              onClose={() => this.setActiveIcon(null)}
+                            />
                           </FlexRow>
                         )}
 
