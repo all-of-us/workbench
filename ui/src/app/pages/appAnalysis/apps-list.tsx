@@ -106,7 +106,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               }
             >
               <div style={{ paddingRight: '0.5rem' }}>Start</div>
-              <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
+              <FontAwesomeIcon icon={faPlusCircle} />
             </Button>
           </FlexRow>
         </FlexColumn>
@@ -122,11 +122,11 @@ export const AppsList = withCurrentWorkspace()((props) => {
           <ModalBody>
             <div style={styles.appsLabel}>Select an application</div>
             <Dropdown
-              data-test-id={'application-list-dropdown'}
-              ariaLabel={'Application List Dropdown'}
+              data-test-id='application-list-dropdown'
+              ariaLabel='Application List Dropdown'
               value={selectedApp}
               options={APP_LIST}
-              placeholder={'Choose One'}
+              placeholder='Choose One'
               onChange={(e) => setSelectedApp(e.value)}
               style={{ width: '9rem' }}
             />
@@ -134,15 +134,15 @@ export const AppsList = withCurrentWorkspace()((props) => {
           <ModalFooter style={{ paddingTop: '2rem' }}>
             <Button
               style={{ marginRight: '2rem' }}
-              type={'secondary'}
+              type='secondary'
               aria-label='close'
               onClick={() => onClose()}
             >
               Close
             </Button>
             <Button
-              data-test-id={'next-btn'}
-              type={'primary'}
+              data-test-id='next-btn'
+              type='primary'
               aria-label='next'
               onClick={() => onNext()}
               disabled={selectedApp === ''}
@@ -154,7 +154,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
       )}
       {showJupyterModal && !showSelectAppModal && (
         <NewNotebookModal
-          data-test-id={'jupyter-modal'}
+          data-test-id='jupyter-modal'
           onClose={() => onClose()}
           workspace={props.workspace}
           existingNameList={null}
