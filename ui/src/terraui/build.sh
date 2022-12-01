@@ -4,7 +4,7 @@
 set -euo pipefail
 set -v
 
-WD="$(dirname $0)"
+WD="$(dirname "$0")"
 cd "$WD"
 
 # Making this a hidden directory avoids having to exclude it from the parent build.
