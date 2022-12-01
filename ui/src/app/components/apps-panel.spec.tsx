@@ -85,16 +85,6 @@ describe('AppsPanel', () => {
     }
   );
 
-  it('should show a Running status for a Running runtime', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
-
-    const runtimeCost = wrapper.find('[data-test-id="runtime-cost"]');
-    expect(runtimeCost.exists()).toBeTruthy();
-
-    expect(runtimeCost.text()).toContain('Running');
-  });
-
   // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]
   test.each([
     [RuntimeStatus.Creating, RuntimeStatus.Creating],
