@@ -57,6 +57,7 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { PanelContent } from 'app/utils/runtime-utils';
 import {
   routeDataStore,
   runtimeStore,
@@ -185,6 +186,7 @@ interface State {
   tooltipId: number;
   currentModal: CurrentModal;
   runtimeErrors: Array<RuntimeError>;
+  runTimeConfPanelInitialState: PanelContent | null;
 }
 
 export const HelpSidebar = fp.flow(
@@ -209,6 +211,7 @@ export const HelpSidebar = fp.flow(
         tooltipId: undefined,
         currentModal: CurrentModal.None,
         runtimeErrors: null,
+        runTimeConfPanelInitialState: null,
       };
     }
 
@@ -235,6 +238,7 @@ export const HelpSidebar = fp.flow(
 
     setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
+      this.setState({ runTimeConfPanelInitialState: null });
     }
 
     async componentDidMount() {
@@ -367,6 +371,8 @@ export const HelpSidebar = fp.flow(
       showFooter: boolean;
     } {
       const { pageKey, cohortContext } = this.props;
+      const { runTimeConfPanelInitialState } = this.state;
+      const { pageKey, workspace, cohortContext } = this.props;
       switch (activeIcon) {
         case 'help':
           return {
@@ -393,25 +399,43 @@ export const HelpSidebar = fp.flow(
         case 'apps':
           return {
             headerPadding: '0.75rem',
-            renderHeader: () => (
-              <div>
-                <h3
-                  style={{
-                    ...styles.sectionTitle,
-                    lineHeight: 1.75,
-                  }}
-                >
-                  Cloud analysis environment
-                </h3>
-              </div>
-            ),
-            bodyWidthRem: '30',
+            renderHeader:
+              // when null, use AppsPanel which renders its own header
+              !!runTimeConfPanelInitialState &&
+              (() => (
+                <div>
+                  <h3
+                    style={{
+                      ...styles.sectionTitle,
+                      lineHeight: 1.75,
+                    }}
+                  >
+                    Cloud analysis environment
+                  </h3>
+                </div>
+              )),
+            bodyWidthRem: !!runTimeConfPanelInitialState ? '30' : '19',
             bodyPadding: '0 1.25rem',
-            renderBody: () => (
-              <RuntimeConfigurationPanel
-                onClose={() => this.setActiveIcon(null)}
-              />
-            ),
+            renderBody: () =>
+              !!runTimeConfPanelInitialState ? (
+                <RuntimeConfigurationPanel
+                  forceInitialPanelContent={runTimeConfPanelInitialState}
+                />
+              ) : (
+                <AppsPanel
+                  {...{ workspace }}
+                  onClickRuntimeConf={() =>
+                    this.setState({
+                      runTimeConfPanelInitialState: PanelContent.Customize,
+                    })
+                  }
+                  onClickDeleteRuntime={() =>
+                    this.setState({
+                      runTimeConfPanelInitialState: PanelContent.DeleteRuntime,
+                    })
+                  }
+                />
+              ),
             showFooter: false,
           };
         case 'apps':
@@ -573,6 +597,7 @@ export const HelpSidebar = fp.flow(
             )}
             <HelpSidebarIcons
               {...{ ...this.props, activeIcon }}
+              runtimeStore={runtimeStore.get()}
               onIconClick={(icon) => this.onIconClick(icon)}
             />
           </div>
