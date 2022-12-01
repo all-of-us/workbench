@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
@@ -678,3 +679,16 @@ export class SlidingFabReact extends React.Component<
     );
   }
 }
+
+interface CloseButtonProps {
+  onClose: Function;
+  style?: CSSProperties;
+}
+export const CloseButton = (props: CloseButtonProps) => {
+  const { onClose, style } = props;
+  return (
+    <Clickable style={{ marginLeft: 'auto', ...style }} onClick={onClose}>
+      <img src={times} style={{ height: '27px', width: '17px' }} alt='Close' />
+    </Clickable>
+  );
+};

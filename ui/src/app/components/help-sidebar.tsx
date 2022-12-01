@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { times } from 'lodash';
 import * as fp from 'lodash/fp';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +17,11 @@ import {
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
-import { Clickable, StyledExternalLink } from 'app/components/buttons';
+import {
+  Clickable,
+  CloseButton,
+  StyledExternalLink,
+} from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -66,7 +71,6 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import times from 'assets/icons/times-light.svg';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -415,6 +419,7 @@ export const HelpSidebar = fp.flow(
             bodyPadding: '0 1.25rem',
             renderBody: () => (
               <RuntimeConfigurationPanel
+                onClose={() => this.setActiveIcon(null)}
                 initialPanelContent={runTimeConfPanelInitialState}
               />
             ),
@@ -426,6 +431,7 @@ export const HelpSidebar = fp.flow(
             renderBody: () => (
               <AppsPanel
                 {...{ workspace }}
+                onClose={() => this.setActiveIcon(null)}
                 onClickRuntimeConf={() =>
                   this.setState({
                     runTimeConfPanelInitialState: PanelContent.Customize,
